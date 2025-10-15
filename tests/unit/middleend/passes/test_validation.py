@@ -183,10 +183,8 @@ class TestPydDynamicFrequencyValidation:
                     frequency=self.get_baseband_frequency_of_pulse_channel(channel.uuid),
                 )
             )
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
     def test_raises_no_error_when_freq_shift_in_range(self, scale):
@@ -201,9 +199,8 @@ class TestPydDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
-        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+        ResultManager()
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
     def test_raises_no_error_when_freq_set_in_range(self, scale):
@@ -217,9 +214,8 @@ class TestPydDynamicFrequencyValidation:
         )
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
-        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+        ResultManager()
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_raises_error_when_shifted_lower_than_min(self, sign):
@@ -234,10 +230,9 @@ class TestPydDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
+        ResultManager()
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_raises_error_when_set_lower_than_min(self, sign):
@@ -251,10 +246,8 @@ class TestPydDynamicFrequencyValidation:
         )
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_raises_error_when_shifted_higher_than_max(self, sign):
@@ -267,10 +260,8 @@ class TestPydDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_raises_error_when_set_higher_than_max(self, sign):
@@ -282,10 +273,8 @@ class TestPydDynamicFrequencyValidation:
         )
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_raises_error_when_shifting_out_of_and_back_in_to_range(self, sign):
@@ -299,10 +288,8 @@ class TestPydDynamicFrequencyValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
         builder.frequency_shift(channel, -delta_freq)
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_raises_error_when_set_out_of_and_back_in_range(self, sign):
@@ -315,10 +302,8 @@ class TestPydDynamicFrequencyValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
         builder.add(FrequencySet(target=channel.uuid, frequency=0.5 * target_freq))
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel: "doesn't matter"}))
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_no_value_error_for_two_channels_same_physical_channel(self, sign):
@@ -339,13 +324,7 @@ class TestPydDynamicFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4 * delta_freq)
 
-        res_mgr = ResultManager()
-        res_mgr.add(
-            ActivePulseChannelResults(
-                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
-            )
-        )
-        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_same_physical_channel(self, sign):
@@ -366,14 +345,8 @@ class TestPydDynamicFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4 * delta_freq)
 
-        res_mgr = ResultManager()
-        res_mgr.add(
-            ActivePulseChannelResults(
-                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
-            )
-        )
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [+1, -1])
     def test_value_error_for_two_channels_different_physical_channel(self, sign):
@@ -394,14 +367,8 @@ class TestPydDynamicFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4 * delta_freq)
 
-        res_mgr = ResultManager()
-        res_mgr.add(
-            ActivePulseChannelResults(
-                target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
-            )
-        )
         with pytest.raises(ValueError):
-            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder, res_mgr)
+            PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     def test_small_change_to_if_is_valid(self):
         """Lil' regression test to test a bug fix for a bug found in pipeline tests.
@@ -417,9 +384,7 @@ class TestPydDynamicFrequencyValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(pulse_channel, 1e3)
         builder.pulse(target=pulse_channel.uuid, duration=80e-9, waveform=SquareWaveform())
-        res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={pulse_channel: "doesn't matter"}))
-        PydDynamicFrequencyValidation(self.hw, target_data).run(builder, res_mgr)
+        PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
 
 class TestPydNoMidCircuitMeasurementValidation:
@@ -729,7 +694,9 @@ class TestFrequencySetupValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.model)
         builder.pulse(target=channel.uuid, waveform=SquareWaveform(width=80e-9))
         res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel.uuid: "doesn't matter"}))
+        res = ActivePulseChannelResults()
+        res.add_target(channel, "doesn't matter")
+        res_mgr.add(res)
         with pytest.raises(ValueError):
             freq_setup = PydFrequencySetupValidation(self.model, self.target_data)
             freq_setup.run(builder, res_mgr)
@@ -770,7 +737,9 @@ class TestFrequencySetupValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.model)
         builder.pulse(target=channel.uuid, waveform=SquareWaveform(width=80e-9))
         res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={channel.uuid: "doesn't matter"}))
+        res = ActivePulseChannelResults()
+        res.add_target(channel, "doesn't matter")
+        res_mgr.add(res)
         with pytest.raises(ValueError):
             PydFrequencySetupValidation(self.model, target_data).run(builder, res_mgr)
 

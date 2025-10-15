@@ -399,9 +399,7 @@ class InactivePulseChannelSanitisation(TransformPass):
         :param res_mgr: The result manager to store the analysis results.
         """
 
-        active_channels = [
-            target for target in res_mgr.lookup_by_type(ActivePulseChannelResults).targets
-        ]
+        active_channels = set(res_mgr.lookup_by_type(ActivePulseChannelResults).targets)
         instructions: list[Instruction] = []
         for inst in ir.instructions:
             if isinstance(inst, Synchronize):
@@ -985,7 +983,7 @@ class EndOfTaskResetSanitisation(TransformPass):
                 if qubit in qubit_map and qubit_map[qubit] is None:
                     qubit_map[qubit] = True
             else:
-                qubit = active_pulse_channels.target_map[inst.target]
+                qubit = active_pulse_channels.pulse_channel_to_qubit_map[inst.target]
                 if qubit_map[qubit] is None:
                     qubit_map[qubit] = False
 
@@ -1038,12 +1036,8 @@ class FreqShiftSanitisation(TransformPass):
             res: ActivePulseChannelResults = res_mgr.lookup_by_type(
                 ActivePulseChannelResults
             )
-            res.target_map.update(
-                {
-                    fs_pulse_ch.uuid: qubit
-                    for fs_pulse_ch, qubit in freq_shift_channels.items()
-                }
-            )
+            for pulse_channel, qubit in freq_shift_channels.items():
+                res.add_target(pulse_channel, qubit)
 
         return ir
 
@@ -1105,7 +1099,7 @@ class InitialPhaseResetSanitisation(TransformPass):
     """
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        active_targets = list(res_mgr.lookup_by_type(ActivePulseChannelResults).targets)
+        active_targets = res_mgr.lookup_by_type(ActivePulseChannelResults).targets
 
         if active_targets:
             index = next(

@@ -92,6 +92,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         self._ids_to_physical_channels = {}
         self._pulse_channel_ids_to_physical_channel = {}
         self._pulse_channel_ids_to_device = {}
+        self._physical_channel_ids_to_device = {}
         self._qubits_to_qubit_ids = {}
         self._resonators_to_qubits = {}
         self._physical_channel_map = {}
@@ -280,7 +281,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def device_for_pulse_channel_id(self, id_: str):
         return self._pulse_channel_ids_to_device.get(id_, None)
 
-    def device_for_physical_channel_id(self, id_: str):
+    def device_for_physical_channel_id(self, id_: str) -> Qubit | Resonator | None:
         return self._physical_channel_ids_to_device.get(id_, None)
 
     def qubit_for_resonator(self, resonator: Resonator) -> Qubit:

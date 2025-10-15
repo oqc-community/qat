@@ -16,6 +16,8 @@ from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.ir.lowered import PartitionedIR
+from qat.middleend.passes.analysis import ActivePulseChannelResults
+from qat.middleend.passes.purr.analysis import ActiveChannelResults
 from qat.middleend.passes.purr.transform import LoopCount
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
@@ -163,13 +165,26 @@ class ConvertToPydanticIR(TransformPass):
             data[attr] = self._convert_element(val, *args, **kwargs)
 
         class_name = value.__class__.__name__
-        # If the value is an ActiveChannelResults, convert it to ActivePulseChannelResults
-        if class_name == "ActiveChannelResults":
-            class_name = "ActivePulseChannelResults"
         # Check non-legacy path for class name first, if not found, use legacy path
         class_path = value.__class__.__module__.replace(".purr", "") + "." + class_name
         cls_ = locate(class_path) or value.__class__
         return cls_(**data)
+
+    @_convert_element.register(ActiveChannelResults)
+    def _(
+        self,
+        value: ActiveChannelResults,
+        *args,
+        **kwargs,
+    ):
+        """Convert an ActiveChannelResults instance to ActivePulseChannelResults."""
+        result = ActivePulseChannelResults()
+        for pulse_channel, device in value.target_map.items():
+            pulse_channel_id = self._convert_element(pulse_channel)
+            device = self._convert_element(device)
+            result.pulse_channel_to_qubit_map[pulse_channel_id] = device
+            result.qubit_to_pulse_channel_map[device].append(pulse_channel_id)
+        return result
 
     @_convert_element.register(PulseChannelTimeline)
     def _(

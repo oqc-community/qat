@@ -11,21 +11,12 @@ from qat.middleend.passes.analysis import (
     ActivePulseChannelAnalysis,
     ActivePulseChannelResults,
 )
-from qat.model.device import Resonator
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.purr.utils.logger import LoggerLevel
 
 
 class TestActivePulseChannelAnalysis:
     model = LucyModelLoader().load()
-
-    def test_create_channel_to_qubit_mapping(self):
-        map = ActivePulseChannelAnalysis._create_channel_to_qubit_mapping(self.model)
-        for pulse_channel_id, qubit in map.items():
-            device = self.model.device_for_pulse_channel_id(pulse_channel_id)
-            if isinstance(device, Resonator):
-                device = self.model.qubit_for_resonator(device)
-            assert device == qubit
 
     def test_valid_instructions(self):
         builder = QuantumInstructionBuilder(self.model)
@@ -46,13 +37,14 @@ class TestActivePulseChannelAnalysis:
         res: ActivePulseChannelResults = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 3
         channel_ids = set([drive_chan.uuid, measure_chan.uuid, acquire_chan.uuid])
-        assert set(res.targets) == channel_ids
-        assert len(res.target_map) == 3
-        assert all([val == qubit for val in res.target_map.values()])
-        assert set(res.target_map.keys()) == channel_ids
+        assert res.targets == channel_ids
+        assert len(res.targets) == 3
+        assert all([val == qubit for val in res.pulse_channel_to_qubit_map.values()])
         assert set([channel.uuid for channel in res.from_qubit(qubit)]) == channel_ids
-        assert res.qubits == [qubit]
-        assert res.physical_qubit_indices == {0}
+        assert res.qubits == set([qubit])
+
+        physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
+        assert physical_qubit_indices == [0]
 
     def test_syncs_dont_add_extra_channels(self):
         builder = QuantumInstructionBuilder(self.model)
@@ -68,7 +60,7 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 1
-        assert set(res.targets) == set([drive_chan.uuid])
+        assert res.targets == set([drive_chan.uuid])
 
     def test_no_active_qubits(self):
         builder = QuantumInstructionBuilder(self.model)
@@ -78,9 +70,6 @@ class TestActivePulseChannelAnalysis:
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
-
-        res = res_mgr.lookup_by_type(ActivePulseChannelResults)
-        assert len(res.physical_qubit_indices) == 0
 
         physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
         assert len(physical_qubit_indices) == 0
@@ -109,9 +98,6 @@ class TestActivePulseChannelAnalysis:
         met_mgr = MetricsManager()
         ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
 
-        res = res_mgr.lookup_by_type(ActivePulseChannelResults)
-        assert res.physical_qubit_indices == set(active_qubits)
-
         physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
         assert physical_qubit_indices == active_qubits
 
@@ -129,8 +115,38 @@ class TestActivePulseChannelAnalysis:
         met_mgr = MetricsManager()
         ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
 
-        res = res_mgr.lookup_by_type(ActivePulseChannelResults)
-        assert res.physical_qubit_indices == set(active_qubits)
-
         physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
         assert physical_qubit_indices == active_qubits
+
+    def test_with_custom_pulse_channel(self):
+        qubit = self.model.qubit_with_index(0)
+        physical_channel = qubit.physical_channel
+
+        builder = QuantumInstructionBuilder(self.model)
+        drive_channel = qubit.drive_pulse_channel
+        measure_channel = qubit.measure_pulse_channel
+        pulse_channel = builder.create_pulse_channel(
+            drive_channel.frequency, physical_channel
+        )
+        builder.pulse(
+            target=pulse_channel.uuid, waveform=SquareWaveform(width=80e-9, amp=1.0)
+        )
+        builder.pulse(
+            target=drive_channel.uuid, waveform=SquareWaveform(width=160e-9, amp=1.0)
+        )
+        builder.synchronize([drive_channel, pulse_channel, measure_channel])
+
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
+        res: ActivePulseChannelResults = res_mgr.lookup_by_type(ActivePulseChannelResults)
+        assert len(res.targets) == 2
+        channel_ids = set([drive_channel.uuid, pulse_channel.uuid])
+        assert res.targets == channel_ids
+        assert len(res.targets) == 2
+        assert all([val == qubit for val in res.pulse_channel_to_qubit_map.values()])
+        assert set([channel.uuid for channel in res.from_qubit(qubit)]) == channel_ids
+        assert res.qubits == set([qubit])
+
+        physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
+        assert physical_qubit_indices == [0]

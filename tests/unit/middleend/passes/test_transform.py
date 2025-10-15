@@ -703,7 +703,8 @@ class TestInactivePulseChannelSanitisation:
         ][0]
         assert len(sync_inst.targets) > 1
 
-        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+        res = ActivePulseChannelResults()
+        res.add_target(qubit.drive_pulse_channel, qubit)
         res_mgr = ResultManager()
         res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
@@ -721,13 +722,11 @@ class TestInactivePulseChannelSanitisation:
         ][0]
         assert len(sync_inst.targets) > 1
 
-        res = ActivePulseChannelResults(
-            target_map={
-                qubit.drive_pulse_channel.uuid: qubit,
-                qubit.measure_pulse_channel.uuid: qubit,
-                qubit.acquire_pulse_channel.uuid: qubit,
-            }
-        )
+        res = ActivePulseChannelResults()
+        res.add_target(qubit.drive_pulse_channel, qubit)
+        res.add_target(qubit.measure_pulse_channel, qubit)
+        res.add_target(qubit.acquire_pulse_channel, qubit)
+
         res_mgr = ResultManager()
         res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
@@ -747,12 +746,10 @@ class TestInactivePulseChannelSanitisation:
         ][0]
         assert len(sync_inst.targets) > 1
 
-        res = ActivePulseChannelResults(
-            target_map={
-                qubit1.drive_pulse_channel.uuid: qubit1,
-                qubit2.drive_pulse_channel.uuid: qubit2,
-            }
-        )
+        res = ActivePulseChannelResults()
+        res.add_target(qubit1.drive_pulse_channel, qubit1)
+        res.add_target(qubit2.drive_pulse_channel, qubit2)
+
         res_mgr = ResultManager()
         res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
@@ -772,7 +769,8 @@ class TestInactivePulseChannelSanitisation:
 
         builder.delay(target=qubit.measure_pulse_channel, duration=80e-9)
 
-        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+        res = ActivePulseChannelResults()
+        res.add_target(qubit.drive_pulse_channel, qubit)
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -790,7 +788,8 @@ class TestInactivePulseChannelSanitisation:
 
         builder.phase_shift(target=qubit.measure_pulse_channel, theta=np.pi)
 
-        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+        res = ActivePulseChannelResults()
+        res.add_target(qubit.drive_pulse_channel, qubit)
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -812,7 +811,8 @@ class TestInactivePulseChannelSanitisation:
             [inst for inst in builder.instructions if isinstance(inst, PhaseShift)]
         )
 
-        res = ActivePulseChannelResults(target_map={qubit.drive_pulse_channel.uuid: qubit})
+        res = ActivePulseChannelResults()
+        res.add_target(qubit.drive_pulse_channel, qubit)
         res_mgr = ResultManager()
         res_mgr.add(res)
         builder = InactivePulseChannelSanitisation().run(builder, res_mgr)
@@ -1354,7 +1354,7 @@ class TestResetsToDelays:
             builder.reset(qubit)
 
         res = ActivePulseChannelResults()
-        res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+        res.add_target(qubit.drive_pulse_channel, qubit)
         res_mgr = ResultManager()
         res_mgr.add(res)
 
@@ -1391,7 +1391,7 @@ class TestResetsToDelays:
         builder.reset(qubit)
 
         res = ActivePulseChannelResults()
-        res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+        res.add_target(qubit.drive_pulse_channel, qubit)
         res_mgr = ResultManager()
         res_mgr.add(res)
 
@@ -1438,8 +1438,8 @@ class TestResetsToDelays:
         builder.add(Reset(qubit_target=qubit_idx))
 
         res = ActivePulseChannelResults()
-        res.target_map[qubit.measure_pulse_channel.uuid] = qubit
-        res.target_map[qubit.acquire_pulse_channel.uuid] = qubit
+        res.add_target(qubit.acquire_pulse_channel, qubit)
+        res.add_target(qubit.measure_pulse_channel, qubit)
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -1585,13 +1585,11 @@ class TestEndOfTaskResetSanitisation:
 
         res = ActivePulseChannelResults()
         for qubit in qubits:
-            res.target_map[qubit.drive_pulse_channel.uuid] = qubit
-            res.target_map[qubit.measure_pulse_channel.uuid] = qubit
-            res.target_map[qubit.acquire_pulse_channel.uuid] = qubit
-        res.target_map[qubits[0].cross_resonance_pulse_channels[1].uuid] = qubits[0]
-        res.target_map[qubits[1].cross_resonance_cancellation_pulse_channels[0].uuid] = (
-            qubits[1]
-        )
+            res.add_target(qubit.drive_pulse_channel, qubit)
+            res.add_target(qubit.measure_pulse_channel, qubit)
+            res.add_target(qubit.acquire_pulse_channel, qubit)
+        res.add_target(qubits[0].cross_resonance_pulse_channels[1], qubits[0])
+        res.add_target(qubits[1].cross_resonance_cancellation_pulse_channels[0], qubits[1])
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -1615,7 +1613,7 @@ class TestEndOfTaskResetSanitisation:
         builder.had(qubit)
 
         res = ActivePulseChannelResults()
-        res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+        res.add_target(qubit.drive_pulse_channel, qubit)
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -1640,7 +1638,7 @@ class TestEndOfTaskResetSanitisation:
         builder.phase_shift(qubit.drive_pulse_channel, np.pi)
 
         res = ActivePulseChannelResults()
-        res.target_map[qubit.drive_pulse_channel.uuid] = qubit
+        res.add_target(qubit.drive_pulse_channel, qubit)
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -1662,7 +1660,7 @@ class TestEndOfTaskResetSanitisation:
         )
 
         res = ActivePulseChannelResults()
-        res.target_map[qubit.measure_pulse_channel.uuid] = qubit
+        res.add_target(qubit.measure_pulse_channel, qubit)
 
         res_mgr = ResultManager()
         res_mgr.add(res)
@@ -1799,15 +1797,14 @@ class TestFreqShiftSanitisation:
         qubits = [model.qubit_with_index(i) for i in range(2)]
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.delay(qubits[0].drive_pulse_channel, 80e-9)
-        res = ActivePulseChannelResults(
-            target_map={qubits[0].drive_pulse_channel.uuid: qubits[0]}
-        )
+        res = ActivePulseChannelResults()
+        res.add_target(qubits[0].drive_pulse_channel, qubits[0])
         res_mgr = ResultManager()
         res_mgr.add(res)
         builder = FreqShiftSanitisation(model).run(builder, res_mgr)
         for fq_pulse_ch in freq_shift_pulse_channels:
-            assert fq_pulse_ch.uuid in res.target_map
-            assert res.target_map[fq_pulse_ch.uuid] in qubits
+            assert fq_pulse_ch.uuid in res.targets
+            assert res.pulse_channel_to_qubit_map[fq_pulse_ch.uuid] in qubits
 
     @pytest.mark.parametrize(
         "builder_fixture", ["builder", "repeat_builder", "jump_builder"]
@@ -1863,49 +1860,49 @@ class TestPhaseResetSanitisation:
     def test_phase_reset_shot(self, model, reset_qubits):
         builder = QuantumInstructionBuilder(hardware_model=model)
 
-        active_targets = {}
+        res = ActivePulseChannelResults()
         for ind in model.qubits:
             qubit = model.qubit_with_index(ind)
             drive_pulse_ch_id = qubit.drive_pulse_channel.uuid
             if reset_qubits:
                 builder.add(PhaseReset(target=drive_pulse_ch_id))
             builder.X(target=qubit)
-            active_targets[drive_pulse_ch_id] = qubit
+            res.add_target(qubit.drive_pulse_channel, qubit)
 
         n_instr_before = builder.number_of_instructions
 
         res_mgr = ResultManager()
+        res_mgr.add(res)
         # Mock some active targets, i.e., the drive pulse channels of the qubits.
-        res_mgr.add(ActivePulseChannelResults(target_map=active_targets))
         InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
 
-        assert builder.number_of_instructions == n_instr_before + len(active_targets)
-        for key, instr in zip(active_targets.keys(), builder.instructions):
+        assert builder.number_of_instructions == n_instr_before + len(res.targets)
+        for key, instr in zip(res.targets, builder.instructions):
             assert isinstance(instr, PhaseReset)
             assert instr.target == key
 
     def test_phase_reset_shot_leading_non_quantum_instructions(self, model):
         builder = QuantumInstructionBuilder(hardware_model=model)
 
-        active_targets = {}
+        res = ActivePulseChannelResults()
         for ind in model.qubits:
             qubit = model.qubit_with_index(ind)
-            drive_pulse_ch_id = qubit.drive_pulse_channel.uuid
+            drive_pulse_ch = qubit.drive_pulse_channel
             # Add a non-quantum instruction before the quantum instructions.
             builder.add(Repeat(repeat_count=42))
             builder.X(target=qubit)
-            active_targets[drive_pulse_ch_id] = qubit
+            res.add_target(drive_pulse_ch, qubit)
 
         n_instr_before = builder.number_of_instructions
 
         res_mgr = ResultManager()
         # Mock some active targets, i.e., the drive pulse channels of the qubits.
-        res_mgr.add(ActivePulseChannelResults(target_map=active_targets))
+        res_mgr.add(res)
         InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
 
-        assert builder.number_of_instructions == n_instr_before + len(active_targets)
+        assert builder.number_of_instructions == n_instr_before + len(res.targets)
         assert isinstance(builder.instructions[0], Repeat)
-        for key, instr in zip(active_targets.keys(), builder.instructions[1:]):
+        for key, instr in zip(res.targets, builder.instructions[1:]):
             assert isinstance(instr, PhaseReset)
             assert instr.target == key
 
@@ -2281,11 +2278,10 @@ class TestSynchronizeTask:
         measure_chan = qubit.measure_pulse_channel
 
         res_mgr = ResultManager()
-        res_mgr.add(
-            ActivePulseChannelResults(
-                target_map={drive_chan.uuid: qubit, measure_chan.uuid: qubit}
-            )
-        )
+        res = ActivePulseChannelResults()
+        res.add_target(drive_chan, qubit)
+        res.add_target(measure_chan, qubit)
+        res_mgr.add(res)
 
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.pulse(target=drive_chan.uuid, waveform=SquareWaveform(width=800e-9))
@@ -2297,7 +2293,7 @@ class TestSynchronizeTask:
 
     def test_synchronize_task_not_adding_if_inactive(self, model):
         res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={}))
+        res_mgr.add(ActivePulseChannelResults())
         builder = QuantumInstructionBuilder(hardware_model=model)
         ir = SynchronizeTask().run(builder, res_mgr)
         assert len(ir.instructions) == 0
@@ -2307,7 +2303,7 @@ class TestSynchronizeTask:
         drive_chan = qubit.drive_pulse_channel
 
         res_mgr = ResultManager()
-        res_mgr.add(ActivePulseChannelResults(target_map={drive_chan.uuid: qubit}))
+        res_mgr.add(ActivePulseChannelResults())
 
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.pulse(target=drive_chan.uuid, waveform=SquareWaveform(width=800e-9))
