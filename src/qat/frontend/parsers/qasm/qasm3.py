@@ -551,7 +551,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
     def walk_node(self, node, context: QasmContext, builder, **kwargs):
         self.visit_children(node)
 
-    def initalize(self, builder: QuantumInstructionBuilder):
+    def initialize(self, builder: QuantumInstructionBuilder):
         self.builder = builder
         self._q3_patcher.builder = builder
 
@@ -1752,7 +1752,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._current_context = existing_context
 
     def parse(self, builder: QuantumInstructionBuilder, qasm_str: str):
-        self.initalize(builder)
+        self.initialize(builder)
         parsed = self._fetch_or_parse(qasm_str)
 
         if (qasm_id := hash(qasm_str)) in self._cached_parses:

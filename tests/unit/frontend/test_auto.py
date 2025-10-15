@@ -248,3 +248,19 @@ class TestAutoFrontend:
         frontend = AutoFrontend.default_for_legacy(model)
         assert isinstance(frontend, AutoFrontend)
         assert any(isinstance(f, FallthroughFrontend) for f in frontend.frontends)
+
+    @pytest.mark.parametrize(
+        "model,builder_type",
+        [
+            (EchoModelLoader(32).load(), QuantumInstructionBuilder),
+            (LucyModelLoader().load(), PydQuantumInstructionBuilder),
+        ],
+    )
+    @pytest.mark.parametrize(
+        "program",
+        [get_qasm2("basic.qasm"), get_qasm3("basic.qasm"), get_qir("bell_psi_plus.ll")],
+    )
+    def test_correct_builder(self, model, builder_type, program):
+        frontend = AutoFrontend(model)
+        builder = frontend.emit(program)
+        assert isinstance(builder, builder_type)

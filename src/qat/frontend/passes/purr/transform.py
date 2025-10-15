@@ -20,6 +20,7 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.frontend.passes.analysis import InputAnalysisResult
+from qat.ir.builder_factory import BuilderFactory
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qasm import CloudQasmParser, Qasm3Parser
@@ -180,7 +181,8 @@ class Parse(TransformPass):
                 fp.write(qir_string)
             fp.close()
             try:
-                parser = QIRParser(self.hardware)
+                builder = BuilderFactory.create_builder(self.hardware)
+                parser = QIRParser(self.hardware, builder=builder)
                 if compiler_config.results_format.format is not None:
                     parser.results_format = compiler_config.results_format.format
                 quantum_builder = parser.parse(fp.name)

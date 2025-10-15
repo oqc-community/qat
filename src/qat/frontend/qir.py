@@ -88,6 +88,7 @@ class QIRFrontend(BaseFrontend):
         results_format = (
             config.results_format.format if config and config.results_format else None
         )
+
         if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
             parser = QIRParser(self.model)
             if results_format is not None:

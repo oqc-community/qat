@@ -123,7 +123,9 @@ class QIRFrontend(LanguageFrontend):
                 )
             else:
                 parser = QIRParser(
-                    hardware, results_format=compiler_config.results_format.format
+                    hardware,
+                    builder=get_model(hardware).create_builder(),
+                    results_format=compiler_config.results_format.format,
                 )
                 quantum_builder = parser.parse(path_or_str)
 

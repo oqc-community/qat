@@ -11,6 +11,7 @@ from uuid import uuid4
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat.ir.builder_factory import BuilderFactory
 from qat.ir.instructions import (
     Assign,
     BinaryOperator,
@@ -227,9 +228,9 @@ class InstructionBuilder(ABC):
         Wrapper method to constrain the rotation angle and to determine whether to avoid redundant rotations around the Bloch sphere.
         """
 
-        def wrapper(self, target, theta=np.pi, **kwargs):
+        def wrapper(self, target, theta=np.pi, *args, **kwargs):
             theta = self.constrain(theta)
-            return self if np.isclose(theta, 0) else f(self, target, theta, **kwargs)
+            return self if np.isclose(theta, 0) else f(self, target, theta, *args, **kwargs)
 
         return wrapper
 
@@ -1015,6 +1016,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         uuid=pc.uuid,
                     )
         return pulse_channels
+
+
+@BuilderFactory.create_builder.register
+def _(model: PhysicalHardwareModel) -> QuantumInstructionBuilder:
+    return QuantumInstructionBuilder(model)
 
 
 PydQuantumInstructionBuilder = QuantumInstructionBuilder

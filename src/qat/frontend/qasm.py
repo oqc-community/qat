@@ -16,9 +16,7 @@ from qat.frontend.parsers.qasm.base import AbstractParser as PydAbstractParser
 from qat.frontend.passes.analysis import InputAnalysis
 from qat.frontend.passes.purr.transform import InputOptimisation
 from qat.frontend.passes.transform import PydInputOptimisation
-from qat.ir.instruction_builder import (
-    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
-)
+from qat.ir.builder_factory import BuilderFactory
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -172,13 +170,9 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         :param compiler_config: The compiler config is used in both the pipeline and for
             parsing.
         """
-        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
-            builder = self.model.create_builder()
-        elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
-            builder = PydQuantumInstructionBuilder(hardware_model=self.model)
+        builder = BuilderFactory.create_builder(self.model)
+        if isinstance(self.model, PydHardwareModel):  # pydantic hardware model
             builder.repeat(compiler_config.repeats)
-        else:
-            raise TypeError("Invalid hardware model type set.")
 
         parser = self.create_parser(compiler_config)
         builder = parser.parse(builder, src)
@@ -193,6 +187,11 @@ class BaseQasmFrontend(BaseFrontend, ABC):
                 )
                 .add(builder)
             )
+        elif isinstance(self.model, PydHardwareModel):
+            return (
+                type(builder)(self.model).repeat(compiler_config.repeats).__add__(builder)
+            )
+
         return builder
 
     def emit(

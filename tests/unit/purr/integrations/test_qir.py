@@ -8,9 +8,9 @@ import numpy as np
 import pytest
 from compiler_config.config import CompilerConfig, Tket
 
+from qat.ir.builder_factory import BuilderFactory
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import qutip_available
-from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.integrations.qir import QIRParser
 from qat.purr.qat import execute, execute_qir
 
@@ -55,7 +55,8 @@ class TestQIR:
 
     @pytest.mark.legacy
     def test_base_profile_ops(self):
-        parser = QIRParser(get_default_echo_hardware(7))
+        model = get_default_echo_hardware(7)
+        parser = QIRParser(model, builder=BuilderFactory.create_builder(model))
         builder = parser.parse(_get_qir_path("base_profile_ops.ll"))
         assert len(builder.instructions) == 180
 
@@ -107,7 +108,8 @@ class TestQIR:
         execute_qir(_get_qir_path("teleportchain.ll"), get_default_echo_hardware(6), config)
 
     def test_qir_instruction_builder(self):
-        parser = QIRParser(get_default_echo_hardware(4))
+        model = get_default_echo_hardware(4)
+        parser = QIRParser(model, builder=BuilderFactory.create_builder(model))
         builder = parser.parse(_get_qir_path("generator-bell.ll"))
         assert len(builder.instructions) == 96
 
@@ -158,10 +160,9 @@ class TestQIR:
             execute("", get_default_echo_hardware(4), config)
 
     def test_parser_bell_psi_plus(self):
-        mock_builder = mock.create_autospec(InstructionBuilder)
-
         hardware = get_default_echo_hardware(qubit_count=2)
-        parser = QIRParser(hardware, mock_builder)
+        mock_builder = mock.create_autospec(BuilderFactory.create_builder(hardware))
+        parser = QIRParser(hardware, builder=mock_builder)
 
         parser.parse(qir_file=_get_qir_path("bell_psi_plus.ll"))
         q0 = hardware.get_qubit(0)
@@ -177,9 +178,9 @@ class TestQIR:
         mock_builder.assert_has_calls(expected_calls, any_order=True)
 
     def test_parser_bell_psi_minus(self):
-        mock_builder = mock.create_autospec(InstructionBuilder)
         hardware = get_default_echo_hardware(qubit_count=2)
-        parser = QIRParser(hardware, mock_builder)
+        mock_builder = mock.create_autospec(BuilderFactory.create_builder(hardware))
+        parser = QIRParser(hardware, builder=mock_builder)
 
         parser.parse(qir_file=_get_qir_path("bell_psi_minus.ll"))
 
@@ -197,9 +198,9 @@ class TestQIR:
         mock_builder.assert_has_calls(expected_calls, any_order=True)
 
     def test_parser_bell_theta_plus(self):
-        mock_builder = mock.create_autospec(InstructionBuilder)
         hardware = get_default_echo_hardware(qubit_count=2)
-        parser = QIRParser(hardware, mock_builder)
+        mock_builder = mock.create_autospec(BuilderFactory.create_builder(hardware))
+        parser = QIRParser(hardware, builder=mock_builder)
 
         parser.parse(qir_file=_get_qir_path("bell_theta_plus.ll"))
 
@@ -217,9 +218,9 @@ class TestQIR:
         mock_builder.assert_has_calls(expected_calls, any_order=True)
 
     def test_parser_bell_theta_minus(self):
-        mock_builder = mock.create_autospec(InstructionBuilder)
         hardware = get_default_echo_hardware(qubit_count=2)
-        parser = QIRParser(hardware, mock_builder)
+        mock_builder = mock.create_autospec(BuilderFactory.create_builder(hardware))
+        parser = QIRParser(hardware, builder=mock_builder)
 
         parser.parse(qir_file=_get_qir_path("bell_theta_minus.ll"))
         q0 = hardware.get_qubit(0)
@@ -287,7 +288,7 @@ class TestQIR:
     )
     def test_on_jagged_hardware(self, qir_file):
         hw = get_jagged_echo_hardware(8)
-        parser = QIRParser(hw)
+        parser = QIRParser(hw, builder=BuilderFactory.create_builder(hw))
         builder = parser.parse(_get_qir_path(qir_file))
         assert len(builder.instructions) > 0
 

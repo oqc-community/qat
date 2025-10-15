@@ -23,6 +23,7 @@ from qat.frontend.parsers import CloudQasmParser as PydCloudQasmParser
 from qat.frontend.parsers import Qasm3Parser as PydQasm3Parser
 from qat.frontend.passes.analysis import InputAnalysisResult
 from qat.integrations.tket import run_pyd_tket_optimizations
+from qat.ir.builder_factory import BuilderFactory
 from qat.ir.instruction_builder import (
     PydQuantumInstructionBuilder,
     QuantumInstructionBuilder,
@@ -155,7 +156,7 @@ class PydParse(TransformPass):
             fp.close()
             try:
                 parser = QIRParser(results_format=compiler_config.results_format.format)
-                builder = QuantumInstructionBuilder(self.hw_model)
+                builder = BuilderFactory.create_builder(self.hw_model)
                 builder = parser.parse(builder, fp.name)
             finally:
                 os.remove(fp.name)
