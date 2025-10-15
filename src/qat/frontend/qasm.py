@@ -171,27 +171,17 @@ class BaseQasmFrontend(BaseFrontend, ABC):
             parsing.
         """
         builder = BuilderFactory.create_builder(self.model)
-        if isinstance(self.model, PydHardwareModel):  # pydantic hardware model
+        if isinstance(self.model, PydHardwareModel):
             builder.repeat(compiler_config.repeats)
+        elif isinstance(self.model, QuantumHardwareModel):
+            builder = builder.repeat(
+                compiler_config.repeats,
+                repetition_period=compiler_config.repetition_period,
+                passive_reset_time=compiler_config.passive_reset_time,
+            )
 
         parser = self.create_parser(compiler_config)
         builder = parser.parse(builder, src)
-
-        if isinstance(self.model, QuantumHardwareModel):
-            return (
-                self.model.create_builder()
-                .repeat(
-                    compiler_config.repeats,
-                    repetition_period=compiler_config.repetition_period,
-                    passive_reset_time=compiler_config.passive_reset_time,
-                )
-                .add(builder)
-            )
-        elif isinstance(self.model, PydHardwareModel):
-            return (
-                type(builder)(self.model).repeat(compiler_config.repeats).__add__(builder)
-            )
-
         return builder
 
     def emit(

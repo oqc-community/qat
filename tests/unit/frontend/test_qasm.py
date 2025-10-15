@@ -20,6 +20,7 @@ from qat.ir.instruction_builder import (
 )
 from qat.ir.instructions import Repeat as PydRepeat
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import Repeat
@@ -291,3 +292,16 @@ class TestQasm3Frontend:
     def test_emit_raises_error_with_invalid_programs(self, qasm_path):
         with pytest.raises(ValueError):
             self.qasm3_frontend().emit(qasm_path)
+
+    def test_emit_has_one_repeat(self):
+        """Tests that the frontend correctly adds a Repeat instruction. Since we need not
+        currently support control flow from qasm, this will always be the case. By the time
+        we do support it, we will have departed form repeats and this test will be obsolete.
+        """
+        model = LucyModelLoader().load()
+        frontend = Qasm3Frontend(model)
+        qasm3_str = get_qasm3("basic.qasm")
+        builder = frontend.emit(qasm3_str)
+
+        repeats = [inst for inst in builder.instructions if isinstance(inst, PydRepeat)]
+        assert len(repeats) == 1
