@@ -24,7 +24,7 @@ from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     DragGaussianWaveform,
     GaussianSquareWaveform,
-    GaussianWaveform,
+    GaussianZeroEdgeWaveform,
     Pulse,
     SampledWaveform,
     SechWaveform,
@@ -837,7 +837,7 @@ class TestQASM3Features:
         assert np.isclose(pulses[0].duration, 80e-9)
 
         waveform = pulses[0].waveform
-        assert isinstance(waveform, GaussianWaveform)
+        assert isinstance(waveform, GaussianZeroEdgeWaveform)
         assert np.isclose(waveform.std_dev, 20e-9)
 
     def test_sech_waveform(self, model, feature_testpath):

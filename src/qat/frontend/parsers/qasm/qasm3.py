@@ -976,7 +976,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             case "gaussian":
                 amp, width, std_dev = _validate_arg_length(tree.children[4], 3)
                 _validate_waveform_args(width=width, amp=amp, std_dev=std_dev)
-                waveform = GaussianWaveform(
+                waveform = GaussianZeroEdgeWaveform(
                     width=width,
                     amp=amp,
                     std_dev=std_dev,
