@@ -147,8 +147,10 @@ class Repeat(Instruction):
         # TODO: Change in next major release of QAT. COMPILER-428
         if repetition_period:
             log.warning(
-                "The `repetition_period` in `Repeat` will soon be removed in favour of "
-                "`passive_reset_time` in the compiler config."
+                "The `repetition_period` in `Repeat` is flagged for removal in QAT v4.0, "
+                "and will be replaced with `passive_reset_time`.  The `passive_reset_time` "
+                "can be set in the `compiler config`. Alternatively, if using QAT "
+                "pipelines, it can also be set in the `TargetData`."
             )
 
     def __repr__(self):
