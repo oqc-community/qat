@@ -40,6 +40,7 @@ from qat.purr.compiler.instructions import (
     MeasurePulse,
     Pulse,
     Sweep,
+    SweepValue,
     Variable,
     calculate_duration,
 )
@@ -111,24 +112,30 @@ class TestQbloxBackend1:
             assert f"GAUSSIAN_{hash(gaussian)}_Q" in pkg.sequence.waveforms
             assert "play 0,1,100" in pkg.sequence.program
 
-    def test_play_square(self, qblox_model):
-        width = 100e-9
+    @pytest.mark.parametrize("start_width, end_width", [(0, 100e-9), (50e-9, 100e-9)])
+    def test_play_square(self, qblox_model, start_width, end_width):
         amp = 1
+        num_points = 50
 
         drive_channel = qblox_model.get_qubit(0).get_drive_channel()
-        builder = qblox_model.create_builder().pulse(
-            drive_channel, PulseShapeType.SQUARE, width=width, amp=amp
-        )
+        time, step = np.linspace(start_width, end_width, num_points, retstep=True)
+        builder = get_builder(qblox_model)
+        builder.sweep(SweepValue("t", time))
+        builder.pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"), amp=amp)
         ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 1
-            channel_id, pkg = next(iter(executable.packages.items()))
-            assert channel_id == drive_channel.full_id()
+        assert len(ordered_executables) == num_points
+
+        ignored_indices = np.squeeze(np.where(time < Constants.GRID_TIME * 1e-9)) + 1
+        for i in ignored_indices:
+            assert not ordered_executables[i].packages
+
+        non_ignored_indices = np.squeeze(np.where(time >= Constants.GRID_TIME * 1e-9)) + 1
+        for i in non_ignored_indices:
+            assert len(ordered_executables[i].packages) == 1
+            pkg = ordered_executables[i].packages[drive_channel.full_id()]
             assert not pkg.sequence.waveforms
-            assert (
-                f"set_awg_offs {Constants.MAX_OFFSET},0\nupd_param {4}\nwait {100 - 4}\nset_awg_offs 0,0"
-                in pkg.sequence.program
-            )
+            assert f"set_awg_offs {Constants.MAX_OFFSET},0" in pkg.sequence.program
+            assert "set_awg_offs 0,0" in pkg.sequence.program
 
     def test_phase_and_frequency_shift(self, qblox_model):
         amp = 1

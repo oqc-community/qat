@@ -536,21 +536,10 @@ class AbstractContext(ABC):
         }
 
         if isinstance(waveform, Pulse) and waveform.shape == PulseShapeType.SQUARE:
-            if "amp" in attr2var:
-                pulse_amp = attr2var["amp"]
-                i_steps = self.alloc_mgr.registers[pulse_amp.name]
-                q_steps = self.alloc_mgr.registers["zero"]
-            else:
-                pulse_amp = self._evaluate_square_pulse(waveform, target)
-                i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
-                q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
-
-            self.sequence_builder.set_awg_offs(i_steps, q_steps)
-
             if "width" in attr2var:
                 pulse_width = attr2var["width"]
                 pulse_width = self.alloc_mgr.registers[pulse_width.name]
-                self._upd_param_reg(pulse_width)
+                # TODO - Continue semantics: jump back to beginning of loop
             else:
                 pulse_width = int(calculate_duration(waveform))
                 if pulse_width < Constants.GRID_TIME:
@@ -562,8 +551,21 @@ class AbstractContext(ABC):
                         """
                     )
                     return
-                self._upd_param_imm(pulse_width)
 
+            if "amp" in attr2var:
+                pulse_amp = attr2var["amp"]
+                i_steps = self.alloc_mgr.registers[pulse_amp.name]
+                q_steps = self.alloc_mgr.registers["zero"]
+            else:
+                pulse_amp = self._evaluate_square_pulse(waveform, target)
+                i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
+                q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
+
+            self.sequence_builder.set_awg_offs(i_steps, q_steps)
+            if "width" in attr2var:
+                self._upd_param_reg(pulse_width)
+            else:
+                self._upd_param_imm(pulse_width)
             self.sequence_builder.set_awg_offs(0, 0)
             self.sequence_builder.upd_param(Constants.GRID_TIME)
 
