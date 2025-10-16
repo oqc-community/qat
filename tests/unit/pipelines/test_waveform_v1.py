@@ -347,8 +347,7 @@ class MockEchoModelLoader(EchoModelLoader):
         return model
 
 
-# TODO: turn on QIR tests when placement is sorted (COMPILER-747)
-parity_test_files = get_pipeline_tests(openpulse=False, qir=False)
+parity_test_files = get_pipeline_tests(openpulse=False)
 
 
 @pytest.mark.experimental
@@ -451,11 +450,21 @@ class TestExperimentalEchoPipelineParity:
         )
         assert stable_executable.shots == experimental_executable.shots
 
-    def test_postprocessing_data(self, stable_executable, experimental_executable):
+    def test_results_processing(self, stable_executable, experimental_executable, request):
+        if "qir-select" in request.node.callspec.id:
+            pytest.xfail(
+                "This is a known issue with the legacy workflow for doing TKET opts on QIR."
+                " The parser will add results processing only on results that are returned,"
+                " but it should add to to all measures. So there is a divergence here "
+                "because the new stack handles it slightly differently to give the correct "
+                "result."
+            )
         assert (
             stable_executable.results_processing
             == experimental_executable.results_processing
         )
+
+    def test_postprocessing_data(self, stable_executable, experimental_executable):
         assert stable_executable.post_processing == experimental_executable.post_processing
         # the ordering of packages, and different times when measures are done mean we
         # no longer have complete parity here.

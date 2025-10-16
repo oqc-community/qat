@@ -49,6 +49,13 @@ log = get_default_logger()
 
 
 class InstructionBuilder(ABC):
+    """Abstract class for assembling quantum programs.
+
+    Provides a number of methods to deal with common quantum semantics, such as qubits,
+    gates, measurements, and control flow. The details of how quantum operations are
+    implemented are left to child classes.
+    """
+
     def __init__(
         self,
         hardware_model: PhysicalHardwareModel,
@@ -65,7 +72,7 @@ class InstructionBuilder(ABC):
     def get_qubit(self, index: int) -> Qubit:
         """Returns the qubit with the given index.
 
-        Note: maybe this is the wrong level of abstraction to have details about the model.
+        TODO: maybe this is the wrong level of abstraction to have details about the model.
         Maybe operations should deal with qubit indices, and the subclass handles the
         translation layer. Nevertheless, this is to be resolved with structured IR.
 
@@ -151,6 +158,17 @@ class InstructionBuilder(ABC):
     @abstractmethod
     def ECR(self, control: Qubit, target: Qubit): ...
 
+    @abstractmethod
+    def measure_single_shot_z(
+        self,
+        target: Qubit,
+        axis: ProcessAxis = ProcessAxis.SEQUENCE,
+        output_variable: str = None,
+    ): ...
+
+    @abstractmethod
+    def reset(self, targets: Qubit | list[Qubit]): ...
+
     def repeat(self, repeat_count: int):
         return self.add(Repeat(repeat_count=repeat_count))
 
@@ -158,33 +176,6 @@ class InstructionBuilder(ABC):
         """Add return statement."""
         variables = variables if variables is not None else []
         return self.add(Return(variables=variables))
-
-    def reset(
-        self, targets: Union[PulseChannel, Qubit] | Iterable[Union[PulseChannel, Qubit]]
-    ):
-        if isinstance(targets, list):
-            targets = set(targets)
-        elif isinstance(targets, PulseChannel | Qubit):
-            targets = {targets}
-        else:
-            raise TypeError(
-                f"Invalid type, expected '(PulseChannel | Qubit | List[PulseChannel | Qubit])' but got {type(targets)}."
-            )
-
-        pulse_channel_ids = []
-        for target in targets:
-            if isinstance(target, Qubit):
-                self.add(Reset(qubit_target=self._qubit_index_by_uuid[target.uuid]))
-                pulse_channel_ids.extend(
-                    [pc.uuid for pc in target.all_qubit_and_resonator_pulse_channels]
-                )
-            else:
-                pulse_channel_ids.append(target.uuid)
-
-        for pulse_ch_id in pulse_channel_ids:
-            self.add(PhaseReset(target=pulse_ch_id))
-
-        return self
 
     def assign(self, name: str, value):
         return self.add(Assign(name=name, value=value))
@@ -261,6 +252,9 @@ class InstructionBuilder(ABC):
 
 
 class QuantumInstructionBuilder(InstructionBuilder):
+    """A pulse-level instruction builder, that provides implementations of quantum gates,
+    and an API for pulse-level instructions."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._pulse_channels: dict[str, PulseChannel] = self._build_pulse_channel_mapping(
@@ -785,6 +779,33 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
             .post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
         )
+
+    def reset(
+        self, targets: Union[PulseChannel, Qubit] | Iterable[Union[PulseChannel, Qubit]]
+    ):
+        if isinstance(targets, list):
+            targets = set(targets)
+        elif isinstance(targets, PulseChannel | Qubit):
+            targets = {targets}
+        else:
+            raise TypeError(
+                f"Invalid type, expected '(PulseChannel | Qubit | list[PulseChannel | Qubit])' but got {type(targets)}."
+            )
+
+        pulse_channel_ids = []
+        for target in targets:
+            if isinstance(target, Qubit):
+                self.add(Reset(qubit_target=self._qubit_index_by_uuid[target.uuid]))
+                pulse_channel_ids.extend(
+                    [pc.uuid for pc in target.all_qubit_and_resonator_pulse_channels]
+                )
+            else:
+                pulse_channel_ids.append(target.uuid)
+
+        for pulse_ch_id in pulse_channel_ids:
+            self.add(PhaseReset(target=pulse_ch_id))
+
+        return self
 
     def _generate_output_variable(self, target: Component):
         return "out_" + target.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"

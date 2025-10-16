@@ -9,9 +9,8 @@ from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
-from qat.ir.instruction_builder import (
-    QuantumInstructionBuilder as PydQuantumInstructionBuilder,
-)
+from qat.integrations.tket import TketBuilder, TketToQatIRConverter, run_tket_optimizations
+from qat.ir.builder_factory import BuilderFactory
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -63,7 +62,11 @@ class QIRFrontend(BaseFrontend):
     and transformation.
     """
 
-    def __init__(self, model: QuantumHardwareModel, pipeline: None | PassManager = None):
+    def __init__(
+        self,
+        model: QuantumHardwareModel | PydHardwareModel,
+        pipeline: None | PassManager = None,
+    ):
         """
         :param model: The hardware model can be required for the pipeline and is used in
             parsing.
@@ -72,6 +75,7 @@ class QIRFrontend(BaseFrontend):
         """
         super().__init__(model)
         self.pipeline = pipeline if pipeline is not None else self.build_pass_pipeline()
+        self._pyd_model = isinstance(model, PydHardwareModel)
 
     @staticmethod
     def build_pass_pipeline() -> PassManager:
@@ -88,13 +92,9 @@ class QIRFrontend(BaseFrontend):
         results_format = (
             config.results_format.format if config and config.results_format else None
         )
-
-        if isinstance(self.model, QuantumHardwareModel):  # legacy hardware model
-            parser = QIRParser(self.model)
-            if results_format is not None:
-                parser.results_format = results_format
-            return parser
-        elif isinstance(self.model, PydHardwareModel):  # pydantic hardware model
+        if not self._pyd_model:
+            return QIRParser(self.model, results_format=results_format)
+        else:
             return PydQIRParser(results_format)
 
     def check_and_return_source(self, src: str | bytes) -> bool | str | bytes:
@@ -134,10 +134,10 @@ class QIRFrontend(BaseFrontend):
     def _get_builder(
         self, compiler_config: CompilerConfig, src: str
     ) -> InstructionBuilder | None:
-        builder = None
+        builder = BuilderFactory.create_builder(self.model)
         parser = self._init_parser(compiler_config)
-        if isinstance(self.model, QuantumHardwareModel):
-            optimizations = compiler_config.optimizations
+        optimizations = compiler_config.optimizations
+        if not self._pyd_model:
             if (
                 isinstance(optimizations, Tket)
                 and optimizations.tket_optimizations != TketOptimizations.Empty
@@ -160,13 +160,23 @@ class QIRFrontend(BaseFrontend):
                 )
                 .add(builder)
             )
-        elif isinstance(self.model, PydHardwareModel):
-            builder = parser.parse(PydQuantumInstructionBuilder(self.model), src)
-            builder = (
-                PydQuantumInstructionBuilder(self.model)
-                .repeat(compiler_config.repeats)
-                .__add__(builder)
-            )
+        else:
+            builder.repeat(compiler_config.repeats)
+            if (
+                isinstance(optimizations, Tket)
+                and optimizations.tket_optimizations != TketOptimizations.Empty
+            ):
+                tket_builder = TketBuilder(self.model)
+                tket_builder = parser.parse(tket_builder, src)
+                tket_builder.circuit = run_tket_optimizations(
+                    tket_builder.circuit,
+                    optimizations.tket_optimizations,
+                    self.model,
+                    return_as_qasm_str=False,
+                )
+                builder = TketToQatIRConverter().convert(builder, tket_builder)
+            else:
+                builder = parser.parse(builder, src)
         return builder
 
     def emit(

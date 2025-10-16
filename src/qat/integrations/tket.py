@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 
+from math import pi
 
 from compiler_config.config import TketOptimizations
-from pytket import Circuit, Qubit
+from pytket import Bit, Circuit, Qubit
 from pytket._tket.architecture import Architecture
 from pytket._tket.predicates import MaxNQubitsPredicate
 from pytket.circuit import Node
@@ -12,9 +13,12 @@ from pytket.placement import Placement
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import QASMUnsupportedError
 
+from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.integrations.tket import (
-    TketBuilder,
+    TketBuilder as LegacyTketBuilder,
+)
+from qat.purr.integrations.tket import (
     TketQasmParser,
     _full_stopalize,
     apply_default_transforms,
@@ -28,7 +32,12 @@ from qat.utils.graphs import get_connected_subgraphs
 log = get_default_logger()
 
 
-def run_tket_optimizations(qasm_string, opts, hardware: PydHardwareModel) -> str:
+def run_tket_optimizations(
+    circuit: str | Circuit,
+    opts,
+    hardware: PydHardwareModel,
+    return_as_qasm_str: bool = True,
+) -> str | QuantumInstructionBuilder:
     """
     Runs tket-based optimizations and modifications given a Pydantic hardware model.
     Routing will always happen no matter the level.
@@ -37,20 +46,15 @@ def run_tket_optimizations(qasm_string, opts, hardware: PydHardwareModel) -> str
     passing optimizations is found.
     """
 
-    optimiser = TketOptimisationHelper(qasm_string, opts, hardware)
+    optimiser = TketOptimisationHelper(circuit, opts, hardware)
     if optimiser.circ is None:
-        return qasm_string
+        return circuit
+    optimiser.run_optimizations()
 
-    n_qubits = optimiser.circ.n_qubits
-    match n_qubits:
-        case 1:
-            optimiser.run_one_qubit_optimizations()
-        case 2:
-            optimiser.run_multi_qubit_optimizations(use_1q_quality=True)
-        case _:
-            optimiser.run_multi_qubit_optimizations()
-
-    return optimiser.convert_to_qasm_string()
+    if return_as_qasm_str:
+        return optimiser.convert_to_qasm_string()
+    else:
+        return optimiser.circ
 
 
 class TketOptimisationHelper:
@@ -59,14 +63,29 @@ class TketOptimisationHelper:
     """
 
     def __init__(
-        self, qasm_string: str, opts: TketOptimizations, hardware: PydHardwareModel
+        self, circuit: Circuit | str, opts: TketOptimizations, hardware: PydHardwareModel
     ):
         self.hardware = hardware
         self.opts = opts
-        self.circ = self._get_circuit_from_qasm(qasm_string)
+        if isinstance(circuit, str):
+            self.circ = self._get_circuit_from_qasm(circuit)
+        else:
+            # Helps handle cases where more qubits are allocated than needed
+            self.circ = circuit
+            self.circ.remove_blank_wires()
         self.coupling_qualities = {}
         self.architecture = None
         self.logical_qubit_map = self._get_logical_qubit_map()
+
+    def run_optimizations(self):
+        n_qubits = self.circ.n_qubits
+        match n_qubits:
+            case 1:
+                self.run_one_qubit_optimizations()
+            case 2:
+                self.run_multi_qubit_optimizations(use_1q_quality=True)
+            case _:
+                self.run_multi_qubit_optimizations()
 
     def run_one_qubit_optimizations(self):
         qubit_qualities = {}
@@ -148,7 +167,9 @@ class TketOptimisationHelper:
         Routing will always happen no matter the level.
         """
         try:
-            tket_builder: TketBuilder = TketQasmParser().parse(TketBuilder(), qasm_string)
+            tket_builder: LegacyTketBuilder = TketQasmParser().parse(
+                LegacyTketBuilder(), qasm_string
+            )
             circ = tket_builder.circuit
             log.info(f"Number of gates before tket optimization: {circ.n_gates}")
             return circ
@@ -224,3 +245,222 @@ class TketOptimisationHelper:
 
 
 run_pyd_tket_optimizations = run_tket_optimizations
+
+
+class TketBuilder(InstructionBuilder):
+    """Assembles a TKET circuit using the InstructionBuilder interface."""
+
+    def __init__(self, hardware_model: PydHardwareModel):
+        super().__init__(hardware_model)
+        n_qubits = len(hardware_model.qubits)
+        self.circuit = Circuit(n_qubits)
+        self._output_variables: dict[int, str] = {}
+        self._bit_ctr = 0
+
+    def get_qubit(self, index: int) -> Qubit:
+        return self.circuit.qubits[index]
+
+    def X(self, qubit: Qubit, theta: float | None = None):
+        if theta is not None:
+            self.circuit.Rx(self._normalize_angle(theta), qubit)
+        else:
+            self.circuit.X(qubit)
+
+    def Y(self, qubit: Qubit, theta: float | None = None):
+        if theta is not None:
+            self.circuit.Ry(self._normalize_angle(theta), qubit)
+        else:
+            self.circuit.Y(qubit)
+        return self
+
+    def Z(self, qubit: Qubit, theta: float | None = None):
+        if theta is not None:
+            self.circuit.Rz(self._normalize_angle(theta), qubit)
+        else:
+            self.circuit.Z(qubit)
+        return self
+
+    def U(self, qubit: Qubit, theta: float, phi: float, lamd: float):
+        self.circuit.U3(
+            self._normalize_angle(theta),
+            self._normalize_angle(phi),
+            self._normalize_angle(lamd),
+            qubit,
+        )
+        return self
+
+    def swap(self, qubit1: Qubit, qubit2: Qubit):
+        self.circuit.SWAP(qubit1, qubit2)
+        return self
+
+    def controlled(self, *args):
+        raise NotImplementedError("Does not yet support custom control gates.")
+
+    def cX(self, control: Qubit, target: Qubit, theta: float = pi):
+        self.circuit.CRx(self._normalize_angle(theta), control, target)
+        return self
+
+    def cY(self, control: Qubit, target: Qubit, theta: float = pi):
+        self.circuit.CRy(self._normalize_angle(theta), control, target)
+        return self
+
+    def cZ(self, control: Qubit, target: Qubit, theta: float = pi):
+        self.circuit.CRz(self._normalize_angle(theta), control, target)
+        return self
+
+    def cnot(self, control: Qubit, target: Qubit):
+        self.circuit.CX(control, target)
+        return self
+
+    def ccnot(self, control1: Qubit, control2: Qubit, target: Qubit):
+        self.circuit.CCX(control1, control2, target)
+        return self
+
+    def ECR(self, qubit1: Qubit, qubit2: Qubit):
+        self.circuit.ECR(qubit1, qubit2)
+        return self
+
+    def measure_single_shot_z(
+        self, qubit: Qubit, output_variable: str | None = None, **kwargs
+    ):
+        self._output_variables[self._bit_ctr] = output_variable or str(self._bit_ctr)
+        cbit = Bit(self._output_variables[self._bit_ctr], self._bit_ctr)
+        self.circuit.add_bit(cbit)
+        self.circuit.Measure(qubit, cbit)
+        self._bit_ctr += 1
+        return self
+
+    def reset(self, qubit: Qubit):
+        self.circuit.Reset(qubit)
+        return self
+
+    def _normalize_angle(self, theta: float) -> float:
+        """Tket likes angles to be in units of pi."""
+        return theta / pi
+
+
+class TketToQatIRConverter:
+    """Converts a Tket circuit into Qat IR.
+
+    Essentially the "parser" for Tket circuits.
+
+    .. warning::
+        This converter is only intended to be used to convert a TKET circuit into QAT IR
+        after being parsed from QIR. It does not account for multiple quantum and classical
+        registers, and might give undesired behaviour if used outside of this use case.
+    """
+
+    @staticmethod
+    def convert_parameter(arg: str):
+        r"""A parameter stored in a Tket operation is in units of :math:`\pi`. Parameters
+        are returned as a string, sometimes in fractional form: we need to convert it to an
+        absolute value."""
+
+        if "/" in arg:
+            a, b = arg.split("/")
+            arg = float(a) / float(b)
+        else:
+            arg = float(arg)
+        return pi * arg
+
+    def convert(
+        self, qat_builder: InstructionBuilder, tket_builder: TketBuilder
+    ) -> InstructionBuilder:
+        """Converts a Tket circuit into Qat IR, adding any necesarry assigns and returns.
+
+        :param circuit: Program as a Tket circuit.
+        :param result_format: Specifies how measurement results are formatted.
+        """
+
+        for command in tket_builder.circuit.to_dict()["commands"]:
+            # Retrieves the qubit / clbit indices for each operation
+            args = [arg[1][0] for arg in command["args"]]
+
+            match command["op"]["type"]:
+                # One-qubit gates
+                case "X":
+                    qat_builder.X(qat_builder.get_qubit(args[0]))
+                case "Y":
+                    qat_builder.Y(qat_builder.get_qubit(args[0]))
+                case "Z":
+                    qat_builder.Z(qat_builder.get_qubit(args[0]))
+                case "H":
+                    qat_builder.had(qat_builder.get_qubit(args[0]))
+                case "SX":
+                    qat_builder.SX(qat_builder.get_qubit(args[0]))
+                case "SXdg":
+                    qat_builder.SXdg(qat_builder.get_qubit(args[0]))
+                case "S":
+                    qat_builder.S(qat_builder.get_qubit(args[0]))
+                case "Sdg":
+                    qat_builder.Sdg(qat_builder.get_qubit(args[0]))
+                case "T":
+                    qat_builder.T(qat_builder.get_qubit(args[0]))
+                case "Tdg":
+                    qat_builder.Tdg(qat_builder.get_qubit(args[0]))
+                case "Rx":
+                    qat_builder.X(
+                        qat_builder.get_qubit(args[0]),
+                        self.convert_parameter(command["op"]["params"][0]),
+                    )
+                case "Ry":
+                    qat_builder.Y(
+                        qat_builder.get_qubit(args[0]),
+                        self.convert_parameter(command["op"]["params"][0]),
+                    )
+                case "Rz":
+                    qat_builder.Z(
+                        qat_builder.get_qubit(args[0]),
+                        self.convert_parameter(command["op"]["params"][0]),
+                    )
+                case "U1":
+                    qat_builder.Z(
+                        qat_builder.get_qubit(args[0]),
+                        self.convert_parameter(command["op"]["params"][0]),
+                    )
+                case "U2":
+                    qat_builder.U(
+                        qat_builder.get_qubit(args[0]),
+                        pi / 2,
+                        self.convert_parameter(command["op"]["params"][0]),
+                        self.convert_parameter(command["op"]["params"][1]),
+                    )
+                case "U3":
+                    qat_builder.U(
+                        qat_builder.get_qubit(args[0]),
+                        self.convert_parameter(command["op"]["params"][0]),
+                        self.convert_parameter(command["op"]["params"][1]),
+                        self.convert_parameter(command["op"]["params"][2]),
+                    )
+
+                # Two-qubit gates
+                case "CX":
+                    qat_builder.cnot(
+                        qat_builder.get_qubit(args[0]), qat_builder.get_qubit(args[1])
+                    )
+                case "ECR":
+                    qat_builder.ECR(
+                        qat_builder.get_qubit(args[0]), qat_builder.get_qubit(args[1])
+                    )
+                case "SWAP":
+                    qat_builder.swap(
+                        qat_builder.get_qubit(args[0]), qat_builder.get_qubit(args[1])
+                    )
+
+                # Operations
+                case "Measure":
+                    output_var = tket_builder._output_variables[int(str(args[1]))]
+                    qat_builder.measure_single_shot_z(
+                        qat_builder.get_qubit(args[0]), output_variable=output_var
+                    )
+                case "Barrier":
+                    qat_builder.synchronize([qat_builder.get_qubit(arg) for arg in args])
+                case "Reset":
+                    qat_builder.reset(qat_builder.get_qubit(args[0]))
+                case _:
+                    raise NotImplementedError(
+                        f"Command {command['op']['type']} not implemented."
+                    )
+
+        qat_builder += tket_builder
+        return qat_builder
