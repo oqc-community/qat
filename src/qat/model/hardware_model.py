@@ -106,11 +106,6 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                 phys_channel = device.physical_channel
                 self._ids_to_physical_channels[phys_channel.uuid] = phys_channel
                 self._physical_channel_ids_to_device[phys_channel.uuid] = device
-
-                if phys_channel.name_index is None:
-                    raise ValueError(
-                        f"Physical channel '{phys_channel}' has no assigned index."
-                    )
                 self._physical_channel_map[phys_channel.name_index] = phys_channel
 
                 for pulse_channel in device.all_pulse_channels:

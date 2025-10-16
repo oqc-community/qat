@@ -35,9 +35,9 @@ from qat.utils.waveform import (
 
 
 class AbstractWaveform(AllowExtraFieldsModel):
-    @property
-    def name(self):
-        return self.__class__.__name__.replace("Waveform", "")
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__.replace("Waveform", "")
 
 
 class Waveform(AbstractWaveform):

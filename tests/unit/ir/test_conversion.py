@@ -266,7 +266,7 @@ class TestConvertToPydanticIRPass:
             elif name in ["duration", "ignore_channel_scale"]:
                 new_value = getattr(converted_value, name)
             elif name == "shape":
-                new_value = converted_value.waveform.name.lower()
+                new_value = converted_value.waveform.name().lower()
                 if legacy_value == instructions.CustomPulse:
                     value = "sampled"
                 elif legacy_value.shape == PulseShapeType.GAUSSIAN_DRAG:
@@ -752,7 +752,7 @@ class TestConvertToPydanticIRPass:
             elif name in ["duration", "ignore_channel_scale"]:
                 new_value = getattr(converted_waveform, name)
             elif name == "shape":
-                new_value = converted_waveform.waveform.name.lower()
+                new_value = converted_waveform.waveform.name().lower()
                 if legacy_pulse == instructions.CustomPulse:
                     value = "sampled"
                 elif legacy_pulse.shape == PulseShapeType.GAUSSIAN_DRAG:
