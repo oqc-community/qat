@@ -9,7 +9,7 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
 from qat.core.result_base import ResultManager
-from qat.ir.instruction_builder import InstructionBuilder
+from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import FrequencySet, FrequencyShift, Instruction, Repeat, Return
 from qat.ir.measure import (
     Acquire,
@@ -166,6 +166,7 @@ class DynamicFrequencyValidation(ValidationPass):
     def _calculate_frequency(
         self,
         instruction: Instruction,
+        ir: QuantumInstructionBuilder,
         ifs: dict[str, list[float]],
         physical_channel_ids: dict[str, str],
     ):
@@ -175,20 +176,19 @@ class DynamicFrequencyValidation(ValidationPass):
     def _(
         self,
         instruction: FrequencyShift,
+        ir: QuantumInstructionBuilder,
         ifs: dict[str, list[float]],
         physical_channel_ids: dict[str, str],
     ):
         frequencies = ifs[instruction.target]
-        physical_channel = self.model.physical_channel_for_pulse_channel_id(
-            instruction.target
+        pulse_channel = ir.get_pulse_channel(instruction.target)
+        physical_channel = self.model.physical_channel_with_id(
+            pulse_channel.physical_channel_id
         )
         freq = (
             frequencies[-1]
             if len(frequencies) > 0
-            else (
-                self.model.pulse_channel_with_id(instruction.target).frequency
-                - physical_channel.baseband.frequency
-            )
+            else pulse_channel.frequency - physical_channel.baseband.frequency
         )
         frequencies.append(freq + instruction.frequency)
         physical_channel_ids[instruction.target] = physical_channel.uuid
@@ -197,24 +197,27 @@ class DynamicFrequencyValidation(ValidationPass):
     def _(
         self,
         instruction: FrequencySet,
+        ir: QuantumInstructionBuilder,
         ifs: dict[str, list[float]],
         physical_channel_ids: dict[str, str],
     ):
-        physical_channel = self.model.physical_channel_for_pulse_channel_id(
-            instruction.target
+        physical_channel = self.model.physical_channel_with_id(
+            ir.get_pulse_channel(instruction.target).physical_channel_id
         )
         ifs[instruction.target].append(
             instruction.frequency - physical_channel.baseband.frequency
         )
         physical_channel_ids[instruction.target] = physical_channel.uuid
 
-    def run(self, ir: InstructionBuilder, *args, **kwargs):
-        """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+    def run(
+        self, ir: QuantumInstructionBuilder, *args, **kwargs
+    ) -> QuantumInstructionBuilder:
+        """:param ir: The list of instructions stored in an :class:`QuantumInstructionBuilder`."""
 
         ifs = defaultdict(list)
         physical_channel_ids = defaultdict(str)
         for instruction in ir.instructions:
-            self._calculate_frequency(instruction, ifs, physical_channel_ids)
+            self._calculate_frequency(instruction, ir, ifs, physical_channel_ids)
 
         violations = []
         for pulse_channel_id, if_values in ifs.items():
@@ -222,8 +225,9 @@ class DynamicFrequencyValidation(ValidationPass):
             if if_violations := self._validate_frequency_shifts(
                 physical_channel_id, if_values
             ):
-                pulse_channel = self.model.pulse_channel_with_id(pulse_channel_id)
-                device = self.model.device_for_pulse_channel_id(pulse_channel_id)
+                device = self.model.device_for_physical_channel_id(
+                    physical_channel_ids[pulse_channel_id]
+                )
                 device_name = "Qubit "
                 if self._is_resonator[physical_channel_id]:
                     device_name = "Resonator "
@@ -231,8 +235,16 @@ class DynamicFrequencyValidation(ValidationPass):
                         filter(lambda qubit: qubit.resonator is device, self.model.qubits)
                     )
                 device_name += str(self.model.index_of_qubit(device))
+
+                if (
+                    hw_pc := self.model.pulse_channel_with_id(pulse_channel_id)
+                ) is not None:
+                    pc_name = f"{hw_pc.pulse_type}"
+                else:
+                    pc_name = f"Custom({pulse_channel_id})"
+
                 violations.append(
-                    f"The IF of {device_name} {pulse_channel.pulse_type} pulse channel is set or "
+                    f"The IF of {device_name} {pc_name} pulse channel is set or "
                     f"shifted to values {if_violations} that exceed the allowed limits."
                 )
 
@@ -422,43 +434,8 @@ class FrequencySetupValidation(ValidationPass):
             target_data.RESONATOR_DATA.pulse_channel_if_freq_min,
             target_data.RESONATOR_DATA.pulse_channel_if_freq_max,
         )
-
-        self._pulse_channel_data = self._get_pulse_channel_data(model)
         self._physical_channel_data = self._get_physical_channel_data(model)
-
-    def _get_pulse_channel_data(self, model: PhysicalHardwareModel) -> dict[str, dict]:
-        """Extracts pulse channel data from the model."""
-        pulse_channel_data = {}
-
-        for qubit in model.qubits.values():
-            pulse_channel_data = self._populate_pulse_channel_dict(
-                pulse_channel_data, qubit.all_pulse_channels, qubit.physical_channel, False
-            )
-            pulse_channel_data = self._populate_pulse_channel_dict(
-                pulse_channel_data,
-                qubit.resonator.all_pulse_channels,
-                qubit.resonator.physical_channel,
-                True,
-            )
-        return pulse_channel_data
-
-    def _populate_pulse_channel_dict(
-        self,
-        pulse_channel_data: dict,
-        pulse_channels: list[Pulse],
-        physical_channel: PhysicalChannel,
-        is_resonator: bool,
-    ) -> dict:
-        for pulse_channel in pulse_channels:
-            if_freq = pulse_channel.frequency - physical_channel.baseband.frequency
-            pulse_channel_data[pulse_channel.uuid] = {
-                "physical_channel": physical_channel.uuid,
-                "is_valid": self._validate_pulse_channel_if(if_freq, is_resonator),
-                "is_resonator": is_resonator,
-                "if_frequency": if_freq,
-                "pulse_type": pulse_channel.pulse_type,
-            }
-        return pulse_channel_data
+        self._model = model
 
     def _get_physical_channel_data(self, model: PhysicalHardwareModel) -> dict[str, dict]:
         """Extracts physical channel data from the model."""
@@ -528,45 +505,55 @@ class FrequencySetupValidation(ValidationPass):
                 )
         return violations
 
-    def _find_pulse_channel_violations(self, pulse_channels) -> list[str] | None:
+    def _find_pulse_channel_violations(
+        self, pulse_channels: set[str], ir: QuantumInstructionBuilder
+    ) -> list[str] | None:
         """Finds violations in the pulse channels based on their IF frequencies."""
         violations = []
-        for pulse_channel in pulse_channels:
-            data = self._pulse_channel_data[pulse_channel]
+        for pulse_channel_id in pulse_channels:
+            pulse_channel = ir.get_pulse_channel(pulse_channel_id)
+            physical_channel_id = pulse_channel.physical_channel_id
+            physical_channel_data = self._physical_channel_data[physical_channel_id]
 
-            # TODO: Add support for custom pulse channels COMPILER-698
-            valid = data["is_valid"]
-
+            if_freq = pulse_channel.frequency - physical_channel_data["baseband_frequency"]
+            valid = self._validate_pulse_channel_if(
+                if_freq, physical_channel_data["is_resonator"]
+            )
             if not valid:
-                freq_range = self._get_if_freq_range(data["is_resonator"])
-                if_freq = data["if_frequency"]
-                index = self._physical_channel_data[data["physical_channel"]]["index"]
-                name = "Resonator" if data["is_resonator"] else "Qubit"
-                name += f" {index} {data['pulse_type']}"
+                name = "Resonator" if physical_channel_data["is_resonator"] else "Qubit"
+                name += f" {physical_channel_data['index']} "
+                if (
+                    hw_pc := self._model.pulse_channel_with_id(pulse_channel_id)
+                ) is not None:
+                    pc_name = f"{hw_pc.pulse_type}"
+                else:
+                    pc_name = f"Custom({pulse_channel_id})"
+
+                freq_range = self._get_if_freq_range(physical_channel_data["is_resonator"])
                 violations.append(
-                    f"The IF of {name} pulse channel has a value {if_freq}, "
+                    f"The IF of {name} {pc_name} pulse channel has a value {if_freq}, "
                     f"which is outside of the the valid range {freq_range}."
                 )
 
         return violations
 
-    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+    def run(
+        self, ir: QuantumInstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+    ) -> QuantumInstructionBuilder:
         """
-        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param ir: The list of instructions stored in an :class:`QuantumInstructionBuilder`.
         :param res_mgr: The result manager containing the results of the analysis.
         """
 
         active_channel_res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         pulse_channels = active_channel_res.targets
         physical_channels = set(
-            [
-                self._pulse_channel_data[pulse_channel]["physical_channel"]
-                for pulse_channel in pulse_channels
-            ]
+            ir.get_pulse_channel(pulse_channel).physical_channel_id
+            for pulse_channel in pulse_channels
         )
 
         violations = self._find_physical_channel_violations(physical_channels)
-        violations.extend(self._find_pulse_channel_violations(pulse_channels))
+        violations.extend(self._find_pulse_channel_violations(pulse_channels, ir))
 
         if len(violations) > 0:
             raise ValueError(

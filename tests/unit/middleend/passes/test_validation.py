@@ -117,7 +117,7 @@ class TestInstructionValidation:
             PydInstructionValidation(self.target_data, self.hw).run(builder)
 
 
-class TestPydDynamicFrequencyValidation:
+class TestDynamicFrequencyValidation:
     target_data = TargetData.default()
     hw = LucyModelLoader(qubit_count=4).load()
 
@@ -199,7 +199,6 @@ class TestPydDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        ResultManager()
         PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
@@ -214,7 +213,6 @@ class TestPydDynamicFrequencyValidation:
         )
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
-        ResultManager()
         PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -230,7 +228,6 @@ class TestPydDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        ResultManager()
         with pytest.raises(ValueError):
             PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
@@ -386,8 +383,49 @@ class TestPydDynamicFrequencyValidation:
         builder.pulse(target=pulse_channel.uuid, duration=80e-9, waveform=SquareWaveform())
         PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
+    @pytest.mark.parametrize("sign", [-1, +1])
+    def test_custom_channel_gets_invalid_frequency(self, sign):
+        target_data = self.target_data_with_non_zero_if_min()
+        channel = self.get_single_pulse_channel()
+        physical_channel = self.hw.physical_channel_for_pulse_channel_id(channel.uuid)
+        qubit_data = target_data.QUBIT_DATA
+        assert qubit_data.pulse_channel_if_freq_min > 0.0
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + sign * 0.5 * qubit_data.pulse_channel_if_freq_min
+        )
+        delta_freq = target_freq - channel.frequency
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        channel = builder.create_pulse_channel(
+            frequency=channel.frequency, physical_channel=physical_channel
+        )
+        builder.frequency_shift(channel, delta_freq)
+        with pytest.raises(ValueError):
+            PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
-class TestPydNoMidCircuitMeasurementValidation:
+    @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
+    def test_custom_channel_raises_no_error_when_freq_shift_in_range(self, scale):
+        """Shifts the frequency in the range [min_if, max_if] to check it does not fail."""
+        channel = self.get_single_pulse_channel()
+        physical_channel = self.hw.physical_channel_for_pulse_channel_id(channel.uuid)
+
+        qubit_data = self.target_data.QUBIT_DATA
+        target_freq = (
+            self.get_baseband_frequency_of_pulse_channel(channel.uuid)
+            + scale * qubit_data.pulse_channel_if_freq_max
+            - (1 - scale) * qubit_data.pulse_channel_if_freq_min
+        )
+        delta_freq = target_freq - channel.frequency
+
+        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
+        channel = builder.create_pulse_channel(
+            frequency=channel.frequency, physical_channel=physical_channel
+        )
+        builder.frequency_shift(channel, delta_freq)
+        PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
+
+
+class TestNoMidCircuitMeasurementValidation:
     hw = LucyModelLoader(qubit_count=4).load()
 
     def test_no_mid_circuit_meas_found(self):
@@ -545,19 +583,6 @@ class TestFrequencySetupValidation:
         )
         assert len(is_resonator) == len(self.model.qubits) * 2
 
-    def test_create_pulse_channel_if_data(self):
-        freq_setup = PydFrequencySetupValidation(self.model, self.target_data)
-        pulse_channel_ifs = [
-            chan["if_frequency"] for chan in freq_setup._pulse_channel_data.values()
-        ]
-        n_qubit_pulse_channels = len(self.model.qubits[0].all_pulse_channels) * len(
-            self.model.qubits
-        )
-        n_resonator_pulse_channels = len(
-            self.model.qubits[0].resonator.all_pulse_channels
-        ) * len(self.model.qubits)
-        assert len(pulse_channel_ifs) == n_qubit_pulse_channels + n_resonator_pulse_channels
-
     def test_validate_baseband_frequency(self):
         is_resonator = {
             "test1": False,
@@ -703,42 +728,42 @@ class TestFrequencySetupValidation:
 
     @pytest.mark.parametrize("violation_type", ["lower", "higher"])
     @pytest.mark.parametrize("channel_type", ["qubit", "resonator"])
-    def test_raises_error_for_invalid_if(self, violation_type, channel_type):
+    @pytest.mark.parametrize("custom", [True, False])
+    def test_raises_error_for_invalid_if(self, violation_type, channel_type, custom):
         target_data = self.target_data_with_non_zero_if_min()
         qubit = self.model.qubits[0]
+        builder = PydQuantumInstructionBuilder(hardware_model=self.model)
 
         # Sets up a channel to have a bad IF freq but not a bad baseband freq.
         if channel_type == "qubit":
-            channel = qubit.drive_pulse_channel
-            baseband_freq = qubit.physical_channel.baseband.frequency
-            if violation_type == "lower":
-                channel.frequency = (
-                    0.99 * target_data.QUBIT_DATA.pulse_channel_if_freq_min + baseband_freq
-                )
-            elif violation_type == "higher":
-                channel.frequency = (
-                    1.1 * target_data.QUBIT_DATA.pulse_channel_if_freq_max + baseband_freq
-                )
+            pulse_channel = qubit.drive_pulse_channel
+            physical_channel = qubit.physical_channel
+            device_data = target_data.QUBIT_DATA
         elif channel_type == "resonator":
-            resonator = qubit.resonator
-            channel = resonator.measure_pulse_channel
-            baseband_freq = resonator.physical_channel.baseband.frequency
-            if violation_type == "lower":
-                channel.frequency = (
-                    0.99 * target_data.RESONATOR_DATA.pulse_channel_if_freq_min
-                    + baseband_freq
-                )
-            elif violation_type == "higher":
-                channel.frequency = (
-                    1.1 * target_data.RESONATOR_DATA.pulse_channel_if_freq_max
-                    + baseband_freq
-                )
+            pulse_channel = qubit.resonator.measure_pulse_channel
+            physical_channel = qubit.resonator.physical_channel
+            device_data = target_data.RESONATOR_DATA
 
-        builder = PydQuantumInstructionBuilder(hardware_model=self.model)
-        builder.pulse(target=channel.uuid, waveform=SquareWaveform(width=80e-9))
+        if custom:
+            pulse_channel = builder.create_pulse_channel(
+                frequency=pulse_channel.frequency, physical_channel=physical_channel
+            )
+
+        if violation_type == "lower":
+            pulse_channel.frequency = (
+                0.99 * device_data.pulse_channel_if_freq_min
+                + physical_channel.baseband.frequency
+            )
+        elif violation_type == "higher":
+            pulse_channel.frequency = (
+                1.1 * device_data.pulse_channel_if_freq_max
+                + physical_channel.baseband.frequency
+            )
+
+        builder.pulse(target=pulse_channel.uuid, waveform=SquareWaveform(width=80e-9))
         res_mgr = ResultManager()
         res = ActivePulseChannelResults()
-        res.add_target(channel, "doesn't matter")
+        res.add_target(pulse_channel, "doesn't matter")
         res_mgr.add(res)
         with pytest.raises(ValueError):
             PydFrequencySetupValidation(self.model, target_data).run(builder, res_mgr)
