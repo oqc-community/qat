@@ -13,7 +13,7 @@ from numpy.typing import NDArray
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
-from qat.ir.instruction_builder import InstructionBuilder
+from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import (
     Assign,
     Delay,
@@ -37,7 +37,7 @@ from qat.ir.instructions import (
 from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import Pulse, SampledWaveform, SquareWaveform, Waveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
-from qat.model.device import FreqShiftPulseChannel, MeasurePulseChannel, PulseChannel, Qubit
+from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import (
@@ -51,9 +51,17 @@ log = get_default_logger()
 
 
 class PopulateWaveformSampleTime(TransformPass):
+    """Populates instructions within the IR with the sample time from their coupled
+    physical channel.
+
+    This is a symptom of the IR builder not having access to the target data when assembling
+    the instructions; this will likely be addressed later.
+    """
+
     def __init__(self, hardware_model: PhysicalHardwareModel, target_data: TargetData):
         """
-        :param hardware_model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param hardware_model: The hardware model that holds calibrated information on the
+            qubits on the QPU.
         :param target_data: Target-related information.
         """
         self._channel_data = self._create_channel_data(hardware_model, target_data)
@@ -62,21 +70,25 @@ class PopulateWaveformSampleTime(TransformPass):
     def _create_channel_data(
         hardware_model: PhysicalHardwareModel, target_data
     ) -> dict[str, float]:
-        """
-        Creates a mapping between physical channel and pulse channel to specify if the
-        channel is a resonator or not.
-        """
+        """Maps physical channels onto their sample times."""
         channel_data = {}
+
         for qubit in hardware_model.qubits.values():
-            for pulse_channel in qubit.all_pulse_channels:
-                channel_data[pulse_channel.uuid] = target_data.QUBIT_DATA.sample_time
-            for pulse_channel in qubit.resonator.all_pulse_channels:
-                channel_data[pulse_channel.uuid] = target_data.RESONATOR_DATA.sample_time
+            channel_data[qubit.physical_channel.uuid] = target_data.QUBIT_DATA.sample_time
+            channel_data[qubit.resonator.physical_channel.uuid] = (
+                target_data.RESONATOR_DATA.sample_time
+            )
         return channel_data
 
-    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+    def run(
+        self, ir: QuantumInstructionBuilder, *args, **kwargs
+    ) -> QuantumInstructionBuilder:
         for inst in ir.instructions:
-            self._add_sample_time(inst, getattr(inst, "target", None))
+            target = getattr(inst, "target", None)
+            if target is None:
+                continue
+            physical_channel_id = ir.get_pulse_channel(target).physical_channel_id
+            self._add_sample_time(inst, physical_channel_id)
         return ir
 
     @singledispatchmethod
@@ -364,11 +376,11 @@ class MeasurePhaseResetSanitisation(TransformPass):
                     new_instructions.append(
                         PhaseReset(target=self.measure_pulse_channels[qubit_target])
                     )
-            elif isinstance(instr, Pulse) and isinstance(
-                pulse_ch := self.model._ids_to_pulse_channels[instr.target],
-                MeasurePulseChannel,
+            elif (
+                isinstance(instr, Pulse)
+                and instr.target in self.measure_pulse_channels.values()
             ):
-                new_instructions.append(PhaseReset(target=pulse_ch.uuid))
+                new_instructions.append(PhaseReset(target=instr.target))
             new_instructions.append(instr)
 
         ir.instructions = new_instructions
@@ -415,6 +427,11 @@ class InactivePulseChannelSanitisation(TransformPass):
             else:
                 instructions.append(inst)
         ir.instructions = instructions
+
+        # TODO: To be fixed with a module passed down the pipeline. (COMPILER-794)
+        ir._pulse_channels = {
+            k: v for k, v in ir._pulse_channels.items() if k in active_channels
+        }
         return ir
 
 
@@ -568,22 +585,20 @@ class InstructionLengthSanitisation(TransformPass):
             pass.
         """
         self.duration_limit = target_data.QUBIT_DATA.pulse_duration_max
-        self.qubit_sample_time = target_data.QUBIT_DATA.sample_time
-        self.resonator_sample_time = target_data.RESONATOR_DATA.sample_time
-        self.is_resonator = self._create_resonator_map(model)
+        self.sample_times = self._create_sample_time_map(model, target_data)
 
     @staticmethod
-    def _create_resonator_map(model: PhysicalHardwareModel) -> dict[str, bool]:
-        """Creates a mapping between physical channel and pulse channel to specify if the
-        channel is a resonator or not."""
-
-        is_resonator = {}
+    def _create_sample_time_map(
+        model: PhysicalHardwareModel, target_data: TargetData
+    ) -> dict[str, float]:
+        """Maps physical channels onto their sample times."""
+        channel_data = {}
         for qubit in model.qubits.values():
-            for pulse_channel in qubit.all_pulse_channels:
-                is_resonator[pulse_channel.uuid] = False
-            for pulse_channel in qubit.resonator.all_pulse_channels:
-                is_resonator[pulse_channel.uuid] = True
-        return is_resonator
+            channel_data[qubit.physical_channel.uuid] = target_data.QUBIT_DATA.sample_time
+            channel_data[qubit.resonator.physical_channel.uuid] = (
+                target_data.RESONATOR_DATA.sample_time
+            )
+        return channel_data
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
@@ -609,8 +624,11 @@ class InstructionLengthSanitisation(TransformPass):
                 and isinstance(instr.waveform, SampledWaveform)
                 and instr.duration > self.duration_limit
             ):
+                target = next(iter(instr.targets))
+                physical_channel_id = ir.get_pulse_channel(target).physical_channel_id
+                sample_time = self.sample_times[physical_channel_id]
                 new_instructions.extend(
-                    self._batch_custom_waveform(instr, self.duration_limit)
+                    self._batch_custom_waveform(instr, self.duration_limit, sample_time)
                 )
 
             else:
@@ -650,17 +668,14 @@ class InstructionLengthSanitisation(TransformPass):
 
         return batch_instr
 
-    def _batch_custom_waveform(self, instruction: Pulse, max_duration: float):
+    def _batch_custom_waveform(
+        self, instruction: Pulse, max_duration: float, sample_time: float
+    ):
         """Breaks up a custom pulse into multiple custom pulses with none exceeding the
         maximum duration."""
 
         n_instr = int(instruction.duration // max_duration)
         remainder = instruction.duration % max_duration
-        sample_time = (
-            self.resonator_sample_time
-            if self.is_resonator[instruction.target]
-            else self.qubit_sample_time
-        )
         max_samples = int(round(max_duration / sample_time))
 
         batch_instr = []
@@ -668,7 +683,8 @@ class InstructionLengthSanitisation(TransformPass):
             waveform = SampledWaveform(
                 samples=instruction.waveform.samples[
                     i * max_samples : (i + 1) * max_samples
-                ]
+                ],
+                sample_time=instruction.waveform.sample_time,
             )
             pulse = Pulse(
                 targets=instruction.target,
@@ -680,7 +696,10 @@ class InstructionLengthSanitisation(TransformPass):
 
         if remainder:
             num_samples = int(round(remainder / sample_time))
-            waveform = SampledWaveform(samples=instruction.waveform.samples[-num_samples:])
+            waveform = SampledWaveform(
+                samples=instruction.waveform.samples[-num_samples:],
+                sample_time=instruction.waveform.sample_time,
+            )
             pulse = Pulse(
                 targets=instruction.target,
                 waveform=waveform,
@@ -1228,9 +1247,7 @@ class EvaluateWaveforms(TransformPass):
         self.acquire_ignored_shapes = self._sanitise_ignored_shapes(
             acquire_ignored_shapes, ()
         )
-        self.scales_map, self.sample_times = self._extract_pulse_channel_features(
-            model, target_data
-        )
+        self.sample_times = self._extract_pulse_channel_features(model, target_data)
 
     @staticmethod
     def _sanitise_ignored_shapes(
@@ -1244,65 +1261,61 @@ class EvaluateWaveforms(TransformPass):
     def _extract_pulse_channel_features(
         model: PhysicalHardwareModel, target_data: TargetData
     ) -> dict[str, float]:
-        """Extracts the scale factor and sample rate for all pulse channels as dicts, with
-        pulse channel IDs as keys."""
+        """Extracts the  sample rate for all pulse channels as dicts, with physical channel
+        IDs as keys."""
 
-        scales_map = {}
         sample_times = {}
         for qubit in model.qubits.values():
-            sample_time = target_data.QUBIT_DATA.sample_time
-            for pulse_channel in qubit.pulse_channels.all_pulse_channels:
-                scales_map[pulse_channel.uuid] = pulse_channel.scale
-                sample_times[pulse_channel.uuid] = sample_time
+            sample_times[qubit.physical_channel.uuid] = target_data.QUBIT_DATA.sample_time
+            sample_times[qubit.resonator.physical_channel.uuid] = (
+                target_data.RESONATOR_DATA.sample_time
+            )
 
-            sample_time = target_data.RESONATOR_DATA.sample_time
-            for pulse_channel in qubit.resonator.pulse_channels.all_pulse_channels:
-                scales_map[pulse_channel.uuid] = pulse_channel.scale
-                sample_times[pulse_channel.uuid] = sample_time
+        return sample_times
 
-        return scales_map, sample_times
-
-    def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
+    def run(
+        self, ir: QuantumInstructionBuilder, *args, **kwargs
+    ) -> QuantumInstructionBuilder:
         """:param ir: The list of instructions as an instruction builder."""
 
         waveform_lookup = defaultdict(dict)
         instructions = []
         for inst in ir.instructions:
-            new_inst = self.process_instruction(inst, waveform_lookup=waveform_lookup)
+            new_inst = self.process_instruction(inst, ir, waveform_lookup=waveform_lookup)
             instructions.append(new_inst)
         ir.instructions = instructions
         return ir
 
     @singledispatchmethod
-    def process_instruction(self, instruction: Instruction, **kwargs):
+    def process_instruction(
+        self, instruction: Instruction, ir: QuantumInstructionBuilder, **kwargs
+    ):
         """Default handler for instructions that do not have a waveform evaluation."""
         return instruction
 
     @process_instruction.register(Acquire)
-    def _(self, instruction: Acquire, **kwargs) -> Acquire:
+    def _(self, instruction: Acquire, ir: QuantumInstructionBuilder, **kwargs) -> Acquire:
         """Implements the waveform evaluation on the filter for an :class:`Acquire`
         instruction."""
 
         instruction.filter = self.process_instruction(
-            instruction.filter, ignored_shapes=self.acquire_ignored_shapes, **kwargs
+            instruction.filter, ir, ignored_shapes=self.acquire_ignored_shapes, **kwargs
         )
         return instruction
 
     @process_instruction.register(Pulse)
-    def _(self, instruction: Pulse, **kwargs) -> Pulse:
+    def _(self, instruction: Pulse, ir: QuantumInstructionBuilder, **kwargs) -> Pulse:
         """Evaluates the waveform within the :class:`Pulse` and handles the channel scale
         factor if required."""
 
-        scale = (
-            self.scales_map[instruction.target]
-            if not instruction.ignore_channel_scale
-            else 1.0
-        )
+        pulse_channel = ir.get_pulse_channel(instruction.target)
+        scale = pulse_channel.scale if not instruction.ignore_channel_scale else 1.0
 
         instruction.waveform = self.evaluate_waveform(
             instruction.waveform,
             ignored_shapes=kwargs.pop("ignored_shapes", self.ignored_shapes),
             target=instruction.target,
+            physical_channel=pulse_channel.physical_channel_id,
             scale=scale,
             **kwargs,
         )
@@ -1310,7 +1323,7 @@ class EvaluateWaveforms(TransformPass):
         return instruction
 
     @singledispatchmethod
-    def evaluate_waveform(self, waveform, **kwargs):
+    def evaluate_waveform(self, waveform, *args, **kwargs):
         """Default handler for waveform evaluation that does not have a specific
         implementation."""
         return ValueError(
@@ -1324,6 +1337,7 @@ class EvaluateWaveforms(TransformPass):
         ignored_shapes: list[type],
         waveform_lookup: dict[str, dict[str, NDArray]],
         target: str,
+        physical_channel: str,
         scale: float = 1.0,
     ) -> Waveform | SampledWaveform:
         """Implements the waveform evaluation for :class:`Waveform`s."""
@@ -1345,7 +1359,7 @@ class EvaluateWaveforms(TransformPass):
             new_waveform = SampledWaveform(samples=samples)
         else:
             # Evaluate the waveform at discrete times
-            sample_time = self.sample_times[target]
+            sample_time = self.sample_times[physical_channel]
             edge = waveform.duration / 2.0 - sample_time * 0.5
             num_samples = int(np.ceil(waveform.duration / sample_time - 1e-10))
             t = np.linspace(start=-edge, stop=edge, num=num_samples)

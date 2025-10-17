@@ -255,6 +255,7 @@ class Pulse(QuantumInstruction):
                 mode="constant",
                 constant_values=0,
             )
+            self.duration = self.waveform.duration
         else:
             raise ValueError(
                 f"{type(self.waveform)} does not support updating duration. "

@@ -513,8 +513,10 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
             ):
                 continue
 
-            pulse_channel = self.model.pulse_channel_with_id(pulse_channel_id)
-            device = self.model.device_for_pulse_channel_id(pulse_channel_id)
+            pulse_channel = ir.get_pulse_channel(pulse_channel_id)
+            device = self.model.device_for_physical_channel_id(
+                pulse_channel.physical_channel_id
+            )
             pulse_channel_buffers[pulse_channel_id] = self.create_pulse_channel_buffer(
                 pulse_channel,
                 ir.target_map[pulse_channel_id],
@@ -522,16 +524,17 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
                 self.target_data.QUBIT_DATA
                 if isinstance(device, Qubit)
                 else self.target_data.RESONATOR_DATA,
-                self.model.physical_channel_for_pulse_channel_id(pulse_channel.uuid),
+                self.model.physical_channel_with_id(pulse_channel.physical_channel_id),
                 upconvert,
             )
 
         # Organize by physical channels
         phys_to_pulse_map = {}
         for pulse_channel_id, buffer in pulse_channel_buffers.items():
-            phys_to_pulse_map.setdefault(
-                self.model.physical_channel_for_pulse_channel_id(pulse_channel_id), []
-            ).append(buffer)
+            physical_channel = self.model.physical_channel_with_id(
+                ir.get_pulse_channel(pulse_channel_id).physical_channel_id
+            )
+            phys_to_pulse_map.setdefault(physical_channel, []).append(buffer)
 
         # Compute sum of pulse channels
         physical_channel_buffers = {}
@@ -559,8 +562,9 @@ class PydWaveformV1Backend(BaseBackend, InvokerMixin):
         """
         acquire_dict = {}
         for pulse_channel_id, acquire_list in ir.acquire_map.items():
-            phys_channel = self.model.physical_channel_for_pulse_channel_id(
-                pulse_channel_id
+            pulse_channel = ir.get_pulse_channel(pulse_channel_id)
+            phys_channel = self.model.physical_channel_with_id(
+                pulse_channel.physical_channel_id
             )
             acq_list = acquire_dict.setdefault(phys_channel, [])
             for acquire in acquire_list:

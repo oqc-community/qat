@@ -3,23 +3,27 @@ from dataclasses import dataclass, field
 
 from qat.ir.instructions import Assign, Instruction, ResultsProcessing, Return
 from qat.ir.measure import Acquire, PostProcessing
-from qat.model.device import PulseChannel
+from qat.ir.pulse_channel import PulseChannel
 
 
 @dataclass
 class PartitionedIR:
-    """Stores the results of the :class:`PartitionByPulseChannel`."""
+    """Contains the IR that has been processed and reduced to a program per pulse channel.
+    Also splits out any post-processing instructions to be used by the executor.
 
-    # TODO: When refactoring into Pydantic instructions, we should replace this object with
-    # a Pydantic base model. Ideally, we would unify the different IR levels by making a
-    # general "QatIR` flexible enough to support them all, but that might be too optimistic. (COMPILER-382)
+    Programs are typically sent to hardware as a package per physical / logical channel,
+    and need to be partitioned out. They also need to be free of instructions that are not
+    used at runtime. This class does this.
 
-    # TODO: Remove `PulseChannel` as keys once we fully migrated to pydantic passes 581
-    target_map: dict[PulseChannel | str, list[Instruction]] = field(
+    This will eventually be replaced by some "partitoned module" approach, which might have
+    a similar schema, or might just be many modules.
+    """
+
+    target_map: dict[str, list[Instruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    # TODO: Remove Repeat type option: COMPILER-451
-    shots: int | None = field(default_factory=lambda: None)
+    pulse_channels: dict[str, PulseChannel] = field(default_factory=dict)
+    shots: int | None = field(default=None)
     compiled_shots: int | None = field(default=None)
     returns: list[Return] = field(default_factory=list)
     assigns: list[Assign] = field(default_factory=list)
@@ -30,3 +34,9 @@ class PartitionedIR:
         default_factory=lambda: defaultdict(list)
     )
     rp_map: dict[str, ResultsProcessing] = field(default_factory=dict)
+
+    def get_pulse_channel(self, id: str) -> PulseChannel | None:
+        """Get a pulse channel by its ID.
+
+        Maintains API with the QuantumInstructionBuilder."""
+        return self.pulse_channels.get(id, None)

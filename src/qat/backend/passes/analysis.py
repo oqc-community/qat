@@ -10,8 +10,6 @@ from qat.ir.instructions import QuantumInstruction
 from qat.ir.lowered import PartitionedIR
 from qat.model.device import (
     PhysicalChannel,
-    Qubit,
-    Resonator,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
@@ -42,41 +40,7 @@ class IntermediateFrequencyAnalysis(AnalysisPass):
 
         # TODO: determine if this pass should be split into an analysis and validation
         #   pass. (COMPILER-610)
-        self.channel_data = self._build_channel_data(model)
-
-    def _build_channel_data(
-        self, hardware_model: PhysicalHardwareModel | None
-    ) -> dict | None:
-        """
-        Builds a dictionary of channel data based on the provided hardware model.
-        The dictionary returned is of the form:
-        channel_data = {
-            pulse_channel_1_id:  {
-                "frequency": pulse_channel_1,
-                "physical_channel": physical_channel_1
-            },
-            ...
-        }
-        """
-        channel_data = {}
-        for qubit in hardware_model.qubits.values():
-            channel_data.update(self._build_device_channel_data(qubit))
-            channel_data.update(self._build_device_channel_data(qubit.resonator))
-        return channel_data
-
-    @staticmethod
-    def _build_device_channel_data(device: Qubit | Resonator) -> dict:
-        physical_channel = device.physical_channel
-        channels = {}
-        for pulse_channel in device.all_pulse_channels:
-            channels[pulse_channel.uuid] = {
-                "fixed_if": pulse_channel.fixed_if,
-                "baseband_freq": pulse_channel.frequency
-                - UPCONVERT_SIGN * physical_channel.baseband.if_frequency,
-                "physical_channel": physical_channel.uuid,
-                "physical_channel_baseband_freq": physical_channel.baseband.if_frequency,
-            }
-        return channels
+        self.model = model
 
     def run(
         self, ir: PartitionedIR, res_mgr: ResultManager, *args, **kwargs
@@ -89,18 +53,20 @@ class IntermediateFrequencyAnalysis(AnalysisPass):
         baseband_freqs = {}
         baseband_freqs_fixed_if = {}
 
-        for pulse_channel in ir.target_map:
-            physical_channel = self.channel_data[pulse_channel]["physical_channel"]
-            baseband_freq = self.channel_data[pulse_channel]["baseband_freq"]
-
-            if fixed_if := self.channel_data[pulse_channel]["fixed_if"]:
+        for pulse_channel in ir.pulse_channels.values():
+            physical_channel = pulse_channel.physical_channel_id
+            if pulse_channel.fixed_if:
+                baseband_if_freq = self.model.physical_channel_with_id(
+                    physical_channel
+                ).baseband.if_frequency
+                baseband_freq = pulse_channel.frequency - UPCONVERT_SIGN * baseband_if_freq
                 self._check_fixed_if_not_violated(
                     baseband_freqs, physical_channel, baseband_freq
                 )
                 baseband_freqs[physical_channel] = baseband_freq
-                baseband_freqs_fixed_if[physical_channel] = fixed_if
+                baseband_freqs_fixed_if[physical_channel] = pulse_channel.fixed_if
             elif not baseband_freqs_fixed_if.get(physical_channel, False):
-                baseband_freqs_fixed_if[physical_channel] = fixed_if
+                baseband_freqs_fixed_if[physical_channel] = pulse_channel.fixed_if
 
         res_mgr.add(IntermediateFrequencyResult(frequencies=baseband_freqs))
         return ir
@@ -173,23 +139,13 @@ class TimelineAnalysis(AnalysisPass):
         :param model: The hardware model that holds calibrated information on the qubits on the QPU.
         :param target_data: Target-related information.
         """
-        self.model = model
-
-        q_sample_time = target_data.QUBIT_DATA.sample_time
-        r_sample_time = target_data.RESONATOR_DATA.sample_time
-        self.pulse_ch_ids_sample_time = {}
+        self.sample_times_map = dict()
         for qubit in model.qubits.values():
-            self.pulse_ch_ids_sample_time.update(
-                {
-                    pulse_channel.uuid: q_sample_time
-                    for pulse_channel in qubit.all_pulse_channels
-                }
+            self.sample_times_map[qubit.physical_channel.uuid] = (
+                target_data.QUBIT_DATA.sample_time
             )
-            self.pulse_ch_ids_sample_time.update(
-                {
-                    pulse_channel.uuid: r_sample_time
-                    for pulse_channel in qubit.resonator.all_pulse_channels
-                }
+            self.sample_times_map[qubit.resonator.physical_channel.uuid] = (
+                target_data.RESONATOR_DATA.sample_time
             )
 
     def run(
@@ -212,7 +168,10 @@ class TimelineAnalysis(AnalysisPass):
             )
             total_duration = max(total_duration, np.sum(pulse_channel_durations))
 
-            durations = self.durations_as_samples(pulse_ch_id, pulse_channel_durations)
+            sample_time = self.sample_times_map[
+                ir.get_pulse_channel(pulse_ch_id).physical_channel_id
+            ]
+            durations = self.durations_as_samples(pulse_channel_durations, sample_time)
             cumulative_durations = np.cumsum(durations)
             result.target_map[pulse_ch_id] = PulseChannelTimeline(
                 samples=durations,
@@ -224,9 +183,8 @@ class TimelineAnalysis(AnalysisPass):
         res_mgr.add(result)
         return ir
 
-    def durations_as_samples(self, pulse_ch_id: str, durations: list[float]):
+    def durations_as_samples(self, durations: list[float], sample_time: float):
         """Converts a list of durations into a number of samples."""
-        sample_time = self.pulse_ch_ids_sample_time[pulse_ch_id]
         block_numbers = np.ceil(np.round(durations / sample_time, decimals=4)).astype(
             np.int64
         )

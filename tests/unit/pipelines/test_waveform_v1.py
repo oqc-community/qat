@@ -78,7 +78,12 @@ class TestExperimentalEchoPipeline:
         assert isinstance(execute_pipeline.engine, EchoEngine)
 
 
-test_files = get_pipeline_tests(openpulse=False, skips=["cudaq-ghz.ll"])
+test_files = get_pipeline_tests(
+    openpulse=True,
+    skips=[
+        "cudaq-ghz.ll",
+    ],
+)
 
 
 @pytest.mark.parametrize("shots", [1254, 10002], scope="class")
@@ -347,6 +352,7 @@ class MockEchoModelLoader(EchoModelLoader):
         return model
 
 
+# TODO: look into failing openpulse parity (COMPILER-789)
 parity_test_files = get_pipeline_tests(openpulse=False)
 
 

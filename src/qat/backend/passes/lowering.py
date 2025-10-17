@@ -75,7 +75,6 @@ class PartitionByPulseChannel(LoweringPass):
                 handled = True
                 for target in instr.targets:
                     partitioned_ir.target_map[target].append(instr)
-
             if isinstance(instr, Return):
                 partitioned_ir.returns.append(instr)
 
@@ -127,6 +126,11 @@ class PartitionByPulseChannel(LoweringPass):
                 add_to_all(instr)
             elif not handled:
                 raise TypeError(f"Unexpected Instruction type: {type(instr)}.")
+
+        for pulse_channel_id in partitioned_ir.target_map:
+            partitioned_ir.pulse_channels[pulse_channel_id] = ir.get_pulse_channel(
+                pulse_channel_id
+            )
 
         # Assume that raw acquisitions are experiment results.
         # TODO: separate as ResultsProcessingSanitisation pass. (COMPILER-412)

@@ -43,7 +43,6 @@ from qat.middleend.passes.purr.validation import (
 )
 from qat.middleend.passes.transform import (
     PopulateWaveformSampleTime,
-    PydAcquireSanitisation,
     PydBatchedShots,
     PydEndOfTaskResetSanitisation,
     PydEvaluateWaveforms,
@@ -260,12 +259,11 @@ class ExperimentalDefaultMiddleend(CustomMiddleend):
             | PydFrequencySetupValidation(model, target_data)
             | PydDynamicFrequencyValidation(model, target_data)
             # Sanitising input IR to make it complete
-            | PydRepeatSanitisation(target_data)  # TODO: COMPILER-347
+            | PydRepeatSanitisation(target_data)
             | PydReturnSanitisation()
             | PydSynchronizeTask()
             | PydPostProcessingSanitisation()
             | PydReadoutValidation()
-            | PydAcquireSanitisation()
             | PydMeasurePhaseResetSanitisation(model)
             | PydInstructionGranularitySanitisation(target_data)
             # Preparing for codegen

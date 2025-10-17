@@ -142,6 +142,18 @@ class TestPydPartitionByPulseChannel:
         ):
             PydPartitionByPulseChannel().run(builder)
 
+    def test_pulse_channels(self, partitioned_ir):
+        qubit = self.hw.qubit_with_index(0)
+        drive_chan = qubit.drive_pulse_channel
+        measure_chan = qubit.measure_pulse_channel
+        acq_chan = qubit.acquire_pulse_channel
+
+        assert isinstance(partitioned_ir.pulse_channels, dict)
+        assert len(partitioned_ir.pulse_channels) == 3
+        assert partitioned_ir.get_pulse_channel(drive_chan.uuid) is not None
+        assert partitioned_ir.get_pulse_channel(measure_chan.uuid) is not None
+        assert partitioned_ir.get_pulse_channel(acq_chan.uuid) is not None
+
     @pytest.fixture(scope="class")
     def leg_partitioned_ir(self):
         model = LegEchoModelLoader().load()
