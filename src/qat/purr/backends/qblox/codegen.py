@@ -24,7 +24,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen_base import DfsTraversal
-from qat.purr.backends.qblox.config import SequencerConfig
+from qat.purr.backends.qblox.config import ModuleConfig, SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.ir import Opcode, Sequence, SequenceBuilder
 from qat.purr.backends.utilities import evaluate_shape
@@ -64,10 +64,15 @@ log = get_default_logger()
 
 @dataclass
 class QbloxPackage:
-    target: PulseChannel = None
-    sequence: Sequence = None
-    sequencer_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
-    timeline: np.ndarray = None
+    pulse_channel_id: Optional[str] = None
+    physical_channel_id: Optional[str] = None
+    instrument_id: Optional[str] = None
+    seq_idx: Optional[int] = None
+    seq_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
+    slot_idx: Optional[int] = None
+    mod_config: ModuleConfig = field(default_factory=lambda: ModuleConfig())
+    sequence: Optional[Sequence] = None
+    timeline: Optional[np.ndarray] = None
 
 
 @dataclass
@@ -122,6 +127,28 @@ class AllocationManager:
         return label
 
 
+class BaseEmitter:
+    def __init__(self):
+        self.allocations: Dict[int, Dict[str, int]] = defaultdict(dict)
+
+    def allocate(self, target: PulseChannel) -> Tuple[int, int]:
+        slot_idx = target.physical_channel.slot_idx
+        target2seq = self.allocations[slot_idx]
+        if (seq_idx := target2seq.get(target.full_id(), None)) is None:
+            total = set(target.physical_channel.config.sequencers.keys())
+            available = total - set(target2seq.values())
+            if not available:
+                raise ValueError(f"""
+                No more available sequencers for {target}
+                Physical channel: {target.physical_channel}
+                Total available: {total}
+                Current allocations: {target2seq}
+                """)
+            seq_idx = next(iter(available))
+            target2seq[target.full_id()] = seq_idx
+        return seq_idx, slot_idx
+
+
 class AbstractContext(ABC):
     def __init__(self, alloc_mgr: AllocationManager = None):
         self.alloc_mgr = alloc_mgr or AllocationManager()
@@ -157,9 +184,50 @@ class AbstractContext(ABC):
 
         ValueError("Cannot determine phase statically in dynamic settings")
 
-    def create_package(self, target: PulseChannel):
-        sequence = self.sequence_builder.build()
-        return QbloxPackage(target, sequence, self.sequencer_config, self._timeline)
+    def create_package(
+        self, target: PulseChannel, seq_idx: int, slot_idx: int
+    ) -> QbloxPackage:
+        lo_freq, nco_freq = TILegalisationPass.decompose_freq(target.frequency, target)
+
+        qblox_config = target.physical_channel.config
+
+        # Customise Module config
+        mod_config: ModuleConfig = qblox_config.module
+        if mod_config.lo.out0_en:
+            mod_config.lo.out0_freq = lo_freq
+        if mod_config.lo.out1_en:
+            mod_config.lo.out1_freq = lo_freq
+        if mod_config.lo.out0_in0_en:
+            mod_config.lo.out0_in0_freq = lo_freq
+
+        mod_config.scope_acq.sequencer_select = seq_idx
+        mod_config.scope_acq.trigger_mode_path0 = "sequencer"
+        mod_config.scope_acq.avg_mode_en_path0 = True
+        mod_config.scope_acq.trigger_mode_path1 = "sequencer"
+        mod_config.scope_acq.avg_mode_en_path1 = True
+
+        # Customise Sequencer config
+        seq_config: SequencerConfig = qblox_config.sequencers[seq_idx]
+        seq_config.nco.freq = nco_freq
+        seq_config.nco.prop_delay_comp_en = True
+        seq_config.square_weight_acq.integration_length = (
+            self.sequencer_config.square_weight_acq.integration_length
+        )
+        seq_config.thresholded_acq.rotation = self.sequencer_config.thresholded_acq.rotation
+        seq_config.thresholded_acq.threshold = (
+            self.sequencer_config.thresholded_acq.threshold
+        )
+
+        return QbloxPackage(
+            pulse_channel_id=target.full_id(),
+            physical_channel_id=target.physical_channel_id,
+            seq_idx=seq_idx,
+            seq_config=seq_config,
+            slot_idx=slot_idx,
+            mod_config=mod_config,
+            sequence=self.sequence_builder.build(),
+            timeline=self._timeline,
+        )
 
     def is_empty(self):
         """
@@ -1001,7 +1069,41 @@ class NewQbloxContext(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxEmitter(InvokerMixin):
+@dataclass
+class PreCodegenResult:
+    alloc_mgrs: Dict[PulseChannel, AllocationManager] = field(
+        default_factory=lambda: defaultdict(lambda: AllocationManager())
+    )
+
+
+class PreCodegenPass(AnalysisPass):
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
+        """
+        Precedes assembly codegen.
+        Performs a naive register allocation through a manager object.
+        Computes useful information in the form of attributes.
+        """
+
+        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        result = PreCodegenResult()
+
+        for target in triage_result.target_map:
+            alloc_mgr = result.alloc_mgrs[target]
+            iter_bound_result = binding_result.iter_bound_results[target]
+            reads = binding_result.rw_results[target].reads
+            writes = binding_result.rw_results[target].writes
+
+            alloc_mgr.reg_alloc("zero")
+            names = set(chain(*[iter_bound_result.keys(), reads.keys(), writes.keys()]))
+            for name in names:
+                alloc_mgr.reg_alloc(name)
+                alloc_mgr.label_gen(name)
+
+        res_mgr.add(result)
+
+
+class QbloxEmitter(BaseEmitter, InvokerMixin):
     def build_pass_pipeline(self, *args, **kwargs):
         pass
 
@@ -1085,51 +1187,16 @@ class QbloxEmitter(InvokerMixin):
                     elif isinstance(inst, Id):
                         context.id()
 
-        if ignore_empty:
-            return [
-                context.create_package(target)
-                for target, context in contexts.items()
-                if not context.is_empty()
-            ]
-        else:
-            return [context.create_package(target) for target, context in contexts.items()]
+        packages = []
+        for target, context in contexts.items():
+            if not context.is_empty() or not ignore_empty:
+                seq_idx, slot_idx = self.allocate(target)
+                package = context.create_package(target, seq_idx, slot_idx)
+                packages.append(package)
+        return packages
 
 
-@dataclass
-class PreCodegenResult:
-    alloc_mgrs: Dict[PulseChannel, AllocationManager] = field(
-        default_factory=lambda: defaultdict(lambda: AllocationManager())
-    )
-
-
-class PreCodegenPass(AnalysisPass):
-    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Precedes assembly codegen.
-        Performs a naive register allocation through a manager object.
-        Computes useful information in the form of attributes.
-        """
-
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        result = PreCodegenResult()
-
-        for target in triage_result.target_map:
-            alloc_mgr = result.alloc_mgrs[target]
-            iter_bound_result = binding_result.iter_bound_results[target]
-            reads = binding_result.rw_results[target].reads
-            writes = binding_result.rw_results[target].writes
-
-            alloc_mgr.reg_alloc("zero")
-            names = set(chain(*[iter_bound_result.keys(), reads.keys(), writes.keys()]))
-            for name in names:
-                alloc_mgr.reg_alloc(name)
-                alloc_mgr.label_gen(name)
-
-        res_mgr.add(result)
-
-
-class NewQbloxEmitter(InvokerMixin):
+class NewQbloxEmitter(BaseEmitter, InvokerMixin):
     def build_pass_pipeline(self, *args, **kwargs):
         return PassManager() | PreCodegenPass() | CFGPass()
 
@@ -1168,14 +1235,13 @@ class NewQbloxEmitter(InvokerMixin):
             }
             QbloxCFGWalker(contexts).run(cfg_result.cfg)
 
-        if ignore_empty:
-            return [
-                context.create_package(target)
-                for target, context in contexts.items()
-                if not context.is_empty()
-            ]
-        else:
-            return [context.create_package(target) for target, context in contexts.items()]
+        packages = []
+        for target, context in contexts.items():
+            if not context.is_empty() or not ignore_empty:
+                seq_idx, slot_idx = self.allocate(target)
+                package = context.create_package(target, seq_idx, slot_idx)
+                packages.append(package)
+        return packages
 
 
 class QbloxCFGWalker(DfsTraversal):

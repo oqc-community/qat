@@ -15,7 +15,6 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriageResult,
 )
 from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter
-from qat.purr.backends.qblox.config import SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
 from qat.purr.backends.qblox.transform_passes import (
@@ -97,7 +96,7 @@ class TestQbloxEmitter(InvokerMixin):
         for packages in iter2packages.values():
             assert len(packages) == 1
             pkg = packages[0]
-            assert pkg.target == drive_channel
+            assert pkg.pulse_channel_id == drive_channel.full_id()
             assert f"GAUSSIAN_{hash(gaussian)}_I" in pkg.sequence.waveforms
             assert f"GAUSSIAN_{hash(gaussian)}_Q" in pkg.sequence.waveforms
             assert "play 0,1,100" in pkg.sequence.program
@@ -123,7 +122,7 @@ class TestQbloxEmitter(InvokerMixin):
         for i in non_ignored_indices:
             assert len(iter2packages[i]) == 1
             pkg = iter2packages[i][0]
-            assert pkg.target == drive_channel
+            assert pkg.pulse_channel_id == drive_channel.full_id()
             assert not pkg.sequence.waveforms
             assert f"set_awg_offs {Constants.MAX_OFFSET},0" in pkg.sequence.program
             assert "set_awg_offs 0,0" in pkg.sequence.program
@@ -191,9 +190,7 @@ class TestQbloxEmitter(InvokerMixin):
             assert isinstance(channel, QbloxPhysicalChannel)
             assert isinstance(channel.baseband, QbloxPhysicalBaseband)
             assert len(channel.config.sequencers) > 0
-            assert pkg.sequencer_config.square_weight_acq.integration_length == int(
-                time * 1e9
-            )
+            assert pkg.seq_config.square_weight_acq.integration_length == int(time * 1e9)
 
     @pytest.mark.parametrize(
         ("width_seconds", "context"),
@@ -233,7 +230,7 @@ class TestQbloxEmitter(InvokerMixin):
         for packages in iter2packages.values():
             assert len(packages) == 1
             acquire_pkg = packages[0]
-            assert acquire_pkg.target == acquire_channel
+            assert acquire_pkg.pulse_channel_id == acquire_channel.full_id()
 
             measure_pulse = next(
                 (inst for inst in builder.instructions if isinstance(inst, MeasurePulse))
@@ -264,7 +261,11 @@ class TestQbloxEmitter(InvokerMixin):
                 qubit = model.get_qubit(index)
                 acquire_channel = qubit.get_acquire_channel()
                 acquire_pkg = next(
-                    (pkg for pkg in packages if pkg.target == acquire_channel)
+                    (
+                        pkg
+                        for pkg in packages
+                        if pkg.pulse_channel_id == acquire_channel.full_id()
+                    )
                 )
                 assert acquire_pkg.sequence.acquisitions
 
@@ -300,7 +301,9 @@ class TestQbloxEmitter(InvokerMixin):
             assert len(packages) == 2
 
             # Drive
-            drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
+            drive_pkg = next(
+                (pkg for pkg in packages if pkg.pulse_channel_id == drive_channel.full_id())
+            )
             drive_pulse = next(
                 (inst for inst in builder.instructions if isinstance(inst, Pulse))
             )
@@ -320,7 +323,13 @@ class TestQbloxEmitter(InvokerMixin):
                 assert "upd_param" not in drive_pkg.sequence.program
 
             # Readout
-            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            acquire_pkg = next(
+                (
+                    pkg
+                    for pkg in packages
+                    if pkg.pulse_channel_id == acquire_channel.full_id()
+                )
+            )
             measure_pulse = next(
                 (inst for inst in builder.instructions if isinstance(inst, MeasurePulse))
             )
@@ -351,7 +360,13 @@ class TestQbloxEmitter(InvokerMixin):
 
                 # Drive
                 drive_channel = qubit.get_drive_channel()
-                drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
+                drive_pkg = next(
+                    (
+                        pkg
+                        for pkg in packages
+                        if pkg.pulse_channel_id == drive_channel.full_id()
+                    )
+                )
                 drive_pulse = next(
                     (
                         inst
@@ -373,7 +388,11 @@ class TestQbloxEmitter(InvokerMixin):
                 # Readout
                 acquire_channel = qubit.get_acquire_channel()
                 acquire_pkg = next(
-                    (pkg for pkg in packages if pkg.target == acquire_channel)
+                    (
+                        pkg
+                        for pkg in packages
+                        if pkg.pulse_channel_id == acquire_channel.full_id()
+                    )
                 )
                 assert acquire_pkg.sequence.acquisitions
                 measure_pulse = next(
@@ -442,7 +461,11 @@ class TestQbloxEmitter(InvokerMixin):
 
                 # Readout
                 measure_pkg = next(
-                    (pkg for pkg in packages if pkg.target == measure_channel)
+                    (
+                        pkg
+                        for pkg in packages
+                        if pkg.pulse_channel_id == measure_channel.full_id()
+                    )
                 )
                 assert measure_pkg.sequence.acquisitions
                 assert measure_pkg.sequence.program.count("acquire") == 2
@@ -464,7 +487,11 @@ class TestQbloxEmitter(InvokerMixin):
 
                     # Readout
                     measure_pkg = next(
-                        (pkg for pkg in packages if pkg.target == measure_channel)
+                        (
+                            pkg
+                            for pkg in packages
+                            if pkg.pulse_channel_id == measure_channel.full_id()
+                        )
                     )
                     assert measure_pkg.sequence.acquisitions
                     assert measure_pkg.sequence.program.count("acquire") == 2
@@ -517,7 +544,7 @@ class TestQbloxEmitter(InvokerMixin):
             qub_pkg_zip = [
                 x
                 for x in zip(qubits, packages)
-                if x[0].get_measure_channel() == x[1].target
+                if x[0].get_measure_channel().full_id() == x[1].pulse_channel_id
             ]
 
             for qubit, measure_pkg in qub_pkg_zip:
@@ -528,11 +555,11 @@ class TestQbloxEmitter(InvokerMixin):
                 rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
                 threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
 
-                assert measure_pkg.sequencer_config.thresholded_acq.rotation == np.rad2deg(
+                assert measure_pkg.seq_config.thresholded_acq.rotation == np.rad2deg(
                     rotation
                 )
                 assert (
-                    measure_pkg.sequencer_config.thresholded_acq.threshold
+                    measure_pkg.seq_config.thresholded_acq.threshold
                     == acq_width * threshold
                 )
 
@@ -567,7 +594,6 @@ class TestNewQbloxEmitter(InvokerMixin):
         assert len(packages) == 2
 
         for pkg in packages:
-            assert pkg.sequencer_config == SequencerConfig()
             assert pkg.timeline.size == 4
             assert not pkg.sequence.waveforms
             assert not pkg.sequence.acquisitions
@@ -595,7 +621,13 @@ class TestNewQbloxEmitter(InvokerMixin):
         for index in qubit_indices:
             qubit = model.get_qubit(index)
             acquire_channel = qubit.get_acquire_channel()
-            acquire_pkg = next((pkg for pkg in packages if pkg.target == acquire_channel))
+            acquire_pkg = next(
+                (
+                    pkg
+                    for pkg in packages
+                    if pkg.pulse_channel_id == acquire_channel.full_id()
+                )
+            )
             measure_pulse = next(
                 (
                     inst
@@ -658,7 +690,13 @@ class TestNewQbloxEmitter(InvokerMixin):
                 acquire_channel = qubit.get_acquire_channel()
 
                 # Drive
-                drive_pkg = next((pkg for pkg in packages if pkg.target == drive_channel))
+                drive_pkg = next(
+                    (
+                        pkg
+                        for pkg in packages
+                        if pkg.pulse_channel_id == drive_channel.full_id()
+                    )
+                )
                 drive_pulse = next(
                     (
                         inst
@@ -684,7 +722,11 @@ class TestNewQbloxEmitter(InvokerMixin):
 
                 # Readout
                 acquire_pkg = next(
-                    (pkg for pkg in packages if pkg.target == acquire_channel)
+                    (
+                        pkg
+                        for pkg in packages
+                        if pkg.pulse_channel_id == acquire_channel.full_id()
+                    )
                 )
                 measure_pulse = next(
                     (

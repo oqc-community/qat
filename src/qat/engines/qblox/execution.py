@@ -10,7 +10,6 @@ from functools import reduce
 from itertools import groupby
 from typing import Dict, List
 
-import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.passes.purr.analysis import TriageResult
@@ -21,10 +20,8 @@ from qat.engines import NativeEngine
 from qat.engines.qblox.instrument import InstrumentConcept
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.backends.utilities import (
-    software_post_process_discriminate,
     software_post_process_linear_map_complex_to_real,
 )
-from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.execution import _binary_average, _numpy_array_to_list
 from qat.purr.compiler.instructions import (
     AcquireMode,
@@ -115,7 +112,7 @@ class QbloxEngine(NativeEngine):
         return {key: assigned_results[key] for key in ret_inst.variables}
 
     @staticmethod
-    def combine_playbacks(playbacks: Dict[PulseChannel, List[Acquisition]]):
+    def combine_playbacks(playbacks: Dict[str, List[Acquisition]]):
         """
         Combines acquisition objects from multiple acquire instructions in multiple readout targets.
         Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
@@ -128,10 +125,10 @@ class QbloxEngine(NativeEngine):
         distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
         """
 
-        playback: Dict[PulseChannel, Dict[str, Acquisition]] = {}
-        for target, acquisitions in playbacks.items():
+        playback: Dict[str, Dict[str, Acquisition]] = {}
+        for pulse_channel_id, acquisitions in playbacks.items():
             groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
-            playback[target] = {
+            playback[pulse_channel_id] = {
                 name: reduce(
                     lambda acq1, acq2: acq1 + acq2,
                     acqs,
@@ -144,7 +141,7 @@ class QbloxEngine(NativeEngine):
 
     def process_playback(
         self,
-        playback: Dict[PulseChannel, Dict[str, Acquisition]],
+        playback: Dict[str, Dict[str, Acquisition]],
         triage_result: TriageResult,
     ):
         """
@@ -161,7 +158,8 @@ class QbloxEngine(NativeEngine):
         repeat_counts = list(r.repeat_count for r in repeats)
 
         results = {}
-        for target, acquisitions in playback.items():
+        for pulse_channel_id, acquisitions in playback.items():
+            target = self.model.get_pulse_channel_from_id(pulse_channel_id)
             acquires = acquire_map[target]
             for name, acquisition in acquisitions.items():
                 scope_data = acquisition.acquisition.scope
@@ -189,15 +187,9 @@ class QbloxEngine(NativeEngine):
                             pp.args, response, axes
                         )
                     elif pp.process == PostProcessType.DISCRIMINATE:
-                        log.info(
-                            f"thrld_data counts: {np.unique(thrld_data, return_counts=True)}"
-                        )
-                        response, _ = software_post_process_discriminate(
-                            pp.args, response, axes
-                        )
-                        log.info(
-                            f"response counts: {np.unique(response, return_counts=True)}"
-                        )
+                        # f : {0, 1} ----> {-1, 1}
+                        #       x    |---> 1 - 2x
+                        response = 1 - 2 * thrld_data
 
                 loop_nest_shape = tuple((sweep_counts or [1]) + (repeat_counts or [-1]))
                 response = response.reshape(loop_nest_shape)
@@ -213,23 +205,23 @@ class QbloxEngine(NativeEngine):
     def execute(
         self, executables: Dict[int, QbloxExecutable], triage_result: TriageResult
     ) -> Dict:
-        playbacks: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
+        playbacks: Dict[str, List[Acquisition]] = defaultdict(list)
         for executable in executables.values():
             if self.plot_executable:
                 plot_executable(executable)
 
             if self.dump_executable:
-                for channel_id, pkg in executable.packages.items():
-                    filename = f"schedules/target_{channel_id}_@_{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
+                for pulse_channel_id, pkg in executable.packages.items():
+                    filename = f"schedules/target_{pulse_channel_id}_@_{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
                     os.makedirs(os.path.dirname(filename), exist_ok=True)
                     with open(filename, "w") as f:
                         f.write(json.dumps(asdict(pkg.sequence)))
 
-            self.instrument.setup(executable, self.model)
+            self.instrument.setup(executable)
             self.instrument.playback()
-            payback: Dict[PulseChannel, List[Acquisition]] = self.instrument.collect()
-            for target, acquisitions in payback.items():
-                playbacks[target] += acquisitions
+            payback: Dict[str, List[Acquisition]] = self.instrument.collect()
+            for pulse_channel_id, acquisitions in payback.items():
+                playbacks[pulse_channel_id] += acquisitions
         playback = self.combine_playbacks(playbacks)
 
         if self.plot_playback:

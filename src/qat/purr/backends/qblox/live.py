@@ -28,7 +28,6 @@ from qat.purr.backends.qblox.transform_passes import (
 from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,
 )
-from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.execution import (
     DeviceInjectors,
     _binary_average,
@@ -162,7 +161,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         return {key: assigned_results[key] for key in ret_inst.variables}
 
     @staticmethod
-    def combine_playbacks(playbacks: Dict[PulseChannel, List[Acquisition]]):
+    def combine_playbacks(playbacks: Dict[str, List[Acquisition]]):
         """
         Combines acquisition objects from multiple acquire instructions in multiple readout targets.
         Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
@@ -175,10 +174,10 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
         """
 
-        playback: Dict[PulseChannel, Dict[str, Acquisition]] = {}
-        for target, acquisitions in playbacks.items():
+        playback: Dict[str, Dict[str, Acquisition]] = {}
+        for pulse_channel_id, acquisitions in playbacks.items():
             groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
-            playback[target] = {
+            playback[pulse_channel_id] = {
                 name: reduce(
                     lambda acq1, acq2: acq1 + acq2,
                     acqs,
@@ -190,7 +189,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         return playback
 
     def process_playback(
-        self, playback: Dict[PulseChannel, Dict[str, Acquisition]], res_mgr: ResultManager
+        self, playback: Dict[str, Dict[str, Acquisition]], res_mgr: ResultManager
     ):
         """
         Now that the combined playback is ready, we can compute and process results as required
@@ -207,7 +206,8 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         repeat_counts = list(r.repeat_count for r in repeats)
 
         results = {}
-        for target, acquisitions in playback.items():
+        for pulse_channel_id, acquisitions in playback.items():
+            target = self.model.get_pulse_channel_from_id(pulse_channel_id)
             acquires = acquire_map[target]
             for name, acquisition in acquisitions.items():
                 scope_data = acquisition.acquisition.scope
@@ -253,7 +253,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     @abstractmethod
     def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager): ...
 
-    def execute_packages(self, packages) -> Dict[PulseChannel, Dict[str, Acquisition]]: ...
+    def execute_packages(self, packages) -> Dict[str, Dict[str, Acquisition]]: ...
 
     def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
         self._model_exists()
@@ -290,14 +290,12 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
         return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
 
     def execute_packages(self, iter2packages):
-        playbacks: Dict[PulseChannel, List[Acquisition]] = defaultdict(list)
+        playbacks: Dict[str, List[Acquisition]] = defaultdict(list)
         for packages in iter2packages.values():
             self.model.control_hardware.set_data(packages)
-            payback: Dict[PulseChannel, List[Acquisition]] = (
-                self.model.control_hardware.start_playback(None, None)
-            )
-            for target, acquisitions in payback.items():
-                playbacks[target] += acquisitions
+            payback = self.model.control_hardware.start_playback(None, None)
+            for pulse_channel_id, acquisitions in payback.items():
+                playbacks[pulse_channel_id] += acquisitions
 
         return self.combine_playbacks(playbacks)
 
@@ -349,7 +347,7 @@ class QbloxLiveEngine2(AbstractQbloxLiveEngine):
 
     def execute_packages(self, packages: List[QbloxPackage]):
         self.model.control_hardware.set_data(packages)
-        playbacks: Dict[PulseChannel, List[Acquisition]] = (
+        playbacks: Dict[str, List[Acquisition]] = (
             self.model.control_hardware.start_playback(None, None)
         )
 

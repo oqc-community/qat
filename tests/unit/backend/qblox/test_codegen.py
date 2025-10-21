@@ -16,7 +16,6 @@ from qat.backend.passes.purr.analysis import (
 from qat.backend.passes.purr.transform import DesugaringPass
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.config.constants import Constants, QbloxTargetData
-from qat.backend.qblox.config.specification import SequencerConfig
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
@@ -84,7 +83,7 @@ class TestQbloxBackend1:
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
-        return QbloxBackend1(qblox_model, ignore_empty).emit(builder, res_mgr, met_mgr)
+        return QbloxBackend1(qblox_model).emit(builder, res_mgr, met_mgr, ignore_empty)
 
     def test_very_long_pulse(self, qblox_model):
         q0 = qblox_model.get_qubit(0)
@@ -106,8 +105,8 @@ class TestQbloxBackend1:
         ordered_executables = self._do_emit(builder, qblox_model)
         for executable in ordered_executables.values():
             assert len(executable.packages) == 1
-            channel_id, pkg = next(iter(executable.packages.items()))
-            assert channel_id == drive_channel.full_id()
+            pulse_channel_id, pkg = next(iter(executable.packages.items()))
+            assert pulse_channel_id == drive_channel.full_id()
             assert f"GAUSSIAN_{hash(gaussian)}_I" in pkg.sequence.waveforms
             assert f"GAUSSIAN_{hash(gaussian)}_Q" in pkg.sequence.waveforms
             assert "play 0,1,100" in pkg.sequence.program
@@ -202,9 +201,7 @@ class TestQbloxBackend1:
             assert isinstance(channel, QbloxPhysicalChannel)
             assert isinstance(channel.baseband, QbloxPhysicalBaseband)
             assert len(channel.config.sequencers) > 0
-            assert pkg.sequencer_config.square_weight_acq.integration_length == int(
-                time * 1e9
-            )
+            assert pkg.seq_config.square_weight_acq.integration_length == int(time * 1e9)
 
     @pytest.mark.parametrize(
         ("width_seconds", "context"),
@@ -248,8 +245,8 @@ class TestQbloxBackend1:
                 acquire_pkg = next(
                     (
                         pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == acquire_channel.full_id()
+                        for pulse_channel_id, pkg in executable.packages.items()
+                        if pulse_channel_id == acquire_channel.full_id()
                     )
                 )
                 assert acquire_pkg.sequence.acquisitions
@@ -289,8 +286,8 @@ class TestQbloxBackend1:
                 drive_pkg = next(
                     (
                         pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == drive_channel.full_id()
+                        for pulse_channel_id, pkg in executable.packages.items()
+                        if pulse_channel_id == drive_channel.full_id()
                     )
                 )
                 drive_pulse = next(
@@ -316,8 +313,8 @@ class TestQbloxBackend1:
                 acquire_pkg = next(
                     (
                         pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == acquire_channel.full_id()
+                        for pulse_channel_id, pkg in executable.packages.items()
+                        if pulse_channel_id == acquire_channel.full_id()
                     )
                 )
                 assert acquire_pkg.sequence.acquisitions
@@ -389,8 +386,8 @@ class TestQbloxBackend1:
                 measure_pkg = next(
                     (
                         pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == measure_channel.full_id()
+                        for pulse_channel_id, pkg in executable.packages.items()
+                        if pulse_channel_id == measure_channel.full_id()
                     )
                 )
                 assert measure_pkg.sequence.acquisitions
@@ -415,8 +412,8 @@ class TestQbloxBackend1:
                     measure_pkg = next(
                         (
                             pkg
-                            for channel_id, pkg in executable.packages.items()
-                            if channel_id == measure_channel.full_id()
+                            for pulse_channel_id, pkg in executable.packages.items()
+                            if pulse_channel_id == measure_channel.full_id()
                         )
                     )
 
@@ -471,9 +468,11 @@ class TestQbloxBackend1:
             assert len(executable.packages) == len(qubits)
             qub_pkg_zip = [
                 (qub, pkg)
-                for (qub, (channel_id, pkg)) in zip(qubits, executable.packages.items())
+                for (qub, (pulse_channel_id, pkg)) in zip(
+                    qubits, executable.packages.items()
+                )
                 if qub.get_measure_channel()
-                == qblox_model.get_pulse_channel_from_id(channel_id)
+                == qblox_model.get_pulse_channel_from_id(pulse_channel_id)
             ]
 
             for qubit, measure_pkg in qub_pkg_zip:
@@ -484,11 +483,11 @@ class TestQbloxBackend1:
                 rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
                 threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
 
-                assert measure_pkg.sequencer_config.thresholded_acq.rotation == np.rad2deg(
+                assert measure_pkg.seq_config.thresholded_acq.rotation == np.rad2deg(
                     rotation
                 )
                 assert (
-                    measure_pkg.sequencer_config.thresholded_acq.threshold
+                    measure_pkg.seq_config.thresholded_acq.threshold
                     == acq_width * threshold
                 )
 
@@ -518,7 +517,7 @@ class TestQbloxBackend2:
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
-        return QbloxBackend2(qblox_model, ignore_empty).emit(builder, res_mgr, met_mgr)
+        return QbloxBackend2(qblox_model).emit(builder, res_mgr, met_mgr, ignore_empty)
 
     def test_prologue_epilogue(self, qblox_model):
         builder = empty(qblox_model)
@@ -530,7 +529,6 @@ class TestQbloxBackend2:
             assert len(executable.packages) == 2
 
             for pkg in executable.packages.values():
-                assert pkg.sequencer_config == SequencerConfig()
                 assert pkg.timeline.size == 4
                 assert not pkg.sequence.waveforms
                 assert not pkg.sequence.acquisitions
@@ -555,8 +553,8 @@ class TestQbloxBackend2:
                 acquire_pkg = next(
                     (
                         pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if channel_id == acquire_channel.full_id()
+                        for pulse_channel_id, pkg in executable.packages.items()
+                        if pulse_channel_id == acquire_channel.full_id()
                     )
                 )
                 measure_pulse = next(
@@ -617,8 +615,8 @@ class TestQbloxBackend2:
                     drive_pkg = next(
                         (
                             pkg
-                            for channel_id, pkg in executable.packages.items()
-                            if channel_id == drive_channel.full_id()
+                            for pulse_channel_id, pkg in executable.packages.items()
+                            if pulse_channel_id == drive_channel.full_id()
                         )
                     )
                     drive_pulse = next(
@@ -649,8 +647,8 @@ class TestQbloxBackend2:
                     acquire_pkg = next(
                         (
                             pkg
-                            for channel_id, pkg in executable.packages.items()
-                            if channel_id == acquire_channel.full_id()
+                            for pulse_channel_id, pkg in executable.packages.items()
+                            if pulse_channel_id == acquire_channel.full_id()
                         )
                     )
                     measure_pulse = next(

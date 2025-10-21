@@ -7,7 +7,6 @@ from matplotlib import pyplot as plt
 
 from qat.purr.backends.qblox.acquisition import Acquisition
 from qat.purr.backends.qblox.codegen import QbloxPackage
-from qat.purr.compiler.devices import PulseChannel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -52,11 +51,11 @@ def plot_packages(packages: List[QbloxPackage]):
     plt.show()
 
 
-def plot_playback(playback: Dict[PulseChannel, List[Acquisition]]):
+def plot_playback(playback: Dict[str, List[Acquisition]]):
     if not playback:
         return
 
-    for i, (target, acquisitions) in enumerate(playback.items()):
+    for i, (pulse_channel_id, acquisitions) in enumerate(playback.items()):
         for acquisition in acquisitions:
             fig, axes = plt.subplots(
                 nrows=3,
@@ -66,7 +65,7 @@ def plot_playback(playback: Dict[PulseChannel, List[Acquisition]]):
                 squeeze=False,
                 figsize=(10, 5),
             )
-            fig.suptitle(f"Playback plots for {acquisition.name} on {target}")
+            fig.suptitle(f"Playback plots for {acquisition.name} on {pulse_channel_id}")
 
             scope_data = acquisition.acquisition.scope
             integ_data = acquisition.acquisition.bins.integration

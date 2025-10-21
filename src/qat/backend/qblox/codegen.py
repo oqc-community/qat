@@ -8,7 +8,6 @@ from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
-from compiler_config.config import CompilerConfig
 
 from qat.backend.base import BaseBackend
 from qat.backend.codegen_base import DfsTraversal
@@ -20,7 +19,7 @@ from qat.backend.passes.purr.analysis import (
     TILegalisationPass,
 )
 from qat.backend.qblox.config.constants import Constants
-from qat.backend.qblox.config.specification import SequencerConfig
+from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.execution import QbloxExecutable, QbloxPackage
 from qat.backend.qblox.ir import Opcode, SequenceBuilder
 from qat.backend.qblox.passes.analysis import (
@@ -35,7 +34,6 @@ from qat.backend.qblox.passes.analysis import (
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import InvokerMixin, PassManager
 from qat.core.result_base import ResultManager
-from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -103,9 +101,50 @@ class AbstractContext(ABC):
 
         ValueError("Cannot determine phase statically in dynamic settings")
 
-    def create_package(self):
-        sequence = self.sequence_builder.build()
-        return QbloxPackage(sequence, self.sequencer_config, self._timeline)
+    def create_package(
+        self, target: PulseChannel, seq_idx: int, slot_idx: int
+    ) -> QbloxPackage:
+        lo_freq, nco_freq = TILegalisationPass.decompose_freq(target.frequency, target)
+
+        qblox_config = target.physical_channel.config
+
+        # Customise Module config
+        mod_config: ModuleConfig = qblox_config.module
+        if mod_config.lo.out0_en:
+            mod_config.lo.out0_freq = lo_freq
+        if mod_config.lo.out1_en:
+            mod_config.lo.out1_freq = lo_freq
+        if mod_config.lo.out0_in0_en:
+            mod_config.lo.out0_in0_freq = lo_freq
+
+        mod_config.scope_acq.sequencer_select = seq_idx
+        mod_config.scope_acq.trigger_mode_path0 = "sequencer"
+        mod_config.scope_acq.avg_mode_en_path0 = True
+        mod_config.scope_acq.trigger_mode_path1 = "sequencer"
+        mod_config.scope_acq.avg_mode_en_path1 = True
+
+        # Customise Sequencer config
+        seq_config: SequencerConfig = qblox_config.sequencers[seq_idx]
+        seq_config.nco.freq = nco_freq
+        seq_config.nco.prop_delay_comp_en = True
+        seq_config.square_weight_acq.integration_length = (
+            self.sequencer_config.square_weight_acq.integration_length
+        )
+        seq_config.thresholded_acq.rotation = self.sequencer_config.thresholded_acq.rotation
+        seq_config.thresholded_acq.threshold = (
+            self.sequencer_config.thresholded_acq.threshold
+        )
+
+        return QbloxPackage(
+            pulse_channel_id=target.full_id(),
+            physical_channel_id=target.physical_channel_id,
+            seq_idx=seq_idx,
+            seq_config=seq_config,
+            slot_idx=slot_idx,
+            mod_config=mod_config,
+            sequence=self.sequence_builder.build(),
+            timeline=self._timeline,
+        )
 
     def is_empty(self):
         """
@@ -948,10 +987,6 @@ class QbloxContext2(AbstractContext):
 
 
 class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
-    def __init__(self, model: QbloxLiveHardwareModel, ignore_empty=True):
-        super().__init__(model)
-        self.ignore_empty = ignore_empty
-
     def build_pass_pipeline(self, *args, **kwargs):
         pass
 
@@ -960,7 +995,7 @@ class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
         ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        ignore_empty=True,
     ) -> Dict[int, QbloxExecutable]:
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         sweeps = triage_result.sweeps
@@ -973,7 +1008,7 @@ class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
             while not switerator.is_finished():
                 switerator.do_sweep(triage_result.quantum_instructions)
                 ordered_executables[switerator.accumulated_sweep_iteration] = self._do_emit(
-                    triage_result
+                    triage_result, ignore_empty
                 )
             return ordered_executables
         except BaseException as e:
@@ -982,7 +1017,7 @@ class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
             switerator.revert(triage_result.quantum_instructions)
             dinjectors.revert()
 
-    def _do_emit(self, triage_result: TriageResult) -> QbloxExecutable:
+    def _do_emit(self, triage_result: TriageResult, ignore_empty=True) -> QbloxExecutable:
         repeat = next(iter(triage_result.repeats))
         contexts: Dict[PulseChannel, QbloxContext1] = {}
 
@@ -1033,20 +1068,16 @@ class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
                     elif isinstance(inst, Id):
                         context.id()
 
-        packages = {
-            target.full_id(): context.create_package()
-            for target, context in contexts.items()
-            if not (self.ignore_empty and context.is_empty())
-        }
-
+        packages = {}
+        for target, context in contexts.items():
+            if not context.is_empty() or not ignore_empty:
+                seq_idx, slot_idx = self.allocate(target)
+                package = context.create_package(target, seq_idx, slot_idx)
+                packages[target.full_id()] = package
         return QbloxExecutable(packages=packages, triage_result=triage_result)
 
 
 class QbloxBackend2(BaseBackend[QbloxExecutable], InvokerMixin):
-    def __init__(self, model: QbloxLiveHardwareModel, ignore_empty=True):
-        super().__init__(model)
-        self.ignore_empty = ignore_empty
-
     def build_pass_pipeline(self, *args, **kwargs):
         # TODO: Make compatible with `DefaultMiddleend`: COMPILER-729
         return PassManager() | PreCodegenPass() | CFGPass()
@@ -1056,7 +1087,7 @@ class QbloxBackend2(BaseBackend[QbloxExecutable], InvokerMixin):
         ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        ignore_empty=True,
     ) -> Dict[int, QbloxExecutable]:
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
@@ -1086,13 +1117,12 @@ class QbloxBackend2(BaseBackend[QbloxExecutable], InvokerMixin):
             }
             QbloxCFGWalker(contexts).run(cfg_result.cfg)
 
-        packages = {
-            target.full_id(): context.create_package()
-            for target, context in contexts.items()
-            if not (self.ignore_empty and context.is_empty())
-        }
-
-        # Makes it similar to vanilla QbloxBackend1.
+        packages = {}
+        for target, context in contexts.items():
+            if not context.is_empty() or not ignore_empty:
+                seq_idx, slot_idx = self.allocate(target)
+                package = context.create_package(target, seq_idx, slot_idx)
+                packages[target.full_id()] = package
         return {1: QbloxExecutable(packages=packages, triage_result=triage_result)}
 
 

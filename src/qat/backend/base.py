@@ -2,14 +2,14 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import abc
-from typing import Generic, Optional, TypeVar
-
-from compiler_config.config import CompilerConfig
+from collections import defaultdict
+from typing import Dict, Generic, Optional, Tuple, TypeVar
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.executables import Executable
 from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 EXE = TypeVar("EXE", bound=Executable)
@@ -27,6 +27,7 @@ class BaseBackend(Generic[EXE], abc.ABC):
         :param model: The hardware model that holds calibrated information on the qubits on the QPU.
         """
         self.model = model
+        self.allocations: Dict[int, Dict[str, int]] = defaultdict(dict)
 
     @abc.abstractmethod
     def emit(
@@ -34,5 +35,22 @@ class BaseBackend(Generic[EXE], abc.ABC):
         ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        **kwargs,
     ) -> EXE: ...
+
+    def allocate(self, target: PulseChannel) -> Tuple[int, int]:
+        slot_idx = target.physical_channel.slot_idx
+        target2seq = self.allocations[slot_idx]
+        if (seq_idx := target2seq.get(target.full_id(), None)) is None:
+            total = set(target.physical_channel.config.sequencers.keys())
+            available = total - set(target2seq.values())
+            if not available:
+                raise ValueError(f"""
+                No more available sequencers for {target}
+                Physical channel: {target.physical_channel}
+                Total available: {total}
+                Current allocations: {target2seq}
+                """)
+            seq_idx = next(iter(available))
+            target2seq[target.full_id()] = seq_idx
+        return seq_idx, slot_idx

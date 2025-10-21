@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 
 from qat.backend.qblox.acquisition import Acquisition
 from qat.backend.qblox.execution import QbloxExecutable
-from qat.purr.compiler.devices import PulseChannel
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -55,7 +54,7 @@ def plot_executable(executable: QbloxExecutable):
     plt.show()
 
 
-def plot_playback(playback: Dict[PulseChannel, List[Acquisition]]):
+def plot_playback(playback: Dict[str, List[Acquisition]]):
     if not playback:
         return
 

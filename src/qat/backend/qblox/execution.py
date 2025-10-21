@@ -2,22 +2,28 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from dataclasses import dataclass, field
-from typing import Dict
+from typing import Dict, Optional
 
 import numpy as np
 from pydantic import ConfigDict
 
 from qat.backend.passes.purr.analysis import TriageResult
-from qat.backend.qblox.config.specification import SequencerConfig
+from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.ir import Sequence
 from qat.executables import AcquireData, ChannelExecutable
 
 
 @dataclass
 class QbloxPackage:
-    sequence: Sequence = None
-    sequencer_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
-    timeline: np.ndarray = None
+    pulse_channel_id: Optional[str] = None
+    physical_channel_id: Optional[str] = None
+    instrument_id: Optional[str] = None
+    seq_idx: Optional[int] = None
+    seq_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
+    slot_idx: Optional[int] = None
+    mod_config: ModuleConfig = field(default_factory=lambda: ModuleConfig())
+    sequence: Optional[Sequence] = None
+    timeline: Optional[np.ndarray] = None
 
 
 class QbloxExecutable(ChannelExecutable):

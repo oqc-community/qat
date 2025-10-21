@@ -130,31 +130,25 @@ class TestInstrument:
         ordered_executables = self._do_emit(qblox_model, backend, builder)
 
         for executable in ordered_executables.values():
-            assert len(qblox_instrument.allocations) == 0
-            qblox_instrument.setup(executable, qblox_model)
-            assert len(qblox_instrument.allocations) == 1
+            assert len(qblox_instrument.id2seq) == 0
+            qblox_instrument.setup(executable)
+            assert len(qblox_instrument.id2seq) == 1
 
             # Unexpecting wf mem as the square pulse in res spec is done via Q1ASM
             # Expecting acquisition specification
-            channel, sequencer = next(
-                ((k, v) for k, v in qblox_instrument.allocations.items())
+            pulse_channel_id, sequencer = next(
+                ((k, v) for k, v in qblox_instrument.id2seq.items())
             )
             assert not sequencer.get_waveforms()
             assert sequencer.get_acquisitions()
 
             # Expecting injected configuration such as integration length (aka. acquire width)
-            acq_pkg = next(
-                (
-                    pkg
-                    for channel_id, pkg in executable.packages.items()
-                    if channel.full_id() == channel_id
-                )
-            )
+            acq_pkg = executable.packages[pulse_channel_id]
             assert (
                 sequencer.integration_length_acq()
-                == acq_pkg.sequencer_config.square_weight_acq.integration_length
+                == acq_pkg.seq_config.square_weight_acq.integration_length
             )
-            qblox_instrument.allocations.clear()
+            qblox_instrument.id2seq.clear()
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
@@ -167,10 +161,8 @@ class TestInstrument:
             with pytest.raises(ValueError):
                 qblox_instrument.playback()
 
-            qblox_instrument.setup(executable, qblox_model)
-            channel, sequencer = next(
-                ((k, v) for k, v in qblox_instrument.allocations.items())
-            )
+            qblox_instrument.setup(executable)
+            channel, sequencer = next(((k, v) for k, v in qblox_instrument.id2seq.items()))
 
             qblox_instrument.playback()  # IDLE ---arm--> ARMED ---start--> STOPPED
 
@@ -181,7 +173,7 @@ class TestInstrument:
             assert SequencerStatusFlags.ACQ_BINNING_DONE in sequencer_status.info_flags
             assert not sequencer.sync_en()
 
-            qblox_instrument.allocations.clear()
+            qblox_instrument.id2seq.clear()
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
@@ -190,10 +182,10 @@ class TestInstrument:
         builder = resonator_spect(qblox_model)
         ordered_executables = self._do_emit(qblox_model, backend, builder)
         for executable in ordered_executables.values():
-            qblox_instrument.setup(executable, qblox_model)
+            qblox_instrument.setup(executable)
             qblox_instrument.playback()
             results = qblox_instrument.collect()
             assert results
 
             # Expect resource cleanup after playback
-            assert not qblox_instrument.allocations
+            assert not qblox_instrument.id2seq

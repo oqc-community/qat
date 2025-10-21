@@ -11,7 +11,6 @@ from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.execution import QbloxExecutable
 from qat.backend.qblox.ir import Sequence
 from qat.engines.qblox.live import QbloxLeafInstrument
-from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
 
@@ -68,18 +67,12 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
 
         log.info(self._driver.get_system_status())
 
-    def setup(self, executable: QbloxExecutable, model: QbloxLiveHardwareModel):
-        super().setup(executable, model)
+    def setup(self, executable: QbloxExecutable):
+        super().setup(executable)
 
         # Stage Scope and Acquisition data
-        for target, sequencer in self._allocations.items():
-            if ChannelType.macq.name in target.full_id():
-                package = next(
-                    (
-                        pkg
-                        for channel_id, pkg in executable.packages.items()
-                        if target.full_id() == channel_id
-                    )
-                )
+        for pulse_channel_id, sequencer in self._id2seq.items():
+            if ChannelType.macq.name in pulse_channel_id:
+                package = executable.packages[pulse_channel_id]
                 self._setup_dummy_scope_acq_data(sequencer, package.sequence)
                 self._setup_dummy_binned_acq_data(sequencer, package.sequence)
