@@ -634,7 +634,7 @@ class AbstractContext(ABC):
             ph_reg = self.alloc_mgr.registers[inst.phase.name]
             with self._modulo_reg(ph_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
                 self.sequence_builder.set_ph_delta(iter_reg)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
         elif isinstance(inst.phase, Number):
             ph_imm = QbloxLegalisationPass.phase_as_steps(inst.phase)
             self.sequence_builder.set_ph_delta(ph_imm)

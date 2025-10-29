@@ -3,7 +3,7 @@
 from qat.model.loaders.purr.dummy import QbloxDummyModelLoader
 from qat.pipelines.updateable import PipelineConfig
 
-from .compile import QbloxCompilePipeline
+from .compile import QbloxCompilePipeline1
 from .execute import QbloxExecutePipeline
 from .full import QbloxPipeline
 
@@ -28,5 +28,5 @@ __all__ = [
     "dummy16",
     # "dummy32",  # TODO: 32Q support: COMPILER-728
     "PipelineConfig",
-    "QbloxCompilePipeline",
+    "QbloxCompilePipeline1",
 ]

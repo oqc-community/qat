@@ -4,7 +4,7 @@ import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
 from qat import QAT
-from qat.backend.qblox.codegen import QbloxBackend2
+from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.config.constants import QbloxTargetData, TargetData
 from qat.backend.qblox.execution import QbloxExecutable
 
@@ -13,15 +13,16 @@ from qat.backend.qblox.execution import QbloxExecutable
 from qat.executables import BaseExecutable
 from qat.frontend import AutoFrontend
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
-from qat.middleend import DefaultMiddleend
+from qat.middleend import CustomMiddleend, DefaultMiddleend
 from qat.model.loaders.purr import QbloxDummyModelLoader
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.purr.qblox import (
     PipelineConfig,
-    QbloxCompilePipeline,
+    QbloxCompilePipeline1,
     QbloxExecutePipeline,
     QbloxPipeline,
 )
+from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
 from qat.purr.backends.qblox.live import QbloxLiveEngineAdapter
 from qat.runtime import SimpleRuntime
 
@@ -76,16 +77,29 @@ class TestQbloxPipeline:
 
 
 class TestQbloxCompilePipeline:
-    def test_build_pipeline(self):
+    def test_build_pipeline1(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = QbloxDummyModelLoader(qubit_count=4).load()
-        compile_pipeline = QbloxCompilePipeline._build_pipeline(
+        compile_pipeline = QbloxCompilePipeline1._build_pipeline(
             config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
         )
         assert isinstance(compile_pipeline, CompilePipeline)
         assert compile_pipeline.name == "qblox_compile"
         assert isinstance(compile_pipeline.frontend, AutoFrontend)
-        assert isinstance(compile_pipeline.middleend, DefaultMiddleend)
+        assert isinstance(compile_pipeline.middleend, CustomMiddleend)
+        assert isinstance(compile_pipeline.backend, QbloxBackend1)
+        assert isinstance(compile_pipeline.target_data, TargetData)
+
+    def test_build_pipeline2(self):
+        """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        model = QbloxDummyModelLoader(qubit_count=4).load()
+        compile_pipeline = QbloxCompilePipeline2._build_pipeline(
+            config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
+        )
+        assert isinstance(compile_pipeline, CompilePipeline)
+        assert compile_pipeline.name == "qblox_compile"
+        assert isinstance(compile_pipeline.frontend, AutoFrontend)
+        assert isinstance(compile_pipeline.middleend, CustomMiddleend)
         assert isinstance(compile_pipeline.backend, QbloxBackend2)
         assert isinstance(compile_pipeline.target_data, TargetData)
 

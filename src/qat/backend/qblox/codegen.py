@@ -9,10 +9,9 @@ from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
-from qat.backend.base import BaseBackend
+from qat.backend.base import AllocatingBackend
 from qat.backend.codegen_base import DfsTraversal
 from qat.backend.passes.purr.analysis import (
-    CFGPass,
     CFGResult,
     ReadWriteResult,
     ScopingResult,
@@ -26,13 +25,11 @@ from qat.backend.qblox.passes.analysis import (
     AllocationManager,
     BindingResult,
     IterBound,
-    PreCodegenPass,
     PreCodegenResult,
     QbloxLegalisationPass,
     TriageResult,
 )
 from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import InvokerMixin, PassManager
 from qat.core.result_base import ResultManager
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
@@ -551,7 +548,7 @@ class AbstractContext(ABC):
             ph_reg = self.alloc_mgr.registers[inst.phase.name]
             with self._modulo_reg(ph_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
                 self.sequence_builder.set_ph_delta(iter_reg)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
         elif isinstance(inst.phase, Number):
             ph_imm = QbloxLegalisationPass.phase_as_steps(inst.phase)
             self.sequence_builder.set_ph_delta(ph_imm)
@@ -986,10 +983,7 @@ class QbloxContext2(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
-    def build_pass_pipeline(self, *args, **kwargs):
-        pass
-
+class QbloxBackend1(AllocatingBackend[QbloxExecutable]):
     def emit(
         self,
         ir: InstructionBuilder,
@@ -1077,11 +1071,7 @@ class QbloxBackend1(BaseBackend[QbloxExecutable], InvokerMixin):
         return QbloxExecutable(packages=packages, triage_result=triage_result)
 
 
-class QbloxBackend2(BaseBackend[QbloxExecutable], InvokerMixin):
-    def build_pass_pipeline(self, *args, **kwargs):
-        # TODO: Make compatible with `DefaultMiddleend`: COMPILER-729
-        return PassManager() | PreCodegenPass() | CFGPass()
-
+class QbloxBackend2(AllocatingBackend[QbloxExecutable]):
     def emit(
         self,
         ir: InstructionBuilder,
@@ -1089,8 +1079,6 @@ class QbloxBackend2(BaseBackend[QbloxExecutable], InvokerMixin):
         met_mgr: Optional[MetricsManager] = None,
         ignore_empty=True,
     ) -> Dict[int, QbloxExecutable]:
-        self.run_pass_pipeline(ir, res_mgr, met_mgr)
-
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)

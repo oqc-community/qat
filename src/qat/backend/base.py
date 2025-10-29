@@ -6,6 +6,7 @@ from collections import defaultdict
 from typing import Dict, Generic, Optional, Tuple, TypeVar
 
 from qat.core.metrics_base import MetricsManager
+from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.executables import Executable
 from qat.purr.compiler.builders import InstructionBuilder
@@ -17,9 +18,8 @@ EXE = TypeVar("EXE", bound=Executable)
 
 class BaseBackend(Generic[EXE], abc.ABC):
     """
-    Converts an intermediate representation (IR) to code for a given target
-    by selecting target-machine operations to implement for each instruction
-    in the IR.
+    Base class for a backend that takes an intermediate representation (IR) :class:`QatIR`
+    and lowers it to machine code that can be executed on a given target.
     """
 
     def __init__(self, model: None | QuantumHardwareModel):
@@ -27,7 +27,6 @@ class BaseBackend(Generic[EXE], abc.ABC):
         :param model: The hardware model that holds calibrated information on the qubits on the QPU.
         """
         self.model = model
-        self.allocations: Dict[int, Dict[str, int]] = defaultdict(dict)
 
     @abc.abstractmethod
     def emit(
@@ -36,9 +35,43 @@ class BaseBackend(Generic[EXE], abc.ABC):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         **kwargs,
-    ) -> EXE: ...
+    ) -> EXE:
+        """
+        Converts an IR :class:`QatIR` to machine instructions of a given target
+        architecture.
+
+        How targets convert the IR is at their discretion but they mostly follow
+        macro-expansion techniques where target instructions are selected
+        for each instruction in the IR.
+        """
+        ...
+
+
+class CustomBackend(BaseBackend[EXE], Generic[EXE], abc.ABC):
+    """
+    Backends may need to run pre-codegen passes on the IR :class:`QatIR` as emitted
+    from the middle end. These passes are specified via a custom pipeline.
+    """
+
+    def __init__(self, model: QuantumHardwareModel, pipeline: PassManager = None):
+        super().__init__(model=model)
+        self.pipeline = pipeline
+
+
+class AllocatingBackend(CustomBackend[EXE], Generic[EXE], abc.ABC):
+    """
+    A backend that's responsible for allocating FPGA card and sequencers AOT.
+    """
+
+    def __init__(self, model: QuantumHardwareModel, pipeline: PassManager = None):
+        super().__init__(model=model, pipeline=pipeline)
+        self.allocations: Dict[int, Dict[str, int]] = defaultdict(dict)
 
     def allocate(self, target: PulseChannel) -> Tuple[int, int]:
+        """
+        For a given target, allocate an FPGA card and a sequencer.
+        """
+
         slot_idx = target.physical_channel.slot_idx
         target2seq = self.allocations[slot_idx]
         if (seq_idx := target2seq.get(target.full_id(), None)) is None:

@@ -8,27 +8,17 @@ import pytest
 from more_itertools import partition
 
 from qat import qatconfig
-from qat.backend.passes.purr.analysis import (
-    BindingPass,
-    TILegalisationPass,
-    TriagePass,
-)
-from qat.backend.passes.purr.transform import DesugaringPass
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.config.constants import Constants, QbloxTargetData
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
 from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.middleend.passes.purr.transform import (
-    DeviceUpdateSanitisation,
-    PhaseOptimisation,
-    PostProcessingSanitisation,
-    RepeatSanitisation,
-    ReturnSanitisation,
-    ScopeSanitisation,
+from qat.pipelines.purr.qblox.compile import (
+    backend_pipeline1,
+    backend_pipeline2,
+    middleend_pipeline1,
+    middleend_pipeline2,
 )
-from qat.middleend.passes.purr.validation import InstructionValidation, ReadoutValidation
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.execution import DeviceInjectors
@@ -64,25 +54,13 @@ log = get_default_logger()
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
 class TestQbloxBackend1:
-    def middleend_pipeline(self, qblox_model):
-        target_data = QbloxTargetData.default()
-
-        return (
-            PassManager()
-            | PhaseOptimisation()
-            | PostProcessingSanitisation()
-            | DeviceUpdateSanitisation()
-            | InstructionValidation(target_data)
-            | ReadoutValidation(qblox_model)
-            | RepeatSanitisation(qblox_model, target_data)
-            | ReturnSanitisation()
-            | TriagePass()
-        )
-
     def _do_emit(self, builder, qblox_model, ignore_empty=True):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
+        middleend_pipeline1(qblox_model, QbloxTargetData.default()).run(
+            builder, res_mgr, met_mgr
+        )
+        backend_pipeline1().run(builder, res_mgr, met_mgr)
         return QbloxBackend1(qblox_model).emit(builder, res_mgr, met_mgr, ignore_empty)
 
     def test_very_long_pulse(self, qblox_model):
@@ -494,29 +472,13 @@ class TestQbloxBackend1:
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
 class TestQbloxBackend2:
-    def middleend_pipeline(self, qblox_model):
-        target_data = QbloxTargetData.default()
-        return (
-            PassManager()
-            | PhaseOptimisation()
-            | PostProcessingSanitisation()
-            | DeviceUpdateSanitisation()  #
-            | InstructionValidation(target_data)  #
-            | ReadoutValidation(qblox_model)
-            | RepeatSanitisation(qblox_model, target_data)
-            | ScopeSanitisation()
-            | ReturnSanitisation()
-            | DesugaringPass()  #
-            | TriagePass()  # Backend, PartitionedIR pass?
-            | BindingPass()  # Backend
-            | TILegalisationPass()  # Backend
-            | QbloxLegalisationPass()  # Backend
-        )
-
     def _do_emit(self, builder, qblox_model, ignore_empty=True):
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
-        self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
+        middleend_pipeline2(qblox_model, QbloxTargetData.default()).run(
+            builder, res_mgr, met_mgr
+        )
+        backend_pipeline2().run(builder, res_mgr, met_mgr)
         return QbloxBackend2(qblox_model).emit(builder, res_mgr, met_mgr, ignore_empty)
 
     def test_prologue_epilogue(self, qblox_model):
