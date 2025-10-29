@@ -13,14 +13,14 @@ jobs:
     steps:
 
       - name: Download pytest report
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: qat-pytest-markdown
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Download formatting report
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: qat-formatting-markdown
           github-token: ${{ secrets.GITHUB_TOKEN }}
