@@ -8,7 +8,7 @@ repos:
       - id: check-merge-conflict
         stages: [pre-commit, manual]
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.17.3  # CURRENT_TAG/COMMIT_HASH
+    rev: v1.18.1  # CURRENT_TAG/COMMIT_HASH
     hooks:
       - id: jupytext
         args: [--sync, --pre-commit-mode, --pipe, "ruff check --fix {}", --pipe, "ruff format {}"]
