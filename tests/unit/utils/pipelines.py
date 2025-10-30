@@ -1,8 +1,8 @@
-from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.engines.native import NativeEngine
 from qat.engines.zero import ZeroEngine
 from qat.frontend.auto import AutoFrontend
-from qat.middleend.middleends import DefaultMiddleend
+from qat.middleend import DefaultMiddleend
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline

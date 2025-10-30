@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import CustomMiddleend
+from qat.middleend import CustomMiddleend
 from qat.model.target_data import TargetData
 from qat.pipelines.legacy.base import results_pipeline
 from qat.pipelines.pipeline import Pipeline

@@ -130,10 +130,10 @@ print(res)
 from qat import Pipeline
 
 # %%
-from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.backend.waveform_v1 import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import DefaultMiddleend
+from qat.middleend import DefaultMiddleend
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.runtime.simple import SimpleRuntime
 

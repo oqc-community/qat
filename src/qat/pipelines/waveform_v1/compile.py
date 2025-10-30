@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
 from qat.frontend import AutoFrontendWithFlattenedIR
-from qat.middleend.middleends import ExperimentalDefaultMiddleend
+from qat.middleend import PydDefaultMiddleend
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline
@@ -44,7 +44,7 @@ class WaveformV1CompilePipeline(UpdateablePipeline):
             model=model,
             target_data=target_data,
             frontend=AutoFrontendWithFlattenedIR.default_for_pydantic(model),
-            middleend=ExperimentalDefaultMiddleend(model, target_data),
+            middleend=PydDefaultMiddleend(model, target_data),
             backend=PydWaveformV1Backend(model, target_data),
             name=config.name,
         )

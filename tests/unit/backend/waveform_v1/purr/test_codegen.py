@@ -11,10 +11,10 @@ from qat.backend.passes.purr.analysis import (
     PulseChannelTimeline,
     TimelineAnalysisResult,
 )
-from qat.backend.waveform_v1.codegen import (
+from qat.backend.waveform_v1.executable import WaveformV1Executable
+from qat.backend.waveform_v1.purr.codegen import (
     WaveformContext,
     WaveformV1Backend,
-    WaveformV1Executable,
 )
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager

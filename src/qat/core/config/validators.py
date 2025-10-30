@@ -25,7 +25,7 @@ def is_frontend(value: type):
 def is_middleend(value: type):
     """A validator which raises when the input not a Middleend."""
 
-    from qat.middleend.middleends import BaseMiddleend
+    from qat.middleend.base import BaseMiddleend
 
     if not (inspect.isclass(value) and issubclass(value, BaseMiddleend)):
         raise ValueError(f"{value} is not a valid Middleend")

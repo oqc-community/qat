@@ -5,7 +5,7 @@ from qat.backend.qblox.codegen import QbloxBackend2
 from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import CustomMiddleend
+from qat.middleend import CustomMiddleend
 from qat.middleend.passes.purr.transform import (
     DeviceUpdateSanitisation,
     PhaseOptimisation,

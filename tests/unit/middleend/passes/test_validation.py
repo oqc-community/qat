@@ -39,6 +39,8 @@ from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import PostProcessType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
+pytestmark = pytest.mark.experimental
+
 qatconfig = get_config()
 
 

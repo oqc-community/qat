@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import DefaultMiddleend
+from qat.middleend import DefaultMiddleend
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline

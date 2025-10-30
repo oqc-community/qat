@@ -4,7 +4,7 @@
 import numpy as np
 import pytest
 
-from qat.backend.waveform_v1.codegen import WaveformV1Backend
+from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
 from qat.middleend.passes.purr.transform import (
     RepeatTranslation,

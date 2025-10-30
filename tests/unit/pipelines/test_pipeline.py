@@ -11,8 +11,8 @@ from qat.executables import AcquireData, AcquireMode, Executable
 from qat.frontend import AutoFrontend, FallthroughFrontend
 from qat.middleend import (
     DefaultMiddleend,
-    ExperimentalDefaultMiddleend,
     FallthroughMiddleend,
+    PydDefaultMiddleend,
 )
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
@@ -114,7 +114,7 @@ class TestCompilePipeline:
             name="TestCompilePipeline",
             model=model,
             frontend=AutoFrontend(model=model),
-            middleend=ExperimentalDefaultMiddleend(model=model),
+            middleend=PydDefaultMiddleend(model=model),
             backend=PydWaveformV1Backend(model=model),
             target_data=TargetData.default(),
         )
@@ -126,7 +126,7 @@ class TestCompilePipeline:
                 name="TestCompilePipeline",
                 model=model,
                 frontend=AutoFrontend(model=model),
-                middleend=ExperimentalDefaultMiddleend(model=model),
+                middleend=PydDefaultMiddleend(model=model),
                 backend=PydWaveformV1Backend(model=new_model),
                 target_data=TargetData.default(),
             )

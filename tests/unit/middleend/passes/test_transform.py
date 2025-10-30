@@ -79,6 +79,8 @@ from qat.model.target_data import (
 
 from tests.unit.utils.pulses import test_waveforms
 
+pytestmark = pytest.mark.experimental
+
 
 class TestPopulateWaveformSampleTime:
     hw = LucyModelLoader(1).load()

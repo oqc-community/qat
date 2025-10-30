@@ -22,7 +22,7 @@ from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
 from qat.executables import ChannelExecutable, Executable
 from qat.frontend import DefaultFrontend, FallthroughFrontend
-from qat.middleend.middleends import FallthroughMiddleend
+from qat.middleend import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.echo import EchoPipeline, PipelineConfig
 from qat.pipelines.pipeline import Pipeline

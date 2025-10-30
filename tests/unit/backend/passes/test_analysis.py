@@ -30,6 +30,8 @@ from qat.model.loaders.converted import PydEchoModelLoader
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.target_data import TargetData
 
+pytestmark = pytest.mark.experimental
+
 
 class TestIntermediateFrequencyAnalysis:
     def test_different_frequencies_with_fixed_if_yields_error(self):

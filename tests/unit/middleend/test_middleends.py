@@ -9,7 +9,7 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
-from qat.middleend.middleends import CustomMiddleend, DefaultMiddleend, FallthroughMiddleend
+from qat.middleend import CustomMiddleend, DefaultMiddleend, FallthroughMiddleend
 from qat.middleend.passes.purr.analysis import ActiveChannelResults
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData

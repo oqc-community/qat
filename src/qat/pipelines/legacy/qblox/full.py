@@ -4,7 +4,7 @@
 from qat.backend.qblox.codegen import QbloxBackend2
 from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import CustomMiddleend
+from qat.middleend import CustomMiddleend
 from qat.pipelines.legacy.base import results_pipeline
 from qat.pipelines.pipeline import Pipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline

@@ -124,7 +124,7 @@ Let us quickly show how to define a custom pipeline by recreating the "echo8" pi
     from qat import QAT 
     from qat.core.pipeline import Pipeline
     from qat.frontend.frontends import DefaultFrontend
-    from qat.middleend.middleends import DefaultMiddleend
+    from qat.middleend import DefaultMiddleend
     from qat.backend.waveform_v1 import WaveformV1Backend
     from qat.engines.waveform_v1 import EchoEngine
     from qat.runtime import SimpleRuntime

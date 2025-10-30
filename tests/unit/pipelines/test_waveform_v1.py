@@ -12,7 +12,7 @@ from qat.executables import BaseExecutable, Executable
 from qat.frontend import AutoFrontend
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
-from qat.middleend.middleends import ExperimentalDefaultMiddleend
+from qat.middleend import PydDefaultMiddleend
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
@@ -31,8 +31,9 @@ from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.qasm_qir import get_pipeline_tests
 
+pytestmark = pytest.mark.experimental
 
-@pytest.mark.experimental
+
 class TestExperimentalEchoPipeline:
     def test_build_pipeline(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
@@ -43,7 +44,7 @@ class TestExperimentalEchoPipeline:
         assert isinstance(pipeline, Pipeline)
         assert pipeline.name == "echo"
         assert isinstance(pipeline.frontend, AutoFrontend)
-        assert isinstance(pipeline.middleend, ExperimentalDefaultMiddleend)
+        assert isinstance(pipeline.middleend, PydDefaultMiddleend)
         assert isinstance(pipeline.backend, PydWaveformV1Backend)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
@@ -61,7 +62,7 @@ class TestExperimentalEchoPipeline:
         assert isinstance(compile_pipeline, CompilePipeline)
         assert compile_pipeline.name == "compile"
         assert isinstance(compile_pipeline.frontend, AutoFrontend)
-        assert isinstance(compile_pipeline.middleend, ExperimentalDefaultMiddleend)
+        assert isinstance(compile_pipeline.middleend, PydDefaultMiddleend)
         assert isinstance(compile_pipeline.backend, PydWaveformV1Backend)
 
     def test_build_execute_pipeline(self):
@@ -103,7 +104,6 @@ test_files = get_pipeline_tests(
     ids=["binary_count", "binary", "raw"],
     scope="class",
 )
-@pytest.mark.experimental
 class TestExperimentalEchoPipelineWithCircuits:
     """A class that tests the compilation and execution of the EchoPipeline with a
     WaveformV1Backend against circuit programs.
@@ -356,7 +356,6 @@ class MockEchoModelLoader(EchoModelLoader):
 parity_test_files = get_pipeline_tests(openpulse=False)
 
 
-@pytest.mark.experimental
 @pytest.mark.parametrize(
     "program_file",
     [val[0] for val in parity_test_files.values()],

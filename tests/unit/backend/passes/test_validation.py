@@ -9,6 +9,8 @@ from qat.ir.measure import Acquire
 from qat.ir.waveforms import Pulse, SquareWaveform
 from qat.model.loaders.lucy import LucyModelLoader
 
+pytestmark = pytest.mark.experimental
+
 
 class TestNoAcquireWeightsValidation:
     def test_acquire_with_filter_raises_error(self):

@@ -6,14 +6,14 @@ from typing import List, Optional
 import numpy as np
 
 from qat.backend.base import BaseBackend
-from qat.backend.passes.analysis import (
+from qat.backend.passes.purr.analysis import (
     IntermediateFrequencyAnalysis,
     IntermediateFrequencyResult,
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
-from qat.backend.passes.lowering import PartitionByPulseChannel
-from qat.backend.passes.validation import NoAcquireWeightsValidation
+from qat.backend.passes.purr.lowering import PartitionByPulseChannel
+from qat.backend.passes.purr.validation import NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import (
     WaveformV1ChannelData,
     WaveformV1Executable,
@@ -21,21 +21,27 @@ from qat.backend.waveform_v1.executable import (
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
 from qat.executables import AcquireData
-from qat.ir.instructions import FrequencyShift, PhaseReset, PhaseSet, PhaseShift, Reset
+from qat.ir.instructions import Assign
 from qat.ir.lowered import PartitionedIR
-from qat.ir.waveforms import Pulse as Pulse
-from qat.ir.waveforms import SampledWaveform
-from qat.model.device import PhysicalChannel, Qubit
-from qat.model.hardware_model import PhysicalHardwareModel
-from qat.model.target_data import DeviceDescription, TargetData
-from qat.purr.backends.utilities import UPCONVERT_SIGN
+from qat.ir.measure import PostProcessing
+from qat.ir.waveforms import Pulse as PydPulse
+from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
+    CustomPulse,
+    FrequencySet,
+    FrequencyShift,
     Instruction,
+    PhaseReset,
+    PhaseSet,
+    PhaseShift,
+    Pulse,
+    Reset,
+    Waveform,
 )
 from qat.purr.utils.logger import get_default_logger
-from qat.utils.waveform import NumericFunction
 
 log = get_default_logger()
 
@@ -45,13 +51,16 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
     Target-machine code generation from an IR for targets that only require the explicit waveforms.
     """
 
-    def __init__(
-        self,
-        model: PhysicalHardwareModel,
-        target_data: TargetData = TargetData.default(),
-    ):
+    # TODO: replacing buffers calculations as passes: waveform generation pass, pulse
+    # channel buffers pass, buffer amalgamation pass (COMPILER-413)
+
+    def __init__(self, model: QuantumHardwareModel):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+                    As the emitter is used to generate code for some target machine, the hardware
+                    model is needed for context-aware compilation.
+        """
         self.model = model
-        self.target_data = target_data
 
     def emit(
         self,
@@ -81,7 +90,7 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
 
         channels: dict[str, WaveformV1ChannelData] = {}
         for physical_channel, buffer in buffers.items():
-            channels[physical_channel.uuid] = WaveformV1ChannelData(
+            channels[physical_channel.full_id()] = WaveformV1ChannelData(
                 baseband_frequency=if_res.frequencies.get(physical_channel, None),
                 buffer=buffer,
                 acquires=acquire_dict.get(physical_channel, []),
@@ -101,11 +110,14 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             shots=ir.shots,
             compiled_shots=ir.compiled_shots,
             repetition_time=repetition_time,
-            post_processing=ir.pp_map,
+            post_processing={
+                var: [PostProcessing._from_legacy(pp) for pp in pp_list]
+                for var, pp_list in ir.pp_map.items()
+            },
             results_processing={
                 var: rp.results_processing for var, rp in ir.rp_map.items()
             },
-            assigns=ir.assigns,
+            assigns=[Assign._from_legacy(assign) for assign in ir.assigns],
             returns=returns,
             calibration_id=self.model.calibration_id,
         )
@@ -115,7 +127,7 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             PassManager()
             | NoAcquireWeightsValidation()
             | PartitionByPulseChannel()
-            | TimelineAnalysis(self.model, self.target_data)
+            | TimelineAnalysis()
             | IntermediateFrequencyAnalysis(self.model)
         )
 
@@ -124,8 +136,6 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         pulse_channel: PulseChannel,
         instructions: list[Instruction],
         durations: list[int],
-        device_description: DeviceDescription,
-        phys_channel: PhysicalChannel,
         upconvert: bool = True,
     ):
         """Creates a buffer of waveforms for a single pulse channel.
@@ -135,12 +145,10 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         :param durations: The list of durations for each instruction.
         :param upconvert: Whether to upconvert the waveforms to the target frequencies.
         """
-        context = WaveformContext(
-            pulse_channel, np.sum(durations), device_description, phys_channel
-        )
+        context = WaveformContext(pulse_channel, np.sum(durations))
         for i, instruction in enumerate(instructions):
             duration = durations[i]
-            if isinstance(instruction, Pulse):
+            if isinstance(instruction, Waveform):
                 context.process_pulse(instruction, duration, upconvert)
             elif isinstance(instruction, PhaseShift):
                 context.process_phaseshift(instruction.phase)
@@ -150,6 +158,8 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
                 context.process_phasereset()
             elif isinstance(instruction, Reset):
                 context.process_reset()
+            elif isinstance(instruction, FrequencySet):
+                context.process_frequencyset(instruction.frequency)
             elif isinstance(instruction, FrequencyShift):
                 context.process_frequencyshift(instruction.frequency)
             else:
@@ -171,40 +181,28 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         """
         # Compute all pulse channel buffers
         pulse_channel_buffers = {}
-        for pulse_channel_id in timeline_res.target_map:
+        for pulse_channel in timeline_res.target_map:
             # The buffer is trivial if there are no waveforms
             if not any(
-                [isinstance(inst, Pulse) for inst in ir.target_map[pulse_channel_id]]
+                [isinstance(inst, Waveform) for inst in ir.target_map[pulse_channel]]
             ):
                 continue
 
-            pulse_channel = ir.get_pulse_channel(pulse_channel_id)
-            device = self.model.device_for_physical_channel_id(
-                pulse_channel.physical_channel_id
-            )
-            pulse_channel_buffers[pulse_channel_id] = self.create_pulse_channel_buffer(
+            pulse_channel_buffers[pulse_channel] = self.create_pulse_channel_buffer(
                 pulse_channel,
-                ir.target_map[pulse_channel_id],
-                timeline_res.target_map[pulse_channel_id].samples,
-                self.target_data.QUBIT_DATA
-                if isinstance(device, Qubit)
-                else self.target_data.RESONATOR_DATA,
-                self.model.physical_channel_with_id(pulse_channel.physical_channel_id),
+                ir.target_map[pulse_channel],
+                timeline_res.target_map[pulse_channel].samples,
                 upconvert,
             )
 
         # Organize by physical channels
         phys_to_pulse_map = {}
-        for pulse_channel_id, buffer in pulse_channel_buffers.items():
-            physical_channel = self.model.physical_channel_with_id(
-                ir.get_pulse_channel(pulse_channel_id).physical_channel_id
-            )
-            phys_to_pulse_map.setdefault(physical_channel, []).append(buffer)
+        for pulse_channel, buffer in pulse_channel_buffers.items():
+            phys_to_pulse_map.setdefault(pulse_channel.physical_channel, []).append(buffer)
 
         # Compute sum of pulse channels
         physical_channel_buffers = {}
-        for device in self.model.quantum_devices:
-            physical_channel = device.physical_channel
+        for physical_channel in self.model.physical_channels.values():
             buffer_list = phys_to_pulse_map.get(physical_channel, [])
             if len(buffer_list) == 0:
                 length = 0
@@ -226,19 +224,15 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
             for each instruction.
         """
         acquire_dict = {}
-        for pulse_channel_id, acquire_list in ir.acquire_map.items():
-            pulse_channel = ir.get_pulse_channel(pulse_channel_id)
-            phys_channel = self.model.physical_channel_with_id(
-                pulse_channel.physical_channel_id
-            )
-            acq_list = acquire_dict.setdefault(phys_channel, [])
+        for pulse_channel, acquire_list in ir.acquire_map.items():
+            acq_list = acquire_dict.setdefault(pulse_channel.physical_channel, [])
             for acquire in acquire_list:
-                idx = ir.target_map[pulse_channel_id].index(acquire)
+                idx = ir.target_map[pulse_channel].index(acquire)
                 acq_list.append(
                     AcquireData(
-                        length=timeline_res.target_map[pulse_channel_id].samples[idx],
+                        length=timeline_res.target_map[pulse_channel].samples[idx],
                         position=np.sum(
-                            timeline_res.target_map[pulse_channel_id].samples[0:idx]
+                            timeline_res.target_map[pulse_channel].samples[0:idx]
                         ),
                         mode=acquire.mode,
                         output_variable=acquire.output_variable,
@@ -257,24 +251,20 @@ class WaveformContext:
     # TODO: refactor this as a "channel backend" or as passes depending on when this is
     # done (COMPILER-413).
 
-    def __init__(
-        self,
-        pulse_channel: PulseChannel,
-        total_duration: int,
-        device_description: DeviceDescription,
-        phys_channel: PhysicalChannel,
-    ):
+    def __init__(self, pulse_channel: PulseChannel, total_duration: int):
         """
         :param pulse_channel: The pulse channel that this is modelling.
         :param total_duration: The lifetime of the pulse channel in number of samples.
         """
         self.pulse_channel = pulse_channel
-        self.physical_channel = phys_channel
-        self._device_desc = device_description
         self._buffer = np.zeros(total_duration, dtype=np.complex128)
         self._duration = 0
         self._phase = 0.0
         self._frequency = pulse_channel.frequency
+
+    @property
+    def physical_channel(self):
+        return self.pulse_channel.physical_channel
 
     @property
     def buffer(self):
@@ -282,8 +272,9 @@ class WaveformContext:
 
     def process_pulse(
         self,
-        instruction: Pulse,
+        instruction: PydPulse,
         samples: int,
+        sample_time: float,
         do_upconvert: bool = True,
     ):
         """Converts a waveform instruction into a discrete number of samples, handling
@@ -292,50 +283,26 @@ class WaveformContext:
         # TODO: the evaluate shape is handled in the EvaluatePulses pass, so this needs
         # adjusting to only accept square waveforms and custom pulses. (COMPILER-413)
 
-        dt = self._device_desc.sample_time
-        length = samples * dt
+        length = samples * sample_time
         centre = length / 2.0
         t = np.linspace(
-            start=-centre + 0.5 * dt, stop=length - centre - 0.5 * dt, num=samples
+            start=-centre + 0.5 * sample_time,
+            stop=length - centre - 0.5 * sample_time,
+            num=samples,
         )
-        waveform = instruction.waveform
-
-        if isinstance(waveform, SampledWaveform):
-            amp = 1.0
-            scale_factor = 1.0
-            drag = 0.0
-            amplitude = np.array(waveform.samples, dtype=np.csingle)
-
-            pulse = scale_factor * amp * np.exp(1.0j * self._phase) * amplitude
-            if not drag == 0.0:
-                amplitude_differential = NumericFunction().derivative(t, amplitude)
-                if len(amplitude_differential) < len(pulse):
-                    amplitude_differential = np.pad(
-                        amplitude_differential,
-                        (0, len(pulse) - len(amplitude_differential)),
-                        "edge",
-                    )
-                pulse += (
-                    drag
-                    * 1.0j
-                    * amp
-                    * scale_factor
-                    * np.exp(1.0j * self._phase)
-                    * amplitude_differential
-                )
-        else:
-            pulse = waveform.sample(t, phase_offset=self._phase).samples
-
-        # pulse = evaluate_shape(instruction.waveform, t, self._phase)
+        pulse = evaluate_shape(instruction, t, self._phase)
 
         scale = self.pulse_channel.scale
-        if instruction.ignore_channel_scale:
+        if (
+            isinstance(instruction, (Pulse, CustomPulse))
+            and instruction.ignore_channel_scale
+        ):
             scale = 1
         pulse *= scale
-        pulse += self.physical_channel.iq_voltage_bias.bias
+        pulse += self.pulse_channel.bias
 
         if do_upconvert:
-            t += centre - 0.5 * dt + self._duration * dt
+            t += centre - 0.5 * sample_time + self._duration * sample_time
             pulse = self._do_upconvert(pulse, t)
 
         self._buffer[self._duration : self._duration + samples] = pulse
@@ -349,12 +316,12 @@ class WaveformContext:
         """A virtually NCO to upconvert the waveforms by a frequency that is the difference
         between the target frequency and the baseband frequency."""
 
-        tslip = self.pulse_channel.phase_iq_offset
+        tslip = self.pulse_channel.phase_offset
         imbalance = self.pulse_channel.imbalance
         if self.pulse_channel.fixed_if:
-            freq = self.physical_channel.baseband.if_frequency
+            freq = self.pulse_channel.baseband_if_frequency
         else:
-            freq = self._frequency - self.physical_channel.baseband.frequency
+            freq = self._frequency - self.pulse_channel.baseband_frequency
         buffer *= np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * time)
         if not tslip == 0.0:
             buffer_slip = buffer * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * tslip)
@@ -388,6 +355,3 @@ class WaveformContext:
 
     def process_delay(self, samples: int):
         self._duration += samples
-
-
-PydWaveformV1Backend = WaveformV1Backend

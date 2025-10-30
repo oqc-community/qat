@@ -3,7 +3,7 @@
 
 from qat.backend.fallthrough import FallthroughBackend
 from qat.frontend import AutoFrontend
-from qat.middleend.middleends import CustomMiddleend
+from qat.middleend import CustomMiddleend
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.pipelines.updateable import UpdateablePipeline

@@ -9,7 +9,7 @@ from qat.core.result_base import ResultManager
 from qat.engines import NativeEngine
 from qat.executables import Executable
 from qat.frontend import BaseFrontend
-from qat.middleend.middleends import BaseMiddleend
+from qat.middleend.base import BaseMiddleend
 from qat.model.target_data import TargetData
 from qat.model.validators import MismatchingHardwareModelException
 from qat.pipelines.base import BasePipeline

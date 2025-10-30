@@ -4,8 +4,8 @@ import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
 from qat import QAT
-from qat.backend.waveform_v1.codegen import WaveformV1Backend
 from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
+from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.engines.waveform_v1 import EchoEngine
 from qat.executables import BaseExecutable, Executable
 from qat.frontend import AutoFrontend

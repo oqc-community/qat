@@ -22,6 +22,8 @@ from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader as LegEchoModelLoader
 from qat.purr.compiler.instructions import PulseShapeType
 
+pytestmark = pytest.mark.experimental
+
 
 class TestPydPartitionByPulseChannel:
     hw = LucyModelLoader().load()
