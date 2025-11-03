@@ -267,3 +267,15 @@ class TestLucyModelLoader:
         for qubit in model.qubits.values():
             for channel in qubit.cross_resonance_cancellation_pulse_channels.values():
                 assert channel.scale == 0.3
+
+    def test_start_index(self):
+        loader = LucyModelLoader(qubit_count=4, start_index=2)
+        model = loader.load()
+        expected_indices = {2, 3, 4, 5}
+        actual_indices = set(model.qubits.keys())
+        assert actual_indices == expected_indices
+
+        for qubit, couplings in model.logical_connectivity.items():
+            assert qubit in expected_indices
+            for coupled_index in couplings:
+                assert coupled_index in expected_indices

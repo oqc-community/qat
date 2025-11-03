@@ -11,7 +11,12 @@ from compiler_config.config import (
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.frontend.qir import QIRFrontend, is_qir_path, is_qir_str, load_qir_file
 from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
+from qat.ir.measure import Acquire, MeasureBlock
+from qat.ir.waveforms import Pulse as PydPulse
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.device import Qubit
+from qat.model.loaders.converted import JaggedEchoModelLoader
+from qat.model.loaders.lucy import LucyCouplingQuality, LucyModelLoader
 from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.purr.compiler.builders import InstructionBuilder as LegInstructionBuilder
 from qat.purr.compiler.devices import QubitCoupling
@@ -180,3 +185,45 @@ class TestQIRFrontend:
         # TODO: Update frontends to work with `Path`s, COMPILER-404
         res = QIRFrontend(legacy_model).check_and_return_source(qasm_path)
         assert not res
+
+    @pytest.mark.parametrize(
+        "model",
+        [
+            LucyModelLoader(
+                qubit_count=32,
+                start_index=5,
+                random_seed=42,
+                coupling_qualities=LucyCouplingQuality.RANDOM,
+            ).load(),
+            LucyModelLoader(
+                qubit_count=9,
+                start_index=0,
+                random_seed=254,
+                coupling_qualities=LucyCouplingQuality.RANDOM,
+            ).load(),
+            JaggedEchoModelLoader(16).load(),
+        ],
+    )
+    def test_placement_with_tket(self, model):
+        frontend = QIRFrontend(model)
+        config = CompilerConfig(optimizations=Tket().default())
+        builder = frontend.emit(_get_qir_path("generator-bell.ll"), compiler_config=config)
+        assert isinstance(builder, PydInstructionBuilder)
+
+        best_coupling = None
+        best_quality = None
+        for coupling, quality in model.logical_connectivity_quality.items():
+            if best_quality is None or quality > best_quality:
+                best_quality = quality
+                best_coupling = coupling
+
+        qubits = set()
+        for instruction in builder.instructions:
+            if isinstance(instruction, (PydPulse, Acquire, MeasureBlock)):
+                for target in instruction.targets:
+                    device = model.device_for_pulse_channel_id(target)
+                    if not isinstance(device, Qubit):
+                        device = model.qubit_for_resonator(device)
+                    qubit_id = model.index_of_qubit(device)
+                    qubits.update({qubit_id})
+        assert set(qubits) == set(best_coupling)

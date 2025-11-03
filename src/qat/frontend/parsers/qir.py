@@ -83,7 +83,7 @@ class QIRParser:
                 args[i] = arg.value
             elif (qid := qubit_id(arg)) is not None:
                 # Checks to see if this is a qubit
-                args[i] = builder.get_qubit(qid)
+                args[i] = builder.get_logical_qubit(qid)
             elif (rid := result_id(arg)) is not None:
                 # Checks to see if this is a result
                 args[i] = str(rid)

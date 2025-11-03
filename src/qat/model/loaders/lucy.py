@@ -56,6 +56,8 @@ class LucyModelLoader(BasePhysicalModelLoader):
         Default is 0.0.
     :param random_seed: An optional seed for the random number generator to ensure
         reproducibility.
+    :param start_index: The starting index for the qubits; useful for testing systems with
+        non-standard indexing conventions. Default is 0.
     """
 
     def __init__(
@@ -73,6 +75,7 @@ class LucyModelLoader(BasePhysicalModelLoader):
         cr_scale: float = 50.0,
         crc_scale: float = 0.0,
         random_seed: int | None = None,
+        start_index: int = 0,
     ):
         self.qubit_count = qubit_count
         self.coupling_direction = coupling_direction
@@ -87,6 +90,7 @@ class LucyModelLoader(BasePhysicalModelLoader):
         self.measure_frequency = measure_frequency
         self.cr_scale = cr_scale
         self.crc_scale = crc_scale
+        self.start_index = start_index
 
         self.random_seed = random_seed
         self._random = Random(random_seed) if random_seed is not None else Random()
@@ -107,10 +111,12 @@ class LucyModelLoader(BasePhysicalModelLoader):
     def _generate_physical_connectivity(self) -> dict[int, set[int]]:
         """Physical connectivity is bidirectional."""
 
-        return {
-            i: set([(i - 1) % self.qubit_count, (i + 1) % self.qubit_count])
-            for i in range(self.qubit_count)
-        }
+        coupling_map = dict()
+        for i in range(self.qubit_count):
+            left_neighbor = self.start_index + (i - 1) % self.qubit_count
+            right_neighbor = self.start_index + (i + 1) % self.qubit_count
+            coupling_map[i + self.start_index] = {left_neighbor, right_neighbor}
+        return coupling_map
 
     def _generate_logical_connectivity(self) -> dict[int, set[int]]:
         """Creates a logical connectivity that is unidirectional, with the direction decided
@@ -118,8 +124,8 @@ class LucyModelLoader(BasePhysicalModelLoader):
 
         connectivity: dict[int, set[int]] = defaultdict(set)
         for i in range(self.qubit_count):
-            left_neighbor = i
-            right_neighbor = (i + 1) % self.qubit_count
+            left_neighbor = self.start_index + i
+            right_neighbor = self.start_index + (i + 1) % self.qubit_count
 
             if self.coupling_direction == LucyCouplingDirection.RANDOM:
                 direction = self._random.choice(
@@ -140,7 +146,7 @@ class LucyModelLoader(BasePhysicalModelLoader):
         """Orders the coupling qualities according to the connectivity of the model."""
 
         ordered_qualities: dict[tuple[int, int], float] = {}
-        for (qubit1, qubit2), quality in qualities.items():
+        for qubit1, qubit2 in qualities.keys():
             if qubit1 in connectivity and qubit2 in connectivity[qubit1]:
                 ordered_qualities[(qubit1, qubit2)] = qualities[(qubit1, qubit2)]
             elif qubit2 in connectivity and qubit1 in connectivity[qubit2]:

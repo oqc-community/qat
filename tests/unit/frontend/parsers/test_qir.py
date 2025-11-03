@@ -4,7 +4,11 @@ import pytest
 
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.ir.instruction_builder import QuantumInstructionBuilder
+from qat.ir.measure import Acquire, MeasureBlock
+from qat.ir.waveforms import Pulse
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.device import Qubit
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.purr.backends.echo import apply_setup_to_hardware
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser as LegQIRParser
@@ -27,6 +31,47 @@ pyd_hw_model = convert_purr_echo_hw_to_pydantic(leg_hw_model)
 
 
 class TestQIRParser:
+    @pytest.mark.parametrize(
+        "qir_file",
+        [
+            "base_profile_ops.ll",
+            "basic_cudaq.ll",
+            "bell_psi_minus.ll",
+            "bell_psi_plus.ll",
+            "bell_theta_minus.ll",
+            "bell_theta_plus.ll",
+            "complicated.ll",
+            "generator-bell.ll",
+            "out_of_order_measure.ll",
+        ],
+    )
+    @pytest.mark.parametrize(
+        "model", [LucyModelLoader(32).load(), LucyModelLoader(32, start_index=2).load()]
+    )
+    def test_programs_parse(self, model, qir_file):
+        """Basic smoke test to ensure QIR programs parse without error."""
+        parser = PydQIRParser()
+        qir_string = _get_qir_path(qir_file)
+        builder = parser.parse(QuantumInstructionBuilder(model), qir_string)
+        assert isinstance(builder, QuantumInstructionBuilder)
+
+    def test_first_logical_indices_are_used(self):
+        model = LucyModelLoader(16, start_index=3).load()
+        parser = PydQIRParser()
+        qir_string = _get_qir_path("generator-bell.ll")
+        builder = parser.parse(QuantumInstructionBuilder(model), qir_string)
+
+        qubits = set()
+        for instruction in builder.instructions:
+            if isinstance(instruction, (Pulse, Acquire, MeasureBlock)):
+                for target in instruction.targets:
+                    device = model.device_for_pulse_channel_id(target)
+                    if not isinstance(device, Qubit):
+                        device = model.qubit_for_resonator(device)
+                    qubit_id = model.index_of_qubit(device)
+                    qubits.update({qubit_id})
+        assert qubits == {3, 4}
+
     @pytest.mark.parametrize(
         "qir_file",
         [

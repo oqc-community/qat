@@ -257,8 +257,22 @@ class TketBuilder(InstructionBuilder):
         self._output_variables: dict[int, str] = {}
         self._bit_ctr = 0
 
-    def get_qubit(self, index: int) -> Qubit:
+    def get_physical_qubit(self, index: int) -> Qubit:
+        if index >= len(self.circuit.qubits):
+            raise IndexError(
+                f"Qubit index {index} out of range for circuit with "
+                f"{len(self.circuit.qubits)} qubits."
+            )
         return self.circuit.qubits[index]
+
+    def get_logical_qubit(self, index: int) -> Qubit:
+        """The TketBuilder doesn't distinguish between physical and logical qubits, so this
+        is identical to get_physical_qubit."""
+        return self.get_physical_qubit(index)
+
+    @property
+    def qubits(self) -> list[Qubit]:
+        return self.circuit.qubits
 
     def X(self, qubit: Qubit, theta: float | None = None):
         if theta is not None:
@@ -379,55 +393,55 @@ class TketToQatIRConverter:
             match command["op"]["type"]:
                 # One-qubit gates
                 case "X":
-                    qat_builder.X(qat_builder.get_qubit(args[0]))
+                    qat_builder.X(qat_builder.get_logical_qubit(args[0]))
                 case "Y":
-                    qat_builder.Y(qat_builder.get_qubit(args[0]))
+                    qat_builder.Y(qat_builder.get_logical_qubit(args[0]))
                 case "Z":
-                    qat_builder.Z(qat_builder.get_qubit(args[0]))
+                    qat_builder.Z(qat_builder.get_logical_qubit(args[0]))
                 case "H":
-                    qat_builder.had(qat_builder.get_qubit(args[0]))
+                    qat_builder.had(qat_builder.get_logical_qubit(args[0]))
                 case "SX":
-                    qat_builder.SX(qat_builder.get_qubit(args[0]))
+                    qat_builder.SX(qat_builder.get_logical_qubit(args[0]))
                 case "SXdg":
-                    qat_builder.SXdg(qat_builder.get_qubit(args[0]))
+                    qat_builder.SXdg(qat_builder.get_logical_qubit(args[0]))
                 case "S":
-                    qat_builder.S(qat_builder.get_qubit(args[0]))
+                    qat_builder.S(qat_builder.get_logical_qubit(args[0]))
                 case "Sdg":
-                    qat_builder.Sdg(qat_builder.get_qubit(args[0]))
+                    qat_builder.Sdg(qat_builder.get_logical_qubit(args[0]))
                 case "T":
-                    qat_builder.T(qat_builder.get_qubit(args[0]))
+                    qat_builder.T(qat_builder.get_logical_qubit(args[0]))
                 case "Tdg":
-                    qat_builder.Tdg(qat_builder.get_qubit(args[0]))
+                    qat_builder.Tdg(qat_builder.get_logical_qubit(args[0]))
                 case "Rx":
                     qat_builder.X(
-                        qat_builder.get_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[0]),
                         self.convert_parameter(command["op"]["params"][0]),
                     )
                 case "Ry":
                     qat_builder.Y(
-                        qat_builder.get_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[0]),
                         self.convert_parameter(command["op"]["params"][0]),
                     )
                 case "Rz":
                     qat_builder.Z(
-                        qat_builder.get_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[0]),
                         self.convert_parameter(command["op"]["params"][0]),
                     )
                 case "U1":
                     qat_builder.Z(
-                        qat_builder.get_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[0]),
                         self.convert_parameter(command["op"]["params"][0]),
                     )
                 case "U2":
                     qat_builder.U(
-                        qat_builder.get_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[0]),
                         pi / 2,
                         self.convert_parameter(command["op"]["params"][0]),
                         self.convert_parameter(command["op"]["params"][1]),
                     )
                 case "U3":
                     qat_builder.U(
-                        qat_builder.get_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[0]),
                         self.convert_parameter(command["op"]["params"][0]),
                         self.convert_parameter(command["op"]["params"][1]),
                         self.convert_parameter(command["op"]["params"][2]),
@@ -436,27 +450,33 @@ class TketToQatIRConverter:
                 # Two-qubit gates
                 case "CX":
                     qat_builder.cnot(
-                        qat_builder.get_qubit(args[0]), qat_builder.get_qubit(args[1])
+                        qat_builder.get_logical_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[1]),
                     )
                 case "ECR":
                     qat_builder.ECR(
-                        qat_builder.get_qubit(args[0]), qat_builder.get_qubit(args[1])
+                        qat_builder.get_logical_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[1]),
                     )
                 case "SWAP":
                     qat_builder.swap(
-                        qat_builder.get_qubit(args[0]), qat_builder.get_qubit(args[1])
+                        qat_builder.get_logical_qubit(args[0]),
+                        qat_builder.get_logical_qubit(args[1]),
                     )
 
                 # Operations
                 case "Measure":
                     output_var = tket_builder._output_variables[int(str(args[1]))]
                     qat_builder.measure_single_shot_z(
-                        qat_builder.get_qubit(args[0]), output_variable=output_var
+                        qat_builder.get_logical_qubit(args[0]),
+                        output_variable=output_var,
                     )
                 case "Barrier":
-                    qat_builder.synchronize([qat_builder.get_qubit(arg) for arg in args])
+                    qat_builder.synchronize(
+                        [qat_builder.get_logical_qubit(arg) for arg in args]
+                    )
                 case "Reset":
-                    qat_builder.reset(qat_builder.get_qubit(args[0]))
+                    qat_builder.reset(qat_builder.get_logical_qubit(args[0]))
                 case _:
                     raise NotImplementedError(
                         f"Command {command['op']['type']} not implemented."

@@ -139,7 +139,7 @@ class TestTketBuilder:
 
     def test_get_qubit(self):
         builder = TketBuilder(self.model)
-        qubit = builder.get_qubit(1)
+        qubit = builder.get_logical_qubit(1)
         assert isinstance(qubit, Qubit)
         assert qubit.index[0] == 1
 
@@ -156,7 +156,7 @@ class TestTketBuilder:
     )
     def test_X_Y_Z(self, method, angle, expected):
         builder = TketBuilder(self.model)
-        qubit = builder.get_qubit(1)
+        qubit = builder.qubits[1]
         if angle is not None:
             getattr(builder, method)(qubit, angle)
         else:
@@ -170,7 +170,7 @@ class TestTketBuilder:
     def test_U(self):
         angles = [0.254, 0.7, 1.2]
         builder = TketBuilder(self.model)
-        qubit = builder.get_qubit(1)
+        qubit = builder.qubits[1]
         builder.U(qubit, angles[0] * pi, angles[1] * pi, angles[2] * pi)
         commands = builder.circuit.commands_of_type(OpType.U3)
         assert len(commands) == 1
@@ -188,8 +188,8 @@ class TestTketBuilder:
     )
     def test_2q(self, method, expected):
         builder = TketBuilder(self.model)
-        qubit1 = builder.get_qubit(1)
-        qubit2 = builder.get_qubit(2)
+        qubit1 = builder.qubits[1]
+        qubit2 = builder.qubits[2]
         getattr(builder, method)(qubit1, qubit2)
         commands = builder.circuit.commands_of_type(expected)
         assert len(commands) == 1
@@ -205,8 +205,8 @@ class TestTketBuilder:
     )
     def test_parametrized_2q(self, method, angle, expected):
         builder = TketBuilder(self.model)
-        qubit1 = builder.get_qubit(1)
-        qubit2 = builder.get_qubit(2)
+        qubit1 = builder.qubits[1]
+        qubit2 = builder.qubits[2]
         getattr(builder, method)(qubit1, qubit2, angle * pi)
         commands = builder.circuit.commands_of_type(expected)
         assert len(commands) == 1
@@ -215,7 +215,7 @@ class TestTketBuilder:
 
     def test_measure(self):
         builder = TketBuilder(self.model)
-        qubit = builder.get_qubit(1)
+        qubit = builder.qubits[1]
         builder.measure_single_shot_z(qubit)
         commands = builder.circuit.commands_of_type(OpType.Measure)
         assert len(commands) == 1
@@ -224,7 +224,7 @@ class TestTketBuilder:
 
     def test_reset(self):
         builder = TketBuilder(self.model)
-        qubit = builder.get_qubit(1)
+        qubit = builder.qubits[1]
         builder.reset(qubit)
         commands = builder.circuit.commands_of_type(OpType.Reset)
         assert len(commands) == 1
@@ -319,8 +319,8 @@ class TestTketToQatIRConverter:
 
         # Build from tket
         tket_builder = TketBuilder(self.model)
-        qubit1 = tket_builder.get_qubit(0)
-        qubit2 = tket_builder.get_qubit(1)
+        qubit1 = tket_builder.qubits[0]
+        qubit2 = tket_builder.qubits[1]
         tket_builder.had(qubit1)
         tket_builder.cnot(qubit1, qubit2)
         tket_builder.measure_single_shot_z(qubit1, output_variable="0")
@@ -329,8 +329,8 @@ class TestTketToQatIRConverter:
 
         # Build directly in QAT
         direct_builder = QuantumInstructionBuilder(self.model)
-        qubit1 = direct_builder.get_qubit(0)
-        qubit2 = direct_builder.get_qubit(1)
+        qubit1 = direct_builder.qubits[0]
+        qubit2 = direct_builder.qubits[1]
         direct_builder.had(qubit1)
         direct_builder.cnot(qubit1, qubit2)
         direct_builder.measure_single_shot_z(qubit1, output_variable="0")
@@ -344,7 +344,7 @@ class TestTketToQatIRConverter:
 
         # Build from tket
         tket_builder = TketBuilder(self.model)
-        qubit1 = tket_builder.get_qubit(0)
+        qubit1 = tket_builder.qubits[0]
         tket_builder.had(qubit1)
         tket_builder.measure_single_shot_z(qubit1, output_variable="0")
         tket_builder.results_processing("0", InlineResultsProcessing.Program)

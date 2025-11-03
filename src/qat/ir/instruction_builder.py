@@ -65,21 +65,36 @@ class InstructionBuilder(ABC):
         self._qubit_index_by_uuid = {
             qubit.uuid: idx for (idx, qubit) in hardware_model.qubits.items()
         }
+        self._qubits_ordered_by_index = [
+            self.hw.qubits[idx] for idx in sorted(self.hw.qubits.keys())
+        ]
         self._ir = InstructionBlock(instructions=instructions)
         self.compiled_shots: int | None = None
         self.shots: int | None = None
 
-    def get_qubit(self, index: int) -> Qubit:
-        """Returns the qubit with the given index.
+    @property
+    def qubits(self) -> list[Qubit]:
+        """Returns the list of qubits, sorted by index."""
+        return self._qubits_ordered_by_index
 
-        TODO: maybe this is the wrong level of abstraction to have details about the model.
-        Maybe operations should deal with qubit indices, and the subclass handles the
-        translation layer. Nevertheless, this is to be resolved with structured IR.
+    def get_physical_qubit(self, index: int) -> Qubit:
+        """Returns the qubit assigned with the given physical index.
 
         :param index: The index of the qubit to return.
         :return: The qubit with the given index.
         """
         return self.hw.qubit_with_index(index)
+
+    def get_logical_qubit(self, index: int) -> Qubit:
+        """Returns the qubit assigned with the given logical index.
+
+        :param index: The logical index of the qubit to return.
+        :return: The qubit with the given logical index.
+        """
+
+        if index >= len(self.qubits):
+            raise IndexError(f"Qubit with logical index {index} does not exist.")
+        return self.qubits[index]
 
     @abstractmethod
     def X(
