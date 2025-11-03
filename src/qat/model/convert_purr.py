@@ -4,6 +4,8 @@ import re
 from collections import defaultdict
 from copy import deepcopy
 
+import numpy as np
+
 from qat.ir.waveforms import SquareWaveform
 from qat.model.device import (
     AcquirePulseChannel,
@@ -22,6 +24,11 @@ from qat.model.device import (
     ResonatorPhysicalChannel,
     ResonatorPulseChannels,
     SecondStatePulseChannel,
+)
+from qat.model.error_mitigation import (
+    CalibratableUnitInterval2x2Array,
+    ErrorMitigation,
+    ReadoutMitigation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannelView
@@ -229,6 +236,34 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
     else:
         logical_connectivity_quality = None
 
+    # Convert Error Mitigation if present
+    if (error_mitigation := legacy_hw.error_mitigation) is not None and (
+        readout_mitigation := getattr(
+            legacy_hw.error_mitigation, "readout_mitigation", None
+        )
+    ) is not None:
+        linear = {}
+        if readout_mitigation.linear:
+            for qubit_idx, qubit_map in readout_mitigation.linear.items():
+                linear[qubit_idx] = CalibratableUnitInterval2x2Array(
+                    np.array(
+                        [
+                            [qubit_map["0|0"], qubit_map["0|1"]],
+                            [qubit_map["1|0"], qubit_map["1|1"]],
+                        ]
+                    )
+                )
+        linear = FrozenDict(linear)
+
+        readout_mitigation = ReadoutMitigation(
+            linear=linear,
+            matrix=getattr(readout_mitigation, "matrix", None),
+            m3_available=getattr(readout_mitigation, "m3_available", False),
+        )
+        error_mitigation = ErrorMitigation(readout_mitigation=readout_mitigation)
+    else:
+        error_mitigation = ErrorMitigation()
+
     calibration_id = getattr(legacy_hw, "calibration_id", "")
     new_hw = PhysicalHardwareModel(
         logical_connectivity=logical_connectivity,
@@ -236,6 +271,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         physical_connectivity=physical_connectivity,
         qubits=new_qubits,
         calibration_id=calibration_id,
+        error_mitigation=error_mitigation,
     )
 
     return new_hw

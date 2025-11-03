@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-import random
 from math import isclose, pi
 
 import pytest
@@ -21,10 +20,9 @@ from qat.integrations.tket import (
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import ResultsProcessing
 from qat.ir.measure import Acquire, PostProcessing
-from qat.model.error_mitigation import ErrorMitigation, ReadoutMitigation
-from qat.model.loaders.converted import PydEchoModelLoader
+from qat.model.loaders.converted import JaggedEchoModelLoader, PydEchoModelLoader
 from qat.model.loaders.lucy import LucyModelLoader
-from qat.utils.hardware_model import generate_hw_model
+from qat.utils.hardware_model import generate_hw_model, random_error_mitigation
 
 from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3
 
@@ -72,22 +70,19 @@ class TestPydTketOptimisation:
         )
 
 
-def test_one_qubit_circuit_optimisation():
-    hw = PydEchoModelLoader(4).load()
+echo_error_mitigation = random_error_mitigation(set(range(4)), seed=42)
+echo = PydEchoModelLoader(4, error_mitigation=echo_error_mitigation).load()
+jagged_indices = {1, 2, 5, 7}
+jagged_error_mitigation = random_error_mitigation(jagged_indices, seed=42)
+jagged = JaggedEchoModelLoader(
+    4, qubit_indices=jagged_indices, error_mitigation=jagged_error_mitigation
+).load()
 
-    linear = {}
-    qubit_qualities = {}
-    for q_id, qubit in hw.qubits.items():
-        p00 = random.uniform(0.8, 1.0)
-        p11 = random.uniform(0.8, 1.0)
-        linear[q_id] = [[p00, 1 - p11], [1 - p00, p11]]
-        qubit_qualities[q_id] = (p00 + p11) / 2
-    best_qubit = max(qubit_qualities, key=qubit_qualities.get)
 
-    hw.error_mitigation = ErrorMitigation(
-        readout_mitigation=ReadoutMitigation(linear=linear)
-    )
-
+@pytest.mark.parametrize(
+    "hw, best_qubit", [(echo, 2), (jagged, 2)], ids=["EchoLoader", "JaggedLoader"]
+)
+def test_one_qubit_circuit_optimisation(hw, best_qubit):
     qasm_1q_x_input = """
     OPENQASM 2.0;
     include "qelib1.inc";
@@ -103,19 +98,9 @@ def test_one_qubit_circuit_optimisation():
     assert best_qubit == circ.qubits[0].index[0]
 
 
-def test_two_qubit_circuit_optimisation():
-    hw = PydEchoModelLoader(4).load()
-    linear = {}
-    qubit_qualities = {}
-    for q_id, qubit in hw.qubits.items():
-        p00 = random.uniform(0.8, 1.0)
-        p11 = random.uniform(0.8, 1.0)
-        linear[q_id] = [[p00, 1 - p11], [1 - p00, p11]]
-        qubit_qualities[q_id] = (p00 + p11) / 2
-
-    hw.error_mitigation = ErrorMitigation(
-        readout_mitigation=ReadoutMitigation(linear=linear)
-    )
+@pytest.mark.parametrize("hw", [echo, jagged], ids=["EchoLoader", "JaggedLoader"])
+def test_two_qubit_circuit_optimisation(hw):
+    index_map = {phys: logic for logic, phys in enumerate(hw.qubits.keys())}
 
     qubit_pair_qualities = {}
     for q, coupled_qs in hw.logical_connectivity.items():
@@ -124,7 +109,7 @@ def test_two_qubit_circuit_optimisation():
             qubit_quality = hw.qubit_quality(q)
             coupled_qubit_quality = hw.qubit_quality(coupled_q)
             quality *= qubit_quality * coupled_qubit_quality
-            qubit_pair_qualities[(q, coupled_q)] = quality
+            qubit_pair_qualities[(index_map[q], index_map[coupled_q])] = quality
 
     best_qubit_pair = max(qubit_pair_qualities, key=qubit_pair_qualities.get)
 

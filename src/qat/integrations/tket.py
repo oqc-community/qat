@@ -89,8 +89,8 @@ class TketOptimisationHelper:
 
     def run_one_qubit_optimizations(self):
         qubit_qualities = {}
-        for log_q in self.logical_qubit_map.values():
-            quality = self.hardware.qubit_quality(log_q)
+        for phys_q, log_q in self.logical_qubit_map.items():
+            quality = self.hardware.qubit_quality(phys_q)
             qubit_qualities[log_q] = quality if quality != 1 else 0
 
         best_qubit = max(qubit_qualities, key=qubit_qualities.get)
@@ -191,8 +191,8 @@ class TketOptimisationHelper:
 
                 quality = self.hardware.logical_connectivity_quality[(q, coupled_q)]
                 if use_1q_quality:
-                    qubit_quality = self.hardware.qubit_quality(logical_q)
-                    coupled_qubit_quality = self.hardware.qubit_quality(logical_coupled_q)
+                    qubit_quality = self.hardware.qubit_quality(q)
+                    coupled_qubit_quality = self.hardware.qubit_quality(coupled_q)
                     quality *= qubit_quality * coupled_qubit_quality
                 self.coupling_qualities[(logical_q, logical_coupled_q)] = quality
 

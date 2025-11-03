@@ -19,7 +19,11 @@ from qat.purr.compiler.devices import (
     QubitCoupling,
     Resonator,
 )
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.hardware_models import (
+    ErrorMitigation,
+    QuantumHardwareModel,
+    ReadoutMitigation,
+)
 
 
 def random_connectivity(n, max_degree=3, seed=42):
@@ -58,12 +62,31 @@ def random_directed_connectivity(n, max_degree=3, seed=42):
     return {node: set(neighbors) for node, neighbors in G.adjacency()}
 
 
-def random_quality_map(connectivity, seed=42):
+def random_quality_map(connectivity, seed=42, min_quality=0.0, max_quality=1.0):
+    seeded_random = random.Random(seed)
     coupling_map = {}
     for q1_index, connected_qubits in connectivity.items():
         for q2_index in connected_qubits:
-            coupling_map[(q1_index, q2_index)] = random.Random(seed).uniform(0.0, 1.0)
+            coupling_map[(q1_index, q2_index)] = seeded_random.uniform(
+                min_quality, max_quality
+            )
     return coupling_map
+
+
+def random_error_mitigation(physicaal_indices, seed: int | None = None) -> ErrorMitigation:
+    seeded_random = random.Random(seed)
+    linear: dict = {}
+    for q_id in physicaal_indices:
+        p00 = seeded_random.uniform(0.8, 1.0)
+        p11 = seeded_random.uniform(0.8, 1.0)
+        linear[str(q_id)] = {
+            "0|0": p00,
+            "1|0": 1 - p00,
+            "1|1": p11,
+            "0|1": 1 - p11,
+        }
+
+    return ErrorMitigation(readout_mitigation=ReadoutMitigation(linear=linear))
 
 
 def pick_subconnectivity(connectivity, n, seed=42):
@@ -72,9 +95,65 @@ def pick_subconnectivity(connectivity, n, seed=42):
     for qubit in sub_qubits:
         for connected_qubit in connectivity[qubit]:
             if qubit not in sub_connectivity[connected_qubit]:
+                # TODO: Discussed that this should possibly be something like:
+                # if connected_qubit in sub_qubits:
+                # Evaluate if it should be changed
+                # COMPILER-822
                 sub_connectivity[qubit].add(connected_qubit)
 
     return sub_connectivity
+
+
+def ensure_connected_connectivity(connectivity: dict, qubit_indices: list | set) -> dict:
+    """Ensures that all `qubit_indeces` are connected together.
+
+    Looks at only the selected qubit indices and ensures that they are all part of a
+    single connected graph. This does not mean an all-to-all connection.
+    E.g. While the connectivity dict below has all qubits linked, in the subset of indices
+    `{1, 2, 3}` qubit `0` is not linked with the other two.
+
+    .. code:: python
+
+        connectivity = {
+            0: {1, 2},
+            1: {0},
+            2: {0, 3},
+            3: {2},
+        }
+        qubit_indices = {1, 2, 3}
+        new_connectivity = ensure_connected_connectivity(connectivity, qubit_indices)
+        # new_connectivity == {
+        #     0: {1, 2},
+        #     1: {0, 2},
+        #     2: {0, 1, 3},
+        #     3: {2}
+        # }
+
+    :param connectivity: Base connectivity dictionary.
+    :param qubit_indices: Selected qubits to ensure are a connected graph.
+    """
+    new_connectivity = {k: set(v) for k, v in connectivity.items()}
+    G = nx.Graph()
+    G.add_nodes_from(qubit_indices)
+    for q1_index in qubit_indices:
+        for q2_index in filter(
+            lambda x: x in qubit_indices, new_connectivity.get(q1_index, [])
+        ):
+            G.add_edge(q1_index, q2_index)
+    if not nx.is_connected(G):
+        connected_generators = nx.connected_components(G)
+        main_component = next(connected_generators)
+        tail = list(main_component)[-1]
+        for component in connected_generators:
+            head = list(component)[0]
+            new_connectivity[tail].add(head)
+            new_connectivity[head].add(tail)
+            G.add_edge(tail, head)
+            G.add_edge(head, tail)
+            tail = list(component)[-1]
+        if not nx.is_connected(G):
+            raise ValueError("The provided connectivity is not connected.")
+    return new_connectivity
 
 
 def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
@@ -95,16 +174,23 @@ def generate_hw_model(n_qubits, seed=42):
     return builder.model
 
 
-def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardwareModel:
-    qubit_devices = []
-    resonator_devices = []
-    channel_index = 1
-
+def apply_setup_to_echo_hardware(
+    qubit_count: int, connectivity, qubit_indices: set = None
+) -> QuantumHardwareModel:
     qubit_devices = []
     resonator_devices = []
     channel_index = 1
     hw = QuantumHardwareModel()
-    for primary_index in range(qubit_count):
+    if qubit_indices is not None:
+        if (no_qubits_indices := len(qubit_indices)) > qubit_count:
+            qubit_indices = it.islice(qubit_indices, qubit_count)
+        elif no_qubits_indices < qubit_count:
+            raise ValueError(
+                f"Not enough qubit indices provided: len({qubit_indices}) = {no_qubits_indices} < {qubit_count}."
+            )
+    else:
+        qubit_indices = range(qubit_count)
+    for primary_index in qubit_indices:
         bb1 = PhysicalBaseband(f"LO{channel_index}", 5.5e9)
         bb2 = PhysicalBaseband(f"LO{channel_index + 1}", 8.5e9)
         hw.add_physical_baseband(bb1, bb2)
@@ -127,10 +213,15 @@ def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardw
         channel_index = channel_index + 2
 
     qubits_by_index = {qb.index: qb for qb in qubit_devices}
-    for connection in connectivity:
+    if isinstance(connectivity, list):
+        connectivity = dict.fromkeys(connectivity, None)
+    for connection, quality in connectivity.items():
         left_index, right_index = connection
-        qubit_left = qubits_by_index.get(left_index)
-        qubit_right = qubits_by_index.get(right_index)
+        qubit_left = qubits_by_index.get(left_index, None)
+        qubit_right = qubits_by_index.get(right_index, None)
+
+        if not all([qubit_left, qubit_right]):
+            continue
 
         qubit_left.create_pulse_channel(
             auxiliary_devices=[qubit_right],
@@ -146,7 +237,9 @@ def apply_setup_to_echo_hardware(qubit_count: int, connectivity) -> QuantumHardw
         )
         qubit_left.add_coupled_qubit(qubit_right)
         hw.qubit_direction_couplings.append(
-            QubitCoupling(direction=connection, quality=random.Random().uniform(0.0, 1.0))
+            QubitCoupling(
+                direction=connection, quality=quality or random.Random().uniform(1, 100)
+            )
         )
 
     hw.add_quantum_device(*qubit_devices, *resonator_devices)

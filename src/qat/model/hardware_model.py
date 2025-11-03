@@ -218,8 +218,8 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     @model_validator(mode="after")
     def validate_error_mitigation(self):
-        if self.error_mitigation.is_enabled and self.error_mitigation.qubits != list(
-            self.qubits.keys()
+        if self.error_mitigation.is_enabled and not all(
+            [q_id in self.qubits.keys() for q_id in self.error_mitigation.qubits]
         ):
             raise ValueError(
                 "Please provide an error mitigation strategy for all qubits in the hardware model."
@@ -293,13 +293,13 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         resonators = [qubit.resonator for qubit in qubits]
         return qubits + resonators
 
-    def qubit_quality(self, logical_qubit_index: int):
+    def qubit_quality(self, physical_qubit_index: int):
         linear_mitigation = getattr(
             self.error_mitigation.readout_mitigation, "linear", None
         )
         if linear_mitigation is None:
             return 1.0
-        readout_quality = linear_mitigation.get(logical_qubit_index, None)
+        readout_quality = linear_mitigation.get(physical_qubit_index, None)
         if readout_quality is not None:
             # TODO: COMPILER-706 linear readout mitigation currently a 2x2 matrix,
             #  we may want to change this to be a dictionary like in the old hardware model.
