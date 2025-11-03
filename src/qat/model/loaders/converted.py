@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-import random
 from collections import defaultdict
+from random import Random
 
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -43,6 +43,7 @@ class JaggedEchoModelLoader(BasePhysicalModelLoader):
         qubit_indices: list[int] = None,
         connectivity: list[(int, int)] | None = None,
         error_mitigation: ErrorMitigation | None = None,
+        random_seed: int | None = None,
     ):
         """Load a converted Echo hardware model with non-sequential physical qubit indices.
 
@@ -54,17 +55,21 @@ class JaggedEchoModelLoader(BasePhysicalModelLoader):
         :param connectivity: List of tuples representing the qubit connections. Defaults
             to a genetared :func:`random_connectivity` including `qubit_indices` if
             provided.
+        :param error_mitigation: Error mitigation settings to apply to the model.
+        :param random_seed: Seed for random connectivity and quality map generation.
         """
         if isinstance(connectivity, Connectivity):
             raise NotImplementedError(
                 "JaggedEchoModelLoader does not support Connectivity type."
             )
+
+        random = Random(random_seed)
         if connectivity is None:
             if qubit_indices is None:
                 n = qubit_count + 5
             else:
                 n = max(qubit_indices) + 1
-            connectivity = random_connectivity(n)
+            connectivity = random_connectivity(n, seed=random)
         else:
             connectivity_dict = defaultdict(set)
             for qubit, coupled in connectivity:
@@ -85,7 +90,7 @@ class JaggedEchoModelLoader(BasePhysicalModelLoader):
 
         new_connectivity = ensure_connected_connectivity(connectivity, qubit_indices)
         self._quality_map = random_quality_map(
-            new_connectivity, min_quality=1, max_quality=100
+            new_connectivity, min_quality=1, max_quality=100, seed=random
         )
         self._qubit_indices = set(qubit_indices)
         self._qubit_count = len(qubit_indices)

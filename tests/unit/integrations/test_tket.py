@@ -75,7 +75,10 @@ echo = PydEchoModelLoader(4, error_mitigation=echo_error_mitigation).load()
 jagged_indices = {1, 2, 5, 7}
 jagged_error_mitigation = random_error_mitigation(jagged_indices, seed=42)
 jagged = JaggedEchoModelLoader(
-    4, qubit_indices=jagged_indices, error_mitigation=jagged_error_mitigation
+    4,
+    qubit_indices=jagged_indices,
+    error_mitigation=jagged_error_mitigation,
+    random_seed=254,
 ).load()
 
 

@@ -30,8 +30,9 @@ def random_connectivity(n, max_degree=3, seed=42):
     """
     Generates a random undirected graph but enforcing that the resulting graph is connected.
     """
+    seeded_random = seed if isinstance(seed, random.Random) else random.Random(seed)
     edges = list(it.combinations(range(n), 2))
-    random.Random(seed).shuffle(edges)
+    seeded_random.shuffle(edges)
     G = nx.Graph()
     G.add_nodes_from(range(n))
     for node_edges in edges:
@@ -63,7 +64,7 @@ def random_directed_connectivity(n, max_degree=3, seed=42):
 
 
 def random_quality_map(connectivity, seed=42, min_quality=0.0, max_quality=1.0):
-    seeded_random = random.Random(seed)
+    seeded_random = seed if isinstance(seed, random.Random) else random.Random(seed)
     coupling_map = {}
     for q1_index, connected_qubits in connectivity.items():
         for q2_index in connected_qubits:
@@ -90,7 +91,8 @@ def random_error_mitigation(physicaal_indices, seed: int | None = None) -> Error
 
 
 def pick_subconnectivity(connectivity, n, seed=42):
-    sub_qubits = random.Random(seed).sample(list(connectivity.keys()), n)
+    seeded_random = seed if isinstance(seed, random.Random) else random.Random(seed)
+    sub_qubits = seeded_random.sample(list(connectivity.keys()), n)
     sub_connectivity = defaultdict(set)
     for qubit in sub_qubits:
         for connected_qubit in connectivity[qubit]:
@@ -105,7 +107,7 @@ def pick_subconnectivity(connectivity, n, seed=42):
 
 
 def ensure_connected_connectivity(connectivity: dict, qubit_indices: list | set) -> dict:
-    """Ensures that all `qubit_indeces` are connected together.
+    """Ensures that all `qubit_indices` are connected together.
 
     Looks at only the selected qubit indices and ensures that they are all part of a
     single connected graph. This does not mean an all-to-all connection.

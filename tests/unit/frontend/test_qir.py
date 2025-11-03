@@ -201,7 +201,7 @@ class TestQIRFrontend:
                 random_seed=254,
                 coupling_qualities=LucyCouplingQuality.RANDOM,
             ).load(),
-            JaggedEchoModelLoader(16).load(),
+            JaggedEchoModelLoader(16, random_seed=254).load(),
         ],
     )
     def test_placement_with_tket(self, model):
