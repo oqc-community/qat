@@ -1523,7 +1523,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 )
 
             waveform_blob = deepcopy(waveform)
-            pulse = Pulse(targets=pulse_target.uuid, waveform=waveform_blob)
+            pulse = Pulse(
+                targets=pulse_target.uuid, waveform=waveform_blob, ignore_channel_scale=True
+            )
 
             self.builder.add(pulse)
 

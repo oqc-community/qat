@@ -447,7 +447,7 @@ class TestWaveformContext:
             shape=PulseShapeType.SQUARE,
             ignore_channel_scale=ignore_scale,
         )
-        context.process_pulse(pulse, 10, sample_time=sample_time, do_upconvert=do_upconvert)
+        context.process_pulse(pulse, 10, do_upconvert=do_upconvert)
         assert np.allclose(context.buffer[0:delay], 0.0)
         assert np.allclose(context.buffer[delay + 10 :], 0.0)
 
@@ -476,3 +476,30 @@ class TestWaveformContext:
         assert np.allclose(context.buffer[0:delay], 0.0)
         assert not np.allclose(context.buffer[delay : delay + 10], 0.0)
         assert np.allclose(context.buffer[delay + 10 :], 0.0)
+
+    def test_process_pulse_with_freq_shift(self):
+        """Regression test that checks pulses are correctly calculated when there is a phase
+        shift."""
+
+        assert self.channel.fixed_if is False
+        freq_shift = 100e6
+        context = WaveformContext(self.channel, 10)
+        pulse = Pulse(
+            self.channel,
+            width=80e-9,
+            shape=PulseShapeType.SQUARE,
+        )
+        context.process_pulse(pulse, 10, do_upconvert=True)
+        waveform = context.buffer
+
+        context = WaveformContext(self.channel, 10)
+        context.process_frequencyshift(freq_shift)
+        context.process_pulse(pulse, 10, do_upconvert=True)
+        waveform_2 = context.buffer
+        assert not np.allclose(waveform, waveform_2)
+
+        times = self.channel.sample_time * np.arange(10)
+        expected_phase = 2.0 * np.pi * freq_shift * times
+        print(expected_phase)
+        expected_waveform = np.exp(1.0j * expected_phase) * waveform
+        assert np.allclose(waveform_2, expected_waveform)

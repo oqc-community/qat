@@ -24,7 +24,6 @@ from qat.executables import AcquireData
 from qat.ir.instructions import Assign
 from qat.ir.lowered import PartitionedIR
 from qat.ir.measure import PostProcessing
-from qat.ir.waveforms import Pulse as PydPulse
 from qat.purr.backends.utilities import UPCONVERT_SIGN, evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
@@ -272,9 +271,8 @@ class WaveformContext:
 
     def process_pulse(
         self,
-        instruction: PydPulse,
+        instruction: Pulse,
         samples: int,
-        sample_time: float,
         do_upconvert: bool = True,
     ):
         """Converts a waveform instruction into a discrete number of samples, handling
@@ -283,6 +281,7 @@ class WaveformContext:
         # TODO: the evaluate shape is handled in the EvaluatePulses pass, so this needs
         # adjusting to only accept square waveforms and custom pulses. (COMPILER-413)
 
+        sample_time = self.pulse_channel.sample_time
         length = samples * sample_time
         centre = length / 2.0
         t = np.linspace(

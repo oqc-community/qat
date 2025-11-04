@@ -196,7 +196,7 @@ class SechFunction(ComplexFunction):
     zero at the edges.
     """
 
-    width: float
+    std_dev: float
 
     @_validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
@@ -204,7 +204,7 @@ class SechFunction(ComplexFunction):
         # Restricting the argument such that cosh is within the max float range
         # will overcome this, and has a neglibable effect (as sech(x) outside this
         # range is practically zero).
-        x = np.clip(x.real / self.width, -MAX_COSH_ARG, MAX_COSH_ARG)
+        x = np.clip(x.real / self.std_dev, -MAX_COSH_ARG, MAX_COSH_ARG)
         return 1 / np.cosh(x)
 
     def derivative(self, x: np.ndarray, _=None):

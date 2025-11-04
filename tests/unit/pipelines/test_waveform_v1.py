@@ -352,8 +352,7 @@ class MockEchoModelLoader(EchoModelLoader):
         return model
 
 
-# TODO: look into failing openpulse parity (COMPILER-789)
-parity_test_files = get_pipeline_tests(openpulse=False)
+parity_test_files = get_pipeline_tests(openpulse=True)
 
 
 @pytest.mark.parametrize(
