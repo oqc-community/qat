@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
-
-
-from qat.backend.passes.purr.analysis import TriagePass, TriageResult
+from qat.backend.passes.purr.analysis import (
+    TriagePass,
+    TriageResult,
+)
 from qat.backend.passes.purr.transform import DesugaringPass
 from qat.core.result_base import ResultManager
 from qat.model.loaders.purr import EchoModelLoader

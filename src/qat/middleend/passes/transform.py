@@ -6,7 +6,7 @@ from copy import deepcopy
 from functools import singledispatchmethod
 
 import numpy as np
-from compiler_config.config import MetricsType
+from compiler_config.config import CompilerConfig, MetricsType
 from more_itertools import partition
 from numpy.typing import NDArray
 
@@ -844,15 +844,23 @@ class ResetsToDelays(TransformPass):
         self.passive_reset_time = target_data.QUBIT_DATA.passive_reset_time
 
     def run(
-        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig = None,
+        **kwargs,
     ) -> InstructionBuilder:
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to store the analysis results.
+        :param compiler_config: The compiler configuration.
         """
         active_pulse_channels: ActivePulseChannelResults = res_mgr.lookup_by_type(
             ActivePulseChannelResults
         )
+
+        reset_time = self._get_reset_time(compiler_config)
 
         new_instructions = []
         for instr in ir:
@@ -862,7 +870,7 @@ class ResetsToDelays(TransformPass):
                     new_instructions.append(
                         Delay(
                             target=pulse_ch.uuid,
-                            duration=self.passive_reset_time,
+                            duration=reset_time,
                         )
                     )
 
@@ -871,6 +879,25 @@ class ResetsToDelays(TransformPass):
 
         ir.instructions = new_instructions
         return ir
+
+    def _get_reset_time(
+        self,
+        compiler_config: CompilerConfig,
+    ) -> float:
+        """Gets the reset time for a qubit from the compiler configuration, or falls back to
+        the passive reset time from the target data."""
+
+        if getattr(compiler_config, "passive_reset_time", None) is not None:
+            return compiler_config.passive_reset_time
+
+        if getattr(compiler_config, "repetition_period", None) is not None:
+            log.warning(
+                "The `repetition_period` in `CompilerConfig` is deprecated. "
+                "Please use `passive_reset_time` instead. "
+                f"Using the default `passive_reset_time` {self.passive_reset_time}."
+            )
+
+        return self.passive_reset_time
 
 
 class SquashDelaysOptimisation(TransformPass):

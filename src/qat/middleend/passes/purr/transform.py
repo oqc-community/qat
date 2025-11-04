@@ -7,7 +7,7 @@ from copy import copy, deepcopy
 from numbers import Number
 
 import numpy as np
-from compiler_config.config import MetricsType
+from compiler_config.config import CompilerConfig, MetricsType
 from more_itertools import partition
 
 from qat.core.metrics_base import MetricsManager
@@ -856,15 +856,23 @@ class ResetsToDelays(TransformPass):
         self.passive_reset_time = target_data.QUBIT_DATA.passive_reset_time
 
     def run(
-        self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig = None,
+        **kwargs,
     ) -> InstructionBuilder:
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to store the analysis results.
+        :param compiler_config: The compiler configuration.
         """
         active_pulse_channels: ActiveChannelResults = res_mgr.lookup_by_type(
             ActiveChannelResults
         )
+
+        reset_time = self._get_reset_time(compiler_config, ir)
 
         new_instructions = []
         for instr in ir.instructions:
@@ -878,7 +886,7 @@ class ResetsToDelays(TransformPass):
                     new_instructions.append(
                         Delay(
                             active_pulse_channels.from_qubit(qubit),
-                            time=self.passive_reset_time,
+                            time=reset_time,
                         )
                     )
 
@@ -887,6 +895,55 @@ class ResetsToDelays(TransformPass):
 
         ir.instructions = new_instructions
         return ir
+
+    def _get_reset_time(
+        self,
+        compiler_config: CompilerConfig,
+        ir: InstructionBuilder = None,
+    ) -> float:
+        """Gets the reset time for a qubit from the compiler configuration, or falls back to
+        the passive reset time from the target data."""
+
+        if getattr(compiler_config, "passive_reset_time", None) is not None:
+            return compiler_config.passive_reset_time
+
+        if getattr(compiler_config, "repetition_period", None) is not None:
+            log.warning(
+                "The `repetition_period` in `CompilerConfig` will soon be deprecated. "
+                "Please use `passive_reset_time` instead. "
+            )
+            return self._calculate_reset_time_for_repetition_period(compiler_config, ir)
+
+        return self.passive_reset_time
+
+    def _calculate_reset_time_for_repetition_period(
+        self,
+        compiler_config: CompilerConfig,
+        ir: InstructionBuilder,
+    ) -> float:
+        """Calculates the reset time for a qubit based on the repetition period in the
+        compiler configuration."""
+
+        total_duration = self._get_total_duration(ir)
+        reset_time = compiler_config.repetition_period - total_duration
+
+        if reset_time < 0:
+            log.warning(
+                "The specified `repetition_period` is shorter than the total instruction duration. "
+                "Setting the repetition period to equal the total instruction duration."
+            )
+            return 0.0
+        return reset_time
+
+    @staticmethod
+    def _get_total_duration(ir: InstructionBuilder) -> float:
+        durations: dict[str, float] = defaultdict(float)
+        for inst in ir.instructions:
+            if isinstance(inst, (Pulse, Acquire, Delay, CustomPulse)):
+                # only increment the durations for meaningful instructions
+                pulse_chan_id = inst.quantum_targets[0].partial_id()
+                durations[pulse_chan_id] += inst.duration
+        return max(durations.values())
 
 
 class EvaluatePulses(TransformPass):

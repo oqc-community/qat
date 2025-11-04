@@ -7,7 +7,7 @@ from copy import deepcopy
 
 import numpy as np
 import pytest
-from compiler_config.config import MetricsType
+from compiler_config.config import CompilerConfig, MetricsType
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
@@ -1330,12 +1330,12 @@ class TestPydBatchedShots:
         assert (num_batches - 1) * ir.compiled_shots < num_shots
 
 
-@pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
 class TestResetsToDelays:
     @pytest.fixture(scope="class")
     def model(self):
         return LucyModelLoader().load()
 
+    @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     @pytest.mark.parametrize("add_reset", [True, False])
     def test_qubit_reset(self, passive_reset_time: float, add_reset: bool, model):
         qubit_data = QubitDescription.random().model_copy(
@@ -1376,6 +1376,62 @@ class TestResetsToDelays:
             assert len(delays[0].targets) == 1
             assert delays[0].duration == passive_reset_time
 
+    @pytest.mark.parametrize(
+        "cc_repetition_period, cc_reset_time, td_reset_time, expected_delay",
+        [
+            (None, None, 5.0, 5.0),
+            (1e-3, None, 5.0, 5.0),
+            (None, 2.0, 5.0, 2.0),
+            (1e-3, 2.0, 5.0, 2.0),
+        ],
+    )
+    def test_qubit_reset_with_compiler_config_reset_times(
+        self, cc_repetition_period, cc_reset_time, td_reset_time, expected_delay, model
+    ):
+        qubit_data = QubitDescription.random().model_copy(
+            update={"passive_reset_time": td_reset_time}
+        )
+        target_data = TargetData(
+            max_shots=1000,
+            default_shots=100,
+            RESONATOR_DATA=ResonatorDescription.random(),
+            QUBIT_DATA=qubit_data,
+        )
+
+        compiler_config = CompilerConfig(
+            repetition_period=cc_repetition_period,
+            passive_reset_time=cc_reset_time,
+        )
+
+        qubit = model.qubit_with_index(0)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.had(qubit)
+        builder.reset(qubit)
+
+        res = ActivePulseChannelResults()
+        res.add_target(qubit.drive_pulse_channel, qubit)
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+
+        before = builder.number_of_instructions
+        builder = ResetsToDelays(model, target_data).run(
+            builder, res_mgr, compiler_config=compiler_config
+        )
+        assert before == builder.number_of_instructions
+
+        delays = []
+        for instr in builder:
+            assert not isinstance(instr, Reset)
+
+            if isinstance(instr, Delay):
+                delays.append(instr)
+
+        assert len(delays) == 1
+        assert len(delays[0].targets) == 1
+        assert delays[0].duration == expected_delay
+
+    @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     def test_pulse_channel_reset(self, passive_reset_time: float, model):
         qubit_data = QubitDescription.random().model_copy(
             update={"passive_reset_time": passive_reset_time}
@@ -1412,6 +1468,7 @@ class TestResetsToDelays:
         assert delays[0].target == qubit.drive_pulse_channel.uuid
         assert delays[0].duration == passive_reset_time
 
+    @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     @pytest.mark.parametrize("reset_chan", ["acquire", "measure"])
     def test_reset_with_no_drive_channel(self, passive_reset_time, reset_chan, model):
         qubit_data = QubitDescription.random().model_copy(
