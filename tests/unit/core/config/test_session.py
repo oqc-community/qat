@@ -8,14 +8,19 @@ import qat.pipelines
 from qat.core.config.descriptions import (
     EngineDescription,
     HardwareLoaderDescription,
+    InstrumentBuilderDescription,
     PipelineClassDescription,
     PipelineInstanceDescription,
     UpdateablePipelineDescription,
 )
 from qat.core.config.session import QatSessionConfig
 from qat.core.pipelines.configurable import ConfigurablePipeline
+from qat.engines.qblox.execution import QbloxEngine
+from qat.instrument.base import InstrumentConcept
+from qat.instrument.builder import InstrumentBuilder
 from qat.model.loaders.cache import CacheAccessLoader
-from qat.model.loaders.purr import EchoModelLoader
+from qat.model.loaders.purr import EchoModelLoader, QbloxDummyModelLoader
+from qat.pipelines.updateable import UpdateablePipeline
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
@@ -231,7 +236,7 @@ class TestQatSessionConfigForPipelines:
         assert engine == P.engine
         assert engine.model == P.model == model_cache["test"]
 
-    def test_yaml_factory_with_engine(self, qatconfig_testfiles):
+    def test_yaml_factory_with_echo_engine(self, qatconfig_testfiles):
         qatconfig = QatSessionConfig.from_yaml(
             qatconfig_testfiles / "pipelinefactorywithengine.yaml"
         )
@@ -259,6 +264,61 @@ class TestQatSessionConfigForPipelines:
 
         assert isinstance(P, MockPipeline)
         assert P.engine == engine
+
+    def test_yaml_factory_with_qblox_engine(self, qatconfig_testfiles):
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "qblox_engines.yaml")
+
+        assert not qatconfig.PIPELINES
+        assert len(qatconfig.HARDWARE) == 1
+        assert len(qatconfig.ENGINES) == 1
+
+        hardware_loader_desc = qatconfig.HARDWARE[0]
+        assert isinstance(hardware_loader_desc, HardwareLoaderDescription)
+        hardware_loader = hardware_loader_desc.construct()
+        assert isinstance(hardware_loader, QbloxDummyModelLoader)
+        model = hardware_loader.load()
+
+        engine_desc = qatconfig.ENGINES[0]
+        assert isinstance(engine_desc, EngineDescription)
+
+        instrument_builder_desc = engine_desc.instrument_builder
+        assert isinstance(instrument_builder_desc, InstrumentBuilderDescription)
+        assert len(instrument_builder_desc.configs) == 3
+        instrument_builder = instrument_builder_desc.construct()
+        assert isinstance(instrument_builder, InstrumentBuilder)
+        instrument = instrument_builder.build()
+        assert isinstance(instrument, InstrumentConcept)
+
+        engine = engine_desc.construct(model)
+        assert isinstance(engine, QbloxEngine)
+
+    def test_yaml_qblox_pipeline(self, qatconfig_testfiles):
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "qblox_pipelines.yaml")
+
+        assert len(qatconfig.PIPELINES) == 1
+        assert len(qatconfig.HARDWARE) == 1
+        assert len(qatconfig.ENGINES) == 1
+
+        hardware_loader_desc = qatconfig.HARDWARE[0]
+        assert isinstance(hardware_loader_desc, HardwareLoaderDescription)
+        hardware_loader = hardware_loader_desc.construct()
+        assert isinstance(hardware_loader, QbloxDummyModelLoader)
+        model = hardware_loader.load()
+
+        engine_desc = qatconfig.ENGINES[0]
+        assert isinstance(engine_desc, EngineDescription)
+        engine = engine_desc.construct(model)
+        assert isinstance(engine, QbloxEngine)
+        assert isinstance(engine.model, QuantumHardwareModel)
+
+        pipeline_desc = qatconfig.PIPELINES[0]
+        assert isinstance(pipeline_desc, UpdateablePipelineDescription)
+        pipeline = pipeline_desc.construct(loader=hardware_loader, engine=engine)
+        assert isinstance(pipeline, UpdateablePipeline)
+        assert isinstance(pipeline.model, QuantumHardwareModel)
+
+        # TODO: Pipelines using `QbloxEngine`: COMPILER-730
+        # assert pipeline.engine is engine
 
     def test_yaml_custom_result_pipeline(self, qatconfig_testfiles):
         qatconfig = QatSessionConfig.from_yaml(

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+
 from qat.model.loaders.purr.base import BaseLegacyModelLoader
 from qat.purr.backends.echo import Connectivity
 from qat.purr.backends.qblox.dummy import (
@@ -16,7 +17,7 @@ class QbloxDummyModelLoader(BaseLegacyModelLoader):
         connectivity: Connectivity | list[(int, int)] | None = None,
         add_direction_couplings=True,
     ):
-        self.name = name or f"DummyModel_{qubit_count}"
+        self.name = name
         self.dummy_cfg = dummy_cfg
         self.connectivity = connectivity
         self.qubit_count = qubit_count

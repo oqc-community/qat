@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from pathlib import Path
 
 import pytest
 from qblox_instruments import (
@@ -24,12 +23,6 @@ from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.engines.qblox.instrument import (
-    CompositeInstrument,
-    LeafInstrument,
-    load_instrument,
-)
-from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
 from qat.middleend.passes.purr.transform import (
     DeviceUpdateSanitisation,
     PhaseOptimisation,
@@ -71,39 +64,6 @@ class TestInstrument:
         met_mgr = MetricsManager()
         self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
         return backend.emit(builder, res_mgr, met_mgr)
-
-    @pytest.mark.parametrize(
-        "cinstr_type, linstr_type",
-        [
-            (None, None),
-            (CompositeInstrument, LeafInstrument),
-            (QbloxCompositeInstrument, QbloxLeafInstrument),
-        ],
-    )
-    def test_load_instrument(self, testpath, cinstr_type, linstr_type):
-        filepath = Path(
-            testpath,
-            "files",
-            "config",
-            "instrument_info.csv",
-        )
-
-        composite = load_instrument(filepath, cinstr_type, linstr_type)
-        if cinstr_type in [None, CompositeInstrument]:
-            assert isinstance(composite, CompositeInstrument)
-            assert all(
-                isinstance(comp, LeafInstrument) for comp in composite.components.values()
-            )
-        else:
-            assert isinstance(composite, QbloxCompositeInstrument)
-            assert all(
-                isinstance(comp, QbloxLeafInstrument)
-                for comp in composite.components.values()
-            )
-            assert all(
-                comp.ref_source == "internal" for comp in composite.components.values()
-            )
-        assert len(composite.components) == 8
 
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
     def test_instrument_lifecycle(self, qblox_instrument):

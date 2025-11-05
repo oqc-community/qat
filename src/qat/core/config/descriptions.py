@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Generic, TypeVar
 
 from pydantic import AfterValidator, ConfigDict, ImportString
 
+from qat.instrument.builder import InstrumentBuilder
 from qat.utils.pydantic import NoExtraFieldsModel
 
 if TYPE_CHECKING:
@@ -22,11 +23,12 @@ if TYPE_CHECKING:
     from qat.pipelines.updateable import UpdateablePipeline
     from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
-from .validators import (
+from qat.core.config.validators import (
     is_backend,
     is_engine,
     is_frontend,
     is_hardwareloader,
+    is_instrument_builder,
     is_middleend,
     is_passmanager_factory,
     is_pipeline_factory,
@@ -45,6 +47,7 @@ ImportFrontend = Annotated[ImportString, AfterValidator(is_frontend)]
 ImportMiddleend = Annotated[ImportString, AfterValidator(is_middleend)]
 ImportBackend = Annotated[ImportString, AfterValidator(is_backend)]
 ImportEngine = Annotated[ImportString, AfterValidator(is_engine)]
+ImportInstrumentBuilder = Annotated[ImportString, AfterValidator(is_instrument_builder)]
 ImportRuntime = Annotated[ImportString, AfterValidator(is_runtime)]
 ImportTargetData = Annotated[ImportString, AfterValidator(is_target_data)]
 
@@ -75,19 +78,39 @@ class HardwareLoaderDescription(NoExtraFieldsModel):
         return self.type(**self.config)
 
 
+class InstrumentBuilderDescription(NoExtraFieldsModel):
+    name: str
+    type: ImportInstrumentBuilder
+    configs: list[dict] = []
+
+    def construct(self) -> "InstrumentBuilder":
+        """Returns the described Instrument instance as an InstrumentBuilder."""
+        return self.type(self.configs)
+
+
 class EngineDescription(NoExtraFieldsModel):
     name: str
     hardware_loader: str | None = None
+    instrument_builder: InstrumentBuilderDescription | None = None
     config: dict = {}
     type: ImportEngine
 
     def construct(
-        self, model: "None | QuantumHardwareModel | PhysicalHardwareModel" = None
+        self,
+        model: "None | QuantumHardwareModel | PhysicalHardwareModel" = None,
     ) -> "NativeEngine":
         """Returns the described Engine instance, injecting the model if provided."""
-        if model is None:
-            return self.type(**self.config)
-        return self.type(model=model, **self.config)
+        kwargs = dict(self.config)
+        if model is not None:
+            kwargs["model"] = model
+
+        instrument_builder = (
+            self.instrument_builder.construct() if self.instrument_builder else None
+        )
+        instrument = instrument_builder.build() if instrument_builder else None
+        if instrument is not None:
+            kwargs["instrument"] = instrument
+        return self.type(**kwargs)
 
 
 T = TypeVar("T")

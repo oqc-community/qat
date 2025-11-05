@@ -1,0 +1,33 @@
+PIPELINES:
+- name: qblox_pipeline
+  pipeline: qat.pipelines.purr.qblox.full.QbloxPipeline
+  hardware_loader: qblox16loader
+  engine: qblox_engine
+
+# TODO: 32Q support: COMPILER-728
+HARDWARE:
+- name: qblox16loader
+  type: qat.model.loaders.purr.QbloxDummyModelLoader
+  config:
+    qubit_count: 16
+
+ENGINES:
+- name: qblox_engine
+  type: qat.engines.qblox.execution.QbloxEngine
+  hardware_loader: qblox16loader
+  instrument_builder:
+    name: config_builder
+    type: qat.instrument.builder.ConfigInstrumentBuilder
+    configs:
+      - name: "cluster0"
+        id: "0_0_0_0"
+        address: "0.0.0.0"
+        type: qat.engines.qblox.instrument.InstrumentModel
+      - name: "cluster1"
+        id: "0_0_0_1"
+        address: "0.0.0.1"
+        type: qat.engines.qblox.instrument.InstrumentModel
+      - name: "cluster2"
+        id: "0_0_0_2"
+        address: "0.0.0.2"
+        type: qat.engines.qblox.instrument.InstrumentModel

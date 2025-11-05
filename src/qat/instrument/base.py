@@ -1,12 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-import csv
-import os
-from pathlib import Path
-from typing import Dict, Generic, Type, TypeVar
+from typing import Dict, Generic, TypeVar
 
-from pydantic import BaseModel, Field, IPvAnyAddress
+from pydantic import BaseModel, ConfigDict, Field, IPvAnyAddress
 
 from qat.engines import ConnectionMixin
 from qat.purr.utils.logger import get_default_logger
@@ -18,6 +15,8 @@ class InstrumentModel(BaseModel):
     """
     Used to parse JSON/CSV entries. An instrument has an id, name, and IP address
     """
+
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str = Field(frozen=True, alias="ID")
     name: str = Field(frozen=True, alias="NAME")
@@ -130,39 +129,3 @@ class CompositeInstrument(Generic[LInstr], InstrumentConcept):
 
 
 CInstr = TypeVar("CInstr", bound=CompositeInstrument)
-
-
-def load_instrument(
-    instrument_info_csv: str | Path,
-    cinstr_type: Type[CInstr] = None,
-    linstr_type: Type[LInstr] = None,
-) -> CInstr:
-    """
-    A generic function that builds an InstrumentConcept object representing
-    an arbitrary fleet of leaf instruments defined as CSV.
-
-    :param instrument_info_csv: path to CSV containing instrument information
-    :param cinstr_type: type of Composite Instrument to build
-    :param linstr_type: type of Leaf Instrument to build
-    """
-
-    cinstr_type = cinstr_type or CompositeInstrument
-    linstr_type = linstr_type or LeafInstrument
-
-    if not os.path.exists(instrument_info_csv):
-        raise ValueError(f"File '{instrument_info_csv}' not found!")
-
-    composite = cinstr_type()
-    with open(instrument_info_csv) as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            instr_model = InstrumentModel.model_validate(row)
-            composite.add(
-                linstr_type(
-                    id=instr_model.id,
-                    name=instr_model.name,
-                    address=str(instr_model.address),
-                )
-            )
-
-    return composite

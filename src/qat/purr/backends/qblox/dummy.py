@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+
+import uuid
+
 import numpy as np
 import regex
 from qblox_instruments import (
@@ -234,7 +237,7 @@ def get_default_dummy_hardware(
     name: str | None = None,
     dummy_cfg: dict | None = None,
 ):
-    name = name or f"dummy_model_{qubit_count}"
+    name = name or f"dummy_model_{qubit_count}_{uuid.uuid4()}".replace("-", "_")
     instrument = DummyQbloxControlHardware(
         dev_id=name, name=name, dummy_cfg=dummy_cfg or _DUMMY_CONFIG
     )

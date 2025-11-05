@@ -17,7 +17,7 @@ from qat.backend.qblox.acquisition import Acquisition
 from qat.backend.qblox.execution import QbloxExecutable
 from qat.backend.qblox.visualisation import plot_executable, plot_playback
 from qat.engines import NativeEngine
-from qat.engines.qblox.instrument import InstrumentConcept
+from qat.instrument.base import InstrumentConcept
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.backends.utilities import (
     software_post_process_linear_map_complex_to_real,

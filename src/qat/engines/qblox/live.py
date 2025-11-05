@@ -19,7 +19,7 @@ from qat.backend.qblox.config.helpers import (
     QrmRfConfigHelper,
 )
 from qat.backend.qblox.execution import QbloxExecutable
-from qat.engines.qblox.instrument import (
+from qat.instrument.base import (
     CompositeInstrument,
     LeafInstrument,
 )

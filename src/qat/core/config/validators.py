@@ -3,6 +3,8 @@
 
 import inspect
 
+from qat.instrument.builder import InstrumentBuilder
+
 
 def is_pipeline_instance(value: type):
     """A validator which raises when the input not a BasePipeline instance."""
@@ -48,6 +50,16 @@ def is_runtime(value: type):
 
     if not (inspect.isclass(value) and issubclass(value, BaseRuntime)):
         raise ValueError(f"{value} is not a valid Runtime")
+    return value
+
+
+def is_instrument_builder(value: type):
+    """
+    A validator which raises when the input not an Instrument builder.
+    """
+
+    if not (inspect.isclass(value) and issubclass(value, InstrumentBuilder)):
+        raise ValueError(f"{value} is not a valid Instrument builder")
     return value
 
 
