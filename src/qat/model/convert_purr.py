@@ -6,7 +6,7 @@ from copy import deepcopy
 
 import numpy as np
 
-from qat.ir.waveforms import SquareWaveform
+from qat.ir.waveforms import SofterSquareWaveform, SoftSquareWaveform, SquareWaveform
 from qat.model.device import (
     AcquirePulseChannel,
     CalibratableAcquire,
@@ -31,7 +31,7 @@ from qat.model.error_mitigation import (
     ReadoutMitigation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
-from qat.purr.compiler.devices import ChannelType, PulseChannelView
+from qat.purr.compiler.devices import ChannelType, PulseChannelView, PulseShapeType
 from qat.purr.compiler.instructions import CustomPulse
 from qat.utils.pydantic import FrozenDict
 
@@ -176,13 +176,25 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 aux_qubit = pulse_channel.auxiliary_devices[0].index
 
                 if pulse_channel.channel_type == ChannelType.cross_resonance:
+                    zx_pi_4 = deepcopy(qubit.pulse_hw_zx_pi_4.get(f"Q{aux_qubit}", None))
+
+                    waveform_type = (
+                        SofterSquareWaveform
+                        if zx_pi_4["shape"] == PulseShapeType.SOFTER_SQUARE
+                        else SoftSquareWaveform
+                    )
+                    zx_pi_4.pop("shape")
+
                     new_cr_pulse_channel = CrossResonancePulseChannel(
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
-                        scale=_process_real_or_complex(pulse_channel.scale),
+                        scale=pulse_channel.scale,
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
+                        zx_pi_4_pulse=CalibratablePulse(
+                            waveform_type=waveform_type, **zx_pi_4
+                        ),
                     )
                     new_cross_resonance_pulse_channels[aux_qubit] = new_cr_pulse_channel
 
@@ -191,7 +203,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
-                        scale=_process_real_or_complex(pulse_channel.scale),
+                        scale=pulse_channel.scale,
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                     )
@@ -217,6 +229,8 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             physical_channel=new_phys_ch_q,
             pulse_channels=new_qubit_pulse_channels,
             resonator=resonator,
+            mean_z_map_args=qubit.mean_z_map_args,
+            discriminator=qubit.discriminator[0],
         )
         new_qubits[qubit.index] = new_qubit
 

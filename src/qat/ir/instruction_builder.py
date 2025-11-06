@@ -545,6 +545,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
         else:
             filter = None
 
+        A, B = target.mean_z_map_args[0], target.mean_z_map_args[1]
+        mean_g = (1 - B) / A
+        mean_e = (-1 - B) / A
+        rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
+        threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+
         acquire_instruction = Acquire(
             targets=acquire_channel.uuid,
             duration=acquire_duration,
@@ -552,6 +558,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
             delay=acquire_channel.acquire.delay,
             filter=filter,
             output_variable=output_variable,
+            rotation=rotation,
+            threshold=threshold,
         )
 
         return [

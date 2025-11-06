@@ -7,6 +7,7 @@ from collections import defaultdict
 from pathlib import Path
 
 import networkx as nx
+import numpy as np
 
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
@@ -14,6 +15,7 @@ from qat.purr.compiler.devices import (
     ChannelType,
     PhysicalBaseband,
     PhysicalChannel,
+    PulseShapeType,
     Qubit,
     QubitCoupling,
     Resonator,
@@ -209,6 +211,14 @@ def apply_setup_to_echo_hardware(
 
         qubit = Qubit(primary_index, resonator, ch1)
         qubit.create_pulse_channel(ChannelType.drive, frequency=5.5e9)
+        qubit.pulse_hw_x_pi_2 = {
+            "shape": PulseShapeType.GAUSSIAN,
+            "width": random.Random().uniform(50e-9, 1000e-9),
+            "rise": random.Random().uniform(1 / 6, 1 / 2),
+            "amp": random.Random().uniform(1e6, 5e6),
+            "drag": random.Random().uniform(0, 0.5),
+            "phase": random.Random().uniform(0, 1),
+        }
 
         qubit_devices.append(qubit)
         resonator_devices.append(resonator)
@@ -229,15 +239,25 @@ def apply_setup_to_echo_hardware(
             auxiliary_devices=[qubit_right],
             channel_type=ChannelType.cross_resonance,
             frequency=5.5e9,
-            scale=50,
+            scale=np.complex128(50 + 50j),
         )
         qubit_left.create_pulse_channel(
             auxiliary_devices=[qubit_right],
             channel_type=ChannelType.cross_resonance_cancellation,
             frequency=5.5e9,
-            scale=0.0,
+            scale=np.complex128(5 + 5j),
         )
         qubit_left.add_coupled_qubit(qubit_right)
+        qubit_left.pulse_hw_zx_pi_4[qubit_right.full_id()] = {
+            "shape": random.choice(
+                [PulseShapeType.SOFT_SQUARE, PulseShapeType.SOFTER_SQUARE]
+            ),
+            "width": random.Random().uniform(100e-9, 250e-9),
+            "rise": random.Random().uniform(1e-9, 100e-9),
+            "amp": random.Random().uniform(1e6, 5e6),
+            "drag": random.Random().uniform(0, 0.5),
+            "phase": random.Random().uniform(0, 1),
+        }
         hw.qubit_direction_couplings.append(
             QubitCoupling(
                 direction=connection, quality=quality or random.Random().uniform(1, 100)

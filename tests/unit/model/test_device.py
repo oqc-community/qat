@@ -106,6 +106,19 @@ class TestDevicesValidation:
         with pytest.raises(ValidationError):
             pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
+    @pytest.mark.parametrize(
+        "input_val, output_type",
+        [
+            (0.5, float),
+            (0.5 + 0.5j, complex),
+            (np.complex128(0.5 + 0.5j), complex),
+            (np.float64(0.5), float),
+        ],
+    )
+    def test_pulse_channel_scale_types(self, input_val, output_type, seed):
+        pulse_channel = PulseChannel(scale=input_val)
+        assert isinstance(pulse_channel.scale, output_type)
+
     def test_custom_pulse_channel(self, seed):
         class CustomPulseChannel(PulseChannel): ...
 

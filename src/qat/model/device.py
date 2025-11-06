@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 from pydantic import Field, field_validator, model_validator
@@ -156,8 +156,12 @@ class PulseChannel(Component):
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
     imbalance: float = 1.0
     phase_iq_offset: float = 0.0
-    scale: float | complex = 1.0 + 0.0j
+    scale: complex | float = 1.0 + 0.0j
     fixed_if: bool = False
+
+    def model_post_init(self, context: Any, /) -> None:
+        if isinstance(self.scale, np.complexfloating):
+            self.scale = complex(self.scale)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
@@ -416,8 +420,16 @@ class Qubit(Component):
     pulse_channels: QubitPulseChannels = Field(frozen=True, default=QubitPulseChannels())
     resonator: Resonator
 
-    mean_z_map_args: list[float] = Field(max_length=2, default=[1.0, 0.0])
-    discriminator: float = 0.0
+    mean_z_map_args: list[complex | float] = Field(max_length=2, default=[1.0, 0.0])
+    discriminator: complex | float = 0.0
+
+    def model_post_init(self, context: Any, /) -> None:
+        if isinstance(self.discriminator, np.complexfloating):
+            self.discriminator = complex(self.discriminator)
+
+        for i in range(len(self.mean_z_map_args)):
+            if isinstance(self.mean_z_map_args[i], np.complexfloating):
+                self.mean_z_map_args[i] = complex(self.mean_z_map_args[i])
 
     @property
     def all_pulse_channels(self):

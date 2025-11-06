@@ -1365,7 +1365,7 @@ class EvaluateWaveforms(TransformPass):
         waveform_lookup: dict[str, dict[str, NDArray]],
         target: str,
         physical_channel: str,
-        scale: float = 1.0,
+        scale: complex | float = 1.0 + 0.0j,
     ) -> Waveform | SampledWaveform:
         """Implements the waveform evaluation for :class:`Waveform`s."""
 
@@ -1398,7 +1398,9 @@ class EvaluateWaveforms(TransformPass):
         return new_waveform
 
     @evaluate_waveform.register(SampledWaveform)
-    def _(self, waveform: SampledWaveform, scale: float = 1.0, **kwargs) -> SampledWaveform:
+    def _(
+        self, waveform: SampledWaveform, scale: complex | float = 1.0 + 0.0j, **kwargs
+    ) -> SampledWaveform:
         """Multiplies the waveform by a scale factor if required."""
 
         if not np.isclose(scale, 1.0):

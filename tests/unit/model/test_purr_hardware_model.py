@@ -3,8 +3,14 @@
 import numpy as np
 import pytest
 
+from qat.ir.waveforms import (
+    GaussianWaveform,
+    SofterSquareWaveform,
+    SoftSquareWaveform,
+    SquareWaveform,
+)
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
-from qat.purr.compiler.devices import ChannelType
+from qat.purr.compiler.devices import ChannelType, PulseShapeType
 from qat.utils.hardware_model import (
     apply_setup_to_echo_hardware,
     random_connectivity,
@@ -45,6 +51,21 @@ def validate_pulse_channel(pyd_pulse_channel, legacy_pulse_channel):
     )
     assert pyd_pulse_channel.scale == legacy_pulse_channel.scale
     assert pyd_pulse_channel.fixed_if == legacy_pulse_channel.fixed_if
+
+
+def validate_pulse_shapes(pyd_pulse, legacy_pulse):
+    waveform_lookup = {
+        PulseShapeType.GAUSSIAN: GaussianWaveform,
+        PulseShapeType.SQUARE: SquareWaveform,
+        PulseShapeType.SOFT_SQUARE: SoftSquareWaveform,
+        PulseShapeType.SOFTER_SQUARE: SofterSquareWaveform,
+    }
+    assert pyd_pulse.waveform_type == waveform_lookup[legacy_pulse["shape"]]
+    assert pyd_pulse.width == legacy_pulse["width"]
+    assert pyd_pulse.amp == legacy_pulse["amp"]
+    assert pyd_pulse.drag == legacy_pulse["drag"]
+    assert pyd_pulse.rise == legacy_pulse["rise"]
+    assert pyd_pulse.phase == legacy_pulse["phase"]
 
 
 @pytest.mark.parametrize("n_qubits", [0, 1, 2, 4, 32, 64])
@@ -111,6 +132,13 @@ class TestEchoHardwareModelConversion:
                 except KeyError:
                     assert np.isnan(pyd_pulse_ch.frequency)
 
+    def test_1q_pulse_shapes(self, n_qubits, seed):
+        pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
+        for qubit_index, qubit in pyd_hw.qubits.items():
+            pyd_pulse = qubit.pulse_channels.drive.pulse
+            legacy_pulse = leg_hw.get_qubit(qubit_index).pulse_hw_x_pi_2
+            validate_pulse_shapes(pyd_pulse, legacy_pulse)
+
     def test_2q_pulse_channels(self, n_qubits, seed):
         pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
 
@@ -133,6 +161,17 @@ class TestEchoHardwareModelConversion:
                     validate_pulse_channel(
                         resonance_pulse_channel, legacy_resonance_pulse_channel
                     )
+
+    def test_2q_pulse_shapes(self, n_qubits, seed):
+        pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
+        for qubit_index, qubit in pyd_hw.qubits.items():
+            pyd_pulse_channel = getattr(qubit.pulse_channels, "cross_resonance_channels")
+            for resonance_pulse_channel in pyd_pulse_channel.values():
+                legacy_pulse = leg_hw.get_qubit(qubit_index).pulse_hw_zx_pi_4[
+                    f"Q{resonance_pulse_channel.auxiliary_qubit}"
+                ]
+
+                validate_pulse_shapes(resonance_pulse_channel.zx_pi_4_pulse, legacy_pulse)
 
     def test_resonator_pulse_channels(self, n_qubits, seed):
         pyd_hw, leg_hw = get_echo_hw_pair(n_qubits, seed=seed)
