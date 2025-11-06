@@ -7,7 +7,6 @@ from collections import defaultdict
 from pathlib import Path
 
 import networkx as nx
-import numpy as np
 
 from qat.model.builder import PhysicalHardwareModelBuilder
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
@@ -24,6 +23,7 @@ from qat.purr.compiler.hardware_models import (
     QuantumHardwareModel,
     ReadoutMitigation,
 )
+from qat.utils.pydantic import CalibratableUnitInterval2x2Array
 
 
 def random_connectivity(n, max_degree=3, seed=42):
@@ -254,7 +254,9 @@ def generate_random_linear(qubit_indices):
     for index in qubit_indices:
         random_0 = random.random()
         random_1 = random.random()
-        output[index] = np.array([[random_0, 1 - random_1], [1 - random_0, random_1]])
+        output[index] = CalibratableUnitInterval2x2Array(
+            [[random_0, 1 - random_1], [1 - random_0, random_1]]
+        )
     return output
 
 

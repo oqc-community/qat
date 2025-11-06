@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import random
+
 import numpy as np
 import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
@@ -335,20 +337,25 @@ class TestExperimentalEchoPipelineWithCircuits:
 class MockEchoModelLoader(EchoModelLoader):
     """A model loader with a fixed calibration ID and sample times for testing purposes."""
 
-    def __init__(self, qubit_count, target_data):
+    def __init__(self, qubit_count, target_data, random_seed=None):
         super().__init__(qubit_count=qubit_count)
         self.target_data = target_data
+        self._random_seed = random_seed
 
     def load(self):
-        model = super().load()
-        model.calibration_id = "default_id"
-        sample_time_qubit = self.target_data.QUBIT_DATA.sample_time
-        sample_time_resonator = self.target_data.RESONATOR_DATA.sample_time
-        for qubit in model.qubits:
-            qubit.measure_acquire["delay"] = 0.0
-            qubit.physical_channel.sample_time = sample_time_qubit
-        for resonator in model.resonators:
-            resonator.physical_channel.sample_time = sample_time_resonator
+        try:
+            random.seed(self._random_seed)
+            model = super().load()
+            model.calibration_id = "default_id"
+            sample_time_qubit = self.target_data.QUBIT_DATA.sample_time
+            sample_time_resonator = self.target_data.RESONATOR_DATA.sample_time
+            for qubit in model.qubits:
+                qubit.measure_acquire["delay"] = 0.0
+                qubit.physical_channel.sample_time = sample_time_qubit
+            for resonator in model.resonators:
+                resonator.physical_channel.sample_time = sample_time_resonator
+        finally:
+            random.seed()
         return model
 
 
@@ -374,7 +381,9 @@ class TestExperimentalEchoPipelineParity:
     """
 
     target_data = TargetData.default()
-    model = MockEchoModelLoader(qubit_count=32, target_data=target_data).load()
+    model = MockEchoModelLoader(
+        qubit_count=32, target_data=target_data, random_seed=42
+    ).load()
     pydantic_model = convert_purr_echo_hw_to_pydantic(model)
     stable_pipeline = EchoPipeline(
         config=PipelineConfig(name="stable"), model=model, target_data=target_data

@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.converted import JaggedEchoModelLoader
+from qat.utils.hardware_model import random_error_mitigation
 
 
 class TestJaggedEchoModelLoader:
@@ -38,3 +40,16 @@ class TestJaggedEchoModelLoader:
             model1.physical_connectivity != model2.physical_connectivity
             or model1.logical_connectivity != model2.logical_connectivity
         )
+
+    def test_serialisation_with_mitigation(self):
+        jagged_indices = {2, 3, 6, 8, 9, 10, 11, 12}
+        error_mit = random_error_mitigation(jagged_indices, seed=42)
+        hw = JaggedEchoModelLoader(
+            qubit_count=8,
+            random_seed=42,
+            qubit_indices=jagged_indices,
+            error_mitigation=error_mit,
+        ).load()
+        assert hw.error_mitigation is not None
+        hw2 = PhysicalHardwareModel.model_validate_json(hw.model_dump_json())
+        assert hw2.error_mitigation == hw.error_mitigation

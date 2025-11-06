@@ -156,11 +156,6 @@ def validate_calibratable_unit_interval_array(array: CalibratableUnitInterval2x2
     return array
 
 
-CalibratableUnitInterval2x2Array = Annotated[
-    NDArray[Shape["2, 2"], float], AfterValidator(validate_calibratable_unit_interval_array)
-]
-
-
 def validate_qubit_coupling(value: QubitCoupling):
     if isinstance(value, str):
         return tuple(map(int, re.findall(r"\d+", value)))
@@ -792,3 +787,9 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
 IntNDArray = annotate_pyd_array(int)
 FloatNDArray = annotate_pyd_array(float)
 ComplexNDArray = annotate_pyd_array(complex)
+
+CalibratableUnitInterval2x2Array = Annotated[
+    PydArray,
+    AfterValidator(validate_calibratable_unit_interval_array),
+    PlainSerializer(lambda x: _serializer(x, float)),
+]

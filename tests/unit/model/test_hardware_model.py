@@ -49,8 +49,15 @@ class TestPhysicalHardwareModel:
 @pytest.mark.parametrize("n_qubits", [2, 3, 4, 10, 32])
 @pytest.mark.parametrize("n_logical_qubits", [0, 2, 4])
 @pytest.mark.parametrize("seed", [1, 2, 3])
+@pytest.mark.parametrize("as_json", [False, True])
 class Test_HW_Serialisation:
-    def test_built_model_serialises(self, n_qubits, n_logical_qubits, seed):
+    @staticmethod
+    def reload_hw(hw, as_json):
+        if as_json:
+            return PhysicalHardwareModel.model_validate_json(hw.model_dump_json())
+        return PhysicalHardwareModel(**hw.model_dump())
+
+    def test_built_model_serialises(self, n_qubits, n_logical_qubits, seed, as_json):
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
@@ -64,11 +71,11 @@ class Test_HW_Serialisation:
         )
 
         hw1 = builder.model
-        hw2 = PhysicalHardwareModel(**hw1.model_dump())
+        hw2 = self.reload_hw(hw1, as_json)
         assert hw1 == hw2
 
     def test_built_model_with_default_error_mit_serialises(
-        self, n_qubits, n_logical_qubits, seed
+        self, n_qubits, n_logical_qubits, seed, as_json
     ):
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
@@ -86,13 +93,12 @@ class Test_HW_Serialisation:
         hw1.error_mitigation = ErrorMitigation()
         assert not hw1.error_mitigation.is_enabled
 
-        blob = hw1.model_dump()
-        hw2 = PhysicalHardwareModel(**blob)
+        hw2 = self.reload_hw(hw1, as_json)
         assert hw1 == hw2
 
     @pytest.mark.parametrize("m3_available", [True, False])
     def test_built_model_with_error_mit_serialises(
-        self, n_qubits, n_logical_qubits, m3_available, seed
+        self, n_qubits, n_logical_qubits, m3_available, seed, as_json
     ):
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
@@ -116,11 +122,12 @@ class Test_HW_Serialisation:
         assert hw1.error_mitigation.is_enabled
         assert hw1.error_mitigation.readout_mitigation == readout_mit
 
-        blob = hw1.model_dump()
-        hw2 = PhysicalHardwareModel(**blob)
+        hw2 = self.reload_hw(hw1, as_json)
         assert hw1 == hw2
 
-    def test_built_logical_model_serialises(self, n_qubits, n_logical_qubits, seed):
+    def test_built_logical_model_serialises(
+        self, n_qubits, n_logical_qubits, seed, as_json
+    ):
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
@@ -134,10 +141,10 @@ class Test_HW_Serialisation:
         )
 
         hw1 = builder.model
-        hw2 = PhysicalHardwareModel(**hw1.model_dump())
+        hw2 = self.reload_hw(hw1, as_json)
         assert hw1 == hw2
 
-    def test_dump_load_eq(self, n_qubits, n_logical_qubits, seed):
+    def test_dump_load_eq(self, n_qubits, n_logical_qubits, seed, as_json):
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
@@ -149,9 +156,8 @@ class Test_HW_Serialisation:
             logical_connectivity=logical_connectivity,
             logical_connectivity_quality=logical_connectivity_quality,
         ).model
-        blob = hw1.model_dump()
 
-        hw2 = PhysicalHardwareModel(**blob)
+        hw2 = self.reload_hw(hw1, as_json)
         assert hw1 == hw2
 
         hw3 = PhysicalHardwareModelBuilder(
@@ -159,7 +165,9 @@ class Test_HW_Serialisation:
         ).model
         assert hw1 != hw3
 
-    def test_dump_eq(self, n_qubits, n_logical_qubits, seed):
+    def test_dump_eq(self, n_qubits, n_logical_qubits, seed, as_json):
+        if as_json:
+            pytest.skip("List ordering in dicts is not guaranteed in JSON.")
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
@@ -173,7 +181,7 @@ class Test_HW_Serialisation:
         ).model
         blob1 = hw1.model_dump()
 
-        hw2 = PhysicalHardwareModel(**blob1)
+        hw2 = self.reload_hw(hw1, as_json)
         blob2 = hw2.model_dump()
         assert blob1 == blob2
 
@@ -183,7 +191,9 @@ class Test_HW_Serialisation:
         blob3 = hw3.model_dump()
         assert blob1 != blob3
 
-    def test_deep_equals(self, n_qubits, n_logical_qubits, seed):
+    def test_deep_equals(self, n_qubits, n_logical_qubits, seed, as_json):
+        if as_json:
+            pytest.skip("Deepcopy does not serialise to json.")
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
@@ -205,7 +215,7 @@ class Test_HW_Serialisation:
         ).uniform(1e08, 1e10)
         assert hw1 != hw2
 
-    def test_deserialise_version(self, n_qubits, n_logical_qubits, seed):
+    def test_deserialise_version(self, n_qubits, n_logical_qubits, seed, as_json):
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(
                 n_qubits, min(n_logical_qubits, n_qubits // 2), seed=seed
@@ -219,7 +229,7 @@ class Test_HW_Serialisation:
         ).model
         assert hw1.version == VERSION
 
-        hw2 = PhysicalHardwareModel(**hw1.model_dump())
+        hw2 = self.reload_hw(hw1, as_json)
         assert hw2.version == VERSION
 
 
