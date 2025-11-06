@@ -3,12 +3,10 @@
 
 from .compile import CompileSweepPipeline
 from .execute import ExecuteSweepPipeline
-from .full import FullSweepPipeline
 from .passes import FrequencyAssignSanitisation
 
 __all__ = [
     "CompileSweepPipeline",
     "ExecuteSweepPipeline",
     "FrequencyAssignSanitisation",
-    "FullSweepPipeline",
 ]

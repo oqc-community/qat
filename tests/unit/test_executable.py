@@ -1,149 +1,111 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import pytest
+from pydantic import ValidationError
 
-from qat.executables import (
-    BaseExecutable,
-    BatchedExecutable,
-    ChannelExecutable,
-    Executable,
-    ParameterizedExecutable,
-)
+from qat.executables import AcquireData, Executable
+from qat.ir.measure import AcquireMode
+
+from tests.unit.utils.executables import MockProgram, MockProgram2
 
 
-class MockExecutableA(Executable):
-    super_cool_instruction: int
-
-    @property
-    def acquires(self) -> list:
-        return []
-
-
-class MockExecutableB(ChannelExecutable):
-    super_cool_instruction: int
-
-    @property
-    def acquires(self) -> list:
-        return []
-
-
-class MockExecutableC(BaseExecutable):
-    super_cool_instruction: int = 5
-
-
-class TestExecutableSerialization:
-    @pytest.mark.parametrize(
-        "executable, deserialize_cls",
-        [
-            (MockExecutableA(super_cool_instruction=42), Executable),
-            (MockExecutableA(super_cool_instruction=42), BaseExecutable),
-            (
-                MockExecutableB(super_cool_instruction=42, channel_data={"ch1": {}}),
-                ChannelExecutable,
+class TestExecutable:
+    @pytest.mark.parametrize("program", [MockProgram, MockProgram2])
+    def test_serialize_deserialize_roundtrip_returns_correct_type(self, program):
+        dummy_program = program(shapes={"a": (10,), "b": (5, 20)})
+        acquire_data = {
+            "a": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(10,), physical_channel="ch1"
             ),
-            (
-                MockExecutableB(super_cool_instruction=42, channel_data={"ch1": {}}),
-                BaseExecutable,
-            ),
-            (
-                MockExecutableB(super_cool_instruction=42, channel_data={"ch1": {}}),
-                Executable,
-            ),
-            (MockExecutableC(super_cool_instruction=42), BaseExecutable),
-        ],
-    )
-    def test_serialize_deserialize_roundtrip_works(self, executable, deserialize_cls):
-        serialized = executable.serialize()
-        deserialized = deserialize_cls.deserialize(serialized)
-        assert deserialized == executable
-        assert isinstance(deserialized, type(executable))
-
-    @pytest.mark.parametrize(
-        "executable, deserialize_cls",
-        [
-            (MockExecutableA(super_cool_instruction=42), ChannelExecutable),
-            (MockExecutableC(super_cool_instruction=42), Executable),
-        ],
-    )
-    def test_serialize_deserialize_raises_value_error(self, executable, deserialize_cls):
-        serialized = executable.serialize()
-        with pytest.raises(TypeError):
-            deserialize_cls.deserialize(serialized)
-
-
-class TestBatchedExecutable:
-    @pytest.mark.parametrize(
-        "executable, deserialize_cls",
-        [
-            (MockExecutableA(super_cool_instruction=42), BatchedExecutable),
-            (MockExecutableA(super_cool_instruction=42), BaseExecutable),
-            (
-                MockExecutableB(super_cool_instruction=42, channel_data={"ch1": {}}),
-                BatchedExecutable,
-            ),
-            (
-                MockExecutableB(super_cool_instruction=42, channel_data={"ch1": {}}),
-                BaseExecutable,
-            ),
-            (MockExecutableC(super_cool_instruction=42), BatchedExecutable),
-            (MockExecutableC(super_cool_instruction=42), BaseExecutable),
-        ],
-    )
-    def test_batched_executable_serialization_roundtrip_works(
-        self, executable, deserialize_cls
-    ):
-        batched = BatchedExecutable(
-            executables=[
-                ParameterizedExecutable(executable=executable, parameters={"param1": 1}),
-                ParameterizedExecutable(executable=executable, parameters={"param2": 2}),
-            ]
-        )
-        serialized = batched.serialize()
-        deserialized = deserialize_cls.deserialize(serialized)
-        assert deserialized == batched
-        assert isinstance(deserialized, BatchedExecutable)
-        for i in range(2):
-            assert isinstance(deserialized.executables[i].executable, type(executable))
-            assert deserialized.executables[i].parameters == {f"param{i + 1}": i + 1}
-            assert deserialized.executables[i].executable.super_cool_instruction == 42
-
-    def test_batched_executable_raises_value_error_on_mixed_types(self):
-        with pytest.raises(
-            ValueError,
-            match="All executables in a BatchedExecutable must be of the same type.",
-        ):
-            BatchedExecutable(
-                executables=[
-                    ParameterizedExecutable(
-                        executable=MockExecutableA(super_cool_instruction=42),
-                        parameters={"param1": 1},
-                    ),
-                    ParameterizedExecutable(
-                        executable=MockExecutableC(super_cool_instruction=42),
-                        parameters={"param2": 2},
-                    ),
-                ]
-            )
-
-    def test_serialization_of_parameters(self):
-        parameters = {
-            "param1": [1.0, 2.0, 3.0],
-            "param2": [1 + 1j, 2 + 2j, 3 + 3j],
+            "b": AcquireData(mode=AcquireMode.RAW, shape=(5, 20), physical_channel="ch2"),
         }
+        returns = {"a", "b"}
+        calibration_id = "id_254"
+        executable = Executable(
+            programs=[dummy_program],
+            acquires=acquire_data,
+            assigns=[],
+            returns=returns,
+            calibration_id=calibration_id,
+        )
 
-        executables = [
-            ParameterizedExecutable(
-                executable=MockExecutableA(super_cool_instruction=42),
-                parameters={"param1": val1, "param2": val2},
-            )
-            for val1 in parameters["param1"]
-            for val2 in parameters["param2"]
+        serialized = executable.serialize()
+        deserialized = Executable.deserialize(serialized)
+
+        assert isinstance(deserialized, Executable)
+        assert len(deserialized.programs) == 1
+        assert isinstance(deserialized.programs[0], program)
+        assert deserialized.programs == [dummy_program]
+        assert deserialized.acquires == acquire_data
+        assert deserialized.assigns == []
+        assert deserialized.returns == returns
+        assert deserialized.calibration_id == calibration_id
+
+    def test_serialize_deserialize_roundtrip_with_multiple_programs(self):
+        dummy_programs = [
+            MockProgram(shapes={"a": (10,)}),
+            MockProgram(shapes={"b": (5, 20)}),
+            MockProgram(shapes={"c": (2, 3, 4)}),
+        ]
+        acquire_data = {
+            "a": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(10,), physical_channel="ch1"
+            ),
+            "b": AcquireData(mode=AcquireMode.RAW, shape=(5, 20), physical_channel="ch2"),
+            "c": AcquireData(
+                mode=AcquireMode.SCOPE, shape=(2, 3, 4), physical_channel="ch3"
+            ),
+        }
+        returns = {"a", "b", "c"}
+        calibration_id = "id_254"
+        executable = Executable(
+            programs=dummy_programs,
+            acquires=acquire_data,
+            assigns=[],
+            returns=returns,
+            calibration_id=calibration_id,
+        )
+
+        serialized = executable.serialize()
+        deserialized = Executable.deserialize(serialized)
+
+        assert isinstance(deserialized, Executable)
+        assert isinstance(deserialized.programs, list)
+        assert len(deserialized.programs) == 3
+        assert isinstance(deserialized.programs[0], MockProgram)
+        assert isinstance(deserialized.programs[1], MockProgram)
+        assert deserialized.programs == dummy_programs
+        assert deserialized.acquires == acquire_data
+        assert deserialized.assigns == []
+        assert deserialized.returns == returns
+        assert deserialized.calibration_id == calibration_id
+
+    def test_different_program_types_raises_error(self):
+        dummy_programs = [
+            MockProgram(shapes={"a": (10,)}),
+            MockProgram2(shapes={"b": (5, 20)}),
         ]
 
-        batched = BatchedExecutable(shape=(3, 3), executables=executables)
-        serialized = batched.serialize()
-        deserialized = BatchedExecutable.deserialize(serialized)
-        assert isinstance(deserialized, BatchedExecutable)
-        assert deserialized.shape == (3, 3)
-        for i, exe in enumerate(deserialized.executables):
-            assert executables[i] == exe
+        with pytest.raises(
+            ValidationError, match="All programs in the executable must be of the same type"
+        ):
+            Executable(
+                programs=dummy_programs,
+                acquires={},
+                assigns=[],
+                returns=set(),
+                calibration_id="",
+            )
+
+    def test_single_program_is_saved_as_list(self):
+        dummy_program = MockProgram(shapes={"a": (10,)})
+
+        executable = Executable(
+            programs=dummy_program,
+            acquires={},
+            assigns=[],
+            returns=set(),
+            calibration_id="",
+        )
+
+        assert executable.programs == [dummy_program]

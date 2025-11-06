@@ -2,7 +2,6 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC
-from collections import OrderedDict
 from contextlib import ExitStack, contextmanager
 from numbers import Number
 from typing import Dict, List, Optional, Set, Tuple, Union
@@ -19,7 +18,7 @@ from qat.backend.passes.purr.analysis import (
 )
 from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
-from qat.backend.qblox.execution import QbloxExecutable, QbloxPackage
+from qat.backend.qblox.execution import QbloxPackage, QbloxProgram
 from qat.backend.qblox.ir import Opcode, SequenceBuilder
 from qat.backend.qblox.passes.analysis import (
     AllocationManager,
@@ -31,6 +30,7 @@ from qat.backend.qblox.passes.analysis import (
 )
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.executables import Executable
 from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -983,35 +983,35 @@ class QbloxContext2(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxBackend1(AllocatingBackend[QbloxExecutable]):
+class QbloxBackend1(AllocatingBackend[QbloxProgram]):
     def emit(
         self,
         ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         ignore_empty=True,
-    ) -> Dict[int, QbloxExecutable]:
+    ) -> Executable[QbloxProgram]:
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         sweeps = triage_result.sweeps
 
         switerator = SweepIterator.from_sweeps(sweeps)
         dinjectors = DeviceInjectors(triage_result.device_updates)
-        ordered_executables: Dict[int, QbloxExecutable] = OrderedDict()
+        programs: list[QbloxProgram] = []
         try:
             dinjectors.inject()
             while not switerator.is_finished():
                 switerator.do_sweep(triage_result.quantum_instructions)
-                ordered_executables[switerator.accumulated_sweep_iteration] = self._do_emit(
-                    triage_result, ignore_empty
-                )
-            return ordered_executables
+                programs.append(self._do_emit(triage_result, ignore_empty))
+            # TODO: This needs to contain the other information required by an executable,
+            # to be extracted from triage results. (COMPILER-827)
+            return Executable[QbloxProgram](programs=programs)
         except BaseException as e:
             raise e
         finally:
             switerator.revert(triage_result.quantum_instructions)
             dinjectors.revert()
 
-    def _do_emit(self, triage_result: TriageResult, ignore_empty=True) -> QbloxExecutable:
+    def _do_emit(self, triage_result: TriageResult, ignore_empty=True) -> QbloxProgram:
         repeat = next(iter(triage_result.repeats))
         contexts: Dict[PulseChannel, QbloxContext1] = {}
 
@@ -1068,17 +1068,17 @@ class QbloxBackend1(AllocatingBackend[QbloxExecutable]):
                 seq_idx, slot_idx = self.allocate(target)
                 package = context.create_package(target, seq_idx, slot_idx)
                 packages[target.full_id()] = package
-        return QbloxExecutable(packages=packages, triage_result=triage_result)
+        return QbloxProgram(packages=packages, triage_result=triage_result)
 
 
-class QbloxBackend2(AllocatingBackend[QbloxExecutable]):
+class QbloxBackend2(AllocatingBackend[QbloxProgram]):
     def emit(
         self,
         ir: InstructionBuilder,
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         ignore_empty=True,
-    ) -> Dict[int, QbloxExecutable]:
+    ) -> Executable[QbloxProgram]:
         triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
         binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
         precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
@@ -1111,7 +1111,11 @@ class QbloxBackend2(AllocatingBackend[QbloxExecutable]):
                 seq_idx, slot_idx = self.allocate(target)
                 package = context.create_package(target, seq_idx, slot_idx)
                 packages[target.full_id()] = package
-        return {1: QbloxExecutable(packages=packages, triage_result=triage_result)}
+        # TODO: This needs to contain the other information required by an executable,
+        # to be extracted from triage results. (COMPILER-827)
+        return Executable[QbloxProgram](
+            programs=[QbloxProgram(packages=packages, triage_result=triage_result)]
+        )
 
 
 class QbloxCFGWalker(DfsTraversal):

@@ -2,7 +2,6 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import re
 from dataclasses import dataclass, field
-from typing import Dict, List, Union
 
 from compiler_config.config import CompilerConfig
 
@@ -18,7 +17,7 @@ from qat.purr.compiler.runtime import CalibrationWithArgs
 
 @dataclass
 class CalibrationAnalysisResult(ResultInfoMixin):
-    calibration_executables: List[CalibrationWithArgs] = field(default_factory=list)
+    calibration_executables: list[CalibrationWithArgs] = field(default_factory=list)
 
 
 class CalibrationAnalysis(AnalysisPass):
@@ -37,7 +36,7 @@ class CalibrationAnalysis(AnalysisPass):
 
 @dataclass
 class IndexMappingResult(ResultInfoMixin):
-    mapping: Dict[str, int]
+    mapping: dict[str, int]
 
 
 class IndexMappingAnalysis(AnalysisPass):
@@ -51,20 +50,14 @@ class IndexMappingAnalysis(AnalysisPass):
 
     def __init__(self, model: QuantumHardwareModel):
         """:param model: The hardware model is needed for the qubit mapping."""
-        # TODO: searching for classical registers feels a little shaky. Guessing there are
-        # changes to make at a higher level to faciliate improvements here.
-        # TODO: support with pydantic instructions and hardware.
-        # TODO: should the output_variable -> qubit mapping be separate from the classical
-        # register extraction? The former might be useful for a compiliation analysis pass.
-        # Only used here right now, so let's worry about this later.
         self.model = model
 
     def run(
         self,
-        acquisitions: Dict[str, any],
+        acquisitions: dict[str, any],
         res_mgr: ResultManager,
         *args,
-        package: Union[InstructionBuilder, Executable],
+        package: InstructionBuilder | Executable,
         **kwargs,
     ):
         """
@@ -91,24 +84,20 @@ class IndexMappingAnalysis(AnalysisPass):
         return acquisitions
 
     @staticmethod
-    def var_to_physical_channel_executable(package: Executable) -> Dict[str, str]:
-        mapping: Dict[str, str] = {}
-        for channel_id, channel_data in package.channel_data.items():
-            for acquire in channel_data.acquires:
-                mapping[acquire.output_variable] = channel_id
-        return mapping
+    def var_to_physical_channel_executable(package: Executable) -> dict[str, str]:
+        return {var: acquire.physical_channel for var, acquire in package.acquires.items()}
 
     @staticmethod
-    def var_to_physical_channel_qat_ir(package: InstructionBuilder) -> Dict[str, str]:
-        mapping: Dict[str, str] = {}
+    def var_to_physical_channel_qat_ir(package: InstructionBuilder) -> dict[str, str]:
+        mapping: dict[str, str] = {}
         for instruction in package.instructions:
             if not isinstance(instruction, Acquire):
                 continue
             mapping[instruction.output_variable] = instruction.channel.physical_channel_id
         return mapping
 
-    def var_to_qubit_map(self, mapping: Dict[str, str]):
-        chan_to_qubit_map: Dict[str, int] = {}
+    def var_to_qubit_map(self, mapping: dict[str, str]):
+        chan_to_qubit_map: dict[str, int] = {}
         for chan in set(mapping.values()):
             qubits = [
                 qubit

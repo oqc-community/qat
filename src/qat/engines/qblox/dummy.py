@@ -8,7 +8,7 @@ from qblox_instruments import (
 )
 
 from qat.backend.qblox.config.constants import Constants
-from qat.backend.qblox.execution import QbloxExecutable
+from qat.backend.qblox.execution import QbloxProgram
 from qat.backend.qblox.ir import Sequence
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.compiler.devices import ChannelType
@@ -67,12 +67,12 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
 
         log.info(self._driver.get_system_status())
 
-    def setup(self, executable: QbloxExecutable):
-        super().setup(executable)
+    def setup(self, program: QbloxProgram):
+        super().setup(program)
 
         # Stage Scope and Acquisition data
         for pulse_channel_id, sequencer in self._id2seq.items():
             if ChannelType.macq.name in pulse_channel_id:
-                package = executable.packages[pulse_channel_id]
+                package = program.packages[pulse_channel_id]
                 self._setup_dummy_scope_acq_data(sequencer, package.sequence)
                 self._setup_dummy_binned_acq_data(sequencer, package.sequence)

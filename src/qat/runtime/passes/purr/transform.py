@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import re
-from typing import Dict
 
 import numpy as np
 from compiler_config.config import CompilerConfig
@@ -28,12 +27,12 @@ class QiskitErrorMitigation(TransformPass):
 
     def run(
         self,
-        acquisitions: Dict[str, any],
+        acquisitions: dict[str, any],
         *args,
         compiler_config: CompilerConfig,
         package: QiskitBuilder,
         **kwargs,
-    ) -> Dict[str, any]:
+    ) -> dict[str, any]:
         """
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :param compiler_config: The compiler config contains the error mitigation
@@ -58,7 +57,7 @@ class QiskitErrorMitigation(TransformPass):
             acquisitions[mitigator.name] = new_result
         return acquisitions
 
-    def classical_to_quantum_mapping(self, package: QiskitBuilder) -> Dict[str, int]:
+    def classical_to_quantum_mapping(self, package: QiskitBuilder) -> dict[str, int]:
         """Generates a mapping between classical register indices and qubit indices.
 
         This would probably be an analysis pass for refactored code, but since its only used
@@ -88,7 +87,7 @@ class QiskitStripMetadata(TransformPass):
     """Detects if Qiskit is returning meta data associated with the simulation, and trims
     it away if so."""
 
-    def run(self, acquisitions: Dict[str, any], *args, **kwargs):
+    def run(self, acquisitions: dict[str, any], *args, **kwargs):
         """
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :return: The acquisition data with metadata stripped away (if found).
@@ -105,7 +104,7 @@ class QiskitSimplifyResults(TransformPass):
     This is the same as the `simplify_results` function in :class:`ResultsTransform`.
     """
 
-    def run(self, acquisitions: Dict[str, any], *args, **kwargs):
+    def run(self, acquisitions: dict[str, any], *args, **kwargs):
         """
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :return: The acquisition data simplified.

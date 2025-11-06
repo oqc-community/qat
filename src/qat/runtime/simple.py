@@ -1,15 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-import warnings
 from typing import Optional
-
-import numpy as np
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.executables import Executable
-from qat.runtime import BaseRuntime, ResultsAggregator
-from qat.runtime.connection import ConnectionMode
+from qat.runtime import BaseRuntime
+from qat.runtime.aggregator import ResultsCollection
 
 
 class SimpleRuntime(BaseRuntime):
@@ -43,20 +40,13 @@ class SimpleRuntime(BaseRuntime):
         if met_mgr is None:
             met_mgr = MetricsManager()
 
-        self.validate_max_shots(package.shots)
-        if package.shots == 0:
-            warnings.warn("Tried to execute a package with zero shots.")
-            return {acquire.output_variable: np.array([]) for acquire in package.acquires}
+        aggregator = ResultsCollection(package.acquires)
+        with self._hold_connection():
+            for program in package.programs:
+                results = self.engine.execute(program, met_mgr=met_mgr, **kwargs)
+                aggregator.append(results)
+        acquisitions = aggregator.results
 
-        number_of_batches = self.number_of_batches(package.shots, package.compiled_shots)
-        self.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
-        aggregator = ResultsAggregator(package.acquires)
-        for _ in range(number_of_batches):
-            batch_results = self.engine.execute(package)
-            aggregator.update(batch_results)
-        self.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
-
-        acquisitions = aggregator.results(package.shots)
         return self.results_pipeline.run(
             acquisitions, res_mgr, met_mgr, package=package, **kwargs
         )

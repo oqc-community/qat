@@ -8,9 +8,9 @@ from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
 from qat import QAT
 from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
-from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Executable
+from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Program
 from qat.engines.waveform_v1 import EchoEngine
-from qat.executables import BaseExecutable, Executable
+from qat.executables import Executable
 from qat.frontend import AutoFrontend
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
@@ -133,21 +133,21 @@ class TestExperimentalEchoPipelineWithCircuits:
     @pytest.fixture(scope="class")
     def executable(
         self, program_file, compiler_config, num_readouts, num_registers
-    ) -> WaveformV1Executable:
+    ) -> Executable[WaveformV1Program]:
         """Compile the program file using the stable pipeline."""
         return QAT().compile(str(program_file), compiler_config, pipeline=self.pipeline)[0]
 
     @pytest.fixture(scope="class")
     def results(
-        self, executable: WaveformV1Executable, compiler_config: CompilerConfig
+        self, executable: Executable[WaveformV1Program], compiler_config: CompilerConfig
     ) -> dict:
         return QAT().execute(executable, compiler_config, pipeline=self.pipeline)[0]
 
     @pytest.fixture(scope="class")
-    def returned_acquires(self, executable: WaveformV1Executable):
+    def returned_acquires(self, executable: Executable[WaveformV1Program]):
         """Returns the acquires that are returned by the executable."""
         returned_acquires = set()
-        acquires = [acq.output_variable for acq in executable.acquires]
+        acquires = list(executable.acquires.keys())
         for return_ in executable.returns:
             if return_ in executable.acquires:
                 returned_acquires.add(return_)
@@ -173,46 +173,52 @@ class TestExperimentalEchoPipelineWithCircuits:
         return returned_acquires
 
     def test_executable(self, executable):
-        assert isinstance(executable, WaveformV1Executable)
+        assert isinstance(executable, Executable)
+        for program in executable.programs:
+            assert isinstance(program, WaveformV1Program)
 
     def test_shots(self, executable, shots):
-        assert executable.shots == shots
-        assert executable.compiled_shots <= shots
-        assert executable.compiled_shots <= self.target_data.max_shots
+        cumulative_shots = 0
+        for program in executable.programs:
+            cumulative_shots += program.shots
+            assert program.shots <= self.target_data.max_shots
+        assert cumulative_shots == shots
 
     def test_shot_period(self, executable):
         """Checks that i) the repetition time accounts for both the passive reset time and
         circuit time, and ii) the buffers for each channel do not exceed the repetition
         time."""
         passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
-        assert executable.repetition_time >= passive_reset_time
-        for physical_channel, channel_data in executable.channel_data.items():
-            for qubit in self.pipeline.backend.model.qubits.values():
-                if physical_channel == qubit.physical_channel.uuid:
-                    sample_time = self.target_data.QUBIT_DATA.sample_time
-                    break
-                elif physical_channel == qubit.resonator.physical_channel.uuid:
-                    sample_time = self.target_data.RESONATOR_DATA.sample_time
-                    break
-            assert len(channel_data.buffer) * sample_time <= executable.repetition_time
+        for program in executable.programs:
+            assert program.repetition_time >= passive_reset_time
+            for physical_channel, channel_data in program.channel_data.items():
+                for qubit in self.pipeline.backend.model.qubits.values():
+                    if physical_channel == qubit.physical_channel.uuid:
+                        sample_time = self.target_data.QUBIT_DATA.sample_time
+                        break
+                    elif physical_channel == qubit.resonator.physical_channel.uuid:
+                        sample_time = self.target_data.RESONATOR_DATA.sample_time
+                        break
+                assert len(channel_data.buffer) * sample_time <= program.repetition_time
 
     def test_channel_data(self, executable):
-        """WaveformV1Executables are expected to have channel data for each physical
+        """WaveformV1Programs are expected to have channel data for each physical
         channel available, regardless of if they're used."""
 
-        assert len(executable.channel_data) == 2 * len(self.model.qubits)
-        for qubit in self.model.qubits.values():
-            for physical_channel in [
-                qubit.physical_channel,
-                qubit.resonator.physical_channel,
-            ]:
-                assert physical_channel.uuid in executable.channel_data
-                channel_data = executable.channel_data[physical_channel.uuid]
-                assert isinstance(channel_data, WaveformV1ChannelData)
-                assert channel_data.baseband_frequency in (
-                    physical_channel.baseband.frequency,
-                    None,
-                )
+        for program in executable.programs:
+            assert len(program.channel_data) == 2 * len(self.model.qubits)
+            for qubit in self.model.qubits.values():
+                for physical_channel in [
+                    qubit.physical_channel,
+                    qubit.resonator.physical_channel,
+                ]:
+                    assert physical_channel.uuid in program.channel_data
+                    channel_data = program.channel_data[physical_channel.uuid]
+                    assert isinstance(channel_data, WaveformV1ChannelData)
+                    assert channel_data.baseband_frequency in (
+                        physical_channel.baseband.frequency,
+                        None,
+                    )
 
     def test_executable_has_correct_number_of_acquires(
         self, returned_acquires, num_readouts
@@ -229,11 +235,11 @@ class TestExperimentalEchoPipelineWithCircuits:
         if "openpulse" in request.node.callspec.id:
             pytest.mark.skip("Openpulse has more expressive use of acquires.")
 
-        for acquire in executable.acquires:
+        for acquire in executable.acquires.values():
             assert acquire.mode == AcquireMode.INTEGRATOR
 
     def test_executable_has_correct_returns(
-        self, executable: WaveformV1Executable, num_registers: int
+        self, executable: Executable[WaveformV1Program], num_registers: int
     ):
         """Check that the executable has a number of returns that matches the provided
         value. In the future, this might need adjusting to account of active reset."""
@@ -241,7 +247,7 @@ class TestExperimentalEchoPipelineWithCircuits:
         assert len(executable.returns) == num_registers
 
     def test_executable_has_correct_post_processing(
-        self, executable: WaveformV1Executable, request
+        self, executable: Executable[WaveformV1Program], request
     ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
         correctly post-processing to be discriminated as a bit. We can assume the acquire
@@ -250,18 +256,16 @@ class TestExperimentalEchoPipelineWithCircuits:
         if "openpulse" in request.node.callspec.id:
             pytest.mark.skip("Openpulse has more expressive use of acquires.")
 
-        for acquire in executable.acquires:
-            output_variable = acquire.output_variable
+        for output_variable, acquire in executable.acquires.items():
             assert isinstance(output_variable, str)
-            assert output_variable in executable.post_processing
-            pps = executable.post_processing[output_variable]
+            pps = acquire.post_processing
             assert len(pps) == 1
             assert isinstance(pps[0], PostProcessing)
             assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
 
     def test_executable_has_correct_results_processing(
         self,
-        executable: WaveformV1Executable,
+        executable: Executable[WaveformV1Program],
         compiler_config: CompilerConfig,
         returned_acquires: set[str],
     ):
@@ -269,14 +273,14 @@ class TestExperimentalEchoPipelineWithCircuits:
         value."""
 
         for acquire in returned_acquires:
-            assert acquire in executable.results_processing
-            rp = executable.results_processing[acquire]
+            assert acquire in executable.acquires
+            rp = executable.acquires[acquire].results_processing
             assert rp == compiler_config.results_format.format
 
     def test_results_contain_all_returns(
         self,
         results: dict[str],
-        executable: WaveformV1Executable,
+        executable: Executable[WaveformV1Program],
         shots: int,
         returned_acquires: set[str],
         request,
@@ -325,13 +329,15 @@ class TestExperimentalEchoPipelineWithCircuits:
         # register is used.
         assert total_length >= len(returned_acquires)
 
-    @pytest.mark.parametrize("cls", [BaseExecutable, Executable])
-    def test_serialization(self, executable: WaveformV1Executable, cls):
+    def test_serialization(self, executable: Executable[WaveformV1Program]):
         """Check that the executable can be serialized and deserialized correctly."""
         json_blob = executable.serialize()
-        new_package = cls.deserialize(json_blob)
-        assert isinstance(new_package, WaveformV1Executable)
-        assert new_package == executable
+        new_executable = Executable.deserialize(json_blob)
+        assert isinstance(new_executable, Executable)
+        assert len(new_executable.programs) == len(executable.programs)
+        for program in new_executable.programs:
+            assert isinstance(program, WaveformV1Program)
+        assert new_executable == executable
 
 
 class MockEchoModelLoader(EchoModelLoader):
@@ -454,14 +460,17 @@ class TestExperimentalEchoPipelineParity:
             pipeline=self.experimental_pipeline,
         )[0]
 
-    def test_package_metadata(self, stable_executable, experimental_executable):
+    def test_executable_metadata(self, stable_executable, experimental_executable):
         assert stable_executable.calibration_id == experimental_executable.calibration_id
-        assert stable_executable.compiled_shots == experimental_executable.compiled_shots
-        assert stable_executable.post_processing == experimental_executable.post_processing
-        assert np.isclose(
-            stable_executable.repetition_time, experimental_executable.repetition_time
-        )
-        assert stable_executable.shots == experimental_executable.shots
+
+    def test_program_metadata(self, stable_executable, experimental_executable):
+        for stable_program, experimental_program in zip(
+            stable_executable.programs, experimental_executable.programs
+        ):
+            assert np.isclose(
+                stable_program.repetition_time, experimental_program.repetition_time
+            )
+            assert np.isclose(stable_program.shots, experimental_program.shots)
 
     def test_results_processing(self, stable_executable, experimental_executable, request):
         if "qir-select" in request.node.callspec.id:
@@ -472,13 +481,21 @@ class TestExperimentalEchoPipelineParity:
                 "because the new stack handles it slightly differently to give the correct "
                 "result."
             )
-        assert (
-            stable_executable.results_processing
-            == experimental_executable.results_processing
-        )
+        assert stable_executable.acquires.keys() == experimental_executable.acquires.keys()
+        for key in stable_executable.acquires.keys():
+            stable_acquire = stable_executable.acquires[key]
+            experimental_acquire = experimental_executable.acquires[key]
+            assert (
+                stable_acquire.results_processing == experimental_acquire.results_processing
+            )
 
     def test_postprocessing_data(self, stable_executable, experimental_executable):
-        assert stable_executable.post_processing == experimental_executable.post_processing
+        assert stable_executable.acquires.keys() == experimental_executable.acquires.keys()
+        for key in stable_executable.acquires.keys():
+            stable_acquire = stable_executable.acquires[key]
+            experimental_acquire = experimental_executable.acquires[key]
+            assert stable_acquire.post_processing == experimental_acquire.post_processing
+
         # the ordering of packages, and different times when measures are done mean we
         # no longer have complete parity here.
         assert len(stable_executable.assigns) == len(experimental_executable.assigns)
@@ -498,39 +515,36 @@ class TestExperimentalEchoPipelineParity:
     def test_subpackages(
         self, stable_executable, experimental_executable, physical_channel_map
     ):
-        for key, stable_data in stable_executable.channel_data.items():
-            new_key = physical_channel_map[key]
-            assert new_key in experimental_executable.channel_data
-            assert isinstance(stable_data, WaveformV1ChannelData)
-            experimental_data = experimental_executable.channel_data[new_key]
-            assert (
-                stable_data.baseband_frequency is None
-                and experimental_data.baseband_frequency is None
-            ) or np.isclose(
-                stable_data.baseband_frequency, experimental_data.baseband_frequency
-            )
+        for stable_program, experimental_program in zip(
+            stable_executable.programs, experimental_executable.programs
+        ):
+            for key, stable_data in stable_program.channel_data.items():
+                new_key = physical_channel_map[key]
+                assert new_key in experimental_program.channel_data
+                assert isinstance(stable_data, WaveformV1ChannelData)
+                experimental_data = experimental_program.channel_data[new_key]
+                assert (
+                    stable_data.baseband_frequency is None
+                    and experimental_data.baseband_frequency is None
+                ) or np.isclose(
+                    stable_data.baseband_frequency, experimental_data.baseband_frequency
+                )
 
-            # Since how we sync qubits before measurement has changed, we have diverged
-            # from complete feature parity here. The buffers and acquires might look
-            # different: check what we can, but otherwise, skip
-            assert len(stable_data.acquires) == len(experimental_data.acquires)
-            if len(stable_data.acquires) > 0:
-                for acq1, acq2 in zip(stable_data.acquires, experimental_data.acquires):
-                    assert acq1.length == acq2.length
-                    assert np.allclose(
-                        stable_data.buffer[acq1.position : acq1.position + acq1.length],
-                        experimental_data.buffer[
-                            acq2.position : acq2.position + acq2.length
-                        ],
-                    )
-            else:
-                assert np.allclose(stable_data.buffer, experimental_data.buffer)
+                # Since how we sync qubits before measurement has changed, we have diverged
+                # from complete feature parity here. The buffers and acquires might look
+                # different: check what we can, but otherwise, skip
+                assert len(stable_data.acquires) == len(experimental_data.acquires)
+                if len(stable_data.acquires) > 0:
+                    for acq1, acq2 in zip(stable_data.acquires, experimental_data.acquires):
+                        assert acq1.length == acq2.length
+                        assert np.allclose(
+                            stable_data.buffer[acq1.position : acq1.position + acq1.length],
+                            experimental_data.buffer[
+                                acq2.position : acq2.position + acq2.length
+                            ],
+                        )
+                else:
+                    assert np.allclose(stable_data.buffer, experimental_data.buffer)
 
     def test_results_formatting(self, stable_results, experimental_results):
         assert stable_results == experimental_results
-
-    @pytest.mark.parametrize("cls", [BaseExecutable, Executable])
-    def test_serialization(self, experimental_executable, cls):
-        json_blob = experimental_executable.serialize()
-        new_package = cls.deserialize(json_blob)
-        assert experimental_executable == new_package

@@ -3,7 +3,7 @@
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.executables import AcquireData, ChannelData, ChannelExecutable
+from qat.executables import AcquireData, Executable
 from qat.ir.instructions import Assign as PydAssign
 from qat.ir.instructions import Variable as PydVariable
 from qat.ir.measure import PostProcessing
@@ -51,12 +51,13 @@ class TestPostProcessingTransform:
             ),
         ]
         acquire = AcquireData(
-            length=254, position=0, mode=AcquireMode.RAW, output_variable="test"
+            mode=AcquireMode.RAW,
+            shape=(1000, 254),
+            post_processing=pp_instructions,
+            results_processing=InlineResultsProcessing.Experiment,
+            physical_channel="ch1",
         )
-        package = ChannelExecutable(
-            channel_data={"CH1": ChannelData(acquires=acquire)},
-            post_processing={"test": pp_instructions},
-        )
+        package = Executable(programs=[], acquires={"test": acquire})
         result = PostProcessingTransform(self.target_data).run(
             mock_readout, package=package
         )
@@ -82,12 +83,13 @@ class TestPostProcessingTransform:
             ),
         ]
         acquire = AcquireData(
-            length=254, position=0, mode=AcquireMode.RAW, output_variable="test"
+            mode=AcquireMode.RAW,
+            shape=(1000, 254),
+            post_processing=pp_instructions,
+            results_processing=InlineResultsProcessing.Experiment,
+            physical_channel="ch1",
         )
-        package = ChannelExecutable(
-            channel_data={"CH1": ChannelData(acquires=acquire)},
-            post_processing={"test": pp_instructions},
-        )
+        package = Executable(programs=[], acquires={"test": acquire})
         result = PostProcessingTransform(self.target_data).run(
             mock_readout, package=package
         )
@@ -100,21 +102,25 @@ class TestPostProcessingTransform:
 class TestInlineResultsProcessingTransform:
     def test_run_results_processing_with_program(self):
         results = {"test": np.random.rand(254, 100)}
-        package = ChannelExecutable(
-            results_processing={"test": InlineResultsProcessing.Program}
+        acquire = AcquireData(
+            mode=AcquireMode.RAW,
+            shape=(254, 100),
+            results_processing=InlineResultsProcessing.Program,
+            physical_channel="ch1",
         )
+        package = Executable(programs=[], acquires={"test": acquire})
         results = InlineResultsProcessingTransform().run(results, package=package)
         assert isinstance(results["test"], int)
 
     def test_run_results_processing_with_experiment(self):
-        results = {
-            "test": np.random.rand(
-                254,
-            )
-        }
-        package = ChannelExecutable(
-            results_processing={"test": InlineResultsProcessing.Experiment}
+        results = {"test": np.random.rand(254)}
+        acquire = AcquireData(
+            mode=AcquireMode.INTEGRATOR,
+            shape=(254,),
+            results_processing=InlineResultsProcessing.Experiment,
+            physical_channel="ch1",
         )
+        package = Executable(programs=[], acquires={"test": acquire})
         InlineResultsProcessingTransform().run(results, package=package)
         assert isinstance(results["test"], np.ndarray)
         assert len(results["test"]) == 254
@@ -123,8 +129,8 @@ class TestInlineResultsProcessingTransform:
 class TestAssignResultsTransform:
     def test_only_returns_what_is_asked(self):
         results = {"q0": np.random.rand(100), "q1": np.random.rand(100)}
-        package = ChannelExecutable(returns=set(["q0"]))
-        results = AssignResultsTransform().run(results, package=package)
+        payload = Executable(programs=[], acquires={}, returns=set(["q0"]))
+        results = AssignResultsTransform().run(results, package=payload)
         assert "q0" in results
         assert "q1" not in results
 
@@ -134,7 +140,9 @@ class TestAssignResultsTransform:
             "q1": np.asarray([2] * 100),
             "q2": np.asarray([3] * 100),
         }
-        package = ChannelExecutable(
+        package = Executable(
+            programs=[],
+            acquires={},
             returns=set(["c"]),
             assigns=[
                 PydAssign(
@@ -146,33 +154,8 @@ class TestAssignResultsTransform:
                     ],
                 )
             ],
-            channel_data={
-                "CH1": ChannelData(
-                    acquires=AcquireData(
-                        output_variable="q0",
-                        length=100,
-                        position=0,
-                        mode=AcquireMode.INTEGRATOR,
-                    )
-                ),
-                "CH2": ChannelData(
-                    acquires=AcquireData(
-                        output_variable="q1",
-                        length=100,
-                        position=0,
-                        mode=AcquireMode.INTEGRATOR,
-                    )
-                ),
-                "CH3": ChannelData(
-                    acquires=AcquireData(
-                        output_variable="q2",
-                        length=100,
-                        position=0,
-                        mode=AcquireMode.INTEGRATOR,
-                    )
-                ),
-            },
         )
+
         results = AssignResultsTransform().run(results, package=package)
         assert len(results) == 1
         assert "c" in results

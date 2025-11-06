@@ -6,7 +6,7 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.executables import BatchedExecutable, Executable, ParameterizedExecutable
+from qat.executables import Executable
 from qat.model.target_data import AbstractTargetData
 from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.pipeline import CompilePipeline
@@ -62,11 +62,14 @@ class CompileSweepPipeline(AbstractPipeline):
         )
 
     def compile(
-        self, program: InstructionBuilder, compiler_config: CompilerConfig | None = None
+        self,
+        program: str | InstructionBuilder,
+        compiler_config: CompilerConfig | None = None,
     ):
         """Compile a builder with sweeps and device assigns against the base pipeline.
 
-        :param program: An instruction builder with sweeps and/or device assigns.
+        :param program: The program to compile, which might include an instruction builder
+            with sweeps.
         :param compiler_config: Optional compiler configuration to use for this compile
             call. If not provided, the compiler configuration from the pipeline will be
             used.
@@ -74,9 +77,7 @@ class CompileSweepPipeline(AbstractPipeline):
             the metrics from the final compile call.
         """
         if not isinstance(program, InstructionBuilder):
-            raise TypeError(
-                "SweepCompilePipeline expects to see an InstructionBuilder with sweeps."
-            )
+            return self._base_pipeline.compile(program, compiler_config)
 
         # done as precaution, since external forces might change the model between compile
         # calls
@@ -99,15 +100,9 @@ class CompileSweepPipeline(AbstractPipeline):
                 executable, metrics = self._base_pipeline.compile(
                     sweep_instance.builder, compiler_config
                 )
-            executable = ParameterizedExecutable(
-                parameters=sweep_instance.variables, executable=executable
-            )
             executables.append(executable)
 
-        calibration_id = executables[0].executable.calibration_id
-        executable = BatchedExecutable(
-            shape=sweep_shape, executables=executables, calibration_id=calibration_id
-        )
+        executable = self._combine_executables(executables, sweep_shape)
         return executable, metrics
 
     def is_subtype_of(self, cls):
@@ -153,3 +148,26 @@ class CompileSweepPipeline(AbstractPipeline):
         with device_assigns.apply():
             self._rebuild_pipeline()
             return self._base_pipeline.compile(builder, compiler_config)
+
+    def _combine_executables(self, executables: list[Executable], sweep_shape: tuple[int]):
+        """Combines the programs within the executables into a single executable."""
+
+        programs = []
+        for executable in executables:
+            programs.extend(executable.programs)
+
+        acquire_data = executables[0].acquires
+        for acquire in acquire_data.values():
+            # This is done intentionally: legacy qat returns with an extra dimension (list)
+            # if sweeps aren't used... so its like [[result1, result2, ...]]
+            if len(sweep_shape) == 0:
+                sweep_shape = (1,)
+            acquire.shape = tuple(list(sweep_shape) + list(acquire.shape))
+
+        return Executable(
+            programs=programs,
+            acquires=acquire_data,
+            assigns=executables[0].assigns,
+            returns=executables[0].returns,
+            calibration_id=executables[0].calibration_id,
+        )

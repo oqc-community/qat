@@ -3,7 +3,6 @@
 
 import re
 from dataclasses import dataclass
-from typing import Union
 
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
@@ -47,7 +46,7 @@ class IndexMappingAnalysis(AnalysisPass):
         acquisitions: dict[str, any],
         res_mgr: ResultManager,
         *args,
-        package: Union[InstructionBuilder, Executable],
+        package: InstructionBuilder | Executable,
         **kwargs,
     ):
         """
@@ -75,11 +74,7 @@ class IndexMappingAnalysis(AnalysisPass):
 
     @staticmethod
     def var_to_physical_channel_executable(package: Executable) -> dict[str, str]:
-        mapping: dict[str, str] = {}
-        for channel_id, channel_data in package.channel_data.items():
-            for acquire in channel_data.acquires:
-                mapping[acquire.output_variable] = channel_id
-        return mapping
+        return {var: acquire.physical_channel for var, acquire in package.acquires.items()}
 
     def var_to_physical_channel_qat_ir(self, package: InstructionBuilder) -> dict[str, str]:
         mapping: dict[str, str] = {}

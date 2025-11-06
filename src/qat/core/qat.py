@@ -9,7 +9,7 @@ from qat.core.config.configure import get_qatconfig, override_config
 from qat.core.config.session import QatSessionConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pipeline import EngineSet, HardwareLoaders, PipelineManager
-from qat.executables import BaseExecutable
+from qat.executables import Executable
 from qat.pipelines import get_default_pipelines
 from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.pipeline import Pipeline
@@ -61,7 +61,7 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
         to_json: bool = False,
-    ) -> tuple[InstructionBuilder | BaseExecutable | str, MetricsManager]:
+    ) -> tuple[InstructionBuilder | Executable | str, MetricsManager]:
         """Compiles a source program into an executable using the specified pipeline.
 
         :param program: The source program to compile.
@@ -81,7 +81,7 @@ class QAT:
 
     def execute(
         self,
-        package: InstructionBuilder | BaseExecutable | str,
+        package: InstructionBuilder | Executable | str,
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
     ) -> tuple[dict, MetricsManager]:
@@ -102,7 +102,7 @@ class QAT:
                 if "py/object" in package:
                     package = InstructionBuilder.deserialize(package)
                 else:
-                    package = BaseExecutable.deserialize(package)
+                    package = Executable.deserialize(package)
             return P.execute(package, compiler_config=compiler_config)
 
     def run(

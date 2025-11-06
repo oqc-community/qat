@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
+from collections import defaultdict
 from typing import List, Optional
 
 import numpy as np
@@ -15,12 +16,13 @@ from qat.backend.passes.analysis import (
 from qat.backend.passes.lowering import PartitionByPulseChannel
 from qat.backend.passes.validation import NoAcquireWeightsValidation
 from qat.backend.waveform_v1.executable import (
+    PositionalAcquireData,
     WaveformV1ChannelData,
-    WaveformV1Executable,
+    WaveformV1Program,
 )
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
-from qat.executables import AcquireData
+from qat.executables import AcquireData, Executable
 from qat.ir.instructions import FrequencyShift, PhaseReset, PhaseSet, PhaseShift, Reset
 from qat.ir.lowered import PartitionedIR
 from qat.ir.waveforms import Pulse as Pulse
@@ -40,7 +42,7 @@ from qat.utils.waveform import NumericFunction
 log = get_default_logger()
 
 
-class WaveformV1Backend(BaseBackend, InvokerMixin):
+class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
     """
     Target-machine code generation from an IR for targets that only require the explicit waveforms.
     """
@@ -60,8 +62,8 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         met_mgr: Optional[MetricsManager] = None,
         upconvert: bool = True,
         **kwargs,
-    ) -> WaveformV1Executable:
-        """Compiles :class:`InstructionBuilder` into a :class:`WaveformV1Executable`.
+    ) -> Executable[WaveformV1Program]:
+        """Compiles :class:`InstructionBuilder` into an :class:`Executable`.
 
         Translates pulse instructions into explicit waveforms at the required times, and
         combines them across pulse channels to give a composite waveform on the necessary
@@ -77,14 +79,14 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         if_res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
 
         buffers = self.create_physical_channel_buffers(ir, timeline_res, upconvert)
-        acquire_dict = self.create_acquire_dict(ir, timeline_res)
+        execute_acquire_dict, runtime_acquire_dict = self.create_acquires(ir, timeline_res)
 
         channels: dict[str, WaveformV1ChannelData] = {}
         for physical_channel, buffer in buffers.items():
             channels[physical_channel.uuid] = WaveformV1ChannelData(
                 baseband_frequency=if_res.frequencies.get(physical_channel, None),
                 buffer=buffer,
-                acquires=acquire_dict.get(physical_channel, []),
+                acquires=execute_acquire_dict.get(physical_channel, []),
             )
 
         returns = []
@@ -96,15 +98,13 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
         else:
             repetition_time = ir.repetition_period
 
-        return WaveformV1Executable(
-            channel_data=channels,
-            shots=ir.shots,
-            compiled_shots=ir.compiled_shots,
-            repetition_time=repetition_time,
-            post_processing=ir.pp_map,
-            results_processing={
-                var: rp.results_processing for var, rp in ir.rp_map.items()
-            },
+        programs = self.create_programs(
+            channels, ir.shots, ir.compiled_shots, repetition_time
+        )
+
+        return Executable[WaveformV1Program](
+            programs=programs,
+            acquires=runtime_acquire_dict,
             assigns=ir.assigns,
             returns=returns,
             calibration_id=self.model.calibration_id,
@@ -217,25 +217,26 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
 
         return physical_channel_buffers
 
-    def create_acquire_dict(self, ir: PartitionedIR, timeline_res: TimelineAnalysisResult):
-        """Creates a dictionary of acquire data for each physical channel based on the
-        acquire map in the IR and the timeline analysis result.
+    def create_acquires(self, ir: PartitionedIR, timeline_res: TimelineAnalysisResult):
+        """Assembles the acquire data needed to perform acquisition, and also the
+        acquire information needed at runtime.
 
         :param ir: The partitioned IR containing the acquire map.
         :param timeline_res: The timeline analysis result containing the number of samples
             for each instruction.
         """
-        acquire_dict = {}
+        execute_acquire_dict = defaultdict(list)
+        runtime_acquire_dict = dict()
         for pulse_channel_id, acquire_list in ir.acquire_map.items():
             pulse_channel = ir.get_pulse_channel(pulse_channel_id)
             phys_channel = self.model.physical_channel_with_id(
                 pulse_channel.physical_channel_id
             )
-            acq_list = acquire_dict.setdefault(phys_channel, [])
+            acq_list = execute_acquire_dict[phys_channel]
             for acquire in acquire_list:
                 idx = ir.target_map[pulse_channel_id].index(acquire)
                 acq_list.append(
-                    AcquireData(
+                    PositionalAcquireData(
                         length=timeline_res.target_map[pulse_channel_id].samples[idx],
                         position=np.sum(
                             timeline_res.target_map[pulse_channel_id].samples[0:idx]
@@ -244,7 +245,46 @@ class WaveformV1Backend(BaseBackend, InvokerMixin):
                         output_variable=acquire.output_variable,
                     )
                 )
-        return acquire_dict
+
+                rp = ir.rp_map.get(acquire.output_variable, None)
+                rp = rp.results_processing if rp is not None else None
+                runtime_acquire_dict[acquire.output_variable] = AcquireData(
+                    mode=acquire.mode,
+                    post_processing=ir.pp_map.get(acquire.output_variable, []),
+                    shape=(ir.shots,),
+                    results_processing=rp,
+                    physical_channel=phys_channel.uuid,
+                )
+
+        return execute_acquire_dict, runtime_acquire_dict
+
+    def create_programs(
+        self,
+        channel_data: dict[str, WaveformV1ChannelData],
+        shots: int,
+        batch_size: int,
+        repetition_time: float,
+    ) -> WaveformV1Program:
+        """Creates WaveformV1Program instances from channel data.
+
+        :param channel_data: The channel data for each physical channel.
+        :param shots: The total number of shots to be executed.
+        :param batch_size: The maximum number of shots per program.
+        :param repetition_time: The time for each shot.
+        """
+        program = WaveformV1Program(
+            channel_data=channel_data, repetition_time=repetition_time, shots=batch_size
+        )
+        programs = [program for _ in range(shots // batch_size)]
+        if (remaining_shots := shots % batch_size) > 0:
+            programs.append(
+                WaveformV1Program(
+                    channel_data=channel_data,
+                    repetition_time=repetition_time,
+                    shots=remaining_shots,
+                )
+            )
+        return programs
 
 
 class WaveformContext:
@@ -346,7 +386,7 @@ class WaveformContext:
         buffer: List[float],
         time: List[float],
     ):
-        """A virtually NCO to upconvert the waveforms by a frequency that is the difference
+        """A virtual NCO to upconvert the waveforms by a frequency that is the difference
         between the target frequency and the baseband frequency."""
 
         tslip = self.pulse_channel.phase_iq_offset

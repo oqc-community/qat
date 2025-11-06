@@ -2,7 +2,7 @@ import numpy as np
 from pydantic import BaseModel, validate_call
 
 from qat.engines.model import RequiresHardwareModelMixin
-from qat.engines.native import NativeEngine
+from qat.engines.native import ConnectionMixin, NativeEngine
 from qat.engines.zero import ZeroEngine
 from qat.executables import Executable
 
@@ -57,3 +57,23 @@ class MockEngineWithModel(ZeroEngine, RequiresHardwareModelMixin):
     def _update_model(self, model):
         self._model = model
         self.num_changes += 1
+
+
+class MockConnectedEngine(NativeEngine, ConnectionMixin):
+    def __init__(self):
+        self._is_connected = False
+        self.connections = 0
+
+    def execute(self, *args, **kwargs):
+        return {}
+
+    def connect(self):
+        self._is_connected = True
+        self.connections += 1
+
+    def disconnect(self):
+        self._is_connected = False
+
+    @property
+    def is_connected(self):
+        return self._is_connected

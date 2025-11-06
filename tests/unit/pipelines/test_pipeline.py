@@ -7,7 +7,7 @@ from qat.backend.base import BaseBackend
 from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
 from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
-from qat.executables import AcquireData, AcquireMode, Executable
+from qat.executables import AbstractProgram, AcquireData, AcquireMode, Executable
 from qat.frontend import AutoFrontend, FallthroughFrontend
 from qat.middleend import (
     DefaultMiddleend,
@@ -24,21 +24,15 @@ from qat.runtime import SimpleRuntime
 from tests.unit.utils.engines import MockEngineWithModel
 
 
-class MockExecutable(Executable):
-    returns: list[str] = ["test"]
-
+class MockProgram(AbstractProgram):
     @property
-    def acquires(self):
-        return [
-            AcquireData(
-                output_variable="test", mode=AcquireMode.INTEGRATOR, length=254, position=0
-            )
-        ]
+    def acquire_shapes(self):
+        return {}
 
 
 class MockBackend(BaseBackend):
     def emit(self, ir, res_mgr=None, met_mgr=None, compiler_config=None):
-        return MockExecutable()
+        return Executable(programs=[MockProgram()])
 
 
 class TestCompilePipeline:
@@ -98,13 +92,15 @@ class TestCompilePipeline:
         program = "test"
         assert hasattr(mock_pipeline, "compile")
         package, metrics = mock_pipeline.compile(program)
-        assert isinstance(package, MockExecutable)
+        assert isinstance(package, Executable)
+        assert len(package.programs) == 1
+        assert isinstance(package.programs[0], MockProgram)
         assert isinstance(metrics, MetricsManager)
 
     def test_execute_is_not_supported(self, mock_pipeline):
         assert not hasattr(mock_pipeline, "execute")
         with pytest.raises(AttributeError):
-            mock_pipeline.execute(MockExecutable())
+            mock_pipeline.execute(Executable())
 
     def test_validate_model(self):
         model = LucyModelLoader(qubit_count=4).load()
@@ -184,7 +180,14 @@ class TestExecutePipeline:
             mock_pipeline.compile("test")
 
     def test_execute(self, mock_pipeline):
-        mock_executable = MockExecutable()
+        mock_executable = Executable(
+            acquires={
+                "test": AcquireData(
+                    mode=AcquireMode.INTEGRATOR, shape=(1000,), physical_channel="ch1"
+                )
+            },
+            returns=["test"],
+        )
         assert hasattr(mock_pipeline, "execute")
         results, metrics = mock_pipeline.execute(mock_executable)
         assert len(mock_executable.acquires) == 1
@@ -280,11 +283,20 @@ class TestPipeline:
         program = "test"
         assert hasattr(mock_pipeline, "compile")
         package, metrics = mock_pipeline.compile(program)
-        assert isinstance(package, MockExecutable)
+        assert isinstance(package, Executable)
+        assert len(package.programs) == 1
+        assert isinstance(package.programs[0], MockProgram)
         assert isinstance(metrics, MetricsManager)
 
     def test_execute(self, mock_pipeline):
-        mock_executable = MockExecutable()
+        mock_executable = Executable(
+            acquires={
+                "test": AcquireData(
+                    mode=AcquireMode.INTEGRATOR, shape=(1000,), physical_channel="ch1"
+                )
+            },
+            returns=["test"],
+        )
         assert hasattr(mock_pipeline, "execute")
         results, metrics = mock_pipeline.execute(mock_executable)
         assert len(mock_executable.acquires) == 1

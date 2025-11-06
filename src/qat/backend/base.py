@@ -3,20 +3,18 @@
 
 import abc
 from collections import defaultdict
-from typing import Dict, Generic, Optional, Tuple, TypeVar
+from typing import Generic, Optional, Tuple
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.executables import Executable
+from qat.executables import Executable, Program
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
-EXE = TypeVar("EXE", bound=Executable)
 
-
-class BaseBackend(Generic[EXE], abc.ABC):
+class BaseBackend(Generic[Program], abc.ABC):
     """
     Base class for a backend that takes an intermediate representation (IR) :class:`QatIR`
     and lowers it to machine code that can be executed on a given target.
@@ -35,7 +33,7 @@ class BaseBackend(Generic[EXE], abc.ABC):
         res_mgr: Optional[ResultManager] = None,
         met_mgr: Optional[MetricsManager] = None,
         **kwargs,
-    ) -> EXE:
+    ) -> Executable[Program]:
         """
         Converts an IR :class:`QatIR` to machine instructions of a given target
         architecture.
@@ -47,7 +45,7 @@ class BaseBackend(Generic[EXE], abc.ABC):
         ...
 
 
-class CustomBackend(BaseBackend[EXE], Generic[EXE], abc.ABC):
+class CustomBackend(BaseBackend[Program], Generic[Program], abc.ABC):
     """
     Backends may need to run pre-codegen passes on the IR :class:`QatIR` as emitted
     from the middle end. These passes are specified via a custom pipeline.
@@ -58,14 +56,14 @@ class CustomBackend(BaseBackend[EXE], Generic[EXE], abc.ABC):
         self.pipeline = pipeline
 
 
-class AllocatingBackend(CustomBackend[EXE], Generic[EXE], abc.ABC):
+class AllocatingBackend(CustomBackend[Program], Generic[Program], abc.ABC):
     """
     A backend that's responsible for allocating FPGA card and sequencers AOT.
     """
 
     def __init__(self, model: QuantumHardwareModel, pipeline: PassManager = None):
         super().__init__(model=model, pipeline=pipeline)
-        self.allocations: Dict[int, Dict[str, int]] = defaultdict(dict)
+        self.allocations: dict[int, dict[str, int]] = defaultdict(dict)
 
     def allocate(self, target: PulseChannel) -> Tuple[int, int]:
         """

@@ -7,14 +7,14 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from qat.backend.qblox.acquisition import Acquisition
-from qat.backend.qblox.execution import QbloxExecutable
+from qat.backend.qblox.execution import QbloxProgram
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
 
-def plot_executable(executable: QbloxExecutable):
-    packages = executable.packages
+def plot_program(program: QbloxProgram):
+    packages = program.packages
 
     if not packages:
         return

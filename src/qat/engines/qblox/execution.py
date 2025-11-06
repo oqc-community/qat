@@ -14,8 +14,8 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.passes.purr.analysis import TriageResult
 from qat.backend.qblox.acquisition import Acquisition
-from qat.backend.qblox.execution import QbloxExecutable
-from qat.backend.qblox.visualisation import plot_executable, plot_playback
+from qat.backend.qblox.execution import QbloxProgram
+from qat.backend.qblox.visualisation import plot_playback, plot_program
 from qat.engines import NativeEngine
 from qat.instrument.base import InstrumentConcept
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
@@ -35,13 +35,13 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class QbloxEngine(NativeEngine):
+class QbloxEngine(NativeEngine[QbloxProgram]):
     def __init__(self, instrument: InstrumentConcept, model: QbloxLiveHardwareModel):
         self.instrument: InstrumentConcept = instrument
         self.model: QbloxLiveHardwareModel = model
 
-        self.plot_executable = False
-        self.dump_executable = False
+        self.plot_program = False
+        self.dump_program = False
         self.plot_playback = False
 
     def _process_results(self, results, triage_result: TriageResult):
@@ -202,22 +202,20 @@ class QbloxEngine(NativeEngine):
 
         return results
 
-    def execute(
-        self, executables: Dict[int, QbloxExecutable], triage_result: TriageResult
-    ) -> Dict:
+    def execute(self, programs: list[QbloxProgram], triage_result: TriageResult) -> Dict:
         playbacks: Dict[str, List[Acquisition]] = defaultdict(list)
-        for executable in executables.values():
-            if self.plot_executable:
-                plot_executable(executable)
+        for program in programs:
+            if self.plot_program:
+                plot_program(program)
 
-            if self.dump_executable:
-                for pulse_channel_id, pkg in executable.packages.items():
+            if self.dump_program:
+                for pulse_channel_id, pkg in program.packages.items():
                     filename = f"schedules/target_{pulse_channel_id}_@_{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
                     os.makedirs(os.path.dirname(filename), exist_ok=True)
                     with open(filename, "w") as f:
                         f.write(json.dumps(asdict(pkg.sequence)))
 
-            self.instrument.setup(executable)
+            self.instrument.setup(program)
             self.instrument.playback()
             payback: Dict[str, List[Acquisition]] = self.instrument.collect()
             for pulse_channel_id, acquisitions in payback.items():

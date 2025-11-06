@@ -3,15 +3,26 @@
 
 
 import numpy as np
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from qat.executables import AcquireData, ChannelData, ChannelExecutable
+from qat.executables import AbstractProgram
+from qat.ir.measure import AcquireMode
 from qat.utils.pydantic import ComplexNDArray
 
 
-class WaveformV1ChannelData(ChannelData):
+class PositionalAcquireData(BaseModel):
+    """Contains the position to acquire from the readout signal, and the length of the
+    readout."""
+
+    output_variable: str
+    position: int
+    length: int
+    mode: AcquireMode
+
+
+class WaveformV1ChannelData(BaseModel):
     """
-    Contains the channel data for a :class:`WaveformV1Executable`.
+    Contains the channel data for a :class:`WaveformV1Program`.
 
     Stores the waveforms and acqusitions needed for execution. No control flow is possible.
 
@@ -25,7 +36,7 @@ class WaveformV1ChannelData(ChannelData):
 
     buffer: ComplexNDArray = Field(default_factory=lambda: ComplexNDArray([]))
     baseband_frequency: float | None = None
-    acquires: list[AcquireData] = []
+    acquires: list[PositionalAcquireData] = Field(default_factory=list)
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):
@@ -39,34 +50,41 @@ class WaveformV1ChannelData(ChannelData):
         return True
 
 
-class WaveformV1Executable(ChannelExecutable):
-    """
-    A :class:`WaveformV1Executable` is an executable used in early iterations of QAT.
+class WaveformV1Program(AbstractProgram):
+    """Contains the information to execute a task using the V1 hardware.
 
-    This type of executable is composed of explicit waveforms that are compiled for each
-    pulse channel, and summed to provide the waveform "buffer" for each physical channel.
-    This early iteration can only instruct waveforms to be executed at a particular time;
-    control flow is not possible. However, simple post-processing of results after execution
-    is provided.
+    Contains the buffers and acquire information for each channel, the repetition period for
+    each shot and the number of shots to execute.
 
-    :param channel_data: Stores the data required by the control hardware for each pulse
-        channel.
-    :type channel_data: dict[str, WaveformV1ChannelData]
-    :param int shots: The number of times the program is executed.
-    :param float repetition_time: The amount of time to wait between shots for the QPU to
-        reset.
-    :param PositiveInt compiled_shots: When the required number of shots exceeds the
-        allowed amount by the target machine, shots can be batched into groups. This states
-        how many shots to do in each batch.
-    :param post_processing: Contains the post-processing information for each acquisition.
-    :type post_processing: dict[str, list[PostProcessing]]
-    :param results_processing: Contains the information for how results should be formatted.
-    :type results_processing: dict[str, InlineResultsProcessing]
-    :param assigns: Assigns results to given variables.
-    :type assigns: list[Assign]
-    :param returns: Which acquisitions/variables should be returned.
-    :type returns: list[str]
+    :param channel_data: Contains the waveform buffers, acquisitions and baseband
+        frequencies for each physical channel.
+    :param repetition_time: The time each shot takes to execute.
+    :param shots: The number of shots to be executed as part of the program.
     """
 
     channel_data: dict[str, WaveformV1ChannelData]
-    repetition_time: float = 100e-6
+    repetition_time: float
+    shots: int
+
+    @property
+    def acquires(self) -> list[PositionalAcquireData]:
+        acquires: list[PositionalAcquireData] = []
+        for channel in self.channel_data.values():
+            acquires.extend(channel.acquires)
+        return acquires
+
+    @property
+    def acquire_shapes(self) -> dict[str, tuple[int, ...]]:
+        acquire_shapes = {}
+        for data in self.channel_data.values():
+            for acquire in data.acquires:
+                if acquire.mode == AcquireMode.SCOPE:
+                    acquire_shapes[acquire.output_variable] = (acquire.length,)
+                elif acquire.mode == AcquireMode.RAW:
+                    acquire_shapes[acquire.output_variable] = (
+                        self.shots,
+                        acquire.length,
+                    )
+                else:
+                    acquire_shapes[acquire.output_variable] = (self.shots,)
+        return acquire_shapes

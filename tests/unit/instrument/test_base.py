@@ -87,11 +87,11 @@ class TestInstrument:
     def test_setup(self, qblox_model, qblox_instrument):
         backend = QbloxBackend1(qblox_model)
         builder = resonator_spect(qblox_model)
-        ordered_executables = self._do_emit(qblox_model, backend, builder)
+        executable = self._do_emit(qblox_model, backend, builder)
 
-        for executable in ordered_executables.values():
+        for program in executable.programs:
             assert len(qblox_instrument.id2seq) == 0
-            qblox_instrument.setup(executable)
+            qblox_instrument.setup(program)
             assert len(qblox_instrument.id2seq) == 1
 
             # Unexpecting wf mem as the square pulse in res spec is done via Q1ASM
@@ -103,7 +103,7 @@ class TestInstrument:
             assert sequencer.get_acquisitions()
 
             # Expecting injected configuration such as integration length (aka. acquire width)
-            acq_pkg = executable.packages[pulse_channel_id]
+            acq_pkg = program.packages[pulse_channel_id]
             assert (
                 sequencer.integration_length_acq()
                 == acq_pkg.seq_config.square_weight_acq.integration_length
@@ -115,14 +115,14 @@ class TestInstrument:
     def test_playback(self, qblox_model, qblox_instrument):
         backend = QbloxBackend1(qblox_model)
         builder = resonator_spect(qblox_model)
-        ordered_executables = self._do_emit(qblox_model, backend, builder)
-        for executable in ordered_executables.values():
+        executable = self._do_emit(qblox_model, backend, builder)
+        for program in executable.programs:
             # Fail if no resource had been allocated leading up to playback
             with pytest.raises(ValueError):
                 qblox_instrument.playback()
 
-            qblox_instrument.setup(executable)
-            channel, sequencer = next(((k, v) for k, v in qblox_instrument.id2seq.items()))
+            qblox_instrument.setup(program)
+            _, sequencer = next(((k, v) for k, v in qblox_instrument.id2seq.items()))
 
             qblox_instrument.playback()  # IDLE ---arm--> ARMED ---start--> STOPPED
 
@@ -140,9 +140,9 @@ class TestInstrument:
     def test_collect(self, qblox_model, qblox_instrument):
         backend = QbloxBackend1(qblox_model)
         builder = resonator_spect(qblox_model)
-        ordered_executables = self._do_emit(qblox_model, backend, builder)
-        for executable in ordered_executables.values():
-            qblox_instrument.setup(executable)
+        executable = self._do_emit(qblox_model, backend, builder)
+        for program in executable.programs:
+            qblox_instrument.setup(program)
             qblox_instrument.playback()
             results = qblox_instrument.collect()
             assert results

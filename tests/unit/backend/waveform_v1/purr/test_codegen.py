@@ -8,27 +8,20 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.passes.purr.analysis import (
     IntermediateFrequencyResult,
-    PulseChannelTimeline,
     TimelineAnalysisResult,
 )
-from qat.backend.waveform_v1.executable import WaveformV1Executable
-from qat.backend.waveform_v1.purr.codegen import (
-    WaveformContext,
-    WaveformV1Backend,
-)
+from qat.backend.waveform_v1.executable import PositionalAcquireData, WaveformV1Program
+from qat.backend.waveform_v1.purr.codegen import WaveformContext, WaveformV1Backend
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
-from qat.executables import AcquireData
+from qat.executables import Executable
 from qat.ir.lowered import PartitionedIR
-from qat.middleend.passes.purr.transform import (
-    LowerSyncsToDelays,
-    RepeatTranslation,
-)
+from qat.ir.measure import AcquireMode
+from qat.middleend.passes.purr.transform import LowerSyncsToDelays, RepeatTranslation
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.instructions import (
-    Acquire,
     Delay,
     PhaseSet,
     PhaseShift,
@@ -41,23 +34,6 @@ from qat.purr.compiler.instructions import (
 )
 
 from tests.unit.utils.pulses import pulse_attributes
-
-
-class TestWaveformV1Executable:
-    def test_same_after_serialize_deserialize_roundtrip(self):
-        model = EchoModelLoader(10).load()
-        builder = model.create_builder()
-        builder.repeat(1000, 100e-6)
-        builder.had(model.get_qubit(0))
-        for i in range(9):
-            builder.cnot(model.get_qubit(i), model.get_qubit(i + 1))
-        # backend is not expected to see syncs, so lets remove them using this pass for
-        # ease
-        builder = LowerSyncsToDelays().run(builder)
-        executable = WaveformV1Backend(model).emit(builder)
-        blob = executable.serialize()
-        new_executable = WaveformV1Executable.deserialize(blob)
-        assert executable == new_executable
 
 
 class TestWaveformV1Backend:
@@ -138,9 +114,10 @@ class TestWaveformV1Backend:
             builder = RepeatTranslation(TargetData.default()).run(builder)
 
         executable = self.backend.emit(builder)
-        assert isinstance(executable, WaveformV1Executable)
-        assert executable.shots == 1000
-        assert executable.compiled_shots == 1000
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == 1
+        assert isinstance(executable.programs[0], WaveformV1Program)
+        assert executable.programs[0].shots == 1000
 
     def test_pipeline_gives_partitioned_ir(self, partitioned_ir):
         assert isinstance(partitioned_ir, PartitionedIR)
@@ -223,89 +200,95 @@ class TestWaveformV1Backend:
             else:
                 assert buffer.size == 0
 
-    def test_create_acquire_dict(self):
-        acquire_chan_1 = self.model.qubits[0].get_acquire_channel()
-        acquire_chan_2 = self.model.qubits[1].get_acquire_channel()
-        acquire_1 = Acquire(acquire_chan_1, 80e-9, delay=0.0, output_variable="test_var1")
-        acquire_2 = Acquire(acquire_chan_2, 88e-9, delay=0.0, output_variable="test_var2")
-        target_map = {
-            acquire_chan_1: [Delay(acquire_chan_1, 40e-9), acquire_1],
-            acquire_chan_2: [Delay(acquire_chan_1, 56e-9), acquire_2],
-        }
-        acquire_map = {acquire_chan_1: [acquire_1], acquire_chan_2: [acquire_2]}
-        ir = PartitionedIR(target_map=target_map, acquire_map=acquire_map)
-        timeline_res = TimelineAnalysisResult(
-            target_map={
-                acquire_chan_1: PulseChannelTimeline(samples=[10, 5]),
-                acquire_chan_2: PulseChannelTimeline(samples=[11, 7]),
-            }
-        )
-        acquire_dict = self.backend.create_acquire_dict(ir, timeline_res)
-        assert len(acquire_dict) == 2
-        assert acquire_chan_1.physical_channel in acquire_dict
-        assert acquire_chan_2.physical_channel in acquire_dict
-        assert acquire_dict[acquire_chan_1.physical_channel][0].length == 5
-        assert acquire_dict[acquire_chan_2.physical_channel][0].length == 7
-        assert acquire_dict[acquire_chan_1.physical_channel][0].position == 10
-        assert acquire_dict[acquire_chan_2.physical_channel][0].position == 11
+    def test_emit_gives_executable(self, executable: Executable[WaveformV1Program]):
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == 1
+        assert isinstance(executable.programs[0], WaveformV1Program)
 
-    def test_emit_gives_executable(self, executable):
-        assert isinstance(executable, WaveformV1Executable)
+    def test_executable_repeats(self, executable: Executable[WaveformV1Program]):
+        assert executable.programs[0].shots == 1254
 
-    def test_executable_repeats(self, executable):
-        assert executable.shots == 1254
+    def test_acquires(self, executable: Executable[WaveformV1Program]):
+        assert len(executable.acquires) == 1
+        assert "test_var" in executable.acquires
+        acquire = executable.acquires["test_var"]
+        assert acquire.shape == (1254, 360)
+        assert acquire.mode == AcquireMode.RAW
 
-    def test_executable_post_processing(self, executable):
-        assert len(executable.post_processing) == 1
-        assert "test_var" in executable.post_processing
-        pp = executable.post_processing["test_var"]
+    def test_executable_post_processing(self, executable: Executable[WaveformV1Program]):
+        pp = executable.acquires["test_var"].post_processing
         assert len(pp) == 1
         pp = pp[0]
         assert pp.process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
         assert pp.axes == [ProcessAxis.SEQUENCE]
         assert pp.args == [0.254, -123.455]
 
-    def test_executable_results_processing(self, executable):
-        assert len(executable.results_processing) == 1
-        assert "test_var" in executable.results_processing
-        rp = executable.results_processing["test_var"]
+    def test_executable_results_processing(self, executable: Executable[WaveformV1Program]):
+        rp = executable.acquires["test_var"].results_processing
         assert rp == InlineResultsProcessing.Binary
 
-    def test_executable_returns(self, executable):
+    def test_executable_returns(self, executable: Executable[WaveformV1Program]):
         assert len(executable.returns) == 1
         assert "test_var" in executable.returns
 
-    def test_executable_calibration_id(self, executable):
+    def test_executable_calibration_id(self, executable: Executable[WaveformV1Program]):
         assert executable.calibration_id == self.model.calibration_id
 
-    def test_executable_channel_data(self, executable):
+    def test_executable_channel_data(self, executable: Executable[WaveformV1Program]):
         # Both legacy and new backend creates data for every physical channel, even if
         # not used.
-        assert len(executable.channel_data) == len(self.model.physical_channels)
+        program = executable.programs[0]
+        assert len(program.channel_data) == len(self.model.physical_channels)
         channels = [
             self.model.qubits[0].get_drive_channel().physical_channel.full_id(),
             self.model.qubits[0].get_measure_channel().physical_channel.full_id(),
         ]
         for channel in channels:
-            assert len(executable.channel_data[channel].buffer) > 0
+            assert len(program.channel_data[channel].buffer) > 0
 
-    def test_executable_acquires(self, executable):
-        assert len(executable.acquires) == 1
-        acquire = executable.acquires[0]
-        assert isinstance(acquire, AcquireData)
+    def test_program_acquires(self, executable: Executable[WaveformV1Program]):
+        program = executable.programs[0]
+        assert len(program.acquires) == 1
+        acquire = program.acquires[0]
+        assert isinstance(acquire, PositionalAcquireData)
         assert acquire.output_variable == "test_var"
         assert acquire.length == 360
         assert acquire.position == 160
 
     def test_batched_shots(self):
         builder = self.model.create_builder()
-        builder.shots = 15000
+        builder.shots = 14500
         builder.compiled_shots = 1000
         builder.repetition_period = 100e-6
         builder.pulse(self.channel, width=80e-9, shape=PulseShapeType.SQUARE)
+        builder.acquire(
+            self.model.qubits[0].get_acquire_channel(),
+            time=200e-9,
+            delay=0.0,
+            output_variable="test",
+            mode=AcquireMode.RAW,
+        )
         executable = self.backend.emit(builder)
-        assert executable.shots == 15000
-        assert executable.compiled_shots == 1000
+
+        assert isinstance(executable.programs, list)
+        assert len(executable.programs) == 15
+
+        assert len(executable.acquires) == 1
+        assert "test" in executable.acquires
+        acquire = executable.acquires["test"]
+        assert acquire.shape == (14500, 200)
+        assert acquire.mode == AcquireMode.RAW
+
+        for i in range(14):
+            program = executable.programs[i]
+            assert isinstance(program, WaveformV1Program)
+            assert program.shots == 1000
+            assert program.acquire_shapes["test"] == (1000, 200)
+
+        program = executable.programs[14]
+        assert isinstance(program, WaveformV1Program)
+        assert program.shots == 500
+        assert program.acquire_shapes["test"] == (500, 200)
 
 
 class TestWaveformContext:

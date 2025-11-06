@@ -20,7 +20,7 @@ from qat.core.config.session import QatSessionConfig
 from qat.core.pipeline import HardwareLoaders, PipelineManager
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
-from qat.executables import ChannelExecutable, Executable
+from qat.executables import Executable
 from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
@@ -290,7 +290,7 @@ class TestQATPipelineSetup:
         assert pkg == src
 
     def test_execute(self, fallthrough_pipeline):
-        pkg = ChannelExecutable()
+        pkg = Executable()
         q = QAT()
         q.pipelines.add(fallthrough_pipeline)
         res, _ = q.execute(pkg, pipeline="fallthrough")

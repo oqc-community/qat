@@ -10,7 +10,7 @@ from pydantic import ConfigDict
 from qat.backend.passes.purr.analysis import TriageResult
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.ir import Sequence
-from qat.executables import AcquireData, ChannelExecutable
+from qat.executables import AbstractProgram
 
 
 @dataclass
@@ -26,12 +26,13 @@ class QbloxPackage:
     timeline: Optional[np.ndarray] = None
 
 
-class QbloxExecutable(ChannelExecutable):
+class QbloxProgram(AbstractProgram):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
+    # COMPILER 828: change to pydantic objects (not dataclasses)
     packages: Dict[str, QbloxPackage]
     triage_result: TriageResult
 
     @property
-    def acquires(self) -> list[AcquireData]:
-        return []
+    def acquire_shapes(self) -> dict[str, tuple[int, ...]]:
+        return {}

@@ -3,7 +3,7 @@
 import pytest
 
 from qat.core.result_base import ResultManager
-from qat.executables import AcquireData, ChannelData, ChannelExecutable
+from qat.executables import AcquireData, Executable
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.measure import AcquireMode
 from qat.model.loaders.lucy import LucyModelLoader
@@ -13,7 +13,7 @@ from qat.runtime.passes.analysis import IndexMappingAnalysis, IndexMappingResult
 class TestIndexMappingAnalysis:
     @pytest.fixture(scope="class")
     def model(self):
-        return LucyModelLoader(2).load()
+        return LucyModelLoader(4).load()
 
     @pytest.fixture(scope="class")
     def ir(self, model):
@@ -27,34 +27,26 @@ class TestIndexMappingAnalysis:
 
     @pytest.fixture(scope="class")
     def executable(self, model):
-        acquires = [
-            AcquireData(
-                length=1,
-                position=0,
+        acquires = {
+            f"test{i}": AcquireData(
                 mode=AcquireMode.INTEGRATOR,
-                output_variable=f"test{i}",
+                shape=(1000,),
+                physical_channel=model.qubit_with_index(i).resonator.physical_channel.uuid,
             )
             for i in range(3)
-        ]
+        }
 
-        channel1 = ChannelData(acquires=[acquires[0], acquires[1]])
-        channel2 = ChannelData(acquires=[acquires[2]])
-        phys_ch_ids = [
-            model.qubit_with_index(i).resonator.physical_channel.uuid for i in range(2)
-        ]
-        package = ChannelExecutable(
-            channel_data={phys_ch_ids[0]: channel1, phys_ch_ids[1]: channel2}
-        )
-        return package
+        return Executable(programs=[], acquires=acquires)
 
     def test_var_to_physical_channel_executable(self, model, executable):
         mapping = IndexMappingAnalysis.var_to_physical_channel_executable(executable)
         assert len(mapping) == 3
         for i in range(3):
             assert f"test{i}" in mapping
-        assert mapping["test0"] == model.qubit_with_index(0).resonator.physical_channel.uuid
-        assert mapping["test1"] == model.qubit_with_index(0).resonator.physical_channel.uuid
-        assert mapping["test2"] == model.qubit_with_index(1).resonator.physical_channel.uuid
+            assert (
+                mapping[f"test{i}"]
+                == model.qubit_with_index(i).resonator.physical_channel.uuid
+            )
 
     def test_var_to_physical_channel_qat_ir(self, model, ir):
         phys_ch1_id = model.qubit_with_index(0).resonator.physical_channel.uuid
@@ -98,6 +90,4 @@ class TestIndexMappingAnalysis:
         assert len(mapping) == 3
         for i in range(3):
             assert f"test{i}" in mapping
-        assert mapping["test0"] == 0
-        assert mapping["test1"] == 0
-        assert mapping["test2"] == 1
+            assert mapping[f"test{i}"] == i

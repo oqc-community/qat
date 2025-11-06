@@ -18,7 +18,7 @@ from qat.backend.qblox.config.helpers import (
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
-from qat.backend.qblox.execution import QbloxExecutable
+from qat.backend.qblox.execution import QbloxProgram
 from qat.instrument.base import (
     CompositeInstrument,
     LeafInstrument,
@@ -113,11 +113,11 @@ class QbloxLeafInstrument(LeafInstrument):
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )
 
-    def setup(self, executable: QbloxExecutable):
+    def setup(self, program: QbloxProgram):
         try:
             self._id2seq.clear()
             self._reset_modules()
-            for pkg in executable.packages.values():
+            for pkg in program.packages.values():
                 self.configure(pkg)
         except BaseException as e:
             self._id2seq.clear()

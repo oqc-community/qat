@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from typing import Dict, List
 
 import numpy as np
 from compiler_config.config import (
@@ -47,20 +46,20 @@ class PostProcessingTransform(TransformPass):
             target_data.RESONATOR_DATA.sample_time if target_data is not None else None
         )
 
-    def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
+    def run(self, acquisitions: dict[str, any], *args, package: Executable, **kwargs):
         """
         :param acquisitions: The dictionary of results acquired from the target machine.
         :param package: The executable program containing the results-processing
             information should be passed as a keyword argument.
         """
 
-        for acquire in package.acquires:
-            response = acquisitions[acquire.output_variable]
+        for output_variable, acquire in package.acquires.items():
+            response = acquisitions[output_variable]
 
             # Starting from all axes, we iterate through each post-processing, keeping track
             # of what axes remain as we go
             response_axes = get_axis_map(acquire.mode, response)
-            for pp in package.post_processing.get(acquire.output_variable, []):
+            for pp in acquire.post_processing:
                 if (
                     pp.process_type == PostProcessType.DOWN_CONVERT
                     and len(args) == 1
@@ -68,7 +67,7 @@ class PostProcessingTransform(TransformPass):
                 ):  # COMPILER-757 backwards compatibility
                     pp.args.append(self.sample_time)
                 response, response_axes = apply_post_processing(response, pp, response_axes)
-            acquisitions[acquire.output_variable] = response
+            acquisitions[output_variable] = response
 
         return acquisitions
 
@@ -78,7 +77,7 @@ class InlineResultsProcessingTransform(TransformPass):
     format the acquired results in the desired format.
     """
 
-    def run(self, acquisitions: Dict[str, any], *args, package: Executable, **kwargs):
+    def run(self, acquisitions: dict[str, any], *args, package: Executable, **kwargs):
         """
         :param acquisitions: The dictionary of results acquired from the target machine.
         :param package: The executable program containing the results-processing
@@ -89,10 +88,9 @@ class InlineResultsProcessingTransform(TransformPass):
         for output_variable in acquisitions:
             target_values = acquisitions[output_variable]
 
-            # TODO: ResultProcessing sanitisation and validation passes
-            rp = package.results_processing.get(
-                output_variable, InlineResultsProcessing.Experiment
-            )
+            rp = package.acquires[output_variable].results_processing
+            if rp is None:
+                rp = InlineResultsProcessing.Experiment
 
             if InlineResultsProcessing.Raw in rp and InlineResultsProcessing.Binary in rp:
                 raise ValueError(
@@ -132,7 +130,7 @@ class AssignResultsTransform(TransformPass):
 
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
-            if isinstance(value, List):
+            if isinstance(value, list):
                 return [recurse_arrays(results_map, val) for val in value]
             elif isinstance(value, tuple):
                 return results_map[value[0]][value[1]]
@@ -157,7 +155,7 @@ class ResultTransform(TransformPass):
     """
 
     def run(
-        self, acquisitions: Dict[str, any], *args, compiler_config: CompilerConfig, **kwargs
+        self, acquisitions: dict[str, any], *args, compiler_config: CompilerConfig, **kwargs
     ):
         """
         :param acquisitions: The dictionary of results acquired from the target machine.
@@ -240,7 +238,7 @@ class ErrorMitigation(TransformPass):
 
     def run(
         self,
-        acquisitions: Dict[str, any],
+        acquisitions: dict[str, any],
         res_mgr: ResultManager,
         *args,
         compiler_config: CompilerConfig,

@@ -3,7 +3,8 @@
 import pytest
 
 from qat import QAT
-from qat.backend.waveform_v1 import WaveformV1Backend, WaveformV1Executable
+from qat.backend.waveform_v1 import WaveformV1Backend, WaveformV1Program 
+from qat.executables import Executable
 from qat.engines.waveform_v1 import EchoEngine
 from qat.pipelines import EchoCompile, EchoExecute, EchoPostProcessing
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -46,8 +47,8 @@ class TestQFT:
             )
 
             def run():
-                package, _ = qat.compile(circuit, pipeline="test")
-                package.serialize()
+                executable, _ = qat.compile(circuit, pipeline="test")
+                executable.serialize()
 
         benchmark(run)
         assert True
@@ -75,13 +76,12 @@ class TestQFT:
                 emitter=WaveformV1Backend(self.hw),
             )
 
-            package, _ = qat.compile(circuit, pipeline="test")
-            blob = package.serialize()
+            executable, _ = qat.compile(circuit, pipeline="test")
+            blob = executable.serialize()
 
             def run():
-                package = WaveformV1Executable.deserialize(blob)
-                print(package.assigns[0].value)
-                qat.execute(package, pipeline="test")
+                executable = Executable.deserialize(blob)
+                qat.execute(executable, pipeline="test")
 
         benchmark(run)
         assert True

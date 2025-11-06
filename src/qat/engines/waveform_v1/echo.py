@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import numpy as np
 
-from qat.backend.waveform_v1 import WaveformV1Executable
+from qat.backend.waveform_v1 import WaveformV1Program
 from qat.engines.native import NativeEngine
 from qat.purr.compiler.instructions import AcquireMode
 from qat.purr.utils.logger import get_default_logger
@@ -10,33 +10,45 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class EchoEngine(NativeEngine):
+class EchoEngine(NativeEngine[WaveformV1Program]):
     """The :class:`EchoEngine` is a minimal execution engine primarily used for testing the
     compilation pipeline.
 
     It is not connected to any target machine such as live hardware or a simulator, and just
-    simply "echos" back the buffers. Currently only accepts :class:`WaveformV1Executables`,
-    but this may be changed in the future.
+    simply "echos" back the buffers. It only accepts :class:`WaveformV1Program` programs.
+
+    It checks the shape of the results generated match the expected shapes from codegen,
+    to test consistency across the compilation and execution pipeline.
     """
 
-    def execute(self, package: WaveformV1Executable):
+    def execute(self, program: WaveformV1Program, **kwargs) -> dict[str, np.ndarray]:
         """
-        Execute a :class:`WaveformV1Executable`.
+        Execute a :class:`WaveformV1Program`.
 
-        :param WaveformV1Executable package: The compiled executable.
-        :returns: Execution results.
-        :rtype: dict[str, np.ndarray]
+        :param program: The compiled program.
+        :returns: The execution results.
         """
-        shots = package.compiled_shots if package.compiled_shots else package.shots
         results = {}
-        for channel_data in package.channel_data.values():
+        acquire_shapes = program.acquire_shapes
+        for channel_data in program.channel_data.values():
             buffer = np.asarray(channel_data.buffer)
             for acquire in channel_data.acquires:
                 results[acquire.output_variable] = process_readout(
                     buffer[acquire.position : acquire.position + acquire.length],
-                    shots,
+                    program.shots,
                     acquire.mode,
                 )
+
+                if (
+                    results[acquire.output_variable].shape
+                    != acquire_shapes[acquire.output_variable]
+                ):
+                    raise ValueError(
+                        f"Acquired data shape {results[acquire.output_variable].shape} "
+                        f"does not match expected shape {acquire.shape} "
+                        f"for variable {acquire.output_variable}."
+                    )
+
         return results
 
 

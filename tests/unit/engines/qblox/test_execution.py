@@ -69,7 +69,8 @@ def _do_emit(model, backend: BaseBackend, builder):
     met_mgr = MetricsManager()
     middleend_pipeline(model).run(builder, res_mgr, met_mgr)
     triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-    return backend.emit(builder, res_mgr, met_mgr), triage_result
+    executable = backend.emit(builder, res_mgr, met_mgr)
+    return executable.programs, triage_result
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

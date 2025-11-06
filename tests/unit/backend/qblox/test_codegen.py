@@ -73,17 +73,17 @@ class TestQbloxBackend1:
         with pytest.raises(ValueError):
             self._do_emit(builder, qblox_model)
 
-    def test_play_guassian(self, qblox_model):
+    def test_play_gaussian(self, qblox_model):
         width = 100e-9
         rise = 1.0 / 5.0
         drive_channel = qblox_model.get_qubit(0).get_drive_channel()
         gaussian = Pulse(drive_channel, PulseShapeType.GAUSSIAN, width=width, rise=rise)
         builder = qblox_model.create_builder().add(gaussian)
 
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 1
-            pulse_channel_id, pkg = next(iter(executable.packages.items()))
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == 1
+            pulse_channel_id, pkg = next(iter(program.packages.items()))
             assert pulse_channel_id == drive_channel.full_id()
             assert f"GAUSSIAN_{hash(gaussian)}_I" in pkg.sequence.waveforms
             assert f"GAUSSIAN_{hash(gaussian)}_Q" in pkg.sequence.waveforms
@@ -95,21 +95,23 @@ class TestQbloxBackend1:
         num_points = 50
 
         drive_channel = qblox_model.get_qubit(0).get_drive_channel()
-        time, step = np.linspace(start_width, end_width, num_points, retstep=True)
+        time, _ = np.linspace(start_width, end_width, num_points, retstep=True)
         builder = get_builder(qblox_model)
         builder.sweep(SweepValue("t", time))
         builder.pulse(drive_channel, PulseShapeType.SQUARE, width=Variable("t"), amp=amp)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        assert len(ordered_executables) == num_points
+        executable = self._do_emit(builder, qblox_model)
+        assert len(executable.programs) == num_points
 
-        ignored_indices = np.squeeze(np.where(time < Constants.GRID_TIME * 1e-9)) + 1
+        ignored_indices = np.squeeze(np.where(time < Constants.GRID_TIME * 1e-9))
+        non_ignored_indices = np.squeeze(np.where(time >= Constants.GRID_TIME * 1e-9))
+        assert len(ignored_indices) + len(non_ignored_indices) == num_points
+
         for i in ignored_indices:
-            assert not ordered_executables[i].packages
+            assert not executable.programs[i].packages
 
-        non_ignored_indices = np.squeeze(np.where(time >= Constants.GRID_TIME * 1e-9)) + 1
         for i in non_ignored_indices:
-            assert len(ordered_executables[i].packages) == 1
-            pkg = ordered_executables[i].packages[drive_channel.full_id()]
+            assert len(executable.programs[i].packages) == 1
+            pkg = executable.programs[i].packages[drive_channel.full_id()]
             assert not pkg.sequence.waveforms
             assert f"set_awg_offs {Constants.MAX_OFFSET},0" in pkg.sequence.program
             assert "set_awg_offs 0,0" in pkg.sequence.program
@@ -130,9 +132,9 @@ class TestQbloxBackend1:
             .pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp)
             .pulse(drive_channel, PulseShapeType.GAUSSIAN, width=150e-9, rise=rise)
         )
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            for pkg in executable.packages.values():
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            for pkg in program.packages.values():
                 expected_phase = QbloxLegalisationPass.phase_as_steps(phase)
                 assert f"set_ph_delta {expected_phase}" in pkg.sequence.program
                 expected_freq = QbloxLegalisationPass.freq_as_steps(
@@ -152,9 +154,9 @@ class TestQbloxBackend1:
 
         builder = qblox_model.create_builder()
         builder.acquire(acquire_channel, time, delay=delay)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 0
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == 0
 
         builder = qblox_model.create_builder()
         builder.add(
@@ -163,11 +165,11 @@ class TestQbloxBackend1:
                 Acquire(acquire_channel, time=time, delay=delay),
             ]
         )
-        ordered_executables = self._do_emit(builder, qblox_model)
+        executable = self._do_emit(builder, qblox_model)
         remaining_width = int(qubit.pulse_measure["width"] * 1e9) - int(delay * 1e9)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 1
-            pkg = next(iter(executable.packages.values()))
+        for program in executable.programs:
+            assert len(program.packages) == 1
+            pkg = next(iter(program.packages.values()))
             assert not pkg.sequence.waveforms
             assert qubit.pulse_measure["shape"] == PulseShapeType.SQUARE
             assert (
@@ -205,17 +207,17 @@ class TestQbloxBackend1:
             builder.pulse(drive_channel, PulseShapeType.GAUSSIAN, width=val, rise=1.0 / 5.0)
 
         with context:
-            ordered_executables = self._do_emit(builder, qblox_model)
-            for executable in ordered_executables.values():
-                assert len(executable.packages) == 1
+            executable = self._do_emit(builder, qblox_model)
+            for program in executable.programs:
+                assert len(program.packages) == 1
 
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_resonator_spect(self, qblox_model, qubit_indices):
         qubit_indices = [0, 1]
         builder = resonator_spect(qblox_model, qubit_indices)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == len(qubit_indices)
 
             for i, index in enumerate(qubit_indices):
                 qubit = qblox_model.get_qubit(index)
@@ -223,7 +225,7 @@ class TestQbloxBackend1:
                 acquire_pkg = next(
                     (
                         pkg
-                        for pulse_channel_id, pkg in executable.packages.items()
+                        for pulse_channel_id, pkg in program.packages.items()
                         if pulse_channel_id == acquire_channel.full_id()
                     )
                 )
@@ -252,9 +254,9 @@ class TestQbloxBackend1:
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_qubit_spect(self, qblox_model, qubit_indices):
         builder = qubit_spect(qblox_model, qubit_indices)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2 * len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == 2 * len(qubit_indices)
 
             for i, index in enumerate(qubit_indices):
                 qubit = qblox_model.get_qubit(index)
@@ -264,7 +266,7 @@ class TestQbloxBackend1:
                 drive_pkg = next(
                     (
                         pkg
-                        for pulse_channel_id, pkg in executable.packages.items()
+                        for pulse_channel_id, pkg in program.packages.items()
                         if pulse_channel_id == drive_channel.full_id()
                     )
                 )
@@ -291,7 +293,7 @@ class TestQbloxBackend1:
                 acquire_pkg = next(
                     (
                         pkg
-                        for pulse_channel_id, pkg in executable.packages.items()
+                        for pulse_channel_id, pkg in program.packages.items()
                         if pulse_channel_id == acquire_channel.full_id()
                     )
                 )
@@ -319,17 +321,17 @@ class TestQbloxBackend1:
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
     def test_scope_acquisition(self, qblox_model, qubit_indices):
         builder = measure_acquire(qblox_model, qubit_indices)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == len(qubit_indices)
 
-            acquire_pkg = next((pkg for pkg in executable.packages.values()))
+            acquire_pkg = next((pkg for pkg in program.packages.values()))
             assert "weighed_acquire" not in acquire_pkg.sequence.program
 
         builder = measure_acquire(qblox_model, qubit_indices, do_X=True)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2 * len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == 2 * len(qubit_indices)
 
             # Enable weights
             builder = measure_acquire(qblox_model, qubit_indices)
@@ -344,17 +346,17 @@ class TestQbloxBackend1:
                 qubit.measure_acquire["weights"] = weights
                 acquire.filter = CustomPulse(acquire.channel, weights)
 
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            acquire_pkg = next((pkg for pkg in executable.packages.values()))
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            acquire_pkg = next((pkg for pkg in program.packages.values()))
             assert "acquire_weighed" in acquire_pkg.sequence.program
 
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_multi_readout(self, qblox_model, qubit_indices):
         builder = multi_readout(qblox_model, qubit_indices, do_X=False)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == len(qubit_indices)
 
             for index in qubit_indices:
                 qubit = qblox_model.get_qubit(index)
@@ -364,7 +366,7 @@ class TestQbloxBackend1:
                 measure_pkg = next(
                     (
                         pkg
-                        for pulse_channel_id, pkg in executable.packages.items()
+                        for pulse_channel_id, pkg in program.packages.items()
                         if pulse_channel_id == measure_channel.full_id()
                     )
                 )
@@ -378,9 +380,9 @@ class TestQbloxBackend1:
         old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
         try:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = False
-            ordered_executables = self._do_emit(builder, qblox_model)
-            for executable in ordered_executables.values():
-                assert len(executable.packages) == 2 * len(qubit_indices)
+            executable = self._do_emit(builder, qblox_model)
+            for program in executable.programs:
+                assert len(program.packages) == 2 * len(qubit_indices)
 
                 for index in qubit_indices:
                     qubit = qblox_model.get_qubit(index)
@@ -390,7 +392,7 @@ class TestQbloxBackend1:
                     measure_pkg = next(
                         (
                             pkg
-                            for pulse_channel_id, pkg in executable.packages.items()
+                            for pulse_channel_id, pkg in program.packages.items()
                             if pulse_channel_id == measure_channel.full_id()
                         )
                     )
@@ -419,9 +421,9 @@ class TestQbloxBackend1:
                 self._do_emit(builder, qblox_model)
 
         else:
-            ordered_executables = self._do_emit(builder, qblox_model)
-            for executable in ordered_executables.values():
-                packages = executable.packages
+            executable = self._do_emit(builder, qblox_model)
+            for program in executable.programs:
+                packages = program.packages
                 if pulse_width < Constants.GRID_TIME:
                     assert len(packages) == 0
                 else:
@@ -441,14 +443,12 @@ class TestQbloxBackend1:
         acquire = next(inst for inst in builder.instructions if isinstance(inst, Acquire))
         acq_width = int(calculate_duration(acquire))
 
-        ordered_executables = self._do_emit(builder, qblox_model)
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == len(qubits)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == len(qubits)
             qub_pkg_zip = [
                 (qub, pkg)
-                for (qub, (pulse_channel_id, pkg)) in zip(
-                    qubits, executable.packages.items()
-                )
+                for (qub, (pulse_channel_id, pkg)) in zip(qubits, program.packages.items())
                 if qub.get_measure_channel()
                 == qblox_model.get_pulse_channel_from_id(pulse_channel_id)
             ]
@@ -485,12 +485,12 @@ class TestQbloxBackend2:
         builder = empty(qblox_model)
         assert len(builder.instructions) == 3
 
-        ordered_executables = self._do_emit(builder, qblox_model, ignore_empty=False)
-        assert len(ordered_executables) == 1
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2
+        executable = self._do_emit(builder, qblox_model, ignore_empty=False)
+        assert len(executable.programs) == 1
+        for program in executable.programs:
+            assert len(program.packages) == 2
 
-            for pkg in executable.packages.values():
+            for pkg in program.packages.values():
                 assert pkg.timeline.size == 4
                 assert not pkg.sequence.waveforms
                 assert not pkg.sequence.acquisitions
@@ -504,10 +504,10 @@ class TestQbloxBackend2:
     def test_resonator_spect(self, qblox_model, num_points, qubit_indices):
         builder = resonator_spect(qblox_model, qubit_indices, num_points)
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
-        ordered_executables = self._do_emit(builder, qblox_model)
-        assert len(ordered_executables) == 1
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        assert len(executable.programs) == 1
+        for program in executable.programs:
+            assert len(program.packages) == len(qubit_indices)
 
             for index in qubit_indices:
                 qubit = qblox_model.get_qubit(index)
@@ -515,7 +515,7 @@ class TestQbloxBackend2:
                 acquire_pkg = next(
                     (
                         pkg
-                        for pulse_channel_id, pkg in executable.packages.items()
+                        for pulse_channel_id, pkg in program.packages.items()
                         if pulse_channel_id == acquire_channel.full_id()
                     )
                 )
@@ -563,10 +563,10 @@ class TestQbloxBackend2:
 
         injectors = DeviceInjectors(static_dus)
         try:
-            ordered_executables = self._do_emit(builder, qblox_model)
-            assert len(ordered_executables) == 1
-            for executable in ordered_executables.values():
-                assert len(executable.packages) == 2 * len(qubit_indices)
+            executable = self._do_emit(builder, qblox_model)
+            assert len(executable.programs) == 1
+            for program in executable.programs:
+                assert len(program.packages) == 2 * len(qubit_indices)
 
                 for index in qubit_indices:
                     qubit = qblox_model.get_qubit(index)
@@ -577,7 +577,7 @@ class TestQbloxBackend2:
                     drive_pkg = next(
                         (
                             pkg
-                            for pulse_channel_id, pkg in executable.packages.items()
+                            for pulse_channel_id, pkg in program.packages.items()
                             if pulse_channel_id == drive_channel.full_id()
                         )
                     )
@@ -609,7 +609,7 @@ class TestQbloxBackend2:
                     acquire_pkg = next(
                         (
                             pkg
-                            for pulse_channel_id, pkg in executable.packages.items()
+                            for pulse_channel_id, pkg in program.packages.items()
                             if pulse_channel_id == acquire_channel.full_id()
                         )
                     )
@@ -643,34 +643,34 @@ class TestQbloxBackend2:
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_delay_iteration(self, qblox_model, num_points, qubit_indices):
         builder = delay_iteration(qblox_model, qubit_indices, num_points)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        assert len(ordered_executables) == 1
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2 * len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        assert len(executable.programs) == 1
+        for program in executable.programs:
+            assert len(program.packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_width_iteration(self, qblox_model, num_points, qubit_indices):
         builder = pulse_width_iteration(qblox_model, qubit_indices, num_points)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        assert len(ordered_executables) == 1
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2 * len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        assert len(executable.programs) == 1
+        for program in executable.programs:
+            assert len(program.packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_pulse_amplitude_iteration(self, qblox_model, num_points, qubit_indices):
         builder = pulse_amplitude_iteration(qblox_model, qubit_indices, num_points)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        assert len(ordered_executables) == 1
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2 * len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        assert len(executable.programs) == 1
+        for program in executable.programs:
+            assert len(program.packages) == 2 * len(qubit_indices)
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_time_and_phase_iteration(self, qblox_model, num_points, qubit_indices):
         builder = time_and_phase_iteration(qblox_model, qubit_indices, num_points)
-        ordered_executables = self._do_emit(builder, qblox_model)
-        assert len(ordered_executables) == 1
-        for executable in ordered_executables.values():
-            assert len(executable.packages) == 2 * len(qubit_indices)
+        executable = self._do_emit(builder, qblox_model)
+        assert len(executable.programs) == 1
+        for program in executable.programs:
+            assert len(program.packages) == 2 * len(qubit_indices)

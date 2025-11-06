@@ -15,9 +15,10 @@ log = get_default_logger()
 
 
 class EchoExecutePipeline(UpdateablePipeline):
-    """A pipeline that executes
-    :class:`WaveformV1Executable <qat.backend.waveform_v1.executeable.WaveformV1Executable>`
-    using the :class:`EchoEngine`.
+    """A pipeline that executes :class:`Executable <qat.executables.Executable>` with
+    :class:`WaveformV1Program <qat.backend.waveform_v1.executable.WaveformV1Program>`
+    packages using the :class:`EchoEngine`, which simply passes through the waveform
+    buffers.
 
     An engine cannot be provided to the pipeline, as the EchoEngine is used directly.
 

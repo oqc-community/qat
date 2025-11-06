@@ -4,8 +4,8 @@
 import numpy as np
 import pytest
 
-from qat.backend.waveform_v1.executable import WaveformV1Executable
-from qat.executables import BatchedExecutable
+from qat.backend.waveform_v1.executable import WaveformV1Program
+from qat.executables import Executable
 from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.purr.sweep.compile import CompileSweepPipeline
@@ -50,32 +50,28 @@ class TestCompileSweepPipeline:
         ):
             CompileSweepPipeline(base_pipeline=base_pipeline)
 
-    def test_compile_rejects_non_builders(self, pipeline):
-        with pytest.raises(
-            TypeError,
-            match="SweepCompilePipeline expects to see an InstructionBuilder with sweeps.",
-        ):
-            pipeline.compile(program="not a builder")
-
     def test_single_sweep(self, pipeline, model):
         """Tests the sweeping over a pulse duration. Checks the buffers to make sure the
-        pulse is active at the expected times."""
+        pulse is active at the expected times. It tests the order of programs are as
+        expected through the inspection of buffers."""
         times = np.linspace(80e-9, 800e-9, 10)
         builder = sweep_pulse_widths(model, qubit=0, times=times)
-        executables, _ = pipeline.compile(builder)
-        assert isinstance(executables, BatchedExecutable)
-        assert len(executables.executables) == len(times)
+        executable, _ = pipeline.compile(builder)
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == len(times)
+
+        assert len(executable.acquires) > 0
+        for acquire in executable.acquires.values():
+            assert acquire.shape == (10, 1000)
 
         physical_channel = model.get_qubit(0).physical_channel
         for i, time in enumerate(times):
-            executable = executables.executables[i].executable
-            params = executables.executables[i].parameters
-            assert isinstance(executable, WaveformV1Executable)
-            assert params["t"] == time
+            program = executable.programs[i]
+            assert isinstance(program, WaveformV1Program)
 
             # test the buffers directly to check the timing is correct
             number_of_samples = int(np.round(time / physical_channel.sample_time))
-            waveforms = executable.channel_data[physical_channel.id].buffer
+            waveforms = program.channel_data[physical_channel.id].buffer
             assert np.all(np.abs(waveforms[0:number_of_samples]) > 0.0)
             assert np.allclose(np.abs(waveforms[number_of_samples:]), 0.0)
 
@@ -87,20 +83,22 @@ class TestCompileSweepPipeline:
         original_scale = model.get_qubit(0).get_drive_channel().scale
         scales = np.linspace(0.5, 1.5, 10)
         builder = sweep_pulse_scales(model, qubit=0, scales=scales)
-        executables, _ = pipeline.compile(builder)
-        assert isinstance(executables, BatchedExecutable)
-        assert len(executables.executables) == len(scales)
+        executable, _ = pipeline.compile(builder)
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == len(scales)
+
+        assert len(executable.acquires) > 0
+        for acquire in executable.acquires.values():
+            assert acquire.shape == (10, 1000)
 
         physical_channel = model.get_qubit(0).physical_channel
         max_amps = []
         for i, scale in enumerate(scales):
-            executable = executables.executables[i].executable
-            params = executables.executables[i].parameters
-            assert isinstance(executable, WaveformV1Executable)
-            assert params["s"] == scale
+            program = executable.programs[i]
+            assert isinstance(program, WaveformV1Program)
 
             # test the buffers directly to check the amplitude scales correctly
-            waveforms = executable.channel_data[physical_channel.id].buffer
+            waveforms = program.channel_data[physical_channel.id].buffer
             max_amps.append(np.max(np.abs(waveforms)))
 
         scale = np.asarray(max_amps) / scales
@@ -114,24 +112,25 @@ class TestCompileSweepPipeline:
         times = np.linspace(80e-9, 800e-9, 5)
         amps = np.linspace(0.5, 1.5, 5)
         builder = sweep_pulse_widths_and_amps(model, qubit=0, times=times, amps=amps)
-        executables, _ = pipeline.compile(builder)
-        assert isinstance(executables, BatchedExecutable)
-        assert len(executables.executables) == len(times) * len(amps)
+        executable, _ = pipeline.compile(builder)
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == len(times) * len(amps)
+
+        assert len(executable.acquires) > 0
+        for acquire in executable.acquires.values():
+            assert acquire.shape == (5, 5, 1000)
 
         physical_channel = model.get_qubit(0).physical_channel
         max_amps = np.zeros((len(times), len(amps)))
         for i, time in enumerate(times):
             for j, amp in enumerate(amps):
                 index = i * len(amps) + j
-                executable = executables.executables[index].executable
-                params = executables.executables[index].parameters
-                assert isinstance(executable, WaveformV1Executable)
-                assert params["t"] == time
-                assert params["a"] == amp
+                program = executable.programs[index]
+                assert isinstance(program, WaveformV1Program)
 
                 # test the buffers directly to check the timing is correct
                 number_of_samples = int(np.round(time / physical_channel.sample_time))
-                waveforms = executable.channel_data[physical_channel.id].buffer
+                waveforms = program.channel_data[physical_channel.id].buffer
                 assert np.all(np.abs(waveforms[0:number_of_samples]) > 0.0)
                 assert np.allclose(np.abs(waveforms[number_of_samples:]), 0.0)
                 max_amps[i, j] = np.max(np.abs(waveforms))
@@ -146,28 +145,30 @@ class TestCompileSweepPipeline:
         timing of a delay."""
         times = np.linspace(80e-9, 800e-9, 10)
         builder = sweep_sequential_pulse_widths(model, qubit1=0, qubit2=1, times=times)
-        executables, _ = pipeline.compile(builder)
-        assert isinstance(executables, BatchedExecutable)
-        assert len(executables.executables) == len(times)
+        executable, _ = pipeline.compile(builder)
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == len(times)
+
+        assert len(executable.acquires) > 0
+        for acquire in executable.acquires.values():
+            assert acquire.shape == (10, 1000)
 
         physical_channel1 = model.get_qubit(0).physical_channel
         physical_channel2 = model.get_qubit(1).physical_channel
         time_pulse2 = model.get_qubit(1).pulse_hw_x_pi_2["width"]
         number_of_samples2 = int(np.round(time_pulse2 / physical_channel2.sample_time))
         for i, time in enumerate(times):
-            executable = executables.executables[i].executable
-            params = executables.executables[i].parameters
-            assert isinstance(executable, WaveformV1Executable)
-            assert params["t"] == time
+            program = executable.programs[i]
+            assert isinstance(program, WaveformV1Program)
 
             # test the buffers directly to check the timing is correct
             number_of_samples1 = int(np.round(time / physical_channel1.sample_time))
 
-            waveforms1 = executable.channel_data[physical_channel1.id].buffer
+            waveforms1 = program.channel_data[physical_channel1.id].buffer
             assert np.all(np.abs(waveforms1[0:number_of_samples1]) > 0.0)
             assert np.allclose(np.abs(waveforms1[number_of_samples1:]), 0.0)
 
-            waveforms2 = executable.channel_data[physical_channel2.id].buffer
+            waveforms2 = program.channel_data[physical_channel2.id].buffer
             assert np.allclose(np.abs(waveforms2[0:number_of_samples1]), 0.0)
             assert np.all(
                 np.abs(
@@ -184,28 +185,43 @@ class TestCompileSweepPipeline:
         flattened builder only has one of each parameter."""
         times = np.linspace(80e-9, 800e-9, 10)
         builder = sweep_zipped_parameters(model, 0, times, 2 * times)
-        executables, _ = pipeline.compile(builder)
-        assert isinstance(executables, BatchedExecutable)
-        assert len(executables.executables) == len(times)
+        executable, _ = pipeline.compile(builder)
+        assert isinstance(executable, Executable)
+        assert len(executable.programs) == len(times)
+
+        assert len(executable.acquires) > 0
+        for acquire in executable.acquires.values():
+            assert acquire.shape == (10, 1000)
 
         physical_channel = model.get_qubit(0).physical_channel
         readout_channel = model.get_qubit(0).measure_device.physical_channel
         for i, time in enumerate(times):
-            executable = executables.executables[i].executable
-            params = executables.executables[i].parameters
-            assert isinstance(executable, WaveformV1Executable)
-            assert params["t1"] == time
-            assert params["t2"] == 2 * time
+            program = executable.programs[i]
+            assert isinstance(program, WaveformV1Program)
 
             # test the buffers directly to check the timing is correct
             number_of_samples = int(np.round(time / physical_channel.sample_time))
-            waveforms = executable.channel_data[physical_channel.id].buffer
+            waveforms = program.channel_data[physical_channel.id].buffer
             assert np.all(np.abs(waveforms[0:number_of_samples]) > 0.0)
             assert np.allclose(np.abs(waveforms[number_of_samples:]), 0.0)
 
-            readout_waveforms = executable.channel_data[readout_channel.id].buffer
+            readout_waveforms = program.channel_data[readout_channel.id].buffer
             number_of_readout_samples = int(
                 np.round(3 * time / readout_channel.sample_time)
             )
             assert np.allclose(np.abs(readout_waveforms[0:number_of_readout_samples]), 0.0)
             assert np.abs(readout_waveforms[number_of_readout_samples]) > 0.0
+
+    def test_extra_dimension_added(self, pipeline, model):
+        """Regression test to check an extra dimension is added."""
+
+        builder = model.create_builder()
+        qubit1 = model.get_qubit(0)
+        qubit2 = model.get_qubit(1)
+        builder.measure(qubit1)
+        builder.measure(qubit2)
+        executable, _ = pipeline.compile(builder)
+
+        assert len(executable.acquires) == 2
+        for acquire in executable.acquires.values():
+            assert acquire.shape == (1, 1000)

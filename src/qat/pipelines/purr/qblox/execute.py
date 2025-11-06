@@ -14,8 +14,8 @@ log = get_default_logger()
 
 
 class QbloxExecutePipeline(UpdateablePipeline):
-    """A pipeline that executes
-    :class:`QbloxExecutables <qat.backend.qblox.execution.QbloxExecutable>`
+    """A pipeline that executes :class:`Executable <qat.executable.Executable>`s with
+    :class:`QbloxProgram <qat.backend.qblox.execution.QbloxProgram>`s
     packages using the :class:`QbloxLiveEngineAdapter`.
 
     .. warning::
