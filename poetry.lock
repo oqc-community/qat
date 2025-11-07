@@ -5095,29 +5095,33 @@ visualization = ["plotly (>=5.23.0)"]
 
 [[package]]
 name = "qutip"
-version = "5.2.1"
+version = "5.2.2"
 description = "QuTiP: The Quantum Toolbox in Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "qutip-5.2.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ad73b1207e0d4c4014f3d9c00f431cf190de471ddc1e8b378c0b223f28a4bbce"},
-    {file = "qutip-5.2.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:ccde27b92758a631e118d16c4415f2d1f49ab71057ad6838f1733bf10e1300f2"},
-    {file = "qutip-5.2.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e2edab13725641d4627f903f9ad7639607666c86589577003d3e71ff11ade74a"},
-    {file = "qutip-5.2.1-cp310-cp310-win_amd64.whl", hash = "sha256:aca004635906f26e16a8327a4776ae3b528ef818e625bcd512d53b80770e8eff"},
-    {file = "qutip-5.2.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:fa20b3656d7f0c81ece57f8b38db9c26f23a48b271c41c3a95fb3118a1f31ea3"},
-    {file = "qutip-5.2.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:9e8856a070d66913f6475c1079a96526facf0f3a2ffad9d0b9415e6467c87b55"},
-    {file = "qutip-5.2.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8cc5586a8a6ae3830f0e7412abc253d795253d9aa9eb4685d64c7db366f74e93"},
-    {file = "qutip-5.2.1-cp311-cp311-win_amd64.whl", hash = "sha256:a0a883341ad2663b00b2161f7f0db06bc26e100815fa65976a02658d109c9379"},
-    {file = "qutip-5.2.1-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:c930efe6a6586a7d5b1a66e0840283b266127b575c35fca17426292e869c4b48"},
-    {file = "qutip-5.2.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ba9348f01349dac1c5505a4caac2a5bbf45447ed030203eaf9a6c51efde8619b"},
-    {file = "qutip-5.2.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3dacb4af2148880d5b46962d024b26919849884481e4809f970052fffe2197d4"},
-    {file = "qutip-5.2.1-cp312-cp312-win_amd64.whl", hash = "sha256:4c9044f7b49244a2de6a00e42a33771cb6c680fe053eb32ae9611ba8941c01fb"},
-    {file = "qutip-5.2.1-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:893f7c523a75b09c5438269e710f4ada8621ba6da9f51fe3ed28d3399e41c1f3"},
-    {file = "qutip-5.2.1-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:8549a1e14756e376b74eaa8be3ec68596667d25f17ebaad564c592bb36acc47c"},
-    {file = "qutip-5.2.1-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e920862b26f104f85a2e493d5cd2210b40aa97e4a6edfb763027ef830ea53ffa"},
-    {file = "qutip-5.2.1-cp313-cp313-win_amd64.whl", hash = "sha256:a108fb89e077bf44368b27eede3914591ec71840bf6619debba437a59802c4fe"},
-    {file = "qutip-5.2.1.tar.gz", hash = "sha256:9fd02d52ddbc1611c6a6dcc92b69f09cabdd9c3252772619fb6208d2dbbcbba0"},
+    {file = "qutip-5.2.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:d6acea4a1001c883f34ace7921d412d33002efb80d3912eb3bb861e1b0f62ede"},
+    {file = "qutip-5.2.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:a801e14a69f85a017e4dbdbd922cef492d63ae2ec620bef2d45c2540a37033e0"},
+    {file = "qutip-5.2.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:a75da703001afb6ef7d7ce9d0042a01515129507af062af369e537ec084374cf"},
+    {file = "qutip-5.2.2-cp310-cp310-win_amd64.whl", hash = "sha256:d9c12397bdc5f860d4b4c9324d30cfcda375b8e60982b0c3767e3a41ee00aa5d"},
+    {file = "qutip-5.2.2-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:53da08d0d5b723147a3129a05dd3cbd90226523dac788dab044e200ff4767447"},
+    {file = "qutip-5.2.2-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:40219f0d364239e8e49cd8f4a26d07acf2fb9f607bad3678df408d76b9e9d5e7"},
+    {file = "qutip-5.2.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:c21e27221372197bd6d6944d1e079197d0c01b7ae9a3ad9200fb6a34ee1b5064"},
+    {file = "qutip-5.2.2-cp311-cp311-win_amd64.whl", hash = "sha256:b85b7e2179f7eba8e0190da09ea135a725ff4332f6c3aecc903c204679b5ba5a"},
+    {file = "qutip-5.2.2-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:e0290629ee2ef14e7d3009d73f0550d712ade724678a68e7867365ae6545ff00"},
+    {file = "qutip-5.2.2-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:ddfa174a05717260739c72860cab42e8a8bb50c5845a2b3942a4adabe28fcc64"},
+    {file = "qutip-5.2.2-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:8528b8c8696eb579140899a8f88bfad2877feda56b22f1b7a2d01bc09d6f376f"},
+    {file = "qutip-5.2.2-cp312-cp312-win_amd64.whl", hash = "sha256:5c9f3d3d66cff26a4ce3591630be397a1e3ddbf4e165c358af201ad61bfd7a24"},
+    {file = "qutip-5.2.2-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:6cfaf23070f859b171d1d3f01b2cf1881906105b5bf2e0997d85c10d50f585af"},
+    {file = "qutip-5.2.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:6d02a68fa35cf1f16adce0df08fda4caf0fac91740d62170836f769e3876115d"},
+    {file = "qutip-5.2.2-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:befdecba3c937fba4841a36383c828e9b64f2d5e1ed5aa3d7a3d6337f254c4c4"},
+    {file = "qutip-5.2.2-cp313-cp313-win_amd64.whl", hash = "sha256:f243dfc3545851474ba2dc4b2bd1c0b68fda950157f6b376cc229c20758e8474"},
+    {file = "qutip-5.2.2-cp314-cp314-macosx_10_15_x86_64.whl", hash = "sha256:dfa0709a864a11af8e26fdad6b81e494d6642926beeaf17bbc57ad1b2458015e"},
+    {file = "qutip-5.2.2-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:025592db3b4feb90a65791e22026d6e8dfeff66a727077ae204d08b55013f954"},
+    {file = "qutip-5.2.2-cp314-cp314-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:88ac0407305d47eeeff9b25fcb0a17bf85cede650c440d6c17935e450ffb0f3a"},
+    {file = "qutip-5.2.2-cp314-cp314-win_amd64.whl", hash = "sha256:71733eeb1e83c01ee6fd3d2b81e76b585c535eec5a73f8acc9fa68c4fb619ee5"},
+    {file = "qutip-5.2.2.tar.gz", hash = "sha256:625117e1e486dbd7cf461c92912999b0a5828161b83d9e6279e78d2055bc8466"},
 ]
 
 [package.dependencies]
@@ -5127,11 +5131,11 @@ scipy = ">=1.9,<1.16.0 || >1.16.0"
 
 [package.extras]
 extras = ["loky (!=3.5.0) ; python_version <= \"3.10\"", "loky ; python_version >= \"3.11\"", "mpmath", "tqdm"]
-full = ["cvxopt", "cvxpy (>=1.0)", "cython (>=0.29.20) ; python_version >= \"3.10\"", "filelock", "ipython", "loky (!=3.5.0) ; python_version <= \"3.10\"", "loky ; python_version >= \"3.11\"", "matplotlib (>=3.5)", "mpmath", "pytest (>=5.2)", "pytest-rerunfailures", "setuptools", "tqdm"]
+full = ["qutip[extras,graphics,ipython,runtime-compilation,semidefinite,tests]"]
 graphics = ["matplotlib (>=3.5)"]
 ipython = ["ipython"]
 mpi = ["mpi4py"]
-runtime-compilation = ["cython (>=0.29.20) ; python_version >= \"3.10\"", "filelock", "setuptools"]
+runtime-compilation = ["cython (>=0.29.20)", "filelock", "setuptools"]
 semidefinite = ["cvxopt", "cvxpy (>=1.0)"]
 tests = ["pytest (>=5.2)", "pytest-rerunfailures"]
 
