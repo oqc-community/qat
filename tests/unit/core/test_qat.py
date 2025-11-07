@@ -207,6 +207,19 @@ class TestQATPipelineSetup:
         )
         assert q2.pipelines.get_execute_pipeline("echocustomconfig").runtime.engine.x == 10
 
+    def test_make_qatconfig_with_yaml_and_custom_target_data(self, testpath):
+        path = str(testpath / "files/qatconfig/target_data.yaml")
+        q = QAT(qatconfig=path)
+        expected_pipelines = {"legacy-compile", "compile"}
+        assert set(q.pipelines.list_compile_pipelines) == expected_pipelines
+
+        for pipeline_name in expected_pipelines:
+            pipeline = q.pipelines.get_compile_pipeline(pipeline_name)
+            target_data = pipeline.target_data
+            assert target_data.default_shots == 254
+            assert target_data.max_shots == 2540
+            assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
+
     def test_FallthroughFrontend(self):
         frontend = FallthroughFrontend()
         assert frontend.model is None

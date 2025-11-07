@@ -1,0 +1,30 @@
+HARDWARE:
+- name: echo6loader
+  type: qat.model.loaders.purr.EchoModelLoader
+  config:
+    qubit_count: 6
+- name: lucy6loader 
+  type: qat.model.loaders.lucy.LucyModelLoader
+  config:
+    qubit_count: 6
+
+COMPILE: 
+- name: legacy-compile
+  pipeline: qat.pipelines.purr.waveform_v1.WaveformV1CompilePipeline
+  hardware_loader: echo6loader
+  target_data:
+    type: qat.model.target_data.CustomTargetData
+    config:
+      max_shots: 2_540
+      default_shots: 254
+      passive_reset_time: 1e-2
+  default: true
+- name: compile
+  pipeline: qat.pipelines.waveform_v1.WaveformV1CompilePipeline
+  hardware_loader: lucy6loader
+  target_data:
+    type: qat.model.target_data.CustomTargetData
+    config:
+      max_shots: 2_540
+      default_shots: 254
+      passive_reset_time: 1e-2

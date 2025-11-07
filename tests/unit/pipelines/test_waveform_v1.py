@@ -190,7 +190,7 @@ class TestExperimentalEchoPipelineWithCircuits:
         time."""
         passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
         for program in executable.programs:
-            assert program.repetition_time >= passive_reset_time
+            has_waveforms = False
             for physical_channel, channel_data in program.channel_data.items():
                 for qubit in self.pipeline.backend.model.qubits.values():
                     if physical_channel == qubit.physical_channel.uuid:
@@ -199,7 +199,19 @@ class TestExperimentalEchoPipelineWithCircuits:
                     elif physical_channel == qubit.resonator.physical_channel.uuid:
                         sample_time = self.target_data.RESONATOR_DATA.sample_time
                         break
-                assert len(channel_data.buffer) * sample_time <= program.repetition_time
+                buffer_time = len(channel_data.buffer) * sample_time
+                assert buffer_time < program.repetition_time or np.isclose(
+                    buffer_time, program.repetition_time
+                )
+                if len(channel_data.buffer) > 0 and any(np.abs(channel_data.buffer) > 0):
+                    has_waveforms = True
+
+            # If there are no waveforms, then there are no active qubits, so no reset is added
+            # and the repetition_time is zero.
+            if has_waveforms:
+                assert program.repetition_time > passive_reset_time
+            else:
+                assert program.repetition_time == 0
 
     def test_channel_data(self, executable):
         """WaveformV1Programs are expected to have channel data for each physical

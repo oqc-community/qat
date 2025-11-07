@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import numpy as np
 import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
@@ -167,10 +168,22 @@ class TestEchoPipelineWithCircuits:
         circuit time, and ii) the buffers for each channel do not exceed the repetition
         time."""
         for program in executable.programs:
-            assert program.repetition_time >= passive_reset_time
+            has_waveforms = False
             for physical_channel, channel_data in program.channel_data.items():
                 sample_time = self.model.physical_channels[physical_channel].sample_time
-                assert len(channel_data.buffer) * sample_time <= program.repetition_time
+                buffer_time = len(channel_data.buffer) * sample_time
+                assert buffer_time < program.repetition_time or np.isclose(
+                    buffer_time, program.repetition_time
+                )
+                if len(channel_data.buffer) > 0 and any(np.abs(channel_data.buffer) > 0):
+                    has_waveforms = True
+
+            # If there are no waveforms, then there are no active qubits, so no reset is added
+            # and the repetition_time is zero.
+            if has_waveforms:
+                assert program.repetition_time > passive_reset_time
+            else:
+                assert program.repetition_time == 0
 
     def test_channel_data(self, executable):
         """WaveformV1Programs are expected to have channel data for each physical

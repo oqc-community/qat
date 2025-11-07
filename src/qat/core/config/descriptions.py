@@ -165,7 +165,7 @@ class PipelineFactoryDescription(NoExtraFieldsModel):
     name: str
     hardware_loader: str | None = None
     engine: str | None = None
-    target_data: ImportTargetData | None = None
+    target_data: TargetDataDescription | None = None
     pipeline: ImportPipelineFactory
     config: dict = {}
     default: bool = False
@@ -202,7 +202,7 @@ class UpdateablePipelineDescription(NoExtraFieldsModel):
     pipeline: ImportUpdateablePipeline
     hardware_loader: str | None = None
     engine: str | None = None
-    target_data: ImportTargetData | None = None
+    target_data: TargetDataDescription | None = None
     config: dict = {}
     default: bool = False
 

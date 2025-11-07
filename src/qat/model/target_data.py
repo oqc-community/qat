@@ -184,12 +184,26 @@ class TargetData(AbstractTargetData):
         )
 
     @classmethod
-    def default(cls) -> "TargetData":
+    def create_with(
+        cls,
+        max_shots: int = 10_000,
+        default_shots: int = 1_000,
+        passive_reset_time: float = 1e-03,
+    ) -> "TargetData":
+        """Returns a default TargetData instance, allowing configuration over user-level
+        parameters.
+
+        :param max_shots: The maximum amount of shots possible on this target.
+        :param default_shots: The default amount of shots on this target if none specified
+            through the instructions or compiler_config.
+        :param passive_reset_time: The amount of time to wait after each shot to allow the
+            qubits to passively reset.
+        """
         return TargetData(
-            max_shots=10_000,
-            default_shots=1_000,
+            max_shots=max_shots,
+            default_shots=default_shots,
             QUBIT_DATA=QubitDescription(
-                passive_reset_time=1e-08,
+                passive_reset_time=passive_reset_time,
                 sample_time=1e-09,
                 samples_per_clock_cycle=1,
                 instruction_memory_size=50_000,
@@ -215,7 +229,31 @@ class TargetData(AbstractTargetData):
             ),
         )
 
+    @classmethod
+    def default(cls) -> "TargetData":
+        """Returns a default TargetData instance."""
+        return cls.create_with()
+
 
 def DefaultTargetData() -> TargetData:
     """Returns a default TargetData instance."""
     return TargetData.default()
+
+
+def CustomTargetData(
+    max_shots: int = 10_000, default_shots: int = 1_000, passive_reset_time: float = 1e-03
+) -> TargetData:
+    """Returns a default TargetData instance, allowing configuration over user-level
+    parameters.
+
+    :param max_shots: The maximum amount of shots possible on this target.
+    :param default_shots: The default amount of shots on this target if none specified
+        through the instructions or compiler_config.
+    :param passive_reset_time: The amount of time to wait after each shot to allow the
+        qubits to passively reset.
+    """
+    return TargetData.create_with(
+        max_shots=max_shots,
+        default_shots=default_shots,
+        passive_reset_time=passive_reset_time,
+    )

@@ -20,6 +20,7 @@ from qat.instrument.base import InstrumentConcept
 from qat.instrument.builder import InstrumentBuilder
 from qat.model.loaders.cache import CacheAccessLoader
 from qat.model.loaders.purr import EchoModelLoader, QbloxDummyModelLoader
+from qat.model.target_data import TargetData
 from qat.pipelines.updateable import UpdateablePipeline
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -495,3 +496,18 @@ class TestQatSessionConfigForPipelines:
         """Checks that duplicate names in engines or hardware raise an error."""
         with pytest.raises(ValidationError, match="Duplicate name"):
             QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / qatconfig_file)
+
+    def test_target_data(self, qatconfig_testfiles):
+        """Checks that target data is correctly loaded from the config."""
+        qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "target_data.yaml")
+
+        assert len(qatconfig.COMPILE) == 2
+        assert qatconfig.COMPILE[0].name == "legacy-compile"
+        assert qatconfig.COMPILE[1].name == "compile"
+
+        for partial in [qatconfig.COMPILE[i].target_data for i in range(2)]:
+            target_data = partial()
+            assert isinstance(target_data, TargetData)
+            assert target_data.default_shots == 254
+            assert target_data.max_shots == 2540
+            assert target_data.QUBIT_DATA.passive_reset_time == 1e-2

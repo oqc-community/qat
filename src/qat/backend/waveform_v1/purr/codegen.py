@@ -102,13 +102,11 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
         for return_ in ir.returns:
             returns.extend(return_.variables)
 
-        if ir.passive_reset_time is not None:
-            repetition_time = timeline_res.total_duration + ir.passive_reset_time
-        else:
-            repetition_time = ir.repetition_period
-
         programs = self.create_programs(
-            channels, ir.shots, ir.compiled_shots, repetition_time
+            channels,
+            ir.shots,
+            ir.compiled_shots,
+            timeline_res.total_duration,
         )
 
         return Executable[WaveformV1Program](
