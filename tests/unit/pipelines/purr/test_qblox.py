@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from pathlib import Path
+
 import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
@@ -7,11 +9,13 @@ from qat import QAT
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.config.constants import QbloxTargetData, TargetData
 from qat.backend.qblox.execution import QbloxProgram
+from qat.engines.qblox.execution import QbloxEngine
 from qat.executables import Executable
 
 # TODO: Pipelines using `QbloxEngine`: COMPILER-730
 # from qat.engines.qblox.live import QbloxEngine
 from qat.frontend import AutoFrontend
+from qat.instrument.builder import CsvInstrumentBuilder
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
 from qat.middleend import CustomMiddleend, DefaultMiddleend
 from qat.model.loaders.purr import QbloxDummyModelLoader
@@ -23,7 +27,6 @@ from qat.pipelines.purr.qblox import (
     QbloxPipeline,
 )
 from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
-from qat.purr.backends.qblox.live import QbloxLiveEngineAdapter
 from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.qasm_qir import (
@@ -46,8 +49,7 @@ class TestQbloxPipeline:
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
         assert pipeline.target_data == QbloxTargetData.default()
-        # TODO: Pipelines using `QbloxEngine`: COMPILER-730
-        assert isinstance(pipeline.engine, QbloxLiveEngineAdapter)
+        assert pipeline.engine is None
 
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
@@ -62,18 +64,28 @@ class TestQbloxPipeline:
         assert isinstance(compile_pipeline.backend, QbloxBackend2)
         assert isinstance(compile_pipeline.target_data, TargetData)
 
-    def test_build_execute_pipeline(self):
+    def test_build_execute_pipeline(self, testpath):
         """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
+        filepath = Path(
+            testpath,
+            "files",
+            "config",
+            "instrument_info.csv",
+        )
+        instrument = CsvInstrumentBuilder(file_path=filepath).build()
         model = QbloxDummyModelLoader(qubit_count=4).load()
+        engine = QbloxEngine(instrument=instrument, model=model)
         execute_pipeline = QbloxPipeline._build_pipeline(
-            config=PipelineConfig(name="qblox_execute"), model=model, target_data=None
+            config=PipelineConfig(name="qblox_execute"),
+            model=model,
+            target_data=None,
+            engine=engine,
         )
         assert isinstance(execute_pipeline, ExecutePipeline)
         assert execute_pipeline.name == "qblox_execute"
         assert isinstance(execute_pipeline.target_data, TargetData)
         assert isinstance(execute_pipeline.runtime, SimpleRuntime)
-        # TODO: Pipelines using `QbloxEngine`: COMPILER-730
-        assert isinstance(execute_pipeline.engine, QbloxLiveEngineAdapter)
+        assert isinstance(execute_pipeline.engine, QbloxEngine)
 
 
 class TestQbloxCompilePipeline:
@@ -105,18 +117,28 @@ class TestQbloxCompilePipeline:
 
 
 class TestQbloxExecutePipeline:
-    def test_build_pipeline(self):
+    def test_build_pipeline(self, testpath):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
+        filepath = Path(
+            testpath,
+            "files",
+            "config",
+            "instrument_info.csv",
+        )
+        instrument = CsvInstrumentBuilder(file_path=filepath).build()
         model = QbloxDummyModelLoader(qubit_count=4).load()
+        engine = QbloxEngine(instrument=instrument, model=model)
         execute_pipeline = QbloxExecutePipeline._build_pipeline(
-            config=PipelineConfig(name="echo_execute"), model=model, target_data=None
+            config=PipelineConfig(name="echo_execute"),
+            model=model,
+            target_data=None,
+            engine=engine,
         )
         assert isinstance(execute_pipeline, ExecutePipeline)
         assert execute_pipeline.name == "echo_execute"
         assert isinstance(execute_pipeline.target_data, TargetData)
         assert isinstance(execute_pipeline.runtime, SimpleRuntime)
-        # TODO: Pipelines using `QbloxEngine`: COMPILER-730
-        assert isinstance(execute_pipeline.engine, QbloxLiveEngineAdapter)
+        assert isinstance(execute_pipeline.engine, QbloxEngine)
 
 
 # test_files = get_pipeline_tests(openpulse=True)
