@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import uuid
 from abc import ABC
-from typing import Set
+from typing import TypeVar
 
 from qat.purr.utils.logger import get_default_logger
 
@@ -53,6 +53,9 @@ class ResultInfoMixin(ABC):
         pass
 
 
+ResultType = TypeVar("ResultType", bound=ResultInfoMixin)
+
+
 class ResultManager:
     """Represents a collection of analysis results with caching and aggregation
     capabilities.
@@ -72,7 +75,7 @@ class ResultManager:
     """
 
     def __init__(self):
-        self._results: Set[ResultModel] = set()
+        self._results: set[ResultModel] = set()
 
     @property
     def results(self):
@@ -99,7 +102,7 @@ class ResultManager:
         self._results -= set(found)
         self._results.add(ResultModel(res_obj))
 
-    def lookup_by_type(self, ty: type):
+    def lookup_by_type(self, ty: type[ResultType]) -> ResultType:
         """Find a result by its type. Throws an error if none or multiple are found.
 
         :param ty: The results type.

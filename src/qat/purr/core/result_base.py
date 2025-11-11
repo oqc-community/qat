@@ -2,7 +2,7 @@
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 import uuid
 from abc import ABC
-from typing import Set
+from typing import Set, TypeVar
 
 
 class ResultConcept(ABC):
@@ -51,6 +51,9 @@ class ResultInfoMixin(ABC):
         pass
 
 
+ResultType = TypeVar("ResultType", bound=ResultInfoMixin)
+
+
 class ResultManager:
     """
     Represents a collection of analysis results with caching and aggregation capabilities.
@@ -85,7 +88,7 @@ class ResultManager:
     def add(self, res_obj):
         self._results.add(ResultModel(res_obj))
 
-    def lookup_by_type(self, ty: type):
+    def lookup_by_type(self, ty: type[ResultType]) -> ResultType:
         found = [res.value for res in self._results if isinstance(res.value, ty)]
         if not found:
             raise ValueError(f"Could not find any results instances of {ty}")

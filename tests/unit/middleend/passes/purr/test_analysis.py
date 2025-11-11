@@ -32,7 +32,7 @@ class TestActivePulseChannelAnalysis:
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
-        res: ActiveChannelResults = res_mgr.lookup_by_type(ActiveChannelResults)
+        res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 3
         assert set(res.targets) == set([drive_chan, measure_chan, acquire_chan])
         assert len(res.target_map) == 3

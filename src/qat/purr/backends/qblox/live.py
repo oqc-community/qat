@@ -197,7 +197,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         requirements.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
         acquire_map = triage_result.acquire_map
         sweeps = triage_result.sweeps
         repeats = triage_result.repeats

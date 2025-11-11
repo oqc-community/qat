@@ -613,7 +613,7 @@ class TestNewQbloxEmitter(InvokerMixin):
 
         self.model = model
         self.run_pass_pipeline(builder, res_mgr, met_mgr)
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
 
         packages = NewQbloxEmitter().emit_packages(builder, res_mgr, met_mgr)
         assert len(packages) == len(qubit_indices)

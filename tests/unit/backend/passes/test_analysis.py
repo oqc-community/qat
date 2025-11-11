@@ -280,9 +280,7 @@ class TestTimelineAnalysis:
         PydTimelineAnalysis(pyd_model, target_data).run(ir, res_mgr)
 
         target_map = ir.target_map
-        timeline_res: PydTimelineAnalysisResult = res_mgr.lookup_by_type(
-            PydTimelineAnalysisResult
-        )
+        timeline_res = res_mgr.lookup_by_type(PydTimelineAnalysisResult)
 
         # Inspect the drive channel: make sure there are two pulses from the ECR gate.
         pyd_qubit1 = pyd_model.qubit_with_index(0)

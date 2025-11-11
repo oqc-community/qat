@@ -483,9 +483,7 @@ class FrequencySetupValidation(ValidationPass):
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         """
 
-        active_channel_res: ActiveChannelResults = res_mgr.lookup_by_type(
-            ActiveChannelResults
-        )
+        active_channel_res = res_mgr.lookup_by_type(ActiveChannelResults)
         pulse_channels = active_channel_res.targets
         physical_channels = set(
             [pulse_channel.physical_channel for pulse_channel in pulse_channels]

@@ -991,7 +991,7 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
         met_mgr: Optional[MetricsManager] = None,
         ignore_empty=True,
     ) -> Executable[QbloxProgram]:
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
         sweeps = triage_result.sweeps
 
         switerator = SweepIterator.from_sweeps(sweeps)
@@ -1079,10 +1079,10 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
         met_mgr: Optional[MetricsManager] = None,
         ignore_empty=True,
     ) -> Executable[QbloxProgram]:
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
-        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
+        precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
+        cfg_result = res_mgr.lookup_by_type(CFGResult)
 
         scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
         rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results

@@ -68,7 +68,7 @@ def _do_emit(model, backend: BaseBackend, builder):
     res_mgr = ResultManager()
     met_mgr = MetricsManager()
     middleend_pipeline(model).run(builder, res_mgr, met_mgr)
-    triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+    triage_result = res_mgr.lookup_by_type(TriageResult)
     executable = backend.emit(builder, res_mgr, met_mgr)
     return executable.programs, triage_result
 

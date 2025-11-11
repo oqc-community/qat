@@ -1084,8 +1084,8 @@ class PreCodegenPass(AnalysisPass):
         Computes useful information in the form of attributes.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
         result = PreCodegenResult()
 
         for target in triage_result.target_map:
@@ -1114,7 +1114,7 @@ class QbloxEmitter(BaseEmitter, InvokerMixin):
         met_mgr: MetricsManager,
         ignore_empty=True,
     ) -> Dict[int, List[QbloxPackage]]:
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
         sweeps = triage_result.sweeps
 
         switerator = SweepIterator.from_sweeps(sweeps)
@@ -1209,10 +1209,10 @@ class NewQbloxEmitter(BaseEmitter, InvokerMixin):
     ) -> List[QbloxPackage]:
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
-        precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
-        cfg_result: CFGResult = res_mgr.lookup_by_type(CFGResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
+        precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
+        cfg_result = res_mgr.lookup_by_type(CFGResult)
 
         scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
         rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results

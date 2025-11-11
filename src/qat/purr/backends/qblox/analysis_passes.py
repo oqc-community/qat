@@ -252,7 +252,7 @@ class BindingPass(AnalysisPass):
         :param res_mgr: The result manager to save the analysis results.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
         for target, instructions in triage_result.target_map.items():
             scoping_result = result.scoping_results[target]
@@ -517,8 +517,8 @@ class TILegalisationPass(AnalysisPass):
         :param res_mgr: The result manager to save the analysis results.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
 
         for target in triage_result.target_map:
             rw_result = binding_result.rw_results[target]
@@ -724,8 +724,8 @@ class QbloxLegalisationPass(AnalysisPass):
         will follow in future iterations.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
 
         for target in triage_result.target_map:
             rw_result = binding_result.rw_results[target]

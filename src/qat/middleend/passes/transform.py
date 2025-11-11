@@ -856,9 +856,7 @@ class ResetsToDelays(TransformPass):
         :param res_mgr: The result manager to store the analysis results.
         :param compiler_config: The compiler configuration.
         """
-        active_pulse_channels: ActivePulseChannelResults = res_mgr.lookup_by_type(
-            ActivePulseChannelResults
-        )
+        active_pulse_channels = res_mgr.lookup_by_type(ActivePulseChannelResults)
 
         reset_time = self._get_reset_time(compiler_config)
 
@@ -1012,9 +1010,7 @@ class EndOfTaskResetSanitisation(TransformPass):
         :param res_mgr: The result manager to store the analysis results.
         """
 
-        active_pulse_channels: ActivePulseChannelResults = res_mgr.lookup_by_type(
-            ActivePulseChannelResults
-        )
+        active_pulse_channels = res_mgr.lookup_by_type(ActivePulseChannelResults)
         qubit_map: dict[Qubit, None | bool] = {
             qubit: None for qubit in active_pulse_channels.qubits
         }
@@ -1079,9 +1075,7 @@ class FreqShiftSanitisation(TransformPass):
         ir = self.add_freq_shift_to_ir(ir, set(freq_shift_channels.keys()))
 
         if res_mgr.check_for_type(ActivePulseChannelResults):
-            res: ActivePulseChannelResults = res_mgr.lookup_by_type(
-                ActivePulseChannelResults
-            )
+            res = res_mgr.lookup_by_type(ActivePulseChannelResults)
             for pulse_channel, qubit in freq_shift_channels.items():
                 res.add_target(pulse_channel, qubit)
 

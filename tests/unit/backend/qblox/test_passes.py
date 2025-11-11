@@ -50,9 +50,9 @@ class TestAnalysisPasses:
 
         pipeline.run(builder, res_mgr, met_mgr)
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
         target_map = triage_result.target_map
-        precodegen_result: PreCodegenResult = res_mgr.lookup_by_type(PreCodegenResult)
+        precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
 
         assert precodegen_result.alloc_mgrs.keys() == target_map.keys()
         for target, alloc_mgr in precodegen_result.alloc_mgrs.items():
@@ -72,12 +72,12 @@ class TestAnalysisPasses:
             | TILegalisationPass()
         ).run(builder, res_mgr, met_mgr)
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
         QbloxLegalisationPass().run(builder, res_mgr)
 
-        legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        legal_binding_result = res_mgr.lookup_by_type(BindingResult)
 
         for target, instructions in triage_result.target_map.items():
             scoping_result = binding_result.scoping_results[target]

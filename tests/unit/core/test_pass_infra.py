@@ -69,7 +69,7 @@ def test_pass_manager():
     pipline.run(builder, res_mgr, met_mgr)
 
     # Get the analysis result
-    dummy_result: DummyResult = res_mgr.lookup_by_type(DummyResult)
+    dummy_result = res_mgr.lookup_by_type(DummyResult)
     assert dummy_result.num_instructions == len(builder.instructions)
 
     # Verify that the instructions list has been reversed

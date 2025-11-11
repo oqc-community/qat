@@ -82,7 +82,7 @@ def test_get_config_global_pipe():
 
         Pm.run(b, res_mgr=res_mgr, met_mgr=met_mgr)
 
-        dummy_result: DummyResult = res_mgr.lookup_by_type(DummyResult)
+        dummy_result = res_mgr.lookup_by_type(DummyResult)
         assert dummy_result.max_repeats == MAX_REPEATS_LIMIT
     finally:
         get_config().MAX_REPEATS_LIMIT = OLD_LIMIT
@@ -103,7 +103,7 @@ def test_get_config_session_pipe():
 
     with override_config(config):
         Pm.run(b, res_mgr=res_mgr, met_mgr=met_mgr)
-        dummy_result: DummyResult = res_mgr.lookup_by_type(DummyResult)
+        dummy_result = res_mgr.lookup_by_type(DummyResult)
         assert dummy_result.max_repeats == MAX_REPEATS_LIMIT
 
 

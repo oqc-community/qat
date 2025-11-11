@@ -18,7 +18,7 @@ class TestTransformPasses:
         res_mgr = ResultManager()
 
         TriagePass().run(builder, res_mgr)
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
 
         assert len(triage_result.sweeps) == 1
         sweep = next(iter(triage_result.sweeps))

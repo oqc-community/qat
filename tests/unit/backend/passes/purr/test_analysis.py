@@ -62,7 +62,7 @@ class TestAnalysisPasses:
         ReturnSanitisation().run(builder, res_mgr)
         ReturnSanitisationValidation().run(builder, res_mgr)
         TriagePass().run(builder, res_mgr)
-        result: TriageResult = res_mgr.lookup_by_type(TriageResult)
+        result = res_mgr.lookup_by_type(TriageResult)
         assert result
         assert result.sweeps
         assert result.returns
@@ -150,8 +150,8 @@ class TestAnalysisPasses:
 
         TriagePass().run(builder, res_mgr)
         BindingPass().run(builder, res_mgr)
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
 
         for target, instructions in triage_result.target_map.items():
             scoping_result = binding_result.scoping_results[target]
@@ -228,12 +228,12 @@ class TestAnalysisPasses:
         TriagePass().run(builder, res_mgr)
         BindingPass().run(builder, res_mgr)
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = deepcopy(res_mgr.lookup_by_type(BindingResult))
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = deepcopy(res_mgr.lookup_by_type(BindingResult))
 
         TILegalisationPass().run(builder, res_mgr)
 
-        legal_binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        legal_binding_result = res_mgr.lookup_by_type(BindingResult)
 
         for target, instructions in triage_result.target_map.items():
             scoping_result = binding_result.scoping_results[target]
@@ -272,7 +272,7 @@ class TestAnalysisPasses:
 
         ScopeSanitisation().run(builder, res_mgr)
         CFGPass().run(builder, res_mgr)
-        result: CFGResult = res_mgr.lookup_by_type(CFGResult)
+        result = res_mgr.lookup_by_type(CFGResult)
         assert result.cfg
         assert result.cfg is not ControlFlowGraph()
         assert len(result.cfg.nodes) == 5
@@ -405,9 +405,7 @@ class TestTimelineAnalysis:
         TimelineAnalysis().run(ir, res_mgr)
 
         target_map = ir.target_map
-        timeline_res: TimelineAnalysisResult = res_mgr.lookup_by_type(
-            TimelineAnalysisResult
-        )
+        timeline_res = res_mgr.lookup_by_type(TimelineAnalysisResult)
 
         # inspect the drive channel: make sure there are two pulses from the ECR gate
         drive_chan = qubit1.get_drive_channel()

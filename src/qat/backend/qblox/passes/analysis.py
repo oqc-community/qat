@@ -212,8 +212,8 @@ class QbloxLegalisationPass(AnalysisPass):
         will follow in future iterations.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
 
         for target in triage_result.target_map:
             rw_result = binding_result.rw_results[target]
@@ -306,8 +306,8 @@ class PreCodegenPass(AnalysisPass):
         Computes useful information in the form of attributes.
         """
 
-        triage_result: TriageResult = res_mgr.lookup_by_type(TriageResult)
-        binding_result: BindingResult = res_mgr.lookup_by_type(BindingResult)
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        binding_result = res_mgr.lookup_by_type(BindingResult)
         result = PreCodegenResult()
 
         for target in triage_result.target_map:

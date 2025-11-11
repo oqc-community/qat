@@ -36,7 +36,7 @@ class TestActivePulseChannelAnalysis:
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
-        res: ActivePulseChannelResults = res_mgr.lookup_by_type(ActivePulseChannelResults)
+        res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 3
         channel_ids = set([drive_chan.uuid, measure_chan.uuid, acquire_chan.uuid])
         assert res.targets == channel_ids
@@ -141,7 +141,7 @@ class TestActivePulseChannelAnalysis:
         res_mgr = ResultManager()
         met_mgr = MetricsManager()
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
-        res: ActivePulseChannelResults = res_mgr.lookup_by_type(ActivePulseChannelResults)
+        res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 2
         channel_ids = set([drive_channel.uuid, pulse_channel.uuid])
         assert res.targets == channel_ids
