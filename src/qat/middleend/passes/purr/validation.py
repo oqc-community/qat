@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from collections import defaultdict
 from numbers import Number
-from typing import List
 
 import numpy as np
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, ResultsFormatting
@@ -263,7 +262,7 @@ class ReadoutValidation(ValidationPass):
         if not isinstance(model, LiveHardwareModel):
             return ir
 
-        consumed_qubits: List[str] = []
+        consumed_qubits: list[str] = []
         chanbits_map = {}
         for inst in ir.instructions:
             if isinstance(inst, PostProcessing):

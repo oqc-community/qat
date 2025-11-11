@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from typing import Dict, List, Optional
-
 import numpy as np
 
 from qat.core.pass_base import TransformPass
@@ -50,10 +48,9 @@ class DecomposeToNativeGates(TransformPass):
     Default native gates are :class:`Z`, :class:`X_pi_2` and :class:`ZX_pi_4`.
     """
 
-    def __init__(self, native_gates: Optional[List[GateBase]] = None):
+    def __init__(self, native_gates: list[GateBase] | None = None):
         """
         :param native_gates: A list of native gates to decompose to.
-        :type native_gates: List[GateBase], optional
         """
         self.decompositions = DefaultGateDecompositions(end_nodes=native_gates)
 
@@ -117,8 +114,8 @@ class Squash1QGates(TransformPass):
 
     def run(self, ir: QatIR, *args, **kwargs):
         """:param ir: QatIR to transform."""
-        gate_sequences: Dict[int, List[int]] = {}
-        new_instructions: List[GateBase] = []
+        gate_sequences: dict[int, list[int]] = {}
+        new_instructions: list[GateBase] = []
         for idx, gate in enumerate(ir.instructions):
             if isinstance(gate, Gate1Q):
                 gate_sequences.setdefault(gate.qubit, []).append(idx)
@@ -138,7 +135,7 @@ class Squash1QGates(TransformPass):
         ir.instructions = new_instructions
         return ir
 
-    def squash_gate(self, gates: List[Gate1Q]):
+    def squash_gate(self, gates: list[Gate1Q]):
         """Squashes a list of gates into a U gate."""
         # can probably be moved elsewhere for reuse.
         if len(gates) == 1:

@@ -4,7 +4,6 @@
 from abc import ABC
 from contextlib import ExitStack, contextmanager
 from numbers import Number
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -75,9 +74,9 @@ class AbstractContext(ABC):
         self._acq_index: int = 0
         self._wgt_index: int = 0
 
-        self._durations: List[Union[float, str]] = []
+        self._durations: list[float | str] = []
         self._frequency: float = 0.0  # Tracks frequency shifts on the target
-        self._phases: List[Union[float, str]] = []
+        self._phases: list[float | str] = []
         self._timeline: np.ndarray = np.empty(0, dtype=complex)
 
     @property
@@ -238,7 +237,7 @@ class AbstractContext(ABC):
             self.sequence_builder.wait(iter_reg)
             self.sequence_builder.label(batch_exit)
 
-    def ledger(self, duration: Union[int, str], pulse: np.ndarray = None):
+    def ledger(self, duration: int | str, pulse: np.ndarray = None):
         if isinstance(duration, int):
             pulse = np.zeros(duration, dtype=complex) if pulse is None else pulse
             if all((isinstance(p, Number) for p in self._phases)):
@@ -426,7 +425,7 @@ class AbstractContext(ABC):
         q_index = self._register_signal(waveform, target, data.imag, "Q")
         return i_index, q_index
 
-    def _register_acquisition(self, acq_name: str, num_bins: Union[int, str]):
+    def _register_acquisition(self, acq_name: str, num_bins: int | str):
         acq_index = self._acq_index
         self.sequence_builder.add_acquisition(acq_name, acq_index, num_bins)
         self._acq_index = acq_index + 1
@@ -633,7 +632,7 @@ class AbstractContext(ABC):
         self.ledger(pulse_width, pulse)
 
     @staticmethod
-    def synchronize(inst: Synchronize, contexts: Dict):
+    def synchronize(inst: Synchronize, contexts: dict):
         """
         Favours static time padding whenever possible, or else uses SYNC.
         TODO - Default to SYNC when Qblox supports finer grained SYNC groups
@@ -736,7 +735,7 @@ class QbloxContext1(AbstractContext):
         self,
         measure: MeasurePulse,
         acquire: Acquire,
-        post_procs: List[PostProcessing],
+        post_procs: list[PostProcessing],
         target: PulseChannel,
     ):
         """
@@ -812,17 +811,17 @@ class QbloxContext2(AbstractContext):
         alloc_mgr: AllocationManager,
         scoping_result: ScopingResult,
         rw_result: ReadWriteResult,
-        iter_bounds: Dict[str, IterBound],
+        iter_bounds: dict[str, IterBound],
     ):
         super().__init__(alloc_mgr)
-        self.scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = (
+        self.scope2symbols: dict[tuple[Instruction, Instruction | None], set[str]] = (
             scoping_result.scope2symbols
         )
-        self.symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = (
+        self.symbol2scopes: dict[str, list[tuple[Instruction, Instruction | None]]] = (
             scoping_result.symbol2scopes
         )
-        self.reads: Dict[str, List[Instruction]] = rw_result.reads
-        self.writes: Dict[str, List[Instruction]] = rw_result.writes
+        self.reads: dict[str, list[Instruction]] = rw_result.reads
+        self.writes: dict[str, list[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
 
     def __enter__(self):
@@ -915,7 +914,7 @@ class QbloxContext2(AbstractContext):
         self.ledger(pulse_width, pulse)
 
     @staticmethod
-    def enter_repeat(inst: Repeat, contexts: Dict):
+    def enter_repeat(inst: Repeat, contexts: dict):
         iter_name = f"repeat_{hash(inst)}"
         for context in contexts.values():
             register = context.alloc_mgr.registers[iter_name]
@@ -930,7 +929,7 @@ class QbloxContext2(AbstractContext):
             context.reset_phase()
 
     @staticmethod
-    def exit_repeat(inst: Repeat, contexts: Dict):
+    def exit_repeat(inst: Repeat, contexts: dict):
         iter_name = f"repeat_{hash(inst)}"
         for context in contexts.values():
             register = context.alloc_mgr.registers[iter_name]
@@ -945,7 +944,7 @@ class QbloxContext2(AbstractContext):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
     @staticmethod
-    def enter_sweep(inst: Sweep, contexts: Dict):
+    def enter_sweep(inst: Sweep, contexts: dict):
         iter_name = f"sweep_{hash(inst)}"
         for context in contexts.values():
             var_names = [n for n in inst.variables if n in context.reads] + [iter_name]
@@ -962,7 +961,7 @@ class QbloxContext2(AbstractContext):
             context.sequence_builder.label(label)
 
     @staticmethod
-    def exit_sweep(inst: Sweep, contexts: Dict):
+    def exit_sweep(inst: Sweep, contexts: dict):
         iter_name = f"sweep_{hash(inst)}"
         for context in contexts.values():
             var_names = [n for (n, insts) in context.writes.items() if inst in insts]
@@ -987,8 +986,8 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
         ignore_empty=True,
     ) -> Executable[QbloxProgram]:
         triage_result = res_mgr.lookup_by_type(TriageResult)
@@ -1013,7 +1012,7 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
 
     def _do_emit(self, triage_result: TriageResult, ignore_empty=True) -> QbloxProgram:
         repeat = next(iter(triage_result.repeats))
-        contexts: Dict[PulseChannel, QbloxContext1] = {}
+        contexts: dict[PulseChannel, QbloxContext1] = {}
 
         with ExitStack() as stack:
             inst_iter = iter(triage_result.quantum_instructions)
@@ -1075,8 +1074,8 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
         ignore_empty=True,
     ) -> Executable[QbloxProgram]:
         triage_result = res_mgr.lookup_by_type(TriageResult)
@@ -1084,12 +1083,12 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
         precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
         cfg_result = res_mgr.lookup_by_type(CFGResult)
 
-        scoping_results: Dict[PulseChannel, ScopingResult] = binding_result.scoping_results
-        rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
-        iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = (
+        scoping_results: dict[PulseChannel, ScopingResult] = binding_result.scoping_results
+        rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
+        iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
             binding_result.iter_bound_results
         )
-        alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
+        alloc_mgrs: dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
 
         with ExitStack() as stack:
             contexts = {
@@ -1119,7 +1118,7 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
 
 
 class QbloxCFGWalker(DfsTraversal):
-    def __init__(self, contexts: Dict[PulseChannel, QbloxContext2]):
+    def __init__(self, contexts: dict[PulseChannel, QbloxContext2]):
         super().__init__()
         self.contexts = contexts
 

@@ -173,7 +173,7 @@ QubitCoupling = Annotated[
     BeforeValidator(validate_qubit_coupling),
 ]
 
-VALIDATORS = Union[BeforeValidator, AfterValidator, PlainValidator]
+VALIDATORS = BeforeValidator | AfterValidator | PlainValidator
 
 
 def validate_value(value: V, value_type: Type[V]):

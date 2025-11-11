@@ -2,7 +2,7 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Optional, Type, Union
+from typing import Type, Union
 
 import numpy as np
 from pydantic import Field, model_validator
@@ -61,7 +61,7 @@ class Waveform(AbstractWaveform):
     std_dev: float = 0.0
     square_width: float = 0.0
 
-    shape_function_type: Optional[Type[ComplexFunction]] = None
+    shape_function_type: Type[ComplexFunction] | None = None
 
     @property
     def duration(self):
@@ -130,7 +130,7 @@ class SampledWaveform(AbstractWaveform):
     """
 
     samples: ComplexNDArray | FloatNDArray
-    sample_time: Optional[float] = None  # Time between samples, in seconds
+    sample_time: float | None = None  # Time between samples, in seconds
 
     @property
     def duration(self):

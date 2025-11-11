@@ -6,7 +6,6 @@ import re
 import threading
 from contextlib import contextmanager
 from pathlib import Path
-from typing import List
 
 import numpy as np
 import pytest
@@ -119,7 +118,7 @@ def apply_setup_to_hardware(hw, qubit_indices: list):
 
 
 def get_jagged_echo_hardware(
-    qubit_count: int = 4, qubit_indices: List[int] = []
+    qubit_count: int = 4, qubit_indices: list[int] = []
 ) -> "QuantumHardwareModel":
     model = QuantumHardwareModel()
     if len(qubit_indices) == 0:
@@ -128,7 +127,7 @@ def get_jagged_echo_hardware(
     return apply_setup_to_hardware(model, qubit_indices)
 
 
-def update_qubit_indices(program: str, qubit_indices: List[int]) -> str:
+def update_qubit_indices(program: str, qubit_indices: list[int]) -> str:
     """Adjust the physical qubit references in the program to use ones from qubit_indices."""
     patterns = [
         r"(\$)(?P<dollar_index>\d+)",

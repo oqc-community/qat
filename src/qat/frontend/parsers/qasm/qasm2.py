@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import Union
 
 from compiler_config.config import Languages
 from qiskit import qasm2
@@ -315,7 +314,7 @@ class Qasm2Parser(AbstractParser):
                 qubits.append(register.qubits[ind])
         return qubits
 
-    def _get_clbits(self, source: Union[DAGOpNode, tuple], context: QasmContext) -> list:
+    def _get_clbits(self, source: DAGOpNode | tuple, context: QasmContext) -> list:
         if isinstance(source, DAGOpNode):
             return self._get_clbits(source.cargs, context)
         else:

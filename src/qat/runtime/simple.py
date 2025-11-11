@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from typing import Optional
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
@@ -12,18 +11,19 @@ from qat.runtime.aggregator import ResultsCollection
 class SimpleRuntime(BaseRuntime):
     """A Runtime for the complete execution of packages without sweeps.
 
-    The :class:`SimpleRuntime` handles the complete execution for simple programs that are
-    free from sweeps (with exceptions of sweeps that have been lowered to the hardware).
-    This includes batching of shots, executing the program on the target machine, and any software
-    post-processing that cannot be achieved in the target machine. The runtime must be provided
-    with a :class:`NativeEngine` that is capable of executing the desired programs.
+    The :class:`SimpleRuntime` is designed to handle the execution of executables; it does
+    not take on any classical-quantum hybrid capabilities, such as using the collective
+    measurement results to inform later quantum execution (such as variational quantum
+    algorithms). This does not mean quantum execution cannot have control flow conditioned
+    on classical measurements.  The runtime must be provided with a :class:`NativeEngine`
+    that is capable of executing the desired programs.
     """
 
     def execute(
         self,
         package: Executable,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
         **kwargs,
     ):
         """Fully execute a package against the hardware with batching of shots and results

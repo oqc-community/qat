@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import Optional
-
 from compiler_config.config import CompilerConfig
 
 from qat.core.metrics_base import MetricsManager
@@ -23,9 +21,9 @@ class FallthroughFrontend(BaseFrontend):
     def emit(
         self,
         src: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
     ) -> InstructionBuilder:
         return src
 

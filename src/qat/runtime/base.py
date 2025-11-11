@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import abc
 from contextlib import contextmanager
-from typing import Optional
 
 from qat.core.pass_base import PassManager
 from qat.engines import ConnectionMixin, NativeEngine
@@ -29,7 +28,7 @@ class BaseRuntime(abc.ABC):
     def __init__(
         self,
         engine: NativeEngine,
-        results_pipeline: Optional[PassManager] = None,
+        results_pipeline: PassManager | None = None,
         connection_mode: ConnectionMode = ConnectionMode.DEFAULT,
     ):
         """

@@ -4,7 +4,6 @@
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Union
 
 from compiler_config.config import Languages
 
@@ -20,7 +19,7 @@ string_regex = re.compile(
 @dataclass
 class InputAnalysisResult(ResultInfoMixin):
     language: Languages = Languages.Empty
-    raw_input: Union[str, bytes] = None
+    raw_input: str | bytes = None
 
 
 class InputAnalysis(AnalysisPass):

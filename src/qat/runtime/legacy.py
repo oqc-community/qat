@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from typing import Optional
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
@@ -19,7 +18,7 @@ class LegacyRuntime(BaseRuntime):
     def __init__(
         self,
         engine: InstructionExecutionEngine,
-        results_pipeline: Optional[PassManager] = None,
+        results_pipeline: PassManager | None = None,
         connection_mode: ConnectionMode = ConnectionMode.DEFAULT,
     ):
         """
@@ -45,8 +44,8 @@ class LegacyRuntime(BaseRuntime):
     def execute(
         self,
         package: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
         **kwargs,
     ):
         """Fully execute QatIR against the hardware using a legacy execution engines.

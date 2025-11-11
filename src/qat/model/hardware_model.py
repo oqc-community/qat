@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import uuid
 from copy import deepcopy
-from typing import Optional
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_extra_types.semantic_version import SemanticVersion
@@ -77,7 +76,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     qubits: FrozenDict[QubitId, Qubit]
     physical_connectivity: FrozenDict[QubitId, FrozenSet[QubitId]] = Field(frozen=True)
-    logical_connectivity: Optional[FrozenDict[QubitId, FrozenSet[QubitId]]] = Field(
+    logical_connectivity: FrozenDict[QubitId, FrozenSet[QubitId]] | None = Field(
         default=None
     )
     logical_connectivity_quality: FrozenDict[QubitCoupling, CalibratableUnitInterval]

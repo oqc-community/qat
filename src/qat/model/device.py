@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 from pydantic import Field, field_validator, model_validator
@@ -118,7 +118,7 @@ class PhysicalChannel(Component):
 
     baseband: PhysicalBaseband = Field(frozen=True)
 
-    block_size: Optional[int] = Field(ge=1, default=1)
+    block_size: int | None = Field(ge=1, default=1)
     iq_voltage_bias: IQBias = Field(default=IQBias())
     name_index: int = Field(ge=0, frozen=True)
 

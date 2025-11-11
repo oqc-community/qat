@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from typing import Dict, List
-
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -54,7 +52,7 @@ def plot_program(program: QbloxProgram):
     plt.show()
 
 
-def plot_playback(playback: Dict[str, List[Acquisition]]):
+def plot_playback(playback: dict[str, list[Acquisition]]):
     if not playback:
         return
 

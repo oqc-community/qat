@@ -3,7 +3,7 @@
 
 import abc
 from collections import defaultdict
-from typing import Generic, Optional, Tuple
+from typing import Generic
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
@@ -30,8 +30,8 @@ class BaseBackend(Generic[Program], abc.ABC):
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
         **kwargs,
     ) -> Executable[Program]:
         """
@@ -65,7 +65,7 @@ class AllocatingBackend(CustomBackend[Program], Generic[Program], abc.ABC):
         super().__init__(model=model, pipeline=pipeline)
         self.allocations: dict[int, dict[str, int]] = defaultdict(dict)
 
-    def allocate(self, target: PulseChannel) -> Tuple[int, int]:
+    def allocate(self, target: PulseChannel) -> tuple[int, int]:
         """
         For a given target, allocate an FPGA card and a sequencer.
         """

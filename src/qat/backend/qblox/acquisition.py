@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from typing import Optional
-
 import numpy as np
 from pydantic import BaseModel, Field
 
@@ -11,8 +9,8 @@ from qat.utils.pydantic import FloatNDArray, IntNDArray
 
 class PathData(BaseModel):
     """
-    This object wraps the actual data as a list of samples, the number
-    of averages performed by the hardware (if any), and whether the hw observed any out-of-range samples.
+    This object wraps the actual data as a list of samples, the number of averages performed
+    by the hardware (if any), and whether the hw observed any out-of-range samples.
     """
 
     avg_cnt: int = None
@@ -102,7 +100,7 @@ class Acquisition(BaseModel):
     An acquisition contains is described by a name, index, and blob data represented by :class:`AcqData`
     """
 
-    name: Optional[str] = None
+    name: str | None = None
     index: int = None
     acquisition: BinnedAndScopeAcqData = BinnedAndScopeAcqData()
 

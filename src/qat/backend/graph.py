@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
-from typing import List
 
 
 class BasicBlock:
     def __init__(self, elements=None):
-        self.elements: List = elements or []
+        self.elements: list = elements or []
 
     def head(self):
         if self.elements:
@@ -41,8 +40,8 @@ class Flow:
 
 class ControlFlowGraph:
     def __init__(self, nodes=None, edges=None):
-        self.nodes: List[BasicBlock] = nodes or []
-        self.edges: List[Flow] = edges or []
+        self.nodes: list[BasicBlock] = nodes or []
+        self.edges: list[Flow] = edges or []
         self.entry = None
 
     def get_or_create_node(self, header: int) -> BasicBlock:
@@ -61,14 +60,14 @@ class ControlFlowGraph:
             self.edges.append(edge)
         return edge
 
-    def out_nbrs(self, node) -> List[BasicBlock]:
+    def out_nbrs(self, node) -> list[BasicBlock]:
         return [e.dest for e in self.edges if e.src == node]
 
-    def in_nbrs(self, node) -> List[BasicBlock]:
+    def in_nbrs(self, node) -> list[BasicBlock]:
         return [e.src for e in self.edges if e.dest == node]
 
-    def out_edges(self, node) -> List[Flow]:
+    def out_edges(self, node) -> list[Flow]:
         return [e for e in self.edges if e.src == node]
 
-    def in_edges(self, node) -> List[Flow]:
+    def in_edges(self, node) -> list[Flow]:
         return [e for e in self.edges if e.dest == node]

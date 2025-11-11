@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from numbers import Number
-from typing import Iterable, List
+from typing import Iterable
 
 import numpy as np
 
@@ -62,11 +62,11 @@ def numpy_array_to_list(array):
     Transform numpy arrays to a normal list.
     """
     if isinstance(array, np.ndarray):
-        numpy_list: List = array.tolist()
+        numpy_list = array.tolist()
         if len(numpy_list) == 1:
             return numpy_list[0]
         return numpy_list
-    elif isinstance(array, List):
+    elif isinstance(array, list):
         list_list = [numpy_array_to_list(val) for val in array]
         if len(list_list) == 1:
             return list_list[0]
@@ -94,7 +94,7 @@ def binary_count(results_list, repeats):
             return str(res)
 
     def get_tuple(res, index):
-        return [val[index] if isinstance(val, (List, np.ndarray)) else val for val in res]
+        return [val[index] if isinstance(val, (list, np.ndarray)) else val for val in res]
 
     binary_results = binary(results_list)
 

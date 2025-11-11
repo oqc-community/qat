@@ -7,7 +7,6 @@ from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
 from itertools import chain
-from typing import Dict, List, Set
 
 import numpy as np
 
@@ -218,9 +217,9 @@ class QbloxLegalisationPass(AnalysisPass):
         for target in triage_result.target_map:
             rw_result = binding_result.rw_results[target]
             bound_result = binding_result.iter_bound_results[target]
-            legal_bound_result: Dict[str, IterBound] = deepcopy(bound_result)
+            legal_bound_result: dict[str, IterBound] = deepcopy(bound_result)
 
-            qblox_bounds: Dict[str, Set[IterBound]] = defaultdict(set)
+            qblox_bounds: dict[str, set[IterBound]] = defaultdict(set)
             for name, instructions in rw_result.reads.items():
                 for inst in instructions:
                     legal_bound = self._legalise_bound(name, bound_result[name], inst)
@@ -241,15 +240,15 @@ class QbloxLegalisationPass(AnalysisPass):
 
 @dataclass
 class AllocationManager:
-    _reg_pool: List[str] = field(
+    _reg_pool: list[str] = field(
         default_factory=lambda: sorted(
             f"R{index}" for index in range(Constants.NUMBER_OF_REGISTERS)
         )
     )
-    _lbl_counters: Dict[str, int] = field(default_factory=dict)
+    _lbl_counters: dict[str, int] = field(default_factory=dict)
 
-    registers: Dict[str, str] = field(default_factory=dict)
-    labels: Dict[str, str] = field(default_factory=dict)
+    registers: dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
     def reg_alloc(self, name: str) -> str:
         if name in self.registers:
@@ -293,7 +292,7 @@ class AllocationManager:
 
 @dataclass
 class PreCodegenResult:
-    alloc_mgrs: Dict[PulseChannel, AllocationManager] = field(
+    alloc_mgrs: dict[PulseChannel, AllocationManager] = field(
         default_factory=lambda: defaultdict(lambda: AllocationManager())
     )
 

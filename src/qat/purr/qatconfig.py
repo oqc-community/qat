@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 
-from typing import Literal, Optional, Tuple, Type
+from typing import Literal, Type
 
 from compiler_config.config import CompilerConfig
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -96,7 +96,7 @@ class QatConfig(BaseSettings):
         env_nested_delimiter="_",
         validate_assignment=True,
     )
-    MAX_REPEATS_LIMIT: Optional[int] = Field(gt=0, default=100_000)
+    MAX_REPEATS_LIMIT: int | None = Field(gt=0, default=100_000)
     """Max number of repeats / shots to be performed in a single job."""
 
     INSTRUCTION_VALIDATION: InstructionValidationConfig = InstructionValidationConfig()
@@ -113,7 +113,7 @@ class QatConfig(BaseSettings):
         env_settings: PydanticBaseSettingsSource,
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
-    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (
             init_settings,
             env_settings,

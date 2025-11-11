@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from numbers import Number
-from typing import Dict, List, Union
 
 import numpy as np
 
@@ -12,7 +11,7 @@ from qat.purr.compiler.instructions import AcquireMode, PostProcessType, Process
 UPCONVERT_SIGN = 1.0
 
 
-def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, int]:
+def get_axis_map(mode: AcquireMode, response: np.ndarray) -> dict[ProcessAxis, int]:
     """
     Given the acquisition mode, determine what each axis corresponds to.
 
@@ -39,8 +38,8 @@ def get_axis_map(mode: AcquireMode, response: np.ndarray) -> Dict[ProcessAxis, i
 
 
 def apply_post_processing(
-    response: np.ndarray, post_processing: PostProcessing, axes: Dict[ProcessAxis, int]
-) -> (np.ndarray, dict[ProcessAxis, int]):
+    response: np.ndarray, post_processing: PostProcessing, axes: dict[ProcessAxis, int]
+) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
     """
     Applies software post processing to the results.
 
@@ -72,7 +71,7 @@ def apply_post_processing(
 
 def down_convert(
     response: np.ndarray,
-    axes: Dict[ProcessAxis, int],
+    axes: dict[ProcessAxis, int],
     frequency: float,
     dt: float,
 ):
@@ -107,18 +106,16 @@ def down_convert(
 
 def mean(
     response: np.ndarray,
-    axes: Dict[ProcessAxis, int],
-    target_axes: Union[ProcessAxis, List[ProcessAxis]],
+    axes: dict[ProcessAxis, int],
+    target_axes: ProcessAxis | list[ProcessAxis],
 ):
     """
     Calculates the mean over the given axes.
 
-    :param np.ndarray response: Readout results from an execution engine.
+    :param response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
         series.
-    :type axes: dict[ProcessAxis, Int]
     :param target_axes: Which axis or axes should the mean be done over?
-    :type target_axes: Union[ProcessAxis, list[ProcessAxis]]
     :returns: The processed results as an array and the axis map.
     """
 
@@ -130,8 +127,8 @@ def mean(
 
 
 def linear_map_complex_to_real(
-    response: List[np.ndarray],
-    axes: Dict[ProcessAxis, int],
+    response: list[np.ndarray],
+    axes: dict[ProcessAxis, int],
     multiplier: Number,
     constant: Number,
 ):
@@ -150,7 +147,7 @@ def linear_map_complex_to_real(
     return np.real(multiplier * response + constant), axes
 
 
-def discriminate(response: np.ndarray, axes: Dict[ProcessAxis, int], threshold: float):
+def discriminate(response: np.ndarray, axes: dict[ProcessAxis, int], threshold: float):
     """
     Discriminates a real value to a classical bit by comparison to a supplied
     discrimination threshold.
@@ -196,7 +193,7 @@ def _remove_axes(original_dims, removed_axis_indices, axis_locations):
 
 
 def _validate_down_convert_axis(target_axis):
-    if isinstance(target_axis, List):
+    if isinstance(target_axis, list):
         if len(target_axis) != 1:
             raise ValueError("Down conversion can only be done over a single axis.")
         target_axis = target_axis[0]

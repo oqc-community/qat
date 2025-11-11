@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import Optional
-
 import numpy as np
 from numpy.typing import NDArray
 from pydantic import ConfigDict, field_validator
@@ -60,7 +58,7 @@ class ErrorMitigation(NoExtraFieldsModel):
     :param readout_mitigation: Linear readout mitigation.
     """
 
-    readout_mitigation: Optional[ReadoutMitigation] = None
+    readout_mitigation: ReadoutMitigation | None = None
 
     @property
     def is_enabled(self):

@@ -6,7 +6,6 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from functools import reduce
 from operator import mul
-from typing import Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
@@ -45,23 +44,23 @@ log = get_default_logger()
 
 @dataclass
 class TriageResult(ResultInfoMixin):
-    sweeps: List[Sweep] = field(default_factory=list)
-    repeats: List[Repeat] = field(default_factory=list)
-    returns: List[Return] = field(default_factory=list)
-    assigns: List[Assign] = field(default_factory=list)
-    target_map: Dict[PulseChannel, List[Instruction]] = field(
+    sweeps: list[Sweep] = field(default_factory=list)
+    repeats: list[Repeat] = field(default_factory=list)
+    returns: list[Return] = field(default_factory=list)
+    assigns: list[Assign] = field(default_factory=list)
+    target_map: dict[PulseChannel, list[Instruction]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    device_updates: List[DeviceUpdate] = field(default_factory=list)
-    quantum_instructions: List[QuantumInstruction] = field(default_factory=list)
-    acquire_map: Dict[PulseChannel, List[Acquire]] = field(
+    device_updates: list[DeviceUpdate] = field(default_factory=list)
+    quantum_instructions: list[QuantumInstruction] = field(default_factory=list)
+    acquire_map: dict[PulseChannel, list[Acquire]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    pp_map: Dict[str, List[PostProcessing]] = field(
+    pp_map: dict[str, list[PostProcessing]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    rp_map: Dict[str, ResultsProcessing] = field(default_factory=dict)
-    active_targets: Set[PulseChannel] = field(default_factory=set)
+    rp_map: dict[str, ResultsProcessing] = field(default_factory=dict)
+    active_targets: set[PulseChannel] = field(default_factory=set)
 
 
 class TriagePass(AnalysisPass):
@@ -153,25 +152,25 @@ class TriagePass(AnalysisPass):
 
 @dataclass
 class ScopingResult:
-    scope2symbols: Dict[Tuple[Instruction, Optional[Instruction]], Set[str]] = field(
+    scope2symbols: dict[tuple[Instruction, Instruction | None], set[str]] = field(
         default_factory=lambda: defaultdict(set)
     )
-    symbol2scopes: Dict[str, List[Tuple[Instruction, Optional[Instruction]]]] = field(
+    symbol2scopes: dict[str, list[tuple[Instruction, Instruction | None]]] = field(
         default_factory=lambda: defaultdict(list)
     )
 
 
 @dataclass
 class ReadWriteResult:
-    reads: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
-    writes: Dict[str, List[Instruction]] = field(default_factory=lambda: defaultdict(list))
+    reads: dict[str, list[Instruction]] = field(default_factory=lambda: defaultdict(list))
+    writes: dict[str, list[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
 
 @dataclass(frozen=True)
 class IterBound:
-    start: Union[int, float, complex] = None
-    step: Union[int, float, complex] = None
-    end: Union[int, float, complex] = None
+    start: int | float | complex = None
+    step: int | float | complex = None
+    end: int | float | complex = None
     count: int = None
 
     def astype(self, ty: type):
@@ -185,13 +184,13 @@ class IterBound:
 
 @dataclass
 class BindingResult(ResultInfoMixin):
-    scoping_results: Dict[PulseChannel, ScopingResult] = field(
+    scoping_results: dict[PulseChannel, ScopingResult] = field(
         default_factory=lambda: defaultdict(lambda: ScopingResult())
     )
-    rw_results: Dict[PulseChannel, ReadWriteResult] = field(
+    rw_results: dict[PulseChannel, ReadWriteResult] = field(
         default_factory=lambda: defaultdict(lambda: ReadWriteResult())
     )
-    iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = field(
+    iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = field(
         default_factory=lambda: defaultdict(dict)
     )
 
@@ -210,7 +209,7 @@ class BindingPass(AnalysisPass):
     """
 
     @staticmethod
-    def extract_iter_bound(value: Union[List, np.ndarray]):
+    def extract_iter_bound(value: list | np.ndarray):
         """
         Given a sequence of numbers (typically having been generated from
         :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced,
@@ -523,9 +522,9 @@ class TILegalisationPass(AnalysisPass):
         for target in triage_result.target_map:
             rw_result = binding_result.rw_results[target]
             bound_result = binding_result.iter_bound_results[target]
-            legal_bound_result: Dict[str, IterBound] = deepcopy(bound_result)
+            legal_bound_result: dict[str, IterBound] = deepcopy(bound_result)
 
-            read_bounds: Dict[str, Set[IterBound]] = defaultdict(set)
+            read_bounds: dict[str, set[IterBound]] = defaultdict(set)
             for name, instructions in rw_result.reads.items():
                 for inst in instructions:
                     legal_bound = self._legalise_bound(name, bound_result[name], inst)
@@ -753,7 +752,7 @@ class TimelineAnalysis(AnalysisPass):
         return ir
 
     @staticmethod
-    def durations_as_samples(channel: PulseChannel, durations: List[float]):
+    def durations_as_samples(channel: PulseChannel, durations: list[float]):
         """Converts a list of durations into a number of samples."""
 
         block_numbers = np.ceil(

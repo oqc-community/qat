@@ -3,7 +3,6 @@
 
 import itertools
 from copy import deepcopy
-from typing import Dict
 
 import numpy as np
 import pytest
@@ -74,14 +73,14 @@ class TestAnalysisPasses:
         assert result is not TriageResult()
 
         target_map = result.target_map
-        assert isinstance(target_map, Dict)
+        assert isinstance(target_map, dict)
         assert len(target_map) == 7
         assert qubit.get_drive_channel() in target_map
         assert qubit.get_measure_channel() in target_map
         assert qubit.get_acquire_channel() in target_map
 
         acquire_map = result.acquire_map
-        assert isinstance(acquire_map, Dict)
+        assert isinstance(acquire_map, dict)
         assert len(acquire_map) == 1
         assert qubit.get_acquire_channel() in acquire_map
         assert len(acquire_map[qubit.get_acquire_channel()]) == 1

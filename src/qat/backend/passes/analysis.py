@@ -1,6 +1,5 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Dict
 
 import numpy as np
 
@@ -18,7 +17,7 @@ from qat.purr.backends.utilities import UPCONVERT_SIGN
 
 @dataclass
 class IntermediateFrequencyResult(ResultInfoMixin):
-    frequencies: Dict[PhysicalChannel, float]
+    frequencies: dict[PhysicalChannel, float]
 
 
 class IntermediateFrequencyAnalysis(AnalysisPass):

@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from collections import defaultdict
-from typing import List, Optional
 
 import numpy as np
 
@@ -67,8 +66,8 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
         upconvert: bool = True,
         **kwargs,
     ) -> Executable[WaveformV1Program]:
@@ -317,12 +316,7 @@ class WaveformContext:
     def buffer(self):
         return self._buffer
 
-    def process_pulse(
-        self,
-        instruction: Pulse,
-        samples: int,
-        do_upconvert: bool = True,
-    ):
+    def process_pulse(self, instruction: Pulse, samples: int, do_upconvert: bool = True):
         """Converts a waveform instruction into a discrete number of samples, handling
         upconversion to the target frequency if specified."""
 
@@ -355,11 +349,7 @@ class WaveformContext:
         self._buffer[self._duration : self._duration + samples] = pulse
         self._duration += samples
 
-    def _do_upconvert(
-        self,
-        buffer: List[float],
-        time: List[float],
-    ):
+    def _do_upconvert(self, buffer: list[float], time: list[float]):
         """A virtually NCO to upconvert the waveforms by a frequency that is the difference
         between the target frequency and the baseband frequency."""
 

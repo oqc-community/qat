@@ -2,7 +2,7 @@ import csv
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Dict, List, Type
+from typing import Type
 
 from qat.instrument.base import (
     CInstr,
@@ -64,7 +64,7 @@ class ConfigInstrumentBuilder(InstrumentBuilder):
     :param linstr_type: type of Leaf Instrument to build
     """
 
-    def __init__(self, configs: List[Dict]):
+    def __init__(self, configs: list[dict]):
         self.configs = configs
 
     def build(

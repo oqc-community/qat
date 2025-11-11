@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Annotated, Optional, Union
+from typing import Annotated
 
 import numpy as np
 from pydantic import (
@@ -31,11 +31,11 @@ class Acquire(QuantumInstruction):
     suffix_incrementor: int = 0
     duration: float = 1e-6
     mode: AcquireMode = AcquireMode.INTEGRATOR
-    delay: Optional[float] = 0.0
-    filter: Optional[Pulse] = Field(default=None)
+    delay: float | None = 0.0
+    filter: Pulse | None = Field(default=None)
     output_variable: str | None = None
-    rotation: Optional[float] = 0.0
-    threshold: Optional[float] = 0.0
+    rotation: float | None = 0.0
+    threshold: float | None = 0.0
 
     @property
     def pulse_channel(self):
@@ -107,7 +107,7 @@ class PostProcessing(Instruction):
         return np.asarray(args).tolist()
 
 
-VALID_MEASURE_INSTR = Union[Synchronize, Acquire, Pulse, Delay]
+VALID_MEASURE_INSTR = Synchronize | Acquire | Pulse | Delay
 
 
 class MeasureBlock(QuantumInstructionBlock):

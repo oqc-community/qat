@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import shutil
-from typing import Dict
 
 import numpy as np
 import pytest
@@ -33,7 +32,7 @@ from tests.unit.utils.engines import InitableEngine, MockEngineWithModel
 
 
 class MockEngine(NativeEngine):
-    def execute(self, package: Executable) -> Dict[str, np.ndarray]:
+    def execute(self, package: Executable) -> dict[str, np.ndarray]:
         return {}
 
     def startup(self): ...

@@ -5,7 +5,6 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Optional, Union
 from uuid import uuid4
 
 import numpy as np
@@ -146,28 +145,24 @@ class InstructionBuilder(ABC):
         return self.Z(target, -(np.pi / 4.0))
 
     @abstractmethod
-    def controlled(
-        self, controllers: Union[Qubit, list[Qubit]], builder: InstructionBuilder
-    ): ...
+    def controlled(self, controllers: Qubit | list[Qubit], builder: InstructionBuilder): ...
 
-    def cX(self, controllers: Union[Qubit, list[Qubit]], target: Qubit, theta=np.pi):
+    def cX(self, controllers: Qubit | list[Qubit], target: Qubit, theta=np.pi):
         return self.controlled(controllers, self.X(target, theta=theta))
 
-    def cY(self, controllers: Union[Qubit, list[Qubit]], target: Qubit, theta=np.pi):
+    def cY(self, controllers: Qubit | list[Qubit], target: Qubit, theta=np.pi):
         return self.controlled(controllers, self.Y(target, theta=theta))
 
-    def cZ(self, controllers: Union[Qubit, list[Qubit]], target: Qubit, theta=np.pi):
+    def cZ(self, controllers: Qubit | list[Qubit], target: Qubit, theta=np.pi):
         return self.controlled(controllers, self.Z(target, theta=theta))
 
-    def cnot(self, control: Union[Qubit, list[Qubit]], target: Qubit):
+    def cnot(self, control: Qubit | list[Qubit], target: Qubit):
         return self.cX(control, target, theta=np.pi)
 
     @abstractmethod
     def ccnot(self, controllers: list[Qubit], target: Qubit): ...
 
-    def cswap(
-        self, controllers: Union[Qubit, list[Qubit]], target: Qubit, destination: Qubit
-    ):
+    def cswap(self, controllers: Qubit | list[Qubit], target: Qubit, destination: Qubit):
         return self.controlled(controllers, self.swap(target, destination))
 
     @abstractmethod
@@ -195,7 +190,7 @@ class InstructionBuilder(ABC):
     def assign(self, name: str, value):
         return self.add(Assign(name=name, value=value))
 
-    def jump(self, label: Union[str, Label], condition: BinaryOperator | None = None):
+    def jump(self, label: str | Label, condition: BinaryOperator | None = None):
         return self.add(Jump(label=label, condition=condition))
 
     def results_processing(self, variable: str, res_format: InlineResultsProcessing):
@@ -803,9 +798,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             .post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
         )
 
-    def reset(
-        self, targets: Union[PulseChannel, Qubit] | Iterable[Union[PulseChannel, Qubit]]
-    ):
+    def reset(self, targets: PulseChannel | Qubit | Iterable[PulseChannel | Qubit]):
         if isinstance(targets, list):
             targets = set(targets)
         elif isinstance(targets, PulseChannel | Qubit):
@@ -852,7 +845,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target: Qubit,
         output_variable: str,
         process_type: PostProcessType,
-        axes: Optional[Union[ProcessAxis, list[ProcessAxis]]] = None,
+        axes: ProcessAxis | list[ProcessAxis] | None = None,
         args=None,
     ):
         axes = axes if axes is not None else []
@@ -957,9 +950,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
             return self
 
-    def controlled(
-        self, controllers: Union[Qubit, list[Qubit]], builder: InstructionBuilder
-    ):
+    def controlled(self, controllers: Qubit | list[Qubit], builder: InstructionBuilder):
         raise NotImplementedError("Not available on this hardware model.")
 
     def ccnot(self, controllers: list[Qubit], target: Qubit):

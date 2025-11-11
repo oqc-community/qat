@@ -8,7 +8,6 @@ from dataclasses import asdict
 from datetime import datetime
 from functools import reduce
 from itertools import groupby
-from typing import Dict, List
 
 from compiler_config.config import InlineResultsProcessing
 
@@ -88,7 +87,7 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
-            if isinstance(value, List):
+            if isinstance(value, list):
                 return [recurse_arrays(results_map, val) for val in value]
             elif isinstance(value, Variable):
                 if value.name not in results_map:
@@ -112,7 +111,7 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
         return {key: assigned_results[key] for key in ret_inst.variables}
 
     @staticmethod
-    def combine_playbacks(playbacks: Dict[str, List[Acquisition]]):
+    def combine_playbacks(playbacks: dict[str, list[Acquisition]]):
         """
         Combines acquisition objects from multiple acquire instructions in multiple readout targets.
         Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
@@ -125,7 +124,7 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
         distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
         """
 
-        playback: Dict[str, Dict[str, Acquisition]] = {}
+        playback: dict[str, dict[str, Acquisition]] = {}
         for pulse_channel_id, acquisitions in playbacks.items():
             groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
             playback[pulse_channel_id] = {
@@ -141,7 +140,7 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
     def process_playback(
         self,
-        playback: Dict[str, Dict[str, Acquisition]],
+        playback: dict[str, dict[str, Acquisition]],
         triage_result: TriageResult,
     ):
         """
@@ -202,8 +201,8 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
         return results
 
-    def execute(self, programs: list[QbloxProgram], triage_result: TriageResult) -> Dict:
-        playbacks: Dict[str, List[Acquisition]] = defaultdict(list)
+    def execute(self, programs: list[QbloxProgram], triage_result: TriageResult) -> dict:
+        playbacks: dict[str, list[Acquisition]] = defaultdict(list)
         for program in programs:
             if self.plot_program:
                 plot_program(program)
@@ -217,7 +216,7 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
             self.instrument.setup(program)
             self.instrument.playback()
-            payback: Dict[str, List[Acquisition]] = self.instrument.collect()
+            payback: dict[str, list[Acquisition]] = self.instrument.collect()
             for pulse_channel_id, acquisitions in payback.items():
                 playbacks[pulse_channel_id] += acquisitions
         playback = self.combine_playbacks(playbacks)

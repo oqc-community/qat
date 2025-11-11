@@ -9,7 +9,7 @@ from numbers import Number
 from os.path import join
 from pathlib import Path
 from pydoc import locate
-from typing import Any, Optional, Union
+from typing import Any
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing, Languages
@@ -141,7 +141,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         return self.process_program(program, context)
 
     def process_program(
-        self, prog: ast.Program, context: Optional[QasmContext]
+        self, prog: ast.Program, context: QasmContext | None
     ) -> QuantumInstructionBuilder:
         context = context or QasmContext()
         self._walk_program(prog, context)
@@ -447,7 +447,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         theta: float,
         phi: float,
         _lambda: float,
-        qubit_or_register: list[Union[Qubit, QubitRegister]],
+        qubit_or_register: list[Qubit | QubitRegister],
         builder: QuantumInstructionBuilder,
     ):
         self._add_unitary(theta, phi, _lambda, qubit_or_register, builder)
@@ -493,10 +493,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
     def __init__(self):
         super().__init__()
-        self.builder: Optional[QuantumInstructionBuilder] = None
-        self._general_context: Optional[OpenPulseContext] = None
-        self._calibration_context: Optional[OpenPulseContext] = None
-        self._current_context: Optional[OpenPulseContext] = None
+        self.builder: QuantumInstructionBuilder | None = None
+        self._general_context: OpenPulseContext | None = None
+        self._calibration_context: OpenPulseContext | None = None
+        self._current_context: OpenPulseContext | None = None
         self._q3_patcher: Qasm3ParserBase = Qasm3ParserBase()
         self._port_mappings: dict[str, PhysicalChannel] = dict()
         self._frame_mappings: dict[str, PulseChannel] = dict()
@@ -1120,7 +1120,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self,
         name: str,
         qubits: list[Qubit],
-        argument_values: Optional[list[Any]] = None,
+        argument_values: list[Any] | None = None,
     ):
         """
         Returns whether this gate has been overriden, either in a generic

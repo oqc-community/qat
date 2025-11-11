@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import abc
-from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
@@ -28,17 +27,17 @@ class BaseMiddleend(abc.ABC):
     def emit(
         self,
         ir,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
     ):
         """
         Converts an IR :class:`QatIR` to an optimised IR.
         :param ir: The intermediate representation.
         :param res_mgr: Collection of analysis results with caching and aggregation
-                        capabilities, defaults to None.
+            capabilities, defaults to None.
         :param met_mgr: Stores useful intermediary metrics that are generated during
-                        compilation, defaults to None.
+            compilation, defaults to None.
         :param compiler_config: Compiler settings, defaults to None.
         """
         ...
@@ -58,17 +57,17 @@ class CustomMiddleend(BaseMiddleend):
     def emit(
         self,
         ir,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
     ):
         """
         Converts an IR :class:`QatIR` to an optimised IR with a custom pipeline.
         :param ir: The intermediate representation.
         :param res_mgr: Collection of analysis results with caching and aggregation
-                        capabilities, defaults to None.
+            capabilities, defaults to None.
         :param met_mgr: Stores useful intermediary metrics that are generated during
-                        compilation, defaults to None.
+            compilation, defaults to None.
         :param compiler_config: Compiler settings, defaults to None.
         """
 

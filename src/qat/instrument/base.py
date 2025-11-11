@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import Dict, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field, IPvAnyAddress
 
@@ -41,7 +41,7 @@ class InstrumentConcept(ConnectionMixin):
     def playback(self, *args, **kwargs):
         pass
 
-    def collect(self, *args, **kwargs) -> Dict:
+    def collect(self, *args, **kwargs) -> dict:
         pass
 
 
@@ -73,10 +73,10 @@ LInstr = TypeVar("LInstr", bound=LeafInstrument)
 
 class CompositeInstrument(Generic[LInstr], InstrumentConcept):
     def __init__(self):
-        self._components: Dict[str, LInstr] = {}
+        self._components: dict[str, LInstr] = {}
 
     @property
-    def components(self) -> Dict[str, LInstr]:
+    def components(self) -> dict[str, LInstr]:
         return self._components
 
     @property

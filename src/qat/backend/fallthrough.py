@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from typing import Optional
-
 from compiler_config.config import CompilerConfig
 
 from qat.backend.base import BaseBackend
@@ -18,15 +16,16 @@ class FallthroughBackend(BaseBackend):
 
     def __init__(self, model: None = None):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         """
         self.model = model
 
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
     ):
         return ir

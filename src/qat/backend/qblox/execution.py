@@ -2,7 +2,6 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from dataclasses import dataclass, field
-from typing import Dict, Optional
 
 import numpy as np
 from pydantic import ConfigDict
@@ -15,22 +14,22 @@ from qat.executables import AbstractProgram
 
 @dataclass
 class QbloxPackage:
-    pulse_channel_id: Optional[str] = None
-    physical_channel_id: Optional[str] = None
-    instrument_id: Optional[str] = None
-    seq_idx: Optional[int] = None
+    pulse_channel_id: str | None = None
+    physical_channel_id: str | None = None
+    instrument_id: str | None = None
+    seq_idx: int | None = None
     seq_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
-    slot_idx: Optional[int] = None
+    slot_idx: int | None = None
     mod_config: ModuleConfig = field(default_factory=lambda: ModuleConfig())
-    sequence: Optional[Sequence] = None
-    timeline: Optional[np.ndarray] = None
+    sequence: Sequence | None = None
+    timeline: np.ndarray | None = None
 
 
 class QbloxProgram(AbstractProgram):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # COMPILER 828: change to pydantic objects (not dataclasses)
-    packages: Dict[str, QbloxPackage]
+    packages: dict[str, QbloxPackage]
     triage_result: TriageResult
 
     @property

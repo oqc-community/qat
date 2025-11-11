@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
 from itertools import product
-from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from scipy.linalg import expm
@@ -18,7 +17,7 @@ from qat.purr.compiler.instructions import Instruction
 
 def get_default_matrix_hardware(
     qubit_count=4,
-    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+    connectivity: Connectivity | list[tuple[int, int]] | None = None,
 ) -> "MatrixHardwareModel":
     model = MatrixHardwareModel()
     if isinstance(connectivity, Connectivity):
@@ -361,7 +360,7 @@ class MatrixInstructionBuilder(QuantumInstructionBuilder):
         super().__init__(hardware_model, instructions)
 
     def add(self, matrices):
-        if not isinstance(matrices, List):
+        if not isinstance(matrices, list):
             matrices = [matrices]
 
         for matrix in matrices:

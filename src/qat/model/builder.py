@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-from typing import Optional
 
 from qat.model.device import (
     AcquirePulseChannel,
@@ -36,7 +35,7 @@ class PhysicalHardwareModelBuilder:
     def __init__(
         self,
         physical_connectivity: dict[int, FrozenSet[int]],
-        logical_connectivity: Optional[dict[int, FrozenSet[int]]] = None,
+        logical_connectivity: dict[int, FrozenSet[int]] | None = None,
         logical_connectivity_quality: FrozenDict[
             tuple[QubitId, QubitId], CalibratableUnitInterval
         ] = None,

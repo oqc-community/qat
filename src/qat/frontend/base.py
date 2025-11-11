@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from compiler_config.config import CompilerConfig
 
@@ -39,9 +38,9 @@ class BaseFrontend(ABC):
     def emit(
         self,
         src: QATInput,
-        res_mgr: Optional[ResultManager] = None,
-        met_mgr: Optional[MetricsManager] = None,
-        compiler_config: Optional[CompilerConfig] = None,
+        res_mgr: ResultManager | None = None,
+        met_mgr: MetricsManager | None = None,
+        compiler_config: CompilerConfig | None = None,
     ) -> InstructionBuilder:
         """
         Compiles an input :class:`QatInput` down to :class:`QatIR` and emits it.

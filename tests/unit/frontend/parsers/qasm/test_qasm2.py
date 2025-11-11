@@ -207,7 +207,7 @@ def test_cl2qu_index_mapping(qasm, expected_mapping):
 
 def get_cl2qu_index_mapping(instructions: InstructionBlock, hw: PhysicalHardwareModel):
     """
-    Returns a Dict[str, str] mapping creg to qreg indices.
+    Returns a dict[str, str] mapping creg to qreg indices.
     Classical register indices are extracted following the pattern <clreg_name>[<clreg_index>]
     """
     mapping = {}

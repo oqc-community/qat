@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import abc
 import itertools as it
-from typing import Any, Iterable, Union
+from typing import Any, Iterable
 
 from compiler_config.config import InlineResultsProcessing, Languages
 from pydantic import Field
@@ -119,7 +119,7 @@ class AbstractParser(abc.ABC):
         theta: float,
         phi: float,
         lamb: float,
-        qubit_or_register: list[Union[Qubit, QubitRegister]],
+        qubit_or_register: list[Qubit | QubitRegister],
         builder: QuantumInstructionBuilder,
     ):
         """Unitary in QASM terms is just ``U(...)``."""

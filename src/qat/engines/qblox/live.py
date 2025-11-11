@@ -3,7 +3,6 @@
 
 from collections import defaultdict
 from dataclasses import asdict
-from typing import Dict, List
 
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
@@ -41,8 +40,8 @@ class QbloxLeafInstrument(LeafInstrument):
         self.ref_source = ref_source or "internal"
 
         self._driver: Cluster = None
-        self._modules: Dict[Module, bool] = {}
-        self._id2seq: Dict[str, Sequencer] = {}
+        self._modules: dict[Module, bool] = {}
+        self._id2seq: dict[str, Sequencer] = {}
 
     def _reset_modules(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
@@ -141,13 +140,13 @@ class QbloxLeafInstrument(LeafInstrument):
             for pulse_channel_id, sequencer in self._id2seq.items():
                 sequencer.sync_en(False)
 
-    def collect(self) -> Dict:
+    def collect(self) -> dict:
         if not any(self._id2seq):
             raise ValueError(
                 "No allocations found. Install packages, configure, and playback first"
             )
 
-        results: Dict[str, List[Acquisition]] = defaultdict(list)
+        results: dict[str, list[Acquisition]] = defaultdict(list)
         try:
             for pulse_channel_id, sequencer in self._id2seq.items():
                 if ChannelType.macq.name in pulse_channel_id:

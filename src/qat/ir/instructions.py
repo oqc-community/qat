@@ -7,7 +7,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from functools import cached_property
 from pydoc import locate
-from typing import Annotated, Any, List, Literal, Optional, Union
+from typing import Annotated, Any, Literal
 
 from compiler_config.config import InlineResultsProcessing
 from pydantic import (
@@ -164,7 +164,7 @@ class Repeat(Instruction):
     value of the current operations, also known as shots.
     """
 
-    repeat_count: Optional[int] = None
+    repeat_count: int | None = None
 
 
 class EndRepeat(Instruction): ...
@@ -173,7 +173,7 @@ class EndRepeat(Instruction): ...
 class Return(Instruction):
     """A statement defining what to return from a quantum execution."""
 
-    variables: List[str] = []
+    variables: list[str] = []
 
     @field_validator("variables", mode="before")
     @classmethod
@@ -181,7 +181,7 @@ class Return(Instruction):
         variables = (
             []
             if variables is None
-            else ([variables] if not isinstance(variables, List) else variables)
+            else ([variables] if not isinstance(variables, list) else variables)
         )
         return variables
 
@@ -209,7 +209,7 @@ class Variable(Instruction):
     """
 
     name: str
-    var_type: Optional[type] = None
+    var_type: type | None = None
     value: Any = None
 
     @staticmethod
@@ -267,7 +267,7 @@ class Jump(Instruction):
 
     @field_validator("label", mode="after")
     @classmethod
-    def _validate_label(cls, label: Union[str, Label]):
+    def _validate_label(cls, label: str | Label):
         if isinstance(label, str):
             label = Label(name=label)
         return label
@@ -292,8 +292,8 @@ class LoopCount(int): ...
 class BinaryOperator(NoExtraFieldsModel):
     """Binary operator, such as ``x == y``, ``x != y`` etc."""
 
-    left: Union[int, float, Variable]
-    right: Union[int, float, Variable]
+    left: int | float | Variable
+    right: int | float | Variable
 
 
 class Equals(BinaryOperator):
