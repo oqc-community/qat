@@ -639,7 +639,7 @@ class TestNewQbloxEmitter(InvokerMixin):
 
             assert acquire_pkg.sequence.acquisitions
             for sweep in triage_result.sweeps:
-                assert f"sweep_{hash(sweep)}_0" in acquire_pkg.sequence.program
+                assert f"{hash(sweep)}_0" in acquire_pkg.sequence.program
 
             assert "wait_sync" in acquire_pkg.sequence.program
 

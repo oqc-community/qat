@@ -26,4 +26,4 @@ class TestTransformPasses:
 
         DesugaringPass().run(builder, res_mgr)
         assert len(sweep.variables) == 2
-        assert f"sweep_{hash(sweep)}" in sweep.variables
+        assert f"{hash(sweep)}" in sweep.variables

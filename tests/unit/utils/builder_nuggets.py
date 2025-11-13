@@ -4,7 +4,8 @@ import numbers
 
 import numpy as np
 
-from qat.purr.compiler.devices import PulseShapeType
+from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.devices import PulseShapeType, Qubit
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -16,6 +17,25 @@ from qat.purr.compiler.instructions import (
     Variable,
 )
 from qat.purr.compiler.runtime import get_builder
+
+
+def _add_builder_measure(
+    builder: InstructionBuilder, qubit: Qubit, signal: bool, single_shot: bool
+):
+    if signal:
+        if single_shot:
+            # Down-convert + integrate
+            builder.measure_single_shot_signal(qubit, output_variable=f"Q{qubit.index}")
+        else:
+            # Down-convert + integrate + average
+            builder.measure_mean_signal(qubit, output_variable=f"Q{qubit.index}")
+    else:
+        if single_shot:
+            # Down-convert + integrate + Linear map and project
+            builder.measure_single_shot_z(qubit, output_variable=f"Q{qubit.index}")
+        else:
+            # Down-convert + integrate + average + Linear map and project
+            builder.measure_mean_z(qubit, output_variable=f"Q{qubit.index}")
 
 
 def direct_x(qubit, channel=None, theta=None, amp=None, drag=None, width=None, rise=None):
@@ -584,4 +604,38 @@ def discrimination(model, qubit_indices=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         builder.measure_single_shot_binned(qubit)
+    return builder
+
+
+def sweep_and_measure(
+    model, qubit_indices=None, num_points=None, signal=True, single_shot=False
+):
+    qubit_indices = qubit_indices if qubit_indices is not None else [0]
+    num_points = num_points if num_points is not None else 10
+    freq_range = 50e6
+
+    readout_freqs = {
+        f"Q{index}": model.get_qubit(index).get_measure_channel().frequency
+        for index in qubit_indices
+    }
+    scan_freqs = {
+        f"Q{index}": readout_freqs[f"Q{index}"]
+        + np.linspace(-freq_range, freq_range, num_points)
+        for index in qubit_indices
+    }
+
+    builder = get_builder(model)
+    builder.synchronize([model.get_qubit(index) for index in qubit_indices])
+    builder.sweep(
+        [SweepValue(f"freq{index}", scan_freqs[f"Q{index}"]) for index in qubit_indices]
+    )
+    for index in qubit_indices:
+        qubit = model.get_qubit(index)
+        measure_channel = qubit.get_measure_channel()
+        acquire_channel = qubit.get_acquire_channel()
+
+        builder.device_assign(measure_channel, "frequency", Variable(f"freq{qubit.index}"))
+        builder.device_assign(acquire_channel, "frequency", Variable(f"freq{qubit.index}"))
+        _add_builder_measure(builder, qubit, signal=signal, single_shot=single_shot)
+        # _add_builder_measure(builder, qubit, signal=signal, single_shot=single_shot)
     return builder

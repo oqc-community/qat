@@ -24,6 +24,6 @@ class DesugaringPass(TransformPass):
         for inst in ir.instructions:
             if isinstance(inst, Sweep):
                 count = len(next(iter(inst.variables.values())))
-                iter_name = f"sweep_{hash(inst)}"
+                iter_name = f"{hash(inst)}"
                 inst.variables[iter_name] = np.linspace(1, count, count, dtype=int).tolist()
         return ir

@@ -883,7 +883,7 @@ class QbloxContext2(AbstractContext):
                 """
             )
 
-        name = f"acquire_{hash(acquire)}"
+        name = f"{hash(acquire)}"
         num_bins = self.iter_bounds[name].count
         acq_bin = self.alloc_mgr.registers[name]
         acq_width = int(calculate_duration(acquire))
@@ -915,14 +915,23 @@ class QbloxContext2(AbstractContext):
 
     @staticmethod
     def enter_repeat(inst: Repeat, contexts: dict):
-        iter_name = f"repeat_{hash(inst)}"
+        iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            register = context.alloc_mgr.registers[iter_name]
-            bound = context.iter_bounds[iter_name]
-            context.sequence_builder.move(bound.start, register, "Shot / Repeat iteration")
+            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
+                n for (n, insts) in context.reads.items() if inst in insts
+            ]
+            for name in var_names:
+                register = context.alloc_mgr.registers[name]
+                bound = context.iter_bounds[name]
+                context.sequence_builder.move(
+                    bound.start,
+                    register,
+                    f"Initialise register allocated for variable {name}",
+                )
 
             label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.label(label)
+
             context.sequence_builder.wait_sync(
                 Constants.GRID_TIME, "Sync at the beginning of shot"
             )
@@ -930,24 +939,36 @@ class QbloxContext2(AbstractContext):
 
     @staticmethod
     def exit_repeat(inst: Repeat, contexts: dict):
-        iter_name = f"repeat_{hash(inst)}"
+        iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            register = context.alloc_mgr.registers[iter_name]
-            label = context.alloc_mgr.labels[iter_name]
-            bound = context.iter_bounds[iter_name]
+            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
+                n for (n, insts) in context.reads.items() if inst in insts
+            ]
+            for name in var_names:
+                register = context.alloc_mgr.registers[name]
+                bound = context.iter_bounds[name]
+                context.sequence_builder.add(
+                    register,
+                    bound.step,
+                    register,
+                    f"Increment register for variable {name}",
+                )
+                context.sequence_builder.nop()
 
             context.wait_imm(int(inst.passive_reset_time * 1e9))
-            context.sequence_builder.add(
-                register, bound.step, register, "Increment Shot / Repeat iterator"
-            )
-            context.sequence_builder.nop()
+
+            register = context.alloc_mgr.registers[iter_name]
+            bound = context.iter_bounds[iter_name]
+            label = context.alloc_mgr.labels[iter_name]
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
     @staticmethod
     def enter_sweep(inst: Sweep, contexts: dict):
-        iter_name = f"sweep_{hash(inst)}"
+        iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for n in inst.variables if n in context.reads] + [iter_name]
+            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
+                n for (n, insts) in context.reads.items() if inst in insts
+            ]
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -962,9 +983,11 @@ class QbloxContext2(AbstractContext):
 
     @staticmethod
     def exit_sweep(inst: Sweep, contexts: dict):
-        iter_name = f"sweep_{hash(inst)}"
+        iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for (n, insts) in context.writes.items() if inst in insts]
+            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
+                n for (n, insts) in context.reads.items() if inst in insts
+            ]
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]

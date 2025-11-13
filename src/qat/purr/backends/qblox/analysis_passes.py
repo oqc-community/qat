@@ -24,6 +24,8 @@ from qat.purr.compiler.instructions import (
     EndSweep,
     Instruction,
     PostProcessing,
+    PostProcessType,
+    ProcessAxis,
     Pulse,
     QuantumInstruction,
     Repeat,
@@ -273,7 +275,7 @@ class BindingPass(AnalysisPass):
                                 scoping_result.scope2symbols[scope].add(name)
                                 scoping_result.symbol2scopes[name].append(scope)
 
-                    iter_name = f"sweep_{hash(inst)}"
+                    iter_name = f"{hash(inst)}"
                     count = len(next(iter(inst.variables.values())))
                     scoping_result.scope2symbols[scope].add(iter_name)
                     scoping_result.symbol2scopes[iter_name].append(scope)
@@ -281,6 +283,7 @@ class BindingPass(AnalysisPass):
                         start=1, step=1, end=count, count=count
                     )
                     rw_result.writes[iter_name].append(inst)
+                    rw_result.reads[iter_name].append(inst)
 
                     for name, value in inst.variables.items():
                         scoping_result.scope2symbols[scope].add(name)
@@ -295,7 +298,7 @@ class BindingPass(AnalysisPass):
                                 scoping_result.scope2symbols[scope].add(name)
                                 scoping_result.symbol2scopes[name].append(scope)
 
-                    iter_name = f"repeat_{hash(inst)}"
+                    iter_name = f"{hash(inst)}"
                     count = inst.repeat_count
                     scoping_result.scope2symbols[scope].add(iter_name)
                     scoping_result.symbol2scopes[iter_name].append(scope)
@@ -303,6 +306,7 @@ class BindingPass(AnalysisPass):
                         start=1, step=1, end=count, count=count
                     )
                     rw_result.writes[iter_name].append(inst)
+                    rw_result.reads[iter_name].append(inst)
                 elif isinstance(inst, (EndSweep, EndRepeat)):
                     delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
                     try:
@@ -329,27 +333,33 @@ class BindingPass(AnalysisPass):
                             (delimiter, inst) if s == scope else s for s in scopes
                         ]
                 elif isinstance(inst, Acquire):
-                    sweeps = [
-                        (s, iter_bound_result[next(iter(s.variables.keys()))].count)
-                        for s in stack
-                        if isinstance(s, Sweep)
-                    ]
-
                     # Acquisition mem addressing
-                    iter_name = f"acquire_{hash(inst)}"
+                    iter_name = f"{hash(inst)}"
+
+                    if any(
+                        pp.process == PostProcessType.MEAN
+                        and ProcessAxis.SEQUENCE in pp.axes
+                        for pp in triage_result.pp_map[inst.output_variable]
+                    ):
+                        # Discard scopes defined by Repeat instructions
+                        parent_scopes = [
+                            (s, e) for (s, e) in parent_scopes if not isinstance(s, Repeat)
+                        ]
+
+                        # Innermost scope writes to the "memory index"
+                        if innermost := next((s for (s, e) in parent_scopes[::-1]), None):
+                            rw_result.writes[iter_name].append(innermost)
 
                     # An acquire reads the "memory index"
                     rw_result.reads[iter_name].append(inst)
 
-                    if sweeps:
-                        loop_nest_size = reduce(mul, [c for (_, c) in sweeps], 1)
-                        iter_bound_result[iter_name] = IterBound(
-                            start=0, step=1, end=loop_nest_size, count=loop_nest_size
-                        )
-
-                        # Innermost sweep writes to the "memory index"
-                        innermost_sweep, _ = sweeps[-1]
-                        rw_result.writes[iter_name].append(innermost_sweep)
+                    shape = tuple(
+                        iter_bound_result[f"{hash(s)}"].count for (s, e) in parent_scopes
+                    )
+                    loop_nest_size = reduce(mul, shape, 1)
+                    iter_bound_result[iter_name] = IterBound(
+                        start=0, step=1, end=loop_nest_size, count=loop_nest_size
+                    )
                 else:
                     attr2var = {
                         attr: var

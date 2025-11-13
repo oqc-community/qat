@@ -23,6 +23,7 @@ from tests.unit.utils.builder_nuggets import (
     qubit_spect,
     readout_freq,
     resonator_spect,
+    sweep_and_measure,
     xpi2amp,
     zmap,
 )
@@ -31,14 +32,14 @@ log = get_default_logger()
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
-@pytest.mark.parametrize("qubit_indices", [[0]])
-@pytest.mark.parametrize("enable_hax", [True])
+@pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+@pytest.mark.parametrize("enable_hax", [True, False])
 class Test1QMeasurements:
     """
     Tests execution of a standard 1Q measurements.
     """
 
-    def test_resonator_spect(self, enable_hax, model, qubit_indices):
+    def test_resonator_spect(self, model, qubit_indices, enable_hax):
         runtime = model.create_runtime()
         engine = runtime.engine
         engine.enable_hax = enable_hax
@@ -50,7 +51,7 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (10,)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_qubit_spect(self, enable_hax, model, qubit_indices):
+    def test_qubit_spect(self, model, qubit_indices, enable_hax):
         runtime = model.create_runtime()
         engine = runtime.engine
         engine.enable_hax = enable_hax
@@ -62,7 +63,7 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (10,)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_xpi2amp(self, enable_hax, model, qubit_indices):
+    def test_xpi2amp(self, model, qubit_indices, enable_hax):
         if enable_hax:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
@@ -78,7 +79,7 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (2, 10)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_readout_freq(self, enable_hax, model, qubit_indices):
+    def test_readout_freq(self, model, qubit_indices, enable_hax):
         if enable_hax:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
@@ -94,7 +95,7 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (10, 2, 1000)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_zmap(self, enable_hax, model, qubit_indices):
+    def test_zmap(self, model, qubit_indices, enable_hax):
         if enable_hax:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
@@ -110,7 +111,7 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (1, 1000)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_t1(self, enable_hax, model, qubit_indices):
+    def test_t1(self, model, qubit_indices, enable_hax):
         runtime = model.create_runtime()
         engine = runtime.engine
         engine.enable_hax = enable_hax
@@ -124,6 +125,8 @@ class Test1QMeasurements:
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)
+@pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+@pytest.mark.parametrize("enable_hax", [True, False])
 class TestBuildingBlocks:
     """
     Tests execution of a plethora of IRs and combinations. These are specific programs
@@ -131,177 +134,191 @@ class TestBuildingBlocks:
     """
 
     @pytest.mark.parametrize("amp", [0.1, 0.2, 0.3])
-    def test_measure_amp_sweep(self, model, amp):
+    def test_measure_amp_sweep(self, model, qubit_indices, enable_hax, amp):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
+        engine.enable_hax = enable_hax
 
-        q0.pulse_measure["amp"] = amp
-        builder = get_builder(model).measure(q0).repeat(10000)
+        builder = get_builder(model)
+        builder.repeat(10000)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            qubit.pulse_measure["amp"] = amp
+            builder.measure(qubit)
+
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_measure_freq_sweep(self, model):
+    def test_measure_freq_sweep(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
+        engine.enable_hax = enable_hax
 
-        q0.pulse_measure["amp"] = 0.3
         center = 9.7772e9
         size = 10
         freqs = center + np.linspace(-100e6, 100e6, size)
-        builder = (
-            get_builder(model)
-            .sweep(SweepValue("frequency", freqs))
-            .measure(q0)
-            .device_assign(q0.get_measure_channel(), "frequency", Variable("frequency"))
-            .device_assign(q0.get_acquire_channel(), "frequency", Variable("frequency"))
-            .repeat(1000)
-        )
+
+        builder = get_builder(model)
+        builder.repeat(1000)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            qubit.pulse_measure["amp"] = 0.3
+            builder.sweep(SweepValue("frequency", freqs))
+            builder.measure(qubit)
+            builder.device_assign(
+                qubit.get_measure_channel(), "frequency", Variable("frequency")
+            )
+            builder.device_assign(
+                qubit.get_acquire_channel(), "frequency", Variable("frequency")
+            )
+
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_instruction_execution(self, model):
+    def test_instruction_execution(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
+        engine.enable_hax = enable_hax
 
         amp = 1
         rise = 1.0 / 3.0
         phase = 0.72
         frequency = 500
 
-        drive_channel = q0.get_drive_channel()
-        builder = (
-            get_builder(model)
-            .pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp)
-            .pulse(drive_channel, PulseShapeType.GAUSSIAN, width=150e-9, rise=rise)
-            .phase_shift(drive_channel, phase)
-            .frequency_shift(drive_channel, frequency)
-        )
+        builder = get_builder(model)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            builder.pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp)
+            builder.pulse(drive_channel, PulseShapeType.GAUSSIAN, width=150e-9, rise=rise)
+            builder.phase_shift(drive_channel, phase)
+            builder.frequency_shift(drive_channel, frequency)
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_one_channel(self, model):
+    def test_one_channel(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
+        engine.enable_hax = enable_hax
 
         amp = 1
         rise = 1.0 / 3.0
 
-        drive_channel = q0.get_drive_channel()
-        builder = (
-            get_builder(model)
-            .pulse(
+        builder = get_builder(model)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            builder.pulse(
                 drive_channel,
                 PulseShapeType.GAUSSIAN,
                 width=100e-9,
                 rise=rise,
                 amp=amp / 2,
             )
-            .delay(drive_channel, 100e-9)
-            .pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp)
-            .delay(drive_channel, 100e-9)
-        )
+            builder.delay(drive_channel, 100e-9)
+            builder.pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp)
+            builder.delay(drive_channel, 100e-9)
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_two_channels(self, model):
+    def test_two_channels(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
-        q1 = model.get_qubit(1)
+        engine.enable_hax = enable_hax
 
         amp = 1
         rise = 1.0 / 3.0
 
-        drive_channel2 = q0.get_drive_channel()
-        drive_channel3 = q1.get_drive_channel()
-        builder = (
-            get_builder(model)
-            .pulse(
-                drive_channel2,
+        builder = get_builder(model)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            second_state_channel = qubit.get_second_state_channel()
+
+            builder.pulse(
+                drive_channel,
                 PulseShapeType.GAUSSIAN,
                 width=100e-9,
                 rise=rise,
                 amp=amp / 2,
             )
-            .pulse(drive_channel3, PulseShapeType.SQUARE, width=50e-9, amp=amp)
-            .delay(drive_channel2, 100e-9)
-            .delay(drive_channel3, 100e-9)
-            .pulse(drive_channel2, PulseShapeType.SQUARE, width=100e-9, amp=amp)
-            .pulse(
-                drive_channel3,
+            builder.pulse(second_state_channel, PulseShapeType.SQUARE, width=50e-9, amp=amp)
+            builder.delay(drive_channel, 100e-9)
+            builder.pulse(
+                second_state_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp
+            )
+            builder.pulse(
+                drive_channel,
                 PulseShapeType.GAUSSIAN,
                 width=50e-9,
                 rise=rise,
                 amp=amp / 2,
             )
-        )
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_sync_two_channel(self, model):
+    def test_sync_two_channel(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
-        q1 = model.get_qubit(1)
+        engine.enable_hax = enable_hax
 
         amp = 1
         rise = 1.0 / 3.0
 
-        drive_channel0 = q0.get_drive_channel()
-        drive_channel1 = q1.get_drive_channel()
-        builder = (
-            get_builder(model)
-            .pulse(
-                drive_channel0,
+        builder = get_builder(model)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            second_state_channel = qubit.get_second_state_channel()
+
+            builder.pulse(
+                drive_channel,
                 PulseShapeType.GAUSSIAN,
                 width=100e-9,
                 rise=rise,
                 amp=amp / 2,
             )
-            .delay(drive_channel0, 100e-9)
-            .pulse(drive_channel1, PulseShapeType.SQUARE, width=50e-9, amp=amp)
-            .synchronize([q0, q1])
-            .pulse(drive_channel0, PulseShapeType.SQUARE, width=100e-9, amp=1j * amp)
-            .pulse(
-                drive_channel1,
+            builder.delay(drive_channel, 100e-9)
+            builder.pulse(second_state_channel, PulseShapeType.SQUARE, width=50e-9, amp=amp)
+            builder.synchronize(qubit)
+            builder.pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=1j * amp)
+            builder.pulse(
+                second_state_channel,
                 PulseShapeType.GAUSSIAN,
                 width=50e-9,
                 rise=rise,
                 amp=amp / 2j,
             )
-        )
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
 
-    def test_play_very_long_pulse(self, model):
+    def test_play_very_long_pulse(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
+        engine.enable_hax = enable_hax
 
-        drive_channel = q0.get_drive_channel()
-        builder = get_builder(model).pulse(
-            drive_channel, PulseShapeType.SOFT_SQUARE, amp=0.1, width=1e-5, rise=1e-8
-        )
+        builder = get_builder(model)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            builder.pulse(
+                drive_channel, PulseShapeType.SOFT_SQUARE, amp=0.1, width=1e-5, rise=1e-8
+            )
 
         with pytest.raises(ValueError):
             results, _ = execute_instructions(engine, builder)
 
-    def test_bare_measure(self, model):
+    def test_bare_measure(self, model, qubit_indices, enable_hax):
         engine = model.create_engine()
-        q0 = model.get_qubit(0)
+        engine.enable_hax = enable_hax
 
         amp = 1
-        qubit = q0
-        qubit.pulse_measure["amp"] = amp
-        drive_channel2 = qubit.get_drive_channel()
 
-        # FluidBuilderWrapper nightmares
-        builder, _ = (
-            get_builder(model)
-            .pulse(drive_channel2, PulseShapeType.SQUARE, width=100e-9, amp=amp)
-            .measure(qubit)
-        )
+        builder = get_builder(model)
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            qubit.pulse_measure["amp"] = amp
+            drive_channel = qubit.get_drive_channel()
+
+            builder.pulse(drive_channel, PulseShapeType.SQUARE, width=100e-9, amp=amp)
+            builder.measure(qubit)
 
         results, _ = execute_instructions(engine, builder)
         assert results is not None
@@ -316,9 +333,9 @@ class TestBuildingBlocks:
         ).tolist(),
     )
     @pytest.mark.parametrize("sync", [True, False])
-    def test_scope_acquisition(self, model, acq_width, sync):
-        qubit_indices = [0]
+    def test_scope_acquisition(self, model, qubit_indices, enable_hax, acq_width, sync):
         engine = model.create_engine()
+        engine.enable_hax = enable_hax
 
         for index in qubit_indices:
             qubit = model.get_qubit(index)
@@ -341,12 +358,13 @@ class TestBuildingBlocks:
             else:
                 assert results[f"Q{index}"].shape == (1, int(acq_width * 1e9))
 
-    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
-    def test_multi_readout(self, model, qubit_indices):
+    def test_multi_readout(self, model, qubit_indices, enable_hax):
         old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
         try:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = False
             engine = model.create_engine()
+            engine.enable_hax = enable_hax
+
             builder = multi_readout(model, qubit_indices, do_X=True)
 
             results, _ = execute_instructions(engine, builder)
@@ -354,17 +372,59 @@ class TestBuildingBlocks:
             assert len(results) == 2 * len(qubit_indices)
             for index in qubit_indices:
                 assert f"0_Q{index}" in results
+                assert results[f"0_Q{index}"].shape == (1, 1000)
+                assert results[f"0_Q{index}"].dtype == np.float64
                 assert f"1_Q{index}" in results
+                assert results[f"1_Q{index}"].shape == (1, 1000)
+                assert results[f"1_Q{index}"].dtype == np.complex128
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 
-    @pytest.mark.parametrize("qubit_indices", [[0]])
-    def test_hidden_mode(self, model, qubit_indices):
+    def test_hidden_mode(self, model, qubit_indices, enable_hax):
+        if enable_hax:
+            pytest.skip("Needs more alignment as JIT execution work advances")
+
+        qubit_indices = [0]
         engine = model.create_engine()
+        engine.enable_hax = enable_hax
+
         builder = hidden_mode(model, qubit_indices, num_points=3)
 
         results, _ = execute_instructions(engine, builder)
         assert results
+
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize(
+        "signal, single_shot, expected_shape, expected_dtype",
+        [
+            (True, True, (10, 1000), np.complex128),
+            (True, False, (10,), np.complex128),
+            (False, True, (10, 1000), np.float64),
+            (False, False, (10,), np.float64),
+        ],
+    )
+    def test_sweep_and_measure(
+        self,
+        model,
+        qubit_indices,
+        enable_hax,
+        num_points,
+        signal,
+        single_shot,
+        expected_shape,
+        expected_dtype,
+    ):
+        engine = model.create_engine()
+        engine.enable_hax = enable_hax
+
+        builder = sweep_and_measure(model, qubit_indices, num_points, signal, single_shot)
+
+        results, _ = execute_instructions(engine, builder)
+        assert results
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == expected_shape
+            assert results[f"Q{index}"].dtype == expected_dtype
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

@@ -13,7 +13,7 @@ import numpy as np
 from qat.backend.passes.purr.analysis import BindingResult, IterBound, TriageResult
 from qat.backend.qblox.config.constants import Constants
 from qat.core.pass_base import AnalysisPass
-from qat.core.result_base import ResultManager
+from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
@@ -285,13 +285,13 @@ class AllocationManager:
     def label_gen(self, name: str):
         counter = self._lbl_counters.setdefault(name, 0)
         self._lbl_counters[name] += 1
-        label = f"{name}_{counter}"
+        label = f"block_{name}_{counter}"
         self.labels[name] = label
         return label
 
 
 @dataclass
-class PreCodegenResult:
+class PreCodegenResult(ResultInfoMixin):
     alloc_mgrs: dict[PulseChannel, AllocationManager] = field(
         default_factory=lambda: defaultdict(lambda: AllocationManager())
     )

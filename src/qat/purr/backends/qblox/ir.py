@@ -109,7 +109,8 @@ class SequenceBuilder:
             (
                 wf["index"]
                 for wf in self.waveforms.values()
-                if (np.array(wf["data"]) == data).all()
+                if np.array(wf["data"]).shape == data.shape
+                and np.all(np.array(wf["data"]) == data)
             ),
             None,
         )

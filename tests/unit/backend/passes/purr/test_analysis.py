@@ -175,12 +175,12 @@ class TestAnalysisPasses:
             }
 
             for inst in sweeps:
-                iter_name = f"sweep_{hash(inst)}"
+                iter_name = f"{hash(inst)}"
                 count = len(next(iter(inst.variables.values())))
                 iter_bounds[iter_name] = IterBound(start=1, step=1, end=count, count=count)
 
             for inst in repeats:
-                name = f"repeat_{hash(inst)}"
+                name = f"{hash(inst)}"
                 iter_bounds[name] = IterBound(
                     start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
                 )
@@ -208,9 +208,7 @@ class TestAnalysisPasses:
                 )
 
             if acquires:
-                assert {f"acquire_{hash(inst)}" for inst in acquires} <= set(
-                    rw_result.reads.keys()
-                )
+                assert {f"{hash(inst)}" for inst in acquires} <= set(rw_result.reads.keys())
 
             for name in iter_bounds:
                 # name is read => name is writen to
