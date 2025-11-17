@@ -21,7 +21,6 @@ from pydantic import (
     Field,
     PlainSerializer,
     PlainValidator,
-    PrivateAttr,
     RootModel,
     computed_field,
     model_validator,
@@ -176,47 +175,57 @@ QubitCoupling = Annotated[
 VALIDATORS = BeforeValidator | AfterValidator | PlainValidator
 
 
-def validate_value(value: V, value_type: Type[V]):
-    # Get the validator function if it's an annotated type.
-    f_validate = None
-    if get_origin(value_type) is Annotated:
-        value_type, *metadata = get_args(value_type)
-        for item in metadata:
-            if isinstance(item, VALIDATORS):
-                f_validate = item.func
-
-    if get_origin(value_type) is Union:
-        allowed_types = get_args(value_type)
-    else:
-        allowed_types = (value_type,)
-
-    # Validate if type of value == `V`.
-    if not isinstance(value, allowed_types):
-        raise TypeError(
-            f"Cannot add value {value} of type '{type(value)} to container of type {value_type}'."
-        )
-
-    # Validate extra constraints on the value, provided via the annotation.
-    if f_validate:
-        value = f_validate(value)
-
-
 K = TypeVar("GeneralKey")
 V = TypeVar("GeneralValue")
 
 
-class PydListBase(RootModel[list[V]]):
-    root: list[V] = Field(default_factory=list)
-    _value_type: type = PrivateAttr()
+class PydValidatedBase(RootModel):
+    """
+    Base class for validated Pydantic containers.
+    """
 
     @model_validator(mode="after")
-    def container_type(self):
+    def validation_setup(self):
         """
-        Validate the type of elements in the list.
+        Setup validation for the container.
         """
-        value_type = get_args(self.__class__.model_fields["root"].annotation)[0]
-        self._value_type = value_type
+        annotation_args = get_args(self.__class__.model_fields["root"].annotation)
+        value_type = annotation_args[0]
+        annotation_type, allowed_types, validation_funcs = self._determine_validation_info(
+            value_type
+        )
+        self._value_type = annotation_type
+        self._value_types = allowed_types
+        self._value_validators = validation_funcs
+
         return self
+
+    @staticmethod
+    def _determine_validation_info(annotation_type):
+        validation_funcs = []
+        if get_origin(annotation_type) is Annotated:
+            annotation_type, *metadata = get_args(annotation_type)
+            for item in metadata:
+                if isinstance(item, VALIDATORS):
+                    validation_funcs.append(item.func)
+        if get_origin(annotation_type) is Union:
+            allowed_types = get_args(annotation_type)
+        else:
+            allowed_types = (annotation_type,)
+        return annotation_type, allowed_types, validation_funcs
+
+    def validate_value(self, value: V):
+        if not isinstance(value, self._value_types):
+            raise TypeError(
+                f"Cannot add value {value} of type '{type(value)}' to container of type {self._value_type}."
+            )
+        for validator in self._value_validators:
+            value = validator(value)
+        return value
+
+
+class PydListBase(RootModel[list[V]]):
+    root: list[V] = Field(default_factory=list)
 
     def __iter__(self):
         return iter(self.root)
@@ -247,21 +256,16 @@ class PydListBase(RootModel[list[V]]):
         return copied_instance
 
 
-class ValidatedList(PydListBase):
+class ValidatedList(PydListBase, PydValidatedBase):
     """
     A list object that validates the input appended/extended after instantiation.
     This way, we are sure that the elements in a list are only of a certain type.
-    (FYI: Pydantic containers only validate upon instantiation.)
+    Pydantic containers only validate upon instantiation, not when modifying the
+    container.
     """
 
-    @model_validator(mode="after")
-    def validate_root(self):
-        for value in self.root:
-            validate_value(value, self._value_type)
-        return self
-
     def append(self, value: V):
-        validate_value(value, self._value_type)
+        self.validate_value(value)
         self.root.append(value)
 
     def extend(self, values: Iterable[V]):
@@ -282,16 +286,6 @@ def _validate_set(value: float | int | str | Iterable | None):
 
 class PydSetBase(RootModel[set[V]]):
     root: set[V] = Field(default_factory=set)
-    _value_type: type = PrivateAttr()
-
-    @model_validator(mode="after")
-    def container_type(self):
-        """
-        Validate the types of keys and values in the dictionary.
-        """
-        value_type = get_args(self.__class__.model_fields["root"].annotation)[0]
-        self._value_type = value_type
-        return self
 
     def __iter__(self):
         return iter(self.root)
@@ -353,21 +347,16 @@ class FrozenSet(PydSetBase):
     root: frozenset[V] = Field(default_factory=frozenset)
 
 
-class ValidatedSet(PydSetBase):
+class ValidatedSet(PydSetBase, PydValidatedBase):
     """
     A set object that validates the input added after instantiation.
     This way, we are sure that the elements in a set are only of a certain type.
-    (FYI: Pydantic containers only validate upon instantiation.)
+    Pydantic containers only validate upon instantiation, not when modifying the
+    container.
     """
 
-    @model_validator(mode="after")
-    def validate_root(self):
-        for value in self.root:
-            validate_value(value, self._value_type)
-        return self
-
     def add(self, value: V):
-        validate_value(value, self._value_type)
+        self.validate_value(value)
         self.root.add(value)
 
     def discard(self, value):
@@ -387,18 +376,6 @@ class ValidatedSet(PydSetBase):
 
 class PydDictBase(RootModel[dict[K, V]]):
     root: dict[K, V] = Field(default_factory=dict)
-    _key_type: type = PrivateAttr()
-    _value_type: type = PrivateAttr()
-
-    @model_validator(mode="after")
-    def container_types(self):
-        """
-        Validate the types of keys and values in the dictionary.
-        """
-        key_type, value_type = get_args(self.__class__.model_fields["root"].annotation)
-        self._key_type = key_type
-        self._value_type = value_type
-        return self
 
     def get(self, key, default=None):
         return self.root.get(key, default)
@@ -483,27 +460,52 @@ class FrozenDict(PydDictBase):
     root: pyd_frozendict[K, V] = Field(default_factory=frozendict)
 
 
-class ValidatedDict(PydDictBase):
+class ValidatedDict(PydDictBase, PydValidatedBase):
     """
     A dict object that validates the input added after instantiation.
     This way, we are sure that the elements in a dict are only of a certain type.
-    (FYI: Pydantic containers only validate upon instantiation.)
+    Pydantic containers only validate upon instantiation, not when modifying the
+    container.
     """
 
     @model_validator(mode="after")
-    def validate_root(self):
-        for key, value in self.root.items():
-            validate_value(key, self._key_type)
-            validate_value(value, self._value_type)
+    def validation_setup(self):
+        """
+        Validate the types of keys and values in the dictionary.
+        """
+        annotation_args = get_args(self.__class__.model_fields["root"].annotation)
+        key_type = annotation_args[0]
+        annotation_type, allowed_types, validation_funcs = self._determine_validation_info(
+            key_type
+        )
+        self._key_type = annotation_type
+        self._key_types = allowed_types
+        self._key_validators = validation_funcs
+        value_type = annotation_args[1]
+        annotation_type, allowed_types, validation_funcs = self._determine_validation_info(
+            value_type
+        )
+        self._value_type = annotation_type
+        self._value_types = allowed_types
+        self._value_validators = validation_funcs
         return self
+
+    def validate_key(self, key: K):
+        if not isinstance(key, self._key_types):
+            raise TypeError(
+                f"Cannot add key {key} of type '{type(key)}' to container of type {self._key_type}."
+            )
+        for validator in self._key_validators:
+            key = validator(key)
+        return key
 
     def update(self, data: dict[K, V]):
         for key, value in data.items():
             self.__setitem__(key, value)
 
     def __setitem__(self, key: K, value: V):
-        validate_value(key, self._key_type)
-        validate_value(value, self._value_type)
+        self.validate_key(key)
+        self.validate_value(value)
         self.root[key] = value
 
 

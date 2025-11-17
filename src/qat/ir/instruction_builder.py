@@ -926,8 +926,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return self.add(Acquire(target=pulse_channel.uuid, **kwargs))
 
     def delay(self, target: Qubit | PulseChannel, duration: float):
-        pulse_channel = target.drive_pulse_channel if isinstance(target, Qubit) else target
-        return self.add(Delay(targets=pulse_channel.uuid, duration=duration))
+        delays = []
+        if isinstance(target, Qubit):
+            delays = [
+                Delay(targets=pulse_ch.uuid, duration=duration)
+                for pulse_ch in target.all_qubit_and_resonator_pulse_channels
+            ]
+        else:
+            delays = [Delay(targets=target.uuid, duration=duration)]
+        return self.add(*delays)
 
     def synchronize(self, targets: Qubit | list[Qubit | PulseChannel]):
         targets = targets if isinstance(targets, list) else [targets]

@@ -181,7 +181,7 @@ class TestPopulateWaveformSampleTime:
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         qubit = self.hw.qubits[0]
 
-        builder.delay(target=qubit, duration=1e-6)
+        builder.delay(target=qubit.drive_pulse_channel, duration=1e-6)
         builder.repeat(repeat_count=1)
         builder.phase_shift(target=qubit.drive_pulse_channel, theta=1)
         builder.reset(targets=qubit)

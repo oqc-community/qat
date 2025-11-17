@@ -75,6 +75,7 @@ class DefaultMiddleend(CustomMiddleend):
             | PopulateWaveformSampleTime(model, target_data)
             | HardwareConfigValidity(model)
             | ActivePulseChannelAnalysis(model)
+            | InactivePulseChannelSanitisation()
             | FrequencySetupValidation(model, target_data)
             | DynamicFrequencyValidation(model, target_data)
             # Sanitising input IR to make it complete
@@ -88,7 +89,6 @@ class DefaultMiddleend(CustomMiddleend):
             # Preparing for codegen
             | EvaluateWaveforms(model, target_data)
             | LowerSyncsToDelays()
-            | InactivePulseChannelSanitisation()
             | FreqShiftSanitisation(model)
             | InitialPhaseResetSanitisation()
             | PhaseOptimisation()
