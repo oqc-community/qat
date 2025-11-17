@@ -28,9 +28,15 @@ class ResultModel(ResultConcept):
         self._result = res_obj
         self._uuid = uuid.uuid4()
 
+        self.is_valid = True
+
     @property
     def value(self):
         return self._result
+
+    @property
+    def id(self):
+        return self._uuid
 
     def __hash__(self):
         return hash(self._uuid)
@@ -81,6 +87,23 @@ class ResultManager:
     def results(self):
         return self._results
 
+    def _find(self, res_obj):
+        found = [res for res in self._results if res.value == res_obj]
+        if not found:
+            raise ValueError(f"Could not find result {res_obj}")
+
+        if len(found) > 1:
+            raise ValueError("Found multiple results")
+        return found[0]
+
+    def _remove(self, *res_objs):
+        for res_obj in res_objs:
+            found = self._find(res_obj)
+            self._results.remove(found)
+
+    def cleanup(self):
+        self._results = set(res for res in self._results if res.is_valid)
+
     def update(self, other_res_mgr):
         """Add the results from another results manager.
 
@@ -102,6 +125,11 @@ class ResultManager:
         self._results -= set(found)
         self._results.add(ResultModel(res_obj))
 
+    def mark_as_dirty(self, *res_objs):
+        results = [self._find(res_obj) for res_obj in res_objs]
+        for result in results:
+            result.is_valid = False
+
     def lookup_by_type(self, ty: type[ResultType]) -> ResultType:
         """Find a result by its type. Throws an error if none or multiple are found.
 
@@ -116,6 +144,16 @@ class ResultManager:
 
         return found[0]
 
+    def remove_by_type(self, ty: type[ResultType]):
+        found = [res for res in self._results if isinstance(res.value, ty)]
+        if not found:
+            raise ValueError(f"Could not find any results instances of {ty}")
+
+        if len(found) > 1:
+            raise ValueError(f"Found multiple results instances of {ty}")
+
+        self._results.remove(found[0])
+
     def check_for_type(self, ty: type) -> bool:
         """Checks the result manager contains a result with a given type.
 
@@ -124,3 +162,49 @@ class ResultManager:
 
         found = [res.value for res in self._results if isinstance(res.value, ty)]
         return len(found) > 0
+
+
+class PreservedResults:
+    """
+    A mechanism for result invalidation and preservation. Similar to LLVM's new PassManager, we state
+    that each transform pass must declare what analysis results it preserves. In this case, the pass returns
+    a PreservedResults instance which is then used by the :class:`PassManager` for cache housekeeping.
+    # TODO - Implement PreservedResult [COMPILER-843]
+    """
+
+    @staticmethod
+    def all():
+        """
+        Indicates that **all** of the previously computed results remain valid. The pass manager will do nothing
+        as analyses results are still safe and correct after the pass in question has finished running.
+        """
+
+        pass
+
+    @staticmethod
+    def none():
+        """
+        Indicates that **none** of the previously computed results are valid. This will cause the pass manager
+        to evict cached results after the (transform) pass in question has finished running.
+        """
+
+        pass
+
+    @staticmethod
+    def preserve(*res_obj):
+        """
+        Selective preservation of the results or indeed result sets indicated by the argument. This will
+        cause the pass manager to filter through the result cache and preserve **only** the ones that
+        the argument points to.
+        """
+
+        pass
+
+    @staticmethod
+    def discard(*res_obj):
+        """
+        Convenient inverse selector for the :meth:`preserve()` API. This will cause the pass manager
+        to discard and evict **only** results pointed to by the argument.
+        """
+
+        pass

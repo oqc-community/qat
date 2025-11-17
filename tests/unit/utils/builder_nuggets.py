@@ -339,11 +339,9 @@ def time_and_phase_iteration(model, qubit_indices=None, num_points=None):
     for index in qubit_indices:
         qubit = model.get_qubit(index)
         drive_channel = qubit.get_drive_channel()
-        second_state_channel = qubit.get_second_state_channel()
 
         # Dummy adjustment of channel scale to compensate for the Pi/2 pulse amplitude
         drive_channel.scale = 1.0e-8 + 0.0j
-        second_state_channel.scale = 1.0e-8 + 0.0j
 
         builder.X(qubit, np.pi / 2.0)
         builder.delay(qubit, Variable(time_var_name))

@@ -298,13 +298,12 @@ class PreCodegenResult(ResultInfoMixin):
 
 
 class PreCodegenPass(AnalysisPass):
-    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Precedes assembly codegen.
-        Performs a naive register allocation through a manager object.
-        Computes useful information in the form of attributes.
-        """
+    """
+    Precedes code generation. The context-based emitter needs registers pre-allocated for every
+    live variable in program. This pass performs a naive register allocation through a manager object.
+    """
 
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         triage_result = res_mgr.lookup_by_type(TriageResult)
         binding_result = res_mgr.lookup_by_type(BindingResult)
         result = PreCodegenResult()

@@ -1005,9 +1005,10 @@ class NewQbloxContext(AbstractContext):
     def enter_repeat(inst: Repeat, contexts: Dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
-                n for (n, insts) in context.reads.items() if inst in insts
-            ]
+            var_names = set(
+                [n for (n, insts) in context.writes.items() if inst in insts]
+                + [n for (n, insts) in context.reads.items() if inst in insts]
+            )
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -1029,9 +1030,10 @@ class NewQbloxContext(AbstractContext):
     def exit_repeat(inst: Repeat, contexts: Dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
-                n for (n, insts) in context.reads.items() if inst in insts
-            ]
+            var_names = set(
+                [n for (n, insts) in context.writes.items() if inst in insts]
+                + [n for (n, insts) in context.reads.items() if inst in insts]
+            )
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -1054,9 +1056,10 @@ class NewQbloxContext(AbstractContext):
     def enter_sweep(inst: Sweep, contexts: Dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
-                n for (n, insts) in context.reads.items() if inst in insts
-            ]
+            var_names = set(
+                [n for (n, insts) in context.writes.items() if inst in insts]
+                + [n for (n, insts) in context.reads.items() if inst in insts]
+            )
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -1073,9 +1076,10 @@ class NewQbloxContext(AbstractContext):
     def exit_sweep(inst: Sweep, contexts: Dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = [n for (n, insts) in context.writes.items() if inst in insts] + [
-                n for (n, insts) in context.reads.items() if inst in insts
-            ]
+            var_names = set(
+                [n for (n, insts) in context.writes.items() if inst in insts]
+                + [n for (n, insts) in context.reads.items() if inst in insts]
+            )
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -1101,13 +1105,12 @@ class PreCodegenResult(ResultInfoMixin):
 
 
 class PreCodegenPass(AnalysisPass):
-    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Precedes assembly codegen.
-        Performs a naive register allocation through a manager object.
-        Computes useful information in the form of attributes.
-        """
+    """
+    Precedes code generation. The context-based emitter needs registers pre-allocated for every
+    live variable in program. This pass performs a naive register allocation through a manager object.
+    """
 
+    def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         triage_result = res_mgr.lookup_by_type(TriageResult)
         binding_result = res_mgr.lookup_by_type(BindingResult)
         result = PreCodegenResult()

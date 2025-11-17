@@ -1,57 +1,39 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import pytest
 
-from qat.backend.passes.purr.analysis import (
+from qat.purr.backends.echo import get_default_echo_hardware
+from qat.purr.backends.qblox.analysis_passes import (
     BindingPass,
     BindingResult,
     TriagePass,
     TriageResult,
 )
-from qat.backend.passes.purr.transform import DesugaringPass, ScopePeeling
-from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import PassManager
-from qat.core.result_base import ResultManager
-from qat.middleend.passes.purr.transform import (
+from qat.purr.backends.qblox.transform_passes import (
     RepeatSanitisation,
     ReturnSanitisation,
+    ScopePeeling,
     ScopeSanitisation,
 )
-from qat.model.loaders.purr import EchoModelLoader
-from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import EndRepeat, EndSweep, Repeat, Sweep
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.pass_base import PassManager
+from qat.purr.core.result_base import ResultManager
 
-from tests.unit.utils.builder_nuggets import resonator_spect, time_and_phase_iteration
-
-
-def test_desugaring_pass():
-    model = EchoModelLoader().load()
-    builder = resonator_spect(model)
-    res_mgr = ResultManager()
-
-    TriagePass().run(builder, res_mgr)
-    triage_result = res_mgr.lookup_by_type(TriageResult)
-
-    assert len(triage_result.sweeps) == 1
-    sweep = next(iter(triage_result.sweeps))
-    assert len(sweep.variables) == 1
-
-    DesugaringPass().run(builder, res_mgr)
-    assert len(sweep.variables) == 2
-    assert f"{hash(sweep)}" in sweep.variables
+from tests.unit.utils.builder_nuggets import time_and_phase_iteration
 
 
 @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
 def test_scope_peeling_pass(qubit_indices):
-    model = EchoModelLoader().load()
+    model = get_default_echo_hardware()
     builder = time_and_phase_iteration(model, qubit_indices)
 
     res_mgr = ResultManager()
     met_mgr = MetricsManager()
     pipeline = (
         PassManager()
-        | RepeatSanitisation(model, TargetData.default())
+        | RepeatSanitisation(model)
         | ScopeSanitisation()
         | ReturnSanitisation()
         | TriagePass()
