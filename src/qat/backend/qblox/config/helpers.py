@@ -41,13 +41,16 @@ class QbloxConfigHelper(ABC):
         if self.sequencer_config.connection.bulk_value:
             sequencer.connect_sequencer(*self.sequencer_config.connection.bulk_value)
 
-    def configure_nco(self, sequencer: Sequencer):
-        if self.sequencer_config.nco.freq:
-            sequencer.nco_freq(self.sequencer_config.nco.freq)
+    # Propagation delay is only available for readout modules
+    def configure_propagation_delay(self, sequencer: Sequencer):
         if self.sequencer_config.nco.prop_delay_comp_en:
             sequencer.nco_prop_delay_comp_en(self.sequencer_config.nco.prop_delay_comp_en)
         if self.sequencer_config.nco.prop_delay_comp:
             sequencer.nco_prop_delay_comp(self.sequencer_config.nco.prop_delay_comp)
+
+    def configure_nco(self, sequencer: Sequencer):
+        if self.sequencer_config.nco.freq:
+            sequencer.nco_freq(self.sequencer_config.nco.freq)
         if self.sequencer_config.nco.phase_offs:
             sequencer.nco_phase_offs(self.sequencer_config.nco.phase_offs)
 
@@ -236,6 +239,7 @@ class QrmRfConfigHelper(QrmConfigHelper):
     def configure_sequencer(self, sequencer: Sequencer):
         self.configure_connection(sequencer)
         self.configure_nco(sequencer)
+        self.configure_propagation_delay(sequencer)
         self.configure_awg(sequencer)
         self.configure_mixer(sequencer)
         self.configure_acq(sequencer)
