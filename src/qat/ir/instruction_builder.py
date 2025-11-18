@@ -622,15 +622,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return self.add(measure_block)
 
-    def _apply_down_conversion_and_take_time_mean(
+    def _take_time_mean(
         self,
         acquire_mode: AcquireMode,
         target: Qubit | set[Qubit],
         output_variable: str,
     ):
         """
-        Applies down conversion and takes the mean of the acquired data.
-        If the acquire mode is INTEGRATOR, down conversion is not needed, so it returns the builder without any changes
+        Takes the mean of the acquired data.
+        If the acquire mode is INTEGRATOR, it returns the builder without any changes
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
@@ -640,8 +640,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
             return self
 
         return self.post_processing(
-            target, output_variable, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME
-        ).post_processing(target, output_variable, PostProcessType.MEAN, ProcessAxis.TIME)
+            target, output_variable, PostProcessType.MEAN, ProcessAxis.TIME
+        )
 
     def _take_sequence_mean(
         self,
@@ -684,9 +684,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
         self.measure(target, acquire_mode, output_variable)
-        self._apply_down_conversion_and_take_time_mean(
-            acquire_mode, target, output_variable
-        )
+        self._take_time_mean(acquire_mode, target, output_variable)
         return self.post_processing(
             target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
         )
@@ -710,9 +708,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
         self.measure(target, acquire_mode, output_variable)
-        return self._apply_down_conversion_and_take_time_mean(
-            acquire_mode, target, output_variable
-        )
+        return self._take_time_mean(acquire_mode, target, output_variable)
 
     def measure_mean_z(
         self,
@@ -733,9 +729,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
         self.measure(target, acquire_mode, output_variable)
-        self._apply_down_conversion_and_take_time_mean(
-            acquire_mode, target, output_variable
-        )
+        self._take_time_mean(acquire_mode, target, output_variable)
         self._take_sequence_mean(acquire_mode, target, output_variable)
         return self.post_processing(
             target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
@@ -764,9 +758,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         :param output_variable: The variable where the output of the acquire should be saved.
         """
         acquire_mode = acq_mode_process_axis[ProcessAxis.TIME]
-        return self.measure(target, acquire_mode, output_variable).post_processing(
-            target, output_variable, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]
-        )
+        return self.measure(target, acquire_mode, output_variable)
 
     def measure_single_shot_binned(
         self,
@@ -789,9 +781,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         acquire_mode = acq_mode_process_axis[axis]
         return (
             self.measure(target, acq_mode_process_axis[axis], output_variable)
-            ._apply_down_conversion_and_take_time_mean(
-                acquire_mode, target, output_variable
-            )
+            ._take_time_mean(acquire_mode, target, output_variable)
             .post_processing(
                 target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
             )
@@ -858,17 +848,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
             elif process_type == PostProcessType.DISCRIMINATE:
                 args = [target.discriminator]
-
-            elif process_type == PostProcessType.DOWN_CONVERT:
-                resonator = target.resonator
-                phys_channel = resonator.physical_channel
-                bb = phys_channel.baseband
-                measure_pulse_ch = resonator.measure_pulse_channel
-
-                if measure_pulse_ch.fixed_if:
-                    args = [bb.if_frequency]
-                else:
-                    args = [measure_pulse_ch.frequency - bb.frequency]
 
         axes = axes if isinstance(axes, list) else [axes]
 

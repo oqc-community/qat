@@ -5,10 +5,8 @@ import pytest
 
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType, ProcessAxis
 from qat.runtime.post_processing import (
-    UPCONVERT_SIGN,
     apply_post_processing,
     discriminate,
-    down_convert,
     get_axis_map,
     linear_map_complex_to_real,
     mean,
@@ -20,47 +18,6 @@ class TestApplyPostProcessing:
         pp = PostProcessing(output_variable="test", process_type=PostProcessType.MUL)
         with pytest.raises(NotImplementedError):
             apply_post_processing({}, pp, {})
-
-    @pytest.mark.parametrize(
-        "axes",
-        [
-            ProcessAxis.SEQUENCE,
-            [ProcessAxis.SEQUENCE, ProcessAxis.TIME],
-            [ProcessAxis.TIME, ProcessAxis.SEQUENCE],
-        ],
-    )
-    def test_down_convert_on_wrong_axes_raises_value_error(self, axes):
-        pp = PostProcessing(
-            output_variable="test", process_type=PostProcessType.DOWN_CONVERT, axes=axes
-        )
-        with pytest.raises(ValueError):
-            apply_post_processing({}, pp, {})
-
-
-@pytest.mark.parametrize("dims", [0, 1, 2])
-@pytest.mark.parametrize("mode", [AcquireMode.RAW, AcquireMode.SCOPE])
-def test_down_convert(dims, mode):
-    # create up-scaled time-series data
-    samples = 52
-    dt = 8e-8
-    freq = 2.54e9
-    ts = np.linspace(0, dt * (samples - 1), samples)
-    response = np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * ts)
-
-    # assemble the mock data
-    dims = [10 * (i + 1) for i in range(dims)]  # sweeping data
-    if mode == AcquireMode.RAW:
-        dims.append(254)  # shots data
-    dims.append(52)  # time-series data
-    response = np.reshape(np.tile(response, (np.prod(dims[0:-1]))), dims)
-    assert list(np.shape(response)) == dims
-
-    # apply down conversion
-    axis_map = get_axis_map(mode, response)
-    response, axes = down_convert(response, axis_map, freq, dt)
-    assert list(np.shape(response)) == dims
-    assert np.allclose(response, 1.0)
-    assert axes == axis_map
 
 
 class TestMean:

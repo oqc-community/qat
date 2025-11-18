@@ -685,7 +685,6 @@ class TestQASM3Features:
             assert pps[0].output_variable == acquire_name
             assert pps[1].output_variable == acquire_name
             assert pps[0].process_type == PostProcessType.MEAN
-            assert pps[1].process_type == PostProcessType.DOWN_CONVERT
 
     def test_delay(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))

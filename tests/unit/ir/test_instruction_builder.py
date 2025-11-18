@@ -552,12 +552,12 @@ class TestMeasure:
     @pytest.mark.parametrize(
         ("measure_method", "pp_length"),
         (
-            ["measure_single_shot_z", 3],
-            ["measure_single_shot_signal", 2],
-            ["measure_mean_z", 4],
+            ["measure_single_shot_z", 2],
+            ["measure_single_shot_signal", 1],
+            ["measure_mean_z", 3],
             ["measure_mean_signal", 1],
-            ["measure_scope_mode", 1],
-            ["measure_single_shot_binned", 4],
+            ["measure_scope_mode", 0],
+            ["measure_single_shot_binned", 3],
         ),
     )
     def test_single_qubit_measurement_with_pp(self, axis, measure_method, pp_length):
@@ -598,7 +598,7 @@ class TestMeasure:
                 "measure_mean_z",
                 "measure_single_shot_binned",
             ]:
-                pp_length -= 2
+                pp_length -= 1
         elif axis == ProcessAxis.TIME:
             if measure_method in [
                 "measure_mean_z",

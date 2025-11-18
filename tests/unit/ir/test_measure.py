@@ -107,9 +107,6 @@ class TestPostProcessing:
             (PostProcessType.DISCRIMINATE, [np.array([0.0 + 1j])[0]]),
             (PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, [-0.1, 1]),
             (PostProcessType.MEAN, []),
-            (PostProcessType.DOWN_CONVERT, [1e8, 1e-8]),
-            (PostProcessType.DOWN_CONVERT, [1e8, 1e-8 + 0j]),
-            (PostProcessType.DOWN_CONVERT, [1e8, np.array([1e-8 + 0j])[0]]),
         ],
     )
     def test_serialize_deserialize_roundtrip(self, pp_type, args):

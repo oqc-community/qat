@@ -54,9 +54,6 @@ def apply_post_processing(
     """
 
     match post_processing.process_type:
-        case PostProcessType.DOWN_CONVERT:
-            _validate_down_convert_axis(post_processing.axes)
-            return down_convert(response, axes, *post_processing.args)
         case PostProcessType.MEAN:
             return mean(response, axes, post_processing.axes)
         case PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
@@ -67,41 +64,6 @@ def apply_post_processing(
     raise NotImplementedError(
         f"Post processing type {post_processing.process_type} not implemented."
     )
-
-
-def down_convert(
-    response: np.ndarray,
-    axes: dict[ProcessAxis, int],
-    frequency: float,
-    dt: float,
-):
-    """
-    Down-conversion of the readout signal.
-
-    If down-conversion of the readout signal is not done on the hardware, is can be done via
-    software using this method. Can only be done over the :attr:`ProcessAxis.TIME` axis.
-
-    :param np.ndarray response: Readout results from an execution engine.
-    :param axes: A dictionary containing which axes contain the shots and which contain time
-        series.
-    :type axes: dict[ProcessAxis, Int]
-    :param float frequency: Down-conversion frequency
-    :param float dt: The sampling rate for the readout
-    :returns: The processed results as an array and the axis map.
-    """
-
-    axis = axes[ProcessAxis.TIME]
-
-    # calculate the kernal used for down-conversion
-    samples = response.shape[axis]
-    t = np.linspace(0.0, dt * (samples - 1), samples)
-    kernal = np.exp(-UPCONVERT_SIGN * 2.0j * np.pi * frequency * t)
-
-    # multiply the response by the kernal over all dimensions.
-    npaxis = [np.newaxis] * response.ndim
-    npaxis[axis] = slice(None, None, None)
-    result = response * kernal[tuple(npaxis)]
-    return result, axes
 
 
 def mean(
@@ -190,13 +152,3 @@ def _remove_axes(original_dims, removed_axis_indices, axis_locations):
         k: (v - new_dims) if axis_negative[k] else v for k, v in new_axis_locations.items()
     }
     return new_axis_locations
-
-
-def _validate_down_convert_axis(target_axis):
-    if isinstance(target_axis, list):
-        if len(target_axis) != 1:
-            raise ValueError("Down conversion can only be done over a single axis.")
-        target_axis = target_axis[0]
-
-    if target_axis != ProcessAxis.TIME:
-        raise ValueError("Down conversion can only be done over the time axis.")

@@ -331,18 +331,11 @@ class PostProcessingSanitisation(TransformPass):
 
         elif acquire_mode == AcquireMode.INTEGRATOR:
             if (
-                pp.process_type == PostProcessType.DOWN_CONVERT
-                and ProcessAxis.TIME in pp.axes
-                and len(pp.axes) <= 1
-            ):
-                return False
-            if (
                 pp.process_type == PostProcessType.MEAN
                 and ProcessAxis.TIME in pp.axes
                 and len(pp.axes) <= 1
             ):
                 return False
-
         return True
 
 

@@ -578,7 +578,6 @@ class TestPydPostProcessingSanitisation:
         "acq_mode,pp_type,pp_axes",
         [
             (AcquireMode.SCOPE, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]),
-            (AcquireMode.INTEGRATOR, PostProcessType.DOWN_CONVERT, [ProcessAxis.TIME]),
             (AcquireMode.INTEGRATOR, PostProcessType.MEAN, [ProcessAxis.TIME]),
         ],
     )
@@ -614,11 +613,6 @@ class TestPydPostProcessingSanitisation:
         # Mid-circuit measurement with some manual (different) post-processing options.
         builder.measure(targets=qubit, mode=AcquireMode.SCOPE)
         assert isinstance(builder._ir.tail, MeasureBlock)
-        builder.post_processing(
-            target=qubit,
-            output_variable=builder._ir.tail.output_variables[0],
-            process_type=PostProcessType.DOWN_CONVERT,
-        )
         builder.X(target=qubit)
         builder.measure(targets=qubit, mode=AcquireMode.INTEGRATOR)
         assert isinstance(builder._ir.tail, MeasureBlock)
@@ -632,8 +626,7 @@ class TestPydPostProcessingSanitisation:
 
         # Make sure no instructions get discarded in the post-processing sanitisation for a mid-circuit measurement.
         pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
-        assert len(pp) == 2
-        assert pp[0].output_variable != pp[1].output_variable
+        assert len(pp) == 1
 
 
 class TestMeasurePhaseResetSanitisation:

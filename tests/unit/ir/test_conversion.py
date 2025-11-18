@@ -767,11 +767,6 @@ class TestConvertToPydanticIRPass:
         "pp_type, axes",
         [
             pytest.param(
-                instructions.PostProcessType.DOWN_CONVERT,
-                [instructions.ProcessAxis.TIME],
-                id="DownConvert-Time",
-            ),
-            pytest.param(
                 instructions.PostProcessType.MEAN,
                 [instructions.ProcessAxis.TIME],
                 id="Mean-Time",

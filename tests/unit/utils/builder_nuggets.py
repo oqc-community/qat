@@ -24,17 +24,17 @@ def _add_builder_measure(
 ):
     if signal:
         if single_shot:
-            # Down-convert + integrate
+            # Integrate
             builder.measure_single_shot_signal(qubit, output_variable=f"Q{qubit.index}")
         else:
-            # Down-convert + integrate + average
+            # Integrate + average
             builder.measure_mean_signal(qubit, output_variable=f"Q{qubit.index}")
     else:
         if single_shot:
-            # Down-convert + integrate + Linear map and project
+            # Integrate + Linear map and project
             builder.measure_single_shot_z(qubit, output_variable=f"Q{qubit.index}")
         else:
-            # Down-convert + integrate + average + Linear map and project
+            # Integrate + average + Linear map and project
             builder.measure_mean_z(qubit, output_variable=f"Q{qubit.index}")
 
 
@@ -535,9 +535,6 @@ def zmap(model, qubit_indices=None, do_X=False):
         )
         builder.add(acquire)
         builder.synchronize(qubit)
-        builder.post_processing(
-            acquire, PostProcessType.DOWN_CONVERT, ProcessAxis.TIME, qubit
-        )
         builder.post_processing(acquire, PostProcessType.MEAN, ProcessAxis.TIME, qubit)
     for index in qubit_indices:
         qubit = model.get_qubit(index)

@@ -1428,9 +1428,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
     ):
         # The acquire integrator mode means that for every acquired resonator response
         # signal within a group of shots, we integrate along the time axis to find the
-        # average amplitude of the response. Before averaging, the acquired waveform is
-        # down converted. Since the down conversion and mean are performed on the FPGA
-        # these post processing operations are removed for executions on live hardware.
+        # average amplitude of the response.
         #
         # The returned value for each shot after postprocessing is a complex iq value.
         device = self.builder.hw.device_for_physical_channel_id(
@@ -1466,12 +1464,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             delay=delay,
         )
         self.builder.add(acquire)
-        self.builder.post_processing(
-            target=qubit,
-            process_type=PostProcessType.DOWN_CONVERT,
-            axes=[ProcessAxis.TIME],
-            output_variable=output_variable,
-        )
         self.builder.post_processing(
             target=qubit,
             process_type=PostProcessType.MEAN,
@@ -1657,13 +1649,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 axes=[ProcessAxis.SEQUENCE],
                 output_variable=acquire.output_variable,
             )
-            self.builder.post_processing(
-                target=qubit,
-                process_type=PostProcessType.DOWN_CONVERT,
-                axes=[ProcessAxis.TIME],
-                output_variable=acquire.output_variable,
-            )
-
             self._attempt_declaration(variable)
             return variable
 

@@ -28,12 +28,6 @@ class TestPostProcessingTransform:
         pp_instructions = [
             PostProcessing(
                 output_variable="test",
-                process_type="down_convert",
-                axes=[ProcessAxis.TIME],
-                args=[0.0, 1e-9],
-            ),
-            PostProcessing(
-                output_variable="test",
                 process_type="mean",
                 axes=[ProcessAxis.TIME],
             ),

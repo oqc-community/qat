@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
 import math
+import warnings
 from collections import defaultdict
 from enum import Enum, auto
 from typing import List, Set, Union
@@ -686,6 +687,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 args = qubit.discriminator
                 args = [args] if not isinstance(args, list) else args
             elif process == PostProcessType.DOWN_CONVERT:
+                warnings.warn(
+                    "DOWN_CONVERT PostProcessing is deprecated and will be removed "
+                    "in future versions."
+                    "This is because down conversion is now handled automatically in the "
+                    "control hardware."
+                    "If you didn't explicitly add down conversion and this warning confuses you,"
+                    "don't worry about it, you did nothing wrong!",
+                    DeprecationWarning,
+                    stacklevel=2,
+                )
                 phys = acq.channel.physical_channel
                 resonator = next(
                     dev

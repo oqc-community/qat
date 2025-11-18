@@ -17,7 +17,6 @@ from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import PostProcessType
 from qat.runtime.passes.purr.analysis import IndexMappingResult
 from qat.runtime.post_processing import apply_post_processing, get_axis_map
 from qat.runtime.results_processing import binary_average, binary_count, numpy_array_to_list
@@ -60,12 +59,6 @@ class PostProcessingTransform(TransformPass):
             # of what axes remain as we go
             response_axes = get_axis_map(acquire.mode, response)
             for pp in acquire.post_processing:
-                if (
-                    pp.process_type == PostProcessType.DOWN_CONVERT
-                    and len(args) == 1
-                    and self.sample_time is not None
-                ):  # COMPILER-757 backwards compatibility
-                    pp.args.append(self.sample_time)
                 response, response_axes = apply_post_processing(response, pp, response_axes)
             acquisitions[output_variable] = response
 
