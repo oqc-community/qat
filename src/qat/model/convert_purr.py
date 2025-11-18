@@ -189,7 +189,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
-                        scale=pulse_channel.scale,
+                        scale=_process_real_or_complex(pulse_channel.scale),
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                         zx_pi_4_pulse=CalibratablePulse(
@@ -203,7 +203,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         auxiliary_qubit=aux_qubit,
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
-                        scale=pulse_channel.scale,
+                        scale=_process_real_or_complex(pulse_channel.scale),
                         fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                     )
