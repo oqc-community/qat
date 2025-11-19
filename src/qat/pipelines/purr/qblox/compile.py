@@ -43,7 +43,9 @@ def middleend_pipeline1(
         | InstructionValidation(target_data)
         | ReadoutValidation(model)
         | RepeatSanitisation(model, target_data)
+        | ScopeSanitisation()
         | ReturnSanitisation()
+        | DesugaringPass()
         | TriagePass()
     )
 
@@ -63,7 +65,6 @@ def middleend_pipeline2(model: QuantumHardwareModel, target_data: TargetData):
         | TriagePass()
         | BindingPass()
         | TILegalisationPass()
-        | QbloxLegalisationPass()
     )
 
 
@@ -72,7 +73,7 @@ def backend_pipeline1():
 
 
 def backend_pipeline2():
-    return PassManager() | PreCodegenPass() | CFGPass()
+    return PassManager() | QbloxLegalisationPass() | PreCodegenPass() | CFGPass()
 
 
 class QbloxCompilePipeline1(UpdateablePipeline):

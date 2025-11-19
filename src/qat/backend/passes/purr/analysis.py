@@ -164,6 +164,7 @@ class ScopingResult:
 
 @dataclass
 class ReadWriteResult:
+    inits: dict[str, list[Instruction]] = field(default_factory=lambda: defaultdict(list))
     reads: dict[str, list[Instruction]] = field(default_factory=lambda: defaultdict(list))
     writes: dict[str, list[Instruction]] = field(default_factory=lambda: defaultdict(list))
 
@@ -273,20 +274,15 @@ class BindingPass(AnalysisPass):
                                 scoping_result.scope2symbols[scope].add(name)
                                 scoping_result.symbol2scopes[name].append(scope)
 
-                    iter_name = f"{hash(inst)}"
-                    count = len(next(iter(inst.variables.values())))
-                    scoping_result.scope2symbols[scope].add(iter_name)
-                    scoping_result.symbol2scopes[iter_name].append(scope)
-                    iter_bound_result[iter_name] = IterBound(
-                        start=1, step=1, end=count, count=count
-                    )
-                    rw_result.writes[iter_name].append(inst)
-                    rw_result.reads[iter_name].append(inst)
-
                     for name, value in inst.variables.items():
                         scoping_result.scope2symbols[scope].add(name)
                         scoping_result.symbol2scopes[name].append(scope)
                         iter_bound_result[name] = self.extract_iter_bound(value)
+
+                    iter_name = f"{hash(inst)}"
+                    rw_result.inits[iter_name].append(inst)
+                    rw_result.reads[iter_name].append(inst)
+                    rw_result.writes[iter_name].append(inst)
                 elif isinstance(inst, Repeat):
                     stack.append(inst)
                     scope = (inst, None)
@@ -297,21 +293,23 @@ class BindingPass(AnalysisPass):
                                 scoping_result.symbol2scopes[name].append(scope)
 
                     iter_name = f"{hash(inst)}"
-                    count = inst.repeat_count
                     scoping_result.scope2symbols[scope].add(iter_name)
                     scoping_result.symbol2scopes[iter_name].append(scope)
                     iter_bound_result[iter_name] = IterBound(
-                        start=1, step=1, end=count, count=count
+                        start=1, step=1, end=inst.repeat_count, count=inst.repeat_count
                     )
-                    rw_result.writes[iter_name].append(inst)
+
+                    iter_name = f"{hash(inst)}"
+                    rw_result.inits[iter_name].append(inst)
                     rw_result.reads[iter_name].append(inst)
+                    rw_result.writes[iter_name].append(inst)
                 elif isinstance(inst, (EndSweep, EndRepeat)):
-                    delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
                     try:
                         delimiter = stack.pop()
                     except IndexError:
                         raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
+                    delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
                     if not isinstance(delimiter, delimiter_type):
                         raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
@@ -331,9 +329,6 @@ class BindingPass(AnalysisPass):
                             (delimiter, inst) if s == scope else s for s in scopes
                         ]
                 elif isinstance(inst, Acquire):
-                    # Acquisition mem addressing
-                    iter_name = f"{hash(inst)}"
-
                     if any(
                         pp.process == PostProcessType.MEAN
                         and ProcessAxis.SEQUENCE in pp.axes
@@ -344,13 +339,7 @@ class BindingPass(AnalysisPass):
                             (s, e) for (s, e) in parent_scopes if not isinstance(s, Repeat)
                         ]
 
-                        # Innermost scope writes to the "memory index"
-                        if innermost := next((s for (s, e) in parent_scopes[::-1]), None):
-                            rw_result.writes[iter_name].append(innermost)
-
-                    # An acquire reads the "memory index"
-                    rw_result.reads[iter_name].append(inst)
-
+                    iter_name = f"{hash(inst)}"
                     shape = tuple(
                         iter_bound_result[f"{hash(s)}"].count for (s, e) in parent_scopes
                     )
@@ -358,6 +347,13 @@ class BindingPass(AnalysisPass):
                     iter_bound_result[iter_name] = IterBound(
                         start=0, step=1, end=loop_nest_size, count=loop_nest_size
                     )
+
+                    iter_name = f"{hash(inst)}"
+                    rw_result.reads[iter_name].append(inst)
+                    if (
+                        innermost := next((s for (s, e) in parent_scopes[::-1]), None)
+                    ) is not None:
+                        rw_result.writes[iter_name].append(innermost)
                 else:
                     attr2var = {
                         attr: var
@@ -366,28 +362,24 @@ class BindingPass(AnalysisPass):
                     }
 
                     for attr, var in attr2var.items():
-                        if not (
-                            defining_sweep := next(
-                                (
-                                    s
-                                    for s in stack[::-1]
-                                    if isinstance(s, Sweep) and var.name in s.variables
-                                ),
-                                None,
-                            )
-                        ):
+                        defining_sweep = next(
+                            (
+                                s
+                                for s in stack[::-1]
+                                if isinstance(s, Sweep) and var.name in s.variables
+                            ),
+                            None,
+                        )
+                        if defining_sweep is None:
                             raise ValueError(
                                 f"Variable {var} referenced but no prior declaration found in target {target}"
                             )
 
-                        # Only the defining sweep writes to the variable named "var.name"
-                        # but only on the target in question !!
+                        rw_result.inits[var.name].append(defining_sweep)
+                        rw_result.reads[var.name].append(inst)
                         rw_result.writes[var.name].append(defining_sweep)
 
-                        # The instruction reads the variable named "var.name"
-                        rw_result.reads[var.name].append(inst)
-
-            if stack:
+            if len(stack) > 0:
                 raise ValueError(
                     f"Unbalanced scopes. Found orphans {stack} in target {target}"
                 )

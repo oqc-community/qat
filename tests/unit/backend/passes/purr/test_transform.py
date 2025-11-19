@@ -54,6 +54,7 @@ def test_scope_peeling_pass(qubit_indices):
         | RepeatSanitisation(model, TargetData.default())
         | ScopeSanitisation()
         | ReturnSanitisation()
+        | DesugaringPass()
         | TriagePass()
         | BindingPass()
     )

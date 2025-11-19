@@ -23,6 +23,7 @@ from qat.backend.passes.purr.analysis import (
     TriageResult,
 )
 from qat.backend.passes.purr.lowering import PartitionByPulseChannel
+from qat.backend.passes.purr.transform import DesugaringPass
 from qat.core.result_base import ResultManager
 from qat.ir.lowered import PartitionedIR
 from qat.middleend.passes.purr.transform import (
@@ -123,7 +124,6 @@ class TestAnalysisPasses:
     def test_binding_pass(self, num_points, qubit_indices):
         model = EchoModelLoader().load()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
-        res_mgr = ResultManager()
 
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
         end_sweeps = [inst for inst in builder.instructions if isinstance(inst, EndSweep)]
@@ -134,6 +134,8 @@ class TestAnalysisPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 0
 
+        res_mgr = ResultManager()
+        TriagePass().run(builder, res_mgr)
         with pytest.raises(ValueError):
             BindingPass().run(builder, res_mgr)
 
@@ -147,6 +149,13 @@ class TestAnalysisPasses:
         assert len(repeats) == 1
         assert len(end_repeats) == 1
 
+        res_mgr = ResultManager()
+        TriagePass().run(builder, res_mgr)
+        with pytest.raises(KeyError):
+            BindingPass().run(builder, res_mgr)
+
+        res_mgr = ResultManager()
+        DesugaringPass().run(builder, res_mgr)
         TriagePass().run(builder, res_mgr)
         BindingPass().run(builder, res_mgr)
         triage_result = res_mgr.lookup_by_type(TriageResult)
@@ -174,11 +183,6 @@ class TestAnalysisPasses:
                 for name, value in inst.variables.items()
             }
 
-            for inst in sweeps:
-                iter_name = f"{hash(inst)}"
-                count = len(next(iter(inst.variables.values())))
-                iter_bounds[iter_name] = IterBound(start=1, step=1, end=count, count=count)
-
             for inst in repeats:
                 name = f"{hash(inst)}"
                 iter_bounds[name] = IterBound(
@@ -190,9 +194,7 @@ class TestAnalysisPasses:
                     assert name in iter_bounds
                     assert name in scoping_result.symbol2scopes
                     assert scope in scoping_result.symbol2scopes[name]
-
-                    for t in triage_result.target_map:
-                        assert iter_bound_result[name] == iter_bounds[name]
+                    assert iter_bound_result[name] == iter_bounds[name]
 
             for symbol, scopes in scoping_result.symbol2scopes.items():
                 assert scopes
@@ -222,6 +224,7 @@ class TestAnalysisPasses:
         res_mgr = ResultManager()
 
         ScopeSanitisation().run(builder, res_mgr)
+        DesugaringPass().run(builder, res_mgr)
         TriagePass().run(builder, res_mgr)
         BindingPass().run(builder, res_mgr)
 

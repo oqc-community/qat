@@ -11,6 +11,7 @@ from qat.purr.backends.qblox.analysis_passes import (
     TriageResult,
 )
 from qat.purr.backends.qblox.transform_passes import (
+    DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopePeeling,
@@ -36,6 +37,7 @@ def test_scope_peeling_pass(qubit_indices):
         | RepeatSanitisation(model)
         | ScopeSanitisation()
         | ReturnSanitisation()
+        | DesugaringPass()
         | TriagePass()
         | BindingPass()
     )

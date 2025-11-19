@@ -13,12 +13,13 @@ from qat.purr.compiler.instructions import Instruction, Sweep
 
 
 class DesugaringPass(TransformPass):
-    """Transforms syntactic sugars and implicit effects. Not that it applies here, but a
-    classical example of a sugar syntax is the ternary expression
-    :code:`"cond ? val1 : val2"` which is nothing more than an if else in disguise.
+    """Transforms syntactic sugars and implicit effects.
 
     The goal of this pass is to desugar any syntactic and semantic sugars. One of these
     sugars is iteration constructs such as :class:`Sweep` and :class:`Repeat`.
+
+    1- Adds an iterator variable for sweep loops. We state that sweep loops implicitly
+       declare an iterator variable to control progress of the sweep. See :class:`BindingPass`
     """
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):

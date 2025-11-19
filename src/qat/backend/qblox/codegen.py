@@ -820,6 +820,7 @@ class QbloxContext2(AbstractContext):
         self.symbol2scopes: dict[str, list[tuple[Instruction, Instruction | None]]] = (
             scoping_result.symbol2scopes
         )
+        self.inits: dict[str, list[Instruction]] = rw_result.inits
         self.reads: dict[str, list[Instruction]] = rw_result.reads
         self.writes: dict[str, list[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
@@ -917,10 +918,7 @@ class QbloxContext2(AbstractContext):
     def enter_repeat(inst: Repeat, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = set(
-                [n for (n, insts) in context.writes.items() if inst in insts]
-                + [n for (n, insts) in context.reads.items() if inst in insts]
-            )
+            var_names = set([n for (n, insts) in context.inits.items() if inst in insts])
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -942,6 +940,8 @@ class QbloxContext2(AbstractContext):
     def exit_repeat(inst: Repeat, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
+            context.wait_imm(int(inst.passive_reset_time * 1e9))
+
             var_names = set(
                 [n for (n, insts) in context.writes.items() if inst in insts]
                 + [n for (n, insts) in context.reads.items() if inst in insts]
@@ -957,8 +957,6 @@ class QbloxContext2(AbstractContext):
                 )
                 context.sequence_builder.nop()
 
-            context.wait_imm(int(inst.passive_reset_time * 1e9))
-
             register = context.alloc_mgr.registers[iter_name]
             bound = context.iter_bounds[iter_name]
             label = context.alloc_mgr.labels[iter_name]
@@ -968,10 +966,7 @@ class QbloxContext2(AbstractContext):
     def enter_sweep(inst: Sweep, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = set(
-                [n for (n, insts) in context.writes.items() if inst in insts]
-                + [n for (n, insts) in context.reads.items() if inst in insts]
-            )
+            var_names = set([n for (n, insts) in context.inits.items() if inst in insts])
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]

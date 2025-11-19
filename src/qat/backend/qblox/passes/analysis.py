@@ -236,6 +236,7 @@ class QbloxLegalisationPass(AnalysisPass):
 
             # TODO: the proper way is to produce a new result and invalidate the old one
             binding_result.iter_bound_results[target] = legal_bound_result
+        return ir
 
 
 @dataclass

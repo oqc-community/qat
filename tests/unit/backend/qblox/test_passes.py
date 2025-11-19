@@ -14,6 +14,7 @@ from qat.backend.passes.purr.analysis import (
     TriagePass,
     TriageResult,
 )
+from qat.backend.passes.purr.transform import DesugaringPass
 from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.backend.qblox.passes.analysis import (
     PreCodegenPass,
@@ -41,6 +42,7 @@ class TestAnalysisPasses:
             PassManager()
             | RepeatSanitisation(qblox_model, target_data)
             | ScopeSanitisation()
+            | DesugaringPass()
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
@@ -67,6 +69,7 @@ class TestAnalysisPasses:
         (
             PassManager()
             | ScopeSanitisation()
+            | DesugaringPass()
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()

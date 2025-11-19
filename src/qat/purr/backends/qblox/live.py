@@ -21,6 +21,7 @@ from qat.purr.backends.qblox.analysis_passes import (
 )
 from qat.purr.backends.qblox.codegen import NewQbloxEmitter, QbloxEmitter, QbloxPackage
 from qat.purr.backends.qblox.transform_passes import (
+    DesugaringPass,
     RepeatSanitisation,
     ReturnSanitisation,
     ScopeSanitisation,
@@ -281,7 +282,9 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
         return (
             PassManager()
             | RepeatSanitisation(self.model)
+            | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
         )
 
@@ -317,6 +320,7 @@ class QbloxLiveEngine2(AbstractQbloxLiveEngine):
             | RepeatSanitisation(self.model)
             | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
             | BindingPass()
             | TILegalisationPass()
