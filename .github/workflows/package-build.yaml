@@ -21,6 +21,9 @@ on:
       experimental-result:
         description: "Experimental unit tests result"
         value: ${{ jobs.experimental-unit-tests.outputs.result }}
+      notebook-result:
+        description: "Notebook execution result"
+        value: ${{ jobs.notebook-validation-tests.outputs.result }}
   
 run-name: Units tests for QAT at ${{ github.ref }}
 
@@ -179,6 +182,22 @@ jobs:
           codebase: experimental
           pytest-args: "--experimental-only"
 
+  notebook-validation-tests:
+    name: Notebook Validation Tests
+    runs-on: ubuntu-22.04
+    outputs:
+      result: ${{ steps.pytest.outputs.result }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: ${{ inputs.repository }}
+      - uses: ./.github/actions/testing-action
+        id: pytest
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          codebase: notebooks
+          pytest-args: "notebooks/ipynb --nbmake"
+
   generate-report:
     name: Generate report
     runs-on: ubuntu-22.04
@@ -188,6 +207,7 @@ jobs:
       - legacy-unit-tests
       - experimental-unit-tests
       - formatting-tests
+      - notebook-validation-tests
     steps:
       - uses: actions/checkout@v6
         with:
