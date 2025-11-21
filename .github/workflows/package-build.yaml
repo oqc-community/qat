@@ -41,7 +41,7 @@ jobs:
       report: ${{ steps.formatting.outputs.markdown-summary }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
 
@@ -130,7 +130,7 @@ jobs:
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -153,7 +153,7 @@ jobs:
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -169,7 +169,7 @@ jobs:
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -189,7 +189,7 @@ jobs:
       - experimental-unit-tests
       - formatting-tests
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
 
