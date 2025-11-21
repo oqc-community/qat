@@ -177,6 +177,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
         playback: Dict[str, Dict[str, Acquisition]] = {}
         for pulse_channel_id, acquisitions in playbacks.items():
+            acquisitions.sort(key=lambda acquisition: acquisition.name)
             groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
             playback[pulse_channel_id] = {
                 name: reduce(
@@ -286,6 +287,7 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
             | ReturnSanitisation()
             | DesugaringPass()
             | TriagePass()
+            | BindingPass()
         )
 
     def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager):
@@ -296,8 +298,8 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
         playbacks: Dict[str, List[Acquisition]] = defaultdict(list)
         for packages in iter2packages.values():
             self.model.control_hardware.set_data(packages)
-            payback = self.model.control_hardware.start_playback(None, None)
-            for pulse_channel_id, acquisitions in payback.items():
+            playback = self.model.control_hardware.start_playback(None, None)
+            for pulse_channel_id, acquisitions in playback.items():
                 playbacks[pulse_channel_id] += acquisitions
 
         return self.combine_playbacks(playbacks)

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import re
 from contextlib import nullcontext
 
 import numpy as np
@@ -27,7 +28,6 @@ from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.execution import DeviceInjectors
 from qat.purr.compiler.instructions import (
     Acquire,
-    CustomPulse,
     DeviceUpdate,
     MeasurePulse,
     Pulse,
@@ -63,8 +63,11 @@ class TestQbloxEmitter(InvokerMixin):
         return (
             PassManager()
             | RepeatSanitisation(self.model)
+            | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
+            | BindingPass()
         )
 
     def _do_emit(self, builder, model, skip_runtime=False):
@@ -176,15 +179,16 @@ class TestQbloxEmitter(InvokerMixin):
         )
         iter2packages = self._do_emit(builder, model)
         remaining_width = int(qubit.pulse_measure["width"] * 1e9) - int(delay * 1e9)
+
+        pattern = r"set_awg_offs {0},0\nupd_param {1}\nacquire 0,R\d{{1,2}},{2}\nset_awg_offs 0,0\nupd_param 4".format(
+            i_offs_steps, int(delay * 1e9), remaining_width
+        )
         for packages in iter2packages.values():
             assert len(packages) == 1
             pkg = packages[0]
             assert not pkg.sequence.waveforms
             assert qubit.pulse_measure["shape"] == PulseShapeType.SQUARE
-            assert (
-                f"set_awg_offs {i_offs_steps},0\nupd_param {int(delay * 1e9)}\nacquire 0,R0,{remaining_width}\nset_awg_offs 0,0"
-                in pkg.sequence.program
-            )
+            assert re.search(pattern, pkg.sequence.program, re.MULTILINE)
 
             channel = acquire_channel.physical_channel
             assert isinstance(channel, QbloxPhysicalChannel)
@@ -416,41 +420,30 @@ class TestQbloxEmitter(InvokerMixin):
                     assert "upd_param" not in acquire_pkg.sequence.program
 
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
-    def test_scope_acquisition(self, model, qubit_indices):
-        builder = measure_acquire(model, qubit_indices)
+    @pytest.mark.parametrize("enable_weights", [True, False])
+    @pytest.mark.parametrize("do_X", [True, False])
+    def test_scope_acquisition(self, model, qubit_indices, enable_weights, do_X):
+        builder = measure_acquire(model, qubit_indices, do_X=do_X)
         iter2packages = self._do_emit(builder, model)
         for packages in iter2packages.values():
-            assert len(packages) == len(qubit_indices)
+            if do_X:
+                assert len(packages) == 2 * len(qubit_indices)
+            else:
+                assert len(packages) == len(qubit_indices)
 
-            acquire_pkg = next((pkg for pkg in packages))
-            assert "weighed_acquire" not in acquire_pkg.sequence.program
-
-        builder = measure_acquire(model, qubit_indices, do_X=True)
+        builder = measure_acquire(model, qubit_indices, enable_weights=enable_weights)
         iter2packages = self._do_emit(builder, model)
         for packages in iter2packages.values():
-            assert len(packages) == 2 * len(qubit_indices)
-
-            # Enable weights
-            builder = measure_acquire(model, qubit_indices)
-
-            for index in qubit_indices:
-                qubit = model.get_qubit(index)
-                num_samples = int(qubit.measure_acquire["width"] * 1e9)
-                acquire = next(
-                    (inst for inst in builder.instructions if isinstance(inst, Acquire))
-                )
-                weights = np.random.rand(num_samples) + 1j * np.random.rand(num_samples)
-                qubit.measure_acquire["weights"] = weights
-                acquire.filter = CustomPulse(acquire.channel, weights)
-
-        iter2packages = self._do_emit(builder, model)
-        for packages in iter2packages.values():
-            acquire_pkg = next((pkg for pkg in packages))
-            assert "acquire_weighed" in acquire_pkg.sequence.program
+            for acquire_pkg in packages:
+                if enable_weights:
+                    assert "acquire_weighed" in acquire_pkg.sequence.program
+                else:
+                    assert "acquire" in acquire_pkg.sequence.program
 
     @pytest.mark.parametrize("qubit_indices", [[0]])
-    def test_multi_readout(self, model, qubit_indices):
-        builder = multi_readout(model, qubit_indices, do_X=False)
+    @pytest.mark.parametrize("num_acquires", [1, 2, 3])
+    def test_multi_readout(self, model, qubit_indices, num_acquires):
+        builder = multi_readout(model, qubit_indices, do_X=False, num_acquires=num_acquires)
         iter2packages = self._do_emit(builder, model)
         for packages in iter2packages.values():
             assert len(packages) == len(qubit_indices)
@@ -468,9 +461,9 @@ class TestQbloxEmitter(InvokerMixin):
                     )
                 )
                 assert measure_pkg.sequence.acquisitions
-                assert measure_pkg.sequence.program.count("acquire") == 2
+                assert measure_pkg.sequence.program.count("acquire") == 2 * num_acquires
 
-        builder = multi_readout(model, qubit_indices, do_X=True)
+        builder = multi_readout(model, qubit_indices, do_X=True, num_acquires=num_acquires)
         with pytest.raises(ValueError):
             self._do_emit(builder, model)
 
@@ -494,7 +487,7 @@ class TestQbloxEmitter(InvokerMixin):
                         )
                     )
                     assert measure_pkg.sequence.acquisitions
-                    assert measure_pkg.sequence.program.count("acquire") == 2
+                    assert measure_pkg.sequence.program.count("acquire") == 2 * num_acquires
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 

@@ -171,13 +171,14 @@ class QbloxControlHardware(ControlHardware):
         else:
             raise ValueError(f"Unknown module type {module.module_type}")
 
-        log.debug(f"Configuring module {module}, and sequencer {sequencer}")
-        config_helper.configure(module, sequencer)
-        self._modules[module] = True  # Mark as dirty
-
-        sequence = asdict(package.sequence)
-        sequencer.sequence(sequence)
-        self._id2seq[package.pulse_channel_id] = sequencer
+        try:
+            log.debug(f"Configuring module {module}, and sequencer {sequencer}")
+            config_helper.configure(module, sequencer)
+            sequence = asdict(package.sequence)
+            sequencer.sequence(sequence)
+        finally:
+            self._modules[module] = True  # Mark as dirty
+            self._id2seq[package.pulse_channel_id] = sequencer
 
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
@@ -289,6 +290,7 @@ class QbloxControlHardware(ControlHardware):
                     sequencer.delete_acquisition_data(all=True)
 
             self._id2seq.clear()
+            self._reset_modules()
 
     def __getstate__(self) -> Dict:
         results = super(QbloxControlHardware, self).__getstate__()

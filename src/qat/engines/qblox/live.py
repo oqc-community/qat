@@ -64,6 +64,10 @@ class QbloxLeafInstrument(LeafInstrument):
     def id2seq(self):
         return self._id2seq
 
+    @property
+    def modules(self):
+        return self._modules
+
     def configure(self, package: QbloxPackage):
         module: Module = getattr(self._driver, f"module{package.slot_idx}")
         sequencer = module.sequencers[package.seq_idx]
@@ -82,13 +86,14 @@ class QbloxLeafInstrument(LeafInstrument):
         else:
             raise ValueError(f"Unknown module type {module.module_type}")
 
-        log.debug(f"Configuring module {module}, and sequencer {sequencer}")
-        config_helper.configure(module, sequencer)
-        self._modules[module] = True  # Mark as dirty
-
-        sequence = asdict(package.sequence)
-        sequencer.sequence(sequence)
-        self._id2seq[package.pulse_channel_id] = sequencer
+        try:
+            log.debug(f"Configuring module {module}, and sequencer {sequencer}")
+            config_helper.configure(module, sequencer)
+            sequence = asdict(package.sequence)
+            sequencer.sequence(sequence)
+        finally:
+            self._modules[module] = True  # Mark as dirty
+            self._id2seq[package.pulse_channel_id] = sequencer
 
     def connect(self):
         if self._driver is None or not Cluster.is_valid(self._driver):
@@ -139,6 +144,8 @@ class QbloxLeafInstrument(LeafInstrument):
         finally:
             for pulse_channel_id, sequencer in self._id2seq.items():
                 sequencer.sync_en(False)
+
+            self._reset_modules()
 
     def collect(self) -> dict:
         if not any(self._id2seq):

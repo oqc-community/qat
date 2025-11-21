@@ -408,8 +408,9 @@ class TestExecutionSuite:
             else:
                 assert results[f"Q{index}"].shape == (1, int(acq_width * 1e9))
 
+    @pytest.mark.parametrize("num_acquires", [1, 2, 3])
     def test_multi_readout(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type
+        self, qblox_model, qblox_instrument, qubit_indices, backend_type, num_acquires
     ):
         old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
         try:
@@ -417,19 +418,22 @@ class TestExecutionSuite:
             backend = backend_type(qblox_model)
             engine = QbloxEngine(qblox_instrument, qblox_model)
 
-            builder = multi_readout(qblox_model, qubit_indices, do_X=True)
+            builder = multi_readout(
+                qblox_model, qubit_indices, do_X=True, num_acquires=num_acquires
+            )
 
             ordered_executables, triage_result = _do_emit(qblox_model, backend, builder)
             results = engine.execute(ordered_executables, triage_result)
             assert results
-            assert len(results) == 2 * len(qubit_indices)
+            assert len(results) == 2 * num_acquires * len(qubit_indices)
             for index in qubit_indices:
-                assert f"0_Q{index}" in results
-                assert results[f"0_Q{index}"].shape == (1, 1000)
-                assert results[f"0_Q{index}"].dtype == np.float64
-                assert f"1_Q{index}" in results
-                assert results[f"1_Q{index}"].shape == (1, 1000)
-                assert results[f"1_Q{index}"].dtype == np.complex128
+                for acq_idx in range(num_acquires):
+                    assert f"ssb_{acq_idx}_Q{index}" in results
+                    assert results[f"ssb_{acq_idx}_Q{index}"].shape == (1, 1000)
+                    assert results[f"ssb_{acq_idx}_Q{index}"].dtype == np.float64
+                    assert f"sss_{acq_idx}_Q{index}" in results
+                    assert results[f"sss_{acq_idx}_Q{index}"].shape == (1, 1000)
+                    assert results[f"sss_{acq_idx}_Q{index}"].dtype == np.complex128
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 

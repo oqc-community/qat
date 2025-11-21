@@ -47,6 +47,7 @@ def middleend_pipeline1(
         | ReturnSanitisation()
         | DesugaringPass()
         | TriagePass()
+        | BindingPass()
     )
 
 
@@ -69,7 +70,7 @@ def middleend_pipeline2(model: QuantumHardwareModel, target_data: TargetData):
 
 
 def backend_pipeline1():
-    return PassManager()
+    return PassManager() | PreCodegenPass()
 
 
 def backend_pipeline2():

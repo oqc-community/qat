@@ -9,6 +9,7 @@ from qat.purr.compiler.devices import PulseShapeType, Qubit
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
+    CustomPulse,
     MeasurePulse,
     PostProcessType,
     ProcessAxis,
@@ -191,7 +192,9 @@ def delay_iteration(model, qubit_indices=None, num_points=None, width=None):
     return builder
 
 
-def measure_acquire(model, qubit_indices=None, do_X=False, acq_mode=AcquireMode.SCOPE):
+def measure_acquire(
+    model, qubit_indices=None, do_X=False, enable_weights=False, acq_mode=AcquireMode.SCOPE
+):
     qubit_indices = qubit_indices or [0]
 
     builder = get_builder(model)
@@ -210,18 +213,26 @@ def measure_acquire(model, qubit_indices=None, do_X=False, acq_mode=AcquireMode.
     builder.synchronize([model.get_qubit(index) for index in qubit_indices])
     for index in qubit_indices:
         qubit = model.get_qubit(index)
+        acquire_channel = qubit.get_acquire_channel()
+
         measure_pulse = qubit.pulse_measure
         measure_acquire = qubit.measure_acquire
         width = (
             measure_pulse["width"] if measure_acquire["sync"] else measure_acquire["width"]
         )
+        filter = None
+        if enable_weights:
+            weights = np.random.rand(int(width * 1e9)) + 1j * np.random.rand(
+                int(width * 1e9)
+            )
+            filter = CustomPulse(acquire_channel, weights)
         builder.add(MeasurePulse(qubit.get_measure_channel(), **measure_pulse))
         builder.add(
             Acquire(
-                qubit.get_acquire_channel(),
+                acquire_channel,
                 output_variable=f"Q{index}",
                 mode=acq_mode,
-                filter=None,
+                filter=filter,
                 delay=measure_acquire["delay"],
                 time=width,
             )
@@ -355,8 +366,9 @@ def time_and_phase_iteration(model, qubit_indices=None, num_points=None):
     return builder
 
 
-def multi_readout(model, qubit_indices=None, do_X=False):
+def multi_readout(model, qubit_indices=None, do_X=False, num_acquires=None):
     qubit_indices = qubit_indices or [0]
+    num_acquires = num_acquires or 2
 
     builder = get_builder(model)
     builder.synchronize([model.get_qubit(index) for index in qubit_indices])
@@ -370,14 +382,20 @@ def multi_readout(model, qubit_indices=None, do_X=False):
         drive_channel.scale = 1.0e-8 + 0.0j
         second_state_channel.scale = 1.0e-8 + 0.0j
 
-        builder.measure_single_shot_binned(qubit, output_variable=f"0_Q{index}")
+        for acq_idx in range(num_acquires):
+            builder.measure_single_shot_binned(
+                qubit, output_variable=f"ssb_{acq_idx}_Q{index}"
+            )
         builder.delay(drive_channel, 5e-6)
         if do_X:
             builder.add(direct_x(qubit, theta=np.pi / 2))
             builder.add(direct_x(qubit, theta=np.pi / 2))
         else:
             builder.delay(drive_channel, 2 * qubit.pulse_hw_x_pi_2["width"])
-        builder.measure_single_shot_signal(qubit, output_variable=f"1_Q{index}")
+        for acq_idx in range(num_acquires):
+            builder.measure_single_shot_signal(
+                qubit, output_variable=f"sss_{acq_idx}_Q{index}"
+            )
 
     return builder
 

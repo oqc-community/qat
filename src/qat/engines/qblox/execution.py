@@ -216,8 +216,8 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
             self.instrument.setup(program)
             self.instrument.playback()
-            payback: dict[str, list[Acquisition]] = self.instrument.collect()
-            for pulse_channel_id, acquisitions in payback.items():
+            playback: dict[str, list[Acquisition]] = self.instrument.collect()
+            for pulse_channel_id, acquisitions in playback.items():
                 playbacks[pulse_channel_id] += acquisitions
         playback = self.combine_playbacks(playbacks)
 

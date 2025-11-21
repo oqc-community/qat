@@ -10,11 +10,14 @@ import numpy as np
 from qat.backend.base import AllocatingBackend
 from qat.backend.codegen_base import DfsTraversal
 from qat.backend.passes.purr.analysis import (
+    BindingPass,
     CFGResult,
     ReadWriteResult,
     ScopingResult,
     TILegalisationPass,
+    TriagePass,
 )
+from qat.backend.passes.purr.transform import ScopePeeling
 from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.execution import QbloxPackage, QbloxProgram
@@ -23,11 +26,13 @@ from qat.backend.qblox.passes.analysis import (
     AllocationManager,
     BindingResult,
     IterBound,
+    PreCodegenPass,
     PreCodegenResult,
     QbloxLegalisationPass,
     TriageResult,
 )
 from qat.core.metrics_base import MetricsManager
+from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.executables import Executable
 from qat.purr.backends.utilities import evaluate_shape
@@ -46,8 +51,6 @@ from qat.purr.compiler.instructions import (
     PhaseReset,
     PhaseShift,
     PostProcessing,
-    PostProcessType,
-    ProcessAxis,
     Pulse,
     QuantumInstruction,
     Repeat,
@@ -62,9 +65,19 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class AbstractContext(ABC):
-    def __init__(self, alloc_mgr: AllocationManager = None):
+class QbloxContext(ABC):
+    def __init__(
+        self,
+        rw_result: ReadWriteResult,
+        iter_bounds: dict[str, IterBound],
+        alloc_mgr: AllocationManager = None,
+    ):
+        self.inits: dict[str, list[Instruction]] = rw_result.inits
+        self.reads: dict[str, list[Instruction]] = rw_result.reads
+        self.writes: dict[str, list[Instruction]] = rw_result.writes
+        self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr or AllocationManager()
+
         self.sequence_builder = SequenceBuilder()
         self.sequencer_config = SequencerConfig()
 
@@ -78,6 +91,33 @@ class AbstractContext(ABC):
         self._frequency: float = 0.0  # Tracks frequency shifts on the target
         self._phases: list[float | str] = []
         self._timeline: np.ndarray = np.empty(0, dtype=complex)
+
+    def __enter__(self):
+        """
+        Serves as the prologue
+        """
+
+        self.clear()
+
+        self.sequence_builder.set_mrk(3)
+        self.sequence_builder.set_latch_en(1, 4)
+        self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+        for name, register in self.alloc_mgr.registers.items():
+            self.sequence_builder.move(
+                0,
+                register,
+                f"Precautionary initialisation for variable {name}",
+            )
+
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Serves as the epilogue
+        """
+
+        self.sequence_builder.stop()
 
     @property
     def durations(self):
@@ -238,6 +278,13 @@ class AbstractContext(ABC):
             self.sequence_builder.label(batch_exit)
 
     def ledger(self, duration: int | str, pulse: np.ndarray = None):
+        """
+        A helper method to keep track of the durations and phase as the codegen runs.
+
+        Every little bit of time is accounted for and a timeline object (in static cases)
+        is also kept up-to-date for debugging and visualisation purposes.
+        """
+
         if isinstance(duration, int):
             pulse = np.zeros(duration, dtype=complex) if pulse is None else pulse
             if all((isinstance(p, Number) for p in self._phases)):
@@ -631,225 +678,6 @@ class AbstractContext(ABC):
 
         self.ledger(pulse_width, pulse)
 
-    @staticmethod
-    def synchronize(inst: Synchronize, contexts: dict):
-        """
-        Favours static time padding whenever possible, or else uses SYNC.
-        TODO - Default to SYNC when Qblox supports finer grained SYNC groups
-        """
-
-        is_static = all(
-            all((isinstance(d, Number) for d in contexts[target].durations))
-            for target in inst.quantum_targets
-        )
-
-        for target in inst.quantum_targets:
-            cxt = contexts[target]
-            if is_static:
-                duration_offset = (
-                    max((contexts[target].duration for target in inst.quantum_targets))
-                    - cxt.duration
-                )
-                cxt.wait_imm(duration_offset)
-                cxt.ledger(duration_offset)
-            else:
-                cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
-                cxt.ledger(Constants.GRID_TIME)
-
-    def device_update(self, du_inst: DeviceUpdate):
-        if isinstance(du_inst.value, Variable):
-            val_reg = self.alloc_mgr.registers[du_inst.value.name]
-            if du_inst.attribute == "frequency":
-                self.sequence_builder.set_freq(val_reg)
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-                self.ledger(Constants.GRID_TIME)
-            elif du_inst.attribute == "scale":
-                pass
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
-                )
-        elif isinstance(du_inst.value, Number):
-            if du_inst.attribute == "frequency":
-                lo_freq, nco_freq = TILegalisationPass.decompose_freq(
-                    du_inst.value, du_inst.target
-                )
-                freq_imm = QbloxLegalisationPass.freq_as_steps(nco_freq)
-                self.sequence_builder.set_freq(freq_imm)
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-                self.ledger(Constants.GRID_TIME)
-            elif du_inst.attribute == "scale":
-                pass
-            else:
-                raise NotImplementedError(
-                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
-                )
-        else:
-            raise ValueError(f"Expected a Variable or a Number but got {du_inst.value}")
-
-
-class QbloxContext1(AbstractContext):
-    def __init__(self, repeat: Repeat):
-        super().__init__()
-
-        self._repeat_count = repeat.repeat_count
-        self._repeat_period = repeat.passive_reset_time
-        self._repeat_reg = None
-        self._repeat_label = None
-
-    def __enter__(self):
-        self.clear()
-        self._repeat_reg = self.alloc_mgr.reg_alloc("shot")
-        self._repeat_label = self.alloc_mgr.label_gen("shot")
-
-        self.sequence_builder.set_mrk(3)
-        self.sequence_builder.set_latch_en(1, 4)
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-        self.sequence_builder.move(0, self._repeat_reg, "Shot / Repeat iteration")
-
-        self.sequence_builder.label(self._repeat_label)
-        self.sequence_builder.wait_sync(
-            Constants.GRID_TIME, "Sync at the beginning of shot"
-        )
-        self.reset_phase()
-
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.wait_imm(int(self._repeat_period * 1e9))
-        self.sequence_builder.add(
-            self._repeat_reg, 1, self._repeat_reg, "Increment Shot / Repeat iterator"
-        )
-        self.sequence_builder.nop()
-        self.sequence_builder.jlt(self._repeat_reg, self._repeat_count, self._repeat_label)
-        self.sequence_builder.stop()
-
-        self.alloc_mgr.reg_free(self._repeat_reg)
-        self._repeat_label = None
-        self._repeat_reg = None
-
-    def measure_acquire(
-        self,
-        measure: MeasurePulse,
-        acquire: Acquire,
-        post_procs: list[PostProcessing],
-        target: PulseChannel,
-    ):
-        """
-        Regarding HW thresholding, `acquire.rotation` is in radians and `acquire.threshold` is uncorrected.
-        (Exactly as they've been computed during measure block construction)
-
-        Here at configuration time, we "legalise" these parameters to what Qblox requires:
-            + `rotation` as degrees
-            + `threshold` to be corrected by the integration length
-        """
-
-        pulse = self._evaluate_waveform(measure, target)
-        pulse_width = pulse.size
-        delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
-
-        if pulse_width < Constants.GRID_TIME:
-            log.debug(
-                f"""
-                Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
-                This pulse will be ignored. 
-                """
-            )
-            return
-
-        if pulse_width < delay_width + Constants.GRID_TIME:
-            raise ValueError(
-                f"""
-                Expected pulse width >= delay width + {Constants.GRID_TIME} ns.
-                Got pulse width = {pulse_width} ns and delay width = {delay_width} ns.
-                """
-            )
-
-        requires_shot_avg = any(
-            (
-                pp.process == PostProcessType.MEAN and ProcessAxis.SEQUENCE in pp.axes
-                for pp in post_procs
-            )
-        )
-        num_bins = 1 if requires_shot_avg else self._repeat_count
-        acq_bin = 0 if requires_shot_avg else self._repeat_reg
-        acq_width = int(calculate_duration(acquire))
-        acq_index = self._register_acquisition(acquire.output_variable, num_bins)
-        self.sequencer_config.square_weight_acq.integration_length = acq_width
-        self.sequencer_config.thresholded_acq.rotation = np.rad2deg(acquire.rotation)
-        self.sequencer_config.thresholded_acq.threshold = acq_width * acquire.threshold
-
-        i_steps, q_steps = None, None
-        i_index, q_index = None, None
-        if measure.shape == PulseShapeType.SQUARE:
-            i_steps = int(pulse[0].real * Constants.MAX_OFFSET)
-            q_steps = int(pulse[0].imag * Constants.MAX_OFFSET)
-        else:
-            i_index, q_index = self._register_waveform(measure, target, pulse)
-
-        with self._wrapper_pulse(
-            delay_width, pulse_width, measure.shape, i_steps, q_steps, i_index, q_index
-        ) as remaining_width:
-            self._do_acquire(
-                acquire.output_variable,
-                acquire.filter,
-                acq_index,
-                acq_bin,
-                remaining_width,
-            )
-
-        self.ledger(pulse_width, pulse)
-
-
-class QbloxContext2(AbstractContext):
-    def __init__(
-        self,
-        alloc_mgr: AllocationManager,
-        scoping_result: ScopingResult,
-        rw_result: ReadWriteResult,
-        iter_bounds: dict[str, IterBound],
-    ):
-        super().__init__(alloc_mgr)
-        self.scope2symbols: dict[tuple[Instruction, Instruction | None], set[str]] = (
-            scoping_result.scope2symbols
-        )
-        self.symbol2scopes: dict[str, list[tuple[Instruction, Instruction | None]]] = (
-            scoping_result.symbol2scopes
-        )
-        self.inits: dict[str, list[Instruction]] = rw_result.inits
-        self.reads: dict[str, list[Instruction]] = rw_result.reads
-        self.writes: dict[str, list[Instruction]] = rw_result.writes
-        self.iter_bounds = iter_bounds
-
-    def __enter__(self):
-        """
-        Serves as the prologue
-        """
-
-        self.sequence_builder.set_mrk(3)
-        self.sequence_builder.set_latch_en(1, 4)
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
-
-        for name, register in self.alloc_mgr.registers.items():
-            self.sequence_builder.move(
-                0,
-                register,
-                f"Precautionary initialisation for variable {name}",
-            )
-
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        Serves as the epilogue
-        """
-
-        self.sequence_builder.stop()
-
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
     ):
@@ -913,6 +741,62 @@ class QbloxContext2(AbstractContext):
             )
 
         self.ledger(pulse_width, pulse)
+
+    @staticmethod
+    def synchronize(inst: Synchronize, contexts: dict):
+        """
+        Favours static time padding whenever possible, or else uses SYNC.
+        TODO - Default to SYNC when Qblox supports finer grained SYNC groups
+        """
+
+        is_static = all(
+            all((isinstance(d, Number) for d in contexts[target].durations))
+            for target in inst.quantum_targets
+        )
+
+        for target in inst.quantum_targets:
+            cxt = contexts[target]
+            if is_static:
+                duration_offset = (
+                    max((contexts[target].duration for target in inst.quantum_targets))
+                    - cxt.duration
+                )
+                cxt.wait_imm(duration_offset)
+                cxt.ledger(duration_offset)
+            else:
+                cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
+                cxt.ledger(Constants.GRID_TIME)
+
+    def device_update(self, du_inst: DeviceUpdate):
+        if isinstance(du_inst.value, Variable):
+            val_reg = self.alloc_mgr.registers[du_inst.value.name]
+            if du_inst.attribute == "frequency":
+                self.sequence_builder.set_freq(val_reg)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+                self.ledger(Constants.GRID_TIME)
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                )
+        elif isinstance(du_inst.value, Number):
+            if du_inst.attribute == "frequency":
+                lo_freq, nco_freq = TILegalisationPass.decompose_freq(
+                    du_inst.value, du_inst.target
+                )
+                freq_imm = QbloxLegalisationPass.freq_as_steps(nco_freq)
+                self.sequence_builder.set_freq(freq_imm)
+                self.sequence_builder.upd_param(Constants.GRID_TIME)
+
+                self.ledger(Constants.GRID_TIME)
+            elif du_inst.attribute == "scale":
+                pass
+            else:
+                raise NotImplementedError(
+                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                )
+        else:
+            raise ValueError(f"Expected a Variable or a Number but got {du_inst.value}")
 
     @staticmethod
     def enter_repeat(inst: Repeat, contexts: dict):
@@ -1013,16 +897,41 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
         ignore_empty=True,
     ) -> Executable[QbloxProgram]:
         triage_result = res_mgr.lookup_by_type(TriageResult)
+        device_updates = triage_result.device_updates
+        quantum_instructions = triage_result.quantum_instructions
         sweeps = triage_result.sweeps
-
         switerator = SweepIterator.from_sweeps(sweeps)
-        dinjectors = DeviceInjectors(triage_result.device_updates)
+        dinjectors = DeviceInjectors(device_updates)
+
+        binding_result = res_mgr.lookup_by_type(BindingResult)
+        scoping_result = next(
+            iter(binding_result.scoping_results.values()), ScopingResult()
+        )
+        scopes = [(s, e) for (s, e) in scoping_result.scope2symbols if s in sweeps]
+
+        ScopePeeling().run(ir, res_mgr, met_mgr, scopes=scopes)
+        # TODO - Pass infrastructural improvements [COMPILER-849]
+        # res_mgr.mark_as_dirty(triage_result, binding_result)
+
         programs: list[QbloxProgram] = []
         try:
             dinjectors.inject()
             while not switerator.is_finished():
-                switerator.do_sweep(triage_result.quantum_instructions)
-                programs.append(self._do_emit(triage_result, ignore_empty))
+                switerator.do_sweep(quantum_instructions)
+                inner_res_mgr = ResultManager()
+                inner_met_mgr = MetricsManager()
+                (PassManager() | TriagePass() | BindingPass() | PreCodegenPass()).run(
+                    ir, inner_res_mgr, inner_met_mgr
+                )
+
+                triage_result = inner_res_mgr.lookup_by_type(TriageResult)
+                binding_result = inner_res_mgr.lookup_by_type(BindingResult)
+                precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
+                programs.append(
+                    self._do_emit(
+                        triage_result, binding_result, precodegen_result, ignore_empty
+                    )
+                )
             # TODO: This needs to contain the other information required by an executable,
             # to be extracted from triage results. (COMPILER-827)
             return Executable[QbloxProgram](programs=programs)
@@ -1032,46 +941,56 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
             switerator.revert(triage_result.quantum_instructions)
             dinjectors.revert()
 
-    def _do_emit(self, triage_result: TriageResult, ignore_empty=True) -> QbloxProgram:
-        repeat = next(iter(triage_result.repeats))
-        contexts: dict[PulseChannel, QbloxContext1] = {}
+    def _do_emit(
+        self,
+        triage_result: TriageResult,
+        binding_result: BindingResult,
+        precodegen_result: PreCodegenResult,
+        ignore_empty=True,
+    ) -> QbloxProgram:
+        rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
+        iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
+            binding_result.iter_bound_results
+        )
+        alloc_mgrs: dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
 
         with ExitStack() as stack:
-            inst_iter = iter(triage_result.quantum_instructions)
-            while (inst := next(inst_iter, None)) is not None:
-                if isinstance(inst, PostProcessing):
-                    continue  # Ignore postprocessing
+            contexts = {
+                t: stack.enter_context(
+                    QbloxContext(
+                        rw_result=rw_results[t],
+                        iter_bounds=iter_bound_results[t],
+                        alloc_mgr=alloc_mgrs[t],
+                    )
+                )
+                for t in triage_result.target_map
+            }
 
-                if isinstance(inst, Synchronize):
-                    for target in inst.quantum_targets:
-                        if not isinstance(target, PulseChannel):
-                            raise ValueError(f"{target} is not a PulseChannel")
-                        contexts.setdefault(
-                            target, stack.enter_context(QbloxContext1(repeat))
-                        )
-                    QbloxContext1.synchronize(inst, contexts)
+            for repeat in triage_result.repeats:
+                QbloxContext.enter_repeat(repeat, contexts)
+
+            iterator = iter(triage_result.quantum_instructions)
+            while (inst := next(iterator, None)) is not None:
+                if isinstance(inst, PostProcessing):
+                    continue
+                elif isinstance(inst, Synchronize):
+                    QbloxContext.synchronize(inst, contexts)
                     continue
 
                 for target in inst.quantum_targets:
-                    if not isinstance(target, PulseChannel):
-                        raise ValueError(f"{target} is not a PulseChannel")
-
-                    context = contexts.setdefault(
-                        target, stack.enter_context(QbloxContext1(repeat))
-                    )
-
+                    context = contexts[target]
                     if isinstance(inst, DeviceUpdate):
                         context.device_update(inst)
                     elif isinstance(inst, PhaseReset):
                         context.reset_phase()
                     elif isinstance(inst, MeasurePulse):
-                        acquire = next(inst_iter, None)
-                        if acquire is None or not isinstance(acquire, Acquire):
+                        next_inst = next(iterator, None)
+                        if next_inst is None or not isinstance(next_inst, Acquire):
                             raise ValueError(
                                 "Found a MeasurePulse but no Acquire instruction followed"
                             )
-                        post_procs = triage_result.pp_map[acquire.output_variable]
-                        context.measure_acquire(inst, acquire, post_procs, target)
+
+                        context.measure_acquire(inst, next_inst, target)
                     elif isinstance(inst, Waveform):
                         context.waveform(inst, target)
                     elif isinstance(inst, Delay):
@@ -1082,6 +1001,9 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
                         context.shift_frequency(inst, target)
                     elif isinstance(inst, Id):
                         context.id()
+
+            for repeat in triage_result.repeats:
+                QbloxContext.exit_repeat(repeat, contexts)
 
         packages = {}
         for target, context in contexts.items():
@@ -1105,7 +1027,6 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
         precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
         cfg_result = res_mgr.lookup_by_type(CFGResult)
 
-        scoping_results: dict[PulseChannel, ScopingResult] = binding_result.scoping_results
         rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
         iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
             binding_result.iter_bound_results
@@ -1115,11 +1036,10 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
         with ExitStack() as stack:
             contexts = {
                 t: stack.enter_context(
-                    QbloxContext2(
-                        alloc_mgr=alloc_mgrs[t],
-                        scoping_result=scoping_results[t],
+                    QbloxContext(
                         rw_result=rw_results[t],
                         iter_bounds=iter_bound_results[t],
+                        alloc_mgr=alloc_mgrs[t],
                     )
                 )
                 for t in triage_result.target_map
@@ -1140,7 +1060,7 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
 
 
 class QbloxCFGWalker(DfsTraversal):
-    def __init__(self, contexts: dict[PulseChannel, QbloxContext2]):
+    def __init__(self, contexts: dict[PulseChannel, QbloxContext]):
         super().__init__()
         self.contexts = contexts
 
@@ -1148,14 +1068,14 @@ class QbloxCFGWalker(DfsTraversal):
         iterator = block.iterator()
         while (inst := next(iterator, None)) is not None:
             if isinstance(inst, Sweep):
-                QbloxContext2.enter_sweep(inst, self.contexts)
+                QbloxContext.enter_sweep(inst, self.contexts)
             elif isinstance(inst, Repeat):
-                QbloxContext2.enter_repeat(inst, self.contexts)
+                QbloxContext.enter_repeat(inst, self.contexts)
             elif isinstance(inst, QuantumInstruction):
                 if isinstance(inst, PostProcessing):
                     continue
                 elif isinstance(inst, Synchronize):
-                    QbloxContext2.synchronize(inst, self.contexts)
+                    QbloxContext.synchronize(inst, self.contexts)
                     continue
 
                 for target in inst.quantum_targets:
@@ -1187,6 +1107,6 @@ class QbloxCFGWalker(DfsTraversal):
         iterator = block.iterator()
         while (inst := next(iterator, None)) is not None:
             if isinstance(inst, Repeat):
-                QbloxContext2.exit_repeat(inst, self.contexts)
+                QbloxContext.exit_repeat(inst, self.contexts)
             elif isinstance(inst, Sweep):
-                QbloxContext2.exit_sweep(inst, self.contexts)
+                QbloxContext.exit_sweep(inst, self.contexts)

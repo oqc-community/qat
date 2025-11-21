@@ -110,6 +110,11 @@ class TestInstrument:
             )
             qblox_instrument.id2seq.clear()
 
+            # Expecting allocated modules to be marked as dirty
+            for pkg in program.packages.values():
+                module = getattr(qblox_instrument.driver, f"module{pkg.slot_idx}")
+                assert qblox_instrument.modules[module]
+
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
     def test_playback(self, qblox_model, qblox_instrument):
@@ -134,6 +139,11 @@ class TestInstrument:
             assert not sequencer.sync_en()
 
             qblox_instrument.id2seq.clear()
+
+            # Expecting allocated modules to be marked as clean
+            for pkg in program.packages.values():
+                module = getattr(qblox_instrument.driver, f"module{pkg.slot_idx}")
+                assert not qblox_instrument.modules[module]
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)

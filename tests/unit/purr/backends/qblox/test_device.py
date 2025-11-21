@@ -3,9 +3,14 @@
 import numpy as np
 import pytest
 
-from qat.purr.backends.qblox.analysis_passes import TriagePass
+from qat.purr.backends.qblox.analysis_passes import BindingPass, TriagePass
 from qat.purr.backends.qblox.codegen import QbloxEmitter
-from qat.purr.backends.qblox.transform_passes import RepeatSanitisation, ReturnSanitisation
+from qat.purr.backends.qblox.transform_passes import (
+    DesugaringPass,
+    RepeatSanitisation,
+    ReturnSanitisation,
+    ScopeSanitisation,
+)
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
@@ -23,8 +28,11 @@ class TestQbloxControlHardware(InvokerMixin):
         return (
             PassManager()
             | RepeatSanitisation(self.model)
+            | ScopeSanitisation()
             | ReturnSanitisation()
+            | DesugaringPass()
             | TriagePass()
+            | BindingPass()
         )
 
     def _do_emit(self, builder, skip_runtime=False):
