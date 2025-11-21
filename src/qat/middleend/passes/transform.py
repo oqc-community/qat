@@ -738,18 +738,35 @@ class RepeatSanitisation(TransformPass):
         """
         self.default_shots = target_data.default_shots
 
-    def run(self, ir: InstructionBuilder, *args, **kwargs):
+    def run(
+        self,
+        ir: InstructionBuilder,
+        *args,
+        compiler_config: CompilerConfig = None,
+        **kwargs,
+    ):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        num_shots = self.default_shots
+        configured = False
+        if compiler_config is not None and compiler_config.repeats is not None:
+            configured = True
+            num_shots = compiler_config.repeats
+
         for inst in ir.instructions:
             if isinstance(inst, Repeat):
                 if inst.repeat_count is None:
-                    inst.repeat_count = self.default_shots
+                    inst.repeat_count = num_shots
+                elif configured and inst.repeat_count != num_shots:
+                    raise ValueError(
+                        f"Repeat instruction 'repeat_count' [{inst.repeat_count}] not "
+                        f"matching CompilerConfig value [{num_shots}]."
+                    )
                 return ir
 
-        ir.repeat(self.default_shots)
+        ir.repeat(num_shots)
         log.warning(
             "Could not find any repeat instructions. "
-            f"One has been added with {self.default_shots} shots."
+            f"One has been added with {num_shots} shots."
         )
         return ir
 

@@ -351,6 +351,47 @@ class TestRepeatSanitisation:
         assert isinstance(repeat := ir.instructions[-1], Repeat)
         assert repeat.repeat_count == shots
 
+    @pytest.mark.parametrize(
+        "compiler_config, use_default",
+        [
+            pytest.param(None, True, id="None"),
+            pytest.param(CompilerConfig(), True, id="Default"),
+            pytest.param(CompilerConfig(repeats=58), False, id="Explicit"),
+        ],
+    )
+    def test_repeat_count_from_config(self, compiler_config, use_default):
+        target_data = TargetData.default()
+        expected_shots = (
+            target_data.default_shots if use_default else compiler_config.repeats
+        )
+        builder = QuantumInstructionBuilder(hardware_model=self.hw).X(
+            target=self.hw.qubit_with_index(0)
+        )
+        ir = RepeatSanitisation(target_data).run(builder, compiler_config=compiler_config)
+        assert isinstance(repeat := ir.instructions[-1], Repeat)
+        assert repeat.repeat_count == expected_shots
+
+    @pytest.mark.parametrize(
+        "repeat_counts, compiler_config",
+        [
+            pytest.param(
+                [12, 12], CompilerConfig(repeats=15), id="Multi Repeats vs Config"
+            ),
+            pytest.param([12], CompilerConfig(repeats=15), id="Single Repeat vs Config"),
+        ],
+    )
+    def test_fails_with_shot_mismatch(self, repeat_counts, compiler_config):
+        target_data = TargetData.default()
+        builder = QuantumInstructionBuilder(hardware_model=self.hw).X(
+            target=self.hw.qubit_with_index(0)
+        )
+        for count in repeat_counts:
+            builder.repeat(count)
+        with pytest.raises(ValueError):
+            _ = RepeatSanitisation(target_data).run(
+                builder, compiler_config=compiler_config
+            )
+
 
 class TestPydPhaseOptimisation:
     hw = LucyModelLoader(8).load()

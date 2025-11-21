@@ -1107,18 +1107,38 @@ class RepeatSanitisation(TransformPass):
         self.model = model
         self.target_data = target_data
 
-    def run(self, ir: InstructionBuilder, *args, **kwargs):
+    def run(
+        self,
+        ir: InstructionBuilder,
+        *args,
+        compiler_config: CompilerConfig = None,
+        **kwargs,
+    ):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
+        num_shots = self.target_data.default_shots
+        configured = False
+        if compiler_config is not None and compiler_config.repeats is not None:
+            configured = True
+            num_shots = compiler_config.repeats
+
         repeats = [inst for inst in ir._instructions if isinstance(inst, Repeat)]
         if repeats:
             for rep in repeats:
                 if rep.repeat_count is None:
-                    rep.repeat_count = self.target_data.default_shots
+                    rep.repeat_count = num_shots
                 if rep.passive_reset_time is None and rep.repetition_period is None:
                     rep.passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
+            if not configured:
+                num_shots = repeats[0].repeat_count
+            if not all([rep.repeat_count == num_shots for rep in repeats]):
+                raise ValueError(
+                    "Inconsistent repeat_count information found. "
+                    + f"Repeat instruction values: {[rep.repeat_count for rep in repeats]}"
+                    + (f", CompilerConfig repeats: {num_shots}." if configured else ".")
+                )
         else:
             ir.repeat(
-                self.target_data.default_shots,
+                num_shots,
                 passive_reset_time=self.target_data.QUBIT_DATA.passive_reset_time,
             )
         return ir
