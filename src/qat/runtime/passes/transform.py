@@ -148,7 +148,12 @@ class ResultTransform(TransformPass):
     """
 
     def run(
-        self, acquisitions: dict[str, any], *args, compiler_config: CompilerConfig, **kwargs
+        self,
+        acquisitions: dict[str, any],
+        *args,
+        compiler_config: CompilerConfig,
+        package: Executable,
+        **kwargs,
     ):
         """
         :param acquisitions: The dictionary of results acquired from the target machine.
@@ -162,7 +167,7 @@ class ResultTransform(TransformPass):
         format_flags = (
             compiler_config.results_format or ResultsFormatting.DynamicStructureReturn
         )
-        repeats = compiler_config.repeats or TargetData.default().default_shots
+        repeats = package.shots or TargetData.default().default_shots
 
         if len(acquisitions) == 0:
             return []

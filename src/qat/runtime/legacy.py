@@ -1,12 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from compiler_config.config import CompilerConfig
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.purr.backends.live import LiveDeviceEngine
+from qat.purr.backends.qiskit_simulator import QiskitBuilder
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.execution import InstructionExecutionEngine
+from qat.purr.compiler.instructions import Repeat
 from qat.runtime import BaseRuntime
 from qat.runtime.connection import ConnectionMode
 
@@ -65,9 +68,36 @@ class LegacyRuntime(BaseRuntime):
         acquisitions = self.engine.execute(package.instructions)
         self.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
 
+        package.shots = self._determine_shots(package, kwargs.get("compiler_config"))
+
         return self.results_pipeline.run(
             acquisitions, res_mgr, met_mgr, package=package, **kwargs
         )
+
+    def _determine_shots(
+        self, package: InstructionBuilder, compiler_config: CompilerConfig | None
+    ) -> int:
+        """Determine the number of shots to use for execution.
+
+        :param package: The "package" that is being executed. For a
+            :class:`LegacyRuntime` that is a Builder.
+        :compiler_config: The config information for the task.
+        """
+        if hasattr(package, "shots") and package.shots is not None:
+            return package.shots
+        elif (
+            isinstance(insts := package.instructions, QiskitBuilder)
+            and insts.shot_count is not None
+        ):
+            return insts.shot_count
+        elif (
+            repeat_inst := next(filter(lambda x: isinstance(x, Repeat), insts), None)
+        ) is not None and repeat_inst.repeat_count is not None:
+            return repeat_inst.repeat_count
+        elif compiler_config is not None and compiler_config.repeats is not None:
+            return compiler_config.repeats
+        else:
+            return None
 
     def connect_engine(self, flag: ConnectionMode):
         """Connect the engine according to the connection mode."""

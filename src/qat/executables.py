@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from compiler_config.config import InlineResultsProcessing
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, PositiveInt, field_validator
 from pydantic_core import from_json
 
 from qat.ir.instructions import Assign
@@ -62,7 +62,8 @@ class Executable(BaseModel, Generic[Program]):
     :param programs: The program(s) to be executed against the engine.
     :param assigns: Assigns results to given variables.
     :param returns: Which acqusitions/variables should be returned.
-    :param str calibration_id: The (unique) cabliration ID of the underlying hardware model.
+    :param calibration_id: The (unique) cabliration ID of the underlying hardware model.
+    :param shots: The total number of shots performed in the :class:`Executable`.
     """
 
     programs: list[Program] = []
@@ -70,6 +71,7 @@ class Executable(BaseModel, Generic[Program]):
     assigns: list[Assign] = []
     returns: set[str] = set()
     calibration_id: str = ""
+    shots: PositiveInt | None = None
 
     def serialize(self, indent: int = 4) -> str:
         """Serializes the executable as a JSON blob."""
