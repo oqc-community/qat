@@ -10,7 +10,6 @@ from uuid import uuid4
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.ir.builder_factory import BuilderFactory
 from qat.ir.instructions import (
     Assign,
     BinaryOperator,
@@ -1037,11 +1036,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         uuid=pc.uuid,
                     )
         return pulse_channels
-
-
-@BuilderFactory.create_builder.register
-def _(model: PhysicalHardwareModel) -> QuantumInstructionBuilder:
-    return QuantumInstructionBuilder(model)
 
 
 PydQuantumInstructionBuilder = QuantumInstructionBuilder

@@ -10,7 +10,6 @@ import jsonpickle
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
-from qat.ir.builder_factory import BuilderFactory
 from qat.purr.compiler.devices import (
     ChannelType,
     CyclicRefPickler,
@@ -20,7 +19,6 @@ from qat.purr.compiler.devices import (
     Qubit,
     Resonator,
 )
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -794,8 +792,3 @@ class QuantumInstructionBuilder(InstructionBuilder):
         results.append(sync_instr)
 
         return self.add(results)
-
-
-@BuilderFactory.create_builder.register
-def _(model: QuantumHardwareModel) -> QuantumInstructionBuilder:
-    return model.create_builder()
