@@ -201,7 +201,12 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
         return results
 
-    def execute(self, programs: list[QbloxProgram], triage_result: TriageResult) -> dict:
+    def execute(
+        self,
+        programs: list[QbloxProgram],
+        triage_result: TriageResult,
+        **kwargs,
+    ) -> dict:
         playbacks: dict[str, list[Acquisition]] = defaultdict(list)
         for program in programs:
             if self.plot_program:

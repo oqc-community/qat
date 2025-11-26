@@ -2,7 +2,6 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import shutil
 
-import numpy as np
 import pytest
 from pydantic import ValidationError
 
@@ -19,7 +18,7 @@ from qat.core.config.session import QatSessionConfig
 from qat.core.pipeline import HardwareLoaders, PipelineManager
 from qat.engines import NativeEngine
 from qat.engines.waveform_v1 import EchoEngine
-from qat.executables import Executable
+from qat.executables import AbstractProgram, Executable
 from qat.frontend import DefaultFrontend, FallthroughFrontend
 from qat.middleend import FallthroughMiddleend
 from qat.model.loaders.purr import EchoModelLoader
@@ -31,12 +30,10 @@ from qat.runtime import SimpleRuntime
 from tests.unit.utils.engines import InitableEngine, MockEngineWithModel
 
 
-class MockEngine(NativeEngine):
-    def execute(self, package: Executable) -> dict[str, np.ndarray]:
-        return {}
-
-    def startup(self): ...
-    def shutdown(self): ...
+@pytest.fixture
+def mock_engine(mocker):
+    mock_engine = mocker.create_autospec(NativeEngine, spec_set=True, instance=True)
+    yield mock_engine
 
 
 @pytest.fixture
@@ -46,14 +43,14 @@ def echo_pipeline(qubit_count=32):
 
 
 @pytest.fixture
-def fallthrough_pipeline(qubit_count=32):
+def fallthrough_pipeline(mock_engine, qubit_count=32):
     model = EchoModelLoader(qubit_count=qubit_count).load()
     yield Pipeline(
         name="fallthrough",
         frontend=FallthroughFrontend(),
         middleend=FallthroughMiddleend(),
         backend=FallthroughBackend(),
-        runtime=SimpleRuntime(engine=MockEngine()),
+        runtime=SimpleRuntime(engine=mock_engine),
         model=model,
     )
 
@@ -301,12 +298,36 @@ class TestQATPipelineSetup:
         pkg, _ = q.compile(src, pipeline="fallthrough")
         assert pkg == src
 
-    def test_execute(self, fallthrough_pipeline):
-        pkg = Executable()
+    def test_execute(self, fallthrough_pipeline, mock_engine, mocker):
+        program = mocker.create_autospec(AbstractProgram, spec_set=True, instance=True)
+        pkg = Executable(programs=[program])
         q = QAT()
         q.pipelines.add(fallthrough_pipeline)
         res, _ = q.execute(pkg, pipeline="fallthrough")
+        mock_engine.execute.assert_called_once()
+        assert mock_engine.execute.call_args[0][0] == program
         assert res == {}
+
+    @pytest.mark.parametrize(
+        "kwargs",
+        [
+            pytest.param({}, id="Empty"),
+            pytest.param({"Hello": "World"}, id="Hello_World"),
+        ],
+    )
+    def test_execute_passing_kwargs(
+        self, fallthrough_pipeline, mock_engine, mocker, kwargs
+    ):
+        program = mocker.create_autospec(AbstractProgram, spec_set=True, instance=True)
+        pkg = Executable(programs=[program])
+        q = QAT()
+        q.pipelines.add(fallthrough_pipeline)
+
+        res_a, _ = q.execute(pkg, pipeline="fallthrough")
+        no_kwargs_input = mock_engine.execute.call_args[0][0]
+
+        res_b, _ = q.execute(pkg, pipeline="fallthrough", **kwargs)
+        print(no_kwargs_input)
 
 
 class TestQATHardwareModelReloading:

@@ -46,6 +46,7 @@ class CustomFrontend(BaseFrontend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
         """
         Compiles an input :class:`QatInput` down to :class:`QatIR` with the custom
@@ -64,5 +65,7 @@ class CustomFrontend(BaseFrontend):
         met_mgr = met_mgr or MetricsManager()
         compiler_config = compiler_config or CompilerConfig()
 
-        ir = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
+        ir = self.pipeline.run(
+            src, res_mgr, met_mgr, compiler_config=compiler_config, **kwargs
+        )
         return ir

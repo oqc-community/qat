@@ -65,6 +65,7 @@ class CompileSweepPipeline(AbstractPipeline):
         self,
         program: str | InstructionBuilder,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
         """Compile a builder with sweeps and device assigns against the base pipeline.
 
@@ -95,10 +96,11 @@ class CompileSweepPipeline(AbstractPipeline):
                     sweep_instance.builder,
                     sweep_instance.device_assigns,
                     compiler_config,
+                    **kwargs,
                 )
             else:
                 executable, metrics = self._base_pipeline.compile(
-                    sweep_instance.builder, compiler_config
+                    sweep_instance.builder, compiler_config, **kwargs
                 )
             executables.append(executable)
 
@@ -142,12 +144,13 @@ class CompileSweepPipeline(AbstractPipeline):
         builder: InstructionBuilder,
         device_assigns,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ) -> tuple[Executable, MetricsManager]:
         """Makes required changes to the hardware model using the device assigns,
         compiles the builder, then restores the hardware model to its original state."""
         with device_assigns.apply():
             self._rebuild_pipeline()
-            return self._base_pipeline.compile(builder, compiler_config)
+            return self._base_pipeline.compile(builder, compiler_config, **kwargs)
 
     def _combine_executables(self, executables: list[Executable], sweep_shape: tuple[int]):
         """Combines the programs within the executables into a single executable."""

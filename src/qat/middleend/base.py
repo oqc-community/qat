@@ -30,6 +30,7 @@ class BaseMiddleend(abc.ABC):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
         """
         Converts an IR :class:`QatIR` to an optimised IR.
@@ -60,6 +61,7 @@ class CustomMiddleend(BaseMiddleend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
         """
         Converts an IR :class:`QatIR` to an optimised IR with a custom pipeline.
@@ -77,5 +79,7 @@ class CustomMiddleend(BaseMiddleend):
             compiler_config if compiler_config is not None else CompilerConfig()
         )
 
-        ir = self.pipeline.run(ir, res_mgr, met_mgr, compiler_config=compiler_config)
+        ir = self.pipeline.run(
+            ir, res_mgr, met_mgr, compiler_config=compiler_config, **kwargs
+        )
         return ir

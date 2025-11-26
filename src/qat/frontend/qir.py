@@ -185,6 +185,7 @@ class QIRFrontend(BaseFrontend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ) -> InstructionBuilder:
         """Compiles the source QIR program into QAT's intermediate representation.
 
@@ -204,7 +205,9 @@ class QIRFrontend(BaseFrontend):
         )
 
         src = self._check_source(src)
-        src = self.pipeline.run(src, res_mgr, met_mgr, compiler_config=compiler_config)
+        src = self.pipeline.run(
+            src, res_mgr, met_mgr, compiler_config=compiler_config, **kwargs
+        )
         builder = self._get_builder(compiler_config, src)
 
         return builder

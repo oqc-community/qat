@@ -58,6 +58,7 @@ class QAT:
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
         to_json: bool = False,
+        **kwargs,
     ) -> tuple[InstructionBuilder | Executable | str, MetricsManager]:
         """Compiles a source program into an executable using the specified pipeline.
 
@@ -72,7 +73,9 @@ class QAT:
 
         with override_config(self.config):
             P = self.pipelines.get_compile_pipeline(pipeline)
-            package, metrics_manager = P.compile(program, compiler_config=compiler_config)
+            package, metrics_manager = P.compile(
+                program, compiler_config=compiler_config, **kwargs
+            )
             package = package.serialize() if to_json else package
             return package, metrics_manager
 
@@ -81,6 +84,7 @@ class QAT:
         package: InstructionBuilder | Executable | str,
         compiler_config: CompilerConfig | None = None,
         pipeline: Pipeline | str = "default",
+        **kwargs,
     ) -> tuple[dict, MetricsManager]:
         """Executes a compiled package on the specified pipeline.
 
@@ -100,7 +104,7 @@ class QAT:
                     package = InstructionBuilder.deserialize(package)
                 else:
                     package = Executable.deserialize(package)
-            return P.execute(package, compiler_config=compiler_config)
+            return P.execute(package, compiler_config=compiler_config, **kwargs)
 
     def run(
         self,
@@ -109,6 +113,7 @@ class QAT:
         pipeline: AbstractPipeline | str = "default",
         compile_pipeline: AbstractPipeline | str | None = None,
         execute_pipeline: AbstractPipeline | str | None = None,
+        **kwargs,
     ) -> tuple[dict, MetricsManager]:
         """Compiles and executes a source program using the specified pipeline.
 
@@ -133,10 +138,16 @@ class QAT:
         execute_pipeline = execute_pipeline if execute_pipeline is not None else pipeline
 
         pkg, compile_metrics = self.compile(
-            program, compiler_config=compiler_config, pipeline=compile_pipeline
+            program,
+            compiler_config=compiler_config,
+            pipeline=compile_pipeline,
+            **kwargs,
         )
         result, execute_metrics = self.execute(
-            pkg, compiler_config=compiler_config, pipeline=execute_pipeline
+            pkg,
+            compiler_config=compiler_config,
+            pipeline=execute_pipeline,
+            **kwargs,
         )
         return result, execute_metrics.merge(compile_metrics)
 

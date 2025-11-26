@@ -54,7 +54,10 @@ class CompilePipeline(BasePipeline):
         self.disable_model_validation = disable_model_validation
 
     def compile(
-        self, program, compiler_config: CompilerConfig | None = None
+        self,
+        program,
+        compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ) -> tuple[Executable, MetricsManager]:
         """Compiles a source program into an executable using the pipeline's components.
 
@@ -77,6 +80,7 @@ class CompilePipeline(BasePipeline):
             compilation_results,
             metrics_manager,
             compiler_config=compiler_config,
+            **kwargs,
         )
 
         ir = self.middleend.emit(
@@ -84,6 +88,7 @@ class CompilePipeline(BasePipeline):
             compilation_results,
             metrics_manager,
             compiler_config=compiler_config,
+            **kwargs,
         )
 
         package = self.backend.emit(
@@ -91,6 +96,7 @@ class CompilePipeline(BasePipeline):
             compilation_results,
             metrics_manager,
             compiler_config=compiler_config,
+            **kwargs,
         )
 
         return package, metrics_manager
@@ -140,7 +146,10 @@ class ExecutePipeline(BasePipeline):
         self.disable_model_validation = disable_model_validation
 
     def execute(
-        self, package: Executable, compiler_config: CompilerConfig | None = None
+        self,
+        package: Executable,
+        compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ) -> tuple[dict, MetricsManager]:
         """Uses the runtime and engine in the pipeline to execute a compiled program and
         process the results.
@@ -171,6 +180,7 @@ class ExecutePipeline(BasePipeline):
             res_mgr=pp_results,
             met_mgr=metrics_manager,
             compiler_config=compiler_config,
+            **kwargs,
         )
         return results, metrics_manager
 

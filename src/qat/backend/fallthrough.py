@@ -27,5 +27,6 @@ class FallthroughBackend(BaseBackend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
         return ir

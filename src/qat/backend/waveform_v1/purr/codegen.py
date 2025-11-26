@@ -80,7 +80,7 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
         """
         res_mgr = res_mgr if res_mgr is not None else ResultManager()
         met_mgr = met_mgr if met_mgr is not None else MetricsManager()
-        ir = self.run_pass_pipeline(ir, res_mgr, met_mgr)
+        ir = self.run_pass_pipeline(ir, res_mgr, met_mgr, **kwargs)
         timeline_res = res_mgr.lookup_by_type(TimelineAnalysisResult)
         if_res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
 

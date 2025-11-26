@@ -41,6 +41,7 @@ class BaseFrontend(ABC):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ) -> InstructionBuilder:
         """
         Compiles an input :class:`QatInput` down to :class:`QatIR` and emits it.

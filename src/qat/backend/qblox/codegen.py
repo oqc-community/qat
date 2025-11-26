@@ -894,7 +894,8 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
         ir: InstructionBuilder,
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
-        ignore_empty=True,
+        ignore_empty: bool = True,
+        **kwargs,
     ) -> Executable[QbloxProgram]:
         triage_result = res_mgr.lookup_by_type(TriageResult)
         device_updates = triage_result.device_updates
@@ -1020,7 +1021,8 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
         ir: InstructionBuilder,
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
-        ignore_empty=True,
+        ignore_empty: bool = True,
+        **kwargs,
     ) -> Executable[QbloxProgram]:
         triage_result = res_mgr.lookup_by_type(TriageResult)
         binding_result = res_mgr.lookup_by_type(BindingResult)

@@ -122,6 +122,7 @@ class AutoFrontend(BaseFrontend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
         """Chooses a suitable frontend and compiles a given source program.
 
@@ -136,7 +137,7 @@ class AutoFrontend(BaseFrontend):
 
         for frontend in self.frontends:
             if frontend.check_and_return_source(src):
-                return frontend.emit(src, res_mgr, met_mgr, compiler_config)
+                return frontend.emit(src, res_mgr, met_mgr, compiler_config, **kwargs)
         raise ValueError("No suitable frontend could be found for the source program.")
 
 
@@ -151,8 +152,9 @@ class AutoFrontendWithFlattenedIR(AutoFrontend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        **kwargs,
     ):
-        ir = super().emit(src, res_mgr, met_mgr, compiler_config)
+        ir = super().emit(src, res_mgr, met_mgr, compiler_config, **kwargs)
 
         if self.model and isinstance(self.model, PydHardwareModel):
             return PydFlattenIR().run(ir)
