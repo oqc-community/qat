@@ -90,7 +90,7 @@ jobs:
         id: pip-audit
         if: ${{ !cancelled() }}
         run: |
-          poetry run pip-audit --ignore-vuln GHSA-4xh5-x5gv-qwph
+          poetry run pip-audit
 
       - name: Pip licensing check
         id: pip-licenses
