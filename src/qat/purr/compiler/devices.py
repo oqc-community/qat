@@ -760,6 +760,7 @@ class Qubit(QuantumDevice):
         self.discriminator = [0.0]
         self.pulse_hw_zx_pi_4 = dict()
         self.default_pulse_channel_type = ChannelType.drive
+        self.direct_x_pi = False
 
         for qubit in coupled_qubits or []:
             self.add_coupled_qubit(qubit)
@@ -767,6 +768,15 @@ class Qubit(QuantumDevice):
         self.pulse_hw_x_pi_2 = {
             "shape": PulseShapeType.GAUSSIAN,
             "width": 100e-9,
+            "rise": 1.0 / 3.0,
+            "amp": 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5),
+            "drag": 0.0,
+            "phase": 0.0,
+        }
+
+        self.pulse_hw_x_pi = {
+            "shape": PulseShapeType.GAUSSIAN,
+            "width": 200e-9,
             "rise": 1.0 / 3.0,
             "amp": 0.25 / (100e-9 * 1.0 / 3.0 * np.pi**0.5),
             "drag": 0.0,

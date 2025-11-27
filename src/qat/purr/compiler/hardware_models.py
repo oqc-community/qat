@@ -471,6 +471,13 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             DrivePulse(pulse_channel or qubit.get_default_pulse_channel(), **pulse_args)
         ]
 
+    def get_hw_x_pi(self, qubit, pulse_channel: PulseChannel = None):
+        return [
+            DrivePulse(
+                pulse_channel or qubit.get_default_pulse_channel(), **qubit.pulse_hw_x_pi
+            )
+        ]
+
     def get_hw_z(self, qubit, phase, pulse_channel: PulseChannel = None) -> List[Any]:
         if phase == 0:
             return []
@@ -530,6 +537,14 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             return [
                 *self.get_hw_z(qubit, np.pi, pulse_channel),
                 *self.get_hw_x_pi_2(qubit, pulse_channel),
+                *self.get_hw_z(qubit, -np.pi, pulse_channel),
+            ]
+        elif np.isclose(theta, np.pi) and getattr(qubit, "direct_x_pi", False):
+            return self.get_hw_x_pi(qubit, pulse_channel)
+        elif np.isclose(theta, -np.pi) and getattr(qubit, "direct_x_pi", False):
+            return [
+                *self.get_hw_z(qubit, np.pi, pulse_channel),
+                *self.get_hw_x_pi(qubit, pulse_channel),
                 *self.get_hw_z(qubit, -np.pi, pulse_channel),
             ]
         return self.get_gate_U(qubit, theta, -np.pi / 2.0, np.pi / 2.0, pulse_channel)
