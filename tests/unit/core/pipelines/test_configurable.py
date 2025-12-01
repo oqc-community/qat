@@ -104,9 +104,10 @@ class TestConfigurableCompilePipeline:
             backend="qat.backend.DefaultBackend",
             target_data="qat.model.target_data.DefaultTargetData",
         )
-        pipeline = ConfigurableCompilePipeline._build_pipeline(
-            config, self.model, self.target_data, engine=ZeroEngine()
-        )
+        with pytest.warns(DeprecationWarning):
+            pipeline = ConfigurableCompilePipeline._build_pipeline(
+                config, self.model, self.target_data, engine=ZeroEngine()
+            )
         assert isinstance(pipeline, CompilePipeline)
         assert pipeline.model == self.model
         assert pipeline.target_data == self.target_data
@@ -158,9 +159,10 @@ class TestConfigurablePipeline:
             results_pipeline="tests.unit.utils.resultsprocessing.get_pipeline",
             target_data="qat.model.target_data.DefaultTargetData",
         )
-        pipeline = ConfigurablePipeline._build_pipeline(
-            config, self.model, self.target_data, engine=ZeroEngine()
-        )
+        with pytest.warns(DeprecationWarning):
+            pipeline = ConfigurablePipeline._build_pipeline(
+                config, self.model, self.target_data, engine=ZeroEngine()
+            )
         assert isinstance(pipeline, Pipeline)
         assert pipeline.model == self.model
         assert pipeline.target_data == self.target_data

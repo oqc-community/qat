@@ -2,9 +2,8 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import pytest
 
-from qat.backend import WaveformV1Backend
 from qat.backend.base import BaseBackend
-from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
+from qat.backend.waveform.codegen import PydWaveformBackend
 from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
 from qat.executables import AbstractProgram, AcquireData, AcquireMode, Executable
@@ -114,7 +113,7 @@ class TestCompilePipeline:
             model=model,
             frontend=AutoFrontend(model=model),
             middleend=PydDefaultMiddleend(model=model),
-            backend=PydWaveformV1Backend(model=model),
+            backend=PydWaveformBackend(model=model),
             target_data=TargetData.default(),
         )
 
@@ -126,7 +125,7 @@ class TestCompilePipeline:
                 model=model,
                 frontend=AutoFrontend(model=model),
                 middleend=PydDefaultMiddleend(model=model),
-                backend=PydWaveformV1Backend(model=new_model),
+                backend=PydWaveformBackend(model=new_model),
                 target_data=TargetData.default(),
             )
 
@@ -255,7 +254,7 @@ class TestPipeline:
                 model=model1,
                 frontend=AutoFrontend(model=model1),
                 middleend=DefaultMiddleend(model=model1),
-                backend=WaveformV1Backend(model=model2),
+                backend=PydWaveformBackend(model=model2),
                 runtime=SimpleRuntime(engine=ZeroEngine()),
                 target_data=TargetData.default(),
             )

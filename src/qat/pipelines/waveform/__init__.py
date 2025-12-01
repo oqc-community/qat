@@ -4,7 +4,7 @@
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.pipelines.updateable import PipelineConfig
 
-from .compile import WaveformV1CompilePipeline
+from .compile import WaveformCompilePipeline
 from .execute import EchoExecutePipeline
 from .full import EchoPipeline
 
@@ -23,7 +23,7 @@ experimental_echo32 = _create_experimental_pipeline_instance(32)
 __all__ = [
     "EchoPipeline",
     "EchoExecutePipeline",
-    "WaveformV1CompilePipeline",
+    "WaveformCompilePipeline",
     "PipelineConfig",
     "experimental_echo8",
     "experimental_echo16",

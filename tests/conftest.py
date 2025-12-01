@@ -7,7 +7,8 @@ import numpy as np
 import pytest
 from qblox_instruments import ClusterType
 
-from qat.engines.qblox.dummy import DummyQbloxInstrument
+with pytest.warns(DeprecationWarning):
+    from qat.engines.qblox.dummy import DummyQbloxInstrument
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.backends.qblox.device import QbloxControlHardware
 from qat.purr.backends.qblox.dummy import (

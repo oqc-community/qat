@@ -18,6 +18,7 @@ from tests.unit.utils.pipelines import (
 )
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestHardwareLoaders:
     def test_init(self):
         loaders_dict = {"a": EchoModelLoader(), "b": QiskitModelLoader()}
@@ -77,6 +78,7 @@ class TestHardwareLoaders:
         assert loaders.models_up_to_date
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestEngineSet:
     def test_instantiation(self):
         """Checks the instantiation of EngineSet with a list of engines."""
@@ -190,6 +192,7 @@ class TestEngineSet:
         assert isinstance(engine_set.get("engine2"), MockEngineWithModel)
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestPipelineSet:
     def test_reload_model(self):
         """Checks the ability to reload a single pipeline, ensuring other pipelines remained
@@ -227,6 +230,7 @@ class TestPipelineSet:
         assert len(pipelines.get("test3").model.qubits) == 2
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestPipelineManager:
     def setup_manager(self):
         """Helper function to set up a PipelineManager with mock pipelines."""

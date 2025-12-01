@@ -5,7 +5,7 @@ from pydantic import ImportString, ValidationError
 
 import qat
 import qat.frontend
-from qat.backend.waveform_v1 import WaveformV1Backend
+from qat.backend.waveform import PydWaveformBackend
 from qat.core.config.descriptions import (
     ClassDescription,
     CompilePipelineDescription,
@@ -31,10 +31,10 @@ from qat.model.loaders.cache import CacheAccessLoader
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
-from qat.pipelines.waveform_v1 import (
+from qat.pipelines.waveform import (
     EchoExecutePipeline,
     EchoPipeline,
-    WaveformV1CompilePipeline,
+    WaveformCompilePipeline,
 )
 from qat.runtime import SimpleRuntime
 
@@ -88,7 +88,7 @@ class TestEngineDescription:
         assert engine.cblam.timeout == 60
 
 
-mock_compile_pipeline = WaveformV1CompilePipeline(
+mock_compile_pipeline = WaveformCompilePipeline(
     config=dict(name="mock_compile"), loader=LucyModelLoader()
 ).pipeline
 mock_execute_pipeline = EchoExecutePipeline(
@@ -226,13 +226,14 @@ class TestPipelineFactoryDescription:
         from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
-        factory = desc.construct(loader=loader)
+        with pytest.warns(DeprecationWarning):
+            factory = desc.construct(loader=loader)
         assert isinstance(factory, PipelineFactory)
         assert isinstance(factory.engine, ZeroEngine)
 
     def test_construct_pipeline_with_engine(self):
         from qat.core.pipelines.factory import PipelineFactory
-        from qat.engines.waveform_v1 import EchoEngine
+        from qat.engines.waveform import EchoEngine
         from qat.model.loaders.purr import EchoModelLoader
 
         desc = PipelineFactoryDescription(
@@ -240,11 +241,12 @@ class TestPipelineFactoryDescription:
             pipeline="tests.unit.utils.pipelines.get_mock_pipeline",
             default=True,
             hardware_loader="echo8a",
-            engine="qat.engines.waveform_v1.EchoEngine",
+            engine="qat.engines.waveform.EchoEngine",
         )
 
         loader = EchoModelLoader()
-        factory = desc.construct(loader=loader, engine=EchoEngine())
+        with pytest.warns(DeprecationWarning):
+            factory = desc.construct(loader=loader, engine=EchoEngine())
         assert isinstance(factory, PipelineFactory)
         assert isinstance(factory.engine, EchoEngine)
 
@@ -310,14 +312,15 @@ class TestUpdateablePipelineDescription:
             pipeline="tests.unit.utils.pipelines.MockPipeline",
             default=True,
             hardware_loader="echo8a",
-            engine="qat.engines.waveform_v1.EchoEngine",
+            engine="qat.engines.waveform.EchoEngine",
         )
 
-        from qat.engines.waveform_v1 import EchoEngine
+        from qat.engines.waveform import EchoEngine
         from qat.model.loaders.purr import EchoModelLoader
 
         loader = EchoModelLoader()
-        pipeline = desc.construct(loader=loader, engine=EchoEngine())
+        with pytest.warns(DeprecationWarning):
+            pipeline = desc.construct(loader=loader, engine=EchoEngine())
         assert isinstance(pipeline, MockPipeline)
         assert isinstance(pipeline.engine, EchoEngine)
 
@@ -385,7 +388,7 @@ class TestPipelineClassDescription:
             hardware_loader=None,
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
             runtime="qat.runtime.SimpleRuntime",
             engine=None,
         )
@@ -403,7 +406,7 @@ class TestPipelineClassDescription:
             hardware_loader=None,
             frontend={"type": "qat.frontend.FallthroughFrontend"},
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
             runtime="qat.runtime.SimpleRuntime",
             engine=None,
         )
@@ -420,7 +423,7 @@ class TestPipelineClassDescription:
             hardware_loader=None,
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
             runtime=dict(
                 type="qat.runtime.SimpleRuntime",
                 config={"connection_mode": ConnectionMode.ALWAYS_ON_EXECUTE},
@@ -450,7 +453,7 @@ class TestPipelineClassDescription:
             hardware_loader=None,
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
             runtime="qat.runtime.SimpleRuntime",
             engine=None,
         )
@@ -461,21 +464,21 @@ class TestPipelineClassDescription:
         assert P.name == "echo8a"
         assert isinstance(P.frontend, FallthroughFrontend)
         assert isinstance(P.middleend, FallthroughMiddleend)
-        assert isinstance(P.backend, WaveformV1Backend)
+        assert isinstance(P.backend, PydWaveformBackend)
         assert isinstance(P.runtime, SimpleRuntime)
         assert isinstance(P.engine, DefaultEngine)
 
     def test_construct_pipeline_with_engine(self):
-        from qat.engines.waveform_v1 import EchoEngine
+        from qat.engines.waveform import EchoEngine
 
         desc = PipelineClassDescription(
             name="echo8a",
             hardware_loader=None,
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
             runtime="qat.runtime.SimpleRuntime",
-            engine="qat.engines.waveform_v1.EchoEngine",
+            engine="qat.engines.waveform.EchoEngine",
         )
 
         loader = EchoModelLoader()
@@ -496,7 +499,7 @@ class TestCompilePipelineDescription:
             hardware_loader="echo8",
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
         )
 
         loader = EchoModelLoader()
@@ -511,7 +514,7 @@ class TestCompilePipelineDescription:
             hardware_loader="echo8",
             frontend={"type": "qat.frontend.FallthroughFrontend"},
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
         )
 
         loader = EchoModelLoader()
@@ -535,7 +538,7 @@ class TestCompilePipelineDescription:
             hardware_loader="echo8",
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
-            backend="qat.backend.WaveformV1Backend",
+            backend="qat.backend.PydWaveformBackend",
         )
 
         loader = EchoModelLoader()
@@ -544,7 +547,7 @@ class TestCompilePipelineDescription:
         assert P.name == "mock_compile"
         assert isinstance(P.frontend, FallthroughFrontend)
         assert isinstance(P.middleend, FallthroughMiddleend)
-        assert isinstance(P.backend, WaveformV1Backend)
+        assert isinstance(P.backend, PydWaveformBackend)
 
     def test_is_subtype_of(self):
         assert CompilePipelineDescription.is_subtype_of(CompilePipeline)
@@ -611,7 +614,7 @@ class TestExecutePipelineDescription:
             name="mock_execute",
             hardware_loader="mock",
             runtime="qat.runtime.SimpleRuntime",
-            engine="qat.engines.waveform_v1.EchoEngine",
+            engine="qat.engines.waveform.EchoEngine",
         )
 
         loader = EchoModelLoader()

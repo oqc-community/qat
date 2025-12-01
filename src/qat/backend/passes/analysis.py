@@ -7,78 +7,8 @@ from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.ir.instructions import QuantumInstruction
 from qat.ir.lowered import PartitionedIR
-from qat.model.device import (
-    PhysicalChannel,
-)
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
-from qat.purr.backends.utilities import UPCONVERT_SIGN
-
-
-@dataclass
-class IntermediateFrequencyResult(ResultInfoMixin):
-    frequencies: dict[PhysicalChannel, float]
-
-
-class IntermediateFrequencyAnalysis(AnalysisPass):
-    """
-    Adapted from :meth:`qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies`.
-
-    Retrieves intermediate frequencies for all physical channels if they exist,
-    and validates that pulse channels that share the same physical channel cannot
-    have differing fixed frequencies. This pass should always follow a :class:`PartitionByPulseChannel`,
-    as information of pulse channels are needed.
-    """
-
-    def __init__(self, model: PhysicalHardwareModel):
-        """
-        Instantiate the pass with a hardware model.
-
-        :param model: The hardware model.
-        """
-
-        # TODO: determine if this pass should be split into an analysis and validation
-        #   pass. (COMPILER-610)
-        self.model = model
-
-    def run(
-        self, ir: PartitionedIR, res_mgr: ResultManager, *args, **kwargs
-    ) -> PartitionedIR:
-        """
-        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
-        :param res_mgr: The result manager to store the analysis results.
-        """
-
-        baseband_freqs = {}
-        baseband_freqs_fixed_if = {}
-
-        for pulse_channel in ir.pulse_channels.values():
-            physical_channel = pulse_channel.physical_channel_id
-            if pulse_channel.fixed_if:
-                baseband_if_freq = self.model.physical_channel_with_id(
-                    physical_channel
-                ).baseband.if_frequency
-                baseband_freq = pulse_channel.frequency - UPCONVERT_SIGN * baseband_if_freq
-                self._check_fixed_if_not_violated(
-                    baseband_freqs, physical_channel, baseband_freq
-                )
-                baseband_freqs[physical_channel] = baseband_freq
-                baseband_freqs_fixed_if[physical_channel] = pulse_channel.fixed_if
-            elif not baseband_freqs_fixed_if.get(physical_channel, False):
-                baseband_freqs_fixed_if[physical_channel] = pulse_channel.fixed_if
-
-        res_mgr.add(IntermediateFrequencyResult(frequencies=baseband_freqs))
-        return ir
-
-    @staticmethod
-    def _check_fixed_if_not_violated(
-        baseband_freqs: dict, physical_channel: str, baseband_freq: float
-    ) -> None:
-        if baseband_freqs.get(physical_channel, baseband_freq) != baseband_freq:
-            raise ValueError(
-                "Cannot fix the frequency for two pulse channels of different "
-                "frequencies on the same physical channel!"
-            )
 
 
 @dataclass
@@ -190,7 +120,5 @@ class TimelineAnalysis(AnalysisPass):
         return block_numbers
 
 
-PydIntermediateFrequencyResult = IntermediateFrequencyResult
-PydIntermediateFrequencyAnalysis = IntermediateFrequencyAnalysis
 PydTimelineAnalysisResult = TimelineAnalysisResult
 PydTimelineAnalysis = TimelineAnalysis

@@ -150,14 +150,12 @@ class PulseChannel(Component):
     :param imbalance: Ratio between I and Q AC voltage that is sent out of the FPGA.
     :param phase_iq_offset: Phase offset between the I and Q plane for AC voltage that is send out the FPGA.
     :param scale: Scale factor for mapping the voltage of the pulse to frequencies.
-    :param fixed_if: Flag which determines if the intermediate frequency is fixed.
     """
 
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
     imbalance: float = 1.0
     phase_iq_offset: float = 0.0
     scale: complex | float = 1.0 + 0.0j
-    fixed_if: bool = False
 
     def model_post_init(self, context: Any, /) -> None:
         if isinstance(self.scale, np.complexfloating):

@@ -978,7 +978,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
             imbalance=pulse_channel.imbalance,
             phase_iq_offset=pulse_channel.phase_iq_offset,
             scale=pulse_channel.scale,
-            fixed_if=pulse_channel.fixed_if,
             uuid=pulse_channel.uuid,
         )
         return pulse_channel
@@ -990,7 +989,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
         imbalance: float = 1.0,
         phase_iq_offset: float = 0.0,
         scale: float | complex = 1.0 + 0.0j,
-        fixed_if: bool = False,
         uuid: str | None = None,
     ) -> PulseChannel:
         """Creates a pulse channel and adds stores it within the builder.
@@ -1015,7 +1013,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
             imbalance=imbalance,
             phase_iq_offset=phase_iq_offset,
             scale=scale,
-            fixed_if=fixed_if,
         )
 
         self._pulse_channels[uuid] = pulse_channel
@@ -1034,7 +1031,6 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         imbalance=pc.imbalance,
                         phase_iq_offset=pc.phase_iq_offset,
                         scale=pc.scale,
-                        fixed_if=pc.fixed_if,
                         uuid=pc.uuid,
                     )
         return pulse_channels

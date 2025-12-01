@@ -2,23 +2,17 @@ import numpy as np
 import pytest
 
 from qat.backend.passes.analysis import (
-    IntermediateFrequencyResult,
-    PydIntermediateFrequencyAnalysis,
     PydTimelineAnalysis,
     PydTimelineAnalysisResult,
 )
 from qat.backend.passes.lowering import PydPartitionByPulseChannel
 from qat.backend.passes.purr.analysis import (
-    IntermediateFrequencyAnalysis,
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
 from qat.backend.passes.purr.lowering import PartitionByPulseChannel
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
-from qat.ir.instructions import Delay
-from qat.ir.lowered import PartitionedIR
-from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import Pulse
 from qat.middleend.passes.purr.transform import (
     InstructionGranularitySanitisation as LegInstructionGranularitySanitisation,
@@ -27,121 +21,9 @@ from qat.middleend.passes.purr.transform import (
     LowerSyncsToDelays as LegLowerSyncsToDelays,
 )
 from qat.model.loaders.converted import PydEchoModelLoader
-from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.target_data import TargetData
 
 pytestmark = pytest.mark.experimental
-
-
-class TestIntermediateFrequencyAnalysis:
-    def test_different_frequencies_with_fixed_if_yields_error(self):
-        model = LucyModelLoader().load()
-        physical_channel_id = model.qubits[0].physical_channel.uuid
-        pulse_channel_1 = PulseChannel(
-            frequency=5.5e9,
-            physical_channel_id=physical_channel_id,
-        )
-        pulse_channel_2 = PulseChannel(
-            frequency=5.6e9,
-            physical_channel_id=physical_channel_id,
-        )
-
-        # some dummy data just to test the IFs
-        res_mgr = ResultManager()
-        ir = PartitionedIR(
-            target_map={
-                pulse_channel_1.uuid: [Delay(target=pulse_channel_1.uuid, duration=8e-8)],
-                pulse_channel_2.uuid: [Delay(target=pulse_channel_2.uuid, duration=1.6e-7)],
-            },
-            pulse_channels={
-                pulse_channel_1.uuid: pulse_channel_1,
-                pulse_channel_2.uuid: pulse_channel_2,
-            },
-        )
-
-        # run the pass: should pass
-        PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
-
-        # fix IF for one channel: should pass
-        pulse_channel_1.fixed_if = True
-        PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
-
-        # fix IF for one channel: should pass
-        pulse_channel_1.fixed_if = False
-        pulse_channel_2.fixed_if = True
-        PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
-
-        # fix IF for both channels: should fail
-        pulse_channel_1.fixed_if = True
-        with pytest.raises(ValueError):
-            PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
-
-    def test_same_frequencies_with_fixed_if_passes(self):
-        model = LucyModelLoader().load()
-        physical_channel_id = model.qubits[0].physical_channel.uuid
-        pulse_channel_1 = PulseChannel(
-            frequency=5.5e9,
-            physical_channel_id=physical_channel_id,
-            fixed_if=True,
-        )
-        pulse_channel_2 = PulseChannel(
-            frequency=5.5e9,
-            physical_channel_id=physical_channel_id,
-            fixed_if=True,
-        )
-
-        # some dummy data just to test the IFs
-        res_mgr = ResultManager()
-        ir = PartitionedIR(
-            target_map={
-                pulse_channel_1.uuid: [Delay(target=pulse_channel_1.uuid, duration=8e-8)],
-                pulse_channel_2.uuid: [Delay(target=pulse_channel_2.uuid, duration=1.6e-7)],
-            },
-            pulse_channels={
-                pulse_channel_1.uuid: pulse_channel_1,
-                pulse_channel_2.uuid: pulse_channel_2,
-            },
-        )
-
-        # run the pass
-        PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
-
-    #
-    def test_fixed_if_returns_frequencies(self):
-        model = LucyModelLoader().load()
-
-        # Find two pulse channels with different physical channels
-        physical_channel_1 = model.qubits[0].physical_channel
-        physical_channel_2 = model.qubits[1].physical_channel
-        pulse_channel_1 = PulseChannel(
-            frequency=5.5e9,
-            physical_channel_id=physical_channel_1.uuid,
-            fixed_if=True,
-        )
-        pulse_channel_2 = PulseChannel(
-            frequency=5.6e9,
-            physical_channel_id=physical_channel_2.uuid,
-            fixed_if=False,
-        )
-
-        # some dummy data just to test the IF
-        res_mgr = ResultManager()
-        ir = PartitionedIR(
-            target_map={
-                pulse_channel_1.uuid: [Delay(target=pulse_channel_1.uuid, duration=8e-8)],
-                pulse_channel_2.uuid: [Delay(target=pulse_channel_2.uuid, duration=1.6e-7)],
-            },
-            pulse_channels={
-                pulse_channel_1.uuid: pulse_channel_1,
-                pulse_channel_2.uuid: pulse_channel_2,
-            },
-        )
-
-        # run the pass
-        PydIntermediateFrequencyAnalysis(model).run(ir, res_mgr)
-        res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
-        assert physical_channel_1.uuid in res.frequencies
-        assert physical_channel_2.uuid not in res.frequencies
 
 
 class TestTimelineAnalysis:
@@ -378,13 +260,11 @@ class TestTimelineAnalysisParity:
         pyd_builder = ConvertToPydanticIR(leg_model, pyd_model).run(builder, pyd_res_mgr)
 
         pyd_ir = PydPartitionByPulseChannel().run(pyd_builder, pyd_res_mgr)
-        PydIntermediateFrequencyAnalysis(pyd_model).run(pyd_ir, pyd_res_mgr)
         PydTimelineAnalysis(pyd_model, target_data).run(pyd_ir, pyd_res_mgr)
         pyd_res = pyd_res_mgr.lookup_by_type(PydTimelineAnalysisResult)
 
         leg_res_mgr = ResultManager()
         leg_ir = PartitionByPulseChannel().run(builder, leg_res_mgr)
-        IntermediateFrequencyAnalysis(leg_model).run(leg_ir, leg_res_mgr)
         TimelineAnalysis().run(leg_ir, leg_res_mgr)
         leg_res = leg_res_mgr.lookup_by_type(TimelineAnalysisResult)
 

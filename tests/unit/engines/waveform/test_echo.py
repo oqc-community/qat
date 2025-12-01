@@ -4,12 +4,12 @@
 import numpy as np
 import pytest
 
-from qat.backend.waveform_v1.executable import (
+from qat.backend.waveform.executable import (
     PositionalAcquireData,
-    WaveformV1ChannelData,
-    WaveformV1Program,
+    WaveformChannelData,
+    WaveformProgram,
 )
-from qat.engines.waveform_v1 import EchoEngine
+from qat.engines.waveform import EchoEngine
 from qat.purr.compiler.instructions import AcquireMode
 
 
@@ -21,10 +21,10 @@ class TestEchoEngine:
         acquire = PositionalAcquireData(
             mode=mode, position=600, length=100, output_variable="test"
         )
-        channel_data = WaveformV1ChannelData(
+        channel_data = WaveformChannelData(
             buffer=np.linspace(0, 1000, 1001), baseband_frequency=5.0e9, acquires=[acquire]
         )
-        program = WaveformV1Program(
+        program = WaveformProgram(
             channel_data={"ch1": channel_data}, repetition_time=1e-3, shots=1000
         )
 
@@ -58,12 +58,12 @@ class TestEchoEngine:
         acquire2 = PositionalAcquireData(
             mode=mode, position=600, length=100, output_variable="test2"
         )
-        channel_data = WaveformV1ChannelData(
+        channel_data = WaveformChannelData(
             buffer=np.linspace(0, 1000, 1001),
             baseband_frequency=5.0e9,
             acquires=[acquire1, acquire2],
         )
-        program = WaveformV1Program(
+        program = WaveformProgram(
             channel_data={"ch1": channel_data}, repetition_time=1e-3, shots=1000
         )
 
@@ -97,15 +97,15 @@ class TestEchoEngine:
         acquire2 = PositionalAcquireData(
             mode=mode, position=600, length=100, output_variable="test2"
         )
-        channel_data_1 = WaveformV1ChannelData(
+        channel_data_1 = WaveformChannelData(
             buffer=np.linspace(0, 1000, 1001), baseband_frequency=5.0e9, acquires=[acquire1]
         )
-        channel_data_2 = WaveformV1ChannelData(
+        channel_data_2 = WaveformChannelData(
             buffer=np.linspace(1000, 2000, 1001),
             baseband_frequency=6.0e9,
             acquires=[acquire2],
         )
-        program = WaveformV1Program(
+        program = WaveformProgram(
             channel_data={"ch1": channel_data_1, "ch2": channel_data_2},
             repetition_time=1e-3,
             shots=1000,

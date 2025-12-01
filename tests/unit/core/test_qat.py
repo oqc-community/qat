@@ -55,6 +55,7 @@ def fallthrough_pipeline(mock_engine, qubit_count=32):
     )
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestQATPipelineSetup:
     def test_make_qat(self):
         q = QAT()
@@ -330,6 +331,7 @@ class TestQATPipelineSetup:
         print(no_kwargs_input)
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestQATHardwareModelReloading:
     @pytest.fixture(autouse=True)
     def qat(self):

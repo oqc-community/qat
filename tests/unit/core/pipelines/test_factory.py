@@ -7,7 +7,7 @@ from qat.backend import DefaultBackend
 from qat.core.config.descriptions import PipelineFactoryDescription
 from qat.core.pipelines.factory import PipelineFactory
 from qat.engines import ZeroEngine
-from qat.engines.waveform_v1 import EchoEngine
+from qat.engines.waveform import EchoEngine
 from qat.frontend import DefaultFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
@@ -20,41 +20,44 @@ def create_mock_pipeline(model, name="test", echo=False) -> Pipeline:
     """Used for mocking a pipeline factory for testing purposes."""
 
     engine = EchoEngine() if echo else ZeroEngine()
-    return Pipeline(
-        name=name,
-        frontend=DefaultFrontend(model=model),
-        middleend=DefaultMiddleend(model=model),
-        backend=DefaultBackend(model=model),
-        model=model,
-        runtime=DefaultRuntime(engine=engine),
-    )
+    with pytest.warns(DeprecationWarning):
+        return Pipeline(
+            name=name,
+            frontend=DefaultFrontend(model=model),
+            middleend=DefaultMiddleend(model=model),
+            backend=DefaultBackend(model=model),
+            model=model,
+            runtime=DefaultRuntime(engine=engine),
+        )
 
 
 def create_mock_pipeline_with_engine(model, engine, name="test") -> Pipeline:
     """Used for mocking a pipeline factory with a specific engine for testing purposes."""
 
-    return Pipeline(
-        name=name,
-        frontend=DefaultFrontend(model=model),
-        middleend=DefaultMiddleend(model=model),
-        backend=DefaultBackend(model=model),
-        model=model,
-        runtime=DefaultRuntime(engine=engine),
-    )
+    with pytest.warns(DeprecationWarning):
+        return Pipeline(
+            name=name,
+            frontend=DefaultFrontend(model=model),
+            middleend=DefaultMiddleend(model=model),
+            backend=DefaultBackend(model=model),
+            model=model,
+            runtime=DefaultRuntime(engine=engine),
+        )
 
 
 def create_mock_pipeline_with_target_data(model, target_data, name="test") -> Pipeline:
     """Used for mocking a pipeline factory with target data for testing purposes."""
 
-    return Pipeline(
-        name=name,
-        frontend=DefaultFrontend(model=model),
-        middleend=DefaultMiddleend(model=model, target_data=target_data),
-        backend=DefaultBackend(model=model),
-        model=model,
-        runtime=DefaultRuntime(engine=ZeroEngine()),
-        target_data=target_data,
-    )
+    with pytest.warns(DeprecationWarning):
+        return Pipeline(
+            name=name,
+            frontend=DefaultFrontend(model=model),
+            middleend=DefaultMiddleend(model=model, target_data=target_data),
+            backend=DefaultBackend(model=model),
+            model=model,
+            runtime=DefaultRuntime(engine=ZeroEngine()),
+            target_data=target_data,
+        )
 
 
 class TestPipelineFactory:

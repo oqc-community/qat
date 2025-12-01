@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from warnings import warn
+
 from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.frontend import AutoFrontend
 from qat.middleend import DefaultMiddleend
@@ -20,6 +22,14 @@ class WaveformV1CompilePipeline(UpdateablePipeline):
         This pipeline is for compilation purposes only and does not execute programs. Please
         select an appropriate execution pipeline if you wish to run the compiled programs.
     """
+
+    def __init__(self, *args, **kwargs):
+        warn(
+            "WaveformV1 support is deprecated and will be removed in v4.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def _build_pipeline(

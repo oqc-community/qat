@@ -9,7 +9,7 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
 from qat.core.qat import QAT
 from qat.core.result_base import ResultInfoMixin, ResultManager
-from qat.engines.waveform_v1.echo import EchoEngine
+from qat.engines.waveform.echo import EchoEngine
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.middleend import CustomMiddleend
 from qat.model.loaders.purr.echo import EchoModelLoader

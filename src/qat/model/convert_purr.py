@@ -95,7 +95,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             frequency=measure_pulse_channel.frequency,
             imbalance=measure_pulse_channel.imbalance,
             scale=_process_real_or_complex(measure_pulse_channel.scale),
-            fixed_if=measure_pulse_channel.fixed_if,
             phase_iq_offset=measure_pulse_channel.phase_offset,
             pulse=CalibratablePulse(waveform_type=SquareWaveform, **pulse_measure),
         )
@@ -111,7 +110,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             frequency=acquire_pulse_channel.frequency,
             imbalance=acquire_pulse_channel.imbalance,
             scale=_process_real_or_complex(acquire_pulse_channel.scale),
-            fixed_if=acquire_pulse_channel.fixed_if,
             phase_iq_offset=acquire_pulse_channel.phase_offset,
             acquire=CalibratableAcquire(**meas_acq),
         )
@@ -133,7 +131,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             frequency=drive_pulse_channel.frequency,
             imbalance=drive_pulse_channel.imbalance,
             scale=_process_real_or_complex(drive_pulse_channel.scale),
-            fixed_if=drive_pulse_channel.fixed_if,
             phase_iq_offset=drive_pulse_channel.phase_offset,
             pulse=CalibratablePulse(**pulse_hw_x_pi_2),
         )
@@ -144,7 +141,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 frequency=freqshift_pulse_channel.frequency,
                 imbalance=freqshift_pulse_channel.imbalance,
                 scale=_process_real_or_complex(freqshift_pulse_channel.scale),
-                fixed_if=freqshift_pulse_channel.fixed_if,
                 phase_iq_offset=freqshift_pulse_channel.phase_offset,
                 active=freqshift_pulse_channel.active,
                 amp=freqshift_pulse_channel.amp,
@@ -159,7 +155,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                 frequency=secondstate_pulse_channel.frequency,
                 imbalance=secondstate_pulse_channel.imbalance,
                 scale=_process_real_or_complex(secondstate_pulse_channel.scale),
-                fixed_if=secondstate_pulse_channel.fixed_if,
                 phase_iq_offset=secondstate_pulse_channel.phase_offset,
             )
         except KeyError:
@@ -190,7 +185,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
                         scale=_process_real_or_complex(pulse_channel.scale),
-                        fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                         zx_pi_4_pulse=CalibratablePulse(
                             waveform_type=waveform_type, **zx_pi_4
@@ -204,7 +198,6 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
                         frequency=pulse_channel.frequency,
                         imbalance=pulse_channel.imbalance,
                         scale=_process_real_or_complex(pulse_channel.scale),
-                        fixed_if=pulse_channel.fixed_if,
                         phase_iq_offset=pulse_channel.phase_offset,
                     )
                     new_cross_resonance_cancellation_pulse_channels[aux_qubit] = (

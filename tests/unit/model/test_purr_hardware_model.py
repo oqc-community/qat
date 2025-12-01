@@ -50,7 +50,6 @@ def validate_pulse_channel(pyd_pulse_channel, legacy_pulse_channel):
         == legacy_pulse_channel.physical_channel.phase_offset
     )
     assert pyd_pulse_channel.scale == legacy_pulse_channel.scale
-    assert pyd_pulse_channel.fixed_if == legacy_pulse_channel.fixed_if
 
 
 def validate_pulse_shapes(pyd_pulse, legacy_pulse):

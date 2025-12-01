@@ -11,7 +11,6 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.backend.graph import ControlFlowGraph
-from qat.backend.passes.analysis import IntermediateFrequencyResult
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
 from qat.executables import AcquireData
@@ -19,7 +18,7 @@ from qat.ir.lowered import PartitionedIR
 from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import PhysicalChannel, PulseChannel, PulseShapeType
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -799,6 +798,11 @@ class TimelineAnalysis(AnalysisPass):
         return block_numbers * channel.block_size
 
 
+@dataclass
+class IntermediateFrequencyResult(ResultInfoMixin):
+    frequencies: dict[PhysicalChannel, float]
+
+
 class IntermediateFrequencyAnalysis(AnalysisPass):
     """
     Adapted from :meth:`qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies`.
@@ -816,8 +820,6 @@ class IntermediateFrequencyAnalysis(AnalysisPass):
         :param model: The hardware model.
         """
 
-        # TODO: determine if this pass should be split into an analysis and validation
-        # pass.
         self.model = model
 
     def run(

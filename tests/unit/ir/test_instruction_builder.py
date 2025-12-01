@@ -175,7 +175,6 @@ class TestInstructionBuilder:
             assert channel.scale == hw_channel.scale
             assert channel.phase_iq_offset == hw_channel.phase_iq_offset
             assert channel.imbalance == hw_channel.imbalance
-            assert channel.fixed_if == hw_channel.fixed_if
             assert (
                 channel.physical_channel_id
                 == hw_model.physical_channel_for_pulse_channel_id(channel.uuid).uuid

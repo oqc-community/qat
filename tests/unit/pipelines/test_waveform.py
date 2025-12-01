@@ -7,9 +7,9 @@ import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
 from qat import QAT
-from qat.backend.waveform_v1.codegen import PydWaveformV1Backend
-from qat.backend.waveform_v1.executable import WaveformV1ChannelData, WaveformV1Program
-from qat.engines.waveform_v1 import EchoEngine
+from qat.backend.waveform.codegen import PydWaveformBackend
+from qat.backend.waveform.executable import WaveformChannelData, WaveformProgram
+from qat.engines.waveform import EchoEngine
 from qat.executables import Executable
 from qat.frontend import AutoFrontend
 from qat.ir.instructions import Variable as PydVariable
@@ -21,13 +21,13 @@ from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.purr.waveform_v1 import EchoPipeline
-from qat.pipelines.waveform_v1 import (
+from qat.pipelines.waveform import (
     EchoExecutePipeline as ExperimentalEchoExecutePipeline,
 )
-from qat.pipelines.waveform_v1 import EchoPipeline as ExperimentalEchoPipeline
-from qat.pipelines.waveform_v1 import PipelineConfig
-from qat.pipelines.waveform_v1 import (
-    WaveformV1CompilePipeline as ExperimentalWaveformV1CompilePipeline,
+from qat.pipelines.waveform import EchoPipeline as ExperimentalEchoPipeline
+from qat.pipelines.waveform import PipelineConfig
+from qat.pipelines.waveform import (
+    WaveformCompilePipeline as ExperimentalWaveformCompilePipeline,
 )
 from qat.runtime import SimpleRuntime
 
@@ -47,7 +47,7 @@ class TestExperimentalEchoPipeline:
         assert pipeline.name == "echo"
         assert isinstance(pipeline.frontend, AutoFrontend)
         assert isinstance(pipeline.middleend, PydDefaultMiddleend)
-        assert isinstance(pipeline.backend, PydWaveformV1Backend)
+        assert isinstance(pipeline.backend, PydWaveformBackend)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
         assert pipeline.target_data == TargetData.default()
@@ -56,7 +56,7 @@ class TestExperimentalEchoPipeline:
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
         model = LucyModelLoader(qubit_count=4).load()
-        compile_pipeline = ExperimentalWaveformV1CompilePipeline._build_pipeline(
+        compile_pipeline = ExperimentalWaveformCompilePipeline._build_pipeline(
             config=PipelineConfig(name="compile"),
             model=model,
             target_data=None,
@@ -65,7 +65,7 @@ class TestExperimentalEchoPipeline:
         assert compile_pipeline.name == "compile"
         assert isinstance(compile_pipeline.frontend, AutoFrontend)
         assert isinstance(compile_pipeline.middleend, PydDefaultMiddleend)
-        assert isinstance(compile_pipeline.backend, PydWaveformV1Backend)
+        assert isinstance(compile_pipeline.backend, PydWaveformBackend)
 
     def test_build_execute_pipeline(self):
         """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
@@ -108,7 +108,7 @@ test_files = get_pipeline_tests(
 )
 class TestExperimentalEchoPipelineWithCircuits:
     """A class that tests the compilation and execution of the EchoPipeline with a
-    WaveformV1Backend against circuit programs.
+    WaveformBackend against circuit programs.
 
     It tests the expectations of the compilation pipelines, inspecting the properties of
     the executable and the results returned by the EchoEngine.
@@ -133,18 +133,18 @@ class TestExperimentalEchoPipelineWithCircuits:
     @pytest.fixture(scope="class")
     def executable(
         self, program_file, compiler_config, num_readouts, num_registers
-    ) -> Executable[WaveformV1Program]:
+    ) -> Executable[WaveformProgram]:
         """Compile the program file using the stable pipeline."""
         return QAT().compile(str(program_file), compiler_config, pipeline=self.pipeline)[0]
 
     @pytest.fixture(scope="class")
     def results(
-        self, executable: Executable[WaveformV1Program], compiler_config: CompilerConfig
+        self, executable: Executable[WaveformProgram], compiler_config: CompilerConfig
     ) -> dict:
         return QAT().execute(executable, compiler_config, pipeline=self.pipeline)[0]
 
     @pytest.fixture(scope="class")
-    def returned_acquires(self, executable: Executable[WaveformV1Program]):
+    def returned_acquires(self, executable: Executable[WaveformProgram]):
         """Returns the acquires that are returned by the executable."""
         returned_acquires = set()
         acquires = list(executable.acquires.keys())
@@ -175,7 +175,7 @@ class TestExperimentalEchoPipelineWithCircuits:
     def test_executable(self, executable):
         assert isinstance(executable, Executable)
         for program in executable.programs:
-            assert isinstance(program, WaveformV1Program)
+            assert isinstance(program, WaveformProgram)
 
     def test_shots(self, executable, shots):
         cumulative_shots = 0
@@ -214,7 +214,7 @@ class TestExperimentalEchoPipelineWithCircuits:
                 assert program.repetition_time == 0
 
     def test_channel_data(self, executable):
-        """WaveformV1Programs are expected to have channel data for each physical
+        """WaveformPrograms are expected to have channel data for each physical
         channel available, regardless of if they're used."""
 
         for program in executable.programs:
@@ -226,7 +226,7 @@ class TestExperimentalEchoPipelineWithCircuits:
                 ]:
                     assert physical_channel.uuid in program.channel_data
                     channel_data = program.channel_data[physical_channel.uuid]
-                    assert isinstance(channel_data, WaveformV1ChannelData)
+                    assert isinstance(channel_data, WaveformChannelData)
                     assert channel_data.baseband_frequency in (
                         physical_channel.baseband.frequency,
                         None,
@@ -251,7 +251,7 @@ class TestExperimentalEchoPipelineWithCircuits:
             assert acquire.mode == AcquireMode.INTEGRATOR
 
     def test_executable_has_correct_returns(
-        self, executable: Executable[WaveformV1Program], num_registers: int
+        self, executable: Executable[WaveformProgram], num_registers: int
     ):
         """Check that the executable has a number of returns that matches the provided
         value. In the future, this might need adjusting to account of active reset."""
@@ -259,7 +259,7 @@ class TestExperimentalEchoPipelineWithCircuits:
         assert len(executable.returns) == num_registers
 
     def test_executable_has_correct_post_processing(
-        self, executable: Executable[WaveformV1Program], request
+        self, executable: Executable[WaveformProgram], request
     ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
         correctly post-processing to be discriminated as a bit. We can assume the acquire
@@ -277,7 +277,7 @@ class TestExperimentalEchoPipelineWithCircuits:
 
     def test_executable_has_correct_results_processing(
         self,
-        executable: Executable[WaveformV1Program],
+        executable: Executable[WaveformProgram],
         compiler_config: CompilerConfig,
         returned_acquires: set[str],
     ):
@@ -292,7 +292,7 @@ class TestExperimentalEchoPipelineWithCircuits:
     def test_results_contain_all_returns(
         self,
         results: dict[str],
-        executable: Executable[WaveformV1Program],
+        executable: Executable[WaveformProgram],
         shots: int,
         returned_acquires: set[str],
         request,
@@ -341,14 +341,14 @@ class TestExperimentalEchoPipelineWithCircuits:
         # register is used.
         assert total_length >= len(returned_acquires)
 
-    def test_serialization(self, executable: Executable[WaveformV1Program]):
+    def test_serialization(self, executable: Executable[WaveformProgram]):
         """Check that the executable can be serialized and deserialized correctly."""
         json_blob = executable.serialize()
         new_executable = Executable.deserialize(json_blob)
         assert isinstance(new_executable, Executable)
         assert len(new_executable.programs) == len(executable.programs)
         for program in new_executable.programs:
-            assert isinstance(program, WaveformV1Program)
+            assert isinstance(program, WaveformProgram)
         assert new_executable == executable
 
 
@@ -533,7 +533,7 @@ class TestExperimentalEchoPipelineParity:
             for key, stable_data in stable_program.channel_data.items():
                 new_key = physical_channel_map[key]
                 assert new_key in experimental_program.channel_data
-                assert isinstance(stable_data, WaveformV1ChannelData)
+                assert isinstance(stable_data, WaveformChannelData)
                 experimental_data = experimental_program.channel_data[new_key]
                 assert (
                     stable_data.baseband_frequency is None

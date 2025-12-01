@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import pytest
 
 from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.core.pass_base import PassManager
-from qat.engines.waveform_v1 import EchoEngine
+from qat.engines.waveform import EchoEngine
 from qat.engines.zero import ZeroEngine
 from qat.executables import AcquireData, Executable
 from qat.middleend.passes.purr.transform import (
@@ -123,7 +124,8 @@ class TestSimpleRuntime:
         builder = RepeatTranslation(TargetData.default()).run(builder)
 
         # Test with default pipeline
-        package = WaveformV1Backend(model).emit(builder)
+        with pytest.warns(DeprecationWarning):
+            package = WaveformV1Backend(model).emit(builder)
         with SimpleRuntime(EchoEngine()) as runtime:
             results = runtime.execute(package)
         assert "qubit0" in results

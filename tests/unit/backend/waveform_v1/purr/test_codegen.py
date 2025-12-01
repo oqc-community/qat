@@ -49,7 +49,8 @@ class TestWaveformV1Backend:
 
     model: EchoModelLoader = EchoModelLoader(10).load()
     channel = model.qubits[0].get_drive_channel()
-    backend = WaveformV1Backend(model)
+    with pytest.warns(DeprecationWarning):
+        backend = WaveformV1Backend(model)
 
     @pytest.fixture(scope="class")
     def builder(self):

@@ -210,7 +210,8 @@ class TestQatSessionConfigForPipelines:
 
         loader = qatconfig.HARDWARE[0].construct()
         engine = qatconfig.ENGINES[0].construct()
-        P = qatconfig.PIPELINES[0].construct(loader=loader, engine=engine)
+        with pytest.warns(DeprecationWarning):
+            P = qatconfig.PIPELINES[0].construct(loader=loader, engine=engine)
 
         assert isinstance(P, ConfigurablePipeline)
         assert P.runtime.engine.x == 10
@@ -228,7 +229,8 @@ class TestQatSessionConfigForPipelines:
         model_cache = {"test": loader.load()}
         engine = qatconfig.ENGINES[0].construct(model=model_cache["test"])
         cache_loader = CacheAccessLoader(model_cache, "test")
-        P = qatconfig.PIPELINES[0].construct(loader=cache_loader, engine=engine)
+        with pytest.warns(DeprecationWarning):
+            P = qatconfig.PIPELINES[0].construct(loader=cache_loader, engine=engine)
 
         assert isinstance(engine, QuantumExecutionEngine)
         assert isinstance(engine.model, QuantumHardwareModel)
@@ -256,7 +258,8 @@ class TestQatSessionConfigForPipelines:
 
         loader = loader.construct()
         engine = engine.construct()
-        P = P.construct(loader=loader, engine=engine)
+        with pytest.warns(DeprecationWarning):
+            P = P.construct(loader=loader, engine=engine)
 
         assert isinstance(loader, EchoModelLoader)
         assert isinstance(engine, InitableEngine)
@@ -332,7 +335,8 @@ class TestQatSessionConfigForPipelines:
         loader = EchoModelLoader()
 
         desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
+        with pytest.warns(DeprecationWarning):
+            P = desc.construct(loader=loader)
         assert isinstance(P, ConfigurablePipeline)
         results_pipeline = P.runtime.results_pipeline
         assert len(results_pipeline.passes) == 1
@@ -350,7 +354,8 @@ class TestQatSessionConfigForPipelines:
 
         desc = qatconfig.PIPELINES[0]
         engine = qatconfig.ENGINES[0].construct()
-        P = desc.construct(loader=loader, engine=engine)
+        with pytest.warns(DeprecationWarning):
+            P = desc.construct(loader=loader, engine=engine)
         assert isinstance(P, ConfigurablePipeline)
         assert P.runtime.engine.x == "A_VALUE"
 
@@ -367,7 +372,8 @@ class TestQatSessionConfigForPipelines:
         loader = EchoModelLoader()
 
         desc = qatconfig.PIPELINES[0]
-        P = desc.construct(loader=loader)
+        with pytest.warns(DeprecationWarning):
+            P = desc.construct(loader=loader)
         assert isinstance(P, ConfigurablePipeline)
         assert type(P.frontend) is DefaultFrontend
         assert type(P.middleend) is DefaultMiddleend

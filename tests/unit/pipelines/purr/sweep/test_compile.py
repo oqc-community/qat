@@ -20,6 +20,7 @@ from .utils import (
 )
 
 
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestCompileSweepPipeline:
     @pytest.fixture
     def model(self):

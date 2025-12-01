@@ -20,7 +20,7 @@ COMPILE:
       passive_reset_time: 1e-2
   default: true
 - name: compile
-  pipeline: qat.pipelines.waveform_v1.WaveformV1CompilePipeline
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
   hardware_loader: lucy6loader
   target_data:
     type: qat.model.target_data.CustomTargetData

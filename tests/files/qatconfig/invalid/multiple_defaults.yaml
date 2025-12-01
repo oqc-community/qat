@@ -12,16 +12,16 @@ HARDWARE:
 
 COMPILE: 
 - name: waveform-compile6 
-  pipeline: qat.pipelines.waveform_v1.WaveformV1CompilePipeline
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
   hardware_loader: echo6loader
   default: true
 - name: waveform-compile8
-  pipeline: qat.pipelines.waveform_v1.WaveformV1CompilePipeline
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
   hardware_loader: echo8loader
   default: true
 
 EXECUTE: 
 - name: waveform-execute 
-  pipeline: qat.pipelines.waveform_v1.EchoExecutePipeline
+  pipeline: qat.pipelines.waveform.EchoExecutePipeline
   hardware_loader: echo6loader
   default: true

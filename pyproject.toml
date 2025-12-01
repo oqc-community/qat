@@ -201,7 +201,8 @@ filterwarnings = [
     # TODO - `qblox-instruments` to fix deprecation warnings regarding QCodes
     'default::qcodes.utils.deprecate.QCoDeSDeprecationWarning:',
     # TODO - remove when purr is dropped COMPILER-844
-    'ignore:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning'
+    'default:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning',
+    'default:WaveformV1 support is deprecated:DeprecationWarning:qat.*.purr',
 ]
 markers = [
   "ab_test",

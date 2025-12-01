@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from collections import defaultdict
+from warnings import warn
 
 import numpy as np
 
@@ -61,6 +62,11 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
                     As the emitter is used to generate code for some target machine, the hardware
                     model is needed for context-aware compilation.
         """
+        warn(
+            "WaveformV1 support is deprecated and will be removed in v4.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.model = model
 
     def emit(

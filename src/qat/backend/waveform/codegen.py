@@ -1,23 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-
 from collections import defaultdict
 
 import numpy as np
 
 from qat.backend.base import BaseBackend
 from qat.backend.passes.analysis import (
-    IntermediateFrequencyAnalysis,
-    IntermediateFrequencyResult,
     TimelineAnalysis,
     TimelineAnalysisResult,
 )
 from qat.backend.passes.lowering import PartitionByPulseChannel
 from qat.backend.passes.validation import NoAcquireWeightsValidation
-from qat.backend.waveform_v1.executable import (
+from qat.backend.waveform.executable import (
     PositionalAcquireData,
-    WaveformV1ChannelData,
-    WaveformV1Program,
+    WaveformChannelData,
+    WaveformProgram,
 )
 from qat.core.pass_base import InvokerMixin, MetricsManager, PassManager
 from qat.core.result_base import ResultManager
@@ -41,7 +38,7 @@ from qat.utils.waveform import NumericFunction
 log = get_default_logger()
 
 
-class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
+class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
     """
     Target-machine code generation from an IR for targets that only require the explicit waveforms.
     """
@@ -61,7 +58,7 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
         met_mgr: MetricsManager | None = None,
         upconvert: bool = True,
         **kwargs,
-    ) -> Executable[WaveformV1Program]:
+    ) -> Executable[WaveformProgram]:
         """Compiles :class:`InstructionBuilder` into an :class:`Executable`.
 
         Translates pulse instructions into explicit waveforms at the required times, and
@@ -73,15 +70,13 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
         met_mgr = met_mgr if met_mgr is not None else MetricsManager()
         ir = self.run_pass_pipeline(ir, res_mgr, met_mgr, **kwargs)
         timeline_res = res_mgr.lookup_by_type(TimelineAnalysisResult)
-        if_res = res_mgr.lookup_by_type(IntermediateFrequencyResult)
 
         buffers = self.create_physical_channel_buffers(ir, timeline_res, upconvert)
         execute_acquire_dict, runtime_acquire_dict = self.create_acquires(ir, timeline_res)
 
-        channels: dict[str, WaveformV1ChannelData] = {}
+        channels: dict[str, WaveformChannelData] = {}
         for physical_channel, buffer in buffers.items():
-            channels[physical_channel.uuid] = WaveformV1ChannelData(
-                baseband_frequency=if_res.frequencies.get(physical_channel, None),
+            channels[physical_channel.uuid] = WaveformChannelData(
                 buffer=buffer,
                 acquires=execute_acquire_dict.get(physical_channel, []),
             )
@@ -97,7 +92,7 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
             timeline_res.total_duration,
         )
 
-        return Executable[WaveformV1Program](
+        return Executable[WaveformProgram](
             programs=programs,
             acquires=runtime_acquire_dict,
             assigns=ir.assigns,
@@ -112,7 +107,6 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
             | NoAcquireWeightsValidation()
             | PartitionByPulseChannel()
             | TimelineAnalysis(self.model, self.target_data)
-            | IntermediateFrequencyAnalysis(self.model)
         )
 
     @staticmethod
@@ -256,25 +250,25 @@ class WaveformV1Backend(BaseBackend[WaveformV1Program], InvokerMixin):
 
     def create_programs(
         self,
-        channel_data: dict[str, WaveformV1ChannelData],
+        channel_data: dict[str, WaveformChannelData],
         shots: int,
         batch_size: int,
         repetition_time: float,
-    ) -> WaveformV1Program:
-        """Creates WaveformV1Program instances from channel data.
+    ) -> WaveformProgram:
+        """Creates WaveformProgram instances from channel data.
 
         :param channel_data: The channel data for each physical channel.
         :param shots: The total number of shots to be executed.
         :param batch_size: The maximum number of shots per program.
         :param repetition_time: The time for each shot.
         """
-        program = WaveformV1Program(
+        program = WaveformProgram(
             channel_data=channel_data, repetition_time=repetition_time, shots=batch_size
         )
         programs = [program for _ in range(shots // batch_size)]
         if (remaining_shots := shots % batch_size) > 0:
             programs.append(
-                WaveformV1Program(
+                WaveformProgram(
                     channel_data=channel_data,
                     repetition_time=repetition_time,
                     shots=remaining_shots,
@@ -378,10 +372,7 @@ class WaveformContext:
 
         tslip = self.pulse_channel.phase_iq_offset
         imbalance = self.pulse_channel.imbalance
-        if self.pulse_channel.fixed_if:
-            freq = self.physical_channel.baseband.if_frequency
-        else:
-            freq = self._frequency - self.physical_channel.baseband.frequency
+        freq = self._frequency - self.physical_channel.baseband.frequency
         buffer *= np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * time)
         if not tslip == 0.0:
             buffer_slip = buffer * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * tslip)
@@ -417,4 +408,4 @@ class WaveformContext:
         self._duration += samples
 
 
-PydWaveformV1Backend = WaveformV1Backend
+PydWaveformBackend = WaveformBackend
