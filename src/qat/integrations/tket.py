@@ -344,7 +344,7 @@ class TketBuilder(InstructionBuilder):
         self._bit_ctr += 1
         return self
 
-    def reset(self, qubit: Qubit):
+    def reset(self, qubit: Qubit, **kwargs):
         self.circuit.Reset(qubit)
         return self
 

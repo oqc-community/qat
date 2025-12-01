@@ -107,6 +107,7 @@ class ChannelType(Enum):
     acquire = auto()
     freq_shift = auto()
     macq = auto()
+    reset = auto()
 
     def __repr__(self):
         return self.name

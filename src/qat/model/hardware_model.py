@@ -11,6 +11,7 @@ from semver import Version
 
 from qat.model.device import Qubit, Resonator
 from qat.model.error_mitigation import ErrorMitigation
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.utils.pydantic import (
     CalibratableUnitInterval,
     FrozenDict,
@@ -309,3 +310,4 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
 PydLogicalHardwareModel = LogicalHardwareModel
 PydPhysicalHardwareModel = PhysicalHardwareModel
+Model = PhysicalHardwareModel | QuantumHardwareModel

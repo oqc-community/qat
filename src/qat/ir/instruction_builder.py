@@ -176,7 +176,7 @@ class InstructionBuilder(ABC):
     ): ...
 
     @abstractmethod
-    def reset(self, targets: Qubit | list[Qubit]): ...
+    def reset(self, targets: Qubit | list[Qubit], **kwargs): ...
 
     def repeat(self, repeat_count: int):
         return self.add(Repeat(repeat_count=repeat_count))
@@ -787,7 +787,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             .post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
         )
 
-    def reset(self, targets: PulseChannel | Qubit | Iterable[PulseChannel | Qubit]):
+    def reset(
+        self, targets: PulseChannel | Qubit | Iterable[PulseChannel | Qubit], **kwargs
+    ):
         if isinstance(targets, list):
             targets = set(targets)
         elif isinstance(targets, PulseChannel | Qubit):

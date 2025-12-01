@@ -380,7 +380,7 @@ class InstructionBuilder:
         """Add return statement."""
         return self.add(Return(variables))
 
-    def reset(self, qubits):
+    def reset(self, qubits, **kwargs):
         self.add(Reset(qubits))
         return self.add(PhaseReset(qubits))
 
@@ -740,9 +740,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             if isinstance(target, PulseChannel):
                 channels.append(target)
             elif isinstance(target, Qubit):
-                channels.append(target.get_acquire_channel())
-                channels.append(target.get_measure_channel())
-                channels.extend(target.pulse_channels.values())
+                channels.extend(target.get_all_channels())
 
         return self.add(Synchronize(channels))
 
