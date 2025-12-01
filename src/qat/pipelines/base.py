@@ -46,7 +46,7 @@ class BasePipeline(AbstractPipeline, ABC):
     def __init__(self, name: str, model: QuantumHardwareModel, target_data: TargetData):
         self._name = name
         self._model = model
-        self._target_data = target_data
+        self._target_data = target_data if target_data is not None else TargetData.default()
 
     @property
     def name(self) -> str:

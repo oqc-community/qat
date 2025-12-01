@@ -83,8 +83,8 @@ class TestAnalysisPasses:
         acquire_map = result.acquire_map
         assert isinstance(acquire_map, dict)
         assert len(acquire_map) == 1
-        assert qubit.get_acquire_channel() in acquire_map
-        assert len(acquire_map[qubit.get_acquire_channel()]) == 1
+        assert qubit.get_acquire_channel().full_id() in acquire_map
+        assert len(acquire_map[qubit.get_acquire_channel().full_id()]) == 1
 
         assert len(result.returns) == 1
         ret_inst = result.returns[0]
@@ -121,7 +121,8 @@ class TestAnalysisPasses:
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1], [0, 1, 2]])
-    def test_binding_pass(self, num_points, qubit_indices):
+    @pytest.mark.parametrize("enable_hw_averaging", [True, False])
+    def test_binding_pass(self, num_points, qubit_indices, enable_hw_averaging):
         model = EchoModelLoader().load()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
 
@@ -137,7 +138,7 @@ class TestAnalysisPasses:
         res_mgr = ResultManager()
         TriagePass().run(builder, res_mgr)
         with pytest.raises(ValueError):
-            BindingPass().run(builder, res_mgr)
+            BindingPass().run(builder, res_mgr, enable_hw_averaging=enable_hw_averaging)
 
         ScopeSanitisation().run(builder, res_mgr)
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
@@ -152,12 +153,12 @@ class TestAnalysisPasses:
         res_mgr = ResultManager()
         TriagePass().run(builder, res_mgr)
         with pytest.raises(KeyError):
-            BindingPass().run(builder, res_mgr)
+            BindingPass().run(builder, res_mgr, enable_hw_averaging=enable_hw_averaging)
 
         res_mgr = ResultManager()
         DesugaringPass().run(builder, res_mgr)
         TriagePass().run(builder, res_mgr)
-        BindingPass().run(builder, res_mgr)
+        BindingPass().run(builder, res_mgr, enable_hw_averaging=enable_hw_averaging)
         triage_result = res_mgr.lookup_by_type(TriageResult)
         binding_result = res_mgr.lookup_by_type(BindingResult)
 

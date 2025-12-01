@@ -8,9 +8,9 @@ from qat.engines import ConnectionMixin, NativeEngine
 from qat.model.target_data import TargetData
 from qat.runtime.connection import ConnectionMode
 from qat.runtime.passes.transform import (
+    AcquisitionPostprocessing,
     AssignResultsTransform,
     InlineResultsProcessingTransform,
-    PostProcessingTransform,
 )
 
 
@@ -51,7 +51,7 @@ class BaseRuntime(abc.ABC):
     def default_pipeline(self, target_data: TargetData | None = None):
         return (
             PassManager()
-            | PostProcessingTransform(target_data)
+            | AcquisitionPostprocessing(target_data)
             | InlineResultsProcessingTransform()
             | AssignResultsTransform()
         )

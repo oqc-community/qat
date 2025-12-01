@@ -21,6 +21,8 @@ from qat.instrument.builder import InstrumentBuilder
 from qat.model.loaders.cache import CacheAccessLoader
 from qat.model.loaders.purr import EchoModelLoader, QbloxDummyModelLoader
 from qat.model.target_data import TargetData
+from qat.pipelines.updateable import UpdateablePipeline
+from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
@@ -277,6 +279,7 @@ class TestQatSessionConfigForPipelines:
         hardware_loader = hardware_loader_desc.construct()
         assert isinstance(hardware_loader, QbloxDummyModelLoader)
         model = hardware_loader.load()
+        assert isinstance(model, QbloxLiveHardwareModel)
 
         engine_desc = qatconfig.ENGINES[0]
         assert isinstance(engine_desc, EngineDescription)
@@ -289,7 +292,7 @@ class TestQatSessionConfigForPipelines:
         instrument = instrument_builder.build()
         assert isinstance(instrument, InstrumentConcept)
 
-        engine = engine_desc.construct(model)
+        engine = engine_desc.construct()
         assert isinstance(engine, QbloxEngine)
 
     def test_yaml_qblox_pipeline(self, qatconfig_testfiles):
@@ -304,21 +307,20 @@ class TestQatSessionConfigForPipelines:
         hardware_loader = hardware_loader_desc.construct()
         assert isinstance(hardware_loader, QbloxDummyModelLoader)
         model = hardware_loader.load()
+        assert isinstance(model, QbloxLiveHardwareModel)
 
         engine_desc = qatconfig.ENGINES[0]
         assert isinstance(engine_desc, EngineDescription)
-        engine = engine_desc.construct(model)
+        engine = engine_desc.construct()
         assert isinstance(engine, QbloxEngine)
-        assert isinstance(engine.model, QuantumHardwareModel)
 
         pipeline_desc = qatconfig.PIPELINES[0]
         assert isinstance(pipeline_desc, UpdateablePipelineDescription)
 
-        # TODO - Enable when COMPILER-835 is done
-        # pipeline = pipeline_desc.construct(loader=hardware_loader, engine=engine)
-        # assert isinstance(pipeline, UpdateablePipeline)
-        # assert isinstance(pipeline.model, QuantumHardwareModel)
-        # assert pipeline.engine is engine
+        pipeline = pipeline_desc.construct(loader=hardware_loader, engine=engine)
+        assert isinstance(pipeline, UpdateablePipeline)
+        assert isinstance(pipeline.model, QuantumHardwareModel)
+        assert pipeline.engine is engine
 
     def test_yaml_custom_result_pipeline(self, qatconfig_testfiles):
         qatconfig = QatSessionConfig.from_yaml(

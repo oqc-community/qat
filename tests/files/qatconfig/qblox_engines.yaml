@@ -8,7 +8,6 @@ HARDWARE:
 ENGINES:
 - name: qblox_engine
   type: qat.engines.qblox.execution.QbloxEngine
-  hardware_loader: qblox16loader
   instrument_builder:
     name: config_builder
     type: qat.instrument.builder.ConfigInstrumentBuilder

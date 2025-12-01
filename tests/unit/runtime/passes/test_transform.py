@@ -14,9 +14,9 @@ from qat.purr.compiler.instructions import (
     ProcessAxis,
 )
 from qat.runtime.passes.transform import (
+    AcquisitionPostprocessing,
     AssignResultsTransform,
     InlineResultsProcessingTransform,
-    PostProcessingTransform,
 )
 
 
@@ -52,7 +52,7 @@ class TestPostProcessingTransform:
             physical_channel="ch1",
         )
         package = Executable(programs=[], acquires={"test": acquire})
-        result = PostProcessingTransform(self.target_data).run(
+        result = AcquisitionPostprocessing(self.target_data).run(
             mock_readout, package=package
         )
         assert len(result) == 1
@@ -84,7 +84,7 @@ class TestPostProcessingTransform:
             physical_channel="ch1",
         )
         package = Executable(programs=[], acquires={"test": acquire})
-        result = PostProcessingTransform(self.target_data).run(
+        result = AcquisitionPostprocessing(self.target_data).run(
             mock_readout, package=package
         )
         assert len(result) == 1

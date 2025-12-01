@@ -25,9 +25,12 @@ from tests.unit.utils.engines import MockEngineWithModel
 
 
 class MockProgram(AbstractProgram):
+    def __init__(self, acquire_shapes: dict[str, tuple[int, ...]] = None):
+        self._acquire_shapes = acquire_shapes if acquire_shapes is not None else {}
+
     @property
     def acquire_shapes(self):
-        return {}
+        return self._acquire_shapes
 
 
 class MockBackend(BaseBackend):
@@ -181,12 +184,13 @@ class TestExecutePipeline:
 
     def test_execute(self, mock_pipeline):
         mock_executable = Executable(
+            programs=[MockProgram(acquire_shapes={"test": (1000,)})],
             acquires={
                 "test": AcquireData(
                     mode=AcquireMode.INTEGRATOR, shape=(1000,), physical_channel="ch1"
                 )
             },
-            returns=["test"],
+            returns={"test"},
         )
         assert hasattr(mock_pipeline, "execute")
         results, metrics = mock_pipeline.execute(mock_executable)
@@ -290,12 +294,13 @@ class TestPipeline:
 
     def test_execute(self, mock_pipeline):
         mock_executable = Executable(
+            programs=[MockProgram(acquire_shapes={"test": (1000,)})],
             acquires={
                 "test": AcquireData(
                     mode=AcquireMode.INTEGRATOR, shape=(1000,), physical_channel="ch1"
                 )
             },
-            returns=["test"],
+            returns={"test"},
         )
         assert hasattr(mock_pipeline, "execute")
         results, metrics = mock_pipeline.execute(mock_executable)

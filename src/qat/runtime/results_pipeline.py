@@ -8,10 +8,10 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.passes.analysis import IndexMappingAnalysis as PydIndexMappingAnalysis
 from qat.runtime.passes.purr.analysis import IndexMappingAnalysis
 from qat.runtime.passes.transform import (
+    AcquisitionPostprocessing,
     AssignResultsTransform,
     ErrorMitigation,
     InlineResultsProcessingTransform,
-    PostProcessingTransform,
     ResultTransform,
 )
 
@@ -24,7 +24,7 @@ def get_default_results_pipeline(model: QuantumHardwareModel) -> PassManager:
 
     return (
         PassManager()
-        | PostProcessingTransform()
+        | AcquisitionPostprocessing()
         | InlineResultsProcessingTransform()
         | AssignResultsTransform()
         | ResultTransform()
@@ -45,7 +45,7 @@ def get_experimental_results_pipeline(
 
     return (
         PassManager()
-        | PostProcessingTransform(target_data)
+        | AcquisitionPostprocessing(target_data)
         | InlineResultsProcessingTransform()
         | AssignResultsTransform()
         | ResultTransform()

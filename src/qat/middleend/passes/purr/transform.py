@@ -318,12 +318,16 @@ class PostProcessingSanitisation(TransformPass):
             optimisation.
         """
 
+        # TODO -COMPILER-851 - Specify ctrl HW features in TargetData
+        enable_hw_averaging = kwargs.get("enable_hw_averaging", False)
+
         pp_insts = [val for val in ir.instructions if isinstance(val, PostProcessing)]
         discarded = []
         for pp in pp_insts:
             if pp.acquire.mode == AcquireMode.SCOPE:
                 if (
-                    pp.process == PostProcessType.MEAN
+                    not enable_hw_averaging
+                    and pp.process == PostProcessType.MEAN
                     and ProcessAxis.SEQUENCE in pp.axes
                     and len(pp.axes) <= 1
                 ):

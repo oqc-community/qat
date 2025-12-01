@@ -15,8 +15,8 @@ from qat.purr.compiler.instructions import AcquireMode, PulseShapeType
 from qat.runtime import SimpleRuntime
 from qat.runtime.connection import ConnectionMode
 from qat.runtime.passes.transform import (
+    AcquisitionPostprocessing,
     InlineResultsProcessingTransform,
-    PostProcessingTransform,
 )
 
 from tests.unit.utils.engines import MockConnectedEngine
@@ -132,7 +132,7 @@ class TestSimpleRuntime:
         # Test with custom pipeline
         pipeline = (
             PassManager()
-            | PostProcessingTransform(TargetData.default())
+            | AcquisitionPostprocessing(TargetData.default())
             | InlineResultsProcessingTransform()
         )
         with SimpleRuntime(EchoEngine(), pipeline) as runtime:

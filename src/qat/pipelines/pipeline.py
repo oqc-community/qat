@@ -139,9 +139,7 @@ class ExecutePipeline(BasePipeline):
     ):
         if not disable_model_validation:
             self._validate_consistent_model(model, runtime, runtime.engine)
-        self._name = name
-        self._model = model
-        self._target_data = target_data if target_data is not None else TargetData.default()
+        super().__init__(name, model, target_data)
         self._runtime = runtime
         self.disable_model_validation = disable_model_validation
 

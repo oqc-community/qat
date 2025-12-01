@@ -1043,14 +1043,15 @@ class QbloxEmitter(BaseEmitter, InvokerMixin):
                 inner_met_mgr = MetricsManager()
                 self.run_pass_pipeline(ir, inner_res_mgr, inner_met_mgr)
 
-                triage_result = inner_res_mgr.lookup_by_type(TriageResult)
-                binding_result = inner_res_mgr.lookup_by_type(BindingResult)
-                precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
+                inner_triage_result = inner_res_mgr.lookup_by_type(TriageResult)
+                inner_binding_result = inner_res_mgr.lookup_by_type(BindingResult)
+                inner_precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
                 iter2packages[switerator.accumulated_sweep_iteration] = self._do_emit(
-                    triage_result, binding_result, precodegen_result, ignore_empty
+                    inner_triage_result,
+                    inner_binding_result,
+                    inner_precodegen_result,
+                    ignore_empty,
                 )
-        except BaseException as e:
-            raise e
         finally:
             switerator.revert(triage_result.quantum_instructions)
             dinjectors.revert()

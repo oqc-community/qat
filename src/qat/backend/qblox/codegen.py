@@ -922,25 +922,40 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
                 inner_res_mgr = ResultManager()
                 inner_met_mgr = MetricsManager()
                 (PassManager() | TriagePass() | BindingPass() | PreCodegenPass()).run(
-                    ir, inner_res_mgr, inner_met_mgr
+                    ir, inner_res_mgr, inner_met_mgr, enable_hw_averaging=True
                 )
 
-                triage_result = inner_res_mgr.lookup_by_type(TriageResult)
-                binding_result = inner_res_mgr.lookup_by_type(BindingResult)
-                precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
+                inner_triage_result = inner_res_mgr.lookup_by_type(TriageResult)
+                inner_binding_result = inner_res_mgr.lookup_by_type(BindingResult)
+                inner_precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
                 programs.append(
                     self._do_emit(
-                        triage_result, binding_result, precodegen_result, ignore_empty
+                        inner_triage_result,
+                        inner_binding_result,
+                        inner_precodegen_result,
+                        ignore_empty,
                     )
                 )
-            # TODO: This needs to contain the other information required by an executable,
-            # to be extracted from triage results. (COMPILER-827)
-            return Executable[QbloxProgram](programs=programs)
-        except BaseException as e:
-            raise e
         finally:
             switerator.revert(triage_result.quantum_instructions)
             dinjectors.revert()
+
+        acquires = binding_result.acquire_data_map
+        assigns = triage_result.assigns
+        return_vars = set(next(iter(triage_result.returns)).variables)
+        shots = (
+            sum((repeat.repeat_count for repeat in triage_result.repeats), 0)
+            if triage_result.repeats
+            else None
+        )
+
+        return Executable[QbloxProgram](
+            programs=programs,
+            acquires=acquires,
+            assigns=assigns,
+            returns=return_vars,
+            shots=shots,
+        )
 
     def _do_emit(
         self,
@@ -1054,10 +1069,23 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
                 seq_idx, slot_idx = self.allocate(target)
                 package = context.create_package(target, seq_idx, slot_idx)
                 packages[target.full_id()] = package
-        # TODO: This needs to contain the other information required by an executable,
-        # to be extracted from triage results. (COMPILER-827)
+
+        programs = [QbloxProgram(packages=packages, triage_result=triage_result)]
+        acquires = binding_result.acquire_data_map
+        assigns = triage_result.assigns
+        return_vars = set(next(iter(triage_result.returns)).variables)
+        shots = (
+            sum((repeat.repeat_count for repeat in triage_result.repeats), 0)
+            if triage_result.repeats
+            else None
+        )
+
         return Executable[QbloxProgram](
-            programs=[QbloxProgram(packages=packages, triage_result=triage_result)]
+            programs=programs,
+            acquires=acquires,
+            assigns=assigns,
+            returns=return_vars,
+            shots=shots,
         )
 
 

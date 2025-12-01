@@ -5,10 +5,41 @@ import pytest
 
 from qat.executables import AcquireData
 from qat.ir.measure import AcquireMode
-from qat.runtime.aggregator import ResultsAggregator, ResultsCollection
+from qat.runtime.aggregator import ResultsAggregator
 
 
 class TestResultsAggregator:
+    def test_with_multiple_acquires(self):
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(5, 1000), physical_channel="ch1"
+            ),
+            "acquire_2": AcquireData(
+                mode=AcquireMode.RAW, shape=(5, 1000, 254), physical_channel="ch2"
+            ),
+            "acquire_3": AcquireData(
+                mode=AcquireMode.SCOPE, shape=(5, 128), physical_channel="ch3"
+            ),
+        }
+
+        aggregator = ResultsAggregator()
+
+        for i in range(5):
+            aggregator.append(
+                playback={
+                    "acquire_1": (i + 1) * np.ones((1000,)),
+                    "acquire_2": (i + 1) * np.ones((1000, 254)),
+                    "acquire_3": (i + 1) * np.ones((128,)),
+                },
+                acquires=acquires,
+            )
+
+        results = aggregator.finalise()
+        for i in range(5):
+            assert np.all(results["acquire_1"][i, :] == (i + 1))
+            assert np.all(results["acquire_2"][i, :, :] == (i + 1))
+            assert np.all(results["acquire_3"][i, :] == (i + 1))
+
     @pytest.mark.parametrize(
         "mode, shape",
         [
@@ -21,15 +52,28 @@ class TestResultsAggregator:
             (AcquireMode.INTEGRATOR, (5, 10, 1000)),  # (5 sweeps, 10 sweeps, 1000 repeats)
         ],
     )
-    @pytest.mark.parametrize("return_as_list", [True, False])
-    def test_results_shape(self, mode, shape, return_as_list):
-        aggregator = ResultsAggregator(mode, shape, return_as_list=return_as_list)
-        if return_as_list:
-            assert isinstance(aggregator.results, list)
-            assert np.array(aggregator.results).shape == shape
+    @pytest.mark.parametrize("as_list", [True, False])
+    def test_results_shape(self, mode, shape, as_list):
+        acquires = {
+            "acquire_1": AcquireData(mode=mode, shape=shape, physical_channel="ch1")
+        }
+        aggregator = ResultsAggregator()
+        playback = {
+            "acquire_1": np.zeros(
+                aggregator._flatten_results_shape(mode, shape), np.complex128
+            )
+        }
+        aggregator.append(playback, acquires)
+        results = aggregator.finalise(as_list)
+
+        assert "acquire_1" in results
+
+        if as_list:
+            assert isinstance(results["acquire_1"], list)
+            assert np.array(results["acquire_1"]).shape == shape
         else:
-            assert isinstance(aggregator.results, np.ndarray)
-            assert aggregator.results.shape == shape
+            assert isinstance(results["acquire_1"], np.ndarray)
+            assert results["acquire_1"].shape == shape
 
     @pytest.mark.parametrize(
         "batch_sizes",
@@ -44,18 +88,26 @@ class TestResultsAggregator:
         """This tests the situation you'd expect to see where shots need to be broken into
         batches."""
 
-        aggregator = ResultsAggregator(AcquireMode.INTEGRATOR, (10000,))
-        for i, batch_size in enumerate(batch_sizes):
-            batch = (i + 1) * np.ones((batch_size,))
-            aggregator.append(batch)
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(10000,), physical_channel="ch1"
+            )
+        }
+        aggregator = ResultsAggregator()
 
-        results = aggregator.results
-        assert results.shape == (10000,)
+        for i, batch_size in enumerate(batch_sizes):
+            batch_playback = {"acquire_1": (i + 1) * np.ones((batch_size,))}
+            aggregator.append(batch_playback, acquires)
+
+        results = aggregator.finalise()
+        assert "acquire_1" in results
+        assert results["acquire_1"].shape == (10000,)
 
         cumulative_size = 0
         for i, batch_size in enumerate(batch_sizes):
             assert np.all(
-                results[cumulative_size : cumulative_size + batch_size] == (i + 1)
+                results["acquire_1"][cumulative_size : cumulative_size + batch_size]
+                == (i + 1)
             )
             cumulative_size += batch_size
 
@@ -66,22 +118,33 @@ class TestResultsAggregator:
         """Simulates a situation with multiple iterators, e.g., two loops with shots, and
         batching of shots."""
 
-        aggregator = ResultsAggregator(AcquireMode.INTEGRATOR, (5, 10, 10000))
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(5, 10, 10000), physical_channel="ch1"
+            )
+        }
+        aggregator = ResultsAggregator()
+
         for i in range(5):
             for j in range(10):
                 for k, batch_size in enumerate(batch_sizes):
-                    batch = (i + j / 10 + k / 100) * np.ones((batch_size,))
-                    aggregator.append(batch)
+                    batch_playback = {
+                        "acquire_1": (i + j / 10 + k / 100) * np.ones((batch_size,))
+                    }
+                    aggregator.append(batch_playback, acquires)
 
-        results = aggregator.results
-        assert results.shape == (5, 10, 10000)
+        results = aggregator.finalise()
+        assert "acquire_1" in results
+        assert results["acquire_1"].shape == (5, 10, 10000)
 
         for i in range(5):
             for j in range(10):
                 cumulative_size = 0
                 for k, batch_size in enumerate(batch_sizes):
                     assert np.all(
-                        results[i, j, cumulative_size : cumulative_size + batch_size]
+                        results["acquire_1"][
+                            i, j, cumulative_size : cumulative_size + batch_size
+                        ]
                         == (i + j / 10 + k / 100)
                     )
                     cumulative_size += batch_size
@@ -93,49 +156,71 @@ class TestResultsAggregator:
         """Simulates a situation with multiple iterators, e.g., two loops with shots, and
         batching of iterators."""
 
-        aggregator = ResultsAggregator(AcquireMode.INTEGRATOR, (5, 10, 10000))
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(5, 10, 10000), physical_channel="ch1"
+            )
+        }
+        aggregator = ResultsAggregator()
+
         for i in range(5):
             for j, batch_size in enumerate(batch_sizes):
-                batch = (i + j / 10) * np.ones((batch_size, 10000))
-                aggregator.append(batch)
+                batch_playback = {"acquire_1": (i + j / 10) * np.ones((batch_size, 10000))}
+                aggregator.append(batch_playback, acquires)
 
-        results = aggregator.results
-        assert results.shape == (5, 10, 10000)
+        results = aggregator.finalise()
+        assert "acquire_1" in results
+        assert results["acquire_1"].shape == (5, 10, 10000)
 
         for i in range(5):
             cumulative_size = 0
             for j, batch_size in enumerate(batch_sizes):
                 assert np.all(
-                    results[i, cumulative_size : cumulative_size + batch_size, :]
+                    results["acquire_1"][
+                        i, cumulative_size : cumulative_size + batch_size, :
+                    ]
                     == (i + j / 10)
                 )
                 cumulative_size += batch_size
 
     @pytest.mark.parametrize("batch_sizes", [[5], [2, 2, 1], [3, 2]])
     def test_with_integrator_on_outermost_iterator(self, batch_sizes):
-        aggregator = ResultsAggregator(AcquireMode.INTEGRATOR, (5, 10, 1000))
-        for i, batch_size in enumerate(batch_sizes):
-            batch = (i + 1) * np.ones((batch_size, 10, 1000))
-            aggregator.append(batch)
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(5, 10, 1000), physical_channel="ch1"
+            )
+        }
+        aggregator = ResultsAggregator()
 
-        results = aggregator.results
-        assert results.shape == (5, 10, 1000)
+        for i, batch_size in enumerate(batch_sizes):
+            batch_playback = {"acquire_1": (i + 1) * np.ones((batch_size, 10, 1000))}
+            aggregator.append(batch_playback, acquires)
+
+        results = aggregator.finalise()
+        assert "acquire_1" in results
+        assert results["acquire_1"].shape == (5, 10, 1000)
 
         cumulative_size = 0
         for i, batch_size in enumerate(batch_sizes):
             assert np.all(
-                results[cumulative_size : cumulative_size + batch_size, :, :] == (i + 1)
+                results["acquire_1"][cumulative_size : cumulative_size + batch_size, :, :]
+                == (i + 1)
             )
             cumulative_size += batch_size
 
     @pytest.mark.parametrize("mode", [AcquireMode.RAW, AcquireMode.SCOPE])
     def test_wrong_data_size(self, mode):
-        aggregator = ResultsAggregator(mode, (1000, 100))
+        acquires = {
+            "acquire_1": AcquireData(mode=mode, shape=(1000, 100), physical_channel="ch1")
+        }
+        aggregator = ResultsAggregator()
 
         with pytest.raises(ValueError, match="Expected readout length"):
-            aggregator.append(np.ones((50)))
+            playback = {"acquire_1": np.ones((50))}
+            aggregator.append(playback, acquires)
         with pytest.raises(ValueError, match="Expected readout length"):
-            aggregator.append(np.ones((500, 50)))
+            playback = {"acquire_1": np.ones((500, 50))}
+            aggregator.append(playback, acquires)
 
     @pytest.mark.parametrize("mode", [AcquireMode.RAW, AcquireMode.SCOPE])
     @pytest.mark.parametrize(
@@ -143,78 +228,69 @@ class TestResultsAggregator:
         [[1000], [200, 200, 200, 200, 200], [300, 300, 300, 100], [400, 300, 205, 95]],
     )
     def test_with_scope_and_raw_with_batched_repeats(self, mode, batch_sizes):
-        aggregator = ResultsAggregator(mode, (1000, 254))
-        for i, batch_size in enumerate(batch_sizes):
-            batch = (i + 1) * np.ones((batch_size, 254))
-            aggregator.append(batch)
+        acquires = {
+            "acquire_1": AcquireData(mode=mode, shape=(1000, 254), physical_channel="ch1")
+        }
+        aggregator = ResultsAggregator()
 
-        results = aggregator.results
-        assert results.shape == (1000, 254)
+        for i, batch_size in enumerate(batch_sizes):
+            batch_playback = {"acquire_1": (i + 1) * np.ones((batch_size, 254))}
+            aggregator.append(batch_playback, acquires)
+
+        results = aggregator.finalise()
+        assert "acquire_1" in results
+        assert results["acquire_1"].shape == (1000, 254)
 
         cumulative_size = 0
         for i, batch_size in enumerate(batch_sizes):
             assert np.all(
-                results[cumulative_size : cumulative_size + batch_size, :] == (i + 1)
+                results["acquire_1"][cumulative_size : cumulative_size + batch_size, :]
+                == (i + 1)
             )
             cumulative_size += batch_size
 
     @pytest.mark.parametrize("mode", [AcquireMode.RAW, AcquireMode.SCOPE])
     @pytest.mark.parametrize("batch_sizes", [[10], [5, 3, 2], [6, 4], [5, 5]])
     def test_with_scope_and_raw_with_multiple_iterators(self, mode, batch_sizes):
-        aggregator = ResultsAggregator(mode, (5, 10, 1000, 254))
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=mode, shape=(5, 10, 1000, 254), physical_channel="ch1"
+            )
+        }
+        aggregator = ResultsAggregator()
         for i in range(5):
             for j, batch_size in enumerate(batch_sizes):
-                batch = (i + j / 10) * np.ones((batch_size, 1000, 254))
-                aggregator.append(batch)
+                batch_playback = {
+                    "acquire_1": (i + j / 10) * np.ones((batch_size, 1000, 254))
+                }
+                aggregator.append(batch_playback, acquires)
 
-        results = aggregator.results
-        assert results.shape == (5, 10, 1000, 254)
+        results = aggregator.finalise()
+        assert "acquire_1" in results
+        assert results["acquire_1"].shape == (5, 10, 1000, 254)
 
         for i in range(5):
             cumulative_size = 0
             for j, batch_size in enumerate(batch_sizes):
                 assert np.all(
-                    results[i, cumulative_size : cumulative_size + batch_size, :, :]
+                    results["acquire_1"][
+                        i, cumulative_size : cumulative_size + batch_size, :, :
+                    ]
                     == (i + j / 10)
                 )
                 cumulative_size += batch_size
 
     def test_overflow(self):
-        aggregator = ResultsAggregator(AcquireMode.INTEGRATOR, (1000,))
-        aggregator.append(np.ones((800,)))
+        acquires = {
+            "acquire_1": AcquireData(
+                mode=AcquireMode.INTEGRATOR, shape=(1000,), physical_channel="ch1"
+            )
+        }
+        playback = {"acquire_1": np.ones((800,))}
+        aggregator = ResultsAggregator()
+        aggregator.append(playback, acquires)
         with pytest.raises(
             ValueError, match="Attempting to append more results than allocated"
         ):
-            aggregator.append(np.ones((300,)))
-
-
-class TestResultsCollection:
-    def test_with_multiple_acquires(self):
-        acquires = {
-            "acquire_1": AcquireData(
-                mode=AcquireMode.INTEGRATOR, shape=(5, 1000), physical_channel="ch1"
-            ),
-            "acquire_2": AcquireData(
-                mode=AcquireMode.RAW, shape=(5, 1000, 254), physical_channel="ch2"
-            ),
-            "acquire_3": AcquireData(
-                mode=AcquireMode.SCOPE, shape=(5, 128), physical_channel="ch3"
-            ),
-        }
-
-        collection = ResultsCollection(acquires)
-
-        for i in range(5):
-            collection.append(
-                {
-                    "acquire_1": (i + 1) * np.ones((1000,)),
-                    "acquire_2": (i + 1) * np.ones((1000, 254)),
-                    "acquire_3": (i + 1) * np.ones((128,)),
-                }
-            )
-
-        results = collection.results
-        for i in range(5):
-            assert np.all(results["acquire_1"][i, :] == (i + 1))
-            assert np.all(results["acquire_2"][i, :, :] == (i + 1))
-            assert np.all(results["acquire_3"][i, :] == (i + 1))
+            playback = {"acquire_1": np.ones((300,))}
+            aggregator.append(playback, acquires)

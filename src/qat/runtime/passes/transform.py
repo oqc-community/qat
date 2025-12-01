@@ -9,20 +9,23 @@ from compiler_config.config import (
     ResultsFormatting,
 )
 
+from qat.backend.qblox.acquisition import Acquisition
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
 from qat.executables import Executable
 from qat.ir.instructions import Variable
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
+from qat.purr.backends.utilities import software_post_process_linear_map_complex_to_real
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.instructions import AcquireMode, PostProcessType
 from qat.runtime.passes.purr.analysis import IndexMappingResult
 from qat.runtime.post_processing import apply_post_processing, get_axis_map
 from qat.runtime.results_processing import binary_average, binary_count, numpy_array_to_list
 
 
-class PostProcessingTransform(TransformPass):
+class AcquisitionPostprocessing(TransformPass):
     """Uses the post-processing instructions from the executable package to process the
     results from the engine.
 
@@ -63,6 +66,59 @@ class PostProcessingTransform(TransformPass):
             acquisitions[output_variable] = response
 
         return acquisitions
+
+
+class QBloxAcquisitionPostProcessing(TransformPass):
+    def run(
+        self,
+        playback: dict[str, dict[str, Acquisition]],
+        *args,
+        package: Executable,
+        **kwargs,
+    ):
+        """
+        Now that the combined playback is ready, we can compute and process results as required
+        by customers. This requires loop nest information as well as post-processing and array shaping
+        requirements.
+        """
+
+        results = {}
+        for pulse_channel_id, acquisitions in playback.items():
+            # TODO - Support multiple acquires target (unicity by name only is not wise)
+            acquires = package.acquires
+            for name, acquisition in acquisitions.items():
+                scope_data = acquisition.acquisition.scope
+                integ_data = acquisition.acquisition.bins.integration
+                thrld_data = acquisition.acquisition.bins.threshold
+
+                # TODO - COMPILER-860 - Safer and more flexible acquisition addressing
+                acquire_data = acquires[name]
+                if acquire_data.mode in [AcquireMode.SCOPE, AcquireMode.RAW]:
+                    response = scope_data.path0.data + 1j * scope_data.path1.data
+                elif acquire_data.mode == AcquireMode.INTEGRATOR:
+                    response = integ_data.path0 + 1j * integ_data.path1
+                else:
+                    raise ValueError(f"Unrecognised acquire mode {acquire_data.mode}")
+
+                post_procs, axes = acquire_data.post_processing, {}
+                for pp in post_procs:
+                    if pp.process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                        response, _ = software_post_process_linear_map_complex_to_real(
+                            pp.args, response, axes
+                        )
+                    elif pp.process_type == PostProcessType.DISCRIMINATE:
+                        # f : {0, 1} ----> {-1, 1}
+                        #       x    |---> 1 - 2x
+                        response = 1 - 2 * thrld_data
+
+                response = response.reshape(acquire_data.shape)
+
+                # TODO - COMPILER-860 - Safer and more flexible acquisition addressing
+                if name in results:
+                    raise ValueError(f"Key {name} already exists")
+                results[name] = response
+
+        return results
 
 
 class InlineResultsProcessingTransform(TransformPass):

@@ -17,14 +17,14 @@ from qat.executables import Executable
 from qat.frontend import AutoFrontend
 from qat.instrument.builder import CsvInstrumentBuilder
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
-from qat.middleend import CustomMiddleend, DefaultMiddleend
+from qat.middleend import CustomMiddleend
 from qat.model.loaders.purr import QbloxDummyModelLoader
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.purr.qblox import (
     PipelineConfig,
     QbloxCompilePipeline1,
     QbloxExecutePipeline,
-    QbloxPipeline,
+    QbloxPipeline2,
 )
 from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
 from qat.runtime import SimpleRuntime
@@ -38,13 +38,13 @@ class TestQbloxPipeline:
     def test_build_pipeline(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = QbloxDummyModelLoader(qubit_count=4).load()
-        pipeline = QbloxPipeline._build_pipeline(
+        pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox"), model=model, target_data=None
         )
         assert isinstance(pipeline, Pipeline)
         assert pipeline.name == "qblox"
         assert isinstance(pipeline.frontend, AutoFrontend)
-        assert isinstance(pipeline.middleend, DefaultMiddleend)
+        assert isinstance(pipeline.middleend, CustomMiddleend)
         assert isinstance(pipeline.backend, QbloxBackend2)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
@@ -54,13 +54,13 @@ class TestQbloxPipeline:
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
         model = QbloxDummyModelLoader(qubit_count=4).load()
-        compile_pipeline = QbloxPipeline._build_pipeline(
+        compile_pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
         )
         assert isinstance(compile_pipeline, CompilePipeline)
         assert compile_pipeline.name == "qblox_compile"
         assert isinstance(compile_pipeline.frontend, AutoFrontend)
-        assert isinstance(compile_pipeline.middleend, DefaultMiddleend)
+        assert isinstance(compile_pipeline.middleend, CustomMiddleend)
         assert isinstance(compile_pipeline.backend, QbloxBackend2)
         assert isinstance(compile_pipeline.target_data, TargetData)
 
@@ -74,8 +74,8 @@ class TestQbloxPipeline:
         )
         instrument = CsvInstrumentBuilder(file_path=filepath).build()
         model = QbloxDummyModelLoader(qubit_count=4).load()
-        engine = QbloxEngine(instrument=instrument, model=model)
-        execute_pipeline = QbloxPipeline._build_pipeline(
+        engine = QbloxEngine(instrument)
+        execute_pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox_execute"),
             model=model,
             target_data=None,
@@ -127,7 +127,7 @@ class TestQbloxExecutePipeline:
         )
         instrument = CsvInstrumentBuilder(file_path=filepath).build()
         model = QbloxDummyModelLoader(qubit_count=4).load()
-        engine = QbloxEngine(instrument=instrument, model=model)
+        engine = QbloxEngine(instrument)
         execute_pipeline = QbloxExecutePipeline._build_pipeline(
             config=PipelineConfig(name="echo_execute"),
             model=model,
@@ -187,7 +187,7 @@ class TestQbloxPipelineWithCircuits:
     target_data = QbloxTargetData.default()
     # TODO: 32Q support: COMPILER-728
     model = QbloxDummyModelLoader(qubit_count=16).load()
-    pipeline = QbloxPipeline(
+    pipeline = QbloxPipeline2(
         config=PipelineConfig(name="stable"), model=model, target_data=target_data
     )
 

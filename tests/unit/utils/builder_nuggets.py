@@ -226,16 +226,21 @@ def measure_acquire(
                 int(width * 1e9)
             )
             filter = CustomPulse(acquire_channel, weights)
-        builder.add(MeasurePulse(qubit.get_measure_channel(), **measure_pulse))
-        builder.add(
-            Acquire(
-                acquire_channel,
-                output_variable=f"Q{index}",
-                mode=acq_mode,
-                filter=filter,
-                delay=measure_acquire["delay"],
-                time=width,
-            )
+
+        measure = MeasurePulse(qubit.get_measure_channel(), **measure_pulse)
+        acquire = Acquire(
+            acquire_channel,
+            output_variable=f"Q{index}",
+            mode=acq_mode,
+            filter=filter,
+            delay=measure_acquire["delay"],
+            time=width,
+        )
+
+        builder.add(measure)
+        builder.add(acquire)
+        builder.post_processing(
+            acquire, PostProcessType.MEAN, ProcessAxis.SEQUENCE, acquire_channel
         )
     return builder
 

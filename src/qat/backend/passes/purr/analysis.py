@@ -14,7 +14,9 @@ from qat.backend.graph import ControlFlowGraph
 from qat.backend.passes.analysis import IntermediateFrequencyResult
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
+from qat.executables import AcquireData
 from qat.ir.lowered import PartitionedIR
+from qat.ir.measure import PostProcessing as PydPostProcessing
 from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
@@ -61,7 +63,7 @@ class TriageResult(ResultInfoMixin):
     pp_map: dict[str, list[PostProcessing]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    rp_map: dict[str, ResultsProcessing] = field(default_factory=dict)
+    rp_map: dict[str, InlineResultsProcessing] = field(default_factory=dict)
     active_targets: set[PulseChannel] = field(default_factory=set)
 
 
@@ -81,6 +83,7 @@ class TriagePass(AnalysisPass):
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
+
         targets = set()
         for inst in ir.instructions:
             if isinstance(inst, QuantumInstruction):
@@ -125,13 +128,13 @@ class TriagePass(AnalysisPass):
             elif isinstance(inst, PostProcessing):
                 result.pp_map[inst.output_variable].append(inst)
             elif isinstance(inst, ResultsProcessing):
-                result.rp_map[inst.variable] = inst
+                result.rp_map[inst.variable] = inst.results_processing
 
             ### Active targets ###
             if isinstance(inst, Acquire):
                 for t in inst.quantum_targets:
                     result.active_targets.add(t)
-                    result.acquire_map[t].append(inst)
+                    result.acquire_map[t.full_id()].append(inst)
             elif isinstance(inst, Pulse):
                 result.active_targets.add(inst.channel)
 
@@ -143,9 +146,7 @@ class TriagePass(AnalysisPass):
             if acq.output_variable not in result.rp_map
         }
         for missing_var in missing_results:
-            result.rp_map[missing_var] = ResultsProcessing(
-                missing_var, InlineResultsProcessing.Experiment
-            )
+            result.rp_map[missing_var] = InlineResultsProcessing.Experiment
 
         res_mgr.add(result)
 
@@ -196,6 +197,10 @@ class BindingResult(ResultInfoMixin):
     iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = field(
         default_factory=lambda: defaultdict(dict)
     )
+
+    # TODO - COMPILER-727 - Move acquire data analysis to its own pass
+    # TODO - COMPILER-860 - Safer and more flexible acquisition addressing
+    acquire_data_map: dict[str, AcquireData] = field(default_factory=dict)
 
 
 class BindingPass(AnalysisPass):
@@ -253,6 +258,10 @@ class BindingPass(AnalysisPass):
         :param res_mgr: The result manager to save the analysis results.
         """
 
+        # TODO -COMPILER-851 - Specify ctrl HW features in TargetData
+        enable_hw_averaging = kwargs.get("enable_hw_averaging", False)
+
+        # TODO - COMPILER-855 - Split into smaller passes
         triage_result = res_mgr.lookup_by_type(TriageResult)
         result = BindingResult()
         for target, instructions in triage_result.target_map.items():
@@ -329,7 +338,7 @@ class BindingPass(AnalysisPass):
                             (delimiter, inst) if s == scope else s for s in scopes
                         ]
                 elif isinstance(inst, Acquire):
-                    if any(
+                    if enable_hw_averaging and any(
                         pp.process == PostProcessType.MEAN
                         and ProcessAxis.SEQUENCE in pp.axes
                         for pp in triage_result.pp_map[inst.output_variable]
@@ -346,6 +355,33 @@ class BindingPass(AnalysisPass):
                     loop_nest_size = reduce(mul, shape, 1)
                     iter_bound_result[iter_name] = IterBound(
                         start=0, step=1, end=loop_nest_size, count=loop_nest_size
+                    )
+
+                    # TODO - COMPILER-727 - Move acquire data analysis to its own pass
+                    # TODO - COMPILER-860 - Safer and more flexible acquisition addressing
+                    if inst.output_variable in result.acquire_data_map:
+                        raise ValueError(f"Key {inst.output_variable} already exists")
+
+                    # TODO - COMPILER-852 - Contractual data specification
+                    if len(parent_scopes) == 0:
+                        assert shape == ()
+                        shape = (1, -1)
+                    elif not any(
+                        (s, e) for (s, e) in parent_scopes if isinstance(s, Sweep)
+                    ):
+                        shape = (1,) + shape
+
+                    legacy_pps = triage_result.pp_map[inst.output_variable]
+                    result.acquire_data_map[inst.output_variable] = AcquireData(
+                        mode=inst.mode,
+                        shape=shape,
+                        physical_channel=target.physical_channel.id,
+                        post_processing=[
+                            PydPostProcessing._from_legacy(pp) for pp in legacy_pps
+                        ],
+                        results_processing=triage_result.rp_map.get(
+                            inst.output_variable, None
+                        ),
                     )
 
                     iter_name = f"{hash(inst)}"

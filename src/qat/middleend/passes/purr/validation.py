@@ -257,6 +257,9 @@ class ReadoutValidation(ValidationPass):
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
+        # TODO -COMPILER-851 - Specify ctrl HW features in TargetData
+        enable_hw_averaging = kwargs.get("enable_hw_averaging", False)
+
         model = self.hardware
 
         if not isinstance(model, LiveHardwareModel):
@@ -270,11 +273,12 @@ class ReadoutValidation(ValidationPass):
                     inst.acquire.mode == AcquireMode.SCOPE
                     and ProcessAxis.SEQUENCE in inst.axes
                 ):
-                    raise ValueError(
-                        "Invalid post-processing! Post-processing over SEQUENCE is "
-                        "not possible after the result is returned from hardware "
-                        "in SCOPE mode!"
-                    )
+                    if not enable_hw_averaging:
+                        raise ValueError(
+                            "Invalid post-processing! Post-processing over SEQUENCE is "
+                            "not possible after the result is returned from hardware "
+                            "in SCOPE mode!"
+                        )
                 elif (
                     inst.acquire.mode == AcquireMode.INTEGRATOR
                     and ProcessAxis.TIME in inst.axes
