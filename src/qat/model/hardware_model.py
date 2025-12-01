@@ -12,6 +12,7 @@ from semver import Version
 from qat.model.device import Qubit, Resonator
 from qat.model.error_mitigation import ErrorMitigation
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import (
     CalibratableUnitInterval,
     FrozenDict,
@@ -22,6 +23,7 @@ from qat.utils.pydantic import (
 )
 
 VERSION = Version(0, 0, 1)
+log = get_default_logger()
 
 
 class LogicalHardwareModel(NoExtraFieldsModel):
@@ -92,20 +94,20 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         self._ids_to_physical_channels = {}
         self._pulse_channel_ids_to_physical_channel = {}
         self._pulse_channel_ids_to_device = {}
-        self._physical_channel_ids_to_device = {}
         self._qubits_to_qubit_ids = {}
         self._resonators_to_qubits = {}
         self._physical_channel_map = {}
-        self._physical_channel_ids_to_device = {}
+        self._physical_channel_ids_to_qubit = {}
+        self._physical_channel_ids_to_resonator = {}
 
         for qubit_id, qubit in self.qubits.items():
             self._qubits_to_qubit_ids[qubit] = qubit_id
             self._resonators_to_qubits[qubit.resonator] = qubit
+            self._physical_channel_to_device_mapping(qubit)
 
             for device in [qubit, qubit.resonator]:
                 phys_channel = device.physical_channel
                 self._ids_to_physical_channels[phys_channel.uuid] = phys_channel
-                self._physical_channel_ids_to_device[phys_channel.uuid] = device
                 self._physical_channel_map[phys_channel.name_index] = phys_channel
 
                 for pulse_channel in device.all_pulse_channels:
@@ -114,6 +116,25 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                         phys_channel
                     )
                     self._pulse_channel_ids_to_device[pulse_channel.uuid] = device
+
+    def _physical_channel_to_device_mapping(self, qubit: Qubit):
+        """
+        populated the mapping from physical channel ids to devices (qubits and resonators)
+        in the hardware model.
+        The qubit mapping will also map the resonator physical channels to the qubit connected to
+        the resonator.
+        While the resonator mapping will only map the physical channels to the resonator.
+        """
+        self._physical_channel_ids_to_qubit.update(
+            {
+                qubit.physical_channel.uuid: qubit,
+                qubit.resonator.physical_channel.uuid: qubit,
+            }
+        )
+
+        self._physical_channel_ids_to_resonator.update(
+            {qubit.resonator.physical_channel.uuid: qubit.resonator}
+        )
 
     @model_validator(mode="before")
     def default_logical_connectivity(cls, data):
@@ -277,11 +298,23 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         return self._pulse_channel_ids_to_device.get(id_, None)
 
     def device_for_physical_channel_id(self, id_: str) -> Qubit | Resonator | None:
-        return self._physical_channel_ids_to_device.get(id_, None)
+        if id_ in self._physical_channel_ids_to_resonator:
+            return self._physical_channel_ids_to_resonator[id_]
+        if id_ in self._physical_channel_ids_to_qubit:
+            return self._physical_channel_ids_to_qubit[id_]
+        log.warning(f"No device found for physical channel id {id_}.")
 
-    def qubit_for_resonator(self, resonator: Resonator) -> Qubit:
+    def qubit_for_physical_channel_id(self, id_: str) -> Qubit | None:
+        """Returns the qubit associated with the given physical channel id."""
+        if id_ in self._physical_channel_ids_to_qubit:
+            return self._physical_channel_ids_to_qubit[id_]
+        log.warning(f"No qubit found for physical channel id {id_}.")
+
+    def qubit_for_resonator(self, resonator: Resonator) -> Qubit | None:
         """Returns the qubit associated with the given resonator."""
-        return self._resonators_to_qubits.get(resonator, None)
+        if resonator in self._resonators_to_qubits:
+            return self._resonators_to_qubits[resonator]
+        log.warning(f"No qubit found for resonator {resonator}.")
 
     @property
     def quantum_devices(self) -> list[Qubit, Resonator]:

@@ -45,6 +45,39 @@ class TestPhysicalHardwareModel:
         with pytest.raises(ValidationError):
             PhysicalHardwareModel(**model_data)
 
+    def test_qubit_for_physical_channel_id_returns_qubits(self):
+        model = LucyModelLoader(qubit_count=8).load()
+        for qubit in model.qubits.values():
+            returned_qubit = model.qubit_for_physical_channel_id(
+                qubit.physical_channel.uuid
+            )
+            assert returned_qubit == qubit
+
+            returned_qubit = model.qubit_for_physical_channel_id(
+                qubit.resonator.physical_channel.uuid
+            )
+            assert returned_qubit == qubit
+
+    def test_device_for_physical_channel_id_returns_correct_devices(self):
+        model = LucyModelLoader(qubit_count=8).load()
+        for qubit in model.qubits.values():
+            returned_device = model.device_for_physical_channel_id(
+                qubit.physical_channel.uuid
+            )
+            assert returned_device == qubit
+
+            returned_device = model.device_for_physical_channel_id(
+                qubit.resonator.physical_channel.uuid
+            )
+            assert returned_device == qubit.resonator
+
+    def test_device_for_invalid_physical_channel_id_raises(self, caplog):
+        model = LucyModelLoader(qubit_count=8).load()
+        invalid_uuid = "00000000-0000-0000-0000-000000000000"
+        with caplog.at_level("WARNING", logger="qat.purr.utils.logger"):
+            model.device_for_physical_channel_id(invalid_uuid)
+        assert "No device found for physical channel id" in caplog.text
+
 
 @pytest.mark.parametrize("n_qubits", [2, 3, 4, 10, 32])
 @pytest.mark.parametrize("n_logical_qubits", [0, 2, 4])

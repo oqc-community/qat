@@ -52,7 +52,6 @@ from qat.model.device import (
     PulseChannel,
     Qubit,
     QubitPulseChannels,
-    Resonator,
     ResonatorPulseChannels,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -1431,16 +1430,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
         # average amplitude of the response.
         #
         # The returned value for each shot after postprocessing is a complex iq value.
-        device = self.builder.hw.device_for_physical_channel_id(
+        qubit = self.builder.hw.qubit_for_physical_channel_id(
             pulse_channel.physical_channel_id
         )
-        if device is None:
+        if qubit is None:
             raise TypeError(
-                f"Pulse channel {pulse_channel} is not assigned to any known device."
+                f"Pulse channel {pulse_channel} is not assigned to any known qubit."
             )
-
-        if isinstance(device, Resonator):
-            qubit = self.builder.hw.qubit_for_resonator(device)
 
         # This kind of logic to add delays is really part of a measure definition, and
         # not within the semantics of a capture command, which is essentially an acqurire.

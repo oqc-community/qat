@@ -9,7 +9,7 @@ from qat.core.result_base import ResultInfoMixin
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.measure import Acquire
 from qat.ir.waveforms import Pulse
-from qat.model.device import PulseChannel, Qubit, Resonator
+from qat.model.device import PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.utils.logger import get_default_logger
 
@@ -87,11 +87,9 @@ class ActivePulseChannelAnalysis(AnalysisPass):
         result = ActivePulseChannelResults()
         for target in targets:
             pulse_channel = ir.get_pulse_channel(target)
-            device = self.model.device_for_physical_channel_id(
+            device = self.model.qubit_for_physical_channel_id(
                 pulse_channel.physical_channel_id
             )
-            if isinstance(device, Resonator):
-                device = self.model.qubit_for_resonator(device)
 
             if device is None:
                 raise ValueError(

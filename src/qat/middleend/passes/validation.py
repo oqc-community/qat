@@ -225,16 +225,13 @@ class DynamicFrequencyValidation(ValidationPass):
             if if_violations := self._validate_frequency_shifts(
                 physical_channel_id, if_values
             ):
-                device = self.model.device_for_physical_channel_id(
+                qubit = self.model.qubit_for_physical_channel_id(
                     physical_channel_ids[pulse_channel_id]
                 )
-                device_name = "Qubit "
-                if self._is_resonator[physical_channel_id]:
-                    device_name = "Resonator "
-                    device = next(
-                        filter(lambda qubit: qubit.resonator is device, self.model.qubits)
-                    )
-                device_name += str(self.model.index_of_qubit(device))
+                device_name = (
+                    "Resonator " if self._is_resonator[physical_channel_id] else "Qubit "
+                )
+                device_name += str(self.model.index_of_qubit(qubit))
 
                 if (
                     hw_pc := self.model.pulse_channel_with_id(pulse_channel_id)
