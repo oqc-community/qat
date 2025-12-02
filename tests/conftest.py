@@ -169,3 +169,9 @@ def qblox_resource(request, legacy_qblox_instrument_factory):
 
     yield _qblox_resource
     instrument.disconnect()
+
+
+def pytest_sessionfinish(session, exitstatus):
+    if session.config.option.experimental == 1 and exitstatus == 5:
+        # No tests collected due to experimental-only flag
+        session.exitstatus = 0

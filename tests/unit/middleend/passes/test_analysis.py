@@ -14,8 +14,6 @@ from qat.middleend.passes.analysis import (
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.purr.utils.logger import LoggerLevel
 
-pytestmark = pytest.mark.experimental
-
 
 class TestActivePulseChannelAnalysis:
     model = LucyModelLoader().load()

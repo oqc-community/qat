@@ -33,14 +33,10 @@ def get_default_results_pipeline(model: QuantumHardwareModel) -> PassManager:
     )
 
 
-def get_experimental_results_pipeline(
-    pyd_model: PydHardwareModel, target_data: TargetData
-) -> PassManager:
-    """Factory for creating the experimental results pipeline.
+def get_results_pipeline(model: PydHardwareModel, target_data: TargetData) -> PassManager:
+    """Factory for creating the results pipeline.
 
-    This pipeline includes additional experimental features.
-
-    :param pyd_model: The quantum hardware model converted to Pydantic.
+    :param model: The quantum hardware model.
     """
 
     return (
@@ -49,6 +45,6 @@ def get_experimental_results_pipeline(
         | InlineResultsProcessingTransform()
         | AssignResultsTransform()
         | ResultTransform()
-        | PydIndexMappingAnalysis(pyd_model)
-        | ErrorMitigation(pyd_model)
+        | PydIndexMappingAnalysis(model)
+        | ErrorMitigation(model)
     )

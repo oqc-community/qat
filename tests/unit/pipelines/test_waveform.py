@@ -20,27 +20,23 @@ from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
-from qat.pipelines.purr.waveform_v1 import EchoPipeline
-from qat.pipelines.waveform import (
-    EchoExecutePipeline as ExperimentalEchoExecutePipeline,
-)
-from qat.pipelines.waveform import EchoPipeline as ExperimentalEchoPipeline
+from qat.pipelines.purr.waveform_v1 import EchoPipeline as PurrEchoPipeline
+from qat.pipelines.waveform import EchoExecutePipeline as PydanticEchoExecutePipeline
+from qat.pipelines.waveform import EchoPipeline as PydanticEchoPipeline
 from qat.pipelines.waveform import PipelineConfig
 from qat.pipelines.waveform import (
-    WaveformCompilePipeline as ExperimentalWaveformCompilePipeline,
+    WaveformCompilePipeline as PydanticWaveformCompilePipeline,
 )
 from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.qasm_qir import get_pipeline_tests
 
-pytestmark = pytest.mark.experimental
 
-
-class TestExperimentalEchoPipeline:
+class TestEchoPipeline:
     def test_build_pipeline(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = LucyModelLoader(qubit_count=4).load()
-        pipeline = ExperimentalEchoPipeline._build_pipeline(
+        pipeline = PydanticEchoPipeline._build_pipeline(
             config=PipelineConfig(name="echo"), model=model, target_data=None
         )
         assert isinstance(pipeline, Pipeline)
@@ -56,7 +52,7 @@ class TestExperimentalEchoPipeline:
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
         model = LucyModelLoader(qubit_count=4).load()
-        compile_pipeline = ExperimentalWaveformCompilePipeline._build_pipeline(
+        compile_pipeline = PydanticWaveformCompilePipeline._build_pipeline(
             config=PipelineConfig(name="compile"),
             model=model,
             target_data=None,
@@ -70,7 +66,7 @@ class TestExperimentalEchoPipeline:
     def test_build_execute_pipeline(self):
         """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
         model = LucyModelLoader(qubit_count=4).load()
-        execute_pipeline = ExperimentalEchoExecutePipeline._build_pipeline(
+        execute_pipeline = PydanticEchoExecutePipeline._build_pipeline(
             config=PipelineConfig(name="execute"),
             model=model,
             target_data=None,
@@ -106,8 +102,8 @@ test_files = get_pipeline_tests(
     ids=["binary_count", "binary", "raw"],
     scope="class",
 )
-class TestExperimentalEchoPipelineWithCircuits:
-    """A class that tests the compilation and execution of the EchoPipeline with a
+class TestEchoPipelineWithCircuits:
+    """A class that tests the compilation and execution of the PydanticEchoPipeline with a
     WaveformBackend against circuit programs.
 
     It tests the expectations of the compilation pipelines, inspecting the properties of
@@ -116,8 +112,8 @@ class TestExperimentalEchoPipelineWithCircuits:
 
     target_data = TargetData.default()
     model = LucyModelLoader(qubit_count=32).load()
-    pipeline = ExperimentalEchoPipeline(
-        config=PipelineConfig(name="stable"), model=model, target_data=target_data
+    pipeline = PydanticEchoPipeline(
+        config=PipelineConfig(name="pydantic"), model=model, target_data=target_data
     )
 
     @pytest.fixture(scope="class")
@@ -134,7 +130,7 @@ class TestExperimentalEchoPipelineWithCircuits:
     def executable(
         self, program_file, compiler_config, num_readouts, num_registers
     ) -> Executable[WaveformProgram]:
-        """Compile the program file using the stable pipeline."""
+        """Compile the program file using the pydantic pipeline."""
         return QAT().compile(str(program_file), compiler_config, pipeline=self.pipeline)[0]
 
     @pytest.fixture(scope="class")
@@ -242,7 +238,7 @@ class TestExperimentalEchoPipelineWithCircuits:
 
     def test_acquires_are_integrator_mode(self, executable, request):
         """Check that all acquires are in INTEGRATOR mode, as this is the expected mode for
-        the EchoPipeline."""
+        the PydanticEchoPipeline."""
 
         if "openpulse" in request.node.callspec.id:
             pytest.mark.skip("Openpulse has more expressive use of acquires.")
@@ -386,10 +382,10 @@ parity_test_files = get_pipeline_tests(openpulse=True)
     ids=parity_test_files.keys(),
     scope="class",
 )
-class TestExperimentalEchoPipelineParity:
+class TestEchoPipelineParity:
     """
     Parity tests specifically targeted at the echo engine in new QAT and the
-    experimental stack that incrementally uses the Pydantic stack. Aims to test:
+    Pydantic stack. Aims to test:
 
     - New echo pipelines: Does compile and execute work in the way we expect using the new
       QAT infrastructure?
@@ -403,11 +399,11 @@ class TestExperimentalEchoPipelineParity:
         qubit_count=32, target_data=target_data, random_seed=42
     ).load()
     pydantic_model = convert_purr_echo_hw_to_pydantic(model)
-    stable_pipeline = EchoPipeline(
-        config=PipelineConfig(name="stable"), model=model, target_data=target_data
+    purr_pipeline = PurrEchoPipeline(
+        config=PipelineConfig(name="purr"), model=model, target_data=target_data
     )
-    experimental_pipeline = ExperimentalEchoPipeline(
-        config=PipelineConfig(name="experimental"),
+    pydantic_pipeline = PydanticEchoPipeline(
+        config=PipelineConfig(name="pydantic"),
         model=pydantic_model,
         target_data=target_data,
     )
@@ -421,20 +417,20 @@ class TestExperimentalEchoPipelineParity:
         )
 
     @pytest.fixture(scope="class")
-    def stable_config(self, program_file):
+    def purr_config(self, program_file):
         # This is intentionally parametrized with program_file so a new instance is created
         # per program.
         return self.compiler_config()
 
     @pytest.fixture(scope="class")
-    def experimental_config(self, program_file):
+    def pydantic_config(self, program_file):
         # This is intentionally parametrized with program_file so a new instance is created
         # per program.
         return self.compiler_config()
 
     @pytest.fixture(scope="class")
     def physical_channel_map(self):
-        pyd_model = self.experimental_pipeline.backend.model
+        pyd_model = self.pydantic_pipeline.backend.model
         physical_channel_map = {}
         for index, qubit in pyd_model.qubits.items():
             legacy_qubit = self.model.get_qubit(index)
@@ -447,44 +443,40 @@ class TestExperimentalEchoPipelineParity:
         return physical_channel_map
 
     @pytest.fixture(scope="class")
-    def stable_executable(self, program_file, stable_config):
+    def purr_executable(self, program_file, purr_config):
+        return QAT().compile(str(program_file), purr_config, pipeline=self.purr_pipeline)[0]
+
+    @pytest.fixture(scope="class")
+    def pydantic_executable(self, program_file, pydantic_config):
         return QAT().compile(
-            str(program_file), stable_config, pipeline=self.stable_pipeline
+            str(program_file), pydantic_config, pipeline=self.pydantic_pipeline
         )[0]
 
     @pytest.fixture(scope="class")
-    def experimental_executable(self, program_file, experimental_config):
-        return QAT().compile(
-            str(program_file), experimental_config, pipeline=self.experimental_pipeline
-        )[0]
+    def purr_results(self, purr_executable, purr_config):
+        return QAT().execute(purr_executable, purr_config, pipeline=self.purr_pipeline)[0]
 
     @pytest.fixture(scope="class")
-    def stable_results(self, stable_executable, stable_config):
+    def pydantic_results(self, pydantic_executable, pydantic_config):
         return QAT().execute(
-            stable_executable, stable_config, pipeline=self.stable_pipeline
+            pydantic_executable,
+            pydantic_config,
+            pipeline=self.pydantic_pipeline,
         )[0]
 
-    @pytest.fixture(scope="class")
-    def experimental_results(self, experimental_executable, experimental_config):
-        return QAT().execute(
-            experimental_executable,
-            experimental_config,
-            pipeline=self.experimental_pipeline,
-        )[0]
+    def test_executable_metadata(self, purr_executable, pydantic_executable):
+        assert purr_executable.calibration_id == pydantic_executable.calibration_id
 
-    def test_executable_metadata(self, stable_executable, experimental_executable):
-        assert stable_executable.calibration_id == experimental_executable.calibration_id
-
-    def test_program_metadata(self, stable_executable, experimental_executable):
-        for stable_program, experimental_program in zip(
-            stable_executable.programs, experimental_executable.programs
+    def test_program_metadata(self, purr_executable, pydantic_executable):
+        for purr_program, pydantic_program in zip(
+            purr_executable.programs, pydantic_executable.programs
         ):
             assert np.isclose(
-                stable_program.repetition_time, experimental_program.repetition_time
+                purr_program.repetition_time, pydantic_program.repetition_time
             )
-            assert np.isclose(stable_program.shots, experimental_program.shots)
+            assert np.isclose(purr_program.shots, pydantic_program.shots)
 
-    def test_results_processing(self, stable_executable, experimental_executable, request):
+    def test_results_processing(self, purr_executable, pydantic_executable, request):
         if "qir-select" in request.node.callspec.id:
             pytest.xfail(
                 "This is a known issue with the legacy workflow for doing TKET opts on QIR."
@@ -493,70 +485,64 @@ class TestExperimentalEchoPipelineParity:
                 "because the new stack handles it slightly differently to give the correct "
                 "result."
             )
-        assert stable_executable.acquires.keys() == experimental_executable.acquires.keys()
-        for key in stable_executable.acquires.keys():
-            stable_acquire = stable_executable.acquires[key]
-            experimental_acquire = experimental_executable.acquires[key]
-            assert (
-                stable_acquire.results_processing == experimental_acquire.results_processing
-            )
+        assert purr_executable.acquires.keys() == pydantic_executable.acquires.keys()
+        for key in purr_executable.acquires.keys():
+            purr_acquire = purr_executable.acquires[key]
+            pydantic_acquire = pydantic_executable.acquires[key]
+            assert purr_acquire.results_processing == pydantic_acquire.results_processing
 
-    def test_postprocessing_data(self, stable_executable, experimental_executable):
-        assert stable_executable.acquires.keys() == experimental_executable.acquires.keys()
-        for key in stable_executable.acquires.keys():
-            stable_acquire = stable_executable.acquires[key]
-            experimental_acquire = experimental_executable.acquires[key]
-            assert stable_acquire.post_processing == experimental_acquire.post_processing
+    def test_postprocessing_data(self, purr_executable, pydantic_executable):
+        assert purr_executable.acquires.keys() == pydantic_executable.acquires.keys()
+        for key in purr_executable.acquires.keys():
+            purr_acquire = purr_executable.acquires[key]
+            pydantic_acquire = pydantic_executable.acquires[key]
+            assert purr_acquire.post_processing == pydantic_acquire.post_processing
 
         # the ordering of packages, and different times when measures are done mean we
         # no longer have complete parity here.
-        assert len(stable_executable.assigns) == len(experimental_executable.assigns)
-        for stable, experimental in zip(
-            stable_executable.assigns, experimental_executable.assigns
-        ):
-            if stable.name.startswith("generated_name_"):
-                assert experimental.name.startswith("generated_name_")
+        assert len(purr_executable.assigns) == len(pydantic_executable.assigns)
+        for purr, pydantic in zip(purr_executable.assigns, pydantic_executable.assigns):
+            if purr.name.startswith("generated_name_"):
+                assert pydantic.name.startswith("generated_name_")
             else:
-                assert stable.name == experimental.name
-            if isinstance(stable.value, list):
-                for sv, ev in zip(stable.value, experimental.value):
+                assert purr.name == pydantic.name
+            if isinstance(purr.value, list):
+                for sv, ev in zip(purr.value, pydantic.value):
                     assert sv == (ev.name if isinstance(ev, PydVariable) else ev)
             else:
-                assert stable.value == experimental.value.name
+                assert purr.value == pydantic.value.name
 
-    def test_subpackages(
-        self, stable_executable, experimental_executable, physical_channel_map
-    ):
-        for stable_program, experimental_program in zip(
-            stable_executable.programs, experimental_executable.programs
+    def test_subpackages(self, purr_executable, pydantic_executable, physical_channel_map):
+        for purr_program, pydantic_program in zip(
+            purr_executable.programs, pydantic_executable.programs
         ):
-            for key, stable_data in stable_program.channel_data.items():
+            for key, purr_data in purr_program.channel_data.items():
                 new_key = physical_channel_map[key]
-                assert new_key in experimental_program.channel_data
-                assert isinstance(stable_data, WaveformChannelData)
-                experimental_data = experimental_program.channel_data[new_key]
+                assert new_key in pydantic_program.channel_data
+                assert isinstance(purr_data, WaveformChannelData)
+                pydantic_data = pydantic_program.channel_data[new_key]
                 assert (
-                    stable_data.baseband_frequency is None
-                    and experimental_data.baseband_frequency is None
+                    purr_data.baseband_frequency is None
+                    and pydantic_data.baseband_frequency is None
                 ) or np.isclose(
-                    stable_data.baseband_frequency, experimental_data.baseband_frequency
+                    purr_data.baseband_frequency, pydantic_data.baseband_frequency
                 )
 
                 # Since how we sync qubits before measurement has changed, we have diverged
                 # from complete feature parity here. The buffers and acquires might look
                 # different: check what we can, but otherwise, skip
-                assert len(stable_data.acquires) == len(experimental_data.acquires)
-                if len(stable_data.acquires) > 0:
-                    for acq1, acq2 in zip(stable_data.acquires, experimental_data.acquires):
+                assert len(purr_data.acquires) == len(pydantic_data.acquires)
+                if len(purr_data.acquires) > 0:
+                    for acq1, acq2 in zip(purr_data.acquires, pydantic_data.acquires):
                         assert acq1.length == acq2.length
                         assert np.allclose(
-                            stable_data.buffer[acq1.position : acq1.position + acq1.length],
-                            experimental_data.buffer[
+                            purr_data.buffer[acq1.position : acq1.position + acq1.length],
+                            pydantic_data.buffer[
                                 acq2.position : acq2.position + acq2.length
                             ],
                         )
                 else:
-                    assert np.allclose(stable_data.buffer, experimental_data.buffer)
+                    assert np.allclose(purr_data.buffer, pydantic_data.buffer)
 
-    def test_results_formatting(self, stable_results, experimental_results):
-        assert stable_results == experimental_results
+    def test_results_formatting(self, purr_results, pydantic_results):
+        assert purr_results == pydantic_results

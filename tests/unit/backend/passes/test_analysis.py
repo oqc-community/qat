@@ -23,8 +23,6 @@ from qat.middleend.passes.purr.transform import (
 from qat.model.loaders.converted import PydEchoModelLoader
 from qat.model.target_data import TargetData
 
-pytestmark = pytest.mark.experimental
-
 
 class TestTimelineAnalysis:
     def test_timelines_match(self):

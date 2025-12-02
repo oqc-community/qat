@@ -13,15 +13,13 @@ log = get_default_logger()
 
 
 class WaveformCompilePipeline(UpdateablePipeline):
-    """A pipeline that compiles programs using the :class:`PydWaveformV1Backend`.
+    """A pipeline that compiles programs using the :class:`PydWaveformBackend`.
 
     .. warning::
 
         This pipeline is for compilation purposes only and does not execute programs.
         Please select an appropriate execution pipeline if you wish to execute compiled
         programs.
-
-        This pipeline is experimental and still in progress. Please use with caution.
     """
 
     @staticmethod
@@ -31,7 +29,7 @@ class WaveformCompilePipeline(UpdateablePipeline):
         target_data: TargetData | None,
         engine: None = None,
     ) -> CompilePipeline:
-        """Constructs a pipeline equipped with the :class:`PydWaveformV1Backend`
+        """Constructs a pipeline equipped with the :class:`PydWaveformBackend`
         and :class:`EchoEngine`."""
 
         if engine is not None:
