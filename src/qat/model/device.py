@@ -214,6 +214,8 @@ class DrivePulseChannel(QubitPulseChannel):
         frozen=True,
     )
 
+    pulse_x_pi: CalibratablePulse | None = Field(default=None)
+
 
 class MeasurePulseChannel(ResonatorPulseChannel):
     """
@@ -420,6 +422,8 @@ class Qubit(Component):
 
     mean_z_map_args: list[complex | float] = Field(max_length=2, default=[1.0, 0.0])
     discriminator: complex | float = 0.0
+
+    direct_x_pi: bool = False
 
     def model_post_init(self, context: Any, /) -> None:
         if isinstance(self.discriminator, np.complexfloating):

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from copy import deepcopy
 from uuid import uuid4
 
 import numpy as np
@@ -302,14 +303,24 @@ class QuantumInstructionBuilder(InstructionBuilder):
         :param theta: The applied rotation angle.
         :param pulse_channel: The pulse channel the pulses get sent to.
         """
-        if np.isclose(theta, np.pi / 2.0):
-            return self.add(*self._hw_X_pi_2(target, pulse_channel))
-        elif np.isclose(theta, -np.pi / 2.0):
-            return self.add(
-                *self._hw_Z(target, theta=np.pi, pulse_channel=pulse_channel),
-                *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
-                *self._hw_Z(target, theta=np.pi, pulse_channel=pulse_channel),
+        if np.isclose(np.abs(theta), np.pi / 2.0):
+            xpi_pulse = self._hw_X_pi_2(target, pulse_channel=pulse_channel)
+            angle = 0 if theta > 0 else np.pi
+            return self._apply_z_transform_on_operation(
+                target, xpi_pulse, angle, pulse_channel=pulse_channel
             )
+
+        elif (
+            np.isclose(np.abs(theta), np.pi)
+            and getattr(target, "direct_x_pi", False)
+            and getattr(target.drive_pulse_channel, "pulse_x_pi", None) is not None
+        ):
+            xpi_pulse = self._hw_X_pi(target, pulse_channel=pulse_channel)
+            angle = 0 if theta > 0 else np.pi
+            return self._apply_z_transform_on_operation(
+                target, xpi_pulse, angle, pulse_channel=pulse_channel
+            )
+
         return self.U(
             target,
             theta=theta,
@@ -327,18 +338,24 @@ class QuantumInstructionBuilder(InstructionBuilder):
         :param theta: The applied rotation angle.
         :param pulse_channel: The pulse channel the pulses get sent to.
         """
-        if np.isclose(theta, np.pi / 2.0):
-            return self.add(
-                *self._hw_Z(target, theta=-np.pi / 2.0, pulse_channel=pulse_channel),
-                *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
-                *self._hw_Z(target, theta=np.pi / 2.0, pulse_channel=pulse_channel),
+        if np.isclose(np.abs(theta), np.pi / 2.0):
+            xpi_pulse = self._hw_X_pi_2(target, pulse_channel=pulse_channel)
+            angle = np.pi / 2 if theta > 0 else -np.pi / 2
+            return self._apply_z_transform_on_operation(
+                target, xpi_pulse, angle, pulse_channel=pulse_channel
             )
-        elif np.isclose(theta, -np.pi / 2.0):
-            return self.add(
-                *self._hw_Z(target, theta=np.pi / 2.0, pulse_channel=pulse_channel),
-                *self._hw_X_pi_2(target, pulse_channel=pulse_channel),
-                *self._hw_Z(target, theta=-np.pi / 2.0, pulse_channel=pulse_channel),
+
+        elif (
+            np.isclose(np.abs(theta), np.pi)
+            and getattr(target, "direct_x_pi", False)
+            and getattr(target.drive_pulse_channel, "pulse_x_pi", None) is not None
+        ):
+            xpi_pulse = self._hw_X_pi(target, pulse_channel=pulse_channel)
+            angle = np.pi / 2 if theta > 0 else -np.pi / 2
+            return self._apply_z_transform_on_operation(
+                target, xpi_pulse, angle, pulse_channel=pulse_channel
             )
+
         return self.U(target, theta=theta, phi=0.0, lamb=0.0, pulse_channel=pulse_channel)
 
     @InstructionBuilder._check_identity_operation
@@ -419,6 +436,22 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 "Generic ZX gate not implemented yet! Please use `theta` = pi/4 or -pi/4."
             )
 
+    def _apply_z_transform_on_operation(
+        self,
+        target: Qubit,
+        gate: list[Pulse],
+        theta: float,
+        pulse_channel: PulseChannel = None,
+    ):
+        if np.isclose(theta, 0.0):
+            return self.add(*gate)
+
+        return self.add(
+            *self._hw_Z(target, theta=-theta, pulse_channel=pulse_channel),
+            *gate,
+            *self._hw_Z(target, theta=theta, pulse_channel=pulse_channel),
+        )
+
     def _hw_X_pi_2(
         self, target: Qubit, pulse_channel: PulseChannel = None, amp_scale: float = 1.0
     ):
@@ -433,6 +466,17 @@ class QuantumInstructionBuilder(InstructionBuilder):
         pulse_waveform = target.drive_pulse_channel.pulse
         pulse_waveform = pulse_waveform.waveform_type(**pulse_waveform.model_dump())
         pulse_waveform.amp *= amp_scale
+        return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
+
+    def _hw_X_pi(self, target: Qubit, pulse_channel: PulseChannel = None):
+        pulse_channel = pulse_channel or self.get_pulse_channel(
+            target.drive_pulse_channel.uuid
+        )
+        pulse_waveform = getattr(target.drive_pulse_channel, "pulse_x_pi", None)
+        if pulse_waveform is None or not getattr(target, "direct_x_pi", False):
+            x_pi_2_pulse = deepcopy(self._hw_X_pi_2(target, pulse_channel=pulse_channel))
+            return [*x_pi_2_pulse, *x_pi_2_pulse]
+        pulse_waveform = pulse_waveform.waveform_type(**pulse_waveform.model_dump())
         return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
 
     def _hw_Z(

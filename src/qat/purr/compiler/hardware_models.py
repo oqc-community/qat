@@ -528,6 +528,13 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         ]
 
     def get_gate_X(self, qubit, theta, pulse_channel: PulseChannel = None):
+        """
+        Provides pulses to perform an X rotation by angle theta on the given qubit.
+        If theta is close to +/- pi/2, the standard x_pi_2 pulse is used, with some phase rotation in the case of - pi.
+        If theta is close to +/- pi and the qubit has direct_x_pi set to True,
+        the get_hw_x_pi method will return an x pi pulse.
+        Otherwise, the gate is decomposed using the U3 decomposition.
+        """
         theta = self.constrain(theta)
         if np.isclose(theta, 0.0):
             return []

@@ -16,8 +16,9 @@ from qat.ir.measure import (
     acq_mode_process_axis,
 )
 from qat.ir.pulse_channel import PulseChannel
-from qat.ir.waveforms import Pulse, SampledWaveform
+from qat.ir.waveforms import GaussianWaveform, Pulse, SampledWaveform
 from qat.model.device import (
+    CalibratablePulse,
     CrossResonanceCancellationPulseChannel,
     CrossResonancePulseChannel,
     MeasurePulseChannel,
@@ -218,8 +219,80 @@ class TestPauliGates:
         assert len(phase_shifts) == ref_number_of_instructions - 1
         assert len(x_pi_2_pulses) == 1
 
+    @pytest.mark.skip(
+        reason="constrain theta takes theta=pi to -pi, making this test invalid"
+    )
+    @pytest.mark.parametrize("add_xpi_pulse", [True])
+    @pytest.mark.parametrize("use_xpi_pulse", [True])
+    def test_X_pi(self, qubit_index, add_xpi_pulse, use_xpi_pulse):
+        model = generate_hw_model(n_qubits=8)
+
+        if add_xpi_pulse:
+            model.qubit_with_index(
+                qubit_index
+            ).drive_pulse_channel.pulse_x_pi = CalibratablePulse(
+                waveform_type=GaussianWaveform, width=100e-9, rise=1.0 / 3.0
+            )
+        qubit = model.qubit_with_index(qubit_index)
+        qubit.direct_x_pi = use_xpi_pulse
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.X(target=qubit, theta=np.pi)
+
+        number_of_instructions = 1
+        if not (use_xpi_pulse and add_xpi_pulse):
+            number_of_instructions = (
+                2 + 3 + len(hw_model.logical_connectivity[qubit_index]) * 6
+            )
+
+        assert builder.number_of_instructions == number_of_instructions
+        assert builder._ir.instructions[0].target == qubit.drive_pulse_channel.uuid
+        if number_of_instructions == 2:
+            assert builder._ir.instructions[1].target == qubit.drive_pulse_channel.uuid
+
+    @pytest.mark.parametrize("add_xpi_pulse", [False, True])
+    @pytest.mark.parametrize("use_xpi_pulse", [False, True])
+    def test_X_min_pi(self, qubit_index, add_xpi_pulse, use_xpi_pulse):
+        model = generate_hw_model(n_qubits=8)
+
+        if add_xpi_pulse:
+            model.qubit_with_index(
+                qubit_index
+            ).drive_pulse_channel.pulse_x_pi = CalibratablePulse(
+                waveform_type=GaussianWaveform, width=100e-9, rise=1.0 / 3.0
+            )
+        qubit = model.qubit_with_index(qubit_index)
+        qubit.direct_x_pi = use_xpi_pulse
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.X(target=qubit, theta=-np.pi)
+
+        if use_xpi_pulse and add_xpi_pulse:
+            # 1 pulse on the drive pulse channel, two phaseshifts on the drive channel,
+            # 2 Z pulses to rotate to -pi
+            # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 2 Z pulses`.
+            ref_number_of_instructions = (
+                1 + 2 + len(hw_model.logical_connectivity[qubit_index]) * 2 * 2
+            )
+        else:
+            # 2 pulses on the drive pulse channel, (two phaseshifts on the drive channel,
+            # 3 Z pulses in U gate
+            # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 3 Z pulses`.
+            ref_number_of_instructions = (
+                2 + 3 + len(hw_model.logical_connectivity[qubit_index]) * 6
+            )
+
+        assert builder.number_of_instructions == ref_number_of_instructions
+
+        phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
+        pulses = [instr for instr in builder._ir if (isinstance(instr, Pulse))]
+        n_pulses = 1 if (use_xpi_pulse and add_xpi_pulse) else 2
+
+        assert len(phase_shifts) == ref_number_of_instructions - n_pulses
+        assert len(pulses) == n_pulses
+
     @pytest.mark.parametrize(
-        "theta", [np.pi / 4, -np.pi / 4, np.pi, -np.pi, 3 * np.pi / 4, -3 * np.pi / 4]
+        "theta", [np.pi / 4, -np.pi / 4, 3 * np.pi / 4, -3 * np.pi / 4]
     )
     @pytest.mark.parametrize("pauli_gate", ["X", "Y"])
     def test_X_Y_arbitrary_rotation(self, qubit_index, theta, pauli_gate):
@@ -280,6 +353,40 @@ class TestPauliGates:
         x_pi_2_pulses = [instr for instr in builder._ir if isinstance(instr, Pulse)]
         assert len(phase_shifts) == ref_number_of_instructions - 1
         assert len(x_pi_2_pulses) == 1
+
+    @pytest.mark.parametrize("theta", [-np.pi, np.pi])
+    @pytest.mark.parametrize("add_xpi_pulse", [False, True])
+    @pytest.mark.parametrize("use_xpi_pulse", [False, True])
+    def test_Y_pi(self, qubit_index, theta, add_xpi_pulse, use_xpi_pulse):
+        model = generate_hw_model(n_qubits=8)
+        if add_xpi_pulse:
+            model.qubit_with_index(
+                qubit_index
+            ).drive_pulse_channel.pulse_x_pi = CalibratablePulse(
+                waveform_type=GaussianWaveform, width=100e-9, rise=1.0 / 3.0
+            )
+        qubit = model.qubit_with_index(qubit_index)
+        qubit.direct_x_pi = use_xpi_pulse
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+
+        builder.Y(target=model.qubit_with_index(qubit_index), theta=theta)
+
+        ref_number_of_instructions = (
+            1 + 1 * 2 + len(model.logical_connectivity[qubit_index]) * 2 * 2
+        )
+
+        if not (use_xpi_pulse and add_xpi_pulse):
+            ref_number_of_instructions += 1
+
+        assert builder.number_of_instructions == ref_number_of_instructions
+
+        phase_shifts = [instr for instr in builder._ir if isinstance(instr, PhaseShift)]
+        pulses = [instr for instr in builder._ir if (isinstance(instr, Pulse))]
+        n_pulses = 1 if (use_xpi_pulse and add_xpi_pulse) else 2
+
+        assert len(phase_shifts) == ref_number_of_instructions - n_pulses
+        assert len(pulses) == n_pulses
 
     @pytest.mark.parametrize(
         "theta", [np.pi / 4, np.pi / 2, np.pi, -np.pi, 3 * np.pi / 2, -3 * np.pi / 4]
