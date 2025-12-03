@@ -127,12 +127,19 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         drive_pulse_channel = qubit.get_pulse_channel(ChannelType.drive)
         pulse_hw_x_pi_2 = deepcopy(qubit.pulse_hw_x_pi_2)
         pulse_hw_x_pi_2.pop("shape")
+        pulse_hw_x_pi = getattr(qubit, "pulse_hw_x_pi", None)
+        if pulse_hw_x_pi is not None:
+            pulse_hw_x_pi = deepcopy(pulse_hw_x_pi)
+            pulse_hw_x_pi.pop("shape")
+            pulse_hw_x_pi = CalibratablePulse(**pulse_hw_x_pi)
+
         new_drive_pulse_channel = DrivePulseChannel(
             frequency=drive_pulse_channel.frequency,
             imbalance=drive_pulse_channel.imbalance,
             scale=_process_real_or_complex(drive_pulse_channel.scale),
             phase_iq_offset=drive_pulse_channel.phase_offset,
             pulse=CalibratablePulse(**pulse_hw_x_pi_2),
+            pulse_x_pi=pulse_hw_x_pi,
         )
 
         try:
@@ -224,6 +231,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
             resonator=resonator,
             mean_z_map_args=qubit.mean_z_map_args,
             discriminator=qubit.discriminator[0],
+            direct_x_pi=getattr(qubit, "direct_x_pi", False),
         )
         new_qubits[qubit.index] = new_qubit
 
