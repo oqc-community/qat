@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+
 from typing import Dict, List
 
 import numpy as np
@@ -37,11 +38,11 @@ def plot_packages(packages: List[QbloxPackage]):
         squeeze=False,
         figsize=(10, 5),
     )
-    fig.suptitle("Target timeline plots")
+    fig.suptitle("Timeline plots")
     for i, pkg in enumerate(packages):
         axes[i][0].plot(t, pkg.timeline.real, label="I")
         axes[i][0].plot(t, pkg.timeline.imag, label="Q")
-        axes[i][0].set_title(pkg.target)
+        axes[i][0].set_title(pkg.pulse_channel_id)
         axes[i][0].set_xlabel("Time (ns)")
         axes[i][0].set_ylabel("Digital offset")
         axes[i][0].autoscale()

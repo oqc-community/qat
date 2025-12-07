@@ -292,7 +292,8 @@ class QbloxContext(ABC):
                 pulse = pulse * np.exp(1.0j * total_phase)
             assert pulse.size == duration
             self._durations.append(duration)
-            self._timeline = np.append(self._timeline, pulse)
+            if self._timeline is not None:
+                self._timeline = np.append(self._timeline, pulse)
         elif isinstance(duration, str):
             self._durations.append(duration)
             self._timeline = None  # Destroy the timeline as we are in dynamic setting

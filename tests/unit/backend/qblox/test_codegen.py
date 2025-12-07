@@ -5,12 +5,14 @@ from contextlib import nullcontext
 
 import numpy as np
 import pytest
+from matplotlib import pyplot as plt
 from more_itertools import partition
 
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.config.constants import Constants, QbloxTargetData
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
+from qat.backend.qblox.visualisation import plot_program
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.pipelines.purr.qblox.compile import (
@@ -465,6 +467,31 @@ class TestQbloxBackend1:
                     == acq_width * threshold
                 )
 
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_timeline_visualisation(self, qblox_model, qubit_indices, monkeypatch):
+        monkeypatch.setattr(plt, "show", lambda: None)
+
+        width = 100e-9
+        rise = 1.0 / 5.0
+
+        builder = qblox_model.create_builder()
+        for index in qubit_indices:
+            qubit = qblox_model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            gaussian = Pulse(drive_channel, PulseShapeType.GAUSSIAN, width=width, rise=rise)
+            builder.add(gaussian)
+
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            assert len(program.packages) == len(qubit_indices)
+            for pkg in program.packages.values():
+                assert pkg.timeline is not None
+                assert isinstance(pkg.timeline, np.ndarray)
+                assert pkg.timeline.size > 0
+                assert not np.all(pkg.timeline == None)
+                assert not np.all(pkg.timeline == np.nan)
+            plot_program(program)
+
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
 class TestQbloxBackend2:
@@ -670,3 +697,45 @@ class TestQbloxBackend2:
         assert len(executable.programs) == 1
         for program in executable.programs:
             assert len(program.packages) == 2 * len(qubit_indices)
+
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    @pytest.mark.parametrize("do_X", [True, False])
+    def test_timeline_visualisation(
+        self, qblox_model, num_points, qubit_indices, do_X, monkeypatch
+    ):
+        monkeypatch.setattr(plt, "show", lambda: None)
+
+        # Static settings
+        builder = measure_acquire(qblox_model, qubit_indices, do_X)
+        executable = self._do_emit(builder, qblox_model)
+        for program in executable.programs:
+            for pkg in program.packages.values():
+                assert pkg.timeline is not None
+                assert isinstance(pkg.timeline, np.ndarray)
+                assert pkg.timeline.size > 0
+                assert not np.all(pkg.timeline == None)
+                assert not np.all(pkg.timeline == np.nan)
+            plot_program(program)
+
+        # Dynamic settings
+        builder = time_and_phase_iteration(qblox_model, qubit_indices, num_points)
+        executable = self._do_emit(builder, qblox_model)
+
+        default_pulse_channel_ids = [
+            qblox_model.get_qubit(index).get_default_pulse_channel().full_id()
+            for index in qubit_indices
+        ]
+
+        for program in executable.programs:
+            for pkg in program.packages.values():
+                if pkg.pulse_channel_id in default_pulse_channel_ids:
+                    assert pkg.timeline is None
+                    with pytest.raises(TypeError):
+                        plot_program(program)
+                else:
+                    assert pkg.timeline is not None
+                    assert isinstance(pkg.timeline, np.ndarray)
+                    assert pkg.timeline.size > 0
+                    assert not np.all(pkg.timeline == None)
+                    assert not np.all(pkg.timeline == np.nan)

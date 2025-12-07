@@ -5,6 +5,7 @@ from contextlib import nullcontext
 
 import numpy as np
 import pytest
+from matplotlib import pyplot as plt
 from more_itertools import partition
 
 from qat import get_config, qatconfig
@@ -24,6 +25,7 @@ from qat.purr.backends.qblox.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
+from qat.purr.backends.qblox.visualisation import plot_packages
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.execution import DeviceInjectors
 from qat.purr.compiler.instructions import (
@@ -556,6 +558,31 @@ class TestQbloxEmitter(InvokerMixin):
                     == acq_width * threshold
                 )
 
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_timeline_visualisation(self, model, qubit_indices, monkeypatch):
+        monkeypatch.setattr(plt, "show", lambda: None)
+
+        width = 100e-9
+        rise = 1.0 / 5.0
+
+        builder = model.create_builder()
+        for index in qubit_indices:
+            qubit = model.get_qubit(index)
+            drive_channel = qubit.get_drive_channel()
+            gaussian = Pulse(drive_channel, PulseShapeType.GAUSSIAN, width=width, rise=rise)
+            builder.add(gaussian)
+
+        iter2packages = self._do_emit(builder, model)
+        for packages in iter2packages.values():
+            assert len(packages) == len(qubit_indices)
+            for pkg in packages:
+                assert pkg.timeline is not None
+                assert isinstance(pkg.timeline, np.ndarray)
+                assert pkg.timeline.size > 0
+                assert not np.all(pkg.timeline == None)
+                assert not np.all(pkg.timeline == np.nan)
+            plot_packages(packages)
+
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestNewQbloxEmitter(InvokerMixin):
@@ -802,3 +829,56 @@ class TestNewQbloxEmitter(InvokerMixin):
         self.run_pass_pipeline(builder, res_mgr, met_mgr)
         packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
         assert len(packages) == 2 * len(qubit_indices)
+
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    @pytest.mark.parametrize("do_X", [True, False])
+    def test_timeline_visualisation(
+        self, model, num_points, qubit_indices, do_X, monkeypatch
+    ):
+        monkeypatch.setattr(plt, "show", lambda: None)
+
+        # Static settings
+        builder = measure_acquire(model, qubit_indices, do_X)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        runtime = model.create_runtime()
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
+
+        self.model = model
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
+        for pkg in packages:
+            assert pkg.timeline is not None
+            assert isinstance(pkg.timeline, np.ndarray)
+            assert pkg.timeline.size > 0
+            assert not np.all(pkg.timeline == None)
+            assert not np.all(pkg.timeline == np.nan)
+        plot_packages(packages)
+
+        # Dynamic settings
+        builder = time_and_phase_iteration(model, qubit_indices, num_points)
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        runtime = model.create_runtime()
+        runtime.run_pass_pipeline(builder, res_mgr, met_mgr)
+
+        default_pulse_channel_ids = [
+            model.get_qubit(index).get_default_pulse_channel().full_id()
+            for index in qubit_indices
+        ]
+
+        self.model = model
+        self.run_pass_pipeline(builder, res_mgr, met_mgr)
+        packages = NewQbloxEmitter().emit_packages(builder, res_mgr, model)
+        for pkg in packages:
+            if pkg.pulse_channel_id in default_pulse_channel_ids:
+                assert pkg.timeline is None
+                with pytest.raises(TypeError):
+                    plot_packages(packages)
+            else:
+                assert pkg.timeline is not None
+                assert isinstance(pkg.timeline, np.ndarray)
+                assert pkg.timeline.size > 0
+                assert not np.all(pkg.timeline == None)
+                assert not np.all(pkg.timeline == np.nan)

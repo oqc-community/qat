@@ -17,12 +17,12 @@ def plot_program(program: QbloxProgram):
     if not packages:
         return
 
-    max_length = max([len(pkg.timeline) for pkg in packages])
+    max_length = max([len(pkg.timeline) for pkg in packages.values()])
     if max_length <= 0:
         return
 
     # Padding short timelines with zeros
-    for pkg in packages:
+    for pkg in packages.values():
         length = len(pkg.timeline)
         if length < max_length:
             pkg.timeline = np.append(
@@ -38,11 +38,11 @@ def plot_program(program: QbloxProgram):
         squeeze=False,
         figsize=(10, 5),
     )
-    fig.suptitle("Target timeline plots")
-    for i, pkg in enumerate(packages):
+    fig.suptitle("Timeline plots")
+    for i, pkg in enumerate(packages.values()):
         axes[i][0].plot(t, pkg.timeline.real, label="I")
         axes[i][0].plot(t, pkg.timeline.imag, label="Q")
-        axes[i][0].set_title(pkg.target)
+        axes[i][0].set_title(pkg.pulse_channel_id)
         axes[i][0].set_xlabel("Time (ns)")
         axes[i][0].set_ylabel("Digital offset")
         axes[i][0].autoscale()
@@ -56,7 +56,7 @@ def plot_playback(playback: dict[str, list[Acquisition]]):
     if not playback:
         return
 
-    for i, (target, acquisitions) in enumerate(playback.items()):
+    for i, (pulse_channel_id, acquisitions) in enumerate(playback.items()):
         for acquisition in acquisitions:
             fig, axes = plt.subplots(
                 nrows=3,
@@ -66,7 +66,7 @@ def plot_playback(playback: dict[str, list[Acquisition]]):
                 squeeze=False,
                 figsize=(10, 5),
             )
-            fig.suptitle(f"Playback plots for {acquisition.name} on {target}")
+            fig.suptitle(f"Playback plots for {acquisition.name} on {pulse_channel_id}")
 
             scope_data = acquisition.acquisition.scope
             integ_data = acquisition.acquisition.bins.integration
