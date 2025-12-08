@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Annotated, Generic, TypeVar
 
 from pydantic import AfterValidator, ConfigDict, ImportString
 
-from qat.instrument.builder import InstrumentBuilder
+from qat.instrument.base import InstrumentBuilder
 from qat.utils.pydantic import NoExtraFieldsModel
 
 if TYPE_CHECKING:
@@ -28,6 +28,7 @@ from qat.core.config.validators import (
     is_engine,
     is_frontend,
     is_hardwareloader,
+    is_instrument,
     is_instrument_builder,
     is_middleend,
     is_passmanager_factory,
@@ -47,6 +48,7 @@ ImportFrontend = Annotated[ImportString, AfterValidator(is_frontend)]
 ImportMiddleend = Annotated[ImportString, AfterValidator(is_middleend)]
 ImportBackend = Annotated[ImportString, AfterValidator(is_backend)]
 ImportEngine = Annotated[ImportString, AfterValidator(is_engine)]
+ImportInstrument = Annotated[ImportString, AfterValidator(is_instrument)]
 ImportInstrumentBuilder = Annotated[ImportString, AfterValidator(is_instrument_builder)]
 ImportRuntime = Annotated[ImportString, AfterValidator(is_runtime)]
 ImportTargetData = Annotated[ImportString, AfterValidator(is_target_data)]
@@ -82,10 +84,12 @@ class InstrumentBuilderDescription(NoExtraFieldsModel):
     name: str
     type: ImportInstrumentBuilder
     configs: list[dict] = []
+    cinstr_type: ImportInstrument
+    linstr_type: ImportInstrument
 
     def construct(self) -> "InstrumentBuilder":
         """Returns the described Instrument instance as an InstrumentBuilder."""
-        return self.type(self.configs)
+        return self.type(self.configs, self.cinstr_type, self.linstr_type)
 
 
 class EngineDescription(NoExtraFieldsModel):

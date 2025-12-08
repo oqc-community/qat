@@ -3,7 +3,7 @@
 
 import inspect
 
-from qat.instrument.builder import InstrumentBuilder
+from qat.instrument.base import InstrumentBuilder, InstrumentConcept
 
 
 def is_pipeline_instance(value: type):
@@ -50,6 +50,16 @@ def is_runtime(value: type):
 
     if not (inspect.isclass(value) and issubclass(value, BaseRuntime)):
         raise ValueError(f"{value} is not a valid Runtime")
+    return value
+
+
+def is_instrument(value: type):
+    """
+    A validator which raises when the input not an Instrument.
+    """
+
+    if not (inspect.isclass(value) and issubclass(value, InstrumentConcept)):
+        raise ValueError(f"{value} is not a valid Instrument builder")
     return value
 
 

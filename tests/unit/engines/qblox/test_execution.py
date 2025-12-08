@@ -68,6 +68,7 @@ def _do_execute(model, engine, executable: Executable[QbloxProgram]):
         aggregator=QBloxAggregator(),
         results_pipeline=get_results_pipeline(model),
     )
+    assert isinstance(runtime.aggregator, QBloxAggregator)
     results = runtime.execute(executable=executable, compiler_config=CompilerConfig())
     return results
 

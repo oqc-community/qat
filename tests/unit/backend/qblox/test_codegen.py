@@ -29,6 +29,7 @@ from qat.purr.compiler.instructions import (
     DeviceUpdate,
     MeasurePulse,
     Pulse,
+    Repeat,
     Sweep,
     SweepValue,
     Variable,
@@ -82,6 +83,15 @@ class TestQbloxBackend1:
         builder = qblox_model.create_builder().add(gaussian)
 
         executable = self._do_emit(builder, qblox_model)
+        repeat = next(
+            (inst for inst in builder.instructions if isinstance(inst, Repeat)), None
+        )
+        assert len(executable.acquires) == 0
+        assert len(executable.assigns) == 0
+        assert len(executable.returns) == 0
+        assert executable.shots == (repeat.repeat_count if repeat else None)
+        assert executable.calibration_id == qblox_model.calibration_id
+        assert len(executable.programs) > 0
         for program in executable.programs:
             assert len(program.packages) == 1
             pulse_channel_id, pkg = next(iter(program.packages.items()))

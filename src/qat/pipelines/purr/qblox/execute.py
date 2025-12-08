@@ -9,6 +9,7 @@ from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime import SimpleRuntime
+from qat.runtime.aggregator import QBloxAggregator
 from qat.runtime.passes.purr.analysis import IndexMappingAnalysis
 from qat.runtime.passes.transform import (
     AssignResultsTransform,
@@ -65,6 +66,7 @@ class QbloxExecutePipeline(UpdateablePipeline):
             runtime=SimpleRuntime(
                 engine=engine,
                 results_pipeline=results_pipeline,
+                aggregator=QBloxAggregator(),
             ),
             name=config.name,
         )

@@ -10,7 +10,7 @@ ENGINES:
   type: qat.engines.qblox.execution.QbloxEngine
   instrument_builder:
     name: config_builder
-    type: qat.instrument.builder.ConfigInstrumentBuilder
+    type: qat.instrument.base.ConfigInstrumentBuilder
     configs:
       - name: "cluster0"
         id: "0_0_0_0"
@@ -24,3 +24,5 @@ ENGINES:
         id: "0_0_0_2"
         address: "0.0.0.2"
         type: qat.engines.qblox.instrument.InstrumentModel
+    cinstr_type: qat.engines.qblox.live.QbloxCompositeInstrument
+    linstr_type: qat.engines.qblox.live.QbloxLeafInstrument

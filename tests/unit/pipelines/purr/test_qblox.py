@@ -15,7 +15,7 @@ from qat.executables import Executable
 # TODO: Pipelines using `QbloxEngine`: COMPILER-730
 # from qat.engines.qblox.live import QbloxEngine
 from qat.frontend import AutoFrontend
-from qat.instrument.builder import CsvInstrumentBuilder
+from qat.instrument.base import CsvInstrumentBuilder
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
 from qat.middleend import CustomMiddleend
 from qat.model.loaders.purr import QbloxDummyModelLoader

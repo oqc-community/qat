@@ -16,8 +16,8 @@ from qat.core.config.descriptions import (
 from qat.core.config.session import QatSessionConfig
 from qat.core.pipelines.configurable import ConfigurablePipeline
 from qat.engines.qblox.execution import QbloxEngine
-from qat.instrument.base import InstrumentConcept
-from qat.instrument.builder import InstrumentBuilder
+from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
+from qat.instrument.base import ConfigInstrumentBuilder
 from qat.model.loaders.cache import CacheAccessLoader
 from qat.model.loaders.purr import EchoModelLoader, QbloxDummyModelLoader
 from qat.model.target_data import TargetData
@@ -291,9 +291,12 @@ class TestQatSessionConfigForPipelines:
         assert isinstance(instrument_builder_desc, InstrumentBuilderDescription)
         assert len(instrument_builder_desc.configs) == 3
         instrument_builder = instrument_builder_desc.construct()
-        assert isinstance(instrument_builder, InstrumentBuilder)
+        assert isinstance(instrument_builder, ConfigInstrumentBuilder)
+
         instrument = instrument_builder.build()
-        assert isinstance(instrument, InstrumentConcept)
+        assert isinstance(instrument, QbloxCompositeInstrument)
+        for comp in instrument.components.values():
+            assert isinstance(comp, QbloxLeafInstrument)
 
         engine = engine_desc.construct()
         assert isinstance(engine, QbloxEngine)

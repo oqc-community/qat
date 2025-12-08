@@ -956,6 +956,7 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
             assigns=assigns,
             returns=return_vars,
             shots=shots,
+            calibration_id=self.model.calibration_id,
         )
 
     def _do_emit(
@@ -1087,6 +1088,7 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
             assigns=assigns,
             returns=return_vars,
             shots=shots,
+            calibration_id=self.model.calibration_id,
         )
 
 

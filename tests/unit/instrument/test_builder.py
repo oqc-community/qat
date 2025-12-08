@@ -5,9 +5,9 @@ import pytest
 from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
 from qat.instrument.base import (
     CompositeInstrument,
+    CsvInstrumentBuilder,
     LeafInstrument,
 )
-from qat.instrument.builder import CsvInstrumentBuilder
 
 
 @pytest.mark.parametrize(
@@ -26,7 +26,7 @@ def test_instrument_csv_builder(testpath, cinstr_type, linstr_type):
         "instrument_info.csv",
     )
 
-    composite = CsvInstrumentBuilder(filepath).build(cinstr_type, linstr_type)
+    composite = CsvInstrumentBuilder(filepath, cinstr_type, linstr_type).build()
     if cinstr_type in [None, CompositeInstrument]:
         assert isinstance(composite, CompositeInstrument)
         assert all(
