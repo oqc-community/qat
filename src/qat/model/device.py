@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import uuid
 from typing import Any
 
 import numpy as np
@@ -19,6 +18,7 @@ from qat.utils.pydantic import (
     QubitId,
     WaveformType,
 )
+from qat.utils.uuid import uuid4
 
 
 class Component(NoExtraFieldsModel):
@@ -29,7 +29,7 @@ class Component(NoExtraFieldsModel):
     :param uuid: The unique string representation of the component.
     """
 
-    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
+    uuid: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
 
     def __hash__(self):
         return hash(self.uuid)

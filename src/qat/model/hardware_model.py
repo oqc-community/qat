@@ -2,7 +2,6 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-import uuid
 from copy import deepcopy
 
 from pydantic import Field, field_validator, model_validator
@@ -21,6 +20,7 @@ from qat.utils.pydantic import (
     QubitCoupling,
     QubitId,
 )
+from qat.utils.uuid import uuid4
 
 VERSION = Version(0, 0, 1)
 log = get_default_logger()
@@ -36,7 +36,7 @@ class LogicalHardwareModel(NoExtraFieldsModel):
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
     logical_connectivity: FrozenDict[QubitId, FrozenSet[QubitId]]
 
-    calibration_id: str = Field(default_factory=lambda: str(uuid.uuid4()), frozen=True)
+    calibration_id: str = Field(default_factory=lambda: str(uuid4()), frozen=True)
 
     @field_validator("version")
     def version_compatibility(version: Version):

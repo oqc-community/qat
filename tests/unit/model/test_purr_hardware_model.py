@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Oxford Quantum Circuits Ltd
+import hashlib
+
 import numpy as np
 import pytest
 
@@ -38,6 +40,7 @@ def get_echo_hw_pair(n_qubits, seed=42):
     hw_legacy_echo = apply_setup_to_echo_hardware(
         qubit_count=n_qubits, connectivity=physical_connectivity
     )
+    hw_legacy_echo.calibration_id = hashlib.md5().hexdigest()
     hw_pyd_echo = convert_purr_echo_hw_to_pydantic(hw_legacy_echo)
     return (hw_pyd_echo, hw_legacy_echo)
 
@@ -203,3 +206,8 @@ class TestEchoHardwareModelConversion:
                 leg_coupling_direction.quality / 100.0
                 == pyd_hw.logical_connectivity_quality[leg_coupling_direction.direction]
             )
+
+    def test_consistent_model_converstion(self, n_qubits, seed):
+        pyd_hw_a, leg_hw = get_echo_hw_pair(n_qubits, seed)
+        pyd_hw_b = convert_purr_echo_hw_to_pydantic(leg_hw)
+        assert pyd_hw_a.model_dump() == pyd_hw_b.model_dump()

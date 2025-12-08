@@ -34,6 +34,7 @@ from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannelView, PulseShapeType
 from qat.purr.compiler.instructions import CustomPulse
 from qat.utils.pydantic import FrozenDict
+from qat.utils.uuid import uuid_randomiser
 
 number_mask = re.compile("[0-9]+")
 
@@ -45,9 +46,12 @@ def get_number_from_string(s: str) -> int | None:
     return None
 
 
-def convert_purr_echo_hw_to_pydantic(legacy_hw):
+def convert_purr_echo_hw_to_pydantic(legacy_hw, seed_uuid: bool = True):
     new_qubits = {}
     logical_connectivity = defaultdict(set)
+
+    if seed_uuid:
+        uuid_randomiser.seed(legacy_hw.calibration_id)
 
     for qubit in legacy_hw.qubits:
         # Add topology of qubit. Since the topology is not always stored both in
@@ -288,6 +292,9 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw):
         calibration_id=calibration_id,
         error_mitigation=error_mitigation,
     )
+
+    if seed_uuid:
+        uuid_randomiser.seed()
 
     return new_hw
 
