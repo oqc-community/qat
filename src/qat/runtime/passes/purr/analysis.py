@@ -13,6 +13,7 @@ from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import Acquire
 from qat.purr.compiler.runtime import CalibrationWithArgs
+from qat.runtime.passes.analysis import IndexMappingResult
 
 
 @dataclass
@@ -32,11 +33,6 @@ class CalibrationAnalysis(AnalysisPass):
         cal_blocks = [find_calibration(arg) for arg in compiler_config.active_calibrations]
         res_mgr.add(CalibrationAnalysisResult(cal_blocks))
         return ir
-
-
-@dataclass
-class IndexMappingResult(ResultInfoMixin):
-    mapping: dict[str, int]
 
 
 class IndexMappingAnalysis(AnalysisPass):

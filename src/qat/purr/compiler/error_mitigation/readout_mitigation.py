@@ -66,14 +66,21 @@ class ApplyLinearReadoutMitigation(ApplyPostProcReadoutMitigation):
         for i in range(qubit_count):
             qubit = mapping[str(i)]
             noise_map = model.error_mitigation.readout_mitigation.linear[str(qubit)]
+            if noise_map is None:
+                noise_map = model.error_mitigation.readout_mitigation.linear[qubit]
             results = self.apply_correction_qubit(results, i, noise_map)
         return results
 
     def apply_correction_qubit(self, results, index, noise_map):
-        noise_matrix = np.zeros((2, 2))
-        for input_bit in [0, 1]:
-            for output_bit in [0, 1]:
-                noise_matrix[output_bit, input_bit] = noise_map[f"{output_bit}|{input_bit}"]
+        if isinstance(noise_map, dict):
+            noise_matrix = np.zeros((2, 2))
+            for input_bit in [0, 1]:
+                for output_bit in [0, 1]:
+                    noise_matrix[output_bit, input_bit] = noise_map[
+                        f"{output_bit}|{input_bit}"
+                    ]
+        else:
+            noise_matrix = noise_map
         inv_noise_matrix = np.linalg.inv(noise_matrix)
         corrected_results = {}
         for bitstring, probability in results.items():
