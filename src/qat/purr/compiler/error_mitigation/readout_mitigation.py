@@ -8,6 +8,8 @@ from compiler_config.config import ErrorMitigationConfig
 
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
+# TODO: Extract Pydantic Mitigation: COMPILER-875
+
 
 class ApplyReadoutMitigation:
     name = "readout_base_class"

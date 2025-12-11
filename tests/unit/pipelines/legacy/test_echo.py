@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-import random
 import re
 
 import pytest
@@ -26,7 +25,6 @@ from qat.pipelines.legacy.echo import (
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.purr.backends.echo import EchoEngine
 from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.hardware_models import ErrorMitigation, ReadoutMitigation
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
@@ -39,6 +37,7 @@ from qat.purr.compiler.instructions import (
 from qat.purr.qat import _return_or_build, fetch_frontend
 from qat.runtime import LegacyRuntime
 
+from tests.unit.utils.loaders import EchoModelLoaderWithErrorMitigation
 from tests.unit.utils.qasm_qir import (
     get_qasm2_path,
     get_qir_path,
@@ -98,36 +97,6 @@ class TestEchoPipelines:
         assert pipeline.model == model
         assert isinstance(pipeline.runtime, LegacyRuntime)
         assert isinstance(pipeline.engine, EchoEngine)
-
-
-class EchoModelLoaderWithErrorMitigation(EchoModelLoader):
-    """A model loader that applies a random error mitigation configuration to the loaded
-    model."""
-
-    def load(self, seed=None):
-        """Load the Echo model and apply error mitigation."""
-        hw = super().load()
-        return self.apply_error_mitigation_setup(hw, seed=seed)
-
-    def generate_random_linear(self, qubit_indices, random_data=True, seed=None):
-        if seed is not None:
-            random.seed(seed)
-        output = {}
-        for index in qubit_indices:
-            random_0 = random.random() if random_data else 1
-            random_1 = random.random() if random_data else 1
-            output[str(index)] = {
-                "0|0": random_0,
-                "1|0": 1 - random_0,
-                "1|1": random_1,
-                "0|1": 1 - random_1,
-            }
-        return output
-
-    def apply_error_mitigation_setup(self, hw, seed=None):
-        lin_mit = self.generate_random_linear([q.index for q in hw.qubits], seed=seed)
-        hw.error_mitigation = ErrorMitigation(ReadoutMitigation(linear=lin_mit))
-        return hw
 
 
 def equivalent_vars(self, other):

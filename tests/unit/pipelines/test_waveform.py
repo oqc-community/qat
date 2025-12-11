@@ -4,7 +4,12 @@ import random
 
 import numpy as np
 import pytest
-from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
+from compiler_config.config import (
+    CompilerConfig,
+    ErrorMitigationConfig,
+    QuantumResultsFormat,
+    Tket,
+)
 
 from qat import QAT
 from qat.backend.waveform.codegen import PydWaveformBackend
@@ -29,7 +34,13 @@ from qat.pipelines.waveform import (
 )
 from qat.runtime import SimpleRuntime
 
-from tests.unit.utils.qasm_qir import get_pipeline_tests
+from tests.unit.utils.loaders import EchoModelLoaderWithErrorMitigation
+from tests.unit.utils.qasm_qir import (
+    get_pipeline_tests,
+    get_qasm2_path,
+    get_qasm3_path,
+    get_qir_path,
+)
 
 
 class TestEchoPipeline:
@@ -346,6 +357,110 @@ class TestEchoPipelineWithCircuits:
         for program in new_executable.programs:
             assert isinstance(program, WaveformProgram)
         assert new_executable == executable
+
+
+class TestEchoPipelineWithErrorMitigation:
+    """A class that tests the compilation and execution of the EchoPipeline with a
+    WaveformV1Backend against circuit programs with error mitigation enabled.
+    It tests the expectations of the compilation pipelines, inspecting the properties of
+    the executable and the results returned by the EchoEngine.
+    """
+
+    target_data = TargetData.default()
+    model = convert_purr_echo_hw_to_pydantic(
+        EchoModelLoaderWithErrorMitigation(qubit_count=32).load()
+    )
+    pipeline = PydanticEchoPipeline(
+        config=PipelineConfig(name="pydantic"), model=model, target_data=target_data
+    )
+
+    @pytest.mark.parametrize(
+        "program_file",
+        [
+            get_qasm2_path("basic.qasm"),
+            get_qasm3_path("ghz.qasm"),
+        ],
+    )
+    def test_error_mitigation_success(self, program_file):
+        compiler_config = CompilerConfig(
+            results_format=QuantumResultsFormat().binary_count(),
+            error_mitigation=ErrorMitigationConfig.LinearMitigation,
+        )
+        executable, _ = QAT().compile(
+            str(program_file), compiler_config, pipeline=self.pipeline
+        )
+        results, _ = QAT().execute(executable, compiler_config, pipeline=self.pipeline)
+        assert isinstance(results, dict)
+        assert len(results) == 2
+        assert "linear_readout_mitigation" in results
+        mitigated_results = results.pop("linear_readout_mitigation")
+        assert mitigated_results != next(iter(results.values()))
+
+    @pytest.mark.parametrize(
+        "program_file, compiler_config, error",
+        [
+            pytest.param(
+                get_qasm2_path("basic.qasm"),
+                CompilerConfig(results_format=QuantumResultsFormat().binary()),
+                pytest.raises(ValueError, match="BinaryCount format required"),
+                id="Binary_results",
+            ),
+            pytest.param(
+                get_qasm2_path("basic.qasm"),
+                CompilerConfig(results_format=QuantumResultsFormat().raw()),
+                pytest.raises(ValueError, match="BinaryCount format required"),
+                id="Raw_results",
+            ),
+        ],
+    )
+    def test_error_mitigation_compile_fail(self, program_file, compiler_config, error):
+        compiler_config.error_mitigation = ErrorMitigationConfig.LinearMitigation
+        with error:
+            _ = QAT().compile(str(program_file), compiler_config, pipeline=self.pipeline)
+
+    # TODO: Update error for un-supported ErrorMitigation programs. - COMPILER-879
+    @pytest.mark.parametrize(
+        "program_file, compiler_config, error",
+        [
+            pytest.param(
+                get_qasm2_path("basic_results_formats.qasm"),
+                CompilerConfig(results_format=QuantumResultsFormat().binary_count()),
+                pytest.raises(ValueError, match="Cannot have multiple registers"),
+                id="Multiple_result_registers",
+            ),
+            pytest.param(
+                get_qasm3_path("ecr_test.qasm"),
+                CompilerConfig(results_format=QuantumResultsFormat().binary_count()),
+                pytest.raises(
+                    AttributeError, match="'list' object has no attribute 'values'"
+                ),
+                id="QASM3_file",
+            ),
+            pytest.param(
+                get_qasm3_path("arb_waveform.qasm"),
+                CompilerConfig(results_format=QuantumResultsFormat().binary_count()),
+                pytest.raises(
+                    AttributeError, match="'list' object has no attribute 'values'"
+                ),
+                id="OpenPulse_file",
+            ),
+            pytest.param(
+                get_qir_path("hello.bc"),
+                CompilerConfig(results_format=QuantumResultsFormat().binary_count()),
+                pytest.raises(
+                    AttributeError, match="'list' object has no attribute 'values'"
+                ),
+                id="QIR_binary",
+            ),
+        ],
+    )
+    def test_error_mitigation_execute_fail(self, program_file, compiler_config, error):
+        compiler_config.error_mitigation = ErrorMitigationConfig.LinearMitigation
+        executable, _ = QAT().compile(
+            str(program_file), compiler_config, pipeline=self.pipeline
+        )
+        with error:
+            _ = QAT().execute(executable, compiler_config, pipeline=self.pipeline)
 
 
 class MockEchoModelLoader(EchoModelLoader):

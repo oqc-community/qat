@@ -1,10 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import random
 
 from qat.model.loaders.purr.base import BaseLegacyModelLoader
 from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.model.loaders.update import ModelUpdateChecker
-from qat.purr.compiler.hardware_models import QuantumHardwareModel
+from qat.purr.compiler.hardware_models import (
+    ErrorMitigation,
+    QuantumHardwareModel,
+    ReadoutMitigation,
+)
 
 
 class BrokenLoader(EchoModelLoader):
@@ -43,3 +48,33 @@ class MockModelLoader(BaseLegacyModelLoader, ModelUpdateChecker):
 
     def is_up_to_date(self, model) -> bool:
         return len(model.qubits) == self.num_qubits
+
+
+class EchoModelLoaderWithErrorMitigation(EchoModelLoader):
+    """A model loader that applies a random error mitigation configuration to the loaded
+    model."""
+
+    def load(self, seed=None):
+        """Load the Echo model and apply error mitigation."""
+        hw = super().load()
+        return self.apply_error_mitigation_setup(hw, seed=seed)
+
+    def generate_random_linear(self, qubit_indices, random_data=True, seed=None):
+        if seed is not None:
+            random.seed(seed)
+        output = {}
+        for index in qubit_indices:
+            random_0 = random.random() if random_data else 1
+            random_1 = random.random() if random_data else 1
+            output[str(index)] = {
+                "0|0": random_0,
+                "1|0": 1 - random_0,
+                "1|1": random_1,
+                "0|1": 1 - random_1,
+            }
+        return output
+
+    def apply_error_mitigation_setup(self, hw, seed=None):
+        lin_mit = self.generate_random_linear([q.index for q in hw.qubits], seed=seed)
+        hw.error_mitigation = ErrorMitigation(ReadoutMitigation(linear=lin_mit))
+        return hw
