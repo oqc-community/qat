@@ -60,7 +60,7 @@ jobs:
 
       - name: Load cached venv
         id: cached-pip-wheels
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
@@ -231,7 +231,7 @@ jobs:
 
       - name: Load cached venv
         id: cached-pip-wheels
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
