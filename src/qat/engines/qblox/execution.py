@@ -36,8 +36,7 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
                     f.write(json.dumps(asdict(pkg.sequence)))
 
         self.instrument.setup(program)
-        self.instrument.playback()
-        playback: dict[str, list[Acquisition]] = self.instrument.collect()
+        playback: dict[str, list[Acquisition]] = self.instrument.playback()
 
         if self.plot_playback:
             plot_playback(playback)

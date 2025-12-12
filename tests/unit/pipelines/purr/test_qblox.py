@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+
 from pathlib import Path
 
 import pytest
@@ -11,9 +12,6 @@ from qat.backend.qblox.config.constants import QbloxTargetData, TargetData
 from qat.backend.qblox.execution import QbloxProgram
 from qat.engines.qblox.execution import QbloxEngine
 from qat.executables import Executable
-
-# TODO: Pipelines using `QbloxEngine`: COMPILER-730
-# from qat.engines.qblox.live import QbloxEngine
 from qat.frontend import AutoFrontend
 from qat.instrument.base import CsvInstrumentBuilder
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
@@ -51,6 +49,8 @@ class TestQbloxPipeline:
         assert pipeline.target_data == QbloxTargetData.default()
         assert pipeline.engine is None
 
+        assert pipeline.backend.pipeline is not None
+
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
         model = QbloxDummyModelLoader(qubit_count=4).load()
@@ -63,6 +63,8 @@ class TestQbloxPipeline:
         assert isinstance(compile_pipeline.middleend, CustomMiddleend)
         assert isinstance(compile_pipeline.backend, QbloxBackend2)
         assert isinstance(compile_pipeline.target_data, TargetData)
+
+        assert compile_pipeline.backend.pipeline is not None
 
     def test_build_execute_pipeline(self, testpath):
         """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
@@ -102,6 +104,8 @@ class TestQbloxCompilePipeline:
         assert isinstance(compile_pipeline.backend, QbloxBackend1)
         assert isinstance(compile_pipeline.target_data, TargetData)
 
+        assert compile_pipeline.backend.pipeline is not None
+
     def test_build_pipeline2(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
         model = QbloxDummyModelLoader(qubit_count=4).load()
@@ -114,6 +118,8 @@ class TestQbloxCompilePipeline:
         assert isinstance(compile_pipeline.middleend, CustomMiddleend)
         assert isinstance(compile_pipeline.backend, QbloxBackend2)
         assert isinstance(compile_pipeline.target_data, TargetData)
+
+        assert compile_pipeline.backend.pipeline is not None
 
 
 class TestQbloxExecutePipeline:
@@ -240,7 +246,7 @@ class TestQbloxPipelineWithCircuits:
 
     def test_executable(self, executable):
         assert isinstance(executable, Executable)
-        for program in executable.programs.programs:
+        for program in executable.programs:
             assert isinstance(program, QbloxProgram)
 
     def test_shots(self, executable, shots):
@@ -260,7 +266,7 @@ class TestQbloxPipelineWithCircuits:
         """QbloxExecutables are expected to have channel data for each physical
         channel available, regardless of if they're used."""
 
-        for program in executable.programs.programs:
+        for program in executable.programs:
             assert len(program.channel_data) == len(self.model.physical_channels)
             for physical_channel in self.model.physical_channels.values():
                 assert physical_channel.id in program.channel_data

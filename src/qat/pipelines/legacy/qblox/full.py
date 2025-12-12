@@ -12,6 +12,7 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime.legacy import LegacyRuntime
 
+from ...purr.qblox.compile import backend_pipeline2
 from .compile import middleend_pipeline
 
 log = get_default_logger()
@@ -48,7 +49,10 @@ class LegacyQbloxPipeline(UpdateablePipeline):
                 model,
                 pipeline=middleend_pipeline(model=model, target_data=target_data),
             ),
-            backend=QbloxBackend2(model),
+            backend=QbloxBackend2(
+                model,
+                pipeline=backend_pipeline2(),
+            ),
             runtime=LegacyRuntime(
                 engine=model.create_engine(),
                 results_pipeline=results_pipeline(model),

@@ -145,7 +145,7 @@ class ExecutePipeline(BasePipeline):
 
     def execute(
         self,
-        package: Executable,
+        executable: Executable,
         compiler_config: CompilerConfig | None = None,
         **kwargs,
     ) -> tuple[dict, MetricsManager]:
@@ -155,7 +155,7 @@ class ExecutePipeline(BasePipeline):
         Checks that the hardware model in the pipeline matches the hardware model used
         during compilation.
 
-        :param package: The compiled program to execute.
+        :param executable: The compiled program to execute.
         :param compiler_config: Configuration options for the compiler, such as optimization
             and results formatting.
         :return: A dictionary of results from the execution and the metrics manager
@@ -164,17 +164,20 @@ class ExecutePipeline(BasePipeline):
 
         compiler_config = CompilerConfig() if compiler_config is None else compiler_config
 
-        if self.model is not None and self.model.calibration_id != package.calibration_id:
+        if (
+            self.model is not None
+            and self.model.calibration_id != executable.calibration_id
+        ):
             raise MismatchingHardwareModelException(
-                f"Hardware id in the executable package '{self.model.calibration_id}'' "
-                f"does not match the hardware id '{package.calibration_id}' used "
-                "during compilation."
+                f"Hardware id '{executable.calibration_id}' in the executable "
+                f"does not match the hardware model id '{self.model.calibration_id}' used "
+                "for execution in this pipeline."
             )
 
         pp_results = ResultManager()
         metrics_manager = MetricsManager(compiler_config.metrics)
         results = self.runtime.execute(
-            package,
+            executable,
             res_mgr=pp_results,
             met_mgr=metrics_manager,
             compiler_config=compiler_config,

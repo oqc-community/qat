@@ -16,6 +16,7 @@ from qat.middleend.passes.purr.validation import (
     ReadoutValidation,
 )
 from qat.pipelines.pipeline import CompilePipeline
+from qat.pipelines.purr.qblox.compile import backend_pipeline2
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
@@ -79,5 +80,8 @@ class LegacyQbloxCompilePipeline(UpdateablePipeline):
                 model,
                 pipeline=middleend_pipeline(model=model, target_data=target_data),
             ),
-            backend=QbloxBackend2(model),
+            backend=QbloxBackend2(
+                model,
+                pipeline=backend_pipeline2(),
+            ),
         )

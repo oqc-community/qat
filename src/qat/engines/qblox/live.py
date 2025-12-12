@@ -132,6 +132,7 @@ class QbloxLeafInstrument(LeafInstrument):
         if not any(self._id2seq):
             raise ValueError("No allocations found. Install packages and configure first")
 
+        results: dict[str, list[Acquisition]] = defaultdict(list)
         try:
             for pulse_channel_id, sequencer in self._id2seq.items():
                 sequencer.sync_en(True)
@@ -141,20 +142,7 @@ class QbloxLeafInstrument(LeafInstrument):
 
             for pulse_channel_id, sequencer in self._id2seq.items():
                 sequencer.start_sequencer()
-        finally:
-            for pulse_channel_id, sequencer in self._id2seq.items():
-                sequencer.sync_en(False)
 
-            self._reset_modules()
-
-    def collect(self) -> dict:
-        if not any(self._id2seq):
-            raise ValueError(
-                "No allocations found. Install packages, configure, and playback first"
-            )
-
-        results: dict[str, list[Acquisition]] = defaultdict(list)
-        try:
             for pulse_channel_id, sequencer in self._id2seq.items():
                 if ChannelType.macq.name in pulse_channel_id:
                     status_obj = sequencer.get_sequencer_status()
@@ -196,10 +184,12 @@ class QbloxLeafInstrument(LeafInstrument):
             return results
         finally:
             for pulse_channel_id, sequencer in self._id2seq.items():
+                sequencer.sync_en(False)
                 if ChannelType.macq.name in pulse_channel_id:
                     sequencer.delete_acquisition_data(all=True)
 
             self._id2seq.clear()
+            self._reset_modules()
 
 
 class QbloxCompositeInstrument(CompositeInstrument[QbloxLeafInstrument]):

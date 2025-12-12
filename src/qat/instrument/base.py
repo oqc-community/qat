@@ -44,9 +44,6 @@ class InstrumentConcept(ConnectionMixin):
     def playback(self, *args, **kwargs):
         pass
 
-    def collect(self, *args, **kwargs) -> dict:
-        pass
-
 
 class LeafInstrument(InstrumentConcept):
     def __init__(self, id: str, name: str, address: str):
@@ -108,12 +105,8 @@ class CompositeInstrument(Generic[LInstr], InstrumentConcept):
             comp.setup(*args, **kwargs)
 
     def playback(self, *args, **kwargs):
-        for comp in self._components.values():
-            comp.playback(*args, **kwargs)
-
-    def collect(self, *args, **kwargs):
         component_results = [
-            comp.collect(*args, **kwargs) for comp in self._components.values()
+            comp.playback(*args, **kwargs) for comp in self._components.values()
         ]
 
         results = {}

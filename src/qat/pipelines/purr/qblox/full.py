@@ -46,7 +46,10 @@ class QbloxPipeline1(UpdateablePipeline):
                 model=model,
                 pipeline=middleend_pipeline1(model=model, target_data=target_data),
             ),
-            backend=QbloxBackend1(model=model, pipeline=backend_pipeline1()),
+            backend=QbloxBackend1(
+                model=model,
+                pipeline=backend_pipeline1(),
+            ),
             runtime=SimpleRuntime(
                 engine=engine,
                 results_pipeline=results_pipeline,
@@ -79,7 +82,10 @@ class QbloxPipeline2(UpdateablePipeline):
                 model=model,
                 pipeline=middleend_pipeline2(model=model, target_data=target_data),
             ),
-            backend=QbloxBackend2(model=model, pipeline=backend_pipeline2()),
+            backend=QbloxBackend2(
+                model=model,
+                pipeline=backend_pipeline2(),
+            ),
             runtime=SimpleRuntime(
                 engine=engine,
                 results_pipeline=results_pipeline,

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-
 import pytest
 from qblox_instruments import (
     Cluster,
@@ -10,61 +9,16 @@ from qblox_instruments import (
     SequencerStatusFlags,
 )
 
-from qat.backend.base import BaseBackend
-from qat.backend.passes.purr.analysis import (
-    BindingPass,
-    TILegalisationPass,
-    TriagePass,
-)
-from qat.backend.passes.purr.transform import DesugaringPass
-from qat.backend.qblox.codegen import QbloxBackend1
-from qat.backend.qblox.config.constants import QbloxTargetData
-from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
-from qat.core.metrics_base import MetricsManager
-from qat.core.pass_base import PassManager
-from qat.core.result_base import ResultManager
-from qat.middleend.passes.purr.transform import (
-    DeviceUpdateSanitisation,
-    PhaseOptimisation,
-    PostProcessingSanitisation,
-    RepeatSanitisation,
-    ReturnSanitisation,
-    ScopeSanitisation,
-)
-from qat.middleend.passes.purr.validation import InstructionValidation, ReadoutValidation
+from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.purr.utils.logger import get_default_logger
 
+from tests.unit.backend.qblox.utils import do_emit
 from tests.unit.utils.builder_nuggets import resonator_spect
 
 log = get_default_logger()
 
 
 class TestInstrument:
-    def middleend_pipeline(self, qblox_model):
-        target_data = QbloxTargetData.default()
-        return (
-            PassManager()
-            | PhaseOptimisation()
-            | PostProcessingSanitisation()
-            | DeviceUpdateSanitisation()
-            | InstructionValidation(target_data)
-            | ReadoutValidation(qblox_model)
-            | RepeatSanitisation(qblox_model, target_data)
-            | ScopeSanitisation()
-            | ReturnSanitisation()
-            | DesugaringPass()
-            | TriagePass()
-            | BindingPass()
-            | TILegalisationPass()
-            | QbloxLegalisationPass()
-        )
-
-    def _do_emit(self, qblox_model, backend: BaseBackend, builder):
-        res_mgr = ResultManager()
-        met_mgr = MetricsManager()
-        self.middleend_pipeline(qblox_model).run(builder, res_mgr, met_mgr)
-        return backend.emit(builder, res_mgr, met_mgr)
-
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
     def test_instrument_lifecycle(self, qblox_instrument):
         assert (
@@ -84,10 +38,10 @@ class TestInstrument:
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
-    def test_setup(self, qblox_model, qblox_instrument):
-        backend = QbloxBackend1(qblox_model)
+    @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+    def test_setup(self, qblox_model, qblox_instrument, backend_type):
         builder = resonator_spect(qblox_model)
-        executable = self._do_emit(qblox_model, backend, builder)
+        executable = do_emit(qblox_model, backend_type, builder)
 
         for program in executable.programs:
             assert len(qblox_instrument.id2seq) == 0
@@ -116,11 +70,11 @@ class TestInstrument:
                 assert qblox_instrument.modules[module]
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
-    def test_playback(self, qblox_model, qblox_instrument):
-        backend = QbloxBackend1(qblox_model)
+    def test_playback(self, qblox_model, qblox_instrument, backend_type):
         builder = resonator_spect(qblox_model)
-        executable = self._do_emit(qblox_model, backend, builder)
+        executable = do_emit(qblox_model, backend_type, builder)
         for program in executable.programs:
             # Fail if no resource had been allocated leading up to playback
             with pytest.raises(ValueError):
@@ -129,7 +83,9 @@ class TestInstrument:
             qblox_instrument.setup(program)
             _, sequencer = next(((k, v) for k, v in qblox_instrument.id2seq.items()))
 
-            qblox_instrument.playback()  # IDLE ---arm--> ARMED ---start--> STOPPED
+            # IDLE ---arm--> ARMED ---start--> STOPPED
+            results = qblox_instrument.playback()
+            assert results
 
             # Expecting STOPPED after "arm" and "start" steps
             sequencer_status = sequencer.get_sequencer_status()
@@ -138,24 +94,10 @@ class TestInstrument:
             assert SequencerStatusFlags.ACQ_BINNING_DONE in sequencer_status.info_flags
             assert not sequencer.sync_en()
 
-            qblox_instrument.id2seq.clear()
+            # Expect resource cleanup after playback
+            assert not qblox_instrument.id2seq
 
             # Expecting allocated modules to be marked as clean
             for pkg in program.packages.values():
                 module = getattr(qblox_instrument.driver, f"module{pkg.slot_idx}")
                 assert not qblox_instrument.modules[module]
-
-    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
-    @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
-    def test_collect(self, qblox_model, qblox_instrument):
-        backend = QbloxBackend1(qblox_model)
-        builder = resonator_spect(qblox_model)
-        executable = self._do_emit(qblox_model, backend, builder)
-        for program in executable.programs:
-            qblox_instrument.setup(program)
-            qblox_instrument.playback()
-            results = qblox_instrument.collect()
-            assert results
-
-            # Expect resource cleanup after playback
-            assert not qblox_instrument.id2seq

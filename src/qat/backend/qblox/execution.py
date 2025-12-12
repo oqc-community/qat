@@ -3,13 +3,12 @@
 
 from dataclasses import dataclass, field
 
-import numpy as np
 from pydantic import ConfigDict
 
-from qat.backend.passes.purr.analysis import TriageResult
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.ir import Sequence
 from qat.executables import AbstractProgram
+from qat.utils.pydantic import ComplexNDArray
 
 
 @dataclass
@@ -22,7 +21,7 @@ class QbloxPackage:
     slot_idx: int | None = None
     mod_config: ModuleConfig = field(default_factory=lambda: ModuleConfig())
     sequence: Sequence | None = None
-    timeline: np.ndarray | None = None
+    timeline: ComplexNDArray | None = None
 
 
 class QbloxProgram(AbstractProgram):
@@ -30,7 +29,6 @@ class QbloxProgram(AbstractProgram):
 
     # COMPILER 828: change to pydantic objects (not dataclasses)
     packages: dict[str, QbloxPackage]
-    triage_result: TriageResult
 
     @property
     def acquire_shapes(self) -> dict[str, tuple[int, ...]]:

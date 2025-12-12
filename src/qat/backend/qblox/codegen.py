@@ -893,11 +893,13 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: ResultManager | None = None,
-        met_mgr: MetricsManager | None = None,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
         ignore_empty: bool = True,
         **kwargs,
     ) -> Executable[QbloxProgram]:
+        self.pipeline.run(ir, res_mgr, met_mgr, **kwargs)
+
         triage_result = res_mgr.lookup_by_type(TriageResult)
         device_updates = triage_result.device_updates
         quantum_instructions = triage_result.quantum_instructions
@@ -1029,18 +1031,20 @@ class QbloxBackend1(AllocatingBackend[QbloxProgram]):
                 seq_idx, slot_idx = self.allocate(target)
                 package = context.create_package(target, seq_idx, slot_idx)
                 packages[target.full_id()] = package
-        return QbloxProgram(packages=packages, triage_result=triage_result)
+        return QbloxProgram(packages=packages)
 
 
 class QbloxBackend2(AllocatingBackend[QbloxProgram]):
     def emit(
         self,
         ir: InstructionBuilder,
-        res_mgr: ResultManager | None = None,
-        met_mgr: MetricsManager | None = None,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
         ignore_empty: bool = True,
         **kwargs,
     ) -> Executable[QbloxProgram]:
+        self.pipeline.run(ir, res_mgr, met_mgr, **kwargs)
+
         triage_result = res_mgr.lookup_by_type(TriageResult)
         binding_result = res_mgr.lookup_by_type(BindingResult)
         precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
@@ -1072,7 +1076,7 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
                 package = context.create_package(target, seq_idx, slot_idx)
                 packages[target.full_id()] = package
 
-        programs = [QbloxProgram(packages=packages, triage_result=triage_result)]
+        programs = [QbloxProgram(packages=packages)]
         acquires = binding_result.acquire_data_map
         assigns = triage_result.assigns
         return_vars = set(next(iter(triage_result.returns)).variables)
