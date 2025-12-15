@@ -121,7 +121,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload markdown report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           path: static-report.md
@@ -256,7 +256,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Upload markdown report
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           path: reports/output.md
           name: qat-pytest-markdown
