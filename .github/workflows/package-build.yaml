@@ -213,7 +213,7 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
 
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           pattern: qat_*
           path: reports/
