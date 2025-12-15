@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import inspect
+from typing import Callable
 
 from qat.instrument.base import InstrumentBuilder, InstrumentConcept
 
@@ -87,7 +88,8 @@ def is_engine(value: type):
         and issubclass(value, (NativeEngine, InstructionExecutionEngine))
     ):
         raise ValueError(
-            f"{value} is not a valid Engine (either NativeEngine or legacy InstructionExecutionEngine)"
+            f"{value} is not a valid Engine (either NativeEngine or legacy "
+            "InstructionExecutionEngine)"
         )
     return value
 
@@ -100,10 +102,13 @@ def is_target_data(value: type):
 
     if inspect.isclass(value) and issubclass(value, AbstractTargetData):
         return value
-    if callable(value) and issubclass(
-        inspect.signature(value).return_annotation, AbstractTargetData
-    ):
-        return value
+
+    if callable(value):
+        return_annotation = inspect.signature(value).return_annotation
+        if isinstance(return_annotation, type) and issubclass(
+            return_annotation, AbstractTargetData
+        ):
+            return value
     raise ValueError(f"{value} is not a valid TargetData")
 
 
@@ -117,11 +122,11 @@ def is_passmanager(value: type):
 
 
 def is_passmanager_factory(value: type):
-    """A validator which raises when the input not function which returns a PassManager."""
+    """A validator which raises when the input is not function that returns a
+    PassManager."""
     from qat.core.pass_base import PassManager
 
-    if not (callable(value) and inspect.signature(value).return_annotation is PassManager):
-        raise ValueError(f"{value} does not return a PassManager")
+    check_callable(value, PassManager)
     return value
 
 
@@ -138,11 +143,7 @@ def is_pipeline_factory(value: type):
     """A validator which raises when the input not function which returns a Pipeline."""
     from qat.pipelines.base import BasePipeline
 
-    if not (
-        callable(value)
-        and issubclass(inspect.signature(value).return_annotation, BasePipeline)
-    ):
-        raise ValueError(f"{value} does not a return a BasePipeline")
+    check_callable(value, BasePipeline)
     return value
 
 
@@ -171,3 +172,18 @@ def requires_target_data(value: type) -> bool:
     consistent enough with type hinting for this.
     """
     return "target_data" in inspect.signature(value).parameters
+
+
+def check_callable(value: Callable, return_type: type):
+    """Raises if the value is not a callable, and the return type is not the expected
+    type."""
+
+    if not callable(value):
+        raise ValueError(f"{value} is not callable")
+
+    return_annotation = inspect.signature(value).return_annotation
+    if not isinstance(return_annotation, type):
+        raise ValueError(f"{value} does not have a valid return annotation")
+
+    if not issubclass(return_annotation, return_type):
+        raise ValueError(f"{value} does not return a {return_type.__name__}")

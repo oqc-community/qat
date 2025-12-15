@@ -11,7 +11,7 @@ from benchmarks.utils.helpers import load_experiments, load_qasm
 experiments = load_experiments(return_builder=False)
 
 
-@pytest.mark.filterwarnings("ignor:WaveformV1 support:DeprecationWarning")
+@pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 @pytest.mark.benchmark(disable_gc=True, max_time=2, min_rounds=10)
 @pytest.mark.parametrize("key", experiments.keys())
 def test_benchmarks_qasm(benchmark, key):
