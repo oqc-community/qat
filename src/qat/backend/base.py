@@ -53,7 +53,7 @@ class CustomBackend(BaseBackend[Program], Generic[Program], abc.ABC):
 
     def __init__(self, model: QuantumHardwareModel, pipeline: PassManager = None):
         super().__init__(model=model)
-        self.pipeline = pipeline
+        self.pipeline = pipeline or PassManager()
 
 
 class AllocatingBackend(CustomBackend[Program], Generic[Program], abc.ABC):

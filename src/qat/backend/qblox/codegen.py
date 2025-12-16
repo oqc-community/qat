@@ -2,10 +2,12 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC
+from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from numbers import Number
 
 import numpy as np
+from more_itertools import partition
 
 from qat.backend.base import AllocatingBackend
 from qat.backend.codegen_base import DfsTraversal
@@ -26,7 +28,6 @@ from qat.backend.qblox.passes.analysis import (
     AllocationManager,
     BindingResult,
     IterBound,
-    PreCodegenPass,
     PreCodegenResult,
     QbloxLegalisationPass,
     TriageResult,
@@ -39,6 +40,7 @@ from qat.purr.backends.utilities import evaluate_shape
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.execution import DeviceInjectors, SweepIterator
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import (
     Acquire,
     CustomPulse,
@@ -889,167 +891,19 @@ class QbloxContext(ABC):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
 
-class QbloxBackend1(AllocatingBackend[QbloxProgram]):
-    def emit(
-        self,
-        ir: InstructionBuilder,
-        res_mgr: ResultManager,
-        met_mgr: MetricsManager,
-        ignore_empty: bool = True,
-        **kwargs,
-    ) -> Executable[QbloxProgram]:
-        self.pipeline.run(ir, res_mgr, met_mgr, **kwargs)
-
-        triage_result = res_mgr.lookup_by_type(TriageResult)
-        device_updates = triage_result.device_updates
-        quantum_instructions = triage_result.quantum_instructions
-        sweeps = triage_result.sweeps
-        switerator = SweepIterator.from_sweeps(sweeps)
-        dinjectors = DeviceInjectors(device_updates)
-
-        binding_result = res_mgr.lookup_by_type(BindingResult)
-        scoping_result = next(
-            iter(binding_result.scoping_results.values()), ScopingResult()
-        )
-        scopes = [(s, e) for (s, e) in scoping_result.scope2symbols if s in sweeps]
-
-        ScopePeeling().run(ir, res_mgr, met_mgr, scopes=scopes)
-        # TODO - Pass infrastructural improvements [COMPILER-849]
-        # res_mgr.mark_as_dirty(triage_result, binding_result)
-
-        programs: list[QbloxProgram] = []
-        try:
-            dinjectors.inject()
-            while not switerator.is_finished():
-                switerator.do_sweep(quantum_instructions)
-                inner_res_mgr = ResultManager()
-                inner_met_mgr = MetricsManager()
-                (PassManager() | TriagePass() | BindingPass() | PreCodegenPass()).run(
-                    ir, inner_res_mgr, inner_met_mgr, enable_hw_averaging=True
-                )
-
-                inner_triage_result = inner_res_mgr.lookup_by_type(TriageResult)
-                inner_binding_result = inner_res_mgr.lookup_by_type(BindingResult)
-                inner_precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
-                programs.append(
-                    self._do_emit(
-                        inner_triage_result,
-                        inner_binding_result,
-                        inner_precodegen_result,
-                        ignore_empty,
-                    )
-                )
-        finally:
-            switerator.revert(triage_result.quantum_instructions)
-            dinjectors.revert()
-
-        acquires = binding_result.acquire_data_map
-        assigns = triage_result.assigns
-        return_vars = set(next(iter(triage_result.returns)).variables)
-        shots = (
-            sum((repeat.repeat_count for repeat in triage_result.repeats), 0)
-            if triage_result.repeats
-            else None
-        )
-
-        return Executable[QbloxProgram](
-            programs=programs,
-            acquires=acquires,
-            assigns=assigns,
-            returns=return_vars,
-            shots=shots,
-            calibration_id=self.model.calibration_id,
-        )
+class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
+    def __init__(self, model: QuantumHardwareModel, pipeline: PassManager = None):
+        super().__init__(model=model, pipeline=pipeline)
+        self.allocations: dict[int, dict[str, int]] = defaultdict(dict)
 
     def _do_emit(
         self,
         triage_result: TriageResult,
         binding_result: BindingResult,
         precodegen_result: PreCodegenResult,
+        cfg_result: CFGResult,
         ignore_empty=True,
     ) -> QbloxProgram:
-        rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
-        iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
-            binding_result.iter_bound_results
-        )
-        alloc_mgrs: dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
-
-        with ExitStack() as stack:
-            contexts = {
-                t: stack.enter_context(
-                    QbloxContext(
-                        rw_result=rw_results[t],
-                        iter_bounds=iter_bound_results[t],
-                        alloc_mgr=alloc_mgrs[t],
-                    )
-                )
-                for t in triage_result.target_map
-            }
-
-            for repeat in triage_result.repeats:
-                QbloxContext.enter_repeat(repeat, contexts)
-
-            iterator = iter(triage_result.quantum_instructions)
-            while (inst := next(iterator, None)) is not None:
-                if isinstance(inst, PostProcessing):
-                    continue
-                elif isinstance(inst, Synchronize):
-                    QbloxContext.synchronize(inst, contexts)
-                    continue
-
-                for target in inst.quantum_targets:
-                    context = contexts[target]
-                    if isinstance(inst, DeviceUpdate):
-                        context.device_update(inst)
-                    elif isinstance(inst, PhaseReset):
-                        context.reset_phase()
-                    elif isinstance(inst, MeasurePulse):
-                        next_inst = next(iterator, None)
-                        if next_inst is None or not isinstance(next_inst, Acquire):
-                            raise ValueError(
-                                "Found a MeasurePulse but no Acquire instruction followed"
-                            )
-
-                        context.measure_acquire(inst, next_inst, target)
-                    elif isinstance(inst, Waveform):
-                        context.waveform(inst, target)
-                    elif isinstance(inst, Delay):
-                        context.delay(inst)
-                    elif isinstance(inst, PhaseShift):
-                        context.shift_phase(inst)
-                    elif isinstance(inst, FrequencyShift):
-                        context.shift_frequency(inst, target)
-                    elif isinstance(inst, Id):
-                        context.id()
-
-            for repeat in triage_result.repeats:
-                QbloxContext.exit_repeat(repeat, contexts)
-
-        packages = {}
-        for target, context in contexts.items():
-            if not context.is_empty() or not ignore_empty:
-                seq_idx, slot_idx = self.allocate(target)
-                package = context.create_package(target, seq_idx, slot_idx)
-                packages[target.full_id()] = package
-        return QbloxProgram(packages=packages)
-
-
-class QbloxBackend2(AllocatingBackend[QbloxProgram]):
-    def emit(
-        self,
-        ir: InstructionBuilder,
-        res_mgr: ResultManager,
-        met_mgr: MetricsManager,
-        ignore_empty: bool = True,
-        **kwargs,
-    ) -> Executable[QbloxProgram]:
-        self.pipeline.run(ir, res_mgr, met_mgr, **kwargs)
-
-        triage_result = res_mgr.lookup_by_type(TriageResult)
-        binding_result = res_mgr.lookup_by_type(BindingResult)
-        precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
-        cfg_result = res_mgr.lookup_by_type(CFGResult)
-
         rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
         iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
             binding_result.iter_bound_results
@@ -1075,8 +929,128 @@ class QbloxBackend2(AllocatingBackend[QbloxProgram]):
                 seq_idx, slot_idx = self.allocate(target)
                 package = context.create_package(target, seq_idx, slot_idx)
                 packages[target.full_id()] = package
+        return QbloxProgram(packages=packages)
 
-        programs = [QbloxProgram(packages=packages)]
+
+class QbloxBackend1(AbstractQbloxBackend):
+    def emit(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        ignore_empty: bool = True,
+        **kwargs,
+    ) -> Executable[QbloxProgram]:
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        device_updates = triage_result.device_updates
+        quantum_instructions = triage_result.quantum_instructions
+        sweeps = triage_result.sweeps
+        switerator = SweepIterator.from_sweeps(sweeps)
+        dinjectors = DeviceInjectors(device_updates)
+
+        binding_result = res_mgr.lookup_by_type(BindingResult)
+        scoping_result = next(
+            iter(binding_result.scoping_results.values()), ScopingResult()
+        )
+        scopes = [(s, e) for (s, e) in scoping_result.scope2symbols if s in sweeps]
+
+        ScopePeeling().run(ir, res_mgr, met_mgr, scopes=scopes)
+        # TODO - Pass infrastructural improvements [COMPILER-849]
+        # res_mgr.mark_as_dirty(triage_result, binding_result)
+
+        programs: list[QbloxProgram] = []
+        try:
+            dinjectors.inject()
+            while not switerator.is_finished():
+                switerator.do_sweep(quantum_instructions)
+                inner_res_mgr = ResultManager()
+                inner_met_mgr = MetricsManager()
+                (PassManager() | TriagePass() | BindingPass()).run(
+                    ir, inner_res_mgr, inner_met_mgr, enable_hw_averaging=True
+                )
+                self.pipeline.run(ir, inner_res_mgr, inner_met_mgr, **kwargs)
+
+                inner_triage_result = inner_res_mgr.lookup_by_type(TriageResult)
+                inner_binding_result = inner_res_mgr.lookup_by_type(BindingResult)
+                inner_precodegen_result = inner_res_mgr.lookup_by_type(PreCodegenResult)
+                inner_cfg_result = inner_res_mgr.lookup_by_type(CFGResult)
+                program = self._do_emit(
+                    inner_triage_result,
+                    inner_binding_result,
+                    inner_precodegen_result,
+                    inner_cfg_result,
+                    ignore_empty,
+                )
+                programs.append(program)
+        finally:
+            switerator.revert(triage_result.quantum_instructions)
+            dinjectors.revert()
+
+        acquires = binding_result.acquire_data_map
+        assigns = triage_result.assigns
+        return_vars = set(next(iter(triage_result.returns)).variables)
+        shots = (
+            sum((repeat.repeat_count for repeat in triage_result.repeats), 0)
+            if triage_result.repeats
+            else None
+        )
+
+        return Executable[QbloxProgram](
+            programs=programs,
+            acquires=acquires,
+            assigns=assigns,
+            returns=return_vars,
+            shots=shots,
+            calibration_id=self.model.calibration_id,
+        )
+
+
+class QbloxBackend2(AbstractQbloxBackend):
+    def emit(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        met_mgr: MetricsManager,
+        ignore_empty: bool = True,
+        **kwargs,
+    ) -> Executable[QbloxProgram]:
+        triage_result = res_mgr.lookup_by_type(TriageResult)
+        device_updates = triage_result.device_updates
+
+        remaining, static_dus = partition(
+            lambda inst: inst in device_updates and not isinstance(inst.value, Variable),
+            ir.instructions,
+        )
+        remaining, static_dus = list(remaining), list(static_dus)
+        dinjectors = DeviceInjectors(static_dus)
+
+        ir.instructions = remaining
+        triage_result.device_updates = [
+            inst for inst in device_updates if inst not in static_dus
+        ]
+        # TODO - Pass infrastructural improvements [COMPILER-849]
+        # res_mgr.mark_as_dirty(triage_result)
+
+        programs: list[QbloxProgram] = []
+        try:
+            dinjectors.inject()
+            self.pipeline.run(ir, res_mgr, met_mgr, **kwargs)
+
+            triage_result = res_mgr.lookup_by_type(TriageResult)
+            binding_result = res_mgr.lookup_by_type(BindingResult)
+            precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
+            cfg_result = res_mgr.lookup_by_type(CFGResult)
+            program = self._do_emit(
+                triage_result,
+                binding_result,
+                precodegen_result,
+                cfg_result,
+                ignore_empty,
+            )
+            programs.append(program)
+        finally:
+            dinjectors.revert()
+
         acquires = binding_result.acquire_data_map
         assigns = triage_result.assigns
         return_vars = set(next(iter(triage_result.returns)).variables)

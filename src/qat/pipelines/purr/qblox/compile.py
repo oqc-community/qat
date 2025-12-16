@@ -70,7 +70,7 @@ def middleend_pipeline2(model: QuantumHardwareModel, target_data: TargetData):
 
 
 def backend_pipeline1():
-    return PassManager() | PreCodegenPass()
+    return PassManager() | PreCodegenPass() | CFGPass()
 
 
 def backend_pipeline2():
