@@ -1,6 +1,17 @@
-import numpy as np
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from qat.ir.waveforms import Pulse, SampledWaveform, SquareWaveform, waveform_classes
+import numpy as np
+import pytest
+
+from qat.ir.waveforms import (
+    ExtraSoftSquareWaveform,
+    Pulse,
+    SampledWaveform,
+    SofterSquareWaveform,
+    SquareWaveform,
+    waveform_classes,
+)
 
 
 class TestWaveformHashing:
@@ -53,3 +64,22 @@ class TestPulse:
         pulse.update_duration(20e-9)
         assert np.isclose(pulse.duration, 20e-9)
         assert np.isclose(waveform.width, 20e-9)
+
+
+@pytest.mark.parametrize("waveform", [SofterSquareWaveform, ExtraSoftSquareWaveform])
+class TestSoftSquares:
+    def test_std_dev_is_used_for_shape_evaluation(self, waveform):
+        """Regression test to ensure std_dev is used in SofterSquareWaveform and
+        ExtraSoftSquareWaveform.
+
+        Tests that changing the std_dev parameter changes the shape of the waveform.
+        """
+
+        waveform1 = waveform(amp=1.0, width=400e-9, rise=50e-9, std_dev=100e-9)
+        waveform2 = waveform(amp=1.0, width=400e-9, rise=50e-9, std_dev=200e-9)
+
+        times = np.linspace(-200e-9, 200e-9, 41)
+        samples1 = waveform1.sample(times).samples
+        samples2 = waveform2.sample(times).samples
+
+        assert not np.allclose(samples1, samples2)

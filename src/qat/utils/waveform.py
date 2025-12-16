@@ -308,13 +308,13 @@ class SoftSquareFunction(NumericFunction):
 
 
 class SofterSquareFunction(NumericFunction):
-    width: float
+    std_dev: float
     rise: float
 
     @_validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
-        pulse = np.tanh((x.real + self.width / 2.0 - self.rise) / self.rise) - np.tanh(
-            (x.real - self.width / 2.0 + self.rise) / self.rise
+        pulse = np.tanh((x.real + self.std_dev / 2.0 - self.rise) / self.rise) - np.tanh(
+            (x.real - self.std_dev / 2.0 + self.rise) / self.rise
         )
         if pulse.any():
             pulse -= np.min(pulse)
@@ -323,14 +323,14 @@ class SofterSquareFunction(NumericFunction):
 
 
 class ExtraSoftSquareFunction(NumericFunction):
-    width: float
+    std_dev: float
     rise: float
 
     @_validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
         pulse = np.tanh(
-            (x.real + self.width / 2.0 - 2.0 * self.rise) / self.rise
-        ) - np.tanh((x.real - self.width / 2.0 + 2.0 * self.rise) / self.rise)
+            (x.real + self.std_dev / 2.0 - 2.0 * self.rise) / self.rise
+        ) - np.tanh((x.real - self.std_dev / 2.0 + 2.0 * self.rise) / self.rise)
         if pulse.any():
             pulse -= np.min(pulse)
             pulse /= np.max(pulse)
