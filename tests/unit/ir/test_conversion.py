@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025-2025 Oxford Quantum Circuits Ltd
 from copy import deepcopy
 from enum import Enum

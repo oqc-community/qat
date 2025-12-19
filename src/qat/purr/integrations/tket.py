@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023-2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from copy import deepcopy
 from numbers import Number
 from typing import List, Union

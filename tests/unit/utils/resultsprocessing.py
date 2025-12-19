@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from pydantic import validate_call
 
 from qat.core.pass_base import AnalysisPass, PassManager

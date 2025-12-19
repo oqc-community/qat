@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.model.loaders.purr.echo import Connectivity, EchoModelLoader
 from qat.purr.compiler.builders import QuantumInstructionBuilder

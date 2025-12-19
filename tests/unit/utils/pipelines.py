@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from qat.backend.waveform_v1.purr.codegen import WaveformV1Backend
 from qat.engines.native import NativeEngine
 from qat.engines.zero import ZeroEngine

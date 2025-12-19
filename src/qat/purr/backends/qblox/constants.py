@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 class Constants:
     MIN_GAIN = -pow(2, 15)
     """Minimum gain in Q1ASM programs."""
