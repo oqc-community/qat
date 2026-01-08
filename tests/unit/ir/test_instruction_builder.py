@@ -23,6 +23,7 @@ from qat.model.device import (
     CrossResonancePulseChannel,
     MeasurePulseChannel,
 )
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
 
@@ -180,6 +181,19 @@ class TestInstructionBuilder:
                 channel.physical_channel_id
                 == hw_model.physical_channel_for_pulse_channel_id(channel.uuid).uuid
             )
+
+
+class TestQuantumInstructionBuilder:
+    def test_blank_copy(self):
+        model = LucyModelLoader(qubit_count=4).load()
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.X(target=model.qubit_with_index(0), theta=np.pi / 2)
+
+        new_builder = builder._create_empty_builder()
+        assert new_builder.instructions == []
+        assert new_builder._pulse_channels is builder._pulse_channels
+        assert new_builder._qubit_index_by_uuid is builder._qubit_index_by_uuid
+        assert new_builder._qubits_ordered_by_index is builder._qubits_ordered_by_index
 
 
 @pytest.mark.parametrize("qubit_index", list(range(0, hw_model.number_of_qubits)))

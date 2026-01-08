@@ -59,14 +59,20 @@ class InstructionBuilder(ABC):
         self,
         hardware_model: PhysicalHardwareModel,
         instructions: list[Instruction] = [],
+        _qubit_index_by_uuid: dict[str, int] | None = None,
+        _qubits_ordered_by_index: list[Qubit] | None = None,
     ):
         self.hw = hardware_model
-        self._qubit_index_by_uuid = {
-            qubit.uuid: idx for (idx, qubit) in hardware_model.qubits.items()
-        }
-        self._qubits_ordered_by_index = [
-            self.hw.qubits[idx] for idx in sorted(self.hw.qubits.keys())
-        ]
+        self._qubit_index_by_uuid = (
+            _qubit_index_by_uuid
+            if _qubit_index_by_uuid is not None
+            else {qubit.uuid: idx for (idx, qubit) in hardware_model.qubits.items()}
+        )
+        self._qubits_ordered_by_index = (
+            _qubits_ordered_by_index
+            if _qubits_ordered_by_index is not None
+            else [self.hw.qubits[idx] for idx in sorted(self.hw.qubits.keys())]
+        )
         self._ir = InstructionBlock(instructions=instructions)
         self.compiled_shots: int | None = None
         self.shots: int | None = None
@@ -266,10 +272,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
     and an API for pulse-level instructions."""
 
     def __init__(self, *args, **kwargs):
+        pulse_channel_map = kwargs.pop("_pulse_channel_map", None)
         super().__init__(*args, **kwargs)
-        self._pulse_channels: dict[str, PulseChannel] = self._build_pulse_channel_mapping(
-            self.hw
-        )
+        if pulse_channel_map is None:
+            pulse_channel_map = self._build_pulse_channel_mapping(self.hw)
+        self._pulse_channels: dict[str, PulseChannel] = pulse_channel_map
 
     def pretty_print(self):
         output_str = ""
@@ -1078,6 +1085,18 @@ class QuantumInstructionBuilder(InstructionBuilder):
                         uuid=pc.uuid,
                     )
         return pulse_channels
+
+    def _create_empty_builder(self):
+        """Creates a new instance of the builder that is free of instructions; passes
+        through the expensive mappings created at instantiation."""
+
+        return type(self)(
+            hardware_model=self.hw,
+            instructions=[],
+            _pulse_channel_map=self._pulse_channels,
+            _qubit_index_by_uuid=self._qubit_index_by_uuid,
+            _qubits_ordered_by_index=self._qubits_ordered_by_index,
+        )
 
 
 PydQuantumInstructionBuilder = QuantumInstructionBuilder
