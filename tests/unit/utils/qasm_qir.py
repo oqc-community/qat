@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+import base64
 from enum import Enum, auto
 from importlib.util import find_spec
 from pathlib import Path
@@ -72,7 +73,7 @@ def get_qir(file_name):
     file_path = get_test_file_path(ProgramFileType.QIR, file_name)
     if file_path.suffix == "":
         with file_path.open("r") as file_:
-            return file_.read()
+            return base64.b64decode(file_.read())
     return load_qir_file(file_path)
 
 
@@ -92,7 +93,7 @@ def get_all_qasm3_paths() -> set[Path]:
 
 def get_all_qir_paths() -> set[Path]:
     dir = get_test_files_dir(ProgramFileType.QIR)
-    return set(Path(dir).glob("*.ll")) | set(Path(dir).glob("*.bc"))
+    return set(filter(lambda item: item.is_file(), Path(dir).glob("*")))
 
 
 def get_all_openpulse_paths() -> set[Path]:
@@ -238,7 +239,6 @@ skip_qir = [
     "teleportchain.ll",
     "bell_qir_measure.bc",
     "cudaq-ghz.ll",  # test is designed to fail for no TKET optims
-    "base64_bitcode_ghz",
 ]
 
 

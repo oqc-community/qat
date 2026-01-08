@@ -214,6 +214,8 @@ class TestLegacyEchoPipelineParity:
 
     @pytest.fixture(scope="class")
     def purr_package(self, source_file, purr_config):
+        if source_file.suffix == "":
+            pytest.skip("Purr does not support files without suffix.")
         frontend = fetch_frontend(str(source_file))
         builder, metrics = _return_or_build(
             str(source_file),
@@ -227,6 +229,9 @@ class TestLegacyEchoPipelineParity:
 
     @pytest.fixture(scope="class")
     def qat_package(self, source_file, qat_config):
+        if source_file.suffix == "":
+            # TODO: Support for base64 encoded files with no suffix, COMPILER-904
+            pytest.skip("QAT Frontends do not support files without suffix.")
         temp = QAT().compile(
             str(source_file),
             compiler_config=qat_config,

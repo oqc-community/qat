@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import uuid
+from enum import Enum
+from importlib.metadata import version
 
 from compiler_config.config import InlineResultsProcessing
 
@@ -18,11 +20,84 @@ try:
         Module,
         extract_byte_string,
         is_entry_point,
-        qubit_id,
-        result_id,
     )
+
+    if version("pyqir") < "0.12.0":
+        # TODO: Drop PyTket < 0.12.0 compatibility, COMPILER-909
+        from pyqir import (
+            qubit_id,
+            result_id,
+        )
+
+        def _convert_args(
+            builder: InstructionBuilder,
+            args: list[Constant],
+            expected_types: list["ArgumentType"],
+        ) -> list:
+            """Converts QIR arguments to appropriate types for the instruction builder."""
+
+            for i, arg in enumerate(args):
+                if isinstance(arg, (IntConstant, FloatConstant)):
+                    args[i] = arg.value
+                elif (qid := qubit_id(arg)) is not None:
+                    # Checks to see if this is a qubit
+                    args[i] = builder.get_logical_qubit(qid)
+                elif (rid := result_id(arg)) is not None:
+                    # Checks to see if this is a result
+                    args[i] = str(rid)
+                elif expected_types[i] == ArgumentType.Label:
+                    if not arg.is_null and (byte_string := extract_byte_string(arg)):
+                        args[i] = byte_string.decode("utf-8").rstrip("\00")
+                    else:
+                        args[i] = None
+
+            return args
+
+    else:
+        from pyqir import ptr_id
+
+        def _convert_args(
+            builder: InstructionBuilder,
+            args: list[Constant],
+            expected_types: list["ArgumentType"],
+        ) -> list:
+            """Converts QIR arguments to appropriate types for the instruction builder,
+            given expected argument types.
+            """
+
+            for i, (arg, expected_type) in enumerate(zip(args, expected_types)):
+                if expected_type == ArgumentType.Qubit:
+                    if (qid := ptr_id(arg)) is not None:
+                        args[i] = builder.get_logical_qubit(qid)
+                    else:
+                        raise ValueError(f"Argument {i} is not a valid qubit.")
+                elif expected_type == ArgumentType.Result:
+                    if (rid := ptr_id(arg)) is not None:
+                        args[i] = str(rid)
+                    else:
+                        raise ValueError(f"Argument {i} is not a valid result.")
+                elif expected_type == ArgumentType.Number:
+                    if isinstance(arg, (IntConstant, FloatConstant)):
+                        args[i] = arg.value
+                    else:
+                        raise ValueError(f"Argument {i} is not a valid number.")
+                elif expected_type == ArgumentType.Label:
+                    if not arg.is_null and (byte_string := extract_byte_string(arg)):
+                        args[i] = byte_string.decode("utf-8").rstrip("\00")
+                    else:
+                        args[i] = None
+
+            return args
+
 except ImportError:
     qir_available = False
+
+
+class ArgumentType(Enum):
+    Qubit = 1
+    Result = 2
+    Number = 3
+    Label = 4
 
 
 class QIRParser:
@@ -75,21 +150,6 @@ class QIRParser:
                 f"{intrinsic_name} has {actual_args} arguments, expected {expected_args}."
             )
 
-    def _convert_args(self, builder: InstructionBuilder, args: list[Constant]) -> list:
-        """Converts QIR arguments to appropriate types for the instruction builder."""
-
-        for i, arg in enumerate(args):
-            if isinstance(arg, (IntConstant, FloatConstant)):
-                args[i] = arg.value
-            elif (qid := qubit_id(arg)) is not None:
-                # Checks to see if this is a qubit
-                args[i] = builder.get_logical_qubit(qid)
-            elif (rid := result_id(arg)) is not None:
-                # Checks to see if this is a result
-                args[i] = str(rid)
-
-        return args
-
     def _process_instruction(self, builder: InstructionBuilder, instruction):
         """Dispatches the correct calls to the builder given the type of instruction.
 
@@ -101,71 +161,104 @@ class QIRParser:
             return
 
         intrinsic_name = instruction.callee.name
-        args = self._convert_args(builder, instruction.args)
+        args = instruction.args
         num_args = len(args)
 
         match intrinsic_name:
             case "__quantum__qis__ccx__body" | "__quantum____qis__ccnot__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 3)
+                args = _convert_args(
+                    builder,
+                    args,
+                    [ArgumentType.Qubit, ArgumentType.Qubit, ArgumentType.Qubit],
+                )
                 builder.ccnot(*args)
             case "__quantum__qis__cnot__body" | "__quantum__qis__cx__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
+                args = _convert_args(
+                    builder, args, [ArgumentType.Qubit, ArgumentType.Qubit]
+                )
                 builder.cnot(*args)
             case "__quantum__qis__cz__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
+                args = _convert_args(
+                    builder, args, [ArgumentType.Qubit, ArgumentType.Qubit]
+                )
                 builder.cZ(*args)
             case "__quantum__qis__h__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.had(*args)
             case "__quantum__qis__mz__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
+                args = _convert_args(
+                    builder, args, [ArgumentType.Qubit, ArgumentType.Result]
+                )
                 builder.measure_single_shot_z(args[0], output_variable=args[1])
                 builder.results_processing(args[1], self._results_format)
             case "__quantum__qis__reset__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.reset(*args)
             case "__quantum__qis__rx__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
+                args = _convert_args(
+                    builder, args, [ArgumentType.Number, ArgumentType.Qubit]
+                )
                 builder.X(args[1], args[0])
             case "__quantum__qis__ry__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
+                args = _convert_args(
+                    builder, args, [ArgumentType.Number, ArgumentType.Qubit]
+                )
                 builder.Y(args[1], args[0])
             case "__quantum__qis__rz__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
+                args = _convert_args(
+                    builder, args, [ArgumentType.Number, ArgumentType.Qubit]
+                )
                 builder.Z(args[1], args[0])
             case "__quantum__qis__s__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.S(*args)
             case "__quantum__qis__s_adj":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.Sdg(*args)
             case "__quantum__qis__t__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.T(*args)
             case "__quantum__qis__t__adj":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.Tdg(*args)
             case "__quantum__qis__x__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.X(*args)
             case "__quantum__qis__y__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.Y(*args)
             case "__quantum__qis__z__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)
+                args = _convert_args(builder, args, [ArgumentType.Qubit])
                 builder.Z(*args)
             case "__quantum__rt__result_record_output":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 2)
 
                 # not exactly clear if there is always a way to identify the type without
                 # the instrinsic for context, so handle this here for now
+                args = _convert_args(
+                    builder,
+                    args,
+                    [ArgumentType.Result, ArgumentType.Label],
+                )
                 res = args[0]
-                label_ptr = args[1]
-                if (not label_ptr.is_null) and (
-                    byte_string := extract_byte_string(label_ptr)
-                ):
-                    label = byte_string.decode("utf-8").rstrip("\x00")
-                else:
+                label = args[1]
+                if label is None:
                     label = "generated_name_" + str(uuid.uuid4())
                 self._result_variables.append((str(res), label))
 

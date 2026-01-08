@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+from importlib.metadata import version
 from typing import List, Union
 
 from compiler_config.config import InlineResultsProcessing
@@ -22,9 +23,20 @@ try:
         Module,
         extract_byte_string,
         is_entry_point,
-        qubit_id,
-        result_id,
     )
+
+    if version("pyqir") < "0.12.0":
+        from pyqir import (
+            qubit_id,
+            result_id,
+        )
+    else:
+        from pyqir import (
+            ptr_id,
+        )
+
+        qubit_id = ptr_id
+        result_id = ptr_id
 except ImportError:
     qir_available = False
 

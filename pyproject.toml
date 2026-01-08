@@ -51,7 +51,7 @@ qiskit = ">=1.4.2,<3.0.0"
 qiskit-aer = "^0.17.1"
 qiskit-experiments = "^0.11.0"
 scipy = ">=1.15.2"
-pyqir = "^0.11.0" # TODO: Resolve issues with pyqir v0.12 use COMPILER-821
+pyqir = ">=0.11.0,!=0.12.0,!=0.12.1,!=0.12.2,<0.13.0"
 regex = ">=3.6.1"
 jsonpickle = ">=4.0.5"
 qblox-instruments = "0.17.1"

@@ -97,16 +97,18 @@ class TestQIRFrontend:
         frontend = QIRFrontend(model)
         assert isinstance(frontend._init_parser(), parser_type)
 
-    def test_invalid_paths(self, legacy_model):
+    @pytest.mark.parametrize(
+        "file_path",
+        [
+            str(Path("\\very\\wrong.ll").absolute()),
+            str(Path("/very/wrong.ll").absolute()),
+            "/very/wrong.bc",
+        ],
+    )
+    def test_invalid_paths(self, legacy_model, file_path):
         frontend = QIRFrontend(legacy_model)
         with pytest.raises(FileNotFoundError):
-            frontend.check_and_return_source(str(Path("\\very\\wrong.ll").absolute()))
-
-        with pytest.raises(FileNotFoundError):
-            frontend.check_and_return_source(str(Path("/very/wrong.ll").absolute()))
-
-        with pytest.raises(FileNotFoundError):
-            frontend.check_and_return_source("/very/wrong.bc")
+            frontend.check_and_return_source(file_path)
 
     def test_check_valid_path(self, legacy_model):
         checked = QIRFrontend(legacy_model).check_and_return_source(
@@ -161,7 +163,10 @@ class TestQIRFrontend:
         assert len(builder.instructions) == instruction_count
 
     @pytest.mark.parametrize("qir_path", get_all_qir_paths(), ids=filename_ids)
-    def test_check_and_return_source_with_qasm_2_files(self, qir_path, legacy_model):
+    def test_check_and_return_source_with_qir_files(self, qir_path, legacy_model):
+        if qir_path.suffix == "":
+            # TODO: Support for base64 encoded files with no suffix, COMPILER-904
+            pytest.skip("QIRFrontend does not support files without suffix.")
         qir_path = str(qir_path)
         qir_str = QIRFrontend(legacy_model).check_and_return_source(qir_path)
         assert qir_str

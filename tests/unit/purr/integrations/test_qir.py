@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
-import base64
 from os.path import abspath
 from unittest import mock
 
@@ -145,7 +144,6 @@ class TestQIR:
         config = CompilerConfig(optimizations=optim_config)
         config.results_format.binary_count()
         program = get_qir("base64_bitcode_ghz")
-        program = base64.b64decode(program)
         results = execute(program, get_default_echo_hardware(4), config)
         assert results == {"0": 1000}
 

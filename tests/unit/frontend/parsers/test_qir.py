@@ -17,6 +17,7 @@ from tests.unit.purr.integrations.test_qir import _get_qir_path
 from tests.unit.utils.instruction import (
     count_number_of_non_sync_non_phase_reset_non_delay_non_post_processing_instructions,
 )
+from tests.unit.utils.qasm_qir import get_qir, qir_files, short_file_name
 
 n_qubits = 32
 linear_topology = []
@@ -33,17 +34,8 @@ pyd_hw_model = convert_purr_echo_hw_to_pydantic(leg_hw_model)
 class TestQIRParser:
     @pytest.mark.parametrize(
         "qir_file",
-        [
-            "base_profile_ops.ll",
-            "basic_cudaq.ll",
-            "bell_psi_minus.ll",
-            "bell_psi_plus.ll",
-            "bell_theta_minus.ll",
-            "bell_theta_plus.ll",
-            "complicated.ll",
-            "generator-bell.ll",
-            "out_of_order_measure.ll",
-        ],
+        list(qir_files),
+        ids=short_file_name,
     )
     @pytest.mark.parametrize(
         "model", [LucyModelLoader(32).load(), LucyModelLoader(32, start_index=2).load()]
@@ -51,7 +43,7 @@ class TestQIRParser:
     def test_programs_parse(self, model, qir_file):
         """Basic smoke test to ensure QIR programs parse without error."""
         parser = PydQIRParser()
-        qir_string = _get_qir_path(qir_file)
+        qir_string = get_qir(qir_file)
         builder = parser.parse(QuantumInstructionBuilder(model), qir_string)
         assert isinstance(builder, QuantumInstructionBuilder)
 
@@ -74,23 +66,14 @@ class TestQIRParser:
 
     @pytest.mark.parametrize(
         "qir_file",
-        [
-            "base_profile_ops.ll",
-            "basic_cudaq.ll",
-            "bell_psi_minus.ll",
-            "bell_psi_plus.ll",
-            "bell_theta_minus.ll",
-            "bell_theta_plus.ll",
-            "complicated.ll",
-            "generator-bell.ll",
-            "out_of_order_measure.ll",
-        ],
+        list(qir_files),
+        ids=short_file_name,
     )
     def test_qir_legacy_vs_pyd_parse(self, qir_file):
         pyd_parser = PydQIRParser()
         leg_parser = LegQIRParser(leg_hw_model)
 
-        qir_string = _get_qir_path(qir_file)
+        qir_string = get_qir(qir_file)
 
         pyd_builder = pyd_parser.parse(QuantumInstructionBuilder(pyd_hw_model), qir_string)
         leg_builder = leg_parser.parse(qir_string)
