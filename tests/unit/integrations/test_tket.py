@@ -10,6 +10,7 @@ from compiler_config.config import (
     Tket,
 )
 from pytket import Circuit, OpType, Qubit
+from sympy import pi as sympy_pi
 
 from qat.integrations.tket import (
     TketBuilder,
@@ -18,7 +19,7 @@ from qat.integrations.tket import (
     run_pyd_tket_optimizations,
 )
 from qat.ir.instruction_builder import QuantumInstructionBuilder
-from qat.ir.instructions import ResultsProcessing
+from qat.ir.instructions import PhaseSet, PhaseShift, ResultsProcessing
 from qat.ir.measure import Acquire, PostProcessing
 from qat.model.loaders.converted import JaggedEchoModelLoader, PydEchoModelLoader
 from qat.model.loaders.lucy import LucyModelLoader
@@ -269,6 +270,10 @@ class TestTketToQatIRConverter:
                 assert type(inst) == type(qat_inst)
                 assert inst.process_type == qat_inst.process_type
                 assert inst.axes == qat_inst.axes
+            elif isinstance(inst, (PhaseShift, PhaseSet)):
+                assert type(inst) == type(qat_inst)
+                assert inst.target == qat_inst.target
+                assert isclose(inst.phase, qat_inst.phase)
             else:
                 assert inst == qat_inst
 
@@ -293,6 +298,11 @@ class TestTketToQatIRConverter:
             ("ECR", (0, 1), "ECR", (qubit1, qubit2)),
             ("Measure", (0, 0), "measure_single_shot_z", (qubit1,)),
             ("Reset", (0,), "reset", (qubit1,)),
+            # The following tests expressions that are symbolic (regression tests)
+            ("Rx", (sympy_pi, 0), "X", (qubit1, pi**2)),
+            ("Rx", (sympy_pi / 2.54, 0), "X", (qubit1, pi**2 / 2.54)),
+            ("Rx", (2.54 * sympy_pi, 0), "X", (qubit1, 2.54 * pi**2)),
+            ("Rx", (2.54 / sympy_pi, 0), "X", (qubit1, 2.54)),
         ],
     )
     def test_supported_commands(self, tket_method, tket_args, qat_method, qat_args):
