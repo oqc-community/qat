@@ -1187,13 +1187,13 @@ files = [
 
 [[package]]
 name = "docplex"
-version = "2.30.251"
+version = "2.31.254"
 description = "The IBM Decision Optimization CPLEX Modeling for Python"
 optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "docplex-2.30.251.tar.gz", hash = "sha256:6503219f5b51275a7e4e77ca4332903b0f80925d205030a48d3f6aa7ca0dbf2a"},
+    {file = "docplex-2.31.254.tar.gz", hash = "sha256:2c632978ddebf7fc48ccb846c2d5ab4eb5ecd0250c0c6126b29bbabd5369c046"},
 ]
 
 [package.dependencies]
@@ -2365,14 +2365,14 @@ test = ["jupyter-server (>=2.0.0)", "pytest (>=7.0)", "pytest-jupyter[server] (>
 
 [[package]]
 name = "jupyterlab"
-version = "4.5.1"
+version = "4.5.2"
 description = "JupyterLab computational environment"
 optional = false
 python-versions = ">=3.9"
 groups = ["notebook"]
 files = [
-    {file = "jupyterlab-4.5.1-py3-none-any.whl", hash = "sha256:31b059de96de0754ff1f2ce6279774b6aab8c34d7082e9752db58207c99bd514"},
-    {file = "jupyterlab-4.5.1.tar.gz", hash = "sha256:09da1ddfbd9eec18b5101dbb8515612aa1e47443321fb99503725a88e93d20d9"},
+    {file = "jupyterlab-4.5.2-py3-none-any.whl", hash = "sha256:76466ebcfdb7a9bb7e2fbd6459c0e2c032ccf75be673634a84bee4b3e6b13ab6"},
+    {file = "jupyterlab-4.5.2.tar.gz", hash = "sha256:c80a6b9f6dace96a566d590c65ee2785f61e7cd4aac5b4d453dcc7d0d5e069b7"},
 ]
 
 [package.dependencies]
@@ -3304,19 +3304,19 @@ files = [
 
 [[package]]
 name = "notebook"
-version = "7.5.1"
+version = "7.5.2"
 description = "Jupyter Notebook - A web-based notebook environment for interactive computing"
 optional = false
 python-versions = ">=3.9"
 groups = ["notebook"]
 files = [
-    {file = "notebook-7.5.1-py3-none-any.whl", hash = "sha256:f4e2451c19910c33b88709b84537e11f6368c1cdff1aa0c43db701aea535dd44"},
-    {file = "notebook-7.5.1.tar.gz", hash = "sha256:b2fb4cef4d47d08c33aecce1c6c6e84be05436fbd791f88fce8df9fbca088b75"},
+    {file = "notebook-7.5.2-py3-none-any.whl", hash = "sha256:17d078a98603d70d62b6b4b3fcb67e87d7a68c398a7ae9b447eb2d7d9aec9979"},
+    {file = "notebook-7.5.2.tar.gz", hash = "sha256:83e82f93c199ca730313bea1bb24bc279ea96f74816d038a92d26b6b9d5f3e4a"},
 ]
 
 [package.dependencies]
 jupyter-server = ">=2.4.0,<3"
-jupyterlab = ">=4.5.1,<4.6"
+jupyterlab = ">=4.5.2,<4.6"
 jupyterlab-server = ">=2.28.0,<3"
 notebook-shim = ">=0.2,<0.3"
 tornado = ">=6.2.0"
@@ -4399,18 +4399,18 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyqir"
-version = "0.11.1"
+version = "0.12.3"
 description = "PyQIR parses, generates and evaluates the Quantum Intermediate Representation."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyqir-0.11.1-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:7a2ae8bf5f28be1983ecc8a43723eb1923f230344b892d2436d3eb3b67a24532"},
-    {file = "pyqir-0.11.1-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:3dde55aecd2722e61b0ed74022cb9116bcaffdcae9dace2eac91cfcadc1a87c3"},
-    {file = "pyqir-0.11.1-cp39-abi3-manylinux_2_34_aarch64.whl", hash = "sha256:d77cc74af94203cbb1b6ace737ffe6149ef86e16f613eb02068e794a66651300"},
-    {file = "pyqir-0.11.1-cp39-abi3-manylinux_2_34_x86_64.manylinux_2_35_x86_64.whl", hash = "sha256:6bfa67455622efbf6ef14c7f8fd0ae1cb79bafd3374df154f5f4bdaa74184ef0"},
-    {file = "pyqir-0.11.1-cp39-abi3-win_amd64.whl", hash = "sha256:446cf346b3f0cfeb4a2c08a5b7b84cb83346b20c84e471f5579f3d7af56c1dda"},
-    {file = "pyqir-0.11.1-cp39-abi3-win_arm64.whl", hash = "sha256:fc915164d4f7a25c06fc1495fd5b9ed415548f1bd9f6b8a64ba13eb318373abb"},
+    {file = "pyqir-0.12.3-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d2e5298b14350b7edb1145ebedeeab61f260df880542c0b5d557991b2f49334f"},
+    {file = "pyqir-0.12.3-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:eb2c41c124dd05dabfafa934dd0a6228783fdd1b32b93effecd4128bb931f2e1"},
+    {file = "pyqir-0.12.3-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:9ceeb69a009c906a22569f048967c8e59c269f2ed5856116d1ce474a27b38c28"},
+    {file = "pyqir-0.12.3-cp39-abi3-manylinux_2_38_aarch64.whl", hash = "sha256:37e5fd01d5e2261f522c9274c309a3e67210d0560c44209397a87818c1b7588c"},
+    {file = "pyqir-0.12.3-cp39-abi3-win_amd64.whl", hash = "sha256:d0516b7f5f44987647398f8f589424a720878928d3178b2a852783e9cf2ff204"},
+    {file = "pyqir-0.12.3-cp39-abi3-win_arm64.whl", hash = "sha256:cf25cdb2e750cb1a9ebe205c7ad27fe1a188cb2c01e15072389ec5b88df0e37b"},
 ]
 
 [package.extras]
@@ -5797,6 +5797,7 @@ files = [
     {file = "rustworkx-0.17.1-cp39-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:48784a673cf8d04f3cd246fa6b53fd1ccc4d83304503463bd561c153517bccc1"},
     {file = "rustworkx-0.17.1-cp39-abi3-win32.whl", hash = "sha256:5dbc567833ff0a8ad4580a4fe4bde92c186d36b4c45fca755fb1792e4fafe9b5"},
     {file = "rustworkx-0.17.1-cp39-abi3-win_amd64.whl", hash = "sha256:d0a48fb62adabd549f9f02927c3a159b51bf654c7388a12fc16d45452d5703ea"},
+    {file = "rustworkx-0.17.1.tar.gz", hash = "sha256:59ea01b4e603daffa4e8827316c1641eef18ae9032f0b1b14aa0181687e3108e"},
 ]
 
 [package.dependencies]
@@ -6161,19 +6162,19 @@ domdf-python-tools = ">=2.7.0"
 
 [[package]]
 name = "sphinx-rtd-theme"
-version = "3.0.2"
+version = "3.1.0"
 description = "Read the Docs theme for Sphinx"
 optional = false
 python-versions = ">=3.8"
 groups = ["docs"]
 files = [
-    {file = "sphinx_rtd_theme-3.0.2-py2.py3-none-any.whl", hash = "sha256:422ccc750c3a3a311de4ae327e82affdaf59eb695ba4936538552f3b00f4ee13"},
-    {file = "sphinx_rtd_theme-3.0.2.tar.gz", hash = "sha256:b7457bc25dda723b20b086a670b9953c859eab60a2a03ee8eb2bb23e176e5f85"},
+    {file = "sphinx_rtd_theme-3.1.0-py2.py3-none-any.whl", hash = "sha256:1785824ae8e6632060490f67cf3a72d404a85d2d9fc26bce3619944de5682b89"},
+    {file = "sphinx_rtd_theme-3.1.0.tar.gz", hash = "sha256:b44276f2c276e909239a4f6c955aa667aaafeb78597923b1c60babc76db78e4c"},
 ]
 
 [package.dependencies]
-docutils = ">0.18,<0.22"
-sphinx = ">=6,<9"
+docutils = ">0.18,<0.23"
+sphinx = ">=6,<10"
 sphinxcontrib-jquery = ">=4,<5"
 
 [package.extras]
