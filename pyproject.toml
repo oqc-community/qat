@@ -65,6 +65,7 @@ semver = "^3.0.2"
 frozendict = "^2.4.6"
 piny = {version = "^1.1.0"}
 more-itertools = "^10.7.0"
+sympy = "^1.14.0"
 
 [tool.poetry.group.dev.dependencies]
 pip-audit = "^2.9.0"
