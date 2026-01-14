@@ -19,8 +19,10 @@ from qiskit.transpiler import TranspilerError
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
-from qat.frontend.parsers import CloudQasmParser as PydCloudQasmParser
-from qat.frontend.parsers import Qasm3Parser as PydQasm3Parser
+from qat.frontend.parsers import (
+    CloudQasmParser as PydCloudQasmParser,
+    Qasm3Parser as PydQasm3Parser,
+)
 from qat.frontend.passes.analysis import InputAnalysisResult
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.builder_factory import BuilderFactory

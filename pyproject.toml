@@ -177,6 +177,8 @@ extend-select = ["I"]
 [tool.ruff.lint.isort]
 known-first-party = ["qat"]
 known-local-folder = ["tests", "benchmarks"]
+combine-as-imports = true
+split-on-trailing-comma = false
 
 [tool.pytest.ini_options]
 addopts = [

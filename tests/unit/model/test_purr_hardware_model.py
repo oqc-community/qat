@@ -13,10 +13,7 @@ from qat.ir.waveforms import (
 )
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
-from qat.utils.hardware_model import (
-    apply_setup_to_echo_hardware,
-    random_connectivity,
-)
+from qat.utils.hardware_model import apply_setup_to_echo_hardware, random_connectivity
 
 channel_type_mapping = {
     "drive": ChannelType.drive,

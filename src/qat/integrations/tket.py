@@ -12,15 +12,12 @@ from pytket.passes import SequencePass
 from pytket.placement import Placement
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import QASMUnsupportedError
-from sympy import pi as sympy_pi
-from sympy import sympify
+from sympy import pi as sympy_pi, sympify
 
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.integrations.tket import (
     TketBuilder as LegacyTketBuilder,
-)
-from qat.purr.integrations.tket import (
     TketQasmParser,
     _full_stopalize,
     apply_default_transforms,

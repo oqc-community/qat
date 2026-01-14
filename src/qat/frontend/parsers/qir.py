@@ -24,10 +24,7 @@ try:
 
     if version("pyqir") < "0.12.0":
         # TODO: Drop PyTket < 0.12.0 compatibility, COMPILER-909
-        from pyqir import (
-            qubit_id,
-            result_id,
-        )
+        from pyqir import qubit_id, result_id
 
         def _convert_args(
             builder: InstructionBuilder,

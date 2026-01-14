@@ -26,14 +26,9 @@ try:
     )
 
     if version("pyqir") < "0.12.0":
-        from pyqir import (
-            qubit_id,
-            result_id,
-        )
+        from pyqir import qubit_id, result_id
     else:
-        from pyqir import (
-            ptr_id,
-        )
+        from pyqir import ptr_id
 
         qubit_id = ptr_id
         result_id = ptr_id

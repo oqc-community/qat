@@ -1,8 +1,7 @@
 from typing import Iterable
 
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import ticker
+from matplotlib import pyplot as plt, ticker
 
 from qat.purr.backends.echo import EchoEngine
 from qat.purr.backends.live import LiveDeviceEngine

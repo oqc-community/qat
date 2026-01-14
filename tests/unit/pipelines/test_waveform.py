@@ -26,10 +26,10 @@ from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.purr.waveform_v1 import EchoPipeline as PurrEchoPipeline
-from qat.pipelines.waveform import EchoExecutePipeline as PydanticEchoExecutePipeline
-from qat.pipelines.waveform import EchoPipeline as PydanticEchoPipeline
-from qat.pipelines.waveform import PipelineConfig
 from qat.pipelines.waveform import (
+    EchoExecutePipeline as PydanticEchoExecutePipeline,
+    EchoPipeline as PydanticEchoPipeline,
+    PipelineConfig,
     WaveformCompilePipeline as PydanticWaveformCompilePipeline,
 )
 from qat.runtime import SimpleRuntime

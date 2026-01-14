@@ -11,10 +11,7 @@ from qat.middleend.passes.purr.transform import (
     PhaseOptimisation,
     PostProcessingSanitisation,
 )
-from qat.middleend.passes.purr.validation import (
-    InstructionValidation,
-    ReadoutValidation,
-)
+from qat.middleend.passes.purr.validation import InstructionValidation, ReadoutValidation
 from qat.pipelines.pipeline import CompilePipeline
 from qat.pipelines.purr.qblox.compile import backend_pipeline2
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline

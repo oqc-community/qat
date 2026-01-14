@@ -18,10 +18,7 @@ from qat.backend.qblox.config.helpers import (
     QrmRfConfigHelper,
 )
 from qat.backend.qblox.execution import QbloxProgram
-from qat.instrument.base import (
-    CompositeInstrument,
-    LeafInstrument,
-)
+from qat.instrument.base import CompositeInstrument, LeafInstrument
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
 

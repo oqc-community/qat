@@ -3,23 +3,15 @@
 import numpy as np
 import pytest
 
-from qat.backend.passes.analysis import (
-    PydTimelineAnalysis,
-    PydTimelineAnalysisResult,
-)
+from qat.backend.passes.analysis import PydTimelineAnalysis, PydTimelineAnalysisResult
 from qat.backend.passes.lowering import PydPartitionByPulseChannel
-from qat.backend.passes.purr.analysis import (
-    TimelineAnalysis,
-    TimelineAnalysisResult,
-)
+from qat.backend.passes.purr.analysis import TimelineAnalysis, TimelineAnalysisResult
 from qat.backend.passes.purr.lowering import PartitionByPulseChannel
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
 from qat.ir.waveforms import Pulse
 from qat.middleend.passes.purr.transform import (
     InstructionGranularitySanitisation as LegInstructionGranularitySanitisation,
-)
-from qat.middleend.passes.purr.transform import (
     LowerSyncsToDelays as LegLowerSyncsToDelays,
 )
 from qat.model.loaders.converted import PydEchoModelLoader

@@ -4,15 +4,10 @@ import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
 from qat.executables import AcquireData, Executable
-from qat.ir.instructions import Assign as PydAssign
-from qat.ir.instructions import Variable as PydVariable
+from qat.ir.instructions import Assign as PydAssign, Variable as PydVariable
 from qat.ir.measure import PostProcessing
 from qat.model.target_data import TargetData
-from qat.purr.compiler.instructions import (
-    AcquireMode,
-    PostProcessType,
-    ProcessAxis,
-)
+from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.runtime.passes.transform import (
     AcquisitionPostprocessing,
     AssignResultsTransform,

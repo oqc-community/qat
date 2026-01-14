@@ -11,10 +11,7 @@ with pytest.warns(DeprecationWarning):
     from qat.engines.qblox.dummy import DummyQbloxInstrument
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.backends.qblox.device import QbloxControlHardware
-from qat.purr.backends.qblox.dummy import (
-    DummyQbloxControlHardware,
-    apply_setup_to_hardware,
-)
+from qat.purr.backends.qblox.dummy import DummyQbloxControlHardware, apply_setup_to_hardware
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 
 

@@ -40,11 +40,7 @@ from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
-from qat.purr.compiler.instructions import (
-    AcquireMode,
-    PostProcessType,
-    ProcessAxis,
-)
+from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()

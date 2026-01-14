@@ -5,11 +5,7 @@ from pathlib import Path
 import pytest
 
 from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
-from qat.instrument.base import (
-    CompositeInstrument,
-    CsvInstrumentBuilder,
-    LeafInstrument,
-)
+from qat.instrument.base import CompositeInstrument, CsvInstrumentBuilder, LeafInstrument
 
 
 @pytest.mark.parametrize(

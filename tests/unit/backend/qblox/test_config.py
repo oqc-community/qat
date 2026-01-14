@@ -13,10 +13,7 @@ from qat.backend.qblox.config.helpers import (
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
-from qat.backend.qblox.config.specification import (
-    ModuleConfig,
-    SequencerConfig,
-)
+from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 
 

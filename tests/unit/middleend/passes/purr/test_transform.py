@@ -14,14 +14,14 @@ from compiler_config.config import CompilerConfig, MetricsType
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.ir.conversion import ConvertToPydanticIR
-from qat.ir.instructions import Delay as PydDelay
-from qat.ir.instructions import PhaseSet as PydPhaseSet
-from qat.ir.instructions import PhaseShift as PydPhaseShift
-from qat.ir.instructions import Synchronize as PydSynchronize
-from qat.ir.measure import AcquireMode, PostProcessType, ProcessAxis
-from qat.middleend.passes.purr.analysis import (
-    ActiveChannelResults,
+from qat.ir.instructions import (
+    Delay as PydDelay,
+    PhaseSet as PydPhaseSet,
+    PhaseShift as PydPhaseShift,
+    Synchronize as PydSynchronize,
 )
+from qat.ir.measure import AcquireMode, PostProcessType, ProcessAxis
+from qat.middleend.passes.purr.analysis import ActiveChannelResults
 from qat.middleend.passes.purr.transform import (
     AcquireSanitisation,
     BatchedShots,

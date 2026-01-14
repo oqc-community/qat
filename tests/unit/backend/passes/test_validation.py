@@ -2,9 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import pytest
 
-from qat.backend.passes.validation import (
-    NoAcquireWeightsValidation,
-)
+from qat.backend.passes.validation import NoAcquireWeightsValidation
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.measure import Acquire

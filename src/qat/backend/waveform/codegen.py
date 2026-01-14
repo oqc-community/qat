@@ -5,10 +5,7 @@ from collections import defaultdict
 import numpy as np
 
 from qat.backend.base import BaseBackend
-from qat.backend.passes.analysis import (
-    TimelineAnalysis,
-    TimelineAnalysisResult,
-)
+from qat.backend.passes.analysis import TimelineAnalysis, TimelineAnalysisResult
 from qat.backend.passes.lowering import PartitionByPulseChannel
 from qat.backend.passes.validation import NoAcquireWeightsValidation
 from qat.backend.waveform.executable import (
@@ -21,17 +18,14 @@ from qat.core.result_base import ResultManager
 from qat.executables import AcquireData, Executable
 from qat.ir.instructions import FrequencyShift, PhaseReset, PhaseSet, PhaseShift, Reset
 from qat.ir.lowered import PartitionedIR
-from qat.ir.waveforms import Pulse as Pulse
-from qat.ir.waveforms import SampledWaveform
+from qat.ir.waveforms import Pulse, SampledWaveform
 from qat.model.device import PhysicalChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import DeviceDescription, TargetData
 from qat.purr.backends.utilities import UPCONVERT_SIGN
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseChannel
-from qat.purr.compiler.instructions import (
-    Instruction,
-)
+from qat.purr.compiler.instructions import Instruction
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.waveform import NumericFunction
 

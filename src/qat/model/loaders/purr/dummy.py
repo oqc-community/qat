@@ -3,9 +3,7 @@
 
 from qat.model.loaders.purr.base import BaseLegacyModelLoader
 from qat.purr.backends.echo import Connectivity
-from qat.purr.backends.qblox.dummy import (
-    get_default_dummy_hardware,
-)
+from qat.purr.backends.qblox.dummy import get_default_dummy_hardware
 
 
 class QbloxDummyModelLoader(BaseLegacyModelLoader):

@@ -27,9 +27,7 @@ from qat.pipelines.purr.qblox import (
 from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
 from qat.runtime import SimpleRuntime
 
-from tests.unit.utils.qasm_qir import (
-    get_pipeline_tests,
-)
+from tests.unit.utils.qasm_qir import get_pipeline_tests
 
 
 class TestQbloxPipeline:

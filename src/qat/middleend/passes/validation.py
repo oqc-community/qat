@@ -11,12 +11,7 @@ from qat.core.pass_base import ValidationPass
 from qat.core.result_base import ResultManager
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import FrequencySet, FrequencyShift, Instruction, Repeat, Return
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    PostProcessing,
-    ProcessAxis,
-)
+from qat.ir.measure import Acquire, AcquireMode, PostProcessing, ProcessAxis
 from qat.ir.waveforms import Pulse
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import PhysicalChannel

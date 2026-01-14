@@ -6,8 +6,8 @@ from qat.model.loaders.purr.base import BaseLegacyModelLoader
 from qat.purr.backends.echo import Connectivity
 from qat.purr.backends.qiskit_simulator import (
     QiskitHardwareModel as LegacyQiskitHardwareModel,
+    get_default_qiskit_hardware,
 )
-from qat.purr.backends.qiskit_simulator import get_default_qiskit_hardware
 
 
 class QiskitModelLoader(BaseLegacyModelLoader):

@@ -7,9 +7,7 @@ from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.utils.logger import get_default_logger
 from qat.runtime import SimpleRuntime
-from qat.runtime.results_pipeline import (
-    get_default_results_pipeline,
-)
+from qat.runtime.results_pipeline import get_default_results_pipeline
 
 log = get_default_logger()
 

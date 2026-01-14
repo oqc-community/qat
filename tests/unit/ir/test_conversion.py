@@ -30,11 +30,7 @@ from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.pipelines.echo import EchoPipeline, PipelineConfig
 from qat.purr.compiler import instructions
-from qat.purr.compiler.devices import (
-    PulseChannel,
-    PulseChannelView,
-    PulseShapeType,
-)
+from qat.purr.compiler.devices import PulseChannel, PulseChannelView, PulseShapeType
 from qat.utils.pydantic import FrozenSet, ValidatedList, ValidatedSet
 
 from tests.unit.utils.qasm_qir import get_qasm2

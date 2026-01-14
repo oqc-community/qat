@@ -20,10 +20,7 @@ from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
-from qat.pipelines.purr.waveform_v1 import (
-    EchoPipeline,
-    PipelineConfig,
-)
+from qat.pipelines.purr.waveform_v1 import EchoPipeline, PipelineConfig
 from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.loaders import EchoModelLoaderWithErrorMitigation

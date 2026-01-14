@@ -4,11 +4,7 @@
 from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.runtime import NewQuantumRuntime
 from qat.purr.core.metrics_base import MetricsManager
-from qat.purr.core.pass_base import (
-    AnalysisPass,
-    TransformPass,
-    ValidationPass,
-)
+from qat.purr.core.pass_base import AnalysisPass, TransformPass, ValidationPass
 from qat.purr.core.result_base import ResultManager
 
 from tests.unit.utils.builder_nuggets import resonator_spect

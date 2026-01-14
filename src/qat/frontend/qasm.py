@@ -10,8 +10,10 @@ from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
-from qat.frontend.parsers.qasm import CloudQasmParser as PydCloudQasmParser
-from qat.frontend.parsers.qasm import Qasm3Parser as PydQasm3Parser
+from qat.frontend.parsers.qasm import (
+    CloudQasmParser as PydCloudQasmParser,
+    Qasm3Parser as PydQasm3Parser,
+)
 from qat.frontend.parsers.qasm.base import AbstractParser as PydAbstractParser
 from qat.frontend.passes.analysis import InputAnalysis
 from qat.frontend.passes.purr.transform import InputOptimisation

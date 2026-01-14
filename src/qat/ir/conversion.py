@@ -21,12 +21,7 @@ from qat.middleend.passes.purr.analysis import ActiveChannelResults
 from qat.middleend.passes.purr.transform import LoopCount
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.builders import InstructionBuilder
-from qat.purr.compiler.devices import (
-    PulseChannel,
-    PulseChannelView,
-    PulseShapeType,
-    Qubit,
-)
+from qat.purr.compiler.devices import PulseChannel, PulseChannelView, PulseShapeType, Qubit
 from qat.purr.compiler.hardware_models import HardwareModel
 from qat.purr.compiler.instructions import (
     BinaryOperator,

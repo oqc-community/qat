@@ -16,9 +16,12 @@ from qat.ir.instructions import (
 from qat.ir.measure import VALID_MEASURE_INSTR, Acquire, MeasureBlock, PostProcessing
 from qat.ir.waveforms import GaussianWaveform, Pulse
 from qat.model.loaders.purr import EchoModelLoader
-from qat.purr.compiler.instructions import Acquire as LegacyAcquire
-from qat.purr.compiler.instructions import PostProcessing as LegacyPostProcessing
-from qat.purr.compiler.instructions import PostProcessType, ProcessAxis
+from qat.purr.compiler.instructions import (
+    Acquire as LegacyAcquire,
+    PostProcessing as LegacyPostProcessing,
+    PostProcessType,
+    ProcessAxis,
+)
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet
 

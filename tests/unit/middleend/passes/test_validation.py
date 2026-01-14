@@ -19,9 +19,7 @@ from qat.ir.instructions import FrequencySet
 from qat.ir.measure import Acquire, AcquireMode, ProcessAxis
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
-from qat.middleend.passes.purr.validation import (
-    HardwareConfigValidity,
-)
+from qat.middleend.passes.purr.validation import HardwareConfigValidity
 from qat.middleend.passes.validation import (
     PydDynamicFrequencyValidation,
     PydFrequencySetupValidation,

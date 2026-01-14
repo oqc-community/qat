@@ -8,11 +8,7 @@ from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
 from qat.executables import AbstractProgram, AcquireData, AcquireMode, Executable
 from qat.frontend import AutoFrontend, FallthroughFrontend
-from qat.middleend import (
-    DefaultMiddleend,
-    FallthroughMiddleend,
-    PydDefaultMiddleend,
-)
+from qat.middleend import DefaultMiddleend, FallthroughMiddleend, PydDefaultMiddleend
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData

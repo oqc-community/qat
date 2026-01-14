@@ -25,10 +25,7 @@ from qat.purr.compiler.execution import (
     QuantumExecutionEngine,
     _binary,
 )
-from qat.purr.compiler.hardware_models import (
-    QuantumHardwareModel,
-    get_cl2qu_index_mapping,
-)
+from qat.purr.compiler.hardware_models import QuantumHardwareModel, get_cl2qu_index_mapping
 from qat.purr.compiler.instructions import Instruction, is_generated_name
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.compiler.metrics import CompilationMetrics, MetricsMixin

@@ -7,9 +7,7 @@ from qat.core.pass_base import PassManager
 from qat.engines.waveform import EchoEngine
 from qat.engines.zero import ZeroEngine
 from qat.executables import AcquireData, Executable
-from qat.middleend.passes.purr.transform import (
-    RepeatTranslation,
-)
+from qat.middleend.passes.purr.transform import RepeatTranslation
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.instructions import AcquireMode, PulseShapeType

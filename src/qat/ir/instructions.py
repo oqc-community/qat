@@ -20,9 +20,11 @@ from pydantic import (
 )
 from typing_extensions import TypeAliasType
 
-from qat.purr.compiler.instructions import BinaryOperator as LegacyBinaryOperator
-from qat.purr.compiler.instructions import IndexAccessor as LegacyIndexAccessor
-from qat.purr.compiler.instructions import Variable as LegacyVariable
+from qat.purr.compiler.instructions import (
+    BinaryOperator as LegacyBinaryOperator,
+    IndexAccessor as LegacyIndexAccessor,
+    Variable as LegacyVariable,
+)
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import (
     AllowExtraFieldsModel,

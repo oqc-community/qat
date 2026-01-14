@@ -4,9 +4,7 @@ from qat.backend.fallthrough import FallthroughBackend
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
-from qat.middleend.passes.purr.transform import (
-    QiskitInstructionsWrapper,
-)
+from qat.middleend.passes.purr.transform import QiskitInstructionsWrapper
 from qat.middleend.passes.purr.validation import (
     HardwareConfigValidity,
     QiskitResultsFormatValidation,

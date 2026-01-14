@@ -4,9 +4,7 @@
 
 from qat.core.pass_base import PassManager
 from qat.middleend.base import CustomMiddleend
-from qat.middleend.passes.purr.analysis import (
-    ActivePulseChannelAnalysis,
-)
+from qat.middleend.passes.purr.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.purr.transform import (
     AcquireSanitisation,
     BatchedShots,

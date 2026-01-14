@@ -3,10 +3,7 @@
 from pathlib import Path
 
 import pytest
-from compiler_config.config import (
-    CompilerConfig,
-    Tket,
-)
+from compiler_config.config import CompilerConfig, Tket
 
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.frontend.qir import QIRFrontend, is_qir_path, is_qir_str, load_qir_file

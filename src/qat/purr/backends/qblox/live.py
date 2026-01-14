@@ -26,9 +26,7 @@ from qat.purr.backends.qblox.transform_passes import (
     ReturnSanitisation,
     ScopeSanitisation,
 )
-from qat.purr.backends.utilities import (
-    software_post_process_linear_map_complex_to_real,
-)
+from qat.purr.backends.utilities import software_post_process_linear_map_complex_to_real
 from qat.purr.compiler.execution import (
     DeviceInjectors,
     _binary_average,

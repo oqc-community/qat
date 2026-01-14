@@ -4,10 +4,8 @@
 from qat.backend.waveform.codegen import PydWaveformBackend as PydWaveformBackend
 from qat.backend.waveform.executable import (
     PositionalAcquireData as PositionalAcquireData,
-)
-from qat.backend.waveform.executable import (
     WaveformChannelData as WaveformChannelData,
+    WaveformProgram as WaveformProgram,
 )
-from qat.backend.waveform.executable import WaveformProgram as WaveformProgram
 
 WaveformBackend = PydWaveformBackend

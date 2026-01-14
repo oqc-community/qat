@@ -3,11 +3,7 @@
 
 
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
-from qat.purr.compiler.instructions import (
-    PulseShapeType,
-    SweepValue,
-    Variable,
-)
+from qat.purr.compiler.instructions import PulseShapeType, SweepValue, Variable
 
 
 def sweep_pulse_widths(model: QuantumHardwareModel, qubit: int, times: list[float]):
