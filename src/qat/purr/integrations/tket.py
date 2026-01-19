@@ -351,12 +351,7 @@ class TketToQatIRConverter:
         are returned as a string, sometimes in fractional form: we need to convert it to an
         absolute value."""
 
-        if "/" in arg:
-            a, b = arg.split("/")
-            arg = float(a) / float(b)
-        else:
-            arg = float(arg)
-        return np.pi * arg
+        return float(pi * sympify(arg))
 
     def convert(self, circuit: Circuit):
         """Converts a Tket circuit into Qat IR, adding any necesarry assigns and returns.

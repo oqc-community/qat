@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import random
+from math import pi
 
 import numpy as np
 import pytest
@@ -218,6 +219,10 @@ class TestTketToQatIRConverter:
             ("0.254", 0.254),
             ("1", 1.0),
             ("-4/3", -4 / 3),
+            ("pi", pi**2),
+            ("pi / 2.54", (pi**2 / 2.54)),
+            ("2.54 * pi", 2.54 * pi**2),
+            ("2.54/pi", 2.54),
         ],
     )
     def test_convert_parameter(self, params):
