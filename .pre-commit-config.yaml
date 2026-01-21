@@ -27,6 +27,6 @@ repos:
       # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/python-poetry/poetry
-    rev: 2.2.1
+    rev: 2.3.1
     hooks:
       - id: poetry-lock
