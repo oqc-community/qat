@@ -306,7 +306,11 @@ class TestExecutionSuite:
         "acq_width",
         (
             np.random.choice(
-                np.arange(Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS) * 1e-9,
+                np.arange(
+                    Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                    Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                )
+                * 1e-9,
                 3,
             )
         ).tolist(),

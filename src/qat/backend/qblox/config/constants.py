@@ -43,6 +43,8 @@ class Constants:
     """Number of registers available in the Qblox sequencers."""
     MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS: int = 16384
     """Maximal amount of scope trace acquisition datapoints returned."""
+    MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS: int = 4
+    """Minimum amount of scope trace acquisition datapoints returned."""
     MAX_TOTAL_BINNED_ACQUISITIONS: int = 589824
     MAX_012_BINNED_ACQUISITIONS: int = 1 << 17
     MAX_345_BINNED_ACQUISITIONS: int = 1 << 16
