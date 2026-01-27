@@ -73,8 +73,9 @@ jobs:
         id: jupytext
         if: ${{ !cancelled() }}
         run: |
-          poetry run jupytext --sync --pipe "ruff check --fix {}" --pipe "ruff format {}" notebooks/scripts/*.py && git diff --exit-code
-          poetry run nbstripout --verify --extra-keys="metadata.kernelspec" notebooks/ipynb/*.ipynb
+          find notebooks/ipynb -name '*.ipynb' | xargs -I {file_path} poetry run nbstripout --verify --extra-keys="metadata.kernelspec" {file_path}
+          find docs/source/notebooks -name '*.ipynb' | xargs -I {file_path} poetry run nbstripout --verify --extra-keys="metadata.kernelspec" {file_path}
+          poetry run jupytext --sync --pipe "ruff check --fix {}" --pipe "ruff format {}" 'notebooks/scripts/**/*.py' && git diff --exit-code
 
       - name: Ruff lint check
         if: ${{ !cancelled() }}

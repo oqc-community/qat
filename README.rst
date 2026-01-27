@@ -50,7 +50,9 @@ We use `jupytext https://jupytext.readthedocs.io/en/latest/` to store notebooks 
 
 For developers, the notebooks should be synced automatically by pre-commit (which you need to install, see above) and verified automatically in the GitHub pipeline.
 They will also be synced automatically on save in jupyterlab. Unfortunately VS code does not sync them automatically on save. They can be manually synced with 
-`poetry run jupytext --sync --pipe black notebooks/scripts/*.py`.
+`poetry run jupytext-sync`.
+
+Notebooks within the `notebooks/ipynb` folder will be tested as part of our CI to ensure they're functional and up-to-date. To run them locally, please use `poetry run pytest notebooks/ipynb --nbmake`.
 
 ----------------------
 Roadmap
@@ -112,6 +114,14 @@ Then checkout back to the branch you are working and run :code:`poetry run pytes
 If the test fails, it might indicate a performance regression: use the comparison table that is outputted to verify.
 The performance of pull requests to main will be automatically tested.
 See the `pytest-benchmark <https://pytest-benchmark.readthedocs.io/en/latest/usage.html>`_ documentation for more information on how to use it.
+
+|
+
+----------------------
+Documentation
+----------------------
+
+Our documentation at `QAT <https://oqc-community.github.io/qat>` is automatically built and deployed as part of our CI pipeline. If making changes to the documentation, you can build it locally by running :code:`poetry run build-docs`, and navigating to `docs/build/`.
 
 |
 

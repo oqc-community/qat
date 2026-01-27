@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 
 def format_code():
@@ -7,12 +8,12 @@ def format_code():
 
 
 def jupytext_sync():
+    ipynb_files = Path("notebooks/ipynb").rglob("*.ipynb")
+    for file in ipynb_files:
+        os.system(f"poetry run nbstripout --extra-keys='metadata.kernelspec' {file}")
     os.system(
         "poetry run jupytext --sync --pipe 'ruff check --fix {}' "
-        "--pipe 'ruff format {}' notebooks/ipynb/*.ipynb"
-    )
-    os.system(
-        "poetry run nbstripout --extra-keys='metadata.kernelspec' notebooks/ipynb/*.ipynb"
+        "--pipe 'ruff format {}' 'notebooks/ipynb/**/*.ipynb'"
     )
 
 

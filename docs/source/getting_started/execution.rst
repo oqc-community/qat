@@ -30,13 +30,13 @@ implement an engine. The engine is expected to uphold a contract with the Runtim
 
 * Packages can be executed through the method 
   :meth:`NativeEngine.execute <qat.engines.native.NativeEngine.execute>`, which expects to 
-  receive an :class:`Executable <qat.runtime.executables.Executable>` (the native code) as
+  receive an :class:`Executable <qat.executables.Executable>` (the native code) as
   an argument.
 * In return, the engine returns the results to the runtime in an expected
   format, which is a dictionary of acquisition results (one result per acquisition). The
   result is an array of readout acquisitions, whose shape will depend on the acquisition
   mode. The key for the acquisition in the dictionary is the :attr:`output_variable` stored
-  in the :class:`AcquireData <qat.runtime.executables.AcquireData>`.
+  in the :class:`AcquireData <qat.executables.AcquireData>`.
 * The number of shots to execute is stored in the attribute :attr:`compiled_shots`. Note
   that while the total number of shots in a program might be larger than the
   :attr:`compiled_shots`, sometimes the target cannot support the required amount of shots.
@@ -48,8 +48,8 @@ Engines available in QAT
 The following engines are available to use within QAT. Engines written for proprietary OQC 
 hardware is not available here.
 
-* :class:`EchoEngine <qat.engines.waveform_v1.echo.EchoEngine>`: an engine compatible only
-  with the :class:`WaveformV1Backend <qat.backend.waveform_v1.codegen.WaveformV1Backend>`
+* :class:`EchoEngine <qat.engines.waveform.echo.EchoEngine>`: an engine compatible only
+  with the :class:`WaveformBackend <qat.backend.waveform.codegen.WaveformBackend>`
   that simply "echos" back the readout pulses, primarily used for testing purposes.
 * :class:`ZeroEngine <qat.engines.zero.ZeroEngine>`: returns all readout responses as
   zeroes, again used for testing purposes.
@@ -63,7 +63,7 @@ hardware is not available here.
 Echo engine example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As an example, let us use the :class:`EchoEngine <qat.engines.waveform_v1.echo.EchoEngine>`
+As an example, let us use the :class:`EchoEngine <qat.engines.waveform.echo.EchoEngine>`
 to execute a QASM2 program. For simplicity, we will make use of a pipeline to compile the
 program, but then use to engine independently to execute the program.
 

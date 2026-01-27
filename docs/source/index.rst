@@ -15,6 +15,7 @@
    :caption: Contents:
    
    getting_started/index
+   tutorials/index
    modules
    license
    coc

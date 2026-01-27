@@ -1,9 +1,12 @@
-Hardware models 
+Hardware models & target data
 ------------------------
 
-Hardware models are a high-level description of quantum processing units (QPUs). They
-contain all the information about a QPU that is needed at compile time and runtime,
-including:
+The description of the quantum processing unit (QPU) and the control hardware used to manipulate is configured through the *hardware model* and *target data*.
+
+Hardware Models 
+*****************************
+
+Hardware models are a high-level description of quantum processing units (QPUs). They contain information about a QPU and the control hardware that is required for compilation, and can change on a regular basis (e.g. during a daily calibration).
 
 * **Topology**: How qubits on the QPU are coupled, and the quality of those couplings.
 * **Qubit properties**: Properties of the qubits that are required for pulse generation,
@@ -35,79 +38,34 @@ nearest-neighbour connectivity.
 
 .. code-block:: python 
 
-    from qat.model.loaders.converted import EchoModelLoader
+    from qat.model.loaders.lucy import LucyModelLoader
 
-    connectivity = [(0, 1), (1, 2), (2, 3), (3, 0)]
-    model = EchoModelLoader(qubit_count=4, connectivity=connectivity).load()
+    model = LucyModelLoader(qubit_count=4).load()
 
-The connectivity here is used to express which qubits are coupled. While we write it down
-here explicitly for demonstration purposes, this is the default connectivity for the 
-:class:`EchoModelLoader <qat.model.loaders.converted.EchoModelLoader>`.
+This is just a mock-up of OQC's Lucy hardware, and doesn't contain any practical calibration data.
+
+File model loaders 
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The :class:`FileModelLoader <qat.model.loaders.file.FileModelLoader>` can be used to load
+hardware models from their respective "calibration" JSON files.
+
+.. code-block:: python 
+  
+    from qat.model.loaders.file import FileModelLoader
+
+    model = FileModelLoader("calibration.json").load()
+
+There is an equivalent legacy (PuRR) :class:`FileModelLoader <qat.model.loaders.purr.file.FileModelLoader>` loader that loads in a :class:`QuantumHardwareModel <qat.purr.compiler.hardware_models.QuantumHardwareModel>`, which can be found at :class:`FileModelLoader <qat.model.loaders.purr.FileModelLoader>`.
+
 
 Legacy models 
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Models from legacy QAT can easily be imported, either as a
-:class:`QuantumHardwareModel <qat.purr.compiler.hardware_models.QuantumHardwareModel>` (the 
-legacy version of hardware models), or as a Pydantic
-:class:`PhysicalHardwareModel <qat.model.hardware_model.PhysicalHardwareModel>`. 
-The import type will depend on its use case. The later was achieved in the previous example,
-where the :class:`EchoModelLoader <qat.model.loaders.converted.EchoModelLoader>` creates a
-legacy Echo model and converts it to a Pydantic model.
-
-To load the models as a
-:class:`QuantumHardwareModel <qat.purr.compiler.hardware_models.QuantumHardwareModel>`,
-:mod:`qat.model.loaders` has a :mod:`legacy <qat.model.loaders.legacy>` package, which
-includes the following loaders:
-
-* :class:`EchoModelLoader <qat.model.loaders.legacy.EchoModelLoader>`: a model
-  traditionally used with "echo engines".
-* :class:`LucyModelLoader <qat.model.loaders.legacy.LucyModelLoader>`: a mock-up hardware 
-  model of the legacy OQC Lucy hardware.
-* :class:`QiskitModelLoader <qat.model.loaders.legacy.QiskitModelLoader>`: a model 
-  with specific support for Qiskit's AerSimulator as a target.
-* :class:`RTCSModelLoader <qat.model.loaders.legacy.RTCSModelLoader>`: a model 
-  with specific support for OQC's real time chip simulator (RTCS).
-* :class:`FileModelLoader <qat.model.loaders.legacy.FileModelLoader>`: used to load 
-  legacy hardware models from file.
-
-For legacy models that do not have a designated loader method, we can manually convert from 
+For PuRR models that do not have a designated loader method, we can manually convert from 
 a legacy to Pydantic hardware model by using the
-:meth:`convert_legacy_echo_hw_to_pydantic <qat.model.convert_legacy.convert_legacy_echo_hw_to_pydantic>`
+:meth:`convert_purr_echo_hw_to_pydantic <qat.model.convert_purr.convert_purr_echo_hw_to_pydantic>`
 method.
-
-
-
-
-
-Loading models from external files 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Hardware models can be serialized and saved as a JSON file, allowing them to be shared and 
-stored elsewhere after calibration routines are complete. QAT has some helper methods to 
-build hardware models from calibration files, Let's start by generating a calibration file 
-that we can use as an example.
-
-.. code-block:: python 
-    :linenos:
-
-    from qat.model.loaders.converted import EchoModelLoader
-
-    connectivity = [(0, 1), (1, 2), (2, 3), (3, 0)]
-    model = EchoModelLoader(qubit_count=4, connectivity=connectivity).load()
-    blob = model.model_dump_json()
-    with open("temp.json", "w") as f:
-        f.write(blob)
-    
-This file can be loaded using the
-:class:`FileModelLoader <qat.model.loaders.file.FileModelLoader>`.
-
-.. code-block:: python 
-    :linenos:
-
-    from qat.model.loaders.file import FileModelLoader
-
-    model = FileModelLoader("temp.json").load()
 
 
 Building hardware models
@@ -142,3 +100,17 @@ couplings, but with random coupling directions.
     Once built, the topology of hardware models (including both the physical and logical 
     topology) is frozen and cannot be changed directly. However, the calibratable
     properties, such as pulses can be modified, are validated to ensure they are sensible.
+
+
+Target Data 
+****************
+
+Unlike the hardware model, the target data contains configurational information about the hardware that is static or information that changes infrequently. This includes:
+
+* Information surrounding the number of shots that can be achieved in a single execution.
+* The passive reset time used to return qubits to their ground state between executions.
+* Constants of the control hardware, such as the sampling rates and clock speeds.
+* Limits on allowed quantities, such as frequencies and pulse durations.
+
+The standard target data can be found at :class:`TargetData <qat.model.target_data.TargetData>`. that can be customized through :class:`CustomTargetData <qat.model.target_data.CustomTargetData>`.
+Each type of control hardware has its own target data, which might contain information unique to that set up. An instance of each target data is expected to exist for each QPU.

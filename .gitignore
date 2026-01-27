@@ -19,6 +19,10 @@ calibration_results/
 
 # Docs
 docs/build/*
+# As part of building the docs, the notebooks are executed and outputs saved here
+docs/jupyter_execute/*
+# A temporary cache for executed notebooks when building the docs
+build/*
 
 # Jupyter
 **/.ipynb_checkpoints/*
