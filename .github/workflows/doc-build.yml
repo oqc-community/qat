@@ -1,8 +1,13 @@
 name: Build documentation
 on:
   pull_request:
-    branches: [main, develop]
-  workflow_dispatch:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - '*.*.*'
   
 jobs:
   deploy:
