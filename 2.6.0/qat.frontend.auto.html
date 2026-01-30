@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.frontend.auto module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -394,6 +395,48 @@ Otherwise, the program is returned (and loaded if required).</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.auto.AutoFrontend.default_for_legacy">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_for_legacy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontend.default_for_legacy" title="Link to this definition"></a></dt>
+<dd><p>Temporary factory for creating an AutoFrontend that has a fallthrough frontend
+to allow any legacy source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.frontend.auto.AutoFrontend" title="qat.frontend.auto.AutoFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoFrontend</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.auto.AutoFrontend.default_for_purr">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_for_purr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontend.default_for_purr" title="Link to this definition"></a></dt>
+<dd><p>Temporary factory for creating an AutoFrontend that allows a PurrFrontend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.frontend.auto.AutoFrontend.default_for_purr.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.auto.AutoFrontend.default_for_purr.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The purr hardware model is needed to instantiate the default
+frontends.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.frontend.auto.AutoFrontend" title="qat.frontend.auto.AutoFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoFrontend</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.auto.AutoFrontend.default_for_pydantic">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_for_pydantic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontend.default_for_pydantic" title="Link to this definition"></a></dt>
+<dd><p>Temporary factory for creating an AutoFrontend that allows a QatFrontend.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.frontend.auto.AutoFrontend.default_for_pydantic.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.auto.AutoFrontend.default_for_pydantic.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></span>) – The hardware model is needed to instantiate the default
+frontends.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.frontend.auto.AutoFrontend" title="qat.frontend.auto.AutoFrontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoFrontend</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.auto.AutoFrontend.default_frontends">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">default_frontends</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontend.default_frontends" title="Link to this definition"></a></dt>
 <dd><p>Returns a default list of frontends to try.</p>
@@ -409,7 +452,7 @@ Otherwise, the program is returned (and loaded if required).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.auto.AutoFrontend.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontend.emit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontend.emit" title="Link to this definition"></a></dt>
 <dd><p>Chooses a suitable frontend and compiles a given source program.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -446,7 +489,7 @@ defaults to None.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.auto.AutoFrontendWithFlattenedIR.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontendWithFlattenedIR.emit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.auto.AutoFrontendWithFlattenedIR.emit" title="Link to this definition"></a></dt>
 <dd><p>Chooses a suitable frontend and compiles a given source program.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -523,6 +566,7 @@ circuit, defaults to None.</p></li>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.frontend.auto.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.frontend.auto.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.frontend.auto.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

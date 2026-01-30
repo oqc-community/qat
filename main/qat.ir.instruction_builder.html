@@ -6,10 +6,11 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.instruction_builder module &mdash; qat-compiler 2.7.0.post187.dev20250818110548 documentation</title>
+  <title>qat.ir.instruction_builder module &mdash; qat-compiler 3.0.0.post151.dev20260130090326 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -48,11 +49,20 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/input.html">Supported input to the compiler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
@@ -89,8 +99,16 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
 </ul>
 </li>
@@ -122,8 +140,13 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.qblox.html">qat.engines.qblox package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.instrument_base.html">qat.engines.qblox.instrument_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
@@ -155,17 +178,27 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.features.html">qat.integrations.features module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
 </ul>
 </li>
@@ -178,11 +211,13 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.conversion.html">qat.ir.conversion module</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.utils.html">qat.ir.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
@@ -212,13 +247,20 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.middleend.middleends.html">qat.middleend.middleends module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.dummy.html">qat.model.loaders.purr.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
@@ -230,6 +272,8 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
@@ -274,6 +318,19 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
@@ -282,10 +339,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform_v1.html">qat.pipelines.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.compile.html">qat.pipelines.waveform_v1.compile module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.execute.html">qat.pipelines.waveform_v1.execute module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.full.html">qat.pipelines.waveform_v1.full module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
@@ -312,14 +369,12 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
@@ -359,6 +414,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
@@ -389,8 +450,10 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -405,6 +468,8 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.uuid.html">qat.utils.uuid module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
@@ -452,8 +517,12 @@
 <span id="qat-ir-instruction-builder-module"></span><h1>qat.ir.instruction_builder module<a class="headerlink" href="#module-qat.ir.instruction_builder" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_qubit_index_by_uuid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_qubits_ordered_by_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract class for assembling quantum programs.</p>
+<p>Provides a number of methods to deal with common quantum semantics, such as qubits,
+gates, measurements, and control flow. The details of how quantum operations are
+implemented are left to child classes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.ECR">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ECR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.ECR" title="Link to this definition"></a></dt>
@@ -569,6 +638,40 @@ instead of accessing the instructions tree directly as it deals with composite i
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.get_logical_qubit">
+<span class="sig-name descname"><span class="pre">get_logical_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.get_logical_qubit" title="Link to this definition"></a></dt>
+<dd><p>Returns the qubit assigned with the given logical index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.ir.instruction_builder.InstructionBuilder.get_logical_qubit.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.InstructionBuilder.get_logical_qubit.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The logical index of the qubit to return.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The qubit with the given logical index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.get_physical_qubit">
+<span class="sig-name descname"><span class="pre">get_physical_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.get_physical_qubit" title="Link to this definition"></a></dt>
+<dd><p>Returns the qubit assigned with the given physical index.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.ir.instruction_builder.InstructionBuilder.get_physical_qubit.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.InstructionBuilder.get_physical_qubit.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The index of the qubit to return.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The qubit with the given index.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.had">
 <span class="sig-name descname"><span class="pre">had</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.had" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -583,10 +686,21 @@ instead of accessing the instructions tree directly as it deals with composite i
 <span class="sig-name descname"><span class="pre">jump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.jump" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.measure_single_shot_z">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measure_single_shot_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.measure_single_shot_z" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.number_of_instructions">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_instructions</span></span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.number_of_instructions" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.qubits">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><span class="pre">Qubit</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.qubits" title="Link to this definition"></a></dt>
+<dd><p>Returns the list of qubits, sorted by index.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.repeat">
@@ -595,7 +709,7 @@ instead of accessing the instructions tree directly as it deals with composite i
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.reset" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.reset" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -624,8 +738,10 @@ instead of accessing the instructions tree directly as it deals with composite i
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></p>
+<p>A pulse-level instruction builder, that provides implementations of quantum gates,
+and an API for pulse-level instructions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.ECR">
 <span class="sig-name descname"><span class="pre">ECR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.ECR" title="Link to this definition"></a></dt>
@@ -643,7 +759,7 @@ to the builder (see <a class="reference external" href="https://doi.org/10.48550
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.theta"></span><strong>theta</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.theta">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Rotation angle.</p></li>
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.phi"></span><strong>phi</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.phi">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Rotation angle.</p></li>
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.lamb"></span><strong>lamb</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.lamb">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Rotation angle.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.pulse_channel"></span><strong>pulse_channel</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.pulse_channel">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.model.device.html#qat.model.device.PulseChannel" title="qat.model.device.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a>]</span>) – The pulse channel the pulses get sent to.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.pulse_channel"></span><strong>pulse_channel</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.U.params.pulse_channel">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.ir.pulse_channel.html#qat.ir.pulse_channel.PulseChannel" title="qat.ir.pulse_channel.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a>]</span>) – The pulse channel the pulses get sent to.</p></li>
 </ul>
 </dd>
 </dl>
@@ -651,17 +767,17 @@ to the builder (see <a class="reference external" href="https://doi.org/10.48550
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.X">
-<span class="sig-name descname"><span class="pre">X</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.X" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">X</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.X" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.Y">
-<span class="sig-name descname"><span class="pre">Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.Y" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.Y" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.Z">
-<span class="sig-name descname"><span class="pre">Z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.Z" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">Z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.Z" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -700,6 +816,19 @@ to the builder (see <a class="reference external" href="https://doi.org/10.48550
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.create_pulse_channel">
+<span class="sig-name descname"><span class="pre">create_pulse_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imbalance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_iq_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span> <span class="pre">+</span> <span class="pre">0j</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.create_pulse_channel" title="Link to this definition"></a></dt>
+<dd><p>Creates a pulse channel and adds stores it within the builder.</p>
+<p>The channel can be provided as a physical channel which the logical channel is
+linked too, or use the physical channel of a provided pulse channel.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.pulse_channel.html#qat.ir.pulse_channel.PulseChannel" title="qat.ir.pulse_channel.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.delay">
 <span class="sig-name descname"><span class="pre">delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.delay" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -708,6 +837,19 @@ to the builder (see <a class="reference external" href="https://doi.org/10.48550
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift">
 <span class="sig-name descname"><span class="pre">frequency_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.get_pulse_channel">
+<span class="sig-name descname"><span class="pre">get_pulse_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.get_pulse_channel" title="Link to this definition"></a></dt>
+<dd><p>Given an id, return the corresponding pulse channel.</p>
+<p>Checks internally stored pulse channels, but can pull pulse channels from the
+hardware model if not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.pulse_channel.html#qat.ir.pulse_channel.PulseChannel" title="qat.ir.pulse_channel.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure">
@@ -834,7 +976,7 @@ for each shot run.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.phase_shift">
-<span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.phase_shift" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">phase_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.phase_shift" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -850,6 +992,11 @@ for each shot run.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.pulse">
 <span class="sig-name descname"><span class="pre">pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.pulse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.reset" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -920,6 +1067,7 @@ for each shot run.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.ir.instruction_builder.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.ir.instruction_builder.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.ir.instruction_builder.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

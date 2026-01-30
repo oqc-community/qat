@@ -1,0 +1,7 @@
+qat.pipelines.purr.qblox.compile module
+=======================================
+
+.. automodule:: qat.pipelines.purr.qblox.compile
+   :members:
+   :undoc-members:
+   :show-inheritance:

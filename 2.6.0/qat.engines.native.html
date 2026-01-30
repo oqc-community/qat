@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.engines.native module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -361,17 +362,17 @@ to the target to be established. This class is used to mix in connection capabil
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.engines.native.NativeEngine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NativeEngine</span></span><a class="headerlink" href="#qat.engines.native.NativeEngine" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>]</p>
 <p><a class="reference internal" href="#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a> acts as an interface between some target machine and an
 executable. They are used to connect to the target machine (if applicable), and execute
 and return the results.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.engines.native.NativeEngine.execute">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine.execute" title="Link to this definition"></a></dt>
-<dd><p>Executes a compiled instruction executable and returns results that are processed
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.native.NativeEngine.execute" title="Link to this definition"></a></dt>
+<dd><p>Executes a compiled instruction program and returns results that are processed
 according to the acquires.</p>
 <p>The engine is expected to return the results as a dictionary with the output
-variables as keys. This may be changed in future iterations.</p>
+variables as keys.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
@@ -437,6 +438,7 @@ variables as keys. This may be changed in future iterations.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.engines.native.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.engines.native.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.engines.native.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

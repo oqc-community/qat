@@ -27,13 +27,11 @@ Submodules
    qat.purr.backends.qblox.config
    qat.purr.backends.qblox.constants
    qat.purr.backends.qblox.device
+   qat.purr.backends.qblox.dummy
    qat.purr.backends.qblox.graph
    qat.purr.backends.qblox.ir
    qat.purr.backends.qblox.live
    qat.purr.backends.qblox.loader
-   qat.purr.backends.qblox.metrics_base
    qat.purr.backends.qblox.model_base
-   qat.purr.backends.qblox.pass_base
-   qat.purr.backends.qblox.result_base
    qat.purr.backends.qblox.transform_passes
    qat.purr.backends.qblox.visualisation

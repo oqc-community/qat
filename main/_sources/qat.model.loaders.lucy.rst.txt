@@ -1,0 +1,7 @@
+qat.model.loaders.lucy module
+=============================
+
+.. automodule:: qat.model.loaders.lucy
+   :members:
+   :undoc-members:
+   :show-inheritance:

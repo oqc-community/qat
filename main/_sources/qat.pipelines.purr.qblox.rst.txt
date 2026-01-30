@@ -1,0 +1,17 @@
+qat.pipelines.purr.qblox package
+================================
+
+.. automodule:: qat.pipelines.purr.qblox
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.pipelines.purr.qblox.compile
+   qat.pipelines.purr.qblox.execute
+   qat.pipelines.purr.qblox.full

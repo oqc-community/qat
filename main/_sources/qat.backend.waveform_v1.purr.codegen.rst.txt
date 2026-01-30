@@ -1,0 +1,7 @@
+qat.backend.waveform\_v1.purr.codegen module
+============================================
+
+.. automodule:: qat.backend.waveform_v1.purr.codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

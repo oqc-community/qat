@@ -6,10 +6,11 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Compilation &mdash; qat-compiler 2.7.0.post187.dev20250818110548 documentation</title>
+  <title>Compilation &mdash; qat-compiler 3.0.0.post151.dev20260130090326 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
 
   
@@ -22,7 +23,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Execution" href="execution.html" />
-    <link rel="prev" title="Pipelines" href="pipelines.html" /> 
+    <link rel="prev" title="QAT Config" href="qat_config.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,11 +49,20 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started with QAT</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="hardware_models.html">Hardware models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input.html">Supported input to the compiler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat_config.html">QAT Config</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a><ul>
@@ -89,8 +99,16 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
 </ul>
 </li>
@@ -122,8 +140,13 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../qat.engines.html">qat.engines package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../qat.engines.qblox.html">qat.engines.qblox package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.instrument_base.html">qat.engines.qblox.instrument_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
@@ -155,17 +178,27 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.auto.html">qat.frontend.auto module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.base.html">qat.frontend.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.custom.html">qat.frontend.custom module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.qir.html">qat.frontend.qir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="../qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.integrations.features.html">qat.integrations.features module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.integrations.tket.html">qat.integrations.tket module</a></li>
 </ul>
 </li>
@@ -178,11 +211,13 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.conversion.html">qat.ir.conversion module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.utils.html">qat.ir.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
@@ -212,13 +247,20 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.middleends.html">qat.middleend.middleends module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../qat.model.html">qat.model package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="../qat.model.loaders.html">qat.model.loaders package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.dummy.html">qat.model.loaders.purr.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
@@ -230,6 +272,8 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.model.builder.html">qat.model.builder module</a></li>
@@ -274,6 +318,19 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
@@ -282,10 +339,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.waveform_v1.html">qat.pipelines.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform_v1.compile.html">qat.pipelines.waveform_v1.compile module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform_v1.execute.html">qat.pipelines.waveform_v1.execute module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform_v1.full.html">qat.pipelines.waveform_v1.full module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.base.html">qat.pipelines.base module</a></li>
@@ -312,14 +369,12 @@
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
@@ -359,6 +414,12 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.purr.integrations.html">qat.purr.integrations package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
@@ -389,8 +450,10 @@
 <li class="toctree-l5"><a class="reference internal" href="../qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -405,6 +468,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.uuid.html">qat.utils.uuid module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
@@ -476,7 +541,7 @@ the modified QAT IR enters the backend, which generates native code for the targ
 </li>
 <li><p><a class="reference internal" href="#backend" id="id10">Backend</a></p>
 <ul>
-<li><p><a class="reference internal" href="#waveformv1backend-example" id="id11">WaveformV1Backend example</a></p></li>
+<li><p><a class="reference internal" href="#waveformbackend-example" id="id11">WaveformBackend example</a></p></li>
 </ul>
 </li>
 <li><p><a class="reference internal" href="#making-ends-meet" id="id12">Making ends meet</a></p></li>
@@ -599,8 +664,8 @@ compatible.</p>
 </pre></div>
 </div>
 <p>The types of the returned objects will be
-<a class="reference internal" href="../qat.frontend.qasm.html#qat.frontend.qasm.Qasm2Frontend" title="qat.frontend.qasm.Qasm2Frontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm2Frontend</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MyCustomFrontend`and</span>
-<span class="pre">:class:`NoneType</span></code> respectively.</p>
+<a class="reference internal" href="../qat.frontend.qasm.html#qat.frontend.qasm.Qasm2Frontend" title="qat.frontend.qasm.Qasm2Frontend"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm2Frontend</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">MyCustomFrontend</span></code> and
+<code class="xref py py-class docutils literal notranslate"><span class="pre">NoneType</span></code> respectively.</p>
 </section>
 <section id="alternative-frontends">
 <h3><a class="toc-backref" href="#id6" role="doc-backlink">Alternative frontends</a><a class="headerlink" href="#alternative-frontends" title="Link to this heading"></a></h3>
@@ -627,7 +692,7 @@ passes that</p>
 <section id="default-middleend">
 <h3><a class="toc-backref" href="#id8" role="doc-backlink">Default Middleend</a><a class="headerlink" href="#default-middleend" title="Link to this heading"></a></h3>
 <p>The standard middleend to use is the
-<a class="reference internal" href="../qat.middleend.middleends.html#qat.middleend.middleends.DefaultMiddleend" title="qat.middleend.middleends.DefaultMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultMiddleend</span></code></a>, which has a
+<a class="reference internal" href="../qat.middleend.default.html#qat.middleend.default.DefaultMiddleend" title="qat.middleend.default.DefaultMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultMiddleend</span></code></a>, which has a
 pre-defined pipeline.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.middleend</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultMiddleend</span>
 <span class="n">middleend</span> <span class="o">=</span> <span class="n">DefaultMiddleend</span><span class="p">(</span><span class="n">hardware_model</span><span class="p">)</span>
@@ -644,7 +709,7 @@ middleend to pass the IR through the compilation pipeline.</p>
 <section id="custom-middleend">
 <h3><a class="toc-backref" href="#id9" role="doc-backlink">Custom Middleend</a><a class="headerlink" href="#custom-middleend" title="Link to this heading"></a></h3>
 <p>We can specify a middleend with a custom compilation pipeline using the
-<a class="reference internal" href="../qat.middleend.middleends.html#qat.middleend.middleends.CustomMiddleend" title="qat.middleend.middleends.CustomMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomMiddleend</span></code></a> class. For example, the
+<a class="reference internal" href="../qat.middleend.base.html#qat.middleend.base.CustomMiddleend" title="qat.middleend.base.CustomMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomMiddleend</span></code></a> class. For example, the
 following middleend would optimise over phase shifts and remove any unnecessary
 post-processing instructions to reduce the overall instruction count.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.middleend</span><span class="w"> </span><span class="kn">import</span> <span class="n">CustomMiddleend</span>
@@ -675,21 +740,21 @@ transformation passes to make the intermediate code more appropriate for the cod
 See <a class="reference internal" href="../qat.backend.passes.html#module-qat.backend.passes" title="qat.backend.passes"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.backend.passes</span></code></a> for a full list of passes (which might be target specific).</p></li>
 <li><p>An emitter that walks through the QAT IR and generates native code.</p></li>
 </ol>
-<section id="waveformv1backend-example">
-<h3><a class="toc-backref" href="#id11" role="doc-backlink">WaveformV1Backend example</a><a class="headerlink" href="#waveformv1backend-example" title="Link to this heading"></a></h3>
+<section id="waveformbackend-example">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">WaveformBackend example</a><a class="headerlink" href="#waveformbackend-example" title="Link to this heading"></a></h3>
 <p>As an example, lets consider the
-<a class="reference internal" href="../qat.backend.waveform_v1.codegen.html#qat.backend.waveform_v1.codegen.WaveformV1Backend" title="qat.backend.waveform_v1.codegen.WaveformV1Backend"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Backend</span></code></a>, a backend
+<a class="reference internal" href="../qat.backend.waveform.codegen.html#qat.backend.waveform.codegen.WaveformBackend" title="qat.backend.waveform.codegen.WaveformBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformBackend</span></code></a>, a backend
 that generates code for earlier (and now legacy) iterations of OQC hardware, but is still
 maintained for some of our simulators and demonstration purposes. Like the frontend and
 middleend, the emitter can be used to generate native code by calling the <code class="code docutils literal notranslate"><span class="pre">emit</span></code>
 method,</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.backend.waveform_v1</span><span class="w"> </span><span class="kn">import</span> <span class="n">WaveformV1Backend</span>
-<span class="n">backend</span> <span class="o">=</span> <span class="n">WaveformV1Backend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.backend.waveform</span><span class="w"> </span><span class="kn">import</span> <span class="n">WaveformBackend</span>
+<span class="n">backend</span> <span class="o">=</span> <span class="n">WaveformBackend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 <span class="n">pkg</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">ir</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The package returned from a backend is referred to as an
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code>. They are Pydantic data classes
+<a class="reference internal" href="../qat.executables.html#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a>. They are Pydantic data classes
 that contain all the information needed to execute a program, including the instructions
 needed by the control hardware (or simulator), and the classical post-processing
 instructions required by the runtime needed to interpret and process the results (see the
@@ -699,33 +764,33 @@ execution section for more details).</p>
 <section id="making-ends-meet">
 <h2><a class="toc-backref" href="#id12" role="doc-backlink">Making ends meet</a><a class="headerlink" href="#making-ends-meet" title="Link to this heading"></a></h2>
 <p>Now that we have covered each type of “end”, we can bring it together to define a complete
-compilation pipeline. Let’s write one that compiles to “WaveformV1”.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.loaders.legacy</span><span class="w"> </span><span class="kn">import</span> <span class="n">EchoModelLoader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qat.frontend</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoFrontend</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qat.middleend</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultMiddleend</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qat.backend.waveform_v1</span><span class="w"> </span><span class="kn">import</span> <span class="n">WaveformV1Backend</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">compiler_config.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompilerConfig</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">EchoModelLoader</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-<span class="n">frontend</span> <span class="o">=</span> <span class="n">AutoFrontend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-<span class="n">middleend</span> <span class="o">=</span> <span class="n">DefaultMiddleend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-<span class="n">backend</span> <span class="o">=</span> <span class="n">WaveformV1Backend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-
-<span class="n">qasm_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">OPENQASM 2.0;</span>
-<span class="s2">include &quot;qelib1.inc&quot;;</span>
-<span class="s2">qreg q[2];</span>
-<span class="s2">creg c[2];</span>
-<span class="s2">h q[0];</span>
-<span class="s2">cx q[0], q[1];</span>
-<span class="s2">measure q -&gt; c;</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">config</span> <span class="o">=</span> <span class="n">CompilerConfig</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
-
-
-<span class="n">ir</span> <span class="o">=</span> <span class="n">frontend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">qasm_str</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
-<span class="n">ir</span> <span class="o">=</span> <span class="n">middleend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">ir</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
-<span class="n">pkg</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">ir</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+compilation pipeline. Let’s write one that compiles to “Waveform”.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.loaders.lucy</span><span class="w"> </span><span class="kn">import</span> <span class="n">LucyModelLoader</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.frontend</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoFrontend</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.middleend.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultMiddleend</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.backend.waveform</span><span class="w"> </span><span class="kn">import</span> <span class="n">WaveformBackend</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">compiler_config.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">CompilerConfig</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">model</span> <span class="o">=</span> <span class="n">LucyModelLoader</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+<span class="linenos"> 8</span><span class="n">frontend</span> <span class="o">=</span> <span class="n">AutoFrontend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="linenos"> 9</span><span class="n">middleend</span> <span class="o">=</span> <span class="n">DefaultMiddleend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="linenos">10</span><span class="n">backend</span> <span class="o">=</span> <span class="n">WaveformBackend</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="n">qasm_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="linenos">13</span><span class="s2">OPENQASM 2.0;</span>
+<span class="linenos">14</span><span class="s2">include &quot;qelib1.inc&quot;;</span>
+<span class="linenos">15</span><span class="s2">qreg q[2];</span>
+<span class="linenos">16</span><span class="s2">creg c[2];</span>
+<span class="linenos">17</span><span class="s2">h q[0];</span>
+<span class="linenos">18</span><span class="s2">cx q[0], q[1];</span>
+<span class="linenos">19</span><span class="s2">measure q -&gt; c;</span>
+<span class="linenos">20</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="linenos">21</span><span class="n">config</span> <span class="o">=</span> <span class="n">CompilerConfig</span><span class="p">(</span><span class="n">repeats</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="n">ir</span> <span class="o">=</span> <span class="n">frontend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">qasm_str</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">25</span><span class="n">ir</span> <span class="o">=</span> <span class="n">middleend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">ir</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">26</span><span class="n">pkg</span> <span class="o">=</span> <span class="n">backend</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">ir</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The result will be a freshly prepared package ready for execution! Notice that this just
@@ -738,7 +803,7 @@ achieves what <code class="code docutils literal notranslate"><span class="pre">
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pipelines.html" class="btn btn-neutral float-left" title="Pipelines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat_config.html" class="btn btn-neutral float-left" title="QAT Config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="execution.html" class="btn btn-neutral float-right" title="Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
@@ -787,6 +852,7 @@ achieves what <code class="code docutils literal notranslate"><span class="pre">
       <dd><a href="../../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../../2.6.0/index.html">2.6.0</a></dd>
       <dd><a href="../../2.7.0/getting_started/compilation.html">2.7.0</a></dd>
+      <dd><a href="../../3.0.0/getting_started/compilation.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

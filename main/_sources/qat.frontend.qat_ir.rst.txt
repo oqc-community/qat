@@ -1,0 +1,7 @@
+qat.frontend.qat\_ir module
+===========================
+
+.. automodule:: qat.frontend.qat_ir
+   :members:
+   :undoc-members:
+   :show-inheritance:

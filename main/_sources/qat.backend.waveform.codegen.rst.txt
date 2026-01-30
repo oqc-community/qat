@@ -1,0 +1,7 @@
+qat.backend.waveform.codegen module
+===================================
+
+.. automodule:: qat.backend.waveform.codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,15 @@
+qat.instrument package
+======================
+
+.. automodule:: qat.instrument
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.instrument.base

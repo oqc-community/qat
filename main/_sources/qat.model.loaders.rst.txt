@@ -24,3 +24,5 @@ Submodules
    qat.model.loaders.cache
    qat.model.loaders.converted
    qat.model.loaders.file
+   qat.model.loaders.lucy
+   qat.model.loaders.update

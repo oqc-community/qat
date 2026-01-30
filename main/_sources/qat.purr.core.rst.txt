@@ -1,0 +1,17 @@
+qat.purr.core package
+=====================
+
+.. automodule:: qat.purr.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.purr.core.metrics_base
+   qat.purr.core.pass_base
+   qat.purr.core.result_base

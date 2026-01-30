@@ -1,0 +1,7 @@
+qat.model.loaders.purr.dummy module
+===================================
+
+.. automodule:: qat.model.loaders.purr.dummy
+   :members:
+   :undoc-members:
+   :show-inheritance:

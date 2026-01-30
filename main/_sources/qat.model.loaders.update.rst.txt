@@ -1,0 +1,7 @@
+qat.model.loaders.update module
+===============================
+
+.. automodule:: qat.model.loaders.update
+   :members:
+   :undoc-members:
+   :show-inheritance:

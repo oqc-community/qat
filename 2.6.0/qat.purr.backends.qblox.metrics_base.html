@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.backends.qblox.metrics_base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -334,93 +335,8 @@
              
 
 
-  <section id="module-qat.purr.backends.qblox.metrics_base">
-<span id="qat-purr-backends-qblox-metrics-base-module"></span><h1>qat.purr.backends.qblox.metrics_base module<a class="headerlink" href="#module-qat.purr.backends.qblox.metrics_base" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetricsManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics=&lt;MetricsType.Experimental:</span> <span class="pre">14&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Pydantic version based on qat.purr.compiler.metrics.py elements.</p>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.are_enabled">
-<span class="sig-name descname"><span class="pre">are_enabled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.are_enabled" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.as_dict">
-<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.as_dict" title="Link to this definition"></a></dt>
-<dd><p>Generates a dictionary of the valid metrics.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.enable">
-<span class="sig-name descname"><span class="pre">enable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.enable" title="Link to this definition"></a></dt>
-<dd><p>Enable these sets of metrics for collection. If overwrite is True then the
-passed-in values will overwrite existing ones.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.enable_metrics">
-<span class="sig-name descname"><span class="pre">enable_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enabled_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.enable_metrics" title="Link to this definition"></a></dt>
-<dd><p>Enables the set of metrics in the current collection. If overwrite is set to
-true, or there are no compilation metrics it’ll create a new collection, if
-overwrite is false it’ll enable these metrics in the currently-active
-collection.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.enabled_metrics">
-<span class="sig-name descname"><span class="pre">enabled_metrics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsType</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.enabled_metrics" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.get_metric">
-<span class="sig-name descname"><span class="pre">get_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.get_metric" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.merge">
-<span class="sig-name descname"><span class="pre">merge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.merge" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_circuit">
-<span class="sig-name descname"><span class="pre">optimized_circuit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_circuit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_instruction_count">
-<span class="sig-name descname"><span class="pre">optimized_instruction_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.optimized_instruction_count" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.physical_qubit_indices">
-<span class="sig-name descname"><span class="pre">physical_qubit_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.physical_qubit_indices" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.record_metric">
-<span class="sig-name descname"><span class="pre">record_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.record_metric" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.metrics_base.MetricsManager.validate_all_fields_exist">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_all_fields_exist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.metrics_base.MetricsManager.validate_all_fields_exist" title="Link to this definition"></a></dt>
-<dd><p>Validate that all expected MetricsType flags have defined fields.</p>
-</dd></dl>
-
-</dd></dl>
-
+  <section id="qat-purr-backends-qblox-metrics-base-module">
+<h1>qat.purr.backends.qblox.metrics_base module<a class="headerlink" href="#qat-purr-backends-qblox-metrics-base-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -477,6 +393,7 @@ collection.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.backends.qblox.metrics_base.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.purr.backends.qblox.metrics_base.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.purr.backends.qblox.metrics_base.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

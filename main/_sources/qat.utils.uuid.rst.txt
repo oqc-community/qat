@@ -1,0 +1,7 @@
+qat.utils.uuid module
+=====================
+
+.. automodule:: qat.utils.uuid
+   :members:
+   :undoc-members:
+   :show-inheritance:

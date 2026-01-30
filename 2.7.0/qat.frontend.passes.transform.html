@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.frontend.passes.transform module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -356,21 +357,55 @@
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.frontend.passes.transform.PydInputOptimisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydInputOptimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.passes.transform.PydInputOptimisation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">InputOptimisation</span></code></p>
+<dt class="sig sig-object py" id="qat.frontend.passes.transform.InputOptimisation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InputOptimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.passes.transform.InputOptimisation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Instantiate the pass with a hardware model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.frontend.passes.transform.PydInputOptimisation.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.passes.transform.PydInputOptimisation.params.model">¶</a> – The hardware model is used in TKET optimisations.</p>
+<dd class="field-odd"><p><span class="target" id="qat.frontend.passes.transform.InputOptimisation.params.hardware"></span><strong>hardware</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.passes.transform.InputOptimisation.params.hardware">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></span>) – The hardware model is used in TKET optimisations.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.passes.transform.PydInputOptimisation.run_qasm_optimisation">
-<span class="sig-name descname"><span class="pre">run_qasm_optimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.passes.transform.PydInputOptimisation.run_qasm_optimisation" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.frontend.passes.transform.InputOptimisation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.passes.transform.InputOptimisation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.frontend.passes.transform.InputOptimisation.run.params.program"></span><strong>program</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.passes.transform.InputOptimisation.run.params.program">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The program as a string (e.g. QASM or QIR), or filepath to the
+program.</p></li>
+<li><p><span class="target" id="qat.frontend.passes.transform.InputOptimisation.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.passes.transform.InputOptimisation.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The results manager to look-up the <code class="xref py py-class docutils literal notranslate"><span class="pre">InputAnalysisResults</span></code>.</p></li>
+<li><p><span class="target" id="qat.frontend.passes.transform.InputOptimisation.run.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.passes.transform.InputOptimisation.run.params.met_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a></span>) – The metrics manager to save the optimised circuit.</p></li>
+<li><p><span class="target" id="qat.frontend.passes.transform.InputOptimisation.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.frontend.passes.transform.InputOptimisation.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code></span>) – The compiler config should be provided by a keyword
+argument.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.passes.transform.InputOptimisation.run_qasm_optimisation">
+<span class="sig-name descname"><span class="pre">run_qasm_optimisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.passes.transform.InputOptimisation.run_qasm_optimisation" title="Link to this definition"></a></dt>
 <dd><p>Extracted from DefaultOptimizers.optimize_qasm</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.passes.transform.InputOptimisation.run_qiskit_optimization">
+<span class="sig-name descname"><span class="pre">run_qiskit_optimization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qasm_string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">level</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.passes.transform.InputOptimisation.run_qiskit_optimization" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.frontend.passes.transform.PydFlattenIR">
+<span class="sig-name descname"><span class="pre">PydFlattenIR</span></span><a class="headerlink" href="#qat.frontend.passes.transform.PydFlattenIR" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.frontend.passes.transform.FlattenIR" title="qat.frontend.passes.transform.FlattenIR"><code class="xref py py-class docutils literal notranslate"><span class="pre">FlattenIR</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.frontend.passes.transform.PydInputOptimisation">
+<span class="sig-name descname"><span class="pre">PydInputOptimisation</span></span><a class="headerlink" href="#qat.frontend.passes.transform.PydInputOptimisation" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.frontend.passes.transform.InputOptimisation" title="qat.frontend.passes.transform.InputOptimisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputOptimisation</span></code></a></p>
 </dd></dl>
 
 <dl class="py class">
@@ -446,6 +481,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.frontend.passes.transform.html">2.6.0</a></dd>
       <dd><a href="qat.frontend.passes.transform.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.frontend.passes.transform.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

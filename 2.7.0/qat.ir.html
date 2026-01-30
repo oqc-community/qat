@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.ir package &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -434,10 +435,14 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.controlled"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.controlled()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.cswap"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.cswap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.flatten"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.flatten()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.get_logical_qubit"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.get_logical_qubit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.get_physical_qubit"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.get_physical_qubit()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.had"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.had()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.instructions</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.jump"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.jump()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.measure_single_shot_z"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.measure_single_shot_z()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.number_of_instructions"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.number_of_instructions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.qubits"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.qubits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.repeat"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.repeat()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.reset"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.reset()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.results_processing"><code class="docutils literal notranslate"><span class="pre">InstructionBuilder.results_processing()</span></code></a></li>
@@ -457,8 +462,10 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.ccnot"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.ccnot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.cnot"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.cnot()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.controlled"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.controlled()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.create_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.create_pulse_channel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.delay"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.delay()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.frequency_shift()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.get_pulse_channel"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.get_pulse_channel()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_mean_signal()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_mean_z()</span></code></a></li>
@@ -470,6 +477,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.post_processing()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.pretty_print"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.pretty_print()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.pulse"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.pulse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.reset"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.reset()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.swap"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.swap()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.synchronize"><code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.synchronize()</span></code></a></li>
 </ul>
@@ -683,7 +691,7 @@
 <li class="toctree-l1"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform.model_config"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform.name"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform.name"><code class="docutils literal notranslate"><span class="pre">AbstractWaveform.name()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.BlackmanWaveform"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveform</span></code></a><ul>
@@ -739,6 +747,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform"><code class="docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform.duration"><code class="docutils literal notranslate"><span class="pre">SampledWaveform.duration</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform.model_config"><code class="docutils literal notranslate"><span class="pre">SampledWaveform.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform.sample_time"><code class="docutils literal notranslate"><span class="pre">SampledWaveform.sample_time</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform.samples"><code class="docutils literal notranslate"><span class="pre">SampledWaveform.samples</span></code></a></li>
 </ul>
 </li>
@@ -858,6 +867,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.ir.html">2.6.0</a></dd>
       <dd><a href="qat.ir.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.ir.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.backends.qblox.result_base module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -342,87 +343,8 @@
              
 
 
-  <section id="module-qat.purr.backends.qblox.result_base">
-<span id="qat-purr-backends-qblox-result-base-module"></span><h1>qat.purr.backends.qblox.result_base module<a class="headerlink" href="#module-qat.purr.backends.qblox.result_base" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultConcept">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultConcept</span></span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultConcept" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base class describing the abstraction of an analysis result.</p>
-<p>See ResultManager.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultInfoMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultInfoMixin</span></span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultInfoMixin" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base mixin specifying result identification mechanism. A result has an id, name, and value.</p>
-<p>See ResultManager.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultInfoMixin.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultInfoMixin.id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultInfoMixin.name">
-<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultInfoMixin.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultInfoMixin.value">
-<span class="sig-name descname"><span class="pre">value</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultInfoMixin.value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultManager</span></span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultManager" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Represents a collection of analysis results with caching and aggregation capabilities.</p>
-<p>Passes that merely compute analyses on the IR must not invalidate prior results. Passes that mutate
-any IR units are likely to invalidate predecessor results.</p>
-<p>An analysis pass can produce 1 or more result objects. There is in theory a duality between passes
-and the results they produce.</p>
-<p>To keep things simple, the ResultManager is just a set of analysis results. Result identification is also
-kept trivial where a UUID is used internally. Proper identification mechanism will be called upon
-once we feel the need for a more sophisticated PassManager.</p>
-<p>See PassManager.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultManager.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultManager.add" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultManager.lookup_by_type">
-<span class="sig-name descname"><span class="pre">lookup_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultManager.lookup_by_type" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultManager.results">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">results</span></span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultManager.results" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultManager.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_res_mgr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultManager.update" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.result_base.ResultConcept" title="qat.purr.backends.qblox.result_base.ResultConcept"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultConcept</span></code></a></p>
-<p>Wrapper for any result object typically produced by an analysis pass.</p>
-<p>See ResultManager.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.result_base.ResultModel.value">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#qat.purr.backends.qblox.result_base.ResultModel.value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <section id="qat-purr-backends-qblox-result-base-module">
+<h1>qat.purr.backends.qblox.result_base module<a class="headerlink" href="#qat-purr-backends-qblox-result-base-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -479,6 +401,7 @@ once we feel the need for a more sophisticated PassManager.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.purr.backends.qblox.result_base.html">2.6.0</a></dd>
       <dd><a href="qat.purr.backends.qblox.result_base.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.purr.backends.qblox.result_base.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

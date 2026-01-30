@@ -1,0 +1,15 @@
+qat.backend.waveform\_v1.purr package
+=====================================
+
+.. automodule:: qat.backend.waveform_v1.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.waveform_v1.purr.codegen

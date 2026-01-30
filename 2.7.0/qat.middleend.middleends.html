@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.middleend.middleends module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -340,164 +341,8 @@
              
 
 
-  <section id="module-qat.middleend.middleends">
-<span id="qat-middleend-middleends-module"></span><h1>qat.middleend.middleends module<a class="headerlink" href="#module-qat.middleend.middleends" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.middleends.BaseMiddleend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BaseMiddleend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.BaseMiddleend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base class for a middle end that takes an intermediate representation (IR) <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>
-and alters it based on optimisation and/or validation passes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.middleends.BaseMiddleend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.BaseMiddleend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.middleends.BaseMiddleend.emit">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.BaseMiddleend.emit" title="Link to this definition"></a></dt>
-<dd><p>Converts an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> to an optimised IR.
-:type _sphinx_paramlinks_qat.middleend.middleends.BaseMiddleend.emit.ir: 
-:param _sphinx_paramlinks_qat.middleend.middleends.BaseMiddleend.emit.ir: The intermediate representation.
-:type _sphinx_paramlinks_qat.middleend.middleends.BaseMiddleend.emit.res_mgr: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a>]</span>
-:param _sphinx_paramlinks_qat.middleend.middleends.BaseMiddleend.emit.res_mgr: Collection of analysis results with caching and aggregation</p>
-<blockquote>
-<div><p>capabilities, defaults to None.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.middleend.middleends.BaseMiddleend.emit.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.BaseMiddleend.emit.params.met_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span>) – Stores useful intermediary metrics that are generated during
-compilation, defaults to None.</p></li>
-<li><p><span class="target" id="qat.middleend.middleends.BaseMiddleend.emit.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.BaseMiddleend.emit.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Compiler settings, defaults to None.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.middleends.CustomMiddleend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CustomMiddleend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.CustomMiddleend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.middleend.middleends.BaseMiddleend" title="qat.middleend.middleends.BaseMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseMiddleend</span></code></a></p>
-<p>Middle end that uses a custom pipeline to convert the IR to an (optimised) IR.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.middleends.CustomMiddleend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.CustomMiddleend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.middleends.CustomMiddleend.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.CustomMiddleend.emit" title="Link to this definition"></a></dt>
-<dd><p>Converts an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> to an optimised IR with a custom pipeline.
-:type _sphinx_paramlinks_qat.middleend.middleends.CustomMiddleend.emit.ir: 
-:param _sphinx_paramlinks_qat.middleend.middleends.CustomMiddleend.emit.ir: The intermediate representation.
-:type _sphinx_paramlinks_qat.middleend.middleends.CustomMiddleend.emit.res_mgr: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a>]</span>
-:param _sphinx_paramlinks_qat.middleend.middleends.CustomMiddleend.emit.res_mgr: Collection of analysis results with caching and aggregation</p>
-<blockquote>
-<div><p>capabilities, defaults to None.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.middleend.middleends.CustomMiddleend.emit.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.CustomMiddleend.emit.params.met_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span>) – Stores useful intermediary metrics that are generated during
-compilation, defaults to None.</p></li>
-<li><p><span class="target" id="qat.middleend.middleends.CustomMiddleend.emit.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.CustomMiddleend.emit.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – Compiler settings, defaults to None.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.middleends.DefaultMiddleend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultMiddleend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TargetData(max_shots=10000,</span> <span class="pre">default_shots=1000,</span> <span class="pre">QUBIT_DATA=QubitDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000,</span> <span class="pre">passive_reset_time=1e-08),</span> <span class="pre">RESONATOR_DATA=ResonatorDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.DefaultMiddleend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.middleend.middleends.CustomMiddleend" title="qat.middleend.middleends.CustomMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomMiddleend</span></code></a></p>
-<p>Validates the compiler settings against the hardware model, finds calibrations within the IR,
-compresses contiguous <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions, checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code>
-instructions that follow an acquisition are suitable for the acquisition mode, validates that
-there are no mid-circuit measurements.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.middleend.middleends.DefaultMiddleend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.DefaultMiddleend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on
-the QPU.</p></li>
-<li><p><span class="target" id="qat.middleend.middleends.DefaultMiddleend.params.clock_cycle"></span><strong>clock_cycle</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.DefaultMiddleend.params.clock_cycle">¶</a> – The period for a single sequencer clock cycle.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.middleends.DefaultMiddleend.build_pass_pipeline">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TargetData(max_shots=10000,</span> <span class="pre">default_shots=1000,</span> <span class="pre">QUBIT_DATA=QubitDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000,</span> <span class="pre">passive_reset_time=1e-08),</span> <span class="pre">RESONATOR_DATA=ResonatorDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.DefaultMiddleend.build_pass_pipeline" title="Link to this definition"></a></dt>
-<dd><p>Builds the default middle end pass pipeline.
-:type _sphinx_paramlinks_qat.middleend.middleends.DefaultMiddleend.build_pass_pipeline.model: <span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>
-:param _sphinx_paramlinks_qat.middleend.middleends.DefaultMiddleend.build_pass_pipeline.model: The hardware model that holds calibrated information on the qubits on</p>
-<blockquote>
-<div><p>the QPU.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code> containing a sequence of passes.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.middleends.ExperimentalDefaultMiddleend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExperimentalDefaultMiddleend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pyd_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TargetData(max_shots=10000,</span> <span class="pre">default_shots=1000,</span> <span class="pre">QUBIT_DATA=QubitDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000,</span> <span class="pre">passive_reset_time=1e-08),</span> <span class="pre">RESONATOR_DATA=ResonatorDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.ExperimentalDefaultMiddleend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.middleend.middleends.CustomMiddleend" title="qat.middleend.middleends.CustomMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomMiddleend</span></code></a></p>
-<p>Validates the compiler settings against the hardware model, finds calibrations within the IR,
-compresses contiguous <code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShift</span></code> instructions, checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code>
-instructions that follow an acquisition are suitable for the acquisition mode, validates that
-there are no mid-circuit measurements.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.middleend.middleends.ExperimentalDefaultMiddleend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.ExperimentalDefaultMiddleend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on
-the QPU.</p></li>
-<li><p><span class="target" id="qat.middleend.middleends.ExperimentalDefaultMiddleend.params.clock_cycle"></span><strong>clock_cycle</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.ExperimentalDefaultMiddleend.params.clock_cycle">¶</a> – The period for a single sequencer clock cycle.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.middleends.ExperimentalDefaultMiddleend.build_pass_pipeline">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">legacy_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pyd_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TargetData(max_shots=10000,</span> <span class="pre">default_shots=1000,</span> <span class="pre">QUBIT_DATA=QubitDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000,</span> <span class="pre">passive_reset_time=1e-08),</span> <span class="pre">RESONATOR_DATA=ResonatorDescription(sample_time=1e-09,</span> <span class="pre">samples_per_clock_cycle=1,</span> <span class="pre">instruction_memory_size=50000,</span> <span class="pre">waveform_memory_size=1500,</span> <span class="pre">pulse_duration_min=6.4e-08,</span> <span class="pre">pulse_duration_max=0.001,</span> <span class="pre">pulse_channel_lo_freq_min=1000000,</span> <span class="pre">pulse_channel_lo_freq_max=10000000000,</span> <span class="pre">pulse_channel_if_freq_min=0,</span> <span class="pre">pulse_channel_if_freq_max=10000000000))</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.ExperimentalDefaultMiddleend.build_pass_pipeline" title="Link to this definition"></a></dt>
-<dd><p>Builds the default middle end pass pipeline.
-:param _sphinx_paramlinks_qat.middleend.middleends.ExperimentalDefaultMiddleend.build_pass_pipeline.model: The hardware model that holds calibrated information on the qubits on</p>
-<blockquote>
-<div><p>the QPU.</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code> containing a sequence of passes.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.middleend.middleends.FallthroughMiddleend">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FallthroughMiddleend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.middleends.FallthroughMiddleend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.middleend.middleends.CustomMiddleend" title="qat.middleend.middleends.CustomMiddleend"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomMiddleend</span></code></a></p>
-<p>A middle end that passes through an input <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> and does not alter it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.middleends.FallthroughMiddleend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.middleends.FallthroughMiddleend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="qat-middleend-middleends-module">
+<h1>qat.middleend.middleends module<a class="headerlink" href="#qat-middleend-middleends-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -554,6 +399,7 @@ the QPU.</p></li>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.middleend.middleends.html">2.6.0</a></dd>
       <dd><a href="qat.middleend.middleends.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.middleend.middleends.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

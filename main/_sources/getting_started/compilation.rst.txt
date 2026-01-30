@@ -144,7 +144,7 @@ Let's consider a simple example to demonstrate how a custom frontend can be used
     no_frontend = frontend.assign_frontend(invalid_program)
 
 The types of the returned objects will be
-:class:`Qasm2Frontend <qat.frontend.qasm.Qasm2Frontend>`, :class:`MyCustomFrontend`and
+:class:`Qasm2Frontend <qat.frontend.qasm.Qasm2Frontend>`, :class:`MyCustomFrontend` and
 :class:`NoneType` respectively.
 
 Alternative frontends
@@ -175,7 +175,7 @@ Default Middleend
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 The standard middleend to use is the
-:class:`DefaultMiddleend <qat.middleend.middleends.DefaultMiddleend>`, which has a
+:class:`DefaultMiddleend <qat.middleend.default.DefaultMiddleend>`, which has a
 pre-defined pipeline.
 
 .. code-block:: python 
@@ -195,7 +195,7 @@ Custom Middleend
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 We can specify a middleend with a custom compilation pipeline using the
-:class:`CustomMiddleend <qat.middleend.middleends.CustomMiddleend>` class. For example, the
+:class:`CustomMiddleend <qat.middleend.base.CustomMiddleend>` class. For example, the
 following middleend would optimise over phase shifts and remove any unnecessary
 post-processing instructions to reduce the overall instruction count.
 
@@ -228,11 +228,11 @@ has two components:
    See :mod:`qat.backend.passes` for a full list of passes (which might be target specific).
 #. An emitter that walks through the QAT IR and generates native code.
 
-WaveformV1Backend example
+WaveformBackend example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As an example, lets consider the
-:class:`WaveformV1Backend <qat.backend.waveform_v1.codegen.WaveformV1Backend>`, a backend
+:class:`WaveformBackend <qat.backend.waveform.codegen.WaveformBackend>`, a backend
 that generates code for earlier (and now legacy) iterations of OQC hardware, but is still
 maintained for some of our simulators and demonstration purposes. Like the frontend and
 middleend, the emitter can be used to generate native code by calling the :code:`emit`
@@ -240,12 +240,12 @@ method,
 
 .. code-block:: python 
 
-    from qat.backend.waveform_v1 import WaveformV1Backend
-    backend = WaveformV1Backend(model)
+    from qat.backend.waveform import WaveformBackend
+    backend = WaveformBackend(model)
     pkg = backend.emit(ir)
 
 The package returned from a backend is referred to as an
-:py:class:`Executable <qat.runtime.executables.Executable>`. They are Pydantic data classes
+:py:class:`Executable <qat.executables.Executable>`. They are Pydantic data classes
 that contain all the information needed to execute a program, including the instructions
 needed by the control hardware (or simulator), and the classical post-processing
 instructions required by the runtime needed to interpret and process the results (see the
@@ -255,20 +255,21 @@ Making ends meet
 *********************
 
 Now that we have covered each type of "end", we can bring it together to define a complete
-compilation pipeline. Let's write one that compiles to "WaveformV1".
+compilation pipeline. Let's write one that compiles to "Waveform".
 
 .. code-block:: python
+    :linenos:
 
-    from qat.model.loaders.legacy import EchoModelLoader
+    from qat.model.loaders.lucy import LucyModelLoader
     from qat.frontend import AutoFrontend
-    from qat.middleend import DefaultMiddleend
-    from qat.backend.waveform_v1 import WaveformV1Backend
+    from qat.middleend.default import DefaultMiddleend
+    from qat.backend.waveform import WaveformBackend
     from compiler_config.config import CompilerConfig
 
-    model = EchoModelLoader(8).load()
+    model = LucyModelLoader(8).load()
     frontend = AutoFrontend(model)
     middleend = DefaultMiddleend(model)
-    backend = WaveformV1Backend(model)
+    backend = WaveformBackend(model)
 
     qasm_str = """
     OPENQASM 2.0;

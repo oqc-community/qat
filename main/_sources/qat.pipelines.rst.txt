@@ -14,7 +14,7 @@ Subpackages
 
    qat.pipelines.legacy
    qat.pipelines.purr
-   qat.pipelines.waveform_v1
+   qat.pipelines.waveform
 
 Submodules
 ----------

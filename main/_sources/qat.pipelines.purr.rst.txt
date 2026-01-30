@@ -12,4 +12,6 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qat.pipelines.purr.qblox
+   qat.pipelines.purr.sweep
    qat.pipelines.purr.waveform_v1

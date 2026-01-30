@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.engines.waveform_v1.echo module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -337,40 +338,14 @@
 <span id="qat-engines-waveform-v1-echo-module"></span><h1>qat.engines.waveform_v1.echo module<a class="headerlink" href="#module-qat.engines.waveform_v1.echo" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.EchoEngine">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoEngine</span></span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.engines.native.html#qat.engines.native.NativeEngine" title="qat.engines.native.NativeEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code></a></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EchoEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">EchoEngine</span></code></p>
 <p>The <a class="reference internal" href="#qat.engines.waveform_v1.echo.EchoEngine" title="qat.engines.waveform_v1.echo.EchoEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">EchoEngine</span></code></a> is a minimal execution engine primarily used for testing the
 compilation pipeline.</p>
 <p>It is not connected to any target machine such as live hardware or a simulator, and just
-simply “echos” back the buffers. Currently only accepts <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executables</span></code>,
-but this may be changed in the future.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.EchoEngine.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.EchoEngine.execute" title="Link to this definition"></a></dt>
-<dd><p>Execute a <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.engines.waveform_v1.echo.EchoEngine.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.engines.waveform_v1.echo.EchoEngine.execute.params.package">¶</a> (<a class="reference internal" href="qat.backend.waveform_v1.executable.html#qat.backend.waveform_v1.executable.WaveformV1Executable" title="qat.backend.waveform_v1.executable.WaveformV1Executable"><em>WaveformV1Executable</em></a>) – The compiled executable.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Execution results.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict[str, np.ndarray]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.engines.waveform_v1.echo.process_readout">
-<span class="sig-name descname"><span class="pre">process_readout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">readout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.waveform_v1.echo.process_readout" title="Link to this definition"></a></dt>
-<dd><p>Processes a single readout into the expected format for a given acquire mode.</p>
-<p>For <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.RAW</span></code>, this means repeating the readout for a given number of
-shots. The <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code> emulates the averaging on hardware by
-taking the mean; note that this does not currently include down scaling. Finally, the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.SCOPE</span></code> simply returns the readout back in its current form.</p>
+simply “echos” back the buffers. It only accepts <code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformProgram</span></code> programs.</p>
+<p>It checks the shape of the results generated match the expected shapes from codegen,
+to test consistency across the compilation and execution pipeline.</p>
 </dd></dl>
 
 </section>
@@ -429,6 +404,7 @@ taking the mean; note that this does not currently include down scaling. Finally
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.engines.waveform_v1.echo.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.engines.waveform_v1.echo.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.engines.waveform_v1.echo.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

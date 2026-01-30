@@ -1,0 +1,7 @@
+qat.instrument.base module
+==========================
+
+.. automodule:: qat.instrument.base
+   :members:
+   :undoc-members:
+   :show-inheritance:

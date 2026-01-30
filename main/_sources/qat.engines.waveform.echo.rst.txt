@@ -1,0 +1,7 @@
+qat.engines.waveform.echo module
+================================
+
+.. automodule:: qat.engines.waveform.echo
+   :members:
+   :undoc-members:
+   :show-inheritance:

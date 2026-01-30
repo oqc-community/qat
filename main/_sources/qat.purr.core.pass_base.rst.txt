@@ -1,0 +1,7 @@
+qat.purr.core.pass\_base module
+===============================
+
+.. automodule:: qat.purr.core.pass_base
+   :members:
+   :undoc-members:
+   :show-inheritance:

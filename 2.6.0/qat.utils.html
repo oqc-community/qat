@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.utils package &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -349,6 +350,7 @@
 <li class="toctree-l1"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.apply_setup_to_echo_hardware"><code class="docutils literal notranslate"><span class="pre">apply_setup_to_echo_hardware()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.check_type_legacy_or_pydantic"><code class="docutils literal notranslate"><span class="pre">check_type_legacy_or_pydantic()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.ensure_connected_connectivity"><code class="docutils literal notranslate"><span class="pre">ensure_connected_connectivity()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_connectivity_data"><code class="docutils literal notranslate"><span class="pre">generate_connectivity_data()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_hw_model"><code class="docutils literal notranslate"><span class="pre">generate_hw_model()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.generate_random_linear"><code class="docutils literal notranslate"><span class="pre">generate_random_linear()</span></code></a></li>
@@ -356,6 +358,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.pick_subconnectivity"><code class="docutils literal notranslate"><span class="pre">pick_subconnectivity()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_connectivity"><code class="docutils literal notranslate"><span class="pre">random_connectivity()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_directed_connectivity"><code class="docutils literal notranslate"><span class="pre">random_directed_connectivity()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_error_mitigation"><code class="docutils literal notranslate"><span class="pre">random_error_mitigation()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.hardware_model.html#qat.utils.hardware_model.random_quality_map"><code class="docutils literal notranslate"><span class="pre">random_quality_map()</span></code></a></li>
 </ul>
 </li>
@@ -366,13 +369,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict"><code class="docutils literal notranslate"><span class="pre">FrozenDict</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.model_config"><code class="docutils literal notranslate"><span class="pre">FrozenDict.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.model_post_init"><code class="docutils literal notranslate"><span class="pre">FrozenDict.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.root"><code class="docutils literal notranslate"><span class="pre">FrozenDict.root</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet"><code class="docutils literal notranslate"><span class="pre">FrozenSet</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet.model_config"><code class="docutils literal notranslate"><span class="pre">FrozenSet.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet.model_post_init"><code class="docutils literal notranslate"><span class="pre">FrozenSet.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet.root"><code class="docutils literal notranslate"><span class="pre">FrozenSet.root</span></code></a></li>
 </ul>
 </li>
@@ -384,30 +385,36 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel.model_config"><code class="docutils literal notranslate"><span class="pre">NoExtraFieldsModel.model_config</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydArray"><code class="docutils literal notranslate"><span class="pre">PydArray</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydArray.model_config"><code class="docutils literal notranslate"><span class="pre">PydArray.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydArray.model_post_init"><code class="docutils literal notranslate"><span class="pre">PydArray.model_post_init()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydArray.value"><code class="docutils literal notranslate"><span class="pre">PydArray.value</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase"><code class="docutils literal notranslate"><span class="pre">PydDictBase</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.container_types"><code class="docutils literal notranslate"><span class="pre">PydDictBase.container_types()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.get"><code class="docutils literal notranslate"><span class="pre">PydDictBase.get()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.items"><code class="docutils literal notranslate"><span class="pre">PydDictBase.items()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.keys"><code class="docutils literal notranslate"><span class="pre">PydDictBase.keys()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.model_config"><code class="docutils literal notranslate"><span class="pre">PydDictBase.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.model_post_init"><code class="docutils literal notranslate"><span class="pre">PydDictBase.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.pop"><code class="docutils literal notranslate"><span class="pre">PydDictBase.pop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.root"><code class="docutils literal notranslate"><span class="pre">PydDictBase.root</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.values"><code class="docutils literal notranslate"><span class="pre">PydDictBase.values()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase"><code class="docutils literal notranslate"><span class="pre">PydListBase</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase.container_type"><code class="docutils literal notranslate"><span class="pre">PydListBase.container_type()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase.model_config"><code class="docutils literal notranslate"><span class="pre">PydListBase.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase.model_post_init"><code class="docutils literal notranslate"><span class="pre">PydListBase.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydListBase.root"><code class="docutils literal notranslate"><span class="pre">PydListBase.root</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase"><code class="docutils literal notranslate"><span class="pre">PydSetBase</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.container_type"><code class="docutils literal notranslate"><span class="pre">PydSetBase.container_type()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.model_config"><code class="docutils literal notranslate"><span class="pre">PydSetBase.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.model_post_init"><code class="docutils literal notranslate"><span class="pre">PydSetBase.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.root"><code class="docutils literal notranslate"><span class="pre">PydSetBase.root</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydValidatedBase"><code class="docutils literal notranslate"><span class="pre">PydValidatedBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydValidatedBase.model_config"><code class="docutils literal notranslate"><span class="pre">PydValidatedBase.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydValidatedBase.validate_value"><code class="docutils literal notranslate"><span class="pre">PydValidatedBase.validate_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.PydValidatedBase.validation_setup"><code class="docutils literal notranslate"><span class="pre">PydValidatedBase.validation_setup()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.RehydratableModel"><code class="docutils literal notranslate"><span class="pre">RehydratableModel</span></code></a><ul>
@@ -417,39 +424,34 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict"><code class="docutils literal notranslate"><span class="pre">ValidatedDict</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.model_config"><code class="docutils literal notranslate"><span class="pre">ValidatedDict.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.model_post_init"><code class="docutils literal notranslate"><span class="pre">ValidatedDict.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.update"><code class="docutils literal notranslate"><span class="pre">ValidatedDict.update()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.validate_root"><code class="docutils literal notranslate"><span class="pre">ValidatedDict.validate_root()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.validate_key"><code class="docutils literal notranslate"><span class="pre">ValidatedDict.validate_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedDict.validation_setup"><code class="docutils literal notranslate"><span class="pre">ValidatedDict.validation_setup()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList"><code class="docutils literal notranslate"><span class="pre">ValidatedList</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.append"><code class="docutils literal notranslate"><span class="pre">ValidatedList.append()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.extend"><code class="docutils literal notranslate"><span class="pre">ValidatedList.extend()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.model_config"><code class="docutils literal notranslate"><span class="pre">ValidatedList.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.model_post_init"><code class="docutils literal notranslate"><span class="pre">ValidatedList.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.remove"><code class="docutils literal notranslate"><span class="pre">ValidatedList.remove()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.validate_root"><code class="docutils literal notranslate"><span class="pre">ValidatedList.validate_root()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet"><code class="docutils literal notranslate"><span class="pre">ValidatedSet</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.add"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.add()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.discard"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.discard()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.model_config"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.model_post_init"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.pop()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.remove"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.remove()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.update"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.update()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.validate_root"><code class="docutils literal notranslate"><span class="pre">ValidatedSet.validate_root()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.annotate_pyd_array"><code class="docutils literal notranslate"><span class="pre">annotate_pyd_array()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.find_all_subclasses"><code class="docutils literal notranslate"><span class="pre">find_all_subclasses()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.get_annotated_array"><code class="docutils literal notranslate"><span class="pre">get_annotated_array()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_positive_float"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_positive_float()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval_array"><code class="docutils literal notranslate"><span class="pre">validate_calibratable_unit_interval_array()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative"><code class="docutils literal notranslate"><span class="pre">validate_non_negative()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_qubit_coupling"><code class="docutils literal notranslate"><span class="pre">validate_qubit_coupling()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_value"><code class="docutils literal notranslate"><span class="pre">validate_value()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.validate_waveform_type"><code class="docutils literal notranslate"><span class="pre">validate_waveform_type()</span></code></a></li>
 </ul>
 </li>
@@ -514,7 +516,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.rise"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.rise</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.width"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.ExtraSoftSquareFunction.std_dev"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareFunction.std_dev</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction"><code class="docutils literal notranslate"><span class="pre">GaussianFunction</span></code></a><ul>
@@ -568,7 +570,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.eval"><code class="docutils literal notranslate"><span class="pre">SechFunction.eval()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SechFunction.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SechFunction.model_post_init()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.width"><code class="docutils literal notranslate"><span class="pre">SechFunction.width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SechFunction.std_dev"><code class="docutils literal notranslate"><span class="pre">SechFunction.std_dev</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction"><code class="docutils literal notranslate"><span class="pre">SetupHoldFunction</span></code></a><ul>
@@ -611,7 +613,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.model_config"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.model_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.model_post_init"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.rise"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.rise</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.width"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SofterSquareFunction.std_dev"><code class="docutils literal notranslate"><span class="pre">SofterSquareFunction.std_dev</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction"><code class="docutils literal notranslate"><span class="pre">SquareFunction</span></code></a><ul>
@@ -682,6 +684,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.utils.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.utils.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.utils.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

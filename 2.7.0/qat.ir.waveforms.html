@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.ir.waveforms module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -356,10 +357,15 @@ validated to form a valid model.</p>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform.name" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -600,8 +606,13 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform.sample_time">
+<span class="sig-name descname"><span class="pre">sample_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.sample_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform.samples">
-<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NDArray[Shape['*</span> <span class="pre">x'],</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex]</span></em><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.samples" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ComplexNDArray</span> <span class="pre">|</span> <span class="pre">FloatNDArray</span></em><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform.samples" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -825,7 +836,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.shape_function_type">
-<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Type[ComplexFunction]]</span></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.shape_function_type" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">shape_function_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Type[ComplexFunction]</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.shape_function_type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -906,6 +917,7 @@ validated to form a valid model.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.ir.waveforms.html">2.6.0</a></dd>
       <dd><a href="qat.ir.waveforms.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.ir.waveforms.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

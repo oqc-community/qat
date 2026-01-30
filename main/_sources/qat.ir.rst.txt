@@ -20,11 +20,13 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.ir.builder_factory
    qat.ir.conversion
    qat.ir.instruction_builder
    qat.ir.instructions
    qat.ir.lowered
    qat.ir.measure
+   qat.ir.pulse_channel
    qat.ir.qat_ir
    qat.ir.utils
    qat.ir.waveforms

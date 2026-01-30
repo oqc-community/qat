@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.utils.pydantic module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -372,23 +373,6 @@ validated to form a valid model.</p>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.FrozenDict.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.FrozenDict.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.utils.pydantic.FrozenDict.root">
 <span class="sig-name descname"><span class="pre">root</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pyd_frozendict[K,</span> <span class="pre">V]</span></em><a class="headerlink" href="#qat.utils.pydantic.FrozenDict.root" title="Link to this definition"></a></dt>
@@ -409,23 +393,6 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.FrozenSet.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.utils.pydantic.FrozenSet.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.FrozenSet.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.FrozenSet.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -489,6 +456,61 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydArray">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydArray" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">NDArrayOperatorsMixin</span></code></p>
+<dl class="simple">
+<dt>A data class wrapper to handle the information needed to completely describe a numpy array:</dt><dd><ul class="simple">
+<li><p>Value is the numpy array itself</p></li>
+<li><p>Shape is the shape of the numpy array</p></li>
+<li><p>dtype is the data (implied) type of the numpy array</p></li>
+</ul>
+</dd>
+</dl>
+<p>Through annotations, this allows creation of metadata classes on top of PydArray that describe
+how to (de)serialise a (blob) PydArray object according to some (required) type. See _validator()
+and _serializer().</p>
+<p>Enlisting the array data as (nested) list(s) is not optimal, and this class renders (de)serialisation
+fast.</p>
+<p>This class also mixes in NDArrayOperatorsMixin, which defines Python arithmetic operators in terms of
+NumPy ufuncs. This does NOT guarantee full interoperability with NumPy but allows the option to extend
+this support in the future. For now, the sole purpose of this class is ONLY to be a data class wrapper
+and mediator for (de)serialisation purposes.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydArray.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.utils.pydantic.PydArray.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydArray.model_post_init">
+<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydArray.model_post_init" title="Link to this definition"></a></dt>
+<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
+<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Args:</dt><dd><p>self: The BaseModel instance.
+context: The context.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydArray.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NDArray[Shape['</span><a href="#id1"><span class="problematic" id="id2"><span class="pre">*</span></span></a><span class="pre">,</span> <span class="pre">...'],</span> <span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">bool]</span></em><a class="headerlink" href="#qat.utils.pydantic.PydArray.value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydDictBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydDictBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydDictBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RootModel[dict[~GeneralKey,</span> <span class="pre">~GeneralValue]]</span></code></p>
@@ -496,12 +518,6 @@ validated to form a valid model.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.PydDictBase.container_types">
-<span class="sig-name descname"><span class="pre">container_types</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydDictBase.container_types" title="Link to this definition"></a></dt>
-<dd><p>Validate the types of keys and values in the dictionary.</p>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydDictBase.get">
 <span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydDictBase.get" title="Link to this definition"></a></dt>
@@ -521,23 +537,6 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydDictBase.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.utils.pydantic.PydDictBase.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.PydDictBase.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydDictBase.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -565,33 +564,10 @@ context: The context.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.PydListBase.container_type">
-<span class="sig-name descname"><span class="pre">container_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydListBase.container_type" title="Link to this definition"></a></dt>
-<dd><p>Validate the type of elements in the list.</p>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydListBase.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.utils.pydantic.PydListBase.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.PydListBase.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydListBase.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -609,39 +585,44 @@ context: The context.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.PydSetBase.container_type">
-<span class="sig-name descname"><span class="pre">container_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydSetBase.container_type" title="Link to this definition"></a></dt>
-<dd><p>Validate the types of keys and values in the dictionary.</p>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydSetBase.model_config">
 <span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.utils.pydantic.PydSetBase.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.PydSetBase.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydSetBase.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydSetBase.root">
 <span class="sig-name descname"><span class="pre">root</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set[V]</span></em><a class="headerlink" href="#qat.utils.pydantic.PydSetBase.root" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydValidatedBase">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydValidatedBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydValidatedBase" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RootModel</span></code></p>
+<p>Base class for validated Pydantic containers.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydValidatedBase.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.utils.pydantic.PydValidatedBase.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydValidatedBase.validate_value">
+<span class="sig-name descname"><span class="pre">validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydValidatedBase.validate_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.utils.pydantic.PydValidatedBase.validation_setup">
+<span class="sig-name descname"><span class="pre">validation_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydValidatedBase.validation_setup" title="Link to this definition"></a></dt>
+<dd><p>Setup validation for the container.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -670,10 +651,11 @@ validated to form a valid model.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedDict">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ValidatedDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedDict" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.PydDictBase" title="qat.utils.pydantic.PydDictBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydDictBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.PydDictBase" title="qat.utils.pydantic.PydDictBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydDictBase</span></code></a>, <a class="reference internal" href="#qat.utils.pydantic.PydValidatedBase" title="qat.utils.pydantic.PydValidatedBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydValidatedBase</span></code></a></p>
 <p>A dict object that validates the input added after instantiation.
 This way, we are sure that the elements in a dict are only of a certain type.
-(FYI: Pydantic containers only validate upon instantiation.)</p>
+Pydantic containers only validate upon instantiation, not when modifying the
+container.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -685,41 +667,31 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedDict.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedDict.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedDict.update">
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedDict.update" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedDict.validate_root">
-<span class="sig-name descname"><span class="pre">validate_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedDict.validate_root" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedDict.validate_key">
+<span class="sig-name descname"><span class="pre">validate_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedDict.validate_key" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedDict.validation_setup">
+<span class="sig-name descname"><span class="pre">validation_setup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedDict.validation_setup" title="Link to this definition"></a></dt>
+<dd><p>Validate the types of keys and values in the dictionary.</p>
+</dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedList">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ValidatedList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedList" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.PydListBase" title="qat.utils.pydantic.PydListBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydListBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.PydListBase" title="qat.utils.pydantic.PydListBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydListBase</span></code></a>, <a class="reference internal" href="#qat.utils.pydantic.PydValidatedBase" title="qat.utils.pydantic.PydValidatedBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydValidatedBase</span></code></a></p>
 <p>A list object that validates the input appended/extended after instantiation.
 This way, we are sure that the elements in a list are only of a certain type.
-(FYI: Pydantic containers only validate upon instantiation.)</p>
+Pydantic containers only validate upon instantiation, not when modifying the
+container.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -741,30 +713,8 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedList.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedList.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedList.remove">
 <span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedList.remove" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedList.validate_root">
-<span class="sig-name descname"><span class="pre">validate_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedList.validate_root" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -772,10 +722,11 @@ context: The context.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedSet">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ValidatedSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedSet" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.PydSetBase" title="qat.utils.pydantic.PydSetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydSetBase</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.PydSetBase" title="qat.utils.pydantic.PydSetBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydSetBase</span></code></a>, <a class="reference internal" href="#qat.utils.pydantic.PydValidatedBase" title="qat.utils.pydantic.PydValidatedBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydValidatedBase</span></code></a></p>
 <p>A set object that validates the input added after instantiation.
 This way, we are sure that the elements in a set are only of a certain type.
-(FYI: Pydantic containers only validate upon instantiation.)</p>
+Pydantic containers only validate upon instantiation, not when modifying the
+container.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -797,23 +748,6 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedSet.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedSet.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>This function is meant to behave like a BaseModel method to initialise private attributes.</p>
-<p>It takes context as an argument since that’s what pydantic-core passes when calling it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Args:</dt><dd><p>self: The BaseModel instance.
-context: The context.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedSet.pop">
 <span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedSet.pop" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -828,11 +762,13 @@ context: The context.</p>
 <span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">sets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedSet.update" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.utils.pydantic.ValidatedSet.validate_root">
-<span class="sig-name descname"><span class="pre">validate_root</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.ValidatedSet.validate_root" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+</dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.utils.pydantic.annotate_pyd_array">
+<span class="sig-name descname"><span class="pre">annotate_pyd_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.annotate_pyd_array" title="Link to this definition"></a></dt>
+<dd><p>Creates an annotated type for numeric lists with Pydantic serializers and validators
+for efficient serialization.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -844,13 +780,6 @@ context: The context.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>]</span></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.utils.pydantic.get_annotated_array">
-<span class="sig-name descname"><span class="pre">get_annotated_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.get_annotated_array" title="Link to this definition"></a></dt>
-<dd><p>Creates an annotated type for numeric lists with Pydantic serializers and validators
-for efficient serialization.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -876,11 +805,6 @@ for efficient serialization.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_qubit_coupling">
 <span class="sig-name descname"><span class="pre">validate_qubit_coupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_qubit_coupling" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.utils.pydantic.validate_value">
-<span class="sig-name descname"><span class="pre">validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_value" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -944,6 +868,7 @@ for efficient serialization.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.utils.pydantic.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.utils.pydantic.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.utils.pydantic.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

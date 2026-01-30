@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.backends.qblox.pass_base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -334,184 +335,8 @@
              
 
 
-  <section id="module-qat.purr.backends.qblox.pass_base">
-<span id="qat-purr-backends-qblox-pass-base-module"></span><h1>qat.purr.backends.qblox.pass_base module<a class="headerlink" href="#module-qat.purr.backends.qblox.pass_base" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.AnalysisPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AnalysisPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.AnalysisPass" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin" title="qat.purr.backends.qblox.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
-<p>Base class of all passes that compute some form of analysis on the IR.
-The IR is imperatively left intact.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.AnalysisPass.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.AnalysisPass.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.InvokerMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InvokerMixin</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.InvokerMixin" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Useful for compilation (global design-wise) stages/phases that are meant to invoke some
-arbitrary formation of passes in the form of a pipeline.</p>
-<p>Organisation, registering, visibility, and discovery of pipelines w.r.t the global quantum compilation
-workflow is hard to pin down early on in this design partly because today’s needs are trivial and
-the traditional “hand-me-down” cascade-like compilation stages is likely to shift as QAT matures.</p>
-<p>However, we’ll start by specifying that an invoker builds and runs its own pipeline, validates its
-analyses results, and uses those results for its purpose.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.InvokerMixin.build_pass_pipeline">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.InvokerMixin.build_pass_pipeline" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.purr.backends.qblox.pass_base.PassManager" title="qat.purr.backends.qblox.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.InvokerMixin.run_pass_pipeline">
-<span class="sig-name descname"><span class="pre">run_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.InvokerMixin.run_pass_pipeline" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassConcept">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassConcept</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassConcept" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base class describing the abstraction of a pass.</p>
-<p>See PassManager.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassConcept.run">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassConcept.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassInfoMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassInfoMixin</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base mixin specifying pass identification mechanism. A pass has an id and name.</p>
-<p>Such identification is loosely specified as it related closely to how passes and their results
-are managed throughout their lifecycle.</p>
-<p>See PassManager.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassInfoMixin.id">
-<span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin.id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassInfoMixin.name">
-<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassManager">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassManager</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassManager" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin" title="qat.purr.backends.qblox.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
-<p>Represents a sequential composite of passes, which can be composites themselves. Although not explicitly
-specified, the pass manager is best modelled as a DAG that acts as a pass itself. In doing so, it runs
-a sequence of (composite or leaf) passes over some unit of IR and aggregates results from them.</p>
-<p>Result aggregation (in general) can be achieved via side effects or simply return values. We adopted
-the latter approach where a ResultManager is passed in as argument. The rationale behind this choice
-is two-fold:</p>
-<p>1) Allow passes to peek, use, or potentially invalidate results via the ResultManager without burdening
-their parent PassManager.</p>
-<p>2) Let the passes and results define their dependency graphs on the fly which saves us from explicitly
-building and maintaining them. Here it’s also a possible direction to let passes lazily declare, create,
-and run their dependencies as they get discovered.</p>
-<p>Result aggregation would also potentially involve cache handling as described in the ResultManager.
-This calls for proper pass identification, cache invalidation, and pass/result cycle detection techniques.</p>
-<p>Example of a DAG:</p>
-<p>(PM1 A B (PM2 C D ) E F) can be thought of as:</p>
-<blockquote>
-<div><p>&lt;—PM2—&gt;</p>
-<blockquote>
-<div><p>–&gt; C</p>
-</div></blockquote>
-</div></blockquote>
-<dl class="simple">
-<dt>A –&gt; B –|    ↓</dt><dd><p>–&gt; D –&gt; E –&gt; F</p>
-</dd>
-</dl>
-<p>&lt;———–PM1————&gt;</p>
-<p>Although the notation of a given (sub-) DAG looks sequential, passes within can run sequentially
-or in parallel depending on their inter-dependencies.</p>
-<p>Notes thus far describe an ideal fully-fledged PassManager. However, today’s needs are very simple as we barely
-have visible features of modular quantum compilation workflow. It is therefore wise to keep the implementation
-light and basic where component passes run and register their own results within the ResultManager passed
-in as argument. Another reason is the possibility in the near future to adopt and tap into existing and mature
-pass pipeline infrastructure which saves us from reinventing or rediscovering the same concepts already covered
-by the opensource community.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassManager.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pass_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassManager.add" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassManager.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassManager.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassModel">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PassModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pass_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassModel" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.pass_base.PassConcept" title="qat.purr.backends.qblox.pass_base.PassConcept"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassConcept</span></code></a></p>
-<p>Implements the polymorphic pass API. A wrapper for any object providing a run()
-method that accepts some unit of IR as well as a ResultManager.</p>
-<p>See PassManager.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.PassModel.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.PassModel.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.QatIR">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QatIR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.QatIR" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.QatIR.value">
-<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code><span class="pre">,</span> <a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder" title="qat.purr.compiler.builders.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.QatIR.value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.TransformPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TransformPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.TransformPass" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin" title="qat.purr.backends.qblox.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
-<p>Base class for all passes that mutate the QatIR in-place.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.TransformPass.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.TransformPass.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.ValidationPass">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ValidationPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.ValidationPass" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.pass_base.PassInfoMixin" title="qat.purr.backends.qblox.pass_base.PassInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassInfoMixin</span></code></a></p>
-<p>Base class for all passes that verify or run some form of check (i.e semantics, legalisation, …)
-on the IR.</p>
-<p>Behaviour is loose as to what the result of the validation would be: either a result or an error raised.
-It can change according to circumstances.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.pass_base.ValidationPass.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.pass_base.ValidationPass.run" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+  <section id="qat-purr-backends-qblox-pass-base-module">
+<h1>qat.purr.backends.qblox.pass_base module<a class="headerlink" href="#qat-purr-backends-qblox-pass-base-module" title="Link to this heading"></a></h1>
 </section>
 
 
@@ -568,6 +393,7 @@ It can change according to circumstances.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.backends.qblox.pass_base.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.purr.backends.qblox.pass_base.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.purr.backends.qblox.pass_base.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

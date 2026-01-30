@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.middleend.passes.validation module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -363,7 +364,10 @@ frequency of a pulse channel outside the allowed limits.</p>
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.validation.DynamicFrequencyValidation.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.validation.DynamicFrequencyValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.DynamicFrequencyValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.validation.DynamicFrequencyValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.DynamicFrequencyValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -391,9 +395,12 @@ against the target data.</p>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.middleend.passes.validation.FrequencySetupValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.FrequencySetupValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.validation.FrequencySetupValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.FrequencySetupValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code>.</p></li>
 <li><p><span class="target" id="qat.middleend.passes.validation.FrequencySetupValidation.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.FrequencySetupValidation.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager containing the results of the analysis.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -419,6 +426,37 @@ If None, uses the default from the QatConfig.</p></li>
 <dt class="sig sig-object py" id="qat.middleend.passes.validation.HardwareConfigValidity.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.validation.HardwareConfigValidity.run" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.validation.InstructionValidation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionValidation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_duration_limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.validation.InstructionValidation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.ValidationPass" title="qat.core.pass_base.ValidationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValidationPass</span></code></a></p>
+<p>Validates instructions against the hardware, including whether:
+- they fit in memory,
+- pulse durations are within the allowed limits and
+- acquire instructions are only performed on acquire channels..</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.middleend.passes.validation.InstructionValidation.params.target_data"></span><strong>target_data</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.InstructionValidation.params.target_data">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></span>) – Target-related information.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.validation.InstructionValidation.params.pulse_duration_limits"></span><strong>pulse_duration_limits</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.InstructionValidation.params.pulse_duration_limits">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</span>) – Whether to check the pulse duration limits.
+If None, uses the default from the QatConfig.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.validation.InstructionValidation.params.instruction_memory_size"></span><strong>instruction_memory_size</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.InstructionValidation.params.instruction_memory_size">¶</a> – The maximum number of instructions that can
+be run in a single shot. If None, uses the default from QatConfig.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.validation.InstructionValidation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.validation.InstructionValidation.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.validation.InstructionValidation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.validation.InstructionValidation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -465,6 +503,12 @@ If None, uses the default from the QatConfig.</p></li>
 <dt class="sig sig-object py" id="qat.middleend.passes.validation.PydHardwareConfigValidity">
 <span class="sig-name descname"><span class="pre">PydHardwareConfigValidity</span></span><a class="headerlink" href="#qat.middleend.passes.validation.PydHardwareConfigValidity" title="Link to this definition"></a></dt>
 <dd><p>alias of <a class="reference internal" href="#qat.middleend.passes.validation.HardwareConfigValidity" title="qat.middleend.passes.validation.HardwareConfigValidity"><code class="xref py py-class docutils literal notranslate"><span class="pre">HardwareConfigValidity</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.middleend.passes.validation.PydInstructionValidation">
+<span class="sig-name descname"><span class="pre">PydInstructionValidation</span></span><a class="headerlink" href="#qat.middleend.passes.validation.PydInstructionValidation" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.middleend.passes.validation.InstructionValidation" title="qat.middleend.passes.validation.InstructionValidation"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a></p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -599,6 +643,7 @@ If None, uses the default from the QatConfig.</p></li>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.middleend.passes.validation.html">2.6.0</a></dd>
       <dd><a href="qat.middleend.passes.validation.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.middleend.passes.validation.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

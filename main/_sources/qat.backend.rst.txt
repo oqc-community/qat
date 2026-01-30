@@ -14,6 +14,7 @@ Subpackages
 
    qat.backend.passes
    qat.backend.qblox
+   qat.backend.waveform
    qat.backend.waveform_v1
 
 Submodules

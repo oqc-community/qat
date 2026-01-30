@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.backend.fallthrough module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -349,13 +350,19 @@
 <p>A backend that passes through an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code> and does not alter it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.backend.fallthrough.FallthroughBackend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.fallthrough.FallthroughBackend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
+<dd class="field-odd"><p><span class="target" id="qat.backend.fallthrough.FallthroughBackend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.fallthrough.FallthroughBackend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The hardware model that holds calibrated information on the qubits on
+the QPU.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.fallthrough.FallthroughBackend.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.fallthrough.FallthroughBackend.emit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.fallthrough.FallthroughBackend.emit" title="Link to this definition"></a></dt>
+<dd><p>Converts an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> to machine instructions of a given target
+architecture.</p>
+<p>How targets convert the IR is at their discretion but they mostly follow
+macro-expansion techniques where target instructions are selected
+for each instruction in the IR.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -415,6 +422,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.backend.fallthrough.html">2.6.0</a></dd>
       <dd><a href="qat.backend.fallthrough.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.backend.fallthrough.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

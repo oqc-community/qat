@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    qat.engines.qblox
+   qat.engines.waveform
    qat.engines.waveform_v1
 
 Submodules

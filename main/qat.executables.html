@@ -6,10 +6,11 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.executables module &mdash; qat-compiler 2.7.0.post187.dev20250818110548 documentation</title>
+  <title>qat.executables module &mdash; qat-compiler 3.0.0.post151.dev20260130090326 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -48,11 +49,20 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/input.html">Supported input to the compiler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
@@ -89,8 +99,16 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
 </ul>
 </li>
@@ -122,8 +140,13 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.qblox.html">qat.engines.qblox package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.instrument_base.html">qat.engines.qblox.instrument_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
@@ -155,17 +178,27 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.features.html">qat.integrations.features module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
 </ul>
 </li>
@@ -178,11 +211,13 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.conversion.html">qat.ir.conversion module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.utils.html">qat.ir.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
@@ -212,13 +247,20 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.middleend.middleends.html">qat.middleend.middleends module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.dummy.html">qat.model.loaders.purr.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
@@ -230,6 +272,8 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
@@ -274,6 +318,19 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
@@ -282,10 +339,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform_v1.html">qat.pipelines.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.compile.html">qat.pipelines.waveform_v1.compile module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.execute.html">qat.pipelines.waveform_v1.execute module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.full.html">qat.pipelines.waveform_v1.full module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
@@ -312,14 +369,12 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
@@ -359,6 +414,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
@@ -389,8 +450,10 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -405,6 +468,8 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.uuid.html">qat.utils.uuid module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
@@ -450,20 +515,50 @@
   <section id="module-qat.executables">
 <span id="qat-executables-module"></span><h1>qat.executables module<a class="headerlink" href="#module-qat.executables" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.executables.AbstractProgram">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractProgram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.AbstractProgram" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.RehydratableModel" title="qat.utils.pydantic.RehydratableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">RehydratableModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for programs to be executed by an engine.</p>
+<p>Child classes must implement the <a class="reference internal" href="#qat.executables.AbstractProgram.acquire_shapes" title="qat.executables.AbstractProgram.acquire_shapes"><code class="xref py py-attr docutils literal notranslate"><span class="pre">acquire_shapes</span></code></a> property, which returns a
+mapping of acquisition output variables to the shape of the acquisition for this
+program. This specification enforces programs to be explicit about what acquisition
+outputs they will produce.</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.executables.AbstractProgram.acquire_shapes">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire_shapes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.executables.AbstractProgram.acquire_shapes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.executables.AbstractProgram.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.executables.AbstractProgram.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.executables.AcquireData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.AcquireData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Contains acquisition information for a measurement / readout that is needed at
-runtime.</p>
+<p>Holds the information required at runtime surrounding an acquisition.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.executables.AcquireData.params.length"></span><strong>length</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.length">¶</a> (<em>NonNegativeInt</em>) – A readout is performed for some given time which
-translates to a number of discrete samples.</p></li>
-<li><p><span class="target" id="qat.executables.AcquireData.params.position"></span><strong>position</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.position">¶</a> (<em>NonNegativeInt</em>) – The sample which a readout starts.</p></li>
-<li><p><span class="target" id="qat.executables.AcquireData.params.mode"></span><strong>mode</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.mode">¶</a> (<a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><em>AcquireMode</em></a>) – The acqusition mode used by the hardware to carry out the
-readout.</p></li>
-<li><p><span class="target" id="qat.executables.AcquireData.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.output_variable">¶</a> (<em>str</em>) – The name of the variable to save the result to.</p></li>
+<li><p><span class="target" id="qat.executables.AcquireData.params.mode"></span><strong>mode</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.mode">¶</a> – The type of acquisition performed on the hardware.</p></li>
+<li><p><span class="target" id="qat.executables.AcquireData.params.shape"></span><strong>shape</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.shape">¶</a> – The shape the data is expected to be returned in. Reflects the type of
+acquisition (e.g. scope or integrator mode), as well as the iteration structure
+(e.g. shots, loops). A shape of (1000,) would indicate 1000 shots of a single
+integrator acquisition.</p></li>
+<li><p><span class="target" id="qat.executables.AcquireData.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.physical_channel">¶</a> – The physical channel the acquisition is performed on, needed
+for post-processing reasons (e.g. error mitigation).</p></li>
+<li><p><span class="target" id="qat.executables.AcquireData.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.post_processing">¶</a> – A list of post-processing steps to be applied to the execution
+data.</p></li>
+<li><p><span class="target" id="qat.executables.AcquireData.params.results_processing"></span><strong>results_processing</strong><a class="paramlink headerlink reference internal" href="#qat.executables.AcquireData.params.results_processing">¶</a> – Contains information surrounding how the results should be
+formatted after post-processing.</p></li>
 </ul>
 </dd>
 </dl>
@@ -471,11 +566,6 @@ readout.</p></li>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.AcquireData.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.AcquireData.length" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.executables.AcquireData.mode">
 <span class="sig-name descname"><span class="pre">mode</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireMode</span></code></a></em><a class="headerlink" href="#qat.executables.AcquireData.mode" title="Link to this definition"></a></dt>
@@ -488,94 +578,43 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.AcquireData.output_variable">
-<span class="sig-name descname"><span class="pre">output_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.executables.AcquireData.output_variable" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.executables.AcquireData.physical_channel">
+<span class="sig-name descname"><span class="pre">physical_channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.executables.AcquireData.physical_channel" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.AcquireData.position">
-<span class="sig-name descname"><span class="pre">position</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.AcquireData.position" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.executables.ChannelData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChannelData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.ChannelData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Base class for “channel data”. This can be used for exectuables which target devices
-that seperate instructions over multiple “channels”.</p>
-<p>It is expected to contain any target-specific information, along with a property that
-retrieves all acquistion data for that channel.</p>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.ChannelData.acquires">
-<span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="#qat.executables.AcquireData" title="qat.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a><span class="pre">]</span> <span class="pre">|</span> <a class="reference internal" href="#qat.executables.AcquireData" title="qat.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a></em><a class="headerlink" href="#qat.executables.ChannelData.acquires" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.executables.AcquireData.post_processing">
+<span class="sig-name descname"><span class="pre">post_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.AcquireData.post_processing" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.ChannelData.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.executables.ChannelData.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.executables.ChannelExecutable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ChannelExecutable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.ChannelExecutable" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></p>
-<p>A base Executable object used for compiled programs that target hardware with many
-“channels”, e.g., live hardware. Defines the acquire property to fetch acquisitions from
-the channel data.</p>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.executables.ChannelExecutable.acquires">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.executables.AcquireData" title="qat.executables.AcquireData"><span class="pre">AcquireData</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.executables.ChannelExecutable.acquires" title="Link to this definition"></a></dt>
-<dd><p>Retrieves all acquires from each channel.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.ChannelExecutable.channel_data">
-<span class="sig-name descname"><span class="pre">channel_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.executables.ChannelData" title="qat.executables.ChannelData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.ChannelExecutable.channel_data" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.executables.AcquireData.results_processing">
+<span class="sig-name descname"><span class="pre">results_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.executables.AcquireData.results_processing" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.ChannelExecutable.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.executables.ChannelExecutable.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
+<dt class="sig sig-object py" id="qat.executables.AcquireData.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.AcquireData.shape" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.executables.Executable">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.executables.Executable" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.RehydratableModel" title="qat.utils.pydantic.RehydratableModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">RehydratableModel</span></code></a></p>
-<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Executables</span></code> are instruction packages that will be sent to a target (either
-physical control hardware or a simulator).</p>
-<p>This class serves as a base model that can be inherited to define a complete instruction
-package tailored to a particular target.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>]</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable`s</span> <span class="pre">are</span> <span class="pre">packages</span> <span class="pre">of</span> <span class="pre">instructions</span> <span class="pre">that</span> <span class="pre">will</span> <span class="pre">be</span> <span class="pre">executed</span> <span class="pre">by</span> <span class="pre">the</span>
+<span class="pre">runtime.</span> <span class="pre">They</span> <span class="pre">contain</span> <span class="pre">a</span> <span class="pre">:class:`Program</span></code>, or a number of :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Program`s to be
+executed by the engine. They also contain the acquire information, such as
+post-processing and result assignments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.executables.Executable.params.channel_data"></span><strong>channel_data</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.channel_data">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#qat.executables.ChannelData" title="qat.executables.ChannelData"><em>ChannelData</em></a><em>]</em>) – Stores the data required by the control hardware for each pulse
-channel.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.shots"></span><strong>shots</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.shots">¶</a> (<em>PositiveInt</em>) – The number of times the program is executed.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.compiled_shots"></span><strong>compiled_shots</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.compiled_shots">¶</a> (<em>PositiveInt</em>) – When the required number of shots exceeds the
-allowed amount by the target machine, shots can be batched into groups. This states
-how many shots to do in each batch.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.post_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><em>PostProcessing</em></a><em>]</em><em>]</em>) – Contains the post-processing information for each acquisition.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.results_processing"></span><strong>results_processing</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.results_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>InlineResultsProcessing</em><em>]</em>) – Contains the information for how results should be formatted.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.assigns"></span><strong>assigns</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.assigns">¶</a> (<em>list</em><em>[</em><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign" title="qat.ir.instructions.Assign"><em>Assign</em></a><em>]</em>) – Assigns results to given variables.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.returns"></span><strong>returns</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.returns">¶</a> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Which acqusitions/variables should be returned.</p></li>
-<li><p><span class="target" id="qat.executables.Executable.params.calibration_id"></span><strong>calibration_id</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.calibration_id">¶</a> (<em>str</em>) – The (unique) calibration ID of the underlying hardware model.</p></li>
+<li><p><span class="target" id="qat.executables.Executable.params.programs"></span><strong>programs</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.programs">¶</a> – The program(s) to be executed against the engine.</p></li>
+<li><p><span class="target" id="qat.executables.Executable.params.assigns"></span><strong>assigns</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.assigns">¶</a> – Assigns results to given variables.</p></li>
+<li><p><span class="target" id="qat.executables.Executable.params.returns"></span><strong>returns</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.returns">¶</a> – Which acqusitions/variables should be returned.</p></li>
+<li><p><span class="target" id="qat.executables.Executable.params.calibration_id"></span><strong>calibration_id</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.calibration_id">¶</a> – The (unique) cabliration ID of the underlying hardware model.</p></li>
+<li><p><span class="target" id="qat.executables.Executable.params.shots"></span><strong>shots</strong><a class="paramlink headerlink reference internal" href="#qat.executables.Executable.params.shots">¶</a> – The total number of shots performed in the <a class="reference internal" href="#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -583,14 +622,10 @@ how many shots to do in each batch.</p></li>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.executables.Executable.acquires">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.executables.AcquireData" title="qat.executables.AcquireData"><span class="pre">AcquireData</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.executables.Executable.acquires" title="Link to this definition"></a></dt>
-<dd><p>Retrieves all acquires for the program.</p>
-<p>This abstract property should be specified for an executable that is coupled to a
-specific backend and target device. It is expected that this returns a list of all
-acquisitions for the program, which will be required by the Runtime.</p>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.executables.AcquireData" title="qat.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.Executable.acquires" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.executables.Executable.assigns">
@@ -600,11 +635,6 @@ acquisitions for the program, which will be required by the Runtime.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.executables.Executable.calibration_id">
 <span class="sig-name descname"><span class="pre">calibration_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.executables.Executable.calibration_id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.Executable.compiled_shots">
-<span class="sig-name descname"><span class="pre">compiled_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.Executable.compiled_shots" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -620,13 +650,8 @@ acquisitions for the program, which will be required by the Runtime.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.Executable.post_processing">
-<span class="sig-name descname"><span class="pre">post_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.executables.Executable.post_processing" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.executables.Executable.results_processing">
-<span class="sig-name descname"><span class="pre">results_processing</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.Executable.results_processing" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.executables.Executable.programs">
+<span class="sig-name descname"><span class="pre">programs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">Program</span></code><span class="pre">,</span> <span class="pre">bound=</span> <a class="reference internal" href="#qat.executables.AbstractProgram" title="qat.executables.AbstractProgram"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractProgram</span></code></a><span class="pre">)]</span></em><a class="headerlink" href="#qat.executables.Executable.programs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -647,7 +672,7 @@ acquisitions for the program, which will be required by the Runtime.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.executables.Executable.shots">
-<span class="sig-name descname"><span class="pre">shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.executables.Executable.shots" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.executables.Executable.shots" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -708,6 +733,7 @@ acquisitions for the program, which will be required by the Runtime.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/index.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/index.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/index.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

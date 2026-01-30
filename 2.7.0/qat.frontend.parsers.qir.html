@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.frontend.parsers.qir module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -344,97 +345,43 @@
   <section id="module-qat.frontend.parsers.qir">
 <span id="qat-frontend-parsers-qir-module"></span><h1>qat.frontend.parsers.qir module<a class="headerlink" href="#module-qat.frontend.parsers.qir" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.frontend.parsers.qir.ArgumentType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ArgumentType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.ArgumentType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.frontend.parsers.qir.ArgumentType.Label">
+<span class="sig-name descname"><span class="pre">Label</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#qat.frontend.parsers.qir.ArgumentType.Label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.frontend.parsers.qir.ArgumentType.Number">
+<span class="sig-name descname"><span class="pre">Number</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#qat.frontend.parsers.qir.ArgumentType.Number" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.frontend.parsers.qir.ArgumentType.Qubit">
+<span class="sig-name descname"><span class="pre">Qubit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#qat.frontend.parsers.qir.ArgumentType.Qubit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.frontend.parsers.qir.ArgumentType.Result">
+<span class="sig-name descname"><span class="pre">Result</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.frontend.parsers.qir.ArgumentType.Result" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QIRParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QIRParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.ccx">
-<span class="sig-name descname"><span class="pre">ccx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.ccx" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.cx">
-<span class="sig-name descname"><span class="pre">cx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.cx" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.cz">
-<span class="sig-name descname"><span class="pre">cz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.cz" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.h">
-<span class="sig-name descname"><span class="pre">h</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.h" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.mz">
-<span class="sig-name descname"><span class="pre">mz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.mz" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<p>Used to parse QIR files and walk the AST to assemble a quantum program.</p>
+<p>The parser makes API calls to the instruction builder passed at instantiation to allow
+for dynamic building of programs. This object is only responsible for interpreting
+and walking the QIR program.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.parse">
-<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qir_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.parse" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.process_instructions">
-<span class="sig-name descname"><span class="pre">process_instructions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.process_instructions" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.reset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.rx">
-<span class="sig-name descname"><span class="pre">rx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.rx" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.ry">
-<span class="sig-name descname"><span class="pre">ry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.ry" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.rz">
-<span class="sig-name descname"><span class="pre">rz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.rz" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.s">
-<span class="sig-name descname"><span class="pre">s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.s" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.s_adj">
-<span class="sig-name descname"><span class="pre">s_adj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.s_adj" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.t">
-<span class="sig-name descname"><span class="pre">t</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.t" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.t_adj">
-<span class="sig-name descname"><span class="pre">t_adj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.t_adj" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.x">
-<span class="sig-name descname"><span class="pre">x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.x" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.y">
-<span class="sig-name descname"><span class="pre">y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.y" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser.z">
-<span class="sig-name descname"><span class="pre">z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.z" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qir_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser.parse" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -495,6 +442,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.frontend.parsers.qir.html">2.6.0</a></dd>
       <dd><a href="qat.frontend.parsers.qir.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.frontend.parsers.qir.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

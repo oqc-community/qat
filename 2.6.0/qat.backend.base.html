@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.backend.base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -335,12 +336,34 @@
   <section id="module-qat.backend.base">
 <span id="qat-backend-base-module"></span><h1>qat.backend.base module<a class="headerlink" href="#module-qat.backend.base" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.base.AllocatingBackend">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllocatingBackend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.AllocatingBackend" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.backend.base.CustomBackend" title="qat.backend.base.CustomBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomBackend</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>A backend that’s responsible for allocating FPGA card and sequencers AOT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.base.AllocatingBackend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.base.AllocatingBackend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.backend.base.AllocatingBackend.allocate">
+<span class="sig-name descname"><span class="pre">allocate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.AllocatingBackend.allocate" title="Link to this definition"></a></dt>
+<dd><p>For a given target, allocate an FPGA card and a sequencer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.base.BaseBackend">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BaseBackend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.BaseBackend" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Converts an intermediate representation (IR) to code for a given target
-by selecting target-machine operations to implement for each instruction
-in the IR.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Base class for a backend that takes an intermediate representation (IR) <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code>
+and lowers it to machine code that can be executed on a given target.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.backend.base.BaseBackend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.base.BaseBackend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
@@ -348,14 +371,32 @@ in the IR.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.base.BaseBackend.emit">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.BaseBackend.emit" title="Link to this definition"></a></dt>
-<dd><dl class="field-list simple">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.BaseBackend.emit" title="Link to this definition"></a></dt>
+<dd><p>Converts an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> to machine instructions of a given target
+architecture.</p>
+<p>How targets convert the IR is at their discretion but they mostly follow
+macro-expansion techniques where target instructions are selected
+for each instruction in the IR.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.backend.base.CustomBackend">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CustomBackend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.base.CustomBackend" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.backend.base.BaseBackend" title="qat.backend.base.BaseBackend"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBackend</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">Program</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Backends may need to run pre-codegen passes on the IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> as emitted
+from the middle end. These passes are specified via a custom pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.backend.base.CustomBackend.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.backend.base.CustomBackend.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the qubits on the QPU.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -414,6 +455,7 @@ in the IR.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.backend.base.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.backend.base.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.backend.base.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

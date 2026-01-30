@@ -6,10 +6,11 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.waveform_v1.executable module &mdash; qat-compiler 2.7.0.post187.dev20250818110548 documentation</title>
+  <title>qat.backend.waveform_v1.executable module &mdash; qat-compiler 3.0.0.post151.dev20260130090326 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -22,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.backend.base module" href="qat.backend.base.html" />
-    <link rel="prev" title="qat.backend.waveform_v1.codegen module" href="qat.backend.waveform_v1.codegen.html" /> 
+    <link rel="prev" title="qat.backend.waveform_v1.purr.codegen module" href="qat.backend.waveform_v1.purr.codegen.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -48,11 +49,20 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/compiler_config.html">Compiler Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/input.html">Supported input to the compiler</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
@@ -89,8 +99,16 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
 <li class="toctree-l4 current"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul class="current">
-<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.codegen.html">qat.backend.waveform_v1.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.backend.waveform_v1.executable module</a></li>
 </ul>
 </li>
@@ -122,8 +140,13 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.qblox.html">qat.engines.qblox package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.instrument_base.html">qat.engines.qblox.instrument_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
@@ -155,17 +178,27 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.features.html">qat.integrations.features module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
 </ul>
 </li>
@@ -178,11 +211,13 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.conversion.html">qat.ir.conversion module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.utils.html">qat.ir.utils module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
@@ -212,13 +247,20 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.middleend.middleends.html">qat.middleend.middleends module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.dummy.html">qat.model.loaders.purr.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
@@ -230,6 +272,8 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
@@ -274,6 +318,19 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
@@ -282,10 +339,10 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform_v1.html">qat.pipelines.waveform_v1 package</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.compile.html">qat.pipelines.waveform_v1.compile module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.execute.html">qat.pipelines.waveform_v1.execute module</a></li>
-<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform_v1.full.html">qat.pipelines.waveform_v1.full module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
@@ -312,14 +369,12 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.metrics_base.html">qat.purr.backends.qblox.metrics_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.pass_base.html">qat.purr.backends.qblox.pass_base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.result_base.html">qat.purr.backends.qblox.result_base module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
 </ul>
@@ -359,6 +414,12 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
@@ -389,8 +450,10 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -405,6 +468,8 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.uuid.html">qat.utils.uuid module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
 </ul>
 </li>
@@ -451,98 +516,6 @@
 
   <section id="module-qat.backend.waveform_v1.executable">
 <span id="qat-backend-waveform-v1-executable-module"></span><h1>qat.backend.waveform_v1.executable module<a class="headerlink" href="#module-qat.backend.waveform_v1.executable" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1ChannelData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.executables.html#qat.executables.ChannelData" title="qat.executables.ChannelData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelData</span></code></a></p>
-<p>Contains the channel data for a <a class="reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable" title="qat.backend.waveform_v1.executable.WaveformV1Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code></a>.</p>
-<p>Stores the waveforms and acqusitions needed for execution. No control flow is possible.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.buffer"></span><strong>buffer</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.buffer">¶</a> (<em>list</em><em>[</em><em>complex</em><em>]</em>) – The waveform to be sent at each sample.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.baseband_frequency"></span><strong>baseband_frequency</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.baseband_frequency">¶</a> (<em>float</em><em> | </em><em>None</em>) – The frequency to be set for the baseband.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires"></span><strong>acquires</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.params.acquires">¶</a> (<em>list</em><em>[</em><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData" title="qat.executables.AcquireData"><em>AcquireData</em></a><em>]</em>) – Acquire information needed for readouts.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.acquires">
-<span class="sig-name descname"><span class="pre">acquires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="qat.executables.html#qat.executables.AcquireData" title="qat.executables.AcquireData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.acquires" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.baseband_frequency">
-<span class="sig-name descname"><span class="pre">baseband_frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.baseband_frequency" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.buffer">
-<span class="sig-name descname"><span class="pre">buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">NDArray</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Shape</span></code><span class="pre">[*</span> <span class="pre">x],</span> <span class="pre">(</span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex64</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex128</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex64</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex128</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">clongdouble</span></code><span class="pre">)]]</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.buffer" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1ChannelData.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1Executable">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaveformV1Executable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1Executable" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.executables.html#qat.executables.ChannelExecutable" title="qat.executables.ChannelExecutable"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChannelExecutable</span></code></a></p>
-<p>A <a class="reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable" title="qat.backend.waveform_v1.executable.WaveformV1Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1Executable</span></code></a> is an executable used in early iterations of QAT.</p>
-<p>This type of executable is composed of explicit waveforms that are compiled for each
-pulse channel, and summed to provide the waveform “buffer” for each physical channel.
-This early iteration can only instruct waveforms to be executed at a particular time;
-control flow is not possible. However, simple post-processing of results after execution
-is provided.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.channel_data"></span><strong>channel_data</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.channel_data">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><a class="reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData" title="qat.backend.waveform_v1.executable.WaveformV1ChannelData"><em>WaveformV1ChannelData</em></a><em>]</em>) – Stores the data required by the control hardware for each pulse
-channel.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.shots"></span><strong>shots</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.shots">¶</a> (<em>int</em>) – The number of times the program is executed.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.repetition_time"></span><strong>repetition_time</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.repetition_time">¶</a> (<em>float</em>) – The amount of time to wait between shots for the QPU to
-reset.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.compiled_shots"></span><strong>compiled_shots</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.compiled_shots">¶</a> (<em>PositiveInt</em>) – When the required number of shots exceeds the
-allowed amount by the target machine, shots can be batched into groups. This states
-how many shots to do in each batch.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.post_processing"></span><strong>post_processing</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.post_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>list</em><em>[</em><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><em>PostProcessing</em></a><em>]</em><em>]</em>) – Contains the post-processing information for each acquisition.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.results_processing"></span><strong>results_processing</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.results_processing">¶</a> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>InlineResultsProcessing</em><em>]</em>) – Contains the information for how results should be formatted.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.assigns"></span><strong>assigns</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.assigns">¶</a> (<em>list</em><em>[</em><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Assign" title="qat.ir.instructions.Assign"><em>Assign</em></a><em>]</em>) – Assigns results to given variables.</p></li>
-<li><p><span class="target" id="qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns"></span><strong>returns</strong><a class="paramlink headerlink reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.params.returns">¶</a> (<em>list</em><em>[</em><em>str</em><em>]</em>) – Which acquisitions/variables should be returned.</p></li>
-</ul>
-</dd>
-</dl>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1Executable.channel_data">
-<span class="sig-name descname"><span class="pre">channel_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.backend.waveform_v1.executable.WaveformV1ChannelData" title="qat.backend.waveform_v1.executable.WaveformV1ChannelData"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformV1ChannelData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.channel_data" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1Executable.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.backend.waveform_v1.executable.WaveformV1Executable.repetition_time">
-<span class="sig-name descname"><span class="pre">repetition_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.backend.waveform_v1.executable.WaveformV1Executable.repetition_time" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 </section>
 
 
@@ -550,7 +523,7 @@ validated to form a valid model.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.backend.waveform_v1.codegen.html" class="btn btn-neutral float-left" title="qat.backend.waveform_v1.codegen module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.backend.waveform_v1.purr.codegen.html" class="btn btn-neutral float-left" title="qat.backend.waveform_v1.purr.codegen module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.backend.base.html" class="btn btn-neutral float-right" title="qat.backend.base module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
@@ -599,6 +572,7 @@ validated to form a valid model.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.backend.waveform_v1.executable.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.backend.waveform_v1.executable.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.backend.waveform_v1.executable.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

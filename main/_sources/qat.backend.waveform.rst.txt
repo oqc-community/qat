@@ -1,0 +1,16 @@
+qat.backend.waveform package
+============================
+
+.. automodule:: qat.backend.waveform
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.backend.waveform.codegen
+   qat.backend.waveform.executable

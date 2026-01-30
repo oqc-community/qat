@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.frontend.qasm module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -398,8 +399,18 @@ Otherwise, the program is returned (and loaded if required).</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.qasm.BaseQasmFrontend.create_parser">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.qasm.BaseQasmFrontend.create_parser" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.AbstractParser" title="qat.purr.integrations.qasm.AbstractParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractParser</span></code></a> | <a class="reference internal" href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.AbstractParser" title="qat.frontend.parsers.qasm.base.AbstractParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractParser</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.qasm.BaseQasmFrontend.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.qasm.BaseQasmFrontend.emit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.qasm.BaseQasmFrontend.emit" title="Link to this definition"></a></dt>
 <dd><p>Compiles the source QASM program into QAT’s intermediate representation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -426,11 +437,6 @@ QASM program.</p>
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.frontend.qasm.BaseQasmFrontend.parser">
-<span class="sig-name descname"><span class="pre">parser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> <span class="pre">|</span> <a class="reference internal" href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.CloudQasmParser" title="qat.purr.integrations.qasm.CloudQasmParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">CloudQasmParser</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser" title="qat.purr.integrations.qasm.Qasm3Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm3Parser</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.CloudQasmParser" title="qat.frontend.parsers.qasm.qasm2.CloudQasmParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">CloudQasmParser</span></code></a> <span class="pre">|</span> <a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser" title="qat.frontend.parsers.qasm.qasm3.Qasm3Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm3Parser</span></code></a></em><a class="headerlink" href="#qat.frontend.qasm.BaseQasmFrontend.parser" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.frontend.qasm.BaseQasmFrontend.version">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qat.frontend.qasm.BaseQasmFrontend.version" title="Link to this definition"></a></dt>
@@ -455,6 +461,16 @@ predefined pipeline that optimizes the QASM file.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.qasm.Qasm2Frontend.create_parser">
+<span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.qasm.Qasm2Frontend.create_parser" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.CloudQasmParser" title="qat.purr.integrations.qasm.CloudQasmParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">CloudQasmParser</span></code></a> | <a class="reference internal" href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.CloudQasmParser" title="qat.frontend.parsers.qasm.qasm2.CloudQasmParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">CloudQasmParser</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.frontend.qasm.Qasm2Frontend.version">
 <span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#qat.frontend.qasm.Qasm2Frontend.version" title="Link to this definition"></a></dt>
@@ -479,6 +495,16 @@ predefined pipeline that optimizes the QASM file.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.frontend.qasm.Qasm3Frontend.create_parser">
+<span class="sig-name descname"><span class="pre">create_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.qasm.Qasm3Frontend.create_parser" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser" title="qat.purr.integrations.qasm.Qasm3Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm3Parser</span></code></a> | <a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser" title="qat.frontend.parsers.qasm.qasm3.Qasm3Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm3Parser</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.frontend.qasm.Qasm3Frontend.version">
 <span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#qat.frontend.qasm.Qasm3Frontend.version" title="Link to this definition"></a></dt>
@@ -607,6 +633,7 @@ predefined pipeline that optimizes the QASM file.</p></li>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.frontend.qasm.html">2.6.0</a></dd>
       <dd><a href="qat.frontend.qasm.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.frontend.qasm.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

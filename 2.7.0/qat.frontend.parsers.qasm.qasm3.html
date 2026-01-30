@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.frontend.parsers.qasm.qasm3 module &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -446,8 +447,13 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.Qasm3Parser.get_waveform_samples">
-<span class="sig-name descname"><span class="pre">get_waveform_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.get_waveform_samples" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-name descname"><span class="pre">get_waveform_samples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.get_waveform_samples" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.Qasm3Parser.include">
@@ -455,8 +461,8 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.Qasm3Parser.initalize">
-<span class="sig-name descname"><span class="pre">initalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.initalize" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.Qasm3Parser.initialize">
+<span class="sig-name descname"><span class="pre">initialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.initialize" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -726,38 +732,6 @@ AST occurs.</p>
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.UntargetedPulse">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UntargetedPulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.UntargetedPulse" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse" title="qat.ir.waveforms.Pulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pulse</span></code></a></p>
-<p>Pulse that currently has no device to send it down.</p>
-<p>Create a new model by parsing and validating input data from keyword arguments.</p>
-<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
-validated to form a valid model.</p>
-<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.UntargetedPulse.built">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">built</span></span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.built" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.UntargetedPulse.ignore_channel_scale">
-<span class="sig-name descname"><span class="pre">ignore_channel_scale</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">True</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.ignore_channel_scale" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.UntargetedPulse.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'populate_by_name':</span> <span class="pre">True,</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True,</span> <span class="pre">'validate_by_name':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.model_config" title="Link to this definition"></a></dt>
-<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.UntargetedPulse.targets">
-<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FrozenSet[str]</span></code></em><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.UntargetedPulse.targets" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.get_frame_mappings">
 <span class="sig-name descname"><span class="pre">get_frame_mappings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hw</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.get_frame_mappings" title="Link to this definition"></a></dt>
@@ -828,6 +802,7 @@ Returns a dictionary mapping name-&gt;physical channel.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.frontend.parsers.qasm.qasm3.html">2.6.0</a></dd>
       <dd><a href="qat.frontend.parsers.qasm.qasm3.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.frontend.parsers.qasm.qasm3.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

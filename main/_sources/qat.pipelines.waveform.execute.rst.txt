@@ -1,0 +1,7 @@
+qat.pipelines.waveform.execute module
+=====================================
+
+.. automodule:: qat.pipelines.waveform.execute
+   :members:
+   :undoc-members:
+   :show-inheritance:

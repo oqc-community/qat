@@ -14,6 +14,7 @@ Subpackages
 
    qat.frontend.parsers
    qat.frontend.passes
+   qat.frontend.purr
 
 Submodules
 ----------
@@ -27,5 +28,6 @@ Submodules
    qat.frontend.custom
    qat.frontend.fallthrough
    qat.frontend.qasm
+   qat.frontend.qat_ir
    qat.frontend.qir
    qat.frontend.register

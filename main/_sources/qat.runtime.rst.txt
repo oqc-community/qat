@@ -20,8 +20,10 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.runtime.aggregator
    qat.runtime.base
    qat.runtime.connection
+   qat.runtime.exceptions
    qat.runtime.legacy
    qat.runtime.post_processing
    qat.runtime.results_pipeline

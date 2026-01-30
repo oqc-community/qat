@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.core.result_base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -335,6 +336,44 @@
   <section id="module-qat.core.result_base">
 <span id="qat-core-result-base-module"></span><h1>qat.core.result_base module<a class="headerlink" href="#module-qat.core.result_base" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.core.result_base.PreservedResults">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreservedResults</span></span><a class="headerlink" href="#qat.core.result_base.PreservedResults" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A mechanism for result invalidation and preservation. Similar to LLVM’s new PassManager, we state
+that each transform pass must declare what analysis results it preserves. In this case, the pass returns
+a PreservedResults instance which is then used by the <code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code> for cache housekeeping.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.PreservedResults.all">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.PreservedResults.all" title="Link to this definition"></a></dt>
+<dd><p>Indicates that <strong>all</strong> of the previously computed results remain valid. The pass manager will do nothing
+as analyses results are still safe and correct after the pass in question has finished running.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.PreservedResults.discard">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">discard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">res_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.PreservedResults.discard" title="Link to this definition"></a></dt>
+<dd><p>Convenient inverse selector for the <a class="reference internal" href="#qat.core.result_base.PreservedResults.preserve" title="qat.core.result_base.PreservedResults.preserve"><code class="xref py py-meth docutils literal notranslate"><span class="pre">preserve()</span></code></a> API. This will cause the pass manager
+to discard and evict <strong>only</strong> results pointed to by the argument.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.PreservedResults.none">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">none</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.PreservedResults.none" title="Link to this definition"></a></dt>
+<dd><p>Indicates that <strong>none</strong> of the previously computed results are valid. This will cause the pass manager
+to evict cached results after the (transform) pass in question has finished running.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.PreservedResults.preserve">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">preserve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">res_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.PreservedResults.preserve" title="Link to this definition"></a></dt>
+<dd><p>Selective preservation of the results or indeed result sets indicated by the argument. This will
+cause the pass manager to filter through the result cache and preserve <strong>only</strong> the ones that
+the argument points to.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultConcept">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultConcept</span></span><a class="headerlink" href="#qat.core.result_base.ResultConcept" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
@@ -408,15 +447,33 @@ type.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.ResultManager.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.cleanup" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultManager.lookup_by_type">
 <span class="sig-name descname"><span class="pre">lookup_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.lookup_by_type" title="Link to this definition"></a></dt>
 <dd><p>Find a result by its type. Throws an error if none or multiple are found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.lookup_by_type.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.lookup_by_type.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – The results type.</p>
+<dd class="field-odd"><p><span class="target" id="qat.core.result_base.ResultManager.lookup_by_type.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.core.result_base.ResultManager.lookup_by_type.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ResultType</span></code>, bound= <a class="reference internal" href="#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a>)]</span>) – The results type.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">ResultType</span></code>, bound= <a class="reference internal" href="#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a>)</span></p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.ResultManager.mark_as_dirty">
+<span class="sig-name descname"><span class="pre">mark_as_dirty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">res_objs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.mark_as_dirty" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.core.result_base.ResultManager.remove_by_type">
+<span class="sig-name descname"><span class="pre">remove_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.ResultManager.remove_by_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultManager.results">
@@ -442,6 +499,11 @@ type.</p>
 <dd><p>Bases: <a class="reference internal" href="#qat.core.result_base.ResultConcept" title="qat.core.result_base.ResultConcept"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultConcept</span></code></a></p>
 <p>Wrapper for any result object typically produced by an analysis pass.</p>
 <p>See <a class="reference internal" href="#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a>.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.core.result_base.ResultModel.id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#qat.core.result_base.ResultModel.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.core.result_base.ResultModel.value">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#qat.core.result_base.ResultModel.value" title="Link to this definition"></a></dt>
@@ -505,6 +567,7 @@ type.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.core.result_base.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.core.result_base.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.core.result_base.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

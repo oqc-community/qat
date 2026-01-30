@@ -19,10 +19,13 @@ an adapter to Qiskit's AerSimulator and our realistic (but limited) real time ch
 
 
 .. toctree::
-    :maxdepth: 4
+   :maxdepth: 4
    
-    hardware_models
-    compiler_config
-    pipelines
-    compilation 
-    execution 
+   first_program
+   hardware_models
+   input
+   pipelines
+   qat_config
+   compilation 
+   execution 
+   simulators

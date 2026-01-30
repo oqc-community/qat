@@ -1,0 +1,15 @@
+qat.engines.waveform package
+============================
+
+.. automodule:: qat.engines.waveform
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.engines.waveform.echo

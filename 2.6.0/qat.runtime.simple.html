@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.runtime.simple module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -336,14 +337,21 @@
 <span id="qat-runtime-simple-module"></span><h1>qat.runtime.simple module<a class="headerlink" href="#module-qat.runtime.simple" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.simple.SimpleRuntime">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_pipeline=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_mode=&lt;ConnectionMode.DEFAULT:</span> <span class="pre">3&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.simple.SimpleRuntime" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SimpleRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results_pipeline=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connection_mode=&lt;ConnectionMode.DEFAULT:</span> <span class="pre">3&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregator=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.simple.SimpleRuntime" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.runtime.base.html#qat.runtime.base.BaseRuntime" title="qat.runtime.base.BaseRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRuntime</span></code></a></p>
-<p>A Runtime for the complete execution of packages without sweeps.</p>
-<p>The <a class="reference internal" href="#qat.runtime.simple.SimpleRuntime" title="qat.runtime.simple.SimpleRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimpleRuntime</span></code></a> handles the complete execution for simple programs that are
-free from sweeps (with exceptions of sweeps that have been lowered to the hardware).
-This includes batching of shots, executing the program on the target machine, and any software
-post-processing that cannot be achieved in the target machine. The runtime must be provided
-with a <code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code> that is capable of executing the desired programs.</p>
+<p>The entry point to the execution interface. Programs generated from the backend are wrapped
+in a :class:Executable object which further specifies high level metadata about acquisition
+restrictions such as the expected shape of any loop nest, the post-processing, and results
+formatting. The runtime provides the following services.</p>
+<ul class="simple">
+<li><p>Execution batching: Some programs require memory specifications beyond that of the control
+hardware. It important to slice and batch-execute large programs. Equally important is
+necessity to aggregate results from different batches.</p></li>
+<li><p>Postprocessing: Performs any required post-processing steps that haven’t been carried out
+real-time on the FPGA.</p></li>
+<li><p>Error mitigation: Adjusts results based on error mitigation strategies.</p></li>
+</ul>
+<p>These services are specified as a pipline of passes, see <cite>results_pipeline</cite> module.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -356,13 +364,13 @@ not provided, a default pipeline is provided.</p></li>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.simple.SimpleRuntime.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">package</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.simple.SimpleRuntime.execute" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">executable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.simple.SimpleRuntime.execute" title="Link to this definition"></a></dt>
 <dd><p>Fully execute a package against the hardware with batching of shots and results
 post-processing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.simple.SimpleRuntime.execute.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.simple.SimpleRuntime.execute.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></span>) – The executable program.</p></li>
+<li><p><span class="target" id="qat.runtime.simple.SimpleRuntime.execute.params.executable"></span><strong>executable</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.simple.SimpleRuntime.execute.params.executable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></span>) – The executable program.</p></li>
 <li><p><span class="target" id="qat.runtime.simple.SimpleRuntime.execute.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.simple.SimpleRuntime.execute.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a>]</span>) – Optionally provide a results manager to save pass information.</p></li>
 <li><p><span class="target" id="qat.runtime.simple.SimpleRuntime.execute.params.met_mgr"></span><strong>met_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.simple.SimpleRuntime.execute.params.met_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager" title="qat.core.metrics_base.MetricsManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetricsManager</span></code></a>]</span>) – Optionally provide a metric manager to save pass information.</p></li>
 </ul>
@@ -431,6 +439,7 @@ post-processing.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.runtime.simple.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.runtime.simple.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.runtime.simple.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

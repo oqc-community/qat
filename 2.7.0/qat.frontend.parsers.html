@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.frontend.parsers package &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -364,7 +365,6 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.OpenPulseContext"><code class="docutils literal notranslate"><span class="pre">OpenPulseContext</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser"><code class="docutils literal notranslate"><span class="pre">Qasm3Parser</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase"><code class="docutils literal notranslate"><span class="pre">Qasm3ParserBase</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.UntargetedPulse"><code class="docutils literal notranslate"><span class="pre">UntargetedPulse</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.get_frame_mappings"><code class="docutils literal notranslate"><span class="pre">get_frame_mappings()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.get_port_mappings"><code class="docutils literal notranslate"><span class="pre">get_port_mappings()</span></code></a></li>
 </ul>
@@ -381,25 +381,15 @@
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.ArgumentType"><code class="docutils literal notranslate"><span class="pre">ArgumentType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.ArgumentType.Label"><code class="docutils literal notranslate"><span class="pre">ArgumentType.Label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.ArgumentType.Number"><code class="docutils literal notranslate"><span class="pre">ArgumentType.Number</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.ArgumentType.Qubit"><code class="docutils literal notranslate"><span class="pre">ArgumentType.Qubit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.ArgumentType.Result"><code class="docutils literal notranslate"><span class="pre">ArgumentType.Result</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser"><code class="docutils literal notranslate"><span class="pre">QIRParser</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.ccx"><code class="docutils literal notranslate"><span class="pre">QIRParser.ccx()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.cx"><code class="docutils literal notranslate"><span class="pre">QIRParser.cx()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.cz"><code class="docutils literal notranslate"><span class="pre">QIRParser.cz()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.h"><code class="docutils literal notranslate"><span class="pre">QIRParser.h()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.mz"><code class="docutils literal notranslate"><span class="pre">QIRParser.mz()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.parse"><code class="docutils literal notranslate"><span class="pre">QIRParser.parse()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.process_instructions"><code class="docutils literal notranslate"><span class="pre">QIRParser.process_instructions()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.reset"><code class="docutils literal notranslate"><span class="pre">QIRParser.reset()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.rx"><code class="docutils literal notranslate"><span class="pre">QIRParser.rx()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.ry"><code class="docutils literal notranslate"><span class="pre">QIRParser.ry()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.rz"><code class="docutils literal notranslate"><span class="pre">QIRParser.rz()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.s"><code class="docutils literal notranslate"><span class="pre">QIRParser.s()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.s_adj"><code class="docutils literal notranslate"><span class="pre">QIRParser.s_adj()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.t"><code class="docutils literal notranslate"><span class="pre">QIRParser.t()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.t_adj"><code class="docutils literal notranslate"><span class="pre">QIRParser.t_adj()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.x"><code class="docutils literal notranslate"><span class="pre">QIRParser.x()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.y"><code class="docutils literal notranslate"><span class="pre">QIRParser.y()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.QIRParser.z"><code class="docutils literal notranslate"><span class="pre">QIRParser.z()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -463,6 +453,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.frontend.parsers.html">2.6.0</a></dd>
       <dd><a href="qat.frontend.parsers.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.frontend.parsers.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

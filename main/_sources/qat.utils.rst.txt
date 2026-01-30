@@ -18,4 +18,6 @@ Submodules
    qat.utils.pydantic
    qat.utils.qasm
    qat.utils.state_tensors
+   qat.utils.units
+   qat.utils.uuid
    qat.utils.waveform

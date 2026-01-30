@@ -1,0 +1,7 @@
+qat.ir.pulse\_channel module
+============================
+
+.. automodule:: qat.ir.pulse_channel
+   :members:
+   :undoc-members:
+   :show-inheritance:

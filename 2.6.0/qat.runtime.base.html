@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.runtime.base module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -368,7 +369,7 @@ not provided, a default pipeline is provided.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.base.BaseRuntime.default_pipeline">
-<span class="sig-name descname"><span class="pre">default_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.BaseRuntime.default_pipeline" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">default_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.BaseRuntime.default_pipeline" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -384,72 +385,8 @@ not provided, a default pipeline is provided.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.base.BaseRuntime.execute">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.BaseRuntime.execute" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.BaseRuntime.execute" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.base.BaseRuntime.number_of_batches">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">number_of_batches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">total_shots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots_per_batch</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.BaseRuntime.number_of_batches" title="Link to this definition"></a></dt>
-<dd><p>Calculates the number of shot batches to execute.</p>
-<p>When the total number of shots exceeds the capabilities of the target machine, we can
-execute a number of batches with a subset of the shots. This number of shots should
-be calculated during compilation, and included in the executable. This method
-calculates number of batches to execute.</p>
-<p>In the instance that the total number of shots cannot be batched into a whole number
-of the compiled shots, the runtime will execute more shots than required. If results
-are returned from the hardware per shot, then we can simply trim the results down to
-the required amount of shots. However, this cannot be done if the post-processing
-over the shots is done on the hardware. In this case, the program will be executed
-for <code class="code docutils literal notranslate"><span class="pre">ceil(total_shots</span> <span class="pre">/</span> <span class="pre">shots_per_batch)</span> <span class="pre">*</span> <span class="pre">shots_per_batch</span></code> shots.</p>
-<p>If the compiled number of shots is zero, then it is assumed all shots can be
-achieved in a single batch.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.base.BaseRuntime.number_of_batches.params.total_shots"></span><strong>total_shots</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.base.BaseRuntime.number_of_batches.params.total_shots">¶</a> (<em>int</em>) – The total number of shots to execute.</p></li>
-<li><p><span class="target" id="qat.runtime.base.BaseRuntime.number_of_batches.params.shots_per_batch"></span><strong>shots_per_batch</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.base.BaseRuntime.number_of_batches.params.shots_per_batch">¶</a> (<em>int</em>) – The compiled number of shots that can be executed in a
-single batch.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.base.BaseRuntime.validate_max_shots">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_max_shots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shots</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.BaseRuntime.validate_max_shots" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.runtime.base.ResultsAggregator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsAggregator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquires</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.ResultsAggregator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Aggregates the acquisition results from batching of shots.</p>
-<p>Begin the aggregation of results for a list of acquisitions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.runtime.base.ResultsAggregator.params.acquires"></span><strong>acquires</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.base.ResultsAggregator.params.acquires">¶</a> (<em>List</em><em>[</em><em>AcquireData</em><em>]</em>) – List of acquires to be collected.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.base.ResultsAggregator.results">
-<span class="sig-name descname"><span class="pre">results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_shots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.ResultsAggregator.results" title="Link to this definition"></a></dt>
-<dd><p>Returns the results normalized in an appropiate way.</p>
-<p>For <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.SCOPE</span></code>, results are averaged over batches. For
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.RAW</span></code> or <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code>, a truncated
-amount of <code class="code docutils literal notranslate"><span class="pre">max_shots</span></code> shots are returned. If <code class="code docutils literal notranslate"><span class="pre">None</span></code>, then returns all
-shots.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.runtime.base.ResultsAggregator.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_results</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.base.ResultsAggregator.update" title="Link to this definition"></a></dt>
-<dd><p>Add a batch of results.</p>
-<p>For <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.RAW</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code>, this means
-to append the new results. For <code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.SCOPE</span></code>, results are accumulated
-as a sum.</p>
-</dd></dl>
 
 </dd></dl>
 
@@ -509,6 +446,7 @@ as a sum.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.runtime.base.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.runtime.base.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.runtime.base.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

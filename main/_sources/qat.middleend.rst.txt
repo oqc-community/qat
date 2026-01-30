@@ -14,6 +14,7 @@ Subpackages
 
    qat.middleend.decompositions
    qat.middleend.passes
+   qat.middleend.purr
 
 Submodules
 ----------
@@ -21,4 +22,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.middleend.middleends
+   qat.middleend.base
+   qat.middleend.default
+   qat.middleend.fallthrough

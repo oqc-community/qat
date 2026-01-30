@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.middleend.passes.transform module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -339,15 +340,12 @@
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.AcquireSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.AcquireSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Sanitises the <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instruction: the first per pulse channel is split into
-an <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> and a <code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code>, and other acquisitions have their delay
-removed.</p>
+<p>Sanitises the <code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instruction to separate the <code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code> from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions.</p>
 <p><code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code> instructions are defined by a “duration” for which they instruct the
 target to readout. They also contain a “delay” attribute, which instructions the
 acquisition to start after some given time. This pass separates acqusitions with a
-delay into two instructions for the first acquire that acts on the channel. For multiple
-acquisitions on a single channel, the delay is not needed for the following
-acquisitions, and is set to zero.</p>
+delay into two instructions for the first acquire that acts on the channel.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.AcquireSanitisation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.AcquireSanitisation.run" title="Link to this definition"></a></dt>
@@ -470,14 +468,14 @@ custom pulse for <code class="xref py py-class docutils literal notranslate"><sp
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluateWaveforms.evaluate_waveform">
-<span class="sig-name descname"><span class="pre">evaluate_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms.evaluate_waveform" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">evaluate_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms.evaluate_waveform" title="Link to this definition"></a></dt>
 <dd><p>Default handler for waveform evaluation that does not have a specific
 implementation.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.EvaluateWaveforms.process_instruction">
-<span class="sig-name descname"><span class="pre">process_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms.process_instruction" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">process_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms.process_instruction" title="Link to this definition"></a></dt>
 <dd><p>Default handler for instructions that do not have a waveform evaluation.</p>
 </dd></dl>
 
@@ -486,10 +484,10 @@ implementation.</p>
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.EvaluateWaveforms.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions as an instruction builder.</p>
+<dd class="field-odd"><p><span class="target" id="qat.middleend.passes.transform.EvaluateWaveforms.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.EvaluateWaveforms.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span>) – The list of instructions as an instruction builder.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -608,7 +606,7 @@ to be stored in the results manager.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.InstructionGranularitySanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Rounds the durations of quantum instructions so they are multiples of the clock
 cycle.</p>
@@ -644,20 +642,6 @@ it up to the nearest integer multiple. Furthemore, it will assume that
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.passes.transform.InstructionGranularitySanitisation.sanitise_custom_pulses">
-<span class="sig-name descname"><span class="pre">sanitise_custom_pulses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation.sanitise_custom_pulses" title="Link to this definition"></a></dt>
-<dd><p>Sanitises the durations of :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>SampledWaveform`s by padding the
-waveforms with zero amplitudes.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.middleend.passes.transform.InstructionGranularitySanitisation.sanitise_quantum_instructions">
-<span class="sig-name descname"><span class="pre">sanitise_quantum_instructions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation.sanitise_quantum_instructions" title="Link to this definition"></a></dt>
-<dd><p>Sanitises the durations quantum instructions with non-zero duration by rounding
-down to the nearest clock cycle.</p>
 </dd></dl>
 
 </dd></dl>
@@ -779,12 +763,40 @@ optimisation.</p></li>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.PopulateWaveformSampleTime">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PopulateWaveformSampleTime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PopulateWaveformSampleTime" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
+<p>Populates instructions within the IR with the sample time from their coupled
+physical channel.</p>
+<p>This is a symptom of the IR builder not having access to the target data when assembling
+the instructions; this will likely be addressed later.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.middleend.passes.transform.PopulateWaveformSampleTime.params.hardware_model"></span><strong>hardware_model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.PopulateWaveformSampleTime.params.hardware_model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></span>) – The hardware model that holds calibrated information on the
+qubits on the QPU.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.PopulateWaveformSampleTime.params.target_data"></span><strong>target_data</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.PopulateWaveformSampleTime.params.target_data">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TargetData</span></code></span>) – Target-related information.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.middleend.passes.transform.PopulateWaveformSampleTime.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PopulateWaveformSampleTime.run" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PostProcessingSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingSanitisation</span></span><a class="headerlink" href="#qat.middleend.passes.transform.PostProcessingSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Checks that the <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code> instructions that follow an acquisition are
 suitable for the acquisition mode, and removes them if not.</p>
-<p>Extracted from <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.optimize" title="qat.purr.backends.live.LiveDeviceEngine.optimize"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.backends.live.LiveDeviceEngine.optimize()</span></code></a>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.PostProcessingSanitisation.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.PostProcessingSanitisation.run" title="Link to this definition"></a></dt>
@@ -934,7 +946,7 @@ is found, a repeat instruction is added.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.RepeatSanitisation.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatSanitisation.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.RepeatSanitisation.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.middleend.passes.transform.RepeatSanitisation.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.RepeatSanitisation.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p>
@@ -988,7 +1000,7 @@ and <code class="xref py py-class docutils literal notranslate"><span class="pre
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.ResetsToDelays">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetsToDelays</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetsToDelays" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Transforms <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> operations to :class:<a href="#id3"><span class="problematic" id="id4">`</span></a>Delay`s.</p>
+<p>Transforms <code class="xref py py-class docutils literal notranslate"><span class="pre">Reset</span></code> operations to :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>Delay`s.</p>
 <p>Note that the delays do not necessarily agree with the granularity of the underlying target machine.
 This can be enforced using the <a class="reference internal" href="#qat.middleend.passes.transform.InstructionGranularitySanitisation" title="qat.middleend.passes.transform.InstructionGranularitySanitisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation</span></code></a> pass.</p>
 <dl class="field-list simple">
@@ -1001,12 +1013,13 @@ This can be enforced using the <a class="reference internal" href="#qat.middleen
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.middleend.passes.transform.ResetsToDelays.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetsToDelays.run" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.ResetsToDelays.run" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.ir"></span><strong>ir</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The list of instructions stored in an <code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code>.</p></li>
 <li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The result manager to store the analysis results.</p></li>
+<li><p><span class="target" id="qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config"></span><strong>compiler_config</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>]</span>) – The compiler configuration.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1173,6 +1186,7 @@ do before resetting the qubits, as it ensures no qubit is reset while the task i
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.middleend.passes.transform.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.middleend.passes.transform.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.middleend.passes.transform.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

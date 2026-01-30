@@ -1,0 +1,7 @@
+qat.purr.core.metrics\_base module
+==================================
+
+.. automodule:: qat.purr.core.metrics_base
+   :members:
+   :undoc-members:
+   :show-inheritance:

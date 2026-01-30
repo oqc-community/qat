@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.compiler.runtime module &mdash; qat-compiler 2.6.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -350,7 +351,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.runtime.NewQuantumRuntime">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NewQuantumRuntime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">execution_engine</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.runtime.NewQuantumRuntime" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.runtime.QuantumRuntime" title="qat.purr.compiler.runtime.QuantumRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRuntime</span></code></a>, <a class="reference internal" href="qat.purr.backends.qblox.pass_base.html#qat.purr.backends.qblox.pass_base.InvokerMixin" title="qat.purr.backends.qblox.pass_base.InvokerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.runtime.QuantumRuntime" title="qat.purr.compiler.runtime.QuantumRuntime"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumRuntime</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">InvokerMixin</span></code></p>
 <p>Uses the new pass infrastructure.</p>
 <p>Notice how polymorphic calls to XEngine.optimize() and XEngine.validate() are avoided. Instead, we have
 a flat structure of passes. This allows developers to focus on efficiently implementing a pass and easily test,
@@ -515,6 +516,7 @@ on classic Python code.</p>
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="qat.purr.compiler.runtime.html">2.6.0</a></dd>
       <dd><a href="../2.7.0/qat.purr.compiler.runtime.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.purr.compiler.runtime.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

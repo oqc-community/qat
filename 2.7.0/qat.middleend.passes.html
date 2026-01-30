@@ -8,8 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.middleend.passes package &mdash; qat-compiler 2.7.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
       <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
 
   
@@ -391,11 +392,11 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.add_target"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.add_target()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.from_qubit"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.from_qubit()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.physical_qubit_indices"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.physical_qubit_indices</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.qubit_to_id_map"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.qubit_to_id_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.pulse_channel_to_qubit_map"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.pulse_channel_to_qubit_map</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.qubit_to_pulse_channel_map"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.qubit_to_pulse_channel_map</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.qubits"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.qubits</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.target_map"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.target_map</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.targets"><code class="docutils literal notranslate"><span class="pre">ActivePulseChannelResults.targets</span></code></a></li>
 </ul>
 </li>
@@ -437,8 +438,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation.run"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation.run()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation.sanitise_custom_pulses"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation.sanitise_custom_pulses()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionGranularitySanitisation.sanitise_quantum_instructions"><code class="docutils literal notranslate"><span class="pre">InstructionGranularitySanitisation.sanitise_quantum_instructions()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InstructionLengthSanitisation"><code class="docutils literal notranslate"><span class="pre">InstructionLengthSanitisation</span></code></a><ul>
@@ -460,6 +459,10 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisationHandler"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisationHandler</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisationHandler.run"><code class="docutils literal notranslate"><span class="pre">PhaseOptimisationHandler.run()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PopulateWaveformSampleTime"><code class="docutils literal notranslate"><span class="pre">PopulateWaveformSampleTime</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PopulateWaveformSampleTime.run"><code class="docutils literal notranslate"><span class="pre">PopulateWaveformSampleTime.run()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation"><code class="docutils literal notranslate"><span class="pre">PostProcessingSanitisation</span></code></a><ul>
@@ -534,6 +537,10 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.HardwareConfigValidity.run"><code class="docutils literal notranslate"><span class="pre">HardwareConfigValidity.run()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation"><code class="docutils literal notranslate"><span class="pre">InstructionValidation</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.InstructionValidation.run"><code class="docutils literal notranslate"><span class="pre">InstructionValidation.run()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.NoMidCircuitMeasurementValidation"><code class="docutils literal notranslate"><span class="pre">NoMidCircuitMeasurementValidation</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.NoMidCircuitMeasurementValidation.run"><code class="docutils literal notranslate"><span class="pre">NoMidCircuitMeasurementValidation.run()</span></code></a></li>
 </ul>
@@ -541,6 +548,7 @@
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydDynamicFrequencyValidation"><code class="docutils literal notranslate"><span class="pre">PydDynamicFrequencyValidation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydFrequencySetupValidation"><code class="docutils literal notranslate"><span class="pre">PydFrequencySetupValidation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydHardwareConfigValidity"><code class="docutils literal notranslate"><span class="pre">PydHardwareConfigValidity</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydInstructionValidation"><code class="docutils literal notranslate"><span class="pre">PydInstructionValidation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydNoMidCircuitMeasurementValidation"><code class="docutils literal notranslate"><span class="pre">PydNoMidCircuitMeasurementValidation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydReadoutValidation"><code class="docutils literal notranslate"><span class="pre">PydReadoutValidation</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.PydRepeatSanitisationValidation"><code class="docutils literal notranslate"><span class="pre">PydRepeatSanitisationValidation</span></code></a></li>
@@ -618,6 +626,7 @@
       <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
       <dd><a href="../2.6.0/qat.middleend.passes.html">2.6.0</a></dd>
       <dd><a href="qat.middleend.passes.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/qat.middleend.passes.html">3.0.0</a></dd>
     </dl>
     <dl>
       <dt>Branches</dt>

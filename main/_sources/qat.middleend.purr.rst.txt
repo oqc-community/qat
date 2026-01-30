@@ -1,0 +1,15 @@
+qat.middleend.purr package
+==========================
+
+.. automodule:: qat.middleend.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.middleend.purr.default

@@ -1,0 +1,18 @@
+qat.pipelines.purr.sweep package
+================================
+
+.. automodule:: qat.pipelines.purr.sweep
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.pipelines.purr.sweep.compile
+   qat.pipelines.purr.sweep.execute
+   qat.pipelines.purr.sweep.flattener
+   qat.pipelines.purr.sweep.passes

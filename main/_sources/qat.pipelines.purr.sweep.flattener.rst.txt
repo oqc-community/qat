@@ -1,0 +1,7 @@
+qat.pipelines.purr.sweep.flattener module
+=========================================
+
+.. automodule:: qat.pipelines.purr.sweep.flattener
+   :members:
+   :undoc-members:
+   :show-inheritance:
