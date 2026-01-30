@@ -52,7 +52,7 @@ For developers, the notebooks should be synced automatically by pre-commit (whic
 They will also be synced automatically on save in jupyterlab. Unfortunately VS code does not sync them automatically on save. They can be manually synced with 
 `poetry run jupytext-sync`.
 
-Notebooks within the `notebooks/ipynb` folder will be tested as part of our CI to ensure they're functional and up-to-date. To run them locally, please use `poetry run pytest notebooks/ipynb --nbmake`.
+Notebooks within the `notebooks/ipynb` folder will be tested as part of our CI to ensure they're functional and up-to-date. To run them locally, please use :code:`poetry run pytest notebooks/ipynb --nbmake`.
 
 ----------------------
 Roadmap
@@ -121,7 +121,7 @@ See the `pytest-benchmark <https://pytest-benchmark.readthedocs.io/en/latest/usa
 Documentation
 ----------------------
 
-Our documentation at `QAT <https://oqc-community.github.io/qat>` is automatically built and deployed as part of our CI pipeline. If making changes to the documentation, you can build it locally by running :code:`poetry run build-docs`, and navigating to `docs/build/`.
+Our documentation at `QAT <https://oqc-community.github.io/qat>`_ is automatically built and deployed as part of our CI pipeline. If making changes to the documentation, you can build it locally by running :code:`poetry run build-docs`, and navigating to `docs/build/`.
 
 |
 
