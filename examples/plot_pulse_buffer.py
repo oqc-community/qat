@@ -3,9 +3,9 @@ from typing import Iterable
 import numpy as np
 from matplotlib import pyplot as plt, ticker
 
+from qat.model.loaders.purr.echo import EchoModelLoader
 from qat.purr.backends.echo import EchoEngine
 from qat.purr.backends.live import LiveDeviceEngine
-from qat.purr.compiler.devices import Calibratable
 from qat.purr.compiler.emitter import QatFile
 from qat.purr.compiler.execution import SweepIterator
 from qat.purr.compiler.runtime import QuantumRuntime, get_builder
@@ -121,9 +121,7 @@ if __name__ == "__main__":
     measure q -> c;
     """
 
-    hw = Calibratable.load_calibration_from_file(
-        "/home/kristianb/farm_fresh_code/whisqrs/qctrl_hw.json"
-    )
+    hw = EchoModelLoader(qubit_count=2).load()
     parser = Qasm3Parser()
     builder = parser.parse(get_builder(hw), qasm)
 
