@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.backends.qblox.constants module &mdash; qat-compiler 3.0.0.post153.dev20260204083547 documentation</title>
+  <title>qat.purr.backends.qblox.constants module &mdash; qat-compiler 3.0.0.post154.dev20260209122129 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -534,19 +534,6 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_012_BINNED_ACQUISITIONS">
-<span class="sig-name descname"><span class="pre">MAX_012_BINNED_ACQUISITIONS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">131072</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_012_BINNED_ACQUISITIONS" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_345_BINNED_ACQUISITIONS">
-<span class="sig-name descname"><span class="pre">MAX_345_BINNED_ACQUISITIONS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65536</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_345_BINNED_ACQUISITIONS" title="Link to this definition"></a></dt>
-<dd><p>Each sequencer has 131072 bins with some caveats. If you are using all sequencers
-you are limited to 131k bins for the first three sequencers and 65536 bins for the final
-three to a maximum number of 589824 bins.</p>
-</dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH">
 <span class="sig-name descname"><span class="pre">MAX_ACQ_INTEGRATION_LENGTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16777212</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH" title="Link to this definition"></a></dt>
 <dd><p>Minimum and maximum integration lengths</p>
@@ -556,6 +543,14 @@ three to a maximum number of 589824 bins.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_ACQ_THRESHOLD">
 <span class="sig-name descname"><span class="pre">MAX_ACQ_THRESHOLD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16777212</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_THRESHOLD" title="Link to this definition"></a></dt>
 <dd><p>Minimum and maximum thresholds for the thresholded acquisition</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.purr.backends.qblox.constants.Constants.MAX_BINNED_ACQUISITIONS">
+<span class="sig-name descname"><span class="pre">MAX_BINNED_ACQUISITIONS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3000000</span></em><a class="headerlink" href="#qat.purr.backends.qblox.constants.Constants.MAX_BINNED_ACQUISITIONS" title="Link to this definition"></a></dt>
+<dd><p>Each QRM(-RF) module has a maximum of 3M memory bins. This memory can be dynamically allocated
+by each of the 6 sequencers. For example, all 6 sequencers can evenly allocate 500K bins simultaneously
+or a single sequencers can allocate the whole 3M and leaves nothing for other sequencers</p>
 </dd></dl>
 
 <dl class="py attribute">
