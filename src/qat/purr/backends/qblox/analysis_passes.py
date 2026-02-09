@@ -599,10 +599,10 @@ class QbloxLegalisationPass(AnalysisPass):
 
         if isinstance(inst, Acquire):
             num_bins = bound.count
-            if num_bins > Constants.MAX_012_BINNED_ACQUISITIONS:
+            if num_bins > Constants.MAX_BINNED_ACQUISITIONS:
                 raise ValueError(
                     f"""
-                        Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
+                        Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_BINNED_ACQUISITIONS}.
                         Please reduce number of points
                         """
                 )

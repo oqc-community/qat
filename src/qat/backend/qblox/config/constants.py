@@ -46,11 +46,11 @@ class Constants:
     MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS: int = 4
     """Minimum amount of scope trace acquisition datapoints returned."""
     MAX_TOTAL_BINNED_ACQUISITIONS: int = 589824
-    MAX_012_BINNED_ACQUISITIONS: int = 1 << 17
-    MAX_345_BINNED_ACQUISITIONS: int = 1 << 16
-    """Each sequencer has 131072 bins with some caveats. If you are using all sequencers
-    you are limited to 131k bins for the first three sequencers and 65536 bins for the final
-    three to a maximum number of 589824 bins."""
+    MAX_BINNED_ACQUISITIONS: int = 3_000_000
+    """Each QRM(-RF) module has a maximum of 3M memory bins. This memory can be dynamically allocated
+    by each of the 6 sequencers. For example, all 6 sequencers can evenly allocate 500K bins simultaneously
+    or a single sequencers can allocate the whole 3M and leaves nothing for other sequencers
+    """
     MIN_ACQ_INTEGRATION_LENGTH = 4
     MAX_ACQ_INTEGRATION_LENGTH = (1 << 24) - 4
     """Minimum and maximum integration lengths"""

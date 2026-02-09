@@ -54,7 +54,7 @@ scipy = ">=1.15.2"
 pyqir = ">=0.11.0,!=0.12.0,!=0.12.1,!=0.12.2,<0.13.0"
 regex = ">=3.6.1"
 jsonpickle = ">=4.0.5"
-qblox-instruments = "0.17.1"
+qblox-instruments = ">=1.0.0,<2.0.0"
 lark = "^1.3.1"
 pydantic = "2.11.7"
 pydantic-settings = ">=2.5.2"
@@ -215,12 +215,12 @@ markers = [
   "legacy",
 ]
 
-# The syncing rules are dispatched in the order defined here; if in the docs sub-directory, 
+# The syncing rules are dispatched in the order defined here; if in the docs sub-directory,
 # it will sync to the docs source, else it will not.
 [[tool.jupytext.formats]]
 "notebooks/ipynb/tutorials" = "ipynb"
 "notebooks/scripts/tutorials" = "py:percent"
-"docs/source/tutorials" = "ipynb" # These will automatically appear in docs 
+"docs/source/tutorials" = "ipynb" # These will automatically appear in docs
 
 [[tool.jupytext.formats]]
 "notebooks/ipynb/docs" = "ipynb"

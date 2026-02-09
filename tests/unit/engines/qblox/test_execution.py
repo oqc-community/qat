@@ -117,20 +117,34 @@ class TestExecutionSuite:
     to trigger certain aspects that have acquired attention over the
     """
 
-    @pytest.mark.parametrize("amp", [0.1, 0.2, 0.3])
+    @pytest.mark.parametrize("amp", [0.1, 0.5, 1])
+    @pytest.mark.parametrize("num_shots", [1, 10_000, 500_000, 1_000_000, 3_000_000])
+    @pytest.mark.parametrize("passive_reset", [0, 1e-6, 2e-6])
     def test_measure_amp_sweep(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type, amp
+        self,
+        qblox_model,
+        qblox_instrument,
+        qubit_indices,
+        backend_type,
+        amp,
+        num_shots,
+        passive_reset,
     ):
+        if num_shots == 3_000_000:
+            pytest.skip("Disables until Qblox fix their dummy/mock cluster")
+
         builder = get_builder(qblox_model)
-        builder.repeat(10000)
+        builder.repeat(repeat_value=num_shots, passive_reset_time=passive_reset)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
             qubit.pulse_measure["amp"] = amp
-            builder.measure(qubit)
+            builder.measure(qubit, output_variable=f"Q{index}")
 
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
-        assert results is not None
+        for index in qubit_indices:
+            assert f"Q{index}" in results
+            assert results[f"Q{index}"].shape == (1, num_shots)
 
     def test_measure_freq_sweep(
         self, qblox_model, qblox_instrument, qubit_indices, backend_type
