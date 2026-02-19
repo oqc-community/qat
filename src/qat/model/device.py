@@ -254,7 +254,7 @@ class FreqShiftPulseChannel(QubitPulseChannel):
 
 class CrossResonancePulseChannel(QubitPulseChannel):
     auxiliary_qubit: QubitId
-    zx_pi_4_pulse: CalibratablePulse = Field(
+    zx_pi_4_pulse: CalibratablePulse | None = Field(
         default=CalibratablePulse(
             waveform_type=SoftSquareWaveform, width=125e-9, rise=10e-9, amp=1e6
         ),

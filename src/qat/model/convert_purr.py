@@ -32,11 +32,15 @@ from qat.model.error_mitigation import (
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.purr.compiler.devices import ChannelType, PulseChannelView, PulseShapeType
+from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.instructions import CustomPulse
+from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import FrozenDict
 from qat.utils.uuid import uuid_randomiser
 
 number_mask = re.compile("[0-9]+")
+
+log = get_default_logger()
 
 
 def get_number_from_string(s: str) -> int | None:
@@ -46,24 +50,16 @@ def get_number_from_string(s: str) -> int | None:
     return None
 
 
-def convert_purr_echo_hw_to_pydantic(legacy_hw, seed_uuid: bool = True):
+def convert_purr_echo_hw_to_pydantic(
+    legacy_hw: QuantumHardwareModel, seed_uuid: bool = True
+) -> PhysicalHardwareModel:
     new_qubits = {}
-    logical_connectivity = defaultdict(set)
+    logical_connectivity = _build_logical_toplogy(legacy_hw)
 
     if seed_uuid:
         uuid_randomiser.seed(legacy_hw.calibration_id)
 
     for qubit in legacy_hw.qubits:
-        # Add topology of qubit. Since the topology is not always stored both in
-        # the `qubit_direction_couplings`, look into `coupled_qubits` as well.
-        if couplings := getattr(legacy_hw, "qubit_direction_couplings", None):
-            coupled_q_indices = [
-                c.direction[1] for c in couplings if c.direction[0] == qubit.index
-            ]
-        else:
-            coupled_q_indices = [q.index for q in qubit.coupled_qubits]
-        logical_connectivity[qubit.index].update(coupled_q_indices)
-
         # Physical baseband
         phys_bb_q = qubit.physical_channel.baseband
         new_phys_bb_q = PhysicalBaseband(
@@ -180,16 +176,40 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw, seed_uuid: bool = True):
                 and pulse_channel.auxiliary_devices
             ):
                 aux_qubit = pulse_channel.auxiliary_devices[0].index
+                if (
+                    aux_qubit not in logical_connectivity[qubit.index]
+                    and qubit.index not in logical_connectivity[aux_qubit]
+                ):
+                    log.warning(
+                        f"Pulse channel {pulse_channel.full_id()} on qubit pairs "
+                        f"{qubit.index} and {aux_qubit} is defined, but the qubits are not "
+                        "in the logical connectivity of the hardware model. This pulse "
+                        "channel will be ignored."
+                    )
+                    log.warning(logical_connectivity)
+                    continue
 
                 if pulse_channel.channel_type == ChannelType.cross_resonance:
                     zx_pi_4 = deepcopy(qubit.pulse_hw_zx_pi_4.get(f"Q{aux_qubit}", None))
 
-                    waveform_type = (
-                        SofterSquareWaveform
-                        if zx_pi_4["shape"] == PulseShapeType.SOFTER_SQUARE
-                        else SoftSquareWaveform
-                    )
-                    zx_pi_4.pop("shape")
+                    if zx_pi_4 is None and aux_qubit in logical_connectivity[qubit.index]:
+                        raise ValueError(
+                            f"Hardware model has a coupling between qubits {qubit.index} "
+                            f"and {aux_qubit}, but with no zx_pi_4 pulse defined. "
+                        )
+                    elif zx_pi_4 is None:
+                        log.info(
+                            f"Cross-resonance pulse channel {pulse_channel.full_id()} has "
+                            "no zx_pi_4 pulse defined."
+                        )
+                    else:
+                        waveform_type = (
+                            SofterSquareWaveform
+                            if zx_pi_4["shape"] == PulseShapeType.SOFTER_SQUARE
+                            else SoftSquareWaveform
+                        )
+                        zx_pi_4.pop("shape")
+                        zx_pi_4 = CalibratablePulse(waveform_type=waveform_type, **zx_pi_4)
 
                     new_cr_pulse_channel = CrossResonancePulseChannel(
                         auxiliary_qubit=aux_qubit,
@@ -197,9 +217,7 @@ def convert_purr_echo_hw_to_pydantic(legacy_hw, seed_uuid: bool = True):
                         imbalance=pulse_channel.imbalance,
                         scale=_process_real_or_complex(pulse_channel.scale),
                         phase_iq_offset=pulse_channel.phase_offset,
-                        zx_pi_4_pulse=CalibratablePulse(
-                            waveform_type=waveform_type, **zx_pi_4
-                        ),
+                        zx_pi_4_pulse=zx_pi_4,
                     )
                     new_cross_resonance_pulse_channels[aux_qubit] = new_cr_pulse_channel
 
@@ -304,3 +322,23 @@ def _process_real_or_complex(value: float | complex) -> float | complex:
         return value.real
 
     return value
+
+
+def _build_logical_toplogy(legacy_hw: QuantumHardwareModel) -> dict[int, set[int]]:
+    """Assembles the logical connectivity from the legacy hardware model. This is done by
+    looking at the qubit couplings if they are defined, and otherwise by looking at the
+    coupled qubits of each qubit."""
+
+    logical_connectivity = defaultdict(set)
+
+    couplings = getattr(legacy_hw, "qubit_direction_couplings", None)
+    if couplings:
+        for coupling in couplings:
+            logical_connectivity[coupling.direction[0]].add(coupling.direction[1])
+    else:
+        for qubit in legacy_hw.qubits:
+            logical_connectivity[qubit.index].update(
+                [q.index for q in qubit.coupled_qubits]
+            )
+
+    return logical_connectivity

@@ -23,6 +23,7 @@ from qat.model.device import (
     CrossResonancePulseChannel,
     MeasurePulseChannel,
 )
+from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
@@ -584,6 +585,22 @@ class TestTwoQubitGates:
         assert len(synchronizes) == 2 * 2  # 2 synchronizes per ZX_pi_4 gate
         assert len(cr_pulses) == 2
         assert len(crc_pulses) == 2
+
+    def test_ZX_with_no_calibrated_pulse_raises_error(self):
+        model = LucyModelLoader(qubit_count=4).load()
+        model_dump = model.model_dump()
+        model_dump["qubits"][0]["pulse_channels"]["cross_resonance_channels"][1][
+            "zx_pi_4_pulse"
+        ] = None
+        model = PhysicalHardwareModel.model_validate(model_dump)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        with pytest.raises(ValueError, match="No `zx_pi_4_pulse` available"):
+            builder.ZX(
+                target1=model.qubit_with_index(0),
+                target2=model.qubit_with_index(1),
+                theta=np.pi / 4,
+            )
 
 
 class TestMeasure:

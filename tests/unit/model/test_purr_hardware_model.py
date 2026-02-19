@@ -12,6 +12,7 @@ from qat.ir.waveforms import (
     SquareWaveform,
 )
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
+from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
 from qat.utils.hardware_model import apply_setup_to_echo_hardware, random_connectivity
 
@@ -208,3 +209,61 @@ class TestEchoHardwareModelConversion:
         pyd_hw_a, leg_hw = get_echo_hw_pair(n_qubits, seed)
         pyd_hw_b = convert_purr_echo_hw_to_pydantic(leg_hw)
         assert pyd_hw_a.model_dump() == pyd_hw_b.model_dump()
+
+
+class TestConversionErrors:
+    def test_missing_zx_pi_4_pulse(self):
+        model = EchoModelLoader(qubit_count=4).load()
+
+        # Remove the zx_pi_4 pulse for the coupling between qubits 0 and 1, then check it
+        # raises an error
+        qubit_0_pulses = model.qubits[0].pulse_hw_zx_pi_4
+        assert "Q1" in qubit_0_pulses
+        qubit_0_pulses.pop("Q1")
+        with pytest.raises(
+            ValueError, match="Hardware model has a coupling between qubits 0 and 1"
+        ):
+            convert_purr_echo_hw_to_pydantic(model)
+
+        # Find the coupling and remove it, then check it converts (in practice a warning is
+        # logged)
+        found_coupling = None
+        for coupling in model.qubit_direction_couplings:
+            if coupling.direction == (0, 1):
+                found_coupling = coupling
+                break
+
+        assert found_coupling is not None
+        model.qubit_direction_couplings.remove(found_coupling)
+        convert_purr_echo_hw_to_pydantic(model)
+
+    def test_pulse_channels_removed_for_missing_couplings(self):
+        model = EchoModelLoader(qubit_count=4).load()
+
+        # test the converted model has the pulse channels
+        pyd_model = convert_purr_echo_hw_to_pydantic(model)
+        qubit_0 = pyd_model.qubit_with_index(0)
+        assert 1 in qubit_0.pulse_channels.cross_resonance_channels
+        assert 1 in qubit_0.pulse_channels.cross_resonance_cancellation_channels
+        qubit_1 = pyd_model.qubit_with_index(1)
+        assert 0 in qubit_1.pulse_channels.cross_resonance_channels
+        assert 0 in qubit_1.pulse_channels.cross_resonance_cancellation_channels
+
+        # test the converted model has the pulse channels removed when the coupling is removed
+        for coupling in [(0, 1), (1, 0)]:
+            found_coupling = None
+            for coupling_direction in model.qubit_direction_couplings:
+                if coupling_direction.direction == coupling:
+                    found_coupling = coupling_direction
+                    break
+
+            assert found_coupling is not None
+            model.qubit_direction_couplings.remove(found_coupling)
+
+        pyd_model = convert_purr_echo_hw_to_pydantic(model)
+        qubit_0 = pyd_model.qubit_with_index(0)
+        assert 1 not in qubit_0.pulse_channels.cross_resonance_channels
+        assert 1 not in qubit_0.pulse_channels.cross_resonance_cancellation_channels
+        qubit_1 = pyd_model.qubit_with_index(1)
+        assert 0 not in qubit_1.pulse_channels.cross_resonance_channels
+        assert 0 not in qubit_1.pulse_channels.cross_resonance_cancellation_channels

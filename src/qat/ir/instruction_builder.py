@@ -539,6 +539,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 f"that is not linked to {str(target1)}."
             )
 
+        if target1_pulse_channel.zx_pi_4_pulse is None:
+            raise ValueError(
+                f"No `zx_pi_4_pulse` available for qubit pair {target1_id} and "
+                f"{target2_id}."
+            )
+
         pulse = target1_pulse_channel.zx_pi_4_pulse.model_dump()
         waveform_type = target1_pulse_channel.zx_pi_4_pulse.waveform_type
         if pulse is None:
