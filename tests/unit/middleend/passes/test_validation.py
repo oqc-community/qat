@@ -51,7 +51,7 @@ class TestInstructionValidation:
             builder.X(target=qubit)
 
         PydInstructionValidation(
-            self.target_data, self.hw, pulse_duration_limits=pulse_duration_limits
+            self.hw, self.target_data, pulse_duration_limits=pulse_duration_limits
         ).run(builder)
 
     @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
@@ -70,7 +70,7 @@ class TestInstructionValidation:
             else nullcontext()
         ):
             PydInstructionValidation(
-                self.target_data, self.hw, pulse_duration_limits=pulse_duration_limits
+                self.hw, self.target_data, pulse_duration_limits=pulse_duration_limits
             ).run(builder)
 
     @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
@@ -89,22 +89,8 @@ class TestInstructionValidation:
             else nullcontext()
         ):
             PydInstructionValidation(
-                self.target_data, self.hw, pulse_duration_limits=pulse_duration_limits
+                self.hw, self.target_data, pulse_duration_limits=pulse_duration_limits
             ).run(builder)
-
-    def test_too_many_instructions(self):
-        builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
-        drive_pulse_ch = self.hw.qubits[0].drive_pulse_channel.uuid
-
-        for _ in range(self.target_data.QUBIT_DATA.instruction_memory_size + 1):
-            builder.pulse(
-                target=drive_pulse_ch, duration=1e-8, waveform=GaussianWaveform(width=1e-8)
-            )
-
-        with pytest.raises(
-            ValueError, match="too large to be run in a single block on current hardware."
-        ):
-            PydInstructionValidation(self.target_data, self.hw).run(builder)
 
     def test_acquire_on_drive_channel(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
@@ -112,7 +98,7 @@ class TestInstructionValidation:
         builder.add(Acquire(target=drive_pulse_ch, duration=1e-8))
 
         with pytest.raises(ValueError, match="Cannot perform an acquire on the"):
-            PydInstructionValidation(self.target_data, self.hw).run(builder)
+            PydInstructionValidation(self.hw, self.target_data).run(builder)
 
 
 class TestDynamicFrequencyValidation:

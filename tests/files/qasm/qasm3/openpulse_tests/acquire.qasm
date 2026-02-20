@@ -7,7 +7,24 @@ cal {
     extern frame r2_acquire;
 }
 cal {
-    waveform wf1 = [0.5, 1 + 0.0im, 0 + 1.0im, 0.3 - 0.5im];
+    waveform wf1 = [
+        0.5, 1 + 0.0im, 0 + 1.0im, 0.3 - 0.5im,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0
+    ];
     barrier q1_q2_cross_resonance, q1_drive;
     play(q1_q2_cross_resonance, wf1);
     delay[300ns] q1_drive;

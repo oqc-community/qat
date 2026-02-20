@@ -411,6 +411,15 @@ class TestEchoPipelineWithErrorMitigation:
                 pytest.raises(ValueError, match="BinaryCount format required"),
                 id="Raw_results",
             ),
+            pytest.param(
+                get_qasm3_path("overlong_waveform.qasm"),
+                CompilerConfig(results_format=QuantumResultsFormat().binary_count()),
+                pytest.raises(
+                    ValueError,
+                    match="Waveform width must be between 6.4e-08 s and 0.001 s.",
+                ),
+                id="overlong_waveform",
+            ),
         ],
     )
     def test_error_mitigation_compile_fail(self, program_file, compiler_config, error):

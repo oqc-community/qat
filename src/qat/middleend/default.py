@@ -31,6 +31,7 @@ from qat.middleend.passes.validation import (
     DynamicFrequencyValidation,
     FrequencySetupValidation,
     HardwareConfigValidity,
+    InstructionValidation,
     ReadoutValidation,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as HardwareModel
@@ -85,6 +86,7 @@ class DefaultMiddleend(CustomMiddleend):
             | PostProcessingSanitisation()
             | ReadoutValidation()
             | MeasurePhaseResetSanitisation(model)
+            | InstructionValidation(model, target_data)
             | InstructionGranularitySanitisation(target_data)
             # Preparing for codegen
             | EvaluateWaveforms(model, target_data)

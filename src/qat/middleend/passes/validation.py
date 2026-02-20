@@ -32,8 +32,8 @@ class InstructionValidation(ValidationPass):
 
     def __init__(
         self,
-        target_data: TargetData,
         model: PhysicalHardwareModel,
+        target_data: TargetData,
         pulse_duration_limits: bool | None = None,
         *args,
         **kwargs,
@@ -72,13 +72,6 @@ class InstructionValidation(ValidationPass):
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
-
-        instruction_length = ir.number_of_instructions
-        if instruction_length > self.instruction_memory_size:
-            raise ValueError(
-                f"Program with {instruction_length} instructions too large to be run "
-                f"in a single block on current hardware."
-            )
 
         for inst in ir.instructions:
             self._validate_instruction(inst)

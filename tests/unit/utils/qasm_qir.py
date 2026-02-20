@@ -232,6 +232,7 @@ skip_qasm3 = [
     "invalid_couplings.qasm",
     "u_gate.qasm",
     "invalid_pulse_length.qasm",
+    "overlong_waveform.qasm",
 ]
 
 

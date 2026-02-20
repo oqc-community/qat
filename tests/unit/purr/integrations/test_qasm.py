@@ -382,7 +382,7 @@ class TestQASM3:
 
         assert len(pluses) == 1
         assert pulse is not None
-        assert pulse.samples == [1, 1j]
+        assert pulse.samples == [1, 1j, -1, -1j] * 16
 
     def test_delay(self):
         hw = get_default_echo_hardware()

@@ -2,7 +2,24 @@ OPENQASM 3;
 defcalgrammar "openpulse";
 cal {
     extern frame q0_q1_cross_resonance;
-    waveform wf1 = [0.5, 0.5im, -0.5, -0.5im, 1 + 0.0im, 0 + 1.0im, 0.3 - 0.5im, 0.9im, -0.5 + 0.1im, 0.5, 0.5, 0.5];
+    waveform wf1 = [
+        0.5, 0.5im, -0.5, -0.5im,
+        1 + 0.0im, 0 + 1.0im, 0.3 - 0.5im, 0.9im,
+        -0.5 + 0.1im, 0.5, 0.5, 0.5,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0,
+        0,0,0,0
+    ];
 }
 defcal xy(angle theta) $0, $1 {
     set_phase(q0_q1_cross_resonance, 0.5);
