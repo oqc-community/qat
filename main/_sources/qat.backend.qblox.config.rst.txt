@@ -12,6 +12,5 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   qat.backend.qblox.config.constants
    qat.backend.qblox.config.helpers
    qat.backend.qblox.config.specification

@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post158.dev20260219082953 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post159.dev20260220081939 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -80,7 +80,6 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.html">qat.backend.qblox package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.constants.html">qat.backend.qblox.config.constants module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a></li>
 </ul>
@@ -93,6 +92,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.ir.html">qat.backend.qblox.ir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.target_data.html">qat.backend.qblox.target_data module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
 </ul>
 </li>
@@ -2031,12 +2031,8 @@
 </li>
       <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.linear_map_complex_to_real.params.constant">constant (qat.runtime.post_processing.linear_map_complex_to_real parameter)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants">Constants (class in qat.backend.qblox.config.constants)</a>
-
-      <ul>
-        <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants">(class in qat.purr.backends.qblox.constants)</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants">Constants (class in qat.purr.backends.qblox.constants)</a>
 </li>
-      </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.constrain">constrain() (InstructionBuilder static method)</a>
 
       <ul>
@@ -2087,6 +2083,12 @@
       </ul></li>
       <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.ControlGate2Q.control">control (ControlGate2Q property)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.CONTROL_SEQUENCER_DATA">CONTROL_SEQUENCER_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.CONTROL_SEQUENCER_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.control_type">control_type (Section attribute)</a>
 </li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.ControlFlowGraph">ControlFlowGraph (class in qat.backend.graph)</a>
@@ -2109,6 +2111,8 @@
         <li><a href="qat.integrations.tket.html#qat.integrations.tket.TketBuilder.controlled">(TketBuilder method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ControlSequencerDescription">ControlSequencerDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.ControlType">ControlType (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
       <li><a href="qat.integrations.tket.html#qat.integrations.tket.TketToQatIRConverter.convert">convert() (TketToQatIRConverter method)</a>, <a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter.convert">[1]</a>
@@ -2439,10 +2443,30 @@
 </li>
       <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.UpdateablePipelineDescription.default">default (UpdateablePipelineDescription attribute)</a>
 </li>
-      <li><a href="qat.purr.utils.serializer.html#qat.purr.utils.serializer.CustomQatJsonDecoder.default">default() (CustomQatJsonDecoder method)</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ControlSequencerDescription.default">default() (ControlSequencerDescription class method)</a>
 
       <ul>
+        <li><a href="qat.purr.utils.serializer.html#qat.purr.utils.serializer.CustomQatJsonDecoder.default">(CustomQatJsonDecoder method)</a>
+</li>
         <li><a href="qat.purr.utils.serializer.html#qat.purr.utils.serializer.CustomQatJsonEncoder.default">(CustomQatJsonEncoder method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ModuleDescription.default">(ModuleDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.default">(Q1asmDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.default">(QbloxTargetData class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.default">(QcmDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription.default">(QcmRfDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.default">(QrmDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.default">(QrmRfDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ReadoutSequencerDescription.default">(ReadoutSequencerDescription class method)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.default">(SequencerDescription class method)</a>
 </li>
         <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.default">(TargetData class method)</a>
 </li>
@@ -2545,6 +2569,8 @@
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SquareFunction.derivative">(SquareFunction method)</a>, <a href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.derivative">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.integrations.features.html#qat.integrations.features.FeatureMetadata.description">description (FeatureMetadata attribute)</a>
 
       <ul>
@@ -2563,8 +2589,6 @@
         <li><a href="qat.purr.backends.qblox.transform_passes.html#qat.purr.backends.qblox.transform_passes.DesugaringPass">(class in qat.purr.backends.qblox.transform_passes)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.SweepInstance.device_assigns">device_assigns (SweepInstance attribute)</a>
@@ -3729,14 +3753,14 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.get_default_RTCS_hardware">get_default_RTCS_hardware() (in module qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveHardwareModel.get_device">get_device() (LiveHardwareModel method)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_device">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_physical_channel">get_devices_from_physical_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_devices_from_pulse_channel">get_devices_from_pulse_channel() (QuantumHardwareModel method)</a>
@@ -3909,8 +3933,14 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.GreaterThan">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.GRID_TIME">GRID_TIME (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.GRID_TIME">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.GRID_TIME">GRID_TIME (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.grid_time">grid_time (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.grid_time">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -4955,10 +4985,10 @@
 </li>
       <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.load_qasm_file">load_qasm_file() (in module qat.frontend.qasm)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.qir.html#qat.frontend.qir.load_qir_file">load_qir_file() (in module qat.frontend.qir)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.CompilePipelineDescription.construct.params.loader">loader (qat.core.config.descriptions.CompilePipelineDescription.construct parameter)</a>
 
       <ul>
@@ -5147,8 +5177,14 @@
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.loop">loop() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.loop">[1]</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.LOOP_UNROLL_THRESHOLD">LOOP_UNROLL_THRESHOLD (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.LOOP_UNROLL_THRESHOLD">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.LOOP_UNROLL_THRESHOLD">LOOP_UNROLL_THRESHOLD (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.loop_unroll_threshold">loop_unroll_threshold (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.loop_unroll_threshold">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.LoopCount">LoopCount (class in qat.ir.instructions)</a>
 
       <ul>
@@ -5271,25 +5307,63 @@
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.ZX_pi_4.matrix">(ZX_pi_4 property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH">MAX_ACQ_INTEGRATION_LENGTH (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_INTEGRATION_LENGTH">MAX_ACQ_INTEGRATION_LENGTH (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_ACQ_THRESHOLD">MAX_ACQ_THRESHOLD (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_THRESHOLD">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.max_acq_integration_length">max_acq_integration_length (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.max_acq_integration_length">(SequencerDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_BINNED_ACQUISITIONS">MAX_BINNED_ACQUISITIONS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_BINNED_ACQUISITIONS">[1]</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_ACQ_THRESHOLD">MAX_ACQ_THRESHOLD (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.max_acq_threshold">max_acq_threshold (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.max_acq_threshold">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_BINNED_ACQUISITIONS">MAX_BINNED_ACQUISITIONS (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.params.max_binned_acquisitions">max_binned_acquisitions (qat.backend.qblox.target_data.QrmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.max_binned_acquisitions">(QrmDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.LucyVerificationEngine.max_circuit_duration">max_circuit_duration (LucyVerificationEngine attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.max_frequency">max_frequency (PulseChannel property)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_GAIN">MAX_GAIN (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_GAIN">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_GAIN">MAX_GAIN (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_GAIN_SIZE">MAX_GAIN_SIZE (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_GAIN_SIZE">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.max_gain">max_gain (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.max_gain">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_GAIN_SIZE">MAX_GAIN_SIZE (Constants attribute)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.MAX_INSTRUCTION_LENGTH">MAX_INSTRUCTION_LENGTH (InstructionValidationConfig attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_OFFSET">MAX_OFFSET (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_OFFSET">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ControlSequencerDescription.max_num_instructions">max_num_instructions (ControlSequencerDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ReadoutSequencerDescription.max_num_instructions">(ReadoutSequencerDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_OFFSET_SIZE">MAX_OFFSET_SIZE (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_OFFSET_SIZE">[1]</a>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.max_num_instructions">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_OFFSET">MAX_OFFSET (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.max_offset">max_offset (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.max_offset">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_OFFSET_SIZE">MAX_OFFSET_SIZE (Constants attribute)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.max_pulse_duration">max_pulse_duration (Constraints attribute)</a>
 
@@ -5297,20 +5371,56 @@
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseConstraints.max_pulse_duration">(OpenPulseConstraints attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_QCM_OFFSET_V">MAX_QCM_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QCM_OFFSET_V">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QCM_OFFSET_V">MAX_QCM_OFFSET_V (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_QCM_RF_OFFSET_MV">MAX_QCM_RF_OFFSET_MV (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QCM_RF_OFFSET_MV">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.params.max_qcm_offset_v">max_qcm_offset_v (qat.backend.qblox.target_data.QcmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.max_qcm_offset_v">(QcmDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_QRM_OFFSET_V">MAX_QRM_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QRM_OFFSET_V">[1]</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QCM_RF_OFFSET_MV">MAX_QCM_RF_OFFSET_MV (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_QRM_RF_OFFSET_V">MAX_QRM_RF_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QRM_RF_OFFSET_V">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription.params.max_qcm_rf_offset_mv">max_qcm_rf_offset_mv (qat.backend.qblox.target_data.QcmRfDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription.max_qcm_rf_offset_mv">(QcmRfDescription attribute)</a>
 </li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QRM_OFFSET_V">MAX_QRM_OFFSET_V (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.params.max_qrm_offset_v">max_qrm_offset_v (qat.backend.qblox.target_data.QrmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.max_qrm_offset_v">(QrmDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QRM_RF_OFFSET_V">MAX_QRM_RF_OFFSET_V (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.params.max_qrm_rf_offset_v">max_qrm_rf_offset_v (qat.backend.qblox.target_data.QrmRfDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.max_qrm_rf_offset_v">(QrmRfDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.MAX_REPEATS_LIMIT">MAX_REPEATS_LIMIT (QatConfig attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS">MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS">MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_SAMPLE_SIZE_WAVEFORMS">MAX_SAMPLE_SIZE_WAVEFORMS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_SAMPLE_SIZE_WAVEFORMS">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.params.max_sample_size_scope_acquisitions">max_sample_size_scope_acquisitions (qat.backend.qblox.target_data.QrmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.max_sample_size_scope_acquisitions">(QrmDescription attribute)</a>
 </li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_SAMPLE_SIZE_WAVEFORMS">MAX_SAMPLE_SIZE_WAVEFORMS (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.max_sample_size_waveforms">max_sample_size_waveforms (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.max_sample_size_waveforms">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.max_scale">max_scale (Constraints attribute)</a>
 
       <ul>
@@ -5331,10 +5441,16 @@
         <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.create_with.params.max_shots">(qat.model.target_data.TargetData.create_with parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_TOTAL_BINNED_ACQUISITIONS">MAX_TOTAL_BINNED_ACQUISITIONS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_TOTAL_BINNED_ACQUISITIONS">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_TOTAL_BINNED_ACQUISITIONS">MAX_TOTAL_BINNED_ACQUISITIONS (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MAX_WAIT_TIME">MAX_WAIT_TIME (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_WAIT_TIME">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_WAIT_TIME">MAX_WAIT_TIME (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.max_wait_time">max_wait_time (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.max_wait_time">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.max_waveform_amplitude">max_waveform_amplitude (Constraints attribute)</a>
 
       <ul>
@@ -5535,16 +5651,40 @@
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.MILLI">MILLI (Scale attribute)</a>, <a href="qat.utils.units.html#qat.utils.units.Scale.MILLI">[1]</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_ACQ_INTEGRATION_LENGTH">MIN_ACQ_INTEGRATION_LENGTH (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_ACQ_INTEGRATION_LENGTH">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_ACQ_INTEGRATION_LENGTH">MIN_ACQ_INTEGRATION_LENGTH (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_ACQ_THRESHOLD">MIN_ACQ_THRESHOLD (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_ACQ_THRESHOLD">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.min_acq_integration_length">min_acq_integration_length (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.min_acq_integration_length">(SequencerDescription attribute)</a>
 </li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_ACQ_THRESHOLD">MIN_ACQ_THRESHOLD (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.min_acq_threshold">min_acq_threshold (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.min_acq_threshold">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.min_frequency">min_frequency (PulseChannel property)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_GAIN">MIN_GAIN (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_GAIN">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_GAIN">MIN_GAIN (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_OFFSET">MIN_OFFSET (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_OFFSET">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.min_gain">min_gain (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.min_gain">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
 </li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_OFFSET">MIN_OFFSET (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.min_offset">min_offset (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.min_offset">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.min_pulse_duration">min_pulse_duration (Constraints attribute)</a>
 
       <ul>
@@ -5557,16 +5697,46 @@
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseConstraints.min_pulse_time">(OpenPulseConstraints attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_QCM_OFFSET_V">MIN_QCM_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QCM_OFFSET_V">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QCM_OFFSET_V">MIN_QCM_OFFSET_V (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_QCM_RF_OFFSET_MV">MIN_QCM_RF_OFFSET_MV (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QCM_RF_OFFSET_MV">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.params.min_qcm_offset_v">min_qcm_offset_v (qat.backend.qblox.target_data.QcmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.min_qcm_offset_v">(QcmDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_QRM_OFFSET_V">MIN_QRM_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QRM_OFFSET_V">[1]</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QCM_RF_OFFSET_MV">MIN_QCM_RF_OFFSET_MV (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_QRM_RF_OFFSET_V">MIN_QRM_RF_OFFSET_V (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QRM_RF_OFFSET_V">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription.params.min_qcm_rf_offset_mv">min_qcm_rf_offset_mv (qat.backend.qblox.target_data.QcmRfDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription.min_qcm_rf_offset_mv">(QcmRfDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS">MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS">[1]</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QRM_OFFSET_V">MIN_QRM_OFFSET_V (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.params.min_qrm_offset_v">min_qrm_offset_v (qat.backend.qblox.target_data.QrmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.min_qrm_offset_v">(QrmDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_QRM_RF_OFFSET_V">MIN_QRM_RF_OFFSET_V (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.params.min_qrm_rf_offset_v">min_qrm_rf_offset_v (qat.backend.qblox.target_data.QrmRfDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.min_qrm_rf_offset_v">(QrmRfDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS">MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.params.min_sample_size_scope_acquisitions">min_sample_size_scope_acquisitions (qat.backend.qblox.target_data.QrmDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.min_sample_size_scope_acquisitions">(QrmDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.model.validators.html#qat.model.validators.MismatchingHardwareModelException">MismatchingHardwareModelException</a>
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.mixer">mixer (SequencerConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.mixer">[1]</a>
@@ -5896,6 +6066,8 @@
 </li>
         <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.ControlGate2Q.model_config">(ControlGate2Q attribute)</a>
 </li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ControlSequencerDescription.model_config">(ControlSequencerDescription attribute)</a>
+</li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.Cos.model_config">(Cos attribute)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.CosWaveform.model_config">(CosWaveform attribute)</a>
@@ -6022,6 +6194,8 @@
 </li>
         <li><a href="qat.core.metrics_base.html#qat.core.metrics_base.MetricsManager.model_config">(MetricsManager attribute)</a>, <a href="qat.purr.core.metrics_base.html#qat.purr.core.metrics_base.MetricsManager.model_config">[1]</a>
 </li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ModuleDescription.model_config">(ModuleDescription attribute)</a>
+</li>
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.NativeGate.model_config">(NativeGate attribute)</a>
 </li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel.model_config">(NoExtraFieldsFrozenModel attribute)</a>
@@ -6090,6 +6264,8 @@
 </li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydValidatedBase.model_config">(PydValidatedBase attribute)</a>
 </li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.model_config">(Q1asmDescription attribute)</a>
+</li>
         <li><a href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.QasmContext.model_config">(QasmContext attribute)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.model_config">(QatConfig attribute)</a>
@@ -6102,9 +6278,17 @@
 </li>
         <li><a href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxProgram.model_config">(QbloxProgram attribute)</a>
 </li>
-        <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.QbloxTargetData.model_config">(QbloxTargetData attribute)</a>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.model_config">(QbloxTargetData attribute)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.model_config">(QcmDescription attribute)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription.model_config">(QcmRfDescription attribute)</a>
 </li>
         <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QiskitSimulationConfig.model_config">(QiskitSimulationConfig attribute)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription.model_config">(QrmDescription attribute)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.model_config">(QrmRfDescription attribute)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.model_config">(QRPairModel attribute)</a>
 </li>
@@ -6129,6 +6313,8 @@
         <li><a href="qat.frontend.register.html#qat.frontend.register.QubitRegister.model_config">(QubitRegister attribute)</a>
 </li>
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.model_config">(ReadoutMitigation attribute)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ReadoutSequencerDescription.model_config">(ReadoutSequencerDescription attribute)</a>
 </li>
         <li><a href="qat.frontend.register.html#qat.frontend.register.Registers.model_config">(Registers attribute)</a>
 </li>
@@ -6175,6 +6361,8 @@
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.SechWaveform.model_config">(SechWaveform attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.model_config">(SecondStatePulseChannel attribute)</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.model_config">(SequencerDescription attribute)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.SetupHoldFunction.model_config">(SetupHoldFunction attribute)</a>
 </li>
@@ -6351,8 +6539,6 @@
 </li>
         <li><a href="qat.backend.qblox.config.html#module-qat.backend.qblox.config">qat.backend.qblox.config</a>
 </li>
-        <li><a href="qat.backend.qblox.config.constants.html#module-qat.backend.qblox.config.constants">qat.backend.qblox.config.constants</a>
-</li>
         <li><a href="qat.backend.qblox.config.helpers.html#module-qat.backend.qblox.config.helpers">qat.backend.qblox.config.helpers</a>
 </li>
         <li><a href="qat.backend.qblox.config.specification.html#module-qat.backend.qblox.config.specification">qat.backend.qblox.config.specification</a>
@@ -6364,6 +6550,8 @@
         <li><a href="qat.backend.qblox.passes.html#module-qat.backend.qblox.passes">qat.backend.qblox.passes</a>
 </li>
         <li><a href="qat.backend.qblox.passes.analysis.html#module-qat.backend.qblox.passes.analysis">qat.backend.qblox.passes.analysis</a>
+</li>
+        <li><a href="qat.backend.qblox.target_data.html#module-qat.backend.qblox.target_data">qat.backend.qblox.target_data</a>
 </li>
         <li><a href="qat.backend.qblox.visualisation.html#module-qat.backend.qblox.visualisation">qat.backend.qblox.visualisation</a>
 </li>
@@ -6906,6 +7094,8 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ModuleConfig">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ModuleDescription">ModuleDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.ModuleFilter">ModuleFilter (class in qat.purr.utils.logger)</a>
 </li>
       <li><a href="qat.engines.qblox.live.html#qat.engines.qblox.live.QbloxLeafInstrument.modules">modules (QbloxLeafInstrument property)</a>
@@ -7030,20 +7220,56 @@
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.nco">nco (SequencerConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.nco">[1]</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NCO_FREQ_LIMIT_STEPS">NCO_FREQ_LIMIT_STEPS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_FREQ_LIMIT_STEPS">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_FREQ_LIMIT_STEPS">NCO_FREQ_LIMIT_STEPS (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_limit_steps">nco_freq_limit_steps (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_freq_limit_steps">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_FREQ_STEPS_PER_HZ">NCO_FREQ_STEPS_PER_HZ (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_steps_per_hz">nco_freq_steps_per_hz (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_freq_steps_per_hz">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ">NCO_MAX_FREQ (Constants attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_max_freq">nco_max_freq (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_max_freq">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NCO_FREQ_STEPS_PER_HZ">NCO_FREQ_STEPS_PER_HZ (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_FREQ_STEPS_PER_HZ">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_PHASE_STEPS">NCO_MAX_PHASE_STEPS (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NCO_MAX_FREQ">NCO_MAX_FREQ (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_FREQ">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_max_phase_steps">nco_max_phase_steps (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_max_phase_steps">(SequencerDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NCO_MAX_PHASE_STEPS">NCO_MAX_PHASE_STEPS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MAX_PHASE_STEPS">[1]</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NCO_MIN_FREQ">NCO_MIN_FREQ (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_MIN_FREQ">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_min_freq">nco_min_freq (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_min_freq">(SequencerDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">[1]</a>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_phase_steps_per_deg">nco_phase_steps_per_deg (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_phase_steps_per_deg">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.NcoConfig">NcoConfig (class in qat.backend.qblox.config.specification)</a>
 
       <ul>
@@ -7122,11 +7348,23 @@
       </ul></li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.number_of_qubits">number_of_qubits (PhysicalHardwareModel property)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NUMBER_OF_REGISTERS">NUMBER_OF_REGISTERS (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_REGISTERS">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_REGISTERS">NUMBER_OF_REGISTERS (Constants attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NUMBER_OF_SEQUENCERS_QCM">NUMBER_OF_SEQUENCERS_QCM (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_SEQUENCERS_QCM">[1]</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.number_of_registers">number_of_registers (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.number_of_registers">(SequencerDescription attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.NUMBER_OF_SEQUENCERS_QRM">NUMBER_OF_SEQUENCERS_QRM (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_SEQUENCERS_QRM">[1]</a>
+      </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ModuleDescription.number_of_sequencers">number_of_sequencers (ModuleDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ModuleDescription.params.number_of_sequencers">(qat.backend.qblox.target_data.ModuleDescription parameter)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_SEQUENCERS_QCM">NUMBER_OF_SEQUENCERS_QCM (Constants attribute)</a>
+</li>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_SEQUENCERS_QRM">NUMBER_OF_SEQUENCERS_QRM (Constants attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.NumericFunction">NumericFunction (class in qat.purr.backends.utilities)</a>
 
@@ -8242,6 +8480,14 @@
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.Q1ASM_DATA">Q1ASM_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.Q1ASM_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription">Q1asmDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Q1asmInstruction">Q1asmInstruction (class in qat.backend.qblox.ir)</a>
 
       <ul>
@@ -8438,13 +8684,6 @@
 </li>
       </ul></li>
       <li>
-    qat.backend.qblox.config.constants
-
-      <ul>
-        <li><a href="qat.backend.qblox.config.constants.html#module-qat.backend.qblox.config.constants">module</a>
-</li>
-      </ul></li>
-      <li>
     qat.backend.qblox.config.helpers
 
       <ul>
@@ -8484,6 +8723,13 @@
 
       <ul>
         <li><a href="qat.backend.qblox.passes.analysis.html#module-qat.backend.qblox.passes.analysis">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.backend.qblox.target_data
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#module-qat.backend.qblox.target_data">module</a>
 </li>
       </ul></li>
       <li>
@@ -9585,8 +9831,6 @@
         <li><a href="qat.pipelines.purr.sweep.execute.html#module-qat.pipelines.purr.sweep.execute">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.purr.sweep.flattener
 
@@ -9608,6 +9852,8 @@
         <li><a href="qat.pipelines.purr.waveform_v1.html#module-qat.pipelines.purr.waveform_v1">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.purr.waveform_v1.compile
 
@@ -10459,20 +10705,36 @@
 </li>
       <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxResonator">QbloxResonator (class in qat.purr.backends.qblox.device)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.QbloxTargetData">QbloxTargetData (class in qat.backend.qblox.config.constants)</a>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData">QbloxTargetData (class in qat.backend.qblox.target_data)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.QCM_DATA">QCM_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.QCM_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.QCM_RF_DATA">QCM_RF_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.QCM_RF_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QcmConfigHelper">QcmConfigHelper (class in qat.backend.qblox.config.helpers)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmConfigHelper">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription">QcmDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QcmRfConfigHelper">QcmRfConfigHelper (class in qat.backend.qblox.config.helpers)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QcmRfConfigHelper">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmRfDescription">QcmRfDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend">QIRFrontend (class in qat.frontend.qir)</a>
 
       <ul>
@@ -10523,18 +10785,36 @@
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.qreg">qreg() (TketBuilder method)</a>
 </li>
+      <li><a href="qat.engines.qblox.dummy.html#qat.engines.qblox.dummy.DummyQbloxInstrument.qrm_data">qrm_data (DummyQbloxInstrument attribute)</a>
+</li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.QRM_DATA">QRM_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.QRM_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.QRM_RF_DATA">QRM_RF_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.QRM_RF_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmConfigHelper">QrmConfigHelper (class in qat.backend.qblox.config.helpers)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmConfigHelper">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmDescription">QrmDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QrmRfConfigHelper">QrmRfConfigHelper (class in qat.backend.qblox.config.helpers)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QrmRfConfigHelper">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription">QrmRfDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel">QRPairModel (class in qat.purr.backends.qblox.model_base)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity">Quantity (class in qat.purr.integrations.features)</a>
@@ -10817,12 +11097,20 @@
         <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ErrorMitigation.params.readout_mitigation">(qat.model.error_mitigation.ErrorMitigation parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.READOUT_SEQUENCER_DATA">READOUT_SEQUENCER_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.READOUT_SEQUENCER_DATA">(QbloxTargetData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation">ReadoutMitigation (class in qat.model.error_mitigation)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.ReadoutMitigation">(class in qat.purr.compiler.hardware_models)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.ReadoutSequencerDescription">ReadoutSequencerDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.middleend.passes.purr.validation.html#qat.middleend.passes.purr.validation.ReadoutValidation">ReadoutValidation (class in qat.middleend.passes.purr.validation)</a>
 
       <ul>
@@ -10865,8 +11153,14 @@
 </li>
       <li><a href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.register_name">register_name (CregIndexValue attribute)</a>
 </li>
-      <li><a href="qat.backend.qblox.config.constants.html#qat.backend.qblox.config.constants.Constants.REGISTER_SIZE">REGISTER_SIZE (Constants attribute)</a>, <a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.REGISTER_SIZE">[1]</a>
+      <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.REGISTER_SIZE">REGISTER_SIZE (Constants attribute)</a>
 </li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.register_size">register_size (Q1asmDescription attribute)</a>
+
+      <ul>
+        <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.Q1asmDescription.params.register_size">(qat.backend.qblox.target_data.Q1asmDescription parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.AllocationManager.registers">registers (AllocationManager attribute)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.AllocationManager.registers">[1]</a>
 </li>
       <li><a href="qat.frontend.register.html#qat.frontend.register.Registers">Registers (class in qat.frontend.register)</a>
@@ -11905,6 +12199,8 @@
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
+      <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription">SequencerDescription (class in qat.backend.qblox.target_data)</a>
+</li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.QbloxConfig.sequencers">sequencers (QbloxConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfig.sequencers">[1]</a>
 </li>
       <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.SequentialEndMeasurements">SequentialEndMeasurements (class in qat.middleend.passes.gates.transform)</a>
@@ -12465,6 +12761,8 @@
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.CompilePipelineDescription.target_data">(CompilePipelineDescription attribute)</a>
 </li>
         <li><a href="qat.pipelines.purr.sweep.compile.html#qat.pipelines.purr.sweep.compile.CompileSweepPipeline.target_data">(CompileSweepPipeline property)</a>, <a href="qat.pipelines.purr.sweep.html#qat.pipelines.purr.sweep.CompileSweepPipeline.target_data">[1]</a>
+</li>
+        <li><a href="qat.engines.qblox.dummy.html#qat.engines.qblox.dummy.DummyQbloxInstrument.target_data">(DummyQbloxInstrument attribute)</a>
 </li>
         <li><a href="qat.pipelines.cache.html#qat.pipelines.cache.ExecutePipelineCache.target_data">(ExecutePipelineCache property)</a>
 </li>

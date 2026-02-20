@@ -25,4 +25,5 @@ Submodules
    qat.backend.qblox.codegen
    qat.backend.qblox.execution
    qat.backend.qblox.ir
+   qat.backend.qblox.target_data
    qat.backend.qblox.visualisation

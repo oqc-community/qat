@@ -1,0 +1,7 @@
+qat.backend.qblox.target\_data module
+=====================================
+
+.. automodule:: qat.backend.qblox.target_data
+   :members:
+   :undoc-members:
+   :show-inheritance:
