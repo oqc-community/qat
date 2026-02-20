@@ -15,12 +15,12 @@ from qat.backend.passes.purr.analysis import (
     TriageResult,
 )
 from qat.backend.passes.purr.transform import DesugaringPass
-from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.backend.qblox.passes.analysis import (
     PreCodegenPass,
     PreCodegenResult,
     QbloxLegalisationPass,
 )
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager

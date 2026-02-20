@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from qat.backend.qblox.config.constants import Constants
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.purr.backends.qblox.acquisition import (
     Acquisition,
     BinnedAcqData,
@@ -14,6 +14,9 @@ from qat.purr.backends.qblox.acquisition import (
     PathData,
     ScopeAcqData,
 )
+
+target_data = QbloxTargetData.default()
+qrm_data = target_data.QRM_DATA
 
 
 class TestAcquisition:
@@ -51,7 +54,7 @@ class TestAcquisition:
     @pytest.mark.parametrize(
         "acquisition, integ_length",
         [
-            ("acquisition_1.json", Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS),
+            ("acquisition_1.json", qrm_data.max_sample_size_scope_acquisitions),
             ("acquisition_2.json", 800),
         ],
     )

@@ -20,7 +20,6 @@ from qat.backend.passes.purr.analysis import (
     TriagePass,
 )
 from qat.backend.passes.purr.transform import ScopePeeling
-from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.execution import QbloxPackage, QbloxProgram
 from qat.backend.qblox.ir import Opcode, SequenceBuilder
@@ -32,6 +31,7 @@ from qat.backend.qblox.passes.analysis import (
     QbloxLegalisationPass,
     TriageResult,
 )
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
@@ -73,18 +73,22 @@ class QbloxContext(ABC):
         rw_result: ReadWriteResult,
         iter_bounds: dict[str, IterBound],
         alloc_mgr: AllocationManager = None,
+        target_data: QbloxTargetData = None,
     ):
         self.inits: dict[str, list[Instruction]] = rw_result.inits
         self.reads: dict[str, list[Instruction]] = rw_result.reads
         self.writes: dict[str, list[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr or AllocationManager()
+        self.target_data = target_data or QbloxTargetData.default()
 
         self.sequence_builder = SequenceBuilder()
         self.sequencer_config = SequencerConfig()
 
         self._num_hw_avg = 1  # Technically disabled
-        self._wf_memory: int = Constants.MAX_SAMPLE_SIZE_WAVEFORMS
+        self._wf_memory: int = (
+            self.target_data.CONTROL_SEQUENCER_DATA.max_sample_size_waveforms
+        )
         self._wf_index: int = 0
         self._acq_index: int = 0
         self._wgt_index: int = 0
@@ -103,7 +107,7 @@ class QbloxContext(ABC):
 
         self.sequence_builder.set_mrk(3)
         self.sequence_builder.set_latch_en(1, 4)
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
+        self.sequence_builder.upd_param(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
         for name, register in self.alloc_mgr.registers.items():
             self.sequence_builder.move(
@@ -224,20 +228,22 @@ class QbloxContext(ABC):
             log.debug(f"Expected positive duration, but got {duration}")
             return
 
-        quotient = duration // Constants.MAX_WAIT_TIME
-        remainder = duration % Constants.MAX_WAIT_TIME
+        quotient = duration // self.target_data.Q1ASM_DATA.max_wait_time
+        remainder = duration % self.target_data.Q1ASM_DATA.max_wait_time
 
-        if remainder < Constants.GRID_TIME:
-            log.debug(f"Rounding up {remainder} ns to {Constants.GRID_TIME} ns")
-            remainder = Constants.GRID_TIME
-            duration = quotient * Constants.MAX_WAIT_TIME + remainder
+        if remainder < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
+            log.debug(
+                f"Rounding up {remainder} ns to {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns"
+            )
+            remainder = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+            duration = quotient * self.target_data.Q1ASM_DATA.max_wait_time + remainder
 
-        if quotient >= Constants.LOOP_UNROLL_THRESHOLD:
+        if quotient >= self.target_data.Q1ASM_DATA.loop_unroll_threshold:
             with self._loop("wait_label", quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+                self.sequence_builder.wait(self.target_data.Q1ASM_DATA.max_wait_time)
         elif quotient >= 1:
             for _ in range(quotient):
-                self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
+                self.sequence_builder.wait(self.target_data.Q1ASM_DATA.max_wait_time)
 
         self.sequence_builder.wait(remainder)
 
@@ -263,17 +269,29 @@ class QbloxContext(ABC):
                 )
                 self.sequence_builder.nop()
 
-            self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, round_up)
-            self.sequence_builder.jlt(iter_reg, Constants.MAX_WAIT_TIME, remainder)
+            self.sequence_builder.jlt(
+                iter_reg, self.target_data.CONTROL_SEQUENCER_DATA.grid_time, round_up
+            )
+            self.sequence_builder.jlt(
+                iter_reg, self.target_data.Q1ASM_DATA.max_wait_time, remainder
+            )
             self.sequence_builder.label(batch_enter)
-            self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-            self.sequence_builder.sub(iter_reg, Constants.MAX_WAIT_TIME, iter_reg)
+            self.sequence_builder.wait(self.target_data.Q1ASM_DATA.max_wait_time)
+            self.sequence_builder.sub(
+                iter_reg, self.target_data.Q1ASM_DATA.max_wait_time, iter_reg
+            )
             self.sequence_builder.nop()
-            self.sequence_builder.jge(iter_reg, Constants.MAX_WAIT_TIME, batch_enter)
-            self.sequence_builder.jge(iter_reg, Constants.GRID_TIME, remainder)
+            self.sequence_builder.jge(
+                iter_reg, self.target_data.Q1ASM_DATA.max_wait_time, batch_enter
+            )
+            self.sequence_builder.jge(
+                iter_reg, self.target_data.CONTROL_SEQUENCER_DATA.grid_time, remainder
+            )
             self.sequence_builder.label(round_up)
             self.sequence_builder.jlt(iter_reg, 1, batch_exit)
-            self.sequence_builder.move(Constants.GRID_TIME, iter_reg, "Rounding up")
+            self.sequence_builder.move(
+                self.target_data.CONTROL_SEQUENCER_DATA.grid_time, iter_reg, "Rounding up"
+            )
             self.sequence_builder.nop()
             self.sequence_builder.label(remainder)
             self.sequence_builder.wait(iter_reg)
@@ -352,43 +370,55 @@ class QbloxContext(ABC):
         self.alloc_mgr.reg_free(iter_reg)
 
     def _upd_param_imm(self, duration: int):
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
-        self.wait_imm(duration - Constants.GRID_TIME)
+        self.sequence_builder.upd_param(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
+        self.wait_imm(duration - self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def _upd_param_reg(self, duration: str):
         """
         Update latched parameters and wait for `duration` nanoseconds expressed as a register
 
-        If `duration` is less than the threshold Constants.GRID_TIME, the generates assembly rounds up
-        and waits for Constants.GRID_TIME.
+        If `duration` is less than the threshold self.target_data.CONTROL_SEQUENCER_DATA.grid_time, the generates assembly rounds up
+        and waits for self.target_data.CONTROL_SEQUENCER_DATA.grid_time.
 
         Note that the `up_param` instruction is defined only for an immediate operand which must be
-        at least Constants.GRID_TIME. Therefore, technically we're already forced to round up.
+        at least self.target_data.CONTROL_SEQUENCER_DATA.grid_time. Therefore, technically we're already forced to round up.
         """
 
         batch_enter = self.alloc_mgr.label_gen("batch_enter")
         batch_exit = self.alloc_mgr.label_gen("batch_exit")
         remainder = self.alloc_mgr.label_gen("remainder")
 
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
+        self.sequence_builder.upd_param(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
         with self.alloc_mgr.reg_borrow("tmp") as iter_reg:
             self.sequence_builder.jlt(
                 duration,
-                Constants.GRID_TIME,
+                self.target_data.CONTROL_SEQUENCER_DATA.grid_time,
                 batch_exit,
                 "Guards against risky underflow",
             )
-            self.sequence_builder.sub(duration, Constants.GRID_TIME, iter_reg)
+            self.sequence_builder.sub(
+                duration, self.target_data.CONTROL_SEQUENCER_DATA.grid_time, iter_reg
+            )
             self.sequence_builder.nop()
 
-            self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, batch_exit)
-            self.sequence_builder.jlt(iter_reg, Constants.MAX_WAIT_TIME, remainder)
+            self.sequence_builder.jlt(
+                iter_reg, self.target_data.CONTROL_SEQUENCER_DATA.grid_time, batch_exit
+            )
+            self.sequence_builder.jlt(
+                iter_reg, self.target_data.Q1ASM_DATA.max_wait_time, remainder
+            )
             self.sequence_builder.label(batch_enter)
-            self.sequence_builder.wait(Constants.MAX_WAIT_TIME)
-            self.sequence_builder.sub(iter_reg, Constants.MAX_WAIT_TIME, iter_reg)
+            self.sequence_builder.wait(self.target_data.Q1ASM_DATA.max_wait_time)
+            self.sequence_builder.sub(
+                iter_reg, self.target_data.Q1ASM_DATA.max_wait_time, iter_reg
+            )
             self.sequence_builder.nop()
-            self.sequence_builder.jge(iter_reg, Constants.MAX_WAIT_TIME, batch_enter)
-            self.sequence_builder.jlt(iter_reg, Constants.GRID_TIME, batch_exit)
+            self.sequence_builder.jge(
+                iter_reg, self.target_data.Q1ASM_DATA.max_wait_time, batch_enter
+            )
+            self.sequence_builder.jlt(
+                iter_reg, self.target_data.CONTROL_SEQUENCER_DATA.grid_time, batch_exit
+            )
             self.sequence_builder.label(remainder)
             self.sequence_builder.wait(iter_reg)
             self.sequence_builder.label(batch_exit)
@@ -488,7 +518,7 @@ class QbloxContext(ABC):
         return wgt_index
 
     def _do_acquire(self, wgt_name, acq_filter, acq_index, acq_bin, acq_width):
-        legal_acq_width = min(acq_width, Constants.MAX_WAIT_TIME)
+        legal_acq_width = min(acq_width, self.target_data.Q1ASM_DATA.max_wait_time)
         if acq_filter:
             weight = acq_filter.samples
             wgt_i_index = self._register_weight(f"{wgt_name}_weight_I", weight.real)
@@ -522,29 +552,33 @@ class QbloxContext(ABC):
         i_index,
         q_index,
     ):
-        effective_width = max(min(pulse_width, delay_width), Constants.GRID_TIME)
+        effective_width = max(
+            min(pulse_width, delay_width), self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+        )
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
             self.sequence_builder.upd_param(effective_width)
         else:
             self.sequence_builder.play(i_index, q_index, effective_width)
         remaining_width = pulse_width - effective_width
-        if remaining_width < Constants.GRID_TIME:
+        if remaining_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
             raise ValueError(
                 f"""
-                Remaining width after delay must be at least {Constants.GRID_TIME} ns.
+                Remaining width after delay must be at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns.
                 Got pulse width = {pulse_width} ns, delay width = {delay_width} ns. This leaves {remaining_width} ns,
                 which isn't enough to trigger acquisition afterwards. Adjust the pulse width or delay width values so
                 that the following holds:
-                pulse_width - max(min(pulse_width, delay_width), Constants.GRID_TIME) >= Constants.GRID_TIME
+                pulse_width - max(min(pulse_width, delay_width), self.target_data.CONTROL_SEQUENCER_DATA.grid_time) >= self.target_data.CONTROL_SEQUENCER_DATA.grid_time
                 """
             )
         yield remaining_width
         if pulse_shape == PulseShapeType.SQUARE:
             self.sequence_builder.set_awg_offs(0, 0)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
+            self.sequence_builder.upd_param(
+                self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+            )
 
-            self.ledger(Constants.GRID_TIME)
+            self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     @contextmanager
     def _wrapper_cond(self, mask, operator, duration):
@@ -588,32 +622,38 @@ class QbloxContext(ABC):
         shifted_nco_freq = target.baseband_if_frequency + self._frequency
         value = QbloxLegalisationPass.freq_as_steps(shifted_nco_freq)  # 1 MHZ <-> 4e6
         self.sequence_builder.set_freq(value)
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
+        self.sequence_builder.upd_param(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
-        self.ledger(Constants.GRID_TIME)
+        self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def shift_phase(self, inst: PhaseShift):
         if isinstance(inst.phase, Variable):
             ph_reg = self.alloc_mgr.registers[inst.phase.name]
-            with self._modulo_reg(ph_reg, Constants.NCO_MAX_PHASE_STEPS) as iter_reg:
+            with self._modulo_reg(
+                ph_reg, self.target_data.CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+            ) as iter_reg:
                 self.sequence_builder.set_ph_delta(iter_reg)
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
+                self.sequence_builder.upd_param(
+                    self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+                )
         elif isinstance(inst.phase, Number):
             ph_imm = QbloxLegalisationPass.phase_as_steps(inst.phase)
             self.sequence_builder.set_ph_delta(ph_imm)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
+            self.sequence_builder.upd_param(
+                self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+            )
         else:
             raise ValueError(f"Expected a Variable or a Number but got {inst.phase}")
 
         self._phases.append(inst.phase)
-        self.ledger(Constants.GRID_TIME)
+        self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def reset_phase(self):
         self.sequence_builder.reset_ph()
-        self.sequence_builder.upd_param(Constants.GRID_TIME)
+        self.sequence_builder.upd_param(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
         self._phases.clear()
-        self.ledger(Constants.GRID_TIME)
+        self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
         attr2var = {
@@ -627,11 +667,11 @@ class QbloxContext(ABC):
                 # TODO - Continue semantics: jump back to beginning of loop
             else:
                 pulse_width = int(calculate_duration(waveform))
-                if pulse_width < Constants.GRID_TIME:
+                if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
                     log.debug(
                         f"""
-                        Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                        Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                        Minimum pulse width is {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns with a resolution of {1} ns.
+                        Please round up the width to at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} nanoseconds.
                         This pulse will be ignored.
                         """
                     )
@@ -643,8 +683,8 @@ class QbloxContext(ABC):
                 q_steps = self.alloc_mgr.registers["zero"]
             else:
                 pulse_amp = self._evaluate_square_pulse(waveform, target)
-                i_steps = int(pulse_amp.real * Constants.MAX_OFFSET)
-                q_steps = int(pulse_amp.imag * Constants.MAX_OFFSET)
+                i_steps = int(pulse_amp.real * self.target_data.Q1ASM_DATA.max_offset)
+                q_steps = int(pulse_amp.imag * self.target_data.Q1ASM_DATA.max_offset)
 
             self.sequence_builder.set_awg_offs(i_steps, q_steps)
             if "width" in attr2var:
@@ -652,9 +692,11 @@ class QbloxContext(ABC):
             else:
                 self._upd_param_imm(pulse_width)
             self.sequence_builder.set_awg_offs(0, 0)
-            self.sequence_builder.upd_param(Constants.GRID_TIME)
+            self.sequence_builder.upd_param(
+                self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+            )
 
-            self.ledger(Constants.GRID_TIME)
+            self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
             pulse = (
                 np.ones(pulse_width, dtype=complex) * pulse_amp
@@ -664,17 +706,17 @@ class QbloxContext(ABC):
         else:
             pulse = self._evaluate_waveform(waveform, target)
             pulse_width = pulse.size
-            if pulse_width < Constants.GRID_TIME:
+            if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
                 log.debug(
                     f"""
-                    Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                    Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                    Minimum pulse width is {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns with a resolution of {1} ns.
+                    Please round up the width to at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} nanoseconds.
                     This pulse will be ignored.
                     """
                 )
                 return
 
-            max_width = min(pulse_width, Constants.MAX_WAIT_TIME)
+            max_width = min(pulse_width, self.target_data.Q1ASM_DATA.max_wait_time)
             i_index, q_index = self._register_waveform(waveform, target, pulse)
             self.sequence_builder.play(i_index, q_index, max_width)
             self.wait_imm(pulse_width - max_width)
@@ -697,20 +739,20 @@ class QbloxContext(ABC):
         pulse_width = pulse.size
         delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
 
-        if pulse_width < Constants.GRID_TIME:
+        if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
             log.debug(
                 f"""
-                Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
-                Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
+                Minimum pulse width is {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns with a resolution of {1} ns.
+                Please round up the width to at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} nanoseconds.
                 This pulse will be ignored. 
                 """
             )
             return
 
-        if pulse_width < delay_width + Constants.GRID_TIME:
+        if pulse_width < delay_width + self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
             raise ValueError(
                 f"""
-                Expected pulse width >= delay width + {Constants.GRID_TIME} ns.
+                Expected pulse width >= delay width + {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns.
                 Got pulse width = {pulse_width} ns and delay width = {delay_width} ns.
                 """
             )
@@ -727,8 +769,8 @@ class QbloxContext(ABC):
         i_steps, q_steps = None, None
         i_index, q_index = None, None
         if measure.shape == PulseShapeType.SQUARE:
-            i_steps = int(pulse[0].real * Constants.MAX_OFFSET)
-            q_steps = int(pulse[0].imag * Constants.MAX_OFFSET)
+            i_steps = int(pulse[0].real * self.target_data.Q1ASM_DATA.max_offset)
+            q_steps = int(pulse[0].imag * self.target_data.Q1ASM_DATA.max_offset)
         else:
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
@@ -767,17 +809,21 @@ class QbloxContext(ABC):
                 cxt.wait_imm(duration_offset)
                 cxt.ledger(duration_offset)
             else:
-                cxt.sequence_builder.wait_sync(Constants.GRID_TIME)
-                cxt.ledger(Constants.GRID_TIME)
+                cxt.sequence_builder.wait_sync(
+                    cxt.target_data.CONTROL_SEQUENCER_DATA.grid_time
+                )
+                cxt.ledger(cxt.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def device_update(self, du_inst: DeviceUpdate):
         if isinstance(du_inst.value, Variable):
             val_reg = self.alloc_mgr.registers[du_inst.value.name]
             if du_inst.attribute == "frequency":
                 self.sequence_builder.set_freq(val_reg)
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
+                self.sequence_builder.upd_param(
+                    self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+                )
 
-                self.ledger(Constants.GRID_TIME)
+                self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
             else:
                 raise NotImplementedError(
                     f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
@@ -789,9 +835,11 @@ class QbloxContext(ABC):
                 )
                 freq_imm = QbloxLegalisationPass.freq_as_steps(nco_freq)
                 self.sequence_builder.set_freq(freq_imm)
-                self.sequence_builder.upd_param(Constants.GRID_TIME)
+                self.sequence_builder.upd_param(
+                    self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+                )
 
-                self.ledger(Constants.GRID_TIME)
+                self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
             elif du_inst.attribute == "scale":
                 pass
             else:
@@ -819,7 +867,8 @@ class QbloxContext(ABC):
             context.sequence_builder.label(label)
 
             context.sequence_builder.wait_sync(
-                Constants.GRID_TIME, "Sync at the beginning of shot"
+                context.target_data.CONTROL_SEQUENCER_DATA.grid_time,
+                "Sync at the beginning of shot",
             )
             context.reset_phase()
 

@@ -10,7 +10,6 @@ from qblox_instruments.qcodes_drivers.sequencer import Sequencer
 
 from qat.backend.qblox.acquisition import Acquisition
 from qat.backend.qblox.codegen import QbloxPackage
-from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.config.helpers import (
     QcmConfigHelper,
     QcmRfConfigHelper,
@@ -18,6 +17,7 @@ from qat.backend.qblox.config.helpers import (
     QrmRfConfigHelper,
 )
 from qat.backend.qblox.execution import QbloxProgram
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.instrument.base import CompositeInstrument, LeafInstrument
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
@@ -36,6 +36,7 @@ class QbloxLeafInstrument(LeafInstrument):
         super().__init__(id=id, name=name, address=address)
         self.ref_source = ref_source or "internal"
 
+        self._target_data = QbloxTargetData.default()
         self._driver: Cluster = None
         self._modules: dict[Module, bool] = {}
         self._id2seq: dict[str, Sequencer] = {}
@@ -161,7 +162,7 @@ class QbloxLeafInstrument(LeafInstrument):
                         0,
                         min(
                             integ_length,
-                            Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                            self._target_data.QRM_DATA.max_sample_size_scope_acquisitions,
                         ),
                     )
                     for name, acquisition in acquisitions.items():

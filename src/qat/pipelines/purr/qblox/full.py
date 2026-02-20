@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.config.constants import QbloxTargetData
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.engines.qblox.execution import QbloxEngine
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend

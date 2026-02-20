@@ -6,7 +6,7 @@ import pytest
 
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.config.constants import Constants
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
@@ -27,6 +27,8 @@ from tests.unit.utils.builder_nuggets import (
 )
 
 log = get_default_logger()
+
+target_data = QbloxTargetData.default()
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
@@ -321,8 +323,8 @@ class TestExecutionSuite:
         (
             np.random.choice(
                 np.arange(
-                    Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
-                    Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+                    target_data.QRM_DATA.min_sample_size_scope_acquisitions,
+                    target_data.QRM_DATA.max_sample_size_scope_acquisitions,
                 )
                 * 1e-9,
                 3,

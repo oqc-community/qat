@@ -9,9 +9,9 @@ from qblox_instruments import (
     Sequencer,
 )
 
-from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.execution import QbloxProgram
 from qat.backend.qblox.ir import Sequence
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
@@ -21,6 +21,8 @@ log = get_default_logger()
 
 class DummyQbloxInstrument(QbloxLeafInstrument):
     shot_pattern = regex.compile("jlt( +)R([0-9]+),([0-9]+),@(.*)\n")
+    target_data = QbloxTargetData.default()
+    qrm_data = target_data.QRM_DATA
 
     def __init__(self, id, name, address, dummy_config):
         super().__init__(id, name, address)
@@ -31,7 +33,7 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
         avg_count = int(shot_match.group(3)) if shot_match else 1
 
         dummy_data = np.random.random(
-            size=(Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS, 2)
+            size=(self.qrm_data.max_sample_size_scope_acquisitions, 2)
         )
         dummy_data = [(iq[0], iq[1]) for iq in dummy_data]
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(

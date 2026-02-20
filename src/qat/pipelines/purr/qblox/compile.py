@@ -9,8 +9,8 @@ from qat.backend.passes.purr.analysis import (
 )
 from qat.backend.passes.purr.transform import DesugaringPass
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.backend.qblox.passes.analysis import PreCodegenPass, QbloxLegalisationPass
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend

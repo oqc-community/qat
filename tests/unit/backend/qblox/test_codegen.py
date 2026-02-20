@@ -11,8 +11,8 @@ from more_itertools import partition
 
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.config.constants import Constants
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.backend.qblox.visualisation import plot_program
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
 from qat.purr.compiler.devices import PulseShapeType
@@ -45,6 +45,10 @@ from tests.unit.utils.builder_nuggets import (
 )
 
 log = get_default_logger()
+
+target_data = QbloxTargetData.default()
+sequencer_data = target_data.CONTROL_SEQUENCER_DATA
+q1asm_data = target_data.Q1ASM_DATA
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
@@ -97,8 +101,8 @@ class TestQbloxBackend1:
         executable = do_emit(qblox_model, QbloxBackend1, builder)
         assert len(executable.programs) == num_points
 
-        ignored_indices = np.squeeze(np.where(time < Constants.GRID_TIME * 1e-9))
-        non_ignored_indices = np.squeeze(np.where(time >= Constants.GRID_TIME * 1e-9))
+        ignored_indices = np.squeeze(np.where(time < sequencer_data.grid_time * 1e-9))
+        non_ignored_indices = np.squeeze(np.where(time >= sequencer_data.grid_time * 1e-9))
         assert len(ignored_indices) + len(non_ignored_indices) == num_points
 
         for i in ignored_indices:
@@ -108,7 +112,7 @@ class TestQbloxBackend1:
             assert len(executable.programs[i].packages) == 1
             pkg = executable.programs[i].packages[drive_channel.full_id()]
             assert not pkg.sequence.waveforms
-            assert f"set_awg_offs {Constants.MAX_OFFSET},0" in pkg.sequence.program
+            assert f"set_awg_offs {q1asm_data.max_offset},0" in pkg.sequence.program
             assert "set_awg_offs 0,0" in pkg.sequence.program
 
     def test_phase_and_frequency_shift(self, qblox_model):
@@ -144,7 +148,7 @@ class TestQbloxBackend1:
         assert measure_channel == acquire_channel
 
         time = 7.5e-6
-        i_offs_steps = int(qubit.pulse_measure["amp"] * Constants.MAX_OFFSET)
+        i_offs_steps = int(qubit.pulse_measure["amp"] * q1asm_data.max_offset)
         delay = qubit.measure_acquire["delay"]
 
         builder = qblox_model.create_builder()
@@ -184,18 +188,21 @@ class TestQbloxBackend1:
         [
             (np.full(10, 5e-6), nullcontext()),
             (
-                np.full(5, (Constants.MAX_SAMPLE_SIZE_WAVEFORMS / 2) * 1e-9),
+                np.full(
+                    5,
+                    (sequencer_data.max_sample_size_waveforms / 2) * 1e-9,
+                ),
                 nullcontext(),
             ),  # 8.192e-6
             (
-                np.full(1, Constants.MAX_SAMPLE_SIZE_WAVEFORMS * 1e-9),
+                np.full(1, sequencer_data.max_sample_size_waveforms * 1e-9),
                 pytest.raises(ValueError),
             ),  # 16.384e-6
         ],
     )
     def test_waveform_caching(self, qblox_model, width_seconds, context):
         width_samples = np.astype(width_seconds * 1e9, int)
-        assert 2 * np.sum(width_samples) > Constants.MAX_SAMPLE_SIZE_WAVEFORMS
+        assert 2 * np.sum(width_samples) > sequencer_data.max_sample_size_waveforms
 
         drive_channel = qblox_model.get_qubit(0).get_drive_channel()
         builder = qblox_model.create_builder()
@@ -394,9 +401,16 @@ class TestQbloxBackend1:
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 
-    @pytest.mark.parametrize("pulse_width", [0, Constants.GRID_TIME, 1e3, 1e6])
+    @pytest.mark.parametrize("pulse_width", [0, sequencer_data.grid_time, 1e3, 1e6])
     @pytest.mark.parametrize(
-        "delay_width", [0, Constants.GRID_TIME, 100, 1e3 - Constants.GRID_TIME, 1e3]
+        "delay_width",
+        [
+            0,
+            sequencer_data.grid_time,
+            100,
+            1e3 - sequencer_data.grid_time,
+            1e3,
+        ],
     )
     def test_measure_acquire_operands(self, qblox_model, pulse_width, delay_width):
         qubit_indices = [0]
@@ -407,8 +421,8 @@ class TestQbloxBackend1:
 
         builder = measure_acquire(qblox_model, qubit_indices)
 
-        effective_width = max(min(pulse_width, delay_width), Constants.GRID_TIME)
-        if 0 < pulse_width < effective_width + Constants.GRID_TIME:
+        effective_width = max(min(pulse_width, delay_width), sequencer_data.grid_time)
+        if 0 < pulse_width < effective_width + sequencer_data.grid_time:
             with pytest.raises(ValueError):
                 do_emit(qblox_model, QbloxBackend1, builder)
 
@@ -416,14 +430,14 @@ class TestQbloxBackend1:
             executable = do_emit(qblox_model, QbloxBackend1, builder)
             for program in executable.programs:
                 packages = program.packages
-                if pulse_width < Constants.GRID_TIME:
+                if pulse_width < sequencer_data.grid_time:
                     assert len(packages) == 0
                 else:
                     assert len(packages) == len(qubit_indices)
                     for pkg in packages.values():
                         program = pkg.sequence.program
-                        quotient = effective_width // Constants.MAX_WAIT_TIME
-                        remainder = effective_width % Constants.MAX_WAIT_TIME
+                        quotient = effective_width // q1asm_data.max_wait_time
+                        remainder = effective_width % q1asm_data.max_wait_time
                         if quotient > 1:
                             assert f"wait {remainder}" in program
 

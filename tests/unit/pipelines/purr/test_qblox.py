@@ -8,8 +8,8 @@ from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
 from qat import QAT
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.config.constants import QbloxTargetData, TargetData
 from qat.backend.qblox.execution import QbloxProgram
+from qat.backend.qblox.target_data import QbloxTargetData, TargetData
 from qat.engines.qblox.execution import QbloxEngine
 from qat.executables import Executable
 from qat.frontend import AutoFrontend

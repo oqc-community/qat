@@ -4,8 +4,8 @@
 from compiler_config.config import CompilerConfig
 
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.config.constants import QbloxTargetData
 from qat.backend.qblox.execution import QbloxProgram
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.engines.qblox.execution import QbloxEngine

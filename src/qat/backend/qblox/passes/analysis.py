@@ -11,7 +11,7 @@ from itertools import chain
 import numpy as np
 
 from qat.backend.passes.purr.analysis import BindingResult, IterBound, TriageResult
-from qat.backend.qblox.config.constants import Constants
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
@@ -30,15 +30,19 @@ log = get_default_logger()
 
 
 class QbloxLegalisationPass(AnalysisPass):
+    def __init__(self, target_data: QbloxTargetData | None = None):
+        self.target_data = target_data or QbloxTargetData.default()
+
     @staticmethod
     def phase_as_steps(phase_rad: float) -> int:
         """
         The instruction `set_ph_delta` expects the phase shift as a (potentially signed) integer operand.
         """
 
+        sequencer_data = QbloxTargetData.default().CONTROL_SEQUENCER_DATA
         phase_deg = np.rad2deg(phase_rad)
         phase_deg %= 360
-        steps = int(round(phase_deg * Constants.NCO_PHASE_STEPS_PER_DEG))
+        steps = int(round(phase_deg * sequencer_data.nco_phase_steps_per_deg))
         return steps
 
     @staticmethod
@@ -47,14 +51,15 @@ class QbloxLegalisationPass(AnalysisPass):
         The instruction `set_freq` expects the frequency as a (potentially signed) integer operand.
         """
 
-        steps = int(round(freq_hz * Constants.NCO_FREQ_STEPS_PER_HZ))
+        sequencer_data = QbloxTargetData.default().CONTROL_SEQUENCER_DATA
+        steps = int(round(freq_hz * sequencer_data.nco_freq_steps_per_hz))
 
         if (
-            steps < -Constants.NCO_FREQ_LIMIT_STEPS
-            or steps > Constants.NCO_FREQ_LIMIT_STEPS
+            steps < -sequencer_data.nco_freq_limit_steps
+            or steps > sequencer_data.nco_freq_limit_steps
         ):
             min_max_frequency_in_hz = (
-                Constants.NCO_FREQ_LIMIT_STEPS / Constants.NCO_FREQ_STEPS_PER_HZ
+                sequencer_data.nco_freq_limit_steps / sequencer_data.nco_freq_steps_per_hz
             )
             raise ValueError(
                 f"IF frequency must be in [-{min_max_frequency_in_hz:e}, {min_max_frequency_in_hz:e}] Hz. "
@@ -68,11 +73,12 @@ class QbloxLegalisationPass(AnalysisPass):
         The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand.
         """
 
-        amp_steps = int(amp.real * Constants.MAX_OFFSET)
-        if amp_steps < Constants.MIN_OFFSET or amp_steps > Constants.MAX_OFFSET:
+        q1asm_data = QbloxTargetData.default().Q1ASM_DATA
+        amp_steps = int(amp.real * q1asm_data.max_offset)
+        if amp_steps < q1asm_data.min_offset or amp_steps > q1asm_data.max_offset:
             raise ValueError(
                 f"""
-                Expected offset to be in range [{Constants.MIN_OFFSET}, {Constants.MAX_OFFSET}].
+                Expected offset to be in range [{q1asm_data.min_offset}, {q1asm_data.max_offset}].
                 Got {amp_steps} instead
                 """
             )
@@ -82,21 +88,24 @@ class QbloxLegalisationPass(AnalysisPass):
     def _legalise_bound(self, name: str, bound: IterBound, inst: Instruction):
         legal_bound = bound
 
+        qrm_data = self.target_data.QRM_DATA
+        q1asm_data = self.target_data.Q1ASM_DATA
+        sequencer_data = self.target_data.CONTROL_SEQUENCER_DATA
         if isinstance(inst, Acquire):
             num_bins = bound.count
-            if num_bins > Constants.MAX_BINNED_ACQUISITIONS:
+            if num_bins > qrm_data.max_binned_acquisitions:
                 raise ValueError(
                     f"""
-                        Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {Constants.MAX_012_BINNED_ACQUISITIONS}.
+                        Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {qrm_data.max_binned_acquisitions}.
                         Please reduce number of points
                         """
                 )
         elif isinstance(inst, Delay):
-            if bound.start < Constants.GRID_TIME:
+            if bound.start < sequencer_data.grid_time:
                 log.warning(
                     f"Undefined runtime behaviour. Variable {name} has illegal lower bound"
                 )
-            if bound.end > Constants.MAX_WAIT_TIME:
+            if bound.end > q1asm_data.max_wait_time:
                 log.warning(
                     f"Undefined runtime behaviour. Will be batching variable {name} at runtime"
                 )
@@ -142,11 +151,11 @@ class QbloxLegalisationPass(AnalysisPass):
                 )
 
             if attr == "width":
-                if bound.start < Constants.GRID_TIME:
+                if bound.start < sequencer_data.grid_time:
                     log.warning(
                         f"Undefined runtime behaviour. Variable {name} has illegal lower bound"
                     )
-                if bound.end > Constants.MAX_WAIT_TIME:
+                if bound.end > q1asm_data.max_wait_time:
                     log.warning(
                         f"Undefined runtime behaviour. Will be batching variable {name} at runtime"
                     )
@@ -243,7 +252,10 @@ class QbloxLegalisationPass(AnalysisPass):
 class AllocationManager:
     _reg_pool: list[str] = field(
         default_factory=lambda: sorted(
-            f"R{index}" for index in range(Constants.NUMBER_OF_REGISTERS)
+            f"R{index}"
+            for index in range(
+                QbloxTargetData.default().CONTROL_SEQUENCER_DATA.number_of_registers
+            )
         )
     )
     _lbl_counters: dict[str, int] = field(default_factory=dict)

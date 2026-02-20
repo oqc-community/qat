@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-from qat.backend.qblox.config.constants import QbloxTargetData
+from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.engines.qblox.execution import QbloxEngine
 from qat.pipelines.pipeline import ExecutePipeline
