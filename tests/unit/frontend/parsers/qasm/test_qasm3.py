@@ -645,8 +645,6 @@ class TestQASM3Features:
     @pytest.mark.parametrize("channel", ["acquire", "measure"])
     def test_capture(self, model, feature_testpath, version, channel):
         index, qubit = next(iter(model.qubits.items()))
-        # TODO: this usage is inconsistent with extern frames in purr. We should probably
-        # align them (COMPILER-716)
         if channel == "measure":
             frame = f"r{index}_measure"
             channel = qubit.measure_pulse_channel
@@ -671,20 +669,17 @@ class TestQASM3Features:
         acquire_name = acquires[0].output_variable
         pps = [inst for inst in builder.instructions if isinstance(inst, PostProcessing)]
 
-        if version == 1:
+        if version == "1":
             # Just returns IQ values: requires no PP
             assert len(pps) == 0
-        elif version == 2:
+        elif version == "2":
             # returns discriminated bit
             assert len(pps) == 1
             assert pps[0].output_variable == acquire_name
             assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
-        elif version == 3:
+        elif version == "3":
             # SCOPE mode
-            assert len(pps) == 2
-            assert pps[0].output_variable == acquire_name
-            assert pps[1].output_variable == acquire_name
-            assert pps[0].process_type == PostProcessType.MEAN
+            assert len(pps) == 0
 
     def test_delay(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))

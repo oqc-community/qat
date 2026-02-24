@@ -29,7 +29,7 @@ from qat.ir.instructions import (
     QuantumInstruction,
     Variable,
 )
-from qat.ir.measure import Acquire, AcquireMode, PostProcessType, ProcessAxis
+from qat.ir.measure import Acquire, AcquireMode, PostProcessType
 from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     AbstractWaveform,
@@ -1460,13 +1460,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             delay=delay,
         )
         self.builder.add(acquire)
-        self.builder.post_processing(
-            target=qubit,
-            process_type=PostProcessType.MEAN,
-            axes=[ProcessAxis.TIME],
-            output_variable=output_variable,
-        )
-
         return acquire
 
     def _validate_channel_args(
@@ -1639,12 +1632,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 )
 
             self.builder.add(acquire)
-            self.builder.post_processing(
-                target=qubit,
-                process_type=PostProcessType.MEAN,
-                axes=[ProcessAxis.SEQUENCE],
-                output_variable=acquire.output_variable,
-            )
             self._attempt_declaration(variable)
             return variable
 
