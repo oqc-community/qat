@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Creating custom pipelines in QAT &mdash; qat-compiler 3.0.0.post161.dev20260224105001 documentation</title>
+  <title>Creating custom pipelines in QAT &mdash; qat-compiler 3.0.0.post162.dev20260224142723 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -550,6 +550,12 @@ See below.</p>
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2823/4210752094.py:12: DeprecationWarning: `DefaultTargetData()` is deprecated; use `TargetData()` instead. This will be removed in v4.0.0.
+  target_data = DefaultTargetData()
+</pre></div>
+</div>
+</div>
 </div>
 <p>If we want to make this an updateable pipeline, we can do so as shown below. The <code class="docutils literal notranslate"><span class="pre">_build_pipeline</span></code> acts a factory method with the recipe to build a pipeline provided the model and target data.</p>
 <div class="cell docutils container">
@@ -592,6 +598,12 @@ See below.</p>
 <span class="n">pipeline_instance</span> <span class="o">=</span> <span class="n">MyCoolPipeline</span><span class="p">(</span>
     <span class="n">config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_pipeline&quot;</span><span class="p">),</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="n">target_data</span>
 <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2823/4073348843.py:35: DeprecationWarning: `DefaultTargetData()` is deprecated; use `TargetData()` instead. This will be removed in v4.0.0.
+  target_data = DefaultTargetData()
 </pre></div>
 </div>
 </div>

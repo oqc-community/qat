@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.target_data module &mdash; qat-compiler 3.0.0.post161.dev20260224105001 documentation</title>
+  <title>qat.model.target_data module &mdash; qat-compiler 3.0.0.post162.dev20260224142723 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -770,16 +770,16 @@ validated to form a valid model.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.create_with">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_shots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_shots</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passive_reset_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.create_with" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passive_reset_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.create_with" title="Link to this definition"></a></dt>
 <dd><p>Returns a default TargetData instance, allowing configuration over user-level
 parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.target_data.TargetData.create_with.params.max_shots"></span><strong>max_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.create_with.params.max_shots">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The maximum amount of shots possible on this target.</p></li>
-<li><p><span class="target" id="qat.model.target_data.TargetData.create_with.params.default_shots"></span><strong>default_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.create_with.params.default_shots">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The default amount of shots on this target if none specified
+<li><p><span class="target" id="qat.model.target_data.TargetData.create_with.params.max_shots"></span><strong>max_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.create_with.params.max_shots">¶</a> – The maximum amount of shots possible on this target.</p></li>
+<li><p><span class="target" id="qat.model.target_data.TargetData.create_with.params.default_shots"></span><strong>default_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.create_with.params.default_shots">¶</a> – The default amount of shots on this target if none specified
 through the instructions or compiler_config.</p></li>
-<li><p><span class="target" id="qat.model.target_data.TargetData.create_with.params.passive_reset_time"></span><strong>passive_reset_time</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.create_with.params.passive_reset_time">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The amount of time to wait after each shot to allow the
+<li><p><span class="target" id="qat.model.target_data.TargetData.create_with.params.passive_reset_time"></span><strong>passive_reset_time</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.create_with.params.passive_reset_time">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span>) – The amount of time to wait after each shot to allow the
 qubits to passively reset.</p></li>
 </ul>
 </dd>
@@ -799,6 +799,11 @@ qubits to passively reset.</p></li>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.TargetData.default_shots">
+<span class="sig-name descname"><span class="pre">default_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.TargetData.default_shots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.instruction_memory_size">
@@ -824,11 +829,6 @@ qubits to passively reset.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.validate_clock_cycles">
 <span class="sig-name descname"><span class="pre">validate_clock_cycles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.validate_clock_cycles" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.model.target_data.TargetData.validate_instruction_memory_size">
-<span class="sig-name descname"><span class="pre">validate_instruction_memory_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData.validate_instruction_memory_size" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
