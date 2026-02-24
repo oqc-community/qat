@@ -56,7 +56,7 @@ def get_mock_compile_pipeline(model, name="test", engine=None) -> CompilePipelin
         frontend=AutoFrontend(model),
         middleend=DefaultMiddleend(model),
         backend=WaveformV1Backend(model),
-        target_data=TargetData.default(),
+        target_data=TargetData(),
     )
 
 
@@ -67,7 +67,7 @@ def get_mock_execute_pipeline(model, name="test", engine=None) -> ExecutePipelin
         name=name,
         model=model,
         runtime=SimpleRuntime(engine=engine),
-        target_data=TargetData.default(),
+        target_data=TargetData(),
     )
 
 
@@ -84,7 +84,7 @@ class MockUpdateablePipeline(UpdateablePipeline):
         config: MockPipelineConfig, model, target_data=None, engine=None
     ) -> Pipeline:
         engine = engine if engine is not None else ZeroEngine()
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return Pipeline(
             name=config.name,
             model=model,
@@ -103,7 +103,7 @@ class MockCompileUpdateablePipeline(UpdateablePipeline):
     def _build_pipeline(
         config: MockPipelineConfig, model, target_data=None, engine=None
     ) -> CompilePipeline:
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return CompilePipeline(
             name=config.name,
             model=model,
@@ -122,7 +122,7 @@ class MockExecuteUpdateablePipeline(UpdateablePipeline):
         config: MockPipelineConfig, model, target_data=None, engine=None
     ) -> ExecutePipeline:
         engine = engine if engine is not None else ZeroEngine()
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return ExecutePipeline(
             name=config.name,
             model=model,

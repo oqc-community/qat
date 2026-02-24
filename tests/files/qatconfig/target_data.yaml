@@ -13,18 +13,20 @@ COMPILE:
   pipeline: qat.pipelines.purr.waveform_v1.WaveformV1CompilePipeline
   hardware_loader: echo6loader
   target_data:
-    type: qat.model.target_data.CustomTargetData
+    type: qat.model.target_data.TargetData
     config:
       max_shots: 2_540
       default_shots: 254
-      passive_reset_time: 1e-2
+      QUBIT_DATA:
+        passive_reset_time: 1e-2
   default: true
 - name: compile
   pipeline: qat.pipelines.waveform.WaveformCompilePipeline
   hardware_loader: lucy6loader
   target_data:
-    type: qat.model.target_data.CustomTargetData
+    type: qat.model.target_data.TargetData
     config:
       max_shots: 2_540
       default_shots: 254
-      passive_reset_time: 1e-2
+      QUBIT_DATA:
+        passive_reset_time: 1e-2

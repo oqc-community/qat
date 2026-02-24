@@ -58,7 +58,7 @@ class QbloxExecutePipeline(UpdateablePipeline):
         target_data: QbloxTargetData | None,
         engine: QbloxEngine = None,
     ) -> ExecutePipeline:
-        target_data = target_data if target_data is not None else QbloxTargetData.default()
+        target_data = target_data if target_data is not None else QbloxTargetData()
         results_pipeline = get_results_pipeline(model)
         return ExecutePipeline(
             model=model,

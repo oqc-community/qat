@@ -80,7 +80,7 @@ class QbloxContext(ABC):
         self.writes: dict[str, list[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr or AllocationManager()
-        self.target_data = target_data or QbloxTargetData.default()
+        self.target_data = target_data or QbloxTargetData()
 
         self.sequence_builder = SequenceBuilder()
         self.sequencer_config = SequencerConfig()

@@ -70,7 +70,7 @@ class LegacyExecutePipeline(UpdateablePipeline):
         else:
             engine = model.create_engine()
 
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return ExecutePipeline(
             name=config.name,
             model=model,

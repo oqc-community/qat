@@ -57,7 +57,7 @@ class TestEchoPipeline:
         assert isinstance(pipeline.backend, PydWaveformBackend)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
-        assert pipeline.target_data == TargetData.default()
+        assert pipeline.target_data == TargetData()
         assert isinstance(pipeline.engine, EchoEngine)
 
     def test_build_compile_pipeline(self):
@@ -121,7 +121,7 @@ class TestEchoPipelineWithCircuits:
     the executable and the results returned by the EchoEngine.
     """
 
-    target_data = TargetData.default()
+    target_data = TargetData()
     model = LucyModelLoader(qubit_count=32).load()
     pipeline = PydanticEchoPipeline(
         config=PipelineConfig(name="pydantic"), model=model, target_data=target_data
@@ -366,7 +366,7 @@ class TestEchoPipelineWithErrorMitigation:
     the executable and the results returned by the EchoEngine.
     """
 
-    target_data = TargetData.default()
+    target_data = TargetData()
     model = convert_purr_echo_hw_to_pydantic(
         EchoModelLoaderWithErrorMitigation(qubit_count=32).load()
     )
@@ -518,7 +518,7 @@ class TestEchoPipelineParity:
     - Execution and results processing: are the results outputted in consistent formats?
     """
 
-    target_data = TargetData.default()
+    target_data = TargetData()
     model = MockEchoModelLoader(
         qubit_count=32, target_data=target_data, random_seed=42
     ).load()
@@ -535,7 +535,7 @@ class TestEchoPipelineParity:
     def compiler_config(self):
         return CompilerConfig(
             results_format=QuantumResultsFormat().binary_count(),
-            repeats=TargetData.default().default_shots,
+            repeats=TargetData().default_shots,
             passive_reset_time=2e-8,
             optimizations=Tket().default(),
         )

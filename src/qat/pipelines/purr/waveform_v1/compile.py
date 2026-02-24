@@ -44,7 +44,7 @@ class WaveformV1CompilePipeline(UpdateablePipeline):
                 "be ignored. "
             )
 
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return CompilePipeline(
             model=model,
             target_data=target_data,

@@ -38,7 +38,7 @@ class EchoPipeline(UpdateablePipeline):
                 "The EchoEngine is used directly."
             )
 
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         results_pipeline = get_default_results_pipeline(model)
         return Pipeline(
             model=model,

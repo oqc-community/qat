@@ -36,7 +36,7 @@ class QbloxLeafInstrument(LeafInstrument):
         super().__init__(id=id, name=name, address=address)
         self.ref_source = ref_source or "internal"
 
-        self._target_data = QbloxTargetData.default()
+        self._target_data = QbloxTargetData()
         self._driver: Cluster = None
         self._modules: dict[Module, bool] = {}
         self._id2seq: dict[str, Sequencer] = {}

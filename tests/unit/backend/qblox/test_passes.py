@@ -37,7 +37,7 @@ class TestAnalysisPasses:
         met_mgr = MetricsManager()
         builder = resonator_spect(qblox_model)
 
-        target_data = QbloxTargetData.default()
+        target_data = QbloxTargetData()
         pipeline = (
             PassManager()
             | RepeatSanitisation(qblox_model, target_data)

@@ -3,6 +3,7 @@
 import random
 from functools import cached_property
 from pathlib import Path
+from warnings import warn
 
 import piny
 from pydantic import (
@@ -33,16 +34,16 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
     :param pulse_channel_if_freq_max: The maximal intermediate frequency for a pulse channel.
     """
 
-    sample_time: PositiveFloat
-    samples_per_clock_cycle: PositiveInt
-    instruction_memory_size: PositiveInt
-    waveform_memory_size: PositiveInt
-    pulse_duration_min: PositiveFloat
-    pulse_duration_max: PositiveFloat
-    pulse_channel_lo_freq_min: NonNegativeInt
-    pulse_channel_lo_freq_max: NonNegativeInt
-    pulse_channel_if_freq_min: NonNegativeInt
-    pulse_channel_if_freq_max: NonNegativeInt
+    sample_time: PositiveFloat = 1e-09
+    samples_per_clock_cycle: PositiveInt = 1
+    instruction_memory_size: PositiveInt = 50_000
+    waveform_memory_size: PositiveInt = 1_500
+    pulse_duration_min: PositiveFloat = 64e-09
+    pulse_duration_max: PositiveFloat = 1e-03
+    pulse_channel_lo_freq_min: NonNegativeInt = 1_000_000
+    pulse_channel_lo_freq_max: NonNegativeInt = 10_000_000_000
+    pulse_channel_if_freq_min: NonNegativeInt = 0
+    pulse_channel_if_freq_max: NonNegativeInt = 10_000_000_000
 
     @model_validator(mode="after")
     def validate_durations(self):
@@ -85,7 +86,7 @@ class QubitDescription(DeviceDescription):
     :param passive_reset_time: The amount of time after each shot where the qubit is idle.
     """
 
-    passive_reset_time: NonNegativeFloat
+    passive_reset_time: NonNegativeFloat = 1e-03
 
     @classmethod
     def random(cls, seed=42):
@@ -112,7 +113,7 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
     :param default_shots: The default amount of shots on this target if none specified through the instructions.
     """
 
-    max_shots: PositiveInt
+    max_shots: PositiveInt = 10_000
     default_shots: PositiveInt = 1
 
     def __getattribute__(self, name: str):
@@ -141,8 +142,9 @@ class TargetData(AbstractTargetData):
     :param RESONATOR_DATA: Resonator-related target description.
     """
 
-    QUBIT_DATA: QubitDescription
-    RESONATOR_DATA: ResonatorDescription
+    default_shots: PositiveInt = 1_000
+    QUBIT_DATA: QubitDescription = QubitDescription()
+    RESONATOR_DATA: ResonatorDescription = ResonatorDescription()
 
     @cached_property
     def clock_cycle(self):
@@ -150,6 +152,14 @@ class TargetData(AbstractTargetData):
 
     @cached_property
     def instruction_memory_size(self):
+        warn(
+            f"`{type(self).__name__}.instruction_memory_size` is deprecated; use "
+            "`QUBIT_DATA.instruction_memory_size` or "
+            "`RESONATOR_DATA.instruction_memory_size` instead. "
+            "This will be removed in v4.0.0.",
+            DeprecationWarning,
+            stacklevel=4,
+        )
         return max(
             self.QUBIT_DATA.instruction_memory_size,
             self.RESONATOR_DATA.instruction_memory_size,
@@ -160,17 +170,6 @@ class TargetData(AbstractTargetData):
         if self.QUBIT_DATA.clock_cycle != self.RESONATOR_DATA.clock_cycle:
             raise ValueError(
                 "Different clock cycles for qubit and resonator are currently not supported."
-            )
-        return self
-
-    @model_validator(mode="after")
-    def validate_instruction_memory_size(self):
-        if (
-            self.QUBIT_DATA.instruction_memory_size
-            != self.RESONATOR_DATA.instruction_memory_size
-        ):
-            raise ValueError(
-                "Different instruction memory sizes for qubit and resonator are currently not supported."
             )
         return self
 
@@ -186,9 +185,8 @@ class TargetData(AbstractTargetData):
     @classmethod
     def create_with(
         cls,
-        max_shots: int = 10_000,
-        default_shots: int = 1_000,
-        passive_reset_time: float = 1e-03,
+        passive_reset_time: NonNegativeFloat | None = None,
+        **kwargs,
     ) -> "TargetData":
         """Returns a default TargetData instance, allowing configuration over user-level
         parameters.
@@ -199,45 +197,40 @@ class TargetData(AbstractTargetData):
         :param passive_reset_time: The amount of time to wait after each shot to allow the
             qubits to passively reset.
         """
-        return TargetData(
-            max_shots=max_shots,
-            default_shots=default_shots,
-            QUBIT_DATA=QubitDescription(
-                passive_reset_time=passive_reset_time,
-                sample_time=1e-09,
-                samples_per_clock_cycle=1,
-                instruction_memory_size=50_000,
-                waveform_memory_size=1_500,
-                pulse_duration_min=64e-09,
-                pulse_duration_max=1e-03,
-                pulse_channel_lo_freq_min=1e06,
-                pulse_channel_lo_freq_max=1e10,
-                pulse_channel_if_freq_min=0,
-                pulse_channel_if_freq_max=1e10,
-            ),
-            RESONATOR_DATA=ResonatorDescription(
-                sample_time=1e-09,
-                samples_per_clock_cycle=1,
-                instruction_memory_size=50_000,
-                waveform_memory_size=1_500,
-                pulse_duration_min=64e-09,
-                pulse_duration_max=1e-03,
-                pulse_channel_lo_freq_min=1e06,
-                pulse_channel_lo_freq_max=1e10,
-                pulse_channel_if_freq_min=0,
-                pulse_channel_if_freq_max=1e10,
-            ),
+        warn(
+            f"`{cls.__name__}.create_with()` is deprecated; use `{cls.__name__}()` with "
+            "appropriate keyword arguments instead. "
+            "This will be removed in v4.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
         )
+        if passive_reset_time is not None:
+            kwargs["QUBIT_DATA"] = kwargs.get("QUBIT_DATA", {}) | {
+                "passive_reset_time": passive_reset_time
+            }
+        return cls(**kwargs)
 
     @classmethod
     def default(cls) -> "TargetData":
         """Returns a default TargetData instance."""
-        return cls.create_with()
+        warn(
+            f"`{cls.__name__}.default()` is deprecated; use `{cls.__name__}()` instead. "
+            "This will be removed in v4.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return cls()
 
 
 def DefaultTargetData() -> TargetData:
     """Returns a default TargetData instance."""
-    return TargetData.default()
+    warn(
+        "`DefaultTargetData()` is deprecated; use `TargetData()` instead. "
+        "This will be removed in v4.0.0.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return TargetData()
 
 
 def CustomTargetData(
@@ -252,8 +245,15 @@ def CustomTargetData(
     :param passive_reset_time: The amount of time to wait after each shot to allow the
         qubits to passively reset.
     """
-    return TargetData.create_with(
+    warn(
+        "`CustomTargetData()` is deprecated; use `TargetData()` with appropriate keyword "
+        "arguments instead. "
+        "This will be removed in v4.0.0.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return TargetData(
         max_shots=max_shots,
         default_shots=default_shots,
-        passive_reset_time=passive_reset_time,
+        QUBIT_DATA=QubitDescription(passive_reset_time=passive_reset_time),
     )

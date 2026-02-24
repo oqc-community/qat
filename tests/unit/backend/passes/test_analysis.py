@@ -220,7 +220,7 @@ class TestTimelineAnalysisParity:
         loader = PydEchoModelLoader()
         leg_model = loader._legacy.load()
         pyd_model = loader.load()
-        target_data = TargetData.default()
+        target_data = TargetData()
 
         qubits = leg_model.qubits[0:2]
         drive_channels = [qubit.get_drive_channel() for qubit in qubits]

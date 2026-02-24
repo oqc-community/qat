@@ -121,7 +121,7 @@ class TestDefaultMiddleend:
 
     @pytest.fixture(scope="class")
     def middleend(self, model):
-        target_data = TargetData.default()
+        target_data = TargetData()
         target_data_blob = target_data.model_dump()
         target_data_blob["QUBIT_DATA"]["passive_reset_time"] = 1e-3
         target_data_blob["QUBIT_DATA"]["pulse_duration_max"] = 1e-4

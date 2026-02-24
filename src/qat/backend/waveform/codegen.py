@@ -40,7 +40,7 @@ class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
     def __init__(
         self,
         model: PhysicalHardwareModel,
-        target_data: TargetData = TargetData.default(),
+        target_data: TargetData = TargetData(),
     ):
         self.model = model
         self.target_data = target_data

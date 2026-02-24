@@ -28,7 +28,7 @@ from tests.unit.utils.builder_nuggets import (
 
 log = get_default_logger()
 
-target_data = QbloxTargetData.default()
+target_data = QbloxTargetData()
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

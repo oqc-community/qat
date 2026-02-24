@@ -31,7 +31,7 @@ log = get_default_logger()
 
 class QbloxLegalisationPass(AnalysisPass):
     def __init__(self, target_data: QbloxTargetData | None = None):
-        self.target_data = target_data or QbloxTargetData.default()
+        self.target_data = target_data or QbloxTargetData()
 
     @staticmethod
     def phase_as_steps(phase_rad: float) -> int:
@@ -39,7 +39,7 @@ class QbloxLegalisationPass(AnalysisPass):
         The instruction `set_ph_delta` expects the phase shift as a (potentially signed) integer operand.
         """
 
-        sequencer_data = QbloxTargetData.default().CONTROL_SEQUENCER_DATA
+        sequencer_data = QbloxTargetData().CONTROL_SEQUENCER_DATA
         phase_deg = np.rad2deg(phase_rad)
         phase_deg %= 360
         steps = int(round(phase_deg * sequencer_data.nco_phase_steps_per_deg))
@@ -51,7 +51,7 @@ class QbloxLegalisationPass(AnalysisPass):
         The instruction `set_freq` expects the frequency as a (potentially signed) integer operand.
         """
 
-        sequencer_data = QbloxTargetData.default().CONTROL_SEQUENCER_DATA
+        sequencer_data = QbloxTargetData().CONTROL_SEQUENCER_DATA
         steps = int(round(freq_hz * sequencer_data.nco_freq_steps_per_hz))
 
         if (
@@ -73,7 +73,7 @@ class QbloxLegalisationPass(AnalysisPass):
         The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand.
         """
 
-        q1asm_data = QbloxTargetData.default().Q1ASM_DATA
+        q1asm_data = QbloxTargetData().Q1ASM_DATA
         amp_steps = int(amp.real * q1asm_data.max_offset)
         if amp_steps < q1asm_data.min_offset or amp_steps > q1asm_data.max_offset:
             raise ValueError(
@@ -253,9 +253,7 @@ class AllocationManager:
     _reg_pool: list[str] = field(
         default_factory=lambda: sorted(
             f"R{index}"
-            for index in range(
-                QbloxTargetData.default().CONTROL_SEQUENCER_DATA.number_of_registers
-            )
+            for index in range(QbloxTargetData().CONTROL_SEQUENCER_DATA.number_of_registers)
         )
     )
     _lbl_counters: dict[str, int] = field(default_factory=dict)

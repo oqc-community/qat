@@ -82,7 +82,7 @@ from tests.unit.utils.pulses import test_waveforms
 
 class TestPopulateWaveformSampleTime:
     hw = LucyModelLoader(1).load()
-    taget_data = TargetData.default()
+    taget_data = TargetData()
 
     def test_sampled_pulse_gains_sample_time(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -241,7 +241,7 @@ class TestRepeatTranslation:
         if explicit_close:
             builder.add(EndRepeat())
 
-        ir = RepeatTranslation(TargetData.default()).run(builder)
+        ir = RepeatTranslation(TargetData()).run(builder)
 
         # assert len(ir.existing_names) == 1
 
@@ -255,7 +255,7 @@ class TestRepeatTranslation:
         if explicit_close:
             builder.add(*[EndRepeat(), EndRepeat()])
 
-        ir = RepeatTranslation(TargetData.default()).run(builder)
+        ir = RepeatTranslation(TargetData()).run(builder)
 
         # assert len(ir.existing_names) == 2
 
@@ -314,7 +314,7 @@ class TestRepeatTranslation:
             if not explicit_close:
                 close_indices = [i + fifth for i in close_indices]
 
-        ir = RepeatTranslation(TargetData.default()).run(builder)
+        ir = RepeatTranslation(TargetData()).run(builder)
 
         self._check_loop_start(ir, start_indices)
         self._check_loop_close(ir, close_indices, [1000, 300])
@@ -358,7 +358,7 @@ class TestRepeatSanitisation:
         ],
     )
     def test_repeat_count_from_config(self, compiler_config, use_default):
-        target_data = TargetData.default()
+        target_data = TargetData()
         expected_shots = (
             target_data.default_shots if use_default else compiler_config.repeats
         )
@@ -379,7 +379,7 @@ class TestRepeatSanitisation:
         ],
     )
     def test_fails_with_shot_mismatch(self, repeat_counts, compiler_config):
-        target_data = TargetData.default()
+        target_data = TargetData()
         builder = QuantumInstructionBuilder(hardware_model=self.hw).X(
             target=self.hw.qubit_with_index(0)
         )
@@ -594,7 +594,7 @@ class TestPydPhaseOptimisation:
 
 class TestPydPostProcessingSanitisation:
     hw = LucyModelLoader(32).load()
-    target_data = TargetData.default()
+    target_data = TargetData()
 
     def test_meas_acq_with_pp(self):
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
@@ -2109,7 +2109,7 @@ class TestEvaluateWaveforms:
 
     @pytest.fixture(scope="class")
     def target_data(self):
-        return TargetData.default()
+        return TargetData()
 
     @pytest.fixture(scope="class")
     def pass_(self, model, target_data):

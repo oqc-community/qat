@@ -42,7 +42,7 @@ qatconfig = get_config()
 
 class TestInstructionValidation:
     hw = LucyModelLoader(qubit_count=4).load()
-    target_data = TargetData.default()
+    target_data = TargetData()
 
     @pytest.mark.parametrize("pulse_duration_limits", [True, False, None])
     def test_valid_instructions(self, pulse_duration_limits):
@@ -102,7 +102,7 @@ class TestInstructionValidation:
 
 
 class TestDynamicFrequencyValidation:
-    target_data = TargetData.default()
+    target_data = TargetData()
     hw = LucyModelLoader(qubit_count=4).load()
 
     def get_single_pulse_channel(self):
@@ -130,7 +130,7 @@ class TestDynamicFrequencyValidation:
 
     @staticmethod
     def target_data_with_non_zero_if_min():
-        target_data = TargetData.default()
+        target_data = TargetData()
         return target_data.model_copy(
             update={
                 "QUBIT_DATA": target_data.QUBIT_DATA.model_copy(
@@ -531,12 +531,12 @@ class TestHardwareConfigValidity:
 
 
 class TestFrequencySetupValidation:
-    target_data = TargetData.default()
+    target_data = TargetData()
     model = LucyModelLoader().load()
 
     @staticmethod
     def target_data_with_non_zero_if_min():
-        target_data = TargetData.default()
+        target_data = TargetData()
         return target_data.model_copy(
             update={
                 "QUBIT_DATA": target_data.QUBIT_DATA.model_copy(

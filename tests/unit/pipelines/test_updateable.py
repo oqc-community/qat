@@ -33,7 +33,7 @@ class TestUpdateablePipeline:
 
     def test_initialization_with_loader(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -54,7 +54,7 @@ class TestUpdateablePipeline:
 
     def test_initialization_with_model(self):
         model = EchoModelLoader(qubit_count=4).load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -75,7 +75,7 @@ class TestUpdateablePipeline:
 
     def test_initialization_with_config_as_dict(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = {"name": "testing"}
         pipeline = MockUpdateablePipeline(
@@ -85,7 +85,7 @@ class TestUpdateablePipeline:
         assert isinstance(pipeline.config, PipelineConfig)
 
     def test_initialization_with_no_model_or_loader_raises_error(self):
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         with pytest.raises(ValueError):
@@ -94,7 +94,7 @@ class TestUpdateablePipeline:
     def test_initialization_with_model_and_loader_takes_precedence(self):
         model_loader = MockModelLoader()
         model = model_loader.load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
 
@@ -116,7 +116,7 @@ class TestUpdateablePipeline:
         """Tests that the engine doesn't fail validation."""
         loader = EchoModelLoader(qubit_count=4)
         model = loader.load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         engine = MockEngineWithModel(model=model)
         pipeline = MockUpdateablePipeline(
@@ -131,7 +131,7 @@ class TestUpdateablePipeline:
     def test_initalization_with_engine_that_requires_model_raises_error_with_loader(self):
         loader = EchoModelLoader(qubit_count=4)
         model = loader.load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         engine = MockEngineWithModel(model=model)
         with pytest.raises(MismatchingHardwareModelException):
@@ -141,7 +141,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_config(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -154,7 +154,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_config_as_dict(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -168,7 +168,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_model(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -182,7 +182,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_loader(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -198,7 +198,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_reload(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -214,7 +214,7 @@ class TestUpdateablePipeline:
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
 
-        target_data = TargetData.default()
+        target_data = TargetData()
         pipeline = MockUpdateablePipeline(
             config=config, loader=model_loader, target_data=target_data, engine=engine
         )
@@ -229,7 +229,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_engine(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
 
         engine = EchoEngine()
@@ -246,7 +246,7 @@ class TestUpdateablePipeline:
 
     def test_update_model_with_engine_that_requires_model(self):
         model = EchoModelLoader(qubit_count=4).load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
 
         engine = MockEngineWithModel(model=model)
@@ -262,7 +262,7 @@ class TestUpdateablePipeline:
 
     def test_update_with_model_and_reload_model_raises_error(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -275,7 +275,7 @@ class TestUpdateablePipeline:
 
     def test_copy(self):
         loader = EchoModelLoader(qubit_count=4)
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -292,7 +292,7 @@ class TestUpdateablePipeline:
 
     def test_copy_with_config(self):
         loader = EchoModelLoader(qubit_count=4)
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -312,7 +312,7 @@ class TestUpdateablePipeline:
 
     def test_copy_with_model(self):
         loader = EchoModelLoader(qubit_count=4)
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -331,7 +331,7 @@ class TestUpdateablePipeline:
 
     def test_copy_with_loader(self):
         loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -352,7 +352,7 @@ class TestUpdateablePipeline:
         loader = EchoModelLoader(qubit_count=4)
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
-        target_data = TargetData.default()
+        target_data = TargetData()
         pipeline = MockUpdateablePipeline(
             config=config, loader=loader, target_data=target_data, engine=engine
         )
@@ -369,7 +369,7 @@ class TestUpdateablePipeline:
 
     def test_copy_with_engine(self):
         loader = EchoModelLoader(qubit_count=4)
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         engine = EchoEngine()
         pipeline = MockUpdateablePipeline(
@@ -387,7 +387,7 @@ class TestUpdateablePipeline:
 
     def test_copy_with_engine_that_requires_model(self):
         model = EchoModelLoader(qubit_count=4).load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
 
         engine = MockEngineWithModel(model=model)
@@ -403,7 +403,7 @@ class TestUpdateablePipeline:
 
     def test_has_loader(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -418,7 +418,7 @@ class TestUpdateablePipeline:
 
     def test_full_pipeline_inherits_properties(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
@@ -437,7 +437,7 @@ class TestUpdateablePipeline:
 
     def test_compile_pipeline_inherits_properties(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockCompileUpdateablePipeline(
@@ -456,7 +456,7 @@ class TestUpdateablePipeline:
 
     def test_execute_pipeline_inherits_properties(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
         pipeline = MockExecuteUpdateablePipeline(
@@ -483,7 +483,7 @@ class TestUpdateablePipeline:
     )
     def test_resolve_model_raises_error(self, model, loader, reload_model):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
             config=config, model=model_loader.load(), target_data=target_data
@@ -495,7 +495,7 @@ class TestUpdateablePipeline:
     @pytest.mark.parametrize("has_loader", [True, False])
     def test_resolve_model_with_new_model(self, has_loader):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         if has_loader:
             pipeline = MockUpdateablePipeline(
@@ -515,7 +515,7 @@ class TestUpdateablePipeline:
     @pytest.mark.parametrize("has_loader", [True, False])
     def test_resolve_with_new_loader(self, has_loader):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         if has_loader:
             pipeline = MockUpdateablePipeline(
@@ -534,7 +534,7 @@ class TestUpdateablePipeline:
 
     def test_resolve_with_model_and_loader(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
             config=config, loader=model_loader, target_data=target_data
@@ -550,7 +550,7 @@ class TestUpdateablePipeline:
 
     def test_resolve_with_reload(self):
         model_loader = MockModelLoader()
-        target_data = TargetData.default()
+        target_data = TargetData()
         config = MockPipelineConfig(name="test")
         pipeline = MockUpdateablePipeline(
             config=config, loader=model_loader, target_data=target_data

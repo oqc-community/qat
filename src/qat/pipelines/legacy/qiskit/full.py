@@ -50,7 +50,7 @@ class LegacyQiskitPipeline(UpdateablePipeline):
         return Pipeline(
             name=config.name,
             model=model,
-            target_data=target_data if target_data is not None else TargetData.default(),
+            target_data=target_data if target_data is not None else TargetData(),
             frontend=AutoFrontend.default_for_legacy(model),
             middleend=CustomMiddleend(model, pipeline=middleend_pipeline(model=model)),
             backend=FallthroughBackend(model),

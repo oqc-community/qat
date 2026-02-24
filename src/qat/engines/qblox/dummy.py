@@ -21,7 +21,7 @@ log = get_default_logger()
 
 class DummyQbloxInstrument(QbloxLeafInstrument):
     shot_pattern = regex.compile("jlt( +)R([0-9]+),([0-9]+),@(.*)\n")
-    target_data = QbloxTargetData.default()
+    target_data = QbloxTargetData()
     qrm_data = target_data.QRM_DATA
 
     def __init__(self, id, name, address, dummy_config):

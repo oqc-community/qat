@@ -44,7 +44,7 @@ class TestQbloxPipeline:
         assert isinstance(pipeline.backend, QbloxBackend2)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
-        assert pipeline.target_data == QbloxTargetData.default()
+        assert pipeline.target_data == QbloxTargetData()
         assert pipeline.engine is None
 
         assert pipeline.backend.pipeline is not None
@@ -188,7 +188,7 @@ class TestQbloxPipelineWithCircuits:
     the executable and the results returned by the QbloxLiveEngineAdapter.
     """
 
-    target_data = QbloxTargetData.default()
+    target_data = QbloxTargetData()
     # TODO: 32Q support: COMPILER-728
     model = QbloxDummyModelLoader(qubit_count=16).load()
     pipeline = QbloxPipeline2(

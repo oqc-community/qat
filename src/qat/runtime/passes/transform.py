@@ -223,7 +223,7 @@ class ResultTransform(TransformPass):
         format_flags = (
             compiler_config.results_format or ResultsFormatting.DynamicStructureReturn
         )
-        repeats = package.shots or TargetData.default().default_shots
+        repeats = package.shots or TargetData().default_shots
 
         if len(acquisitions) == 0:
             return []

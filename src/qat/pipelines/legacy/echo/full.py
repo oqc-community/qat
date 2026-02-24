@@ -38,7 +38,7 @@ class LegacyEchoPipeline(UpdateablePipeline):
                 "The legacy EchoEngine is used directly."
             )
 
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return Pipeline(
             name=config.name,
             model=model,

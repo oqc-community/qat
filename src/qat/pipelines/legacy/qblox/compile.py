@@ -67,7 +67,7 @@ class LegacyQbloxCompilePipeline(UpdateablePipeline):
                 "The compilation pipeline does not require an engine. It will be ignored."
             )
 
-        target_data = target_data or QbloxTargetData.default()
+        target_data = target_data or QbloxTargetData()
         return CompilePipeline(
             name=config.name,
             model=model,

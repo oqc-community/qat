@@ -20,7 +20,7 @@ from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
 from qat.instrument.base import ConfigInstrumentBuilder
 from qat.model.loaders.cache import CacheAccessLoader
 from qat.model.loaders.purr import EchoModelLoader, QbloxDummyModelLoader
-from qat.model.target_data import TargetData
+from qat.model.target_data import QubitDescription, ResonatorDescription, TargetData
 from qat.pipelines.updateable import UpdateablePipeline
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.execution import QuantumExecutionEngine
@@ -30,7 +30,7 @@ from tests.unit.utils.engines import InitableEngine
 from tests.unit.utils.pipelines import MockPipeline
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def qatconfig_testfiles(testpath):
     return testpath / "files" / "qatconfig"
 
@@ -521,3 +521,92 @@ class TestQatSessionConfigForPipelines:
             assert target_data.default_shots == 254
             assert target_data.max_shots == 2540
             assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
+
+
+class TestSpecifiedTargetDataFields:
+    @pytest.fixture(scope="class")
+    def target_data_dict(self, qatconfig_testfiles):
+        qatconfig = QatSessionConfig.from_yaml(
+            qatconfig_testfiles / "target_data_specs.yaml"
+        )
+        d: dict[str, TargetData] = {}
+
+        for pipeline in qatconfig.COMPILE:
+            d[pipeline.name] = pipeline.target_data()
+
+        return d
+
+    @pytest.fixture(scope="class")
+    def default_qubit_data(self):
+        return QubitDescription()
+
+    @pytest.fixture(scope="class")
+    def default_resonator_data(self):
+        return ResonatorDescription()
+
+    def test_all_target_datas_load(self, target_data_dict):
+        """
+        Test that all target data objects are loaded successfully from the configuration file.
+        Skips unsupported items. Asserts that each loaded object is an instance of TargetData.
+        """
+        for target_data in target_data_dict.values():
+            assert isinstance(target_data, TargetData)
+
+    def test_top_level_info(
+        self, target_data_dict, default_qubit_data, default_resonator_data
+    ):
+        """
+        Test that target data with top-level adjustments has the correct values for max_shots,
+        default_shots, QUBIT_DATA, and RESONATOR_DATA.
+        """
+        target_data = target_data_dict["top_level_info"]
+        assert target_data.max_shots == 2540
+        assert target_data.default_shots == 425
+        assert target_data.QUBIT_DATA == default_qubit_data
+        assert target_data.RESONATOR_DATA == default_resonator_data
+
+    def test_passive_reset_time(self, target_data_dict, default_resonator_data):
+        """
+        Test that the passive_reset_time field in QUBIT_DATA is set correctly and that
+        RESONATOR_DATA matches the default.
+        """
+        target_data = target_data_dict["passive_reset_time"]
+        assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
+        assert target_data.RESONATOR_DATA == default_resonator_data
+
+    def test_different_memory_size(self, target_data_dict):
+        """
+        Test that accessing TargetData.instruction_memory_size warns, and returns the
+        larger value.
+        """
+        target_data = target_data_dict["different_memory_size"]
+        assert target_data.QUBIT_DATA.instruction_memory_size == 4096
+        assert target_data.RESONATOR_DATA.instruction_memory_size == 1024
+        with pytest.warns(
+            DeprecationWarning,
+            match=("`TargetData.instruction_memory_size` is deprecated"),
+        ):
+            max_size = target_data.instruction_memory_size
+        assert max_size == 4096
+
+    def test_resonator_if(self, target_data_dict, default_qubit_data):
+        """
+        Test that the RESONATOR_DATA fields pulse_channel_if_freq_min and pulse_channel_if_freq_max
+        are set correctly, and that QUBIT_DATA matches the default.
+        """
+        target_data = target_data_dict["resonator_if"]
+        assert target_data.RESONATOR_DATA.pulse_channel_if_freq_min == 400
+        assert target_data.RESONATOR_DATA.pulse_channel_if_freq_max == 100_000_000_000
+        assert target_data.QUBIT_DATA == default_qubit_data
+
+    def test_combined(self, target_data_dict):
+        """
+        Test that a target data object with combined field adjustments has all expected values set
+        for max_shots, default_shots, QUBIT_DATA.passive_reset_time, and RESONATOR_DATA IF fields.
+        """
+        target_data = target_data_dict["combined"]
+        assert target_data.max_shots == 2540
+        assert target_data.default_shots == 425
+        assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
+        assert target_data.RESONATOR_DATA.pulse_channel_if_freq_min == 400
+        assert target_data.RESONATOR_DATA.pulse_channel_if_freq_max == 100_000_000_000

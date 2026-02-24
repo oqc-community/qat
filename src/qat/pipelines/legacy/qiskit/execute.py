@@ -53,7 +53,7 @@ class LegacyQiskitExecutePipeline(UpdateablePipeline):
         return ExecutePipeline(
             name=config.name,
             model=model,
-            target_data=target_data if target_data is not None else TargetData.default(),
+            target_data=target_data if target_data is not None else TargetData(),
             runtime=LegacyRuntime(
                 engine=model.create_engine(),
                 results_pipeline=results_pipeline(),

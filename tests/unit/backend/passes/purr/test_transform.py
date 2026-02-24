@@ -53,7 +53,7 @@ def test_scope_peeling_pass(qubit_indices):
     met_mgr = MetricsManager()
     pipeline = (
         PassManager()
-        | RepeatSanitisation(model, TargetData.default())
+        | RepeatSanitisation(model, TargetData())
         | ScopeSanitisation()
         | ReturnSanitisation()
         | DesugaringPass()

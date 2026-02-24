@@ -15,7 +15,7 @@ from qat.engines import ZeroEngine
 from qat.frontend import DefaultFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
-from qat.model.target_data import DefaultTargetData
+from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.runtime import DefaultRuntime
 
@@ -54,7 +54,7 @@ class TestInjectModelAndTargetData:
         model = EchoModelLoader().load()
         kwargs = {"engine": ZeroEngine()} if with_engine else {}
         result = _inject_model_and_target_data(
-            MockModelInjectee, model, DefaultTargetData(), **kwargs
+            MockModelInjectee, model, TargetData(), **kwargs
         )
         assert result.model == model
         if with_engine:
@@ -64,7 +64,7 @@ class TestInjectModelAndTargetData:
 
     def test_inject_target_data(self, with_engine):
         """Test injecting only the target data."""
-        target_data = DefaultTargetData()
+        target_data = TargetData()
         kwargs = {"engine": ZeroEngine()} if with_engine else {}
         result = _inject_model_and_target_data(
             MockTargetDataInjectee, EchoModelLoader().load(), target_data, **kwargs
@@ -78,7 +78,7 @@ class TestInjectModelAndTargetData:
     def test_inject_model_and_target_data(self, with_engine):
         """Test injecting both model and target data."""
         model = EchoModelLoader().load()
-        target_data = DefaultTargetData()
+        target_data = TargetData()
         kwargs = {"engine": ZeroEngine()} if with_engine else {}
         result = _inject_model_and_target_data(
             MockModelAndTargetDataInjectee, model, target_data, **kwargs
@@ -93,7 +93,7 @@ class TestInjectModelAndTargetData:
 
 class TestConfigurableCompilePipeline:
     model = EchoModelLoader().load()
-    target_data = DefaultTargetData()
+    target_data = TargetData()
 
     def test_build_pipeline(self):
         """Test the _build_pipeline method."""
@@ -102,7 +102,7 @@ class TestConfigurableCompilePipeline:
             frontend="qat.frontend.DefaultFrontend",
             middleend="qat.middleend.DefaultMiddleend",
             backend="qat.backend.DefaultBackend",
-            target_data="qat.model.target_data.DefaultTargetData",
+            target_data="qat.model.target_data.TargetData",
         )
         with pytest.warns(DeprecationWarning):
             pipeline = ConfigurableCompilePipeline._build_pipeline(
@@ -119,7 +119,7 @@ class TestConfigurableCompilePipeline:
 
 class TestConfigurableExecutePipeline:
     model = EchoModelLoader().load()
-    target_data = DefaultTargetData()
+    target_data = TargetData()
 
     def test_build_pipeline(self):
         """Test the _build_pipeline method."""
@@ -128,7 +128,7 @@ class TestConfigurableExecutePipeline:
             engine="zero",
             runtime="qat.runtime.DefaultRuntime",
             results_pipeline="tests.unit.utils.resultsprocessing.get_pipeline",
-            target_data="qat.model.target_data.DefaultTargetData",
+            target_data="qat.model.target_data.TargetData",
         )
         pipeline = ConfigurableExecutePipeline._build_pipeline(
             config, self.model, self.target_data, engine=ZeroEngine()
@@ -145,7 +145,7 @@ class TestConfigurableExecutePipeline:
 
 class TestConfigurablePipeline:
     model = EchoModelLoader().load()
-    target_data = DefaultTargetData()
+    target_data = TargetData()
 
     def test_build_pipeline(self):
         """Test the _build_pipeline method."""
@@ -157,7 +157,7 @@ class TestConfigurablePipeline:
             engine="zero",
             runtime="qat.runtime.DefaultRuntime",
             results_pipeline="tests.unit.utils.resultsprocessing.get_pipeline",
-            target_data="qat.model.target_data.DefaultTargetData",
+            target_data="qat.model.target_data.TargetData",
         )
         with pytest.warns(DeprecationWarning):
             pipeline = ConfigurablePipeline._build_pipeline(

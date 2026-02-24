@@ -16,7 +16,7 @@ from qat.runtime.passes.transform import (
 
 
 class TestPostProcessingTransform:
-    target_data = TargetData.default()
+    target_data = TargetData()
 
     def test_raw_to_bits(self):
         mock_readout = {"test": np.ones((1000, 254))}

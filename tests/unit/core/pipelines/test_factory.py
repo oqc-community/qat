@@ -11,7 +11,7 @@ from qat.engines.waveform import EchoEngine
 from qat.frontend import DefaultFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
-from qat.model.target_data import DefaultTargetData, TargetData
+from qat.model.target_data import TargetData
 from qat.pipelines.pipeline import Pipeline
 from qat.runtime import DefaultRuntime
 
@@ -143,10 +143,10 @@ class TestPipelineFactory:
         config = PipelineFactoryDescription(
             name="test_factory",
             pipeline="tests.unit.core.pipelines.test_factory.create_mock_pipeline_with_target_data",
-            target_data="qat.model.target_data.DefaultTargetData",
+            target_data="qat.model.target_data.TargetData",
         )
 
         factory = PipelineFactory(
-            config, loader=EchoModelLoader(), target_data=DefaultTargetData()
+            config, loader=EchoModelLoader(), target_data=TargetData()
         )
         assert isinstance(factory.target_data, TargetData)

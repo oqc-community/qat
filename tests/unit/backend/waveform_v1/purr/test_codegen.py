@@ -112,7 +112,7 @@ class TestWaveformV1Backend:
         # ease
         builder = LowerSyncsToDelays().run(builder)
         if repeat_translation:
-            builder = RepeatTranslation(TargetData.default()).run(builder)
+            builder = RepeatTranslation(TargetData()).run(builder)
 
         executable = self.backend.emit(builder)
         assert isinstance(executable, Executable)

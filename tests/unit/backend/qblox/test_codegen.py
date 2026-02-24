@@ -46,7 +46,7 @@ from tests.unit.utils.builder_nuggets import (
 
 log = get_default_logger()
 
-target_data = QbloxTargetData.default()
+target_data = QbloxTargetData()
 sequencer_data = target_data.CONTROL_SEQUENCER_DATA
 q1asm_data = target_data.Q1ASM_DATA
 

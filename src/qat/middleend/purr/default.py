@@ -48,7 +48,7 @@ class DefaultMiddleend(CustomMiddleend):
     def __init__(
         self,
         model: QuantumHardwareModel,
-        target_data: TargetData = TargetData.default(),
+        target_data: TargetData = TargetData(),
     ):
         """
         :param model: The hardware model that holds calibrated information on the qubits on
@@ -61,7 +61,7 @@ class DefaultMiddleend(CustomMiddleend):
 
     @staticmethod
     def build_pass_pipeline(
-        model: QuantumHardwareModel, target_data: TargetData = TargetData.default()
+        model: QuantumHardwareModel, target_data: TargetData = TargetData()
     ) -> PassManager:
         """
         Builds the default middle end pass pipeline.

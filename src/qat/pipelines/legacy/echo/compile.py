@@ -58,7 +58,7 @@ class LegacyEchoCompilePipeline(UpdateablePipeline):
                 "The compilation pipeline does not require an engine. It will be ignored."
             )
 
-        target_data = target_data if target_data is not None else TargetData.default()
+        target_data = target_data if target_data is not None else TargetData()
         return CompilePipeline(
             name=config.name,
             model=model,

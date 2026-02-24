@@ -46,7 +46,7 @@ class TestEchoPipeline:
         assert isinstance(pipeline.backend, WaveformV1Backend)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
-        assert pipeline.target_data == TargetData.default()
+        assert pipeline.target_data == TargetData()
         assert isinstance(pipeline.engine, EchoEngine)
 
     def test_build_compile_pipeline(self):
@@ -104,7 +104,7 @@ class TestEchoPipelineWithCircuits:
     the executable and the results returned by the EchoEngine.
     """
 
-    target_data = TargetData.default()
+    target_data = TargetData()
     model = EchoModelLoaderWithErrorMitigation(qubit_count=32).load()
     pipeline = EchoPipeline(
         config=PipelineConfig(name="stable"), model=model, target_data=target_data
@@ -333,7 +333,7 @@ class TestEchoPipelineWithErrorMitigation:
     the executable and the results returned by the EchoEngine.
     """
 
-    target_data = TargetData.default()
+    target_data = TargetData()
     model = EchoModelLoaderWithErrorMitigation(qubit_count=32).load()
     pipeline = EchoPipeline(
         config=PipelineConfig(name="stable"), model=model, target_data=target_data

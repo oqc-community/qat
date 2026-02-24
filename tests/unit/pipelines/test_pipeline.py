@@ -43,7 +43,7 @@ class TestCompilePipeline:
             frontend=FallthroughFrontend(model=model),
             middleend=FallthroughMiddleend(model=model),
             backend=MockBackend(model=model),
-            target_data=TargetData.default(),
+            target_data=TargetData(),
         )
 
     def test_pipeline_initialization(self, mock_pipeline):
@@ -63,7 +63,7 @@ class TestCompilePipeline:
                 frontend=AutoFrontend(model=model1),
                 middleend=DefaultMiddleend(model=model1),
                 backend=MockBackend(model=model2),
-                target_data=TargetData.default(),
+                target_data=TargetData(),
             )
 
     def test_copy_returns_new_instance_same_components(self, mock_pipeline):
@@ -110,7 +110,7 @@ class TestCompilePipeline:
             frontend=AutoFrontend(model=model),
             middleend=PydDefaultMiddleend(model=model),
             backend=PydWaveformBackend(model=model),
-            target_data=TargetData.default(),
+            target_data=TargetData(),
         )
 
         # will raise
@@ -122,7 +122,7 @@ class TestCompilePipeline:
                 frontend=AutoFrontend(model=model),
                 middleend=PydDefaultMiddleend(model=model),
                 backend=PydWaveformBackend(model=new_model),
-                target_data=TargetData.default(),
+                target_data=TargetData(),
             )
 
 
@@ -134,7 +134,7 @@ class TestExecutePipeline:
             name="TestExecutePipeline",
             model=model,
             runtime=SimpleRuntime(engine=ZeroEngine()),
-            target_data=TargetData.default(),
+            target_data=TargetData(),
         )
 
     def test_pipeline_initialization(self, mock_pipeline):
@@ -151,7 +151,7 @@ class TestExecutePipeline:
                 name="TestExecutePipeline",
                 model=model1,
                 runtime=SimpleRuntime(engine=MockEngineWithModel(model2)),
-                target_data=TargetData.default(),
+                target_data=TargetData(),
             )
 
     def test_copy_returns_new_instance_same_components(self, mock_pipeline):
@@ -204,7 +204,7 @@ class TestExecutePipeline:
             name="TestExecutePipeline",
             model=model,
             runtime=SimpleRuntime(engine=MockEngineWithModel(model)),
-            target_data=TargetData.default(),
+            target_data=TargetData(),
         )
 
         # will raise
@@ -214,7 +214,7 @@ class TestExecutePipeline:
                 name="TestExecutePipeline",
                 model=model,
                 runtime=SimpleRuntime(engine=MockEngineWithModel(new_model)),
-                target_data=TargetData.default(),
+                target_data=TargetData(),
             )
 
 
@@ -229,7 +229,7 @@ class TestPipeline:
             middleend=FallthroughMiddleend(model),
             backend=MockBackend(model),
             runtime=SimpleRuntime(engine=ZeroEngine()),
-            target_data=TargetData.default(),
+            target_data=TargetData(),
         )
 
     def test_correct_pipeline_initialization(self, mock_pipeline):
@@ -252,7 +252,7 @@ class TestPipeline:
                 middleend=DefaultMiddleend(model=model1),
                 backend=PydWaveformBackend(model=model2),
                 runtime=SimpleRuntime(engine=ZeroEngine()),
-                target_data=TargetData.default(),
+                target_data=TargetData(),
             )
 
     def test_copy_returns_new_instance_same_components(self, mock_pipeline):

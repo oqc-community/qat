@@ -243,7 +243,7 @@ class CompilePipelineDescription(NoExtraFieldsModel):
     frontend: FrontendDescription = "qat.frontend.DefaultFrontend"
     middleend: MiddleendDescription = "qat.middleend.DefaultMiddleend"
     backend: BackendDescription = "qat.backend.DefaultBackend"
-    target_data: TargetDataDescription = "qat.model.target_data.DefaultTargetData"
+    target_data: TargetDataDescription = "qat.model.target_data.TargetData"
     default: bool = False
     model_config = ConfigDict(validate_default=True)
 
@@ -280,7 +280,7 @@ class ExecutePipelineDescription(NoExtraFieldsModel):
     hardware_loader: str | None = None
     engine: str | None = None
     runtime: RuntimeDescription = "qat.runtime.DefaultRuntime"
-    target_data: TargetDataDescription = "qat.model.target_data.DefaultTargetData"
+    target_data: TargetDataDescription = "qat.model.target_data.TargetData"
     results_pipeline: PassManagerFactoryDescription = (
         "qat.runtime.results_pipeline.get_default_results_pipeline"
     )
@@ -324,7 +324,7 @@ class PipelineClassDescription(NoExtraFieldsModel):
     middleend: MiddleendDescription = "qat.middleend.DefaultMiddleend"
     backend: BackendDescription = "qat.backend.DefaultBackend"
     runtime: RuntimeDescription = "qat.runtime.DefaultRuntime"
-    target_data: TargetDataDescription = "qat.model.target_data.DefaultTargetData"
+    target_data: TargetDataDescription = "qat.model.target_data.TargetData"
     results_pipeline: PassManagerFactoryDescription = (
         "qat.runtime.results_pipeline.get_default_results_pipeline"
     )

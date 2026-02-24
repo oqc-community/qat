@@ -15,7 +15,7 @@ from qat.purr.backends.qblox.acquisition import (
     ScopeAcqData,
 )
 
-target_data = QbloxTargetData.default()
+target_data = QbloxTargetData()
 qrm_data = target_data.QRM_DATA
 
 

@@ -99,7 +99,7 @@ class QbloxCompilePipeline1(UpdateablePipeline):
                 "be ignored. "
             )
 
-        target_data = target_data if target_data is not None else QbloxTargetData.default()
+        target_data = target_data if target_data is not None else QbloxTargetData()
         return CompilePipeline(
             model=model,
             target_data=target_data,
@@ -138,7 +138,7 @@ class QbloxCompilePipeline2(UpdateablePipeline):
                 "be ignored. "
             )
 
-        target_data = target_data if target_data is not None else QbloxTargetData.default()
+        target_data = target_data if target_data is not None else QbloxTargetData()
         return CompilePipeline(
             model=model,
             target_data=target_data,

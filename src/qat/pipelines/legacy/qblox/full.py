@@ -39,7 +39,7 @@ class LegacyQbloxPipeline(UpdateablePipeline):
                 "The legacy QbloxEngine is used directly."
             )
 
-        target_data = target_data or QbloxTargetData.default()
+        target_data = target_data or QbloxTargetData()
         return Pipeline(
             name=config.name,
             model=model,

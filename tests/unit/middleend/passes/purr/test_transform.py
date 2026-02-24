@@ -2019,7 +2019,7 @@ class TestRepeatTranslation:
         if explicit_close:
             builder.add(EndRepeat())
 
-        ir = RepeatTranslation(TargetData.default()).run(builder)
+        ir = RepeatTranslation(TargetData()).run(builder)
 
         assert len(ir.existing_names) == 1
 
@@ -2033,7 +2033,7 @@ class TestRepeatTranslation:
         if explicit_close:
             builder.add([EndRepeat(), EndRepeat()])
 
-        ir = RepeatTranslation(TargetData.default()).run(builder)
+        ir = RepeatTranslation(TargetData()).run(builder)
 
         assert len(ir.existing_names) == 2
 
@@ -2092,7 +2092,7 @@ class TestRepeatTranslation:
             if not explicit_close:
                 close_indices = [i + fifth for i in close_indices]
 
-        ir = RepeatTranslation(TargetData.default()).run(builder)
+        ir = RepeatTranslation(TargetData()).run(builder)
 
         self._check_loop_start(ir, start_indices)
         self._check_loop_close(ir, close_indices, [1000, 300])
@@ -2133,7 +2133,7 @@ class TestRepeatSanitisation:
 
     def test_repeat_instructions_are_sanitised(self):
         model = EchoModelLoader().load()
-        target_data = TargetData.default()
+        target_data = TargetData()
 
         builder = model.create_builder()
         builder.X(model.qubits[0])
@@ -2154,7 +2154,7 @@ class TestRepeatSanitisation:
     )
     def test_repeat_count_from_config(self, compiler_config, use_default):
         model = EchoModelLoader().load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         expected_shots = (
             target_data.default_shots if use_default else compiler_config.repeats
         )
@@ -2177,7 +2177,7 @@ class TestRepeatSanitisation:
     )
     def test_fails_with_shot_mismatch(self, repeat_counts, compiler_config):
         model = EchoModelLoader().load()
-        target_data = TargetData.default()
+        target_data = TargetData()
         builder = QuantumInstructionBuilder(model).X(model.get_qubit(0))
         for count in repeat_counts:
             builder.repeat(count)

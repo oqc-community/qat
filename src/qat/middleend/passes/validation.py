@@ -42,10 +42,7 @@ class InstructionValidation(ValidationPass):
         :param target_data: Target-related information.
         :param pulse_duration_limits: Whether to check the pulse duration limits.
             If None, uses the default from the QatConfig.
-        :param instruction_memory_size: The maximum number of instructions that can
-            be run in a single shot. If None, uses the default from QatConfig.
         """
-        self.instruction_memory_size = target_data.instruction_memory_size
         self.pulse_duration_max = max(
             target_data.QUBIT_DATA.pulse_duration_max,
             target_data.RESONATOR_DATA.pulse_duration_max,

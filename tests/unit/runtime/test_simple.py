@@ -119,7 +119,7 @@ class TestSimpleRuntime:
                 output_variable=f"qubit{i}",
             )
         builder.returns("qubit0")
-        builder = RepeatTranslation(TargetData.default()).run(builder)
+        builder = RepeatTranslation(TargetData()).run(builder)
 
         # Test with default pipeline
         with pytest.warns(DeprecationWarning):
@@ -132,7 +132,7 @@ class TestSimpleRuntime:
         # Test with custom pipeline
         pipeline = (
             PassManager()
-            | AcquisitionPostprocessing(TargetData.default())
+            | AcquisitionPostprocessing(TargetData())
             | InlineResultsProcessingTransform()
         )
         with SimpleRuntime(EchoEngine(), pipeline) as runtime:

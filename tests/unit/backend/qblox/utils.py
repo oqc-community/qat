@@ -24,10 +24,10 @@ from qat.runtime.aggregator import QBloxAggregator
 
 def do_emit(model: QbloxLiveHardwareModel, backend_type: type, builder, ignore_empty=True):
     if backend_type == QbloxBackend1:
-        middleend_pipeline = middleend_pipeline1(model, QbloxTargetData.default())
+        middleend_pipeline = middleend_pipeline1(model, QbloxTargetData())
         backend_pipeline = backend_pipeline1()
     elif backend_type == QbloxBackend2:
-        middleend_pipeline = middleend_pipeline2(model, QbloxTargetData.default())
+        middleend_pipeline = middleend_pipeline2(model, QbloxTargetData())
         backend_pipeline = backend_pipeline2()
     else:
         raise ValueError(f"Expected QbloxBackend1 or QbloxBackend2, got {backend_type}")

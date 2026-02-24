@@ -29,7 +29,7 @@ class TestCompileSweepPipeline:
     @pytest.fixture
     def base_pipeline(self, model):
         return WaveformV1CompilePipeline(
-            config=dict(name="test"), model=model, target_data=TargetData.default()
+            config=dict(name="test"), model=model, target_data=TargetData()
         )
 
     @pytest.fixture
@@ -44,7 +44,7 @@ class TestCompileSweepPipeline:
 
     def test_init_with_execute_pipeline_raises(self, model):
         base_pipeline = EchoExecutePipeline(
-            config=dict(name="test"), model=model, target_data=TargetData.default()
+            config=dict(name="test"), model=model, target_data=TargetData()
         )
         with pytest.raises(
             TypeError, match="CompileSweepPipeline can only wrap CompilePipelines."

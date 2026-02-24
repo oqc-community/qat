@@ -1,0 +1,56 @@
+HARDWARE:
+- name: lucy6loader 
+  type: qat.model.loaders.lucy.LucyModelLoader
+  config:
+    qubit_count: 6
+
+COMPILE: 
+- name: top_level_info
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
+  hardware_loader: lucy6loader
+  target_data:
+    type: qat.model.target_data.TargetData
+    config:
+      max_shots: 2_540
+      default_shots: 425
+  default: true
+- name: passive_reset_time
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
+  hardware_loader: lucy6loader
+  target_data:
+    type: qat.model.target_data.TargetData
+    config:
+      QUBIT_DATA:
+        passive_reset_time: 1e-2
+- name: different_memory_size
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
+  hardware_loader: lucy6loader
+  target_data:
+    type: qat.model.target_data.TargetData
+    config:
+      QUBIT_DATA:
+        instruction_memory_size: 4096
+      RESONATOR_DATA:
+        instruction_memory_size: 1024
+- name: resonator_if
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
+  hardware_loader: lucy6loader
+  target_data:
+    type: qat.model.target_data.TargetData
+    config:
+      RESONATOR_DATA:
+        pulse_channel_if_freq_min: 400
+        pulse_channel_if_freq_max: 100_000_000_000
+- name: combined
+  pipeline: qat.pipelines.waveform.WaveformCompilePipeline
+  hardware_loader: lucy6loader
+  target_data:
+    type: qat.model.target_data.TargetData
+    config:
+      max_shots: 2_540
+      default_shots: 425
+      QUBIT_DATA:
+        passive_reset_time: 1e-2
+      RESONATOR_DATA:
+        pulse_channel_if_freq_min: 400
+        pulse_channel_if_freq_max: 100_000_000_000

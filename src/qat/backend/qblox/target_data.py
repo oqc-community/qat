@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from warnings import warn
 
 from pydantic import NegativeFloat, NegativeInt, PositiveFloat, PositiveInt
 
@@ -32,6 +33,12 @@ class Q1asmDescription(NoExtraFieldsFrozenModel):
 
     @classmethod
     def default(cls):
+        warn(
+            f"`{cls.__name__}.default()` is deprecated; use `{cls.__name__}()` instead. "
+            "This will be removed in v4.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return cls()
 
 
@@ -72,27 +79,21 @@ class SequencerDescription(NoExtraFieldsFrozenModel):
 
     @classmethod
     def default(cls):
+        warn(
+            f"`{cls.__name__}.default()` is deprecated; use `{cls.__name__}()` instead. "
+            "This will be removed in v4.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return cls()
 
 
 class ControlSequencerDescription(SequencerDescription):
     max_num_instructions: PositiveInt = 16384
 
-    @classmethod
-    def default(cls):
-        seq_descr = SequencerDescription().model_dump()
-        ctrl_seq_descr = ControlSequencerDescription().model_dump()
-        return cls(**(seq_descr | ctrl_seq_descr))
-
 
 class ReadoutSequencerDescription(SequencerDescription):
     max_num_instructions: PositiveInt = 12288
-
-    @classmethod
-    def default(cls):
-        seq_descr = SequencerDescription().model_dump()
-        read_seq_descr = ReadoutSequencerDescription().model_dump()
-        return cls(**(seq_descr | read_seq_descr))
 
 
 class ModuleDescription(NoExtraFieldsFrozenModel):
@@ -107,6 +108,12 @@ class ModuleDescription(NoExtraFieldsFrozenModel):
 
     @classmethod
     def default(cls):
+        warn(
+            f"`{cls.__name__}.default()` is deprecated; use `{cls.__name__}()` instead. "
+            "This will be removed in v4.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return cls()
 
 
@@ -121,12 +128,6 @@ class QcmDescription(ModuleDescription):
     min_qcm_offset_v: NegativeFloat = -2.5
     max_qcm_offset_v: PositiveFloat = 2.5
 
-    @classmethod
-    def default(cls):
-        module_descr = ModuleDescription().model_dump()
-        qcm_descr = QcmDescription().model_dump()
-        return cls(**(module_descr | qcm_descr))
-
 
 class QcmRfDescription(QcmDescription):
     """
@@ -138,12 +139,6 @@ class QcmRfDescription(QcmDescription):
 
     min_qcm_rf_offset_mv: NegativeInt = -84
     max_qcm_rf_offset_mv: PositiveInt = 73
-
-    @classmethod
-    def default(cls):
-        qcm_descr = QcmDescription().model_dump()
-        qcm_rf_descr = QcmRfDescription().model_dump()
-        return cls(**(qcm_descr | qcm_rf_descr))
 
 
 class QrmDescription(ModuleDescription):
@@ -166,12 +161,6 @@ class QrmDescription(ModuleDescription):
     max_sample_size_scope_acquisitions: PositiveInt = 16384
     max_binned_acquisitions: PositiveInt = 3_000_000
 
-    @classmethod
-    def default(cls):
-        module_descr = ModuleDescription().model_dump()
-        qrm_descr = QrmDescription().model_dump()
-        return cls(**(module_descr | qrm_descr))
-
 
 class QrmRfDescription(QrmDescription):
     """
@@ -183,12 +172,6 @@ class QrmRfDescription(QrmDescription):
 
     min_qrm_rf_offset_v: NegativeFloat = -0.09
     max_qrm_rf_offset_v: PositiveFloat = 0.09
-
-    @classmethod
-    def default(cls):
-        qrm_descr = QrmDescription().model_dump()
-        qrm_rf_descr = QrmRfDescription().model_dump()
-        return cls(**(qrm_descr | qrm_rf_descr))
 
 
 class QbloxTargetData(TargetData):
@@ -211,26 +194,3 @@ class QbloxTargetData(TargetData):
     QCM_RF_DATA: QcmRfDescription = QcmRfDescription()
     QRM_DATA: QrmDescription = QrmDescription()
     QRM_RF_DATA: QrmRfDescription = QrmRfDescription()
-
-    @classmethod
-    def default(cls) -> "QbloxTargetData":
-        """
-        Returns a default QbloxTargetData instance.
-        """
-
-        target_data = TargetData.default().model_dump()
-
-        return cls(
-            **(
-                target_data
-                | {
-                    "Q1ASM_DATA": Q1asmDescription(),
-                    "CONTROL_SEQUENCER_DATA": ControlSequencerDescription(),
-                    "READOUT_SEQUENCER_DATA": ReadoutSequencerDescription(),
-                    "QCM_DATA": QcmDescription(),
-                    "QCM_RF_DATA": QcmRfDescription(),
-                    "QRM_DATA": QrmDescription(),
-                    "QRM_RF_DATA": QrmRfDescription(),
-                }
-            )
-        )

@@ -36,7 +36,7 @@ class QbloxPipeline1(UpdateablePipeline):
         target_data: QbloxTargetData | None,
         engine: QbloxEngine = None,
     ) -> Pipeline:
-        target_data = target_data if target_data is not None else QbloxTargetData.default()
+        target_data = target_data if target_data is not None else QbloxTargetData()
         results_pipeline = get_results_pipeline(model)
         return Pipeline(
             model=model,
@@ -72,7 +72,7 @@ class QbloxPipeline2(UpdateablePipeline):
         target_data: QbloxTargetData | None,
         engine: QbloxEngine = None,
     ) -> Pipeline:
-        target_data = target_data if target_data is not None else QbloxTargetData.default()
+        target_data = target_data if target_data is not None else QbloxTargetData()
         results_pipeline = get_results_pipeline(model)
         return Pipeline(
             model=model,

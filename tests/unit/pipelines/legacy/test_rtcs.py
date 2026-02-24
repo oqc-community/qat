@@ -72,8 +72,8 @@ class TestRTCSPipelines:
 
         config = CompilerConfig(
             results_format=QuantumResultsFormat().binary_count(),
-            repeats=TargetData.default().default_shots,
-            repetition_period=TargetData.default().QUBIT_DATA.passive_reset_time,
+            repeats=TargetData().default_shots,
+            repetition_period=TargetData().QUBIT_DATA.passive_reset_time,
         )
         results = self.execute_bell_state(config)
         assert len(results) == 1

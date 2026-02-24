@@ -47,7 +47,7 @@ class CompilePipeline(BasePipeline):
             self._validate_consistent_model(model, frontend, middleend, backend)
         self._name = name
         self._model = model
-        self._target_data = target_data if target_data is not None else TargetData.default()
+        self._target_data = target_data if target_data is not None else TargetData()
         self._frontend = frontend
         self._middleend = middleend
         self._backend = backend
@@ -221,7 +221,7 @@ class Pipeline(CompilePipeline, ExecutePipeline):
             )
         self._name = name
         self._model = model
-        self._target_data = target_data if target_data is not None else TargetData.default()
+        self._target_data = target_data if target_data is not None else TargetData()
         self._frontend = frontend
         self._middleend = middleend
         self._backend = backend
