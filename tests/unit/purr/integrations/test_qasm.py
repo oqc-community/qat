@@ -669,6 +669,7 @@ class TestQASM3:
 
         N, gate_string = gate_tup
         file_name = gate_string.split(" ")[0].split("(")[0] + ".json"
+        file_name = file_name.lower()
         qasm = qasm3_base.format(N=N, gate_strings=gate_string)
         hw = get_default_echo_hardware(
             N, [(i, j) for i in range(N) for j in range(i, N) if i != j]
