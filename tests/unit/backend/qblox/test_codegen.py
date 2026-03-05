@@ -14,6 +14,14 @@ from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
 from qat.backend.qblox.target_data import QbloxTargetData
 from qat.backend.qblox.visualisation import plot_program
+from qat.core.metrics_base import MetricsManager
+from qat.core.result_base import ResultManager
+from qat.pipelines.purr.qblox.compile import (
+    backend_pipeline1,
+    backend_pipeline2,
+    middleend_pipeline1,
+    middleend_pipeline2,
+)
 from qat.purr.backends.qblox.device import QbloxPhysicalBaseband, QbloxPhysicalChannel
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import (
@@ -49,6 +57,30 @@ log = get_default_logger()
 target_data = QbloxTargetData()
 sequencer_data = target_data.CONTROL_SEQUENCER_DATA
 q1asm_data = target_data.Q1ASM_DATA
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+def test_allocation(qblox_model, backend_type):
+    if backend_type == QbloxBackend1:
+        middleend_pipeline = middleend_pipeline1(qblox_model, QbloxTargetData())
+        backend_pipeline = backend_pipeline1()
+    elif backend_type == QbloxBackend2:
+        middleend_pipeline = middleend_pipeline2(qblox_model, QbloxTargetData())
+        backend_pipeline = backend_pipeline2()
+    else:
+        raise ValueError(f"Expected QbloxBackend1 or QbloxBackend2, got {backend_type}")
+
+    drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+    gaussian = Pulse(drive_channel, PulseShapeType.GAUSSIAN, width=100e-9, rise=1.0 / 5.0)
+    builder = qblox_model.create_builder().add(gaussian)
+
+    res_mgr = ResultManager()
+    met_mgr = MetricsManager()
+    middleend_pipeline.run(builder, res_mgr, met_mgr, enable_hw_averaging=True)
+    backend = backend_type(model=qblox_model, pipeline=backend_pipeline)
+
+    assert not backend.allocations
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

@@ -1109,7 +1109,8 @@ class RepeatSanitisation(TransformPass):
         :param target_data: Target-related information.
         """
         self.model = model
-        self.target_data = target_data
+        self.default_shots = target_data.default_shots
+        self.default_passive_reset_time = target_data.QUBIT_DATA.passive_reset_time
 
     def run(
         self,
@@ -1119,31 +1120,53 @@ class RepeatSanitisation(TransformPass):
         **kwargs,
     ):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
-        num_shots = self.target_data.default_shots
-        configured = False
-        if compiler_config is not None and compiler_config.repeats is not None:
-            configured = True
-            num_shots = compiler_config.repeats
+        num_shots = self.default_shots
+        passive_reset_time = self.default_passive_reset_time
+        num_shots_configured = False
+        passive_reset_time_configured = False
+        if compiler_config is not None:
+            if compiler_config.repeats is not None:
+                num_shots_configured = True
+                num_shots = compiler_config.repeats
+            if compiler_config.passive_reset_time is not None:
+                passive_reset_time_configured = True
+                passive_reset_time = compiler_config.passive_reset_time
 
         repeats = [inst for inst in ir._instructions if isinstance(inst, Repeat)]
         if repeats:
             for rep in repeats:
                 if rep.repeat_count is None:
                     rep.repeat_count = num_shots
-                if rep.passive_reset_time is None and rep.repetition_period is None:
-                    rep.passive_reset_time = self.target_data.QUBIT_DATA.passive_reset_time
-            if not configured:
+                if rep.passive_reset_time is None:
+                    rep.passive_reset_time = passive_reset_time
+            if not num_shots_configured:
                 num_shots = repeats[0].repeat_count
+            if not passive_reset_time_configured:
+                passive_reset_time = repeats[0].passive_reset_time
             if not all([rep.repeat_count == num_shots for rep in repeats]):
                 raise ValueError(
                     "Inconsistent repeat_count information found. "
                     + f"Repeat instruction values: {[rep.repeat_count for rep in repeats]}"
-                    + (f", CompilerConfig repeats: {num_shots}." if configured else ".")
+                    + (
+                        f", CompilerConfig values: {num_shots}."
+                        if num_shots_configured
+                        else "."
+                    )
+                )
+            if not all([rep.passive_reset_time == passive_reset_time for rep in repeats]):
+                raise ValueError(
+                    "Inconsistent passive_reset_time information found. "
+                    + f"Repeat instruction values: {[rep.passive_reset_time for rep in repeats]}"
+                    + (
+                        f", CompilerConfig values: {passive_reset_time}."
+                        if passive_reset_time_configured
+                        else "."
+                    )
                 )
         else:
             ir.repeat(
-                num_shots,
-                passive_reset_time=self.target_data.QUBIT_DATA.passive_reset_time,
+                repeat_value=num_shots,
+                passive_reset_time=passive_reset_time,
             )
         return ir
 

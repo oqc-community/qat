@@ -2099,71 +2099,84 @@ class TestRepeatTranslation:
 
 
 class TestRepeatSanitisation:
-    @pytest.mark.parametrize("shots", [10, 100, 1000])
-    @pytest.mark.parametrize("passive_reset_time", [1e-03, 2])
-    @pytest.mark.parametrize("default", [True, False])
-    def test_default_repeat(self, shots, passive_reset_time, default):
+    @pytest.mark.parametrize("default_shots", [10, 100, 1000])
+    @pytest.mark.parametrize("default_passive_reset_time", [1e-03, 2])
+    @pytest.mark.parametrize("missing_shots", [True, False])
+    @pytest.mark.parametrize("missing_passive_reset_time", [True, False])
+    def test_values_from_target_data(
+        self,
+        default_shots,
+        default_passive_reset_time,
+        missing_shots,
+        missing_passive_reset_time,
+    ):
         model = EchoModelLoader().load()
         # TODO: Change to `passive_reset_time`. 428, 455
         qubit_data = QubitDescription.random().model_copy(
-            update={"passive_reset_time": passive_reset_time}
+            update={"passive_reset_time": default_passive_reset_time}
         )
         target_data = TargetData(
             max_shots=1000,
-            default_shots=shots,
+            default_shots=default_shots,
             RESONATOR_DATA=ResonatorDescription.random(),
             QUBIT_DATA=qubit_data,
         )
 
+        shots = default_shots
+        passive_reset_time = default_passive_reset_time
+        if missing_shots:
+            shots = None
+        if missing_passive_reset_time:
+            passive_reset_time = None
+
         builder = QuantumInstructionBuilder(model).X(model.get_qubit(0))
-        if not default:
-            # To make sure the parameters are different from the default params.
-            shots = shots - 1
-            passive_reset_time = passive_reset_time - 1e-04
-            builder.repeat(shots, passive_reset_time=passive_reset_time)
-        else:
-            default = target_data
+        builder.repeat(repeat_value=shots, passive_reset_time=passive_reset_time)
+
+        repeat_inst = builder.instructions[-1]
+        assert isinstance(repeat_inst, Repeat)
+        assert repeat_inst.repetition_period is None
+
+        assert repeat_inst.repeat_count == shots
+        assert repeat_inst.passive_reset_time == passive_reset_time
+
+        RepeatSanitisation(model, target_data).run(builder)
+
+        assert repeat_inst.repeat_count == default_shots
+        assert repeat_inst.passive_reset_time == default_passive_reset_time
 
         RepeatSanitisationValidation().run(builder)
-        ir = RepeatSanitisation(model, target_data).run(builder)
-        assert isinstance(repeat := ir.instructions[-1], Repeat)
-        assert repeat.repeat_count == shots
-        passive_reset_time
-        assert repeat.passive_reset_time == passive_reset_time
-
-    def test_repeat_instructions_are_sanitised(self):
-        model = EchoModelLoader().load()
-        target_data = TargetData()
-
-        builder = model.create_builder()
-        builder.X(model.qubits[0])
-        builder.repeat(None, passive_reset_time=None)
-
-        builder = RepeatSanitisation(model, target_data).run(builder)
-        assert isinstance(repeat := builder.instructions[-1], Repeat)
-        assert repeat.repeat_count == target_data.default_shots
-        assert repeat.passive_reset_time == target_data.QUBIT_DATA.passive_reset_time
 
     @pytest.mark.parametrize(
         "compiler_config, use_default",
         [
             pytest.param(None, True, id="None"),
             pytest.param(CompilerConfig(), True, id="Default"),
-            pytest.param(CompilerConfig(repeats=58), False, id="Explicit"),
+            pytest.param(
+                CompilerConfig(repeats=58, passive_reset_time=100e-6),
+                False,
+                id="Explicit",
+            ),
         ],
     )
-    def test_repeat_count_from_config(self, compiler_config, use_default):
+    def test_values_from_compiler_config(self, compiler_config, use_default):
         model = EchoModelLoader().load()
         target_data = TargetData()
         expected_shots = (
             target_data.default_shots if use_default else compiler_config.repeats
         )
-        builder = QuantumInstructionBuilder(model).X(model.get_qubit(0))
-        ir = RepeatSanitisation(model, target_data).run(
-            builder, compiler_config=compiler_config
+        expected_passive_reset_time = (
+            target_data.QUBIT_DATA.passive_reset_time
+            if use_default
+            else compiler_config.passive_reset_time
         )
-        assert isinstance(repeat := ir.instructions[-1], Repeat)
+        expected_repetition_period = None
+
+        builder = QuantumInstructionBuilder(model).X(model.get_qubit(0))
+        RepeatSanitisation(model, target_data).run(builder, compiler_config=compiler_config)
+        assert isinstance(repeat := builder.instructions[-1], Repeat)
         assert repeat.repeat_count == expected_shots
+        assert repeat.passive_reset_time == expected_passive_reset_time
+        assert repeat.repetition_period == expected_repetition_period
 
     @pytest.mark.parametrize(
         "repeat_counts, compiler_config",

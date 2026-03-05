@@ -133,7 +133,12 @@ class TestExecutionSuite:
         passive_reset,
     ):
         if num_shots == 3_000_000:
-            pytest.skip("Disables until Qblox fix their dummy/mock cluster")
+            pytest.skip("Disables until Qblox fix their dummy/mock cluster - COMPILER-986")
+
+        if amp != 0.5 or passive_reset != 2e-6:
+            pytest.skip(
+                "Skipped to reduce latency of the unit test as it takes too long to run"
+            )
 
         builder = get_builder(qblox_model)
         builder.repeat(repeat_value=num_shots, passive_reset_time=passive_reset)

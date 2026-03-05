@@ -59,6 +59,7 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
             )
 
     def _delete_acquisitions(self, sequencer):
+        # TODO - Follow up on acquisition cleanup inconsistencies: COMPILER-987
         sequencer.delete_dummy_scope_acquisition_data()
         sequencer.delete_dummy_binned_acquisition_data()
 
@@ -78,5 +79,6 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
         for pulse_channel_id, sequencer in self._id2seq.items():
             if ChannelType.macq.name in pulse_channel_id:
                 package = program.packages[pulse_channel_id]
-                self._setup_dummy_scope_acq_data(sequencer, package.sequence)
-                self._setup_dummy_binned_acq_data(sequencer, package.sequence)
+                if package.sequence.acquisitions:
+                    self._setup_dummy_scope_acq_data(sequencer, package.sequence)
+                    self._setup_dummy_binned_acq_data(sequencer, package.sequence)

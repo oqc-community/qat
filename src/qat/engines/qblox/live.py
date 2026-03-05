@@ -54,6 +54,9 @@ class QbloxLeafInstrument(LeafInstrument):
                 mod.disconnect_inputs()
             self._modules[mod] = False  # Mark as clean
 
+    def _delete_acquisitions(self, sequencer: Sequencer):
+        sequencer.delete_acquisition_data(all=True)
+
     @property
     def driver(self):
         return self._driver
@@ -184,7 +187,7 @@ class QbloxLeafInstrument(LeafInstrument):
             for pulse_channel_id, sequencer in self._id2seq.items():
                 sequencer.sync_en(False)
                 if ChannelType.macq.name in pulse_channel_id:
-                    sequencer.delete_acquisition_data(all=True)
+                    self._delete_acquisitions(sequencer)
 
             self._id2seq.clear()
             self._reset_modules()

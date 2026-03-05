@@ -972,13 +972,16 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
             }
             QbloxCFGWalker(contexts).run(cfg_result.cfg)
 
-        packages = {}
-        for target, context in contexts.items():
-            if not context.is_empty() or not ignore_empty:
-                seq_idx, slot_idx = self.allocate(target)
-                package = context.create_package(target, seq_idx, slot_idx)
-                packages[target.full_id()] = package
-        return QbloxProgram(packages=packages)
+        try:
+            packages = {}
+            for target, context in contexts.items():
+                if not context.is_empty() or not ignore_empty:
+                    seq_idx, slot_idx = self.allocate(target)
+                    package = context.create_package(target, seq_idx, slot_idx)
+                    packages[target.full_id()] = package
+            return QbloxProgram(packages=packages)
+        finally:
+            self.allocations.clear()
 
 
 class QbloxBackend1(AbstractQbloxBackend):
