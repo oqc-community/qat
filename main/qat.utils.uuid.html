@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.utils.uuid module &mdash; qat-compiler 3.0.0.post169.dev20260306125439 documentation</title>
+  <title>qat.utils.uuid module &mdash; qat-compiler 3.0.0.post170.dev20260306163120 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -515,6 +515,15 @@
 
   <section id="module-qat.utils.uuid">
 <span id="qat-utils-uuid-module"></span><h1>qat.utils.uuid module<a class="headerlink" href="#module-qat.utils.uuid" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.utils.uuid.temporary_uuid_seed">
+<span class="sig-name descname"><span class="pre">temporary_uuid_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.uuid.temporary_uuid_seed" title="Link to this definition"></a></dt>
+<dd><p>Context manager to temporarily seed the uuid generation for reproducibility.
+Only affects uuid() and uuid4() in this module, for the current context.</p>
+<p>This is re-entrant and thread-safe: nested contexts are supported and random
+state is isolated between concurrent contexts.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.uuid.uuid">
 <span class="sig-name descname"><span class="pre">uuid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.uuid.uuid" title="Link to this definition"></a></dt>
