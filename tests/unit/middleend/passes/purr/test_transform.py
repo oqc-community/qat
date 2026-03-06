@@ -94,10 +94,12 @@ from tests.unit.utils.pulses import pulse_attributes
 
 
 class TestLegacyPhaseOptimisation:
-    hw = EchoModelLoader(qubit_count=4).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        hw = EchoModelLoader(qubit_count=8, random_seed=class_seed).load()
+        return hw
 
-    def test_empty_constructor(self):
-        hw = EchoModelLoader(8).load()
+    def test_empty_constructor(self, hw):
         builder = hw.create_builder()
 
         builder_optimised = LegacyPhaseOptimisation().run(
@@ -107,8 +109,7 @@ class TestLegacyPhaseOptimisation:
 
     @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_single_phase(self, phase, pulse_enabled):
-        hw = EchoModelLoader(8).load()
+    def test_single_phase(self, hw, phase, pulse_enabled):
         builder = hw.create_builder()
         for qubit in hw.qubits:
             builder.phase_shift(qubit, phase)
@@ -133,8 +134,7 @@ class TestLegacyPhaseOptimisation:
 
     @pytest.mark.parametrize("phase", [0.5, 0.73, 2.75])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_accumulate_phases(self, phase, pulse_enabled):
-        hw = EchoModelLoader(8).load()
+    def test_accumulate_phases(self, hw, phase, pulse_enabled):
         builder = hw.create_builder()
         qubits = hw.qubits
         for qubit in qubits:
@@ -166,8 +166,8 @@ class TestLegacyPhaseOptimisation:
                 len(phase_shifts) == 0
             )  # Phase shifts without a pulse/reset afterwards are removed.
 
-    def test_phase_reset(self):
-        hw = EchoModelLoader(2).load()
+    def test_phase_reset(self, function_seed):
+        hw = EchoModelLoader(2, random_seed=function_seed).load()
         builder = hw.create_builder()
         qubits = list(hw.qubits)
 
@@ -188,12 +188,15 @@ class TestLegacyPhaseOptimisation:
 
 
 class TestPhaseOptimisation:
-    hw = EchoModelLoader(qubit_count=4).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        hw = EchoModelLoader(qubit_count=4, random_seed=class_seed).load()
+        return hw
 
-    def test_merged_identical_phase_resets(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_merged_identical_phase_resets(self, hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        phase_reset = PhaseReset(self.hw.qubits)
+        phase_reset = PhaseReset(hw.qubits)
         builder.add(phase_reset)
         builder.add(phase_reset)
         builder.delay(phase_reset.quantum_targets, 1e-3)  # to stop them being deleted
@@ -205,8 +208,7 @@ class TestPhaseOptimisation:
         channels = set([inst.channel for inst in builder.instructions[:-1]])
         assert len(channels) == len(builder.instructions) - 1
 
-    def test_empty_constructor(self):
-        hw = EchoModelLoader(8).load()
+    def test_empty_constructor(self, hw):
         builder = hw.create_builder()
 
         builder_optimised = PhaseOptimisation().run(
@@ -216,8 +218,7 @@ class TestPhaseOptimisation:
 
     @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_zero_phase(self, phase, pulse_enabled):
-        hw = EchoModelLoader(8).load()
+    def test_zero_phase(self, hw, phase, pulse_enabled):
         builder = hw.create_builder()
         for qubit in hw.qubits:
             builder.add(PhaseShift(qubit.get_drive_channel(), phase))
@@ -237,8 +238,7 @@ class TestPhaseOptimisation:
 
     @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_single_phase(self, phase, pulse_enabled):
-        hw = EchoModelLoader(8).load()
+    def test_single_phase(self, hw, phase, pulse_enabled):
         builder = hw.create_builder()
         for qubit in hw.qubits:
             builder.phase_shift(qubit, phase)
@@ -263,8 +263,7 @@ class TestPhaseOptimisation:
 
     @pytest.mark.parametrize("phase", [0.5, 0.73, 2.75])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_accumulate_phases(self, phase, pulse_enabled):
-        hw = EchoModelLoader(8).load()
+    def test_accumulate_phases(self, hw, phase, pulse_enabled):
         builder = hw.create_builder()
         qubits = hw.qubits
         for qubit in qubits:
@@ -296,8 +295,8 @@ class TestPhaseOptimisation:
                 len(phase_shifts) == 0
             )  # Phase shifts without a pulse/reset afterwards are removed.
 
-    def test_phase_reset(self):
-        hw = EchoModelLoader(2).load()
+    def test_phase_reset(self, hw, function_seed):
+        hw = EchoModelLoader(2, random_seed=function_seed).load()
         builder = hw.create_builder()
         qubits = list(hw.qubits)
 
@@ -316,8 +315,8 @@ class TestPhaseOptimisation:
         ]
         assert len(phase_shifts) == 0
 
-    def test_reset_and_shift_become_set(self):
-        hw = EchoModelLoader(2).load()
+    def test_reset_and_shift_become_set(self, function_seed):
+        hw = EchoModelLoader(2, random_seed=function_seed).load()
         ir = hw.create_builder()
         chan = hw.qubits[0].get_drive_channel()
 
@@ -331,10 +330,10 @@ class TestPhaseOptimisation:
         assert isinstance(ir.instructions[0], PhaseSet)
         assert np.isclose(ir.instructions[0].phase, np.pi / 4)
 
-    def test_phaseset_does_not_commute_through_delay(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_phaseset_does_not_commute_through_delay(self, hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        chan = self.hw.qubits[0].get_drive_channel()
+        chan = hw.qubits[0].get_drive_channel()
         builder.add(PhaseReset(chan))
         builder.delay(chan, 1e-3)
         builder.add(PhaseSet(chan, np.pi / 2))
@@ -354,11 +353,11 @@ class TestPhaseOptimisation:
             Delay,
         ]
 
-    def test_phaseset_does_not_commute_through_sync(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_phaseset_does_not_commute_through_sync(self, hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        chan1 = self.hw.qubits[0].get_drive_channel()
-        chan2 = self.hw.qubits[0].get_measure_channel()
+        chan1 = hw.qubits[0].get_drive_channel()
+        chan2 = hw.qubits[0].get_measure_channel()
         builder.add(PhaseReset(chan1))
         builder.add(PhaseReset(chan2))
         builder.delay(chan1, 1e-3)
@@ -390,10 +389,10 @@ class TestPhaseOptimisation:
             if isinstance(inst, PhaseSet)
         ] == [chan1, chan2, chan2, chan1]
 
-    def test_partial_ids_are_used(self):
+    def test_partial_ids_are_used(self, function_seed):
         """Regression test to ensure the partial ids are used as keys."""
 
-        model = EchoModelLoader(2).load()
+        model = EchoModelLoader(2, random_seed=function_seed).load()
         model.qubits[0].get_drive_channel().id = "test"
         model.qubits[1].get_drive_channel().id = "test"
         builder = model.create_builder()
@@ -417,13 +416,16 @@ class TestPhaseOptimisation:
 
 
 class TestPhaseOptimisationParityWithPyd:
-    hw = EchoModelLoader(qubit_count=4).load()
-    pyd_hw = PydEchoModelLoader(4).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(qubit_count=4, random_seed=class_seed).load()
 
-    def _get_optimized_builders(self, builder):
-        pyd_builder = ConvertToPydanticIR(self.hw, self.pyd_hw).run(
-            builder, ResultManager()
-        )
+    @pytest.fixture(scope="class")
+    def pyd_hw(self, class_seed):
+        return PydEchoModelLoader(qubit_count=4, random_seed=class_seed).load()
+
+    def _get_optimized_builders(self, builder, hw, pyd_hw):
+        pyd_builder = ConvertToPydanticIR(hw, pyd_hw).run(builder, ResultManager())
         builder_optimised = PhaseOptimisation().run(
             builder, ResultManager(), MetricsManager()
         )
@@ -432,55 +434,55 @@ class TestPhaseOptimisationParityWithPyd:
         )
         return builder_optimised, pyd_builder
 
-    def test_merged_identical_phase_resets(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
-        target = self.hw.get_qubit(0).get_pulse_channel()
+    def test_merged_identical_phase_resets(self, hw, pyd_hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
+        target = hw.get_qubit(0).get_pulse_channel()
         phase_reset = PhaseReset(target)
         builder.add(phase_reset)
         builder.add(phase_reset)
         builder.delay(target, 1e-3)  # to stop them being deleted
         assert len(builder.instructions) == 3
 
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
 
         assert pyd_builder.number_of_instructions == len(builder_optimised.instructions)
 
-    def test_empty_constructor(self):
-        builder = self.hw.create_builder()
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+    def test_empty_constructor(self, hw, pyd_hw):
+        builder = hw.create_builder()
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
         assert len(builder_optimised.instructions) == 0
         assert pyd_builder.number_of_instructions == 0
 
     @pytest.mark.parametrize("phase", [-4 * np.pi, -2 * np.pi, 0.0, 2 * np.pi, 4 * np.pi])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_zero_phase(self, phase, pulse_enabled):
-        builder = self.hw.create_builder()
-        for qubit in self.hw.qubits:
+    def test_zero_phase(self, phase, pulse_enabled, hw, pyd_hw):
+        builder = hw.create_builder()
+        for qubit in hw.qubits:
             builder.add(PhaseShift(qubit.get_drive_channel(), phase))
             if pulse_enabled:
                 builder.pulse(
                     qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
                 )
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
 
         if pulse_enabled:
-            assert len(builder_optimised.instructions) == len(self.hw.qubits)
-            assert pyd_builder.number_of_instructions == len(self.hw.qubits)
+            assert len(builder_optimised.instructions) == len(hw.qubits)
+            assert pyd_builder.number_of_instructions == len(hw.qubits)
         else:
             assert len(builder_optimised.instructions) == 0
             assert pyd_builder.number_of_instructions == 0
 
     @pytest.mark.parametrize("phase", [0.15, 1.0, 3.14])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_single_phase(self, phase, pulse_enabled):
-        builder = self.hw.create_builder()
-        for qubit in self.hw.qubits:
+    def test_single_phase(self, phase, pulse_enabled, hw, pyd_hw):
+        builder = hw.create_builder()
+        for qubit in hw.qubits:
             builder.phase_shift(qubit, phase)
             if pulse_enabled:
                 builder.pulse(
                     qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
                 )
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
 
         phase_shifts = [
             instr
@@ -493,7 +495,7 @@ class TestPhaseOptimisationParityWithPyd:
         ]
 
         if pulse_enabled:
-            assert len(phase_shifts) == len(self.hw.qubits)
+            assert len(phase_shifts) == len(hw.qubits)
             assert len(pyd_phase_shifts) == len(phase_shifts)
         else:
             assert len(phase_shifts) == 0
@@ -501,8 +503,7 @@ class TestPhaseOptimisationParityWithPyd:
 
     @pytest.mark.parametrize("phase", [0.5, 0.73, 2.75])
     @pytest.mark.parametrize("pulse_enabled", [False, True])
-    def test_accumulate_phases(self, phase, pulse_enabled):
-        hw = self.hw
+    def test_accumulate_phases(self, phase, pulse_enabled, hw, pyd_hw):
         builder = hw.create_builder()
         qubits = hw.qubits
         for qubit in qubits:
@@ -516,9 +517,7 @@ class TestPhaseOptimisationParityWithPyd:
                     qubit.get_drive_channel(), shape=PulseShapeType.SQUARE, width=80e-9
                 )
 
-        pyd_builder = ConvertToPydanticIR(self.hw, self.pyd_hw).run(
-            builder, ResultManager()
-        )
+        pyd_builder = ConvertToPydanticIR(hw, pyd_hw).run(builder, ResultManager())
         builder_optimised = PhaseOptimisation().run(
             builder, ResultManager(), MetricsManager()
         )
@@ -546,8 +545,7 @@ class TestPhaseOptimisationParityWithPyd:
             assert len(pyd_phase_shifts) == 0
             # Phase shifts without a pulse/reset afterwards are removed.
 
-    def test_phase_reset(self):
-        hw = self.hw
+    def test_phase_reset(self, hw, pyd_hw):
         builder = hw.create_builder()
         qubits = list(hw.qubits)
 
@@ -555,7 +553,7 @@ class TestPhaseOptimisationParityWithPyd:
             builder.phase_shift(qubit, 0.5)
             builder.reset(qubit)
 
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
 
         phase_shifts = [
             instr
@@ -569,8 +567,7 @@ class TestPhaseOptimisationParityWithPyd:
         assert len(phase_shifts) == 0
         assert len(pyd_phase_shifts) == 0
 
-    def test_reset_and_shift_become_set(self):
-        hw = EchoModelLoader(2).load()
+    def test_reset_and_shift_become_set(self, hw, pyd_hw):
         ir = hw.create_builder()
         chan = hw.qubits[0].get_drive_channel()
 
@@ -578,7 +575,7 @@ class TestPhaseOptimisationParityWithPyd:
         ir.add(PhaseShift(chan, np.pi / 4))
         ir.pulse(chan, shape=PulseShapeType.SQUARE, width=80e-9)
 
-        ir, pyd_ir = self._get_optimized_builders(ir)
+        ir, pyd_ir = self._get_optimized_builders(ir, hw, pyd_hw)
 
         assert len(ir.instructions) == 2
         assert pyd_ir.number_of_instructions == 2
@@ -587,10 +584,10 @@ class TestPhaseOptimisationParityWithPyd:
         assert np.isclose(ir.instructions[0].phase, np.pi / 4)
         assert np.isclose(pyd_ir.instructions[0].phase, np.pi / 4)
 
-    def test_phaseset_does_not_commute_through_delay(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_phaseset_does_not_commute_through_delay(self, hw, pyd_hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        chan = self.hw.qubits[0].get_drive_channel()
+        chan = hw.qubits[0].get_drive_channel()
         builder.add(PhaseReset(chan))
         builder.delay(chan, 1e-3)
         builder.add(PhaseSet(chan, np.pi / 2))
@@ -598,7 +595,7 @@ class TestPhaseOptimisationParityWithPyd:
         builder.add(PhaseShift(chan, np.pi / 4))
         builder.delay(chan, 1e-3)
 
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
 
         assert [type(inst) for inst in builder.instructions] == [
             PhaseSet,
@@ -616,11 +613,11 @@ class TestPhaseOptimisationParityWithPyd:
             PydDelay,
         ]
 
-    def test_phaseset_does_not_commute_through_sync(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_phaseset_does_not_commute_through_sync(self, hw, pyd_hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        chan1 = self.hw.qubits[0].get_drive_channel()
-        chan2 = self.hw.qubits[0].get_measure_channel()
+        chan1 = hw.qubits[0].get_drive_channel()
+        chan2 = hw.qubits[0].get_measure_channel()
         builder.add(PhaseReset(chan1))
         builder.add(PhaseReset(chan2))
         builder.delay(chan1, 1e-3)
@@ -632,7 +629,7 @@ class TestPhaseOptimisationParityWithPyd:
         builder.add(PhaseShift(chan1, np.pi / 4))
         builder.add(PhaseShift(chan2, np.pi / 4))
 
-        builder_optimised, pyd_builder = self._get_optimized_builders(builder)
+        builder_optimised, pyd_builder = self._get_optimized_builders(builder, hw, pyd_hw)
 
         assert [type(inst) for inst in builder.instructions] == [
             PhaseSet,
@@ -661,8 +658,8 @@ class TestPhaseOptimisationParityWithPyd:
             if isinstance(inst, PhaseSet)
         ] == [chan1, chan2, chan2, chan1]
 
-        target_1 = self.pyd_hw.qubits[0].drive_pulse_channel.uuid
-        target_2 = self.pyd_hw.qubits[0].measure_pulse_channel.uuid
+        target_1 = pyd_hw.qubits[0].drive_pulse_channel.uuid
+        target_2 = pyd_hw.qubits[0].measure_pulse_channel.uuid
 
         assert [
             inst.target
@@ -672,7 +669,9 @@ class TestPhaseOptimisationParityWithPyd:
 
 
 class TestPostProcessingSanitisation:
-    hw = EchoModelLoader(32).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(qubit_count=32, random_seed=class_seed).load()
 
     @pytest.mark.parametrize(
         "axis, pp_type",
@@ -681,9 +680,9 @@ class TestPostProcessingSanitisation:
             (ProcessAxis.SEQUENCE, PostProcessType.MEAN),
         ],
     )
-    def test_valid_meas_acq_with_pp(self, axis, pp_type):
-        builder = self.hw.create_builder()
-        qubit = self.hw.get_qubit(0)
+    def test_valid_meas_acq_with_pp(self, axis, pp_type, hw):
+        builder = hw.create_builder()
+        qubit = hw.get_qubit(0)
 
         _, acq = builder.measure(qubit=qubit, axis=axis)
         builder.post_processing(acq, pp_type)
@@ -704,9 +703,9 @@ class TestPostProcessingSanitisation:
             (AcquireMode.INTEGRATOR, PostProcessType.MEAN, [ProcessAxis.TIME]),
         ],
     )
-    def test_invalid_acq_pp(self, acq_mode, pp_type, pp_axes):
-        builder = self.hw.create_builder()
-        qubit = self.hw.get_qubit(0)
+    def test_invalid_acq_pp(self, acq_mode, pp_type, pp_axes, hw):
+        builder = hw.create_builder()
+        qubit = hw.get_qubit(0)
 
         _, acq = builder.measure(qubit=qubit, output_variable="test")
         acq.mode = acq_mode
@@ -723,9 +722,9 @@ class TestPostProcessingSanitisation:
             met_mgr.get_metric(MetricsType.OptimizedInstructionCount) == n_instr_before - 1
         )
 
-    def test_mid_circuit_measurement_two_diff_post_processing(self):
-        builder = self.hw.create_builder()
-        qubit = self.hw.get_qubit(2)
+    def test_mid_circuit_measurement_two_diff_post_processing(self, hw):
+        builder = hw.create_builder()
+        qubit = hw.get_qubit(2)
 
         # Mid-circuit measurement with some manual (different) post-processing options.
         _, acq1 = builder.measure(qubit=qubit, axis=ProcessAxis.TIME)
@@ -749,10 +748,12 @@ class TestPostProcessingSanitisation:
 
 
 class TestReturnSanitisation:
-    hw = EchoModelLoader(4).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(4, random_seed=class_seed).load()
 
-    def test_empty_builder(self):
-        builder = self.hw.create_builder()
+    def test_empty_builder(self, hw):
+        builder = hw.create_builder()
         res_mgr = ResultManager()
 
         with pytest.raises(ValueError):
@@ -764,8 +765,8 @@ class TestReturnSanitisation:
         return_instr: Return = builder.instructions[-1]
         assert len(return_instr.variables) == 0
 
-    def test_single_return(self):
-        builder = self.hw.create_builder()
+    def test_single_return(self, hw):
+        builder = hw.create_builder()
         builder.returns(variables=["test"])
         ref_nr_instructions = len(builder.instructions)
 
@@ -776,11 +777,11 @@ class TestReturnSanitisation:
         assert len(builder.instructions) == ref_nr_instructions
         assert builder.instructions[0].variables == ["test"]
 
-    def test_multiple_returns_squashed(self):
-        q0 = self.hw.get_qubit(0)
-        q1 = self.hw.get_qubit(1)
+    def test_multiple_returns_squashed(self, hw):
+        q0 = hw.get_qubit(0)
+        q1 = hw.get_qubit(1)
 
-        builder = self.hw.create_builder()
+        builder = hw.create_builder()
         builder.measure_single_shot_z(target=q0, output_variable="out_q0")
         builder.measure_single_shot_z(target=q1, output_variable="out_q1")
 
@@ -810,9 +811,12 @@ class TestReturnSanitisation:
 
 
 class TestAcquireSanitisation:
-    def test_acquire_with_no_delay_is_unchanged(self):
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(10, random_seed=class_seed).load()
+
+    def test_acquire_with_no_delay_is_unchanged(self, model):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
         acquire_chan = model.qubits[0].get_acquire_channel()
         acquire_block_time = acquire_chan.physical_channel.block_time
         builder = model.create_builder()
@@ -824,9 +828,8 @@ class TestAcquireSanitisation:
         assert len(builder.instructions) == 1
         assert isinstance(builder.instructions[0], Acquire)
 
-    def test_acquire_with_delay_is_decomposed(self):
+    def test_acquire_with_delay_is_decomposed(self, model):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
         acquire_chan = model.qubits[0].get_acquire_channel()
         acquire_block_time = acquire_chan.physical_channel.block_time
         builder = model.create_builder()
@@ -841,8 +844,7 @@ class TestAcquireSanitisation:
         assert isinstance(builder.instructions[0], Delay)
         assert isinstance(builder.instructions[1], Acquire)
 
-    def test_acquire_with_delay_two_chans_is_decomposed(self):
-        model = EchoModelLoader(10).load()
+    def test_acquire_with_delay_two_chans_is_decomposed(self, model):
         builder = model.create_builder()
         for qubit in (0, 1):
             acquire_chan = model.qubits[qubit].get_acquire_channel()
@@ -862,16 +864,21 @@ class TestAcquireSanitisation:
 
 
 class TestInstructionGranularitySanitisation:
-    def test_instructions_with_correct_timings_are_unchanged(self):
-        # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(10, random_seed=class_seed).load()
+
+    @pytest.fixture(scope="class")
+    def target_data(self, class_seed):
+        return TargetData(
             max_shots=1000,
             default_shots=10,
-            QUBIT_DATA=QubitDescription.random(),
-            RESONATOR_DATA=ResonatorDescription.random(),
+            QUBIT_DATA=QubitDescription.random(seed=class_seed),
+            RESONATOR_DATA=ResonatorDescription.random(seed=class_seed),
         )
 
+    def test_instructions_with_correct_timings_are_unchanged(self, model, target_data):
+        # Mock up some channels and a builder
         drive_chan = model.qubits[0].get_drive_channel()
         acquire_chan = model.qubits[0].get_acquire_channel()
         builder = model.create_builder()
@@ -894,16 +901,8 @@ class TestInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[1].duration * 1e9, pulse_time * 1e9)
         assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
 
-    def test_instructions_are_rounded_down(self):
+    def test_instructions_are_rounded_down(self, model, target_data):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(),
-            RESONATOR_DATA=ResonatorDescription.random(),
-        )
-
         drive_chan = model.qubits[0].get_drive_channel()
         acquire_chan = model.qubits[0].get_acquire_channel()
         builder = model.create_builder()
@@ -932,16 +931,8 @@ class TestInstructionGranularitySanitisation:
         assert np.isclose(ir.instructions[1].duration * 1e9, pulse_time * 1e9)
         assert np.isclose(ir.instructions[2].duration * 1e9, acquire_time * 1e9)
 
-    def test_custom_pulses_with_correct_length_are_unchanged(self):
+    def test_custom_pulses_with_correct_length_are_unchanged(self, model, target_data):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(),
-            RESONATOR_DATA=ResonatorDescription.random(),
-        )
-
         drive_chan = model.qubits[0].get_drive_channel()
         sample_time = drive_chan.physical_channel.sample_time
         builder = model.create_builder()
@@ -958,16 +949,10 @@ class TestInstructionGranularitySanitisation:
 
     @pytest.mark.parametrize("seed", [1, 2, 3, 4])
     @pytest.mark.parametrize("samples_type", ["list", "np_array"])
-    def test_custom_pulses_with_invalid_length_are_padded(self, seed, samples_type):
+    def test_custom_pulses_with_invalid_length_are_padded(
+        self, seed, samples_type, model, target_data
+    ):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(seed),
-            RESONATOR_DATA=ResonatorDescription.random(seed),
-        )
-
         drive_chan = model.qubits[0].get_drive_channel()
         sample_time = target_data.QUBIT_DATA.sample_time
         builder = model.create_builder()
@@ -988,16 +973,10 @@ class TestInstructionGranularitySanitisation:
 
         assert len(ir.instructions[0].samples) == n
 
-    def test_acquires_with_too_large_custom_pulse_filters_are_sanitised(self):
+    def test_acquires_with_too_large_custom_pulse_filters_are_sanitised(
+        self, model, target_data
+    ):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(),
-            RESONATOR_DATA=ResonatorDescription.random(),
-        )
-
         acquire_chan = model.qubits[0].get_acquire_channel()
         sample_time = target_data.RESONATOR_DATA.sample_time
 
@@ -1028,16 +1007,10 @@ class TestInstructionGranularitySanitisation:
         )
         assert ir.instructions[0].filter is not filter
 
-    def test_acquires_with_too_small_custom_pulse_filters_are_sanitised(self):
+    def test_acquires_with_too_small_custom_pulse_filters_are_sanitised(
+        self, model, target_data
+    ):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(),
-            RESONATOR_DATA=ResonatorDescription.random(),
-        )
-
         acquire_chan = model.qubits[0].get_acquire_channel()
         sample_time = target_data.RESONATOR_DATA.sample_time
 
@@ -1068,16 +1041,8 @@ class TestInstructionGranularitySanitisation:
         assert np.allclose(ir.instructions[0].filter.samples[:-2], samples)
         assert ir.instructions[0].filter is not filter
 
-    def test_acquires_with_square_filters_are_sanitised(self):
+    def test_acquires_with_square_filters_are_sanitised(self, model, target_data):
         # Mock up some channels and a builder
-        model = EchoModelLoader(10).load()
-        target_data = TargetData(
-            max_shots=1000,
-            default_shots=10,
-            QUBIT_DATA=QubitDescription.random(),
-            RESONATOR_DATA=ResonatorDescription.random(),
-        )
-
         acquire_chan = model.qubits[0].get_acquire_channel()
         sample_time = target_data.RESONATOR_DATA.sample_time
 
@@ -1105,17 +1070,19 @@ class TestInstructionGranularitySanitisation:
 
 
 class TestPhaseResetSanitisation:
-    hw = EchoModelLoader(qubit_count=4).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(qubit_count=4, random_seed=class_seed).load()
 
     @pytest.mark.parametrize("reset_qubits", [False, True])
-    def test_phase_reset_shot(self, reset_qubits):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_phase_reset_shot(self, reset_qubits, hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
         if reset_qubits:
-            builder.add(PhaseReset(self.hw.qubits))
+            builder.add(PhaseReset(hw.qubits))
 
         active_targets = {}
-        for qubit in self.hw.qubits:
+        for qubit in hw.qubits:
             builder.X(target=qubit)
             drive_pulse_ch = qubit.get_drive_channel()
             active_targets[drive_pulse_ch] = qubit
@@ -1133,10 +1100,10 @@ class TestPhaseResetSanitisation:
         assert isinstance(builder.instructions[0], PhaseReset)
         assert builder.instructions[0].quantum_targets == list(active_targets.keys())
 
-    def test_phase_reset_shot_no_active_pulse_channels(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_phase_reset_shot_no_active_pulse_channels(self, hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        for qubit in self.hw.qubits:
+        for qubit in hw.qubits:
             builder.X(target=qubit)
 
         n_instr_before = len(builder.instructions)
@@ -1152,12 +1119,14 @@ class TestPhaseResetSanitisation:
 
 
 class TestMeasurePhaseResetSanitisation:
-    hw = EchoModelLoader(qubit_count=4).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(qubit_count=4, random_seed=class_seed).load()
 
-    def test_measure_phase_reset(self):
-        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+    def test_measure_phase_reset(self, hw):
+        builder = QuantumInstructionBuilder(hardware_model=hw)
 
-        for qubit in self.hw.qubits:
+        for qubit in hw.qubits:
             builder.X(target=qubit)
             builder.measure(qubit)
 
@@ -1166,10 +1135,10 @@ class TestMeasurePhaseResetSanitisation:
         ir = MeasurePhaseResetSanitisation().run(builder)
 
         # A phase reset should be added for each measure instruction.
-        assert len(ir.instructions) == n_instr_before + len(self.hw.qubits)
+        assert len(ir.instructions) == n_instr_before + len(hw.qubits)
 
         ref_measure_pulse_channels = set(
-            [qubit.get_measure_channel() for qubit in self.hw.qubits]
+            [qubit.get_measure_channel() for qubit in hw.qubits]
         )
         measure_pulse_channels = set()
         for i, instr in enumerate(ir.instructions):
@@ -1181,8 +1150,11 @@ class TestMeasurePhaseResetSanitisation:
 
 
 class TestInactivePulseChannelSanitisation:
-    def test_syncs_are_sanitized(self):
-        model = EchoModelLoader(10).load()
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(10, random_seed=class_seed).load()
+
+    def test_syncs_are_sanitized(self, model):
         builder = model.create_builder()
         builder.X(model.qubits[0])
         builder.synchronize(model.qubits[0])
@@ -1203,8 +1175,7 @@ class TestInactivePulseChannelSanitisation:
         assert len(sync_inst.quantum_targets) == 1
         assert next(iter(sync_inst.quantum_targets)) == model.qubits[0].get_drive_channel()
 
-    def test_delays_are_sanitized(self):
-        model = EchoModelLoader(10).load()
+    def test_delays_are_sanitized(self, model):
         builder = model.create_builder()
         qubit = model.qubits[0]
 
@@ -1220,8 +1191,7 @@ class TestInactivePulseChannelSanitisation:
         assert len(builder.instructions) == 1
         assert isinstance(builder.instructions[0], Pulse)
 
-    def test_phase_shifts_are_sanitized(self):
-        model = EchoModelLoader(10).load()
+    def test_phase_shifts_are_sanitized(self, model):
         builder = model.create_builder()
         qubit = model.qubits[0]
 
@@ -1237,8 +1207,7 @@ class TestInactivePulseChannelSanitisation:
         assert len(builder.instructions) == 1
         assert isinstance(builder.instructions[0], Pulse)
 
-    def test_Z_is_sanitized(self):
-        model = EchoModelLoader(10).load()
+    def test_Z_is_sanitized(self, model):
         builder = model.create_builder()
         qubit = model.qubits[0]
 
@@ -1266,7 +1235,9 @@ class TestInactivePulseChannelSanitisation:
 
 @pytest.mark.parametrize("seed", [1, 2, 3, 4])
 class TestInstructionLengthSanitisation:
-    hw = EchoModelLoader(8).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(8, random_seed=class_seed).load()
 
     @staticmethod
     def get_target_data(seed):
@@ -1277,73 +1248,73 @@ class TestInstructionLengthSanitisation:
             RESONATOR_DATA=ResonatorDescription.random(seed),
         )
 
-    def test_delay_not_sanitised(self, seed):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_delay_not_sanitised(self, seed, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
-        pulse_ch = self.hw.qubits[0].get_acquire_channel()
+        pulse_ch = hw.qubits[0].get_acquire_channel()
 
         valid_duration = target_data.QUBIT_DATA.pulse_duration_max / 2
         builder.add(Delay(pulse_ch, valid_duration))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 1
         assert builder.instructions[0].duration == valid_duration
 
-    def test_delay_sanitised_zero_remainder(self, seed):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_delay_sanitised_zero_remainder(self, seed, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
-        pulse_ch = self.hw.qubits[0].get_acquire_channel()
+        pulse_ch = hw.qubits[0].get_acquire_channel()
 
         invalid_duration = target_data.QUBIT_DATA.pulse_duration_max * 2
         builder.add(Delay(pulse_ch, invalid_duration))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 2
         for instr in builder.instructions:
             assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
 
-    def test_delay_sanitised(self, seed):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_delay_sanitised(self, seed, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
-        pulse_ch = self.hw.qubits[0].get_acquire_channel()
+        pulse_ch = hw.qubits[0].get_acquire_channel()
 
         remainder = random.uniform(1e-06, 2e-06)
         invalid_duration = target_data.QUBIT_DATA.pulse_duration_max * 2 + remainder
         builder.add(Delay(pulse_ch, invalid_duration))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 3
         for instr in builder.instructions[:-1]:
             assert instr.duration == target_data.QUBIT_DATA.pulse_duration_max
         assert math.isclose(builder.instructions[-1].duration, remainder)
 
-    def test_square_pulse_not_sanitised(self, seed):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_square_pulse_not_sanitised(self, seed, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
-        pulse_ch = self.hw.qubits[0].get_acquire_channel()
+        pulse_ch = hw.qubits[0].get_acquire_channel()
 
         valid_width = target_data.QUBIT_DATA.pulse_duration_max / 2
         builder.add(Pulse(pulse_ch, shape=PulseShapeType.SQUARE, width=valid_width))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 1
         assert builder.instructions[0].width == valid_width
 
-    def test_square_pulse_sanitised(self, seed):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_square_pulse_sanitised(self, seed, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
-        pulse_ch = self.hw.qubits[0].get_acquire_channel()
+        pulse_ch = hw.qubits[0].get_acquire_channel()
 
         remainder = random.uniform(1e-06, 2e-06)
         invalid_width = target_data.QUBIT_DATA.pulse_duration_max * 2 + remainder
         builder.add(Pulse(pulse_ch, shape=PulseShapeType.SQUARE, width=invalid_width))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 3
 
         for instr in builder.instructions[:-1]:
@@ -1351,15 +1322,15 @@ class TestInstructionLengthSanitisation:
         assert math.isclose(builder.instructions[-1].width, remainder)
 
     @pytest.mark.parametrize("resonator", [False, True])
-    def test_custom_pulse_not_sanitised(self, seed, resonator):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_custom_pulse_not_sanitised(self, seed, resonator, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
         if resonator:
-            channel = self.hw.qubits[0].get_acquire_channel()
+            channel = hw.qubits[0].get_acquire_channel()
             max_length = target_data.RESONATOR_DATA.pulse_duration_max
             sample_time = target_data.RESONATOR_DATA.sample_time
         else:
-            channel = self.hw.qubits[0].get_drive_channel()
+            channel = hw.qubits[0].get_drive_channel()
             max_length = target_data.QUBIT_DATA.pulse_duration_max
             sample_time = target_data.QUBIT_DATA.sample_time
 
@@ -1369,20 +1340,20 @@ class TestInstructionLengthSanitisation:
         builder.add(CustomPulse(channel, samples))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 1
         assert np.allclose(builder.instructions[0].samples, samples)
 
     @pytest.mark.parametrize("resonator", [False, True])
-    def test_custom_pulse_sanitised(self, seed, resonator):
-        builder = QuantumInstructionBuilder(self.hw)
+    def test_custom_pulse_sanitised(self, seed, resonator, hw):
+        builder = QuantumInstructionBuilder(hw)
         target_data = self.get_target_data(seed)
         if resonator:
-            channel = self.hw.qubits[0].get_acquire_channel()
+            channel = hw.qubits[0].get_acquire_channel()
             max_length = target_data.RESONATOR_DATA.pulse_duration_max
             sample_time = target_data.RESONATOR_DATA.sample_time
         else:
-            channel = self.hw.qubits[0].get_drive_channel()
+            channel = hw.qubits[0].get_drive_channel()
             max_length = target_data.QUBIT_DATA.pulse_duration_max
             sample_time = target_data.QUBIT_DATA.sample_time
 
@@ -1394,7 +1365,7 @@ class TestInstructionLengthSanitisation:
         builder.add(CustomPulse(channel, samples))
         assert len(builder.instructions) == 1
 
-        InstructionLengthSanitisation(self.hw, target_data).run(builder)
+        InstructionLengthSanitisation(hw, target_data).run(builder)
         assert len(builder.instructions) == 3
 
         max_samples = int(np.round(max_length / sample_time))
@@ -1408,8 +1379,11 @@ class TestInstructionLengthSanitisation:
 
 
 class TestSynchronizeTask:
-    def test_synchronize_task_adds_sync(self):
-        model = EchoModelLoader().load()
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
+    def test_synchronize_task_adds_sync(self, model):
         qubit = model.qubits[0]
         drive_chan = qubit.get_drive_channel()
         measure_chan = qubit.get_measure_channel()
@@ -1427,9 +1401,7 @@ class TestSynchronizeTask:
         assert isinstance(ir.instructions[-1], Synchronize)
         assert set(ir.instructions[-1].quantum_targets) == set([drive_chan, measure_chan])
 
-    def test_synchronize_task_not_adding_if_inactive(self):
-        model = EchoModelLoader().load()
-
+    def test_synchronize_task_not_adding_if_inactive(self, model):
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={}))
 
@@ -1440,10 +1412,13 @@ class TestSynchronizeTask:
 
 
 class TestEndOfTaskResetSanitisation:
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
     @pytest.mark.parametrize("reset_q1", [False, True])
     @pytest.mark.parametrize("reset_q2", [False, True])
-    def test_resets_added(self, reset_q1, reset_q2):
-        model = EchoModelLoader().load()
+    def test_resets_added(self, reset_q1, reset_q2, model):
         qubits = model.qubits[0:2]
 
         builder = model.create_builder()
@@ -1481,8 +1456,7 @@ class TestEndOfTaskResetSanitisation:
         assert len(reset_channels) == 2
         assert set(reset_channels) == set([qubit.get_drive_channel() for qubit in qubits])
 
-    def test_mid_circuit_reset_is_ignored(self):
-        model = EchoModelLoader().load()
+    def test_mid_circuit_reset_is_ignored(self, model):
         qubit = model.qubits[0]
 
         builder = model.create_builder()
@@ -1508,8 +1482,7 @@ class TestEndOfTaskResetSanitisation:
         assert len(reset_channels) == 2
         assert set(reset_channels) == set([qubit.get_drive_channel()])
 
-    def test_inactive_instruction_after_reset_ignored(self):
-        model = EchoModelLoader().load()
+    def test_inactive_instruction_after_reset_ignored(self, model):
         qubit = model.qubits[0]
 
         builder = model.create_builder()
@@ -1535,8 +1508,7 @@ class TestEndOfTaskResetSanitisation:
         assert len(reset_channels) == 1
         assert reset_channels[0] == qubit.get_drive_channel()
 
-    def test_reset_with_no_drive_channel(self):
-        model = EchoModelLoader().load()
+    def test_reset_with_no_drive_channel(self, model):
         qubit = model.qubits[0]
 
         builder = model.create_builder()
@@ -1555,17 +1527,22 @@ class TestEndOfTaskResetSanitisation:
 
 
 class TestResetsToDelays:
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
     @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     @pytest.mark.parametrize("add_reset", [True, False])
-    def test_qubit_reset(self, passive_reset_time: float, add_reset: bool):
-        model = EchoModelLoader().load()
-        qubit_data = QubitDescription.random().model_copy(
+    def test_qubit_reset(
+        self, passive_reset_time: float, add_reset: bool, model, function_seed
+    ):
+        qubit_data = QubitDescription.random(function_seed).model_copy(
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
             max_shots=1000,
             default_shots=100,
-            RESONATOR_DATA=ResonatorDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
         )
 
@@ -1607,16 +1584,21 @@ class TestResetsToDelays:
         ],
     )
     def test_qubit_reset_with_compiler_config_reset_times(
-        self, cc_repetition_period, cc_reset_time, td_reset_time, expected_delay
+        self,
+        cc_repetition_period,
+        cc_reset_time,
+        td_reset_time,
+        expected_delay,
+        model,
+        function_seed,
     ):
-        model = EchoModelLoader().load()
-        qubit_data = QubitDescription.random().model_copy(
+        qubit_data = QubitDescription.random(function_seed).model_copy(
             update={"passive_reset_time": td_reset_time}
         )
         target_data = TargetData(
             max_shots=1000,
             default_shots=100,
-            RESONATOR_DATA=ResonatorDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
         )
 
@@ -1654,15 +1636,14 @@ class TestResetsToDelays:
         assert delays[0].time == expected_delay
 
     @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
-    def test_pulse_channel_reset(self, passive_reset_time: float):
-        model = EchoModelLoader().load()
-        qubit_data = QubitDescription.random().model_copy(
+    def test_pulse_channel_reset(self, passive_reset_time: float, model, function_seed):
+        qubit_data = QubitDescription.random(function_seed).model_copy(
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
             max_shots=1000,
             default_shots=100,
-            RESONATOR_DATA=ResonatorDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
         )
 
@@ -1695,15 +1676,16 @@ class TestResetsToDelays:
 
     @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     @pytest.mark.parametrize("reset_chan", ["acquire", "measure"])
-    def test_reset_with_no_drive_channel(self, passive_reset_time, reset_chan):
-        model = EchoModelLoader().load()
-        qubit_data = QubitDescription.random().model_copy(
+    def test_reset_with_no_drive_channel(
+        self, passive_reset_time, reset_chan, model, function_seed
+    ):
+        qubit_data = QubitDescription.random(function_seed).model_copy(
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
             max_shots=1000,
             default_shots=100,
-            RESONATOR_DATA=ResonatorDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
         )
 
@@ -1752,9 +1734,12 @@ def mock_evaluate(data, t, phase_offset):
 
 
 class TestEvaluatePulses:
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
     @pytest.mark.parametrize("scale", [True, False])
-    def test_pulse_not_lowered(self, scale: bool):
-        model = EchoModelLoader().load()
+    def test_pulse_not_lowered(self, scale: bool, model):
         chan = model.qubits[0].get_drive_channel()
         chan.scale = 0.05
         builder = model.create_builder()
@@ -1776,8 +1761,7 @@ class TestEvaluatePulses:
 
     @pytest.mark.parametrize("scale", [True, False])
     @pytest.mark.parametrize("attributes", pulse_attributes)
-    def test_non_square_pulses_are_lowered(self, scale: bool, attributes: dict[str]):
-        model = EchoModelLoader().load()
+    def test_non_square_pulses_are_lowered(self, scale: bool, attributes: dict[str], model):
         chan = model.qubits[0].get_drive_channel()
         chan.scale = 0.05
         builder = model.create_builder()
@@ -1796,8 +1780,7 @@ class TestEvaluatePulses:
         )
 
     @pytest.mark.parametrize("scale", [True, False])
-    def test_custom_pulse(self, scale):
-        model = EchoModelLoader().load()
+    def test_custom_pulse(self, scale, model):
         chan = model.qubits[0].get_drive_channel()
         chan.scale = 0.05
         builder = model.create_builder()
@@ -1811,8 +1794,7 @@ class TestEvaluatePulses:
         assert np.allclose(pulse.samples, 1.0 if scale else 0.05)
 
     @pytest.mark.parametrize("scale", [True, False])
-    def test_acquire_is_lowered(self, scale):
-        model = EchoModelLoader().load()
+    def test_acquire_is_lowered(self, scale, model):
         chan = model.qubits[0].get_acquire_channel()
         chan.scale = 0.05
         builder = model.create_builder()
@@ -1837,8 +1819,7 @@ class TestEvaluatePulses:
         assert np.allclose(pulse.samples, (1.0 if scale else 0.05))
 
     @pytest.mark.parametrize("scale", [True, False])
-    def test_acquire_is_not_lowered(self, scale):
-        model = EchoModelLoader().load()
+    def test_acquire_is_not_lowered(self, scale, model):
         chan = model.qubits[0].get_acquire_channel()
         chan.scale = 0.05
         builder = model.create_builder()
@@ -1860,8 +1841,7 @@ class TestEvaluatePulses:
         assert pulse.ignore_channel_scale
         assert pulse.shape == PulseShapeType.SQUARE
 
-    def test_evaluate_injection_with_square(self):
-        model = EchoModelLoader().load()
+    def test_evaluate_injection_with_square(self, model):
         chan = model.qubits[0].get_drive_channel()
         builder = model.create_builder()
         builder.pulse(chan, shape=PulseShapeType.SQUARE, width=400e-9, amp=1.0)
@@ -1885,8 +1865,7 @@ class TestEvaluatePulses:
         assert isinstance(builder.instructions[1], CustomPulse)
         assert isinstance(builder.instructions[2], CustomPulse)
 
-    def test_evaluate_injection_with_custom_ignore(self):
-        model = EchoModelLoader().load()
+    def test_evaluate_injection_with_custom_ignore(self, model):
         chan = model.qubits[0].get_drive_channel()
         builder = model.create_builder()
         builder.pulse(chan, shape=PulseShapeType.SQUARE, width=400e-9, amp=1.0)
@@ -1912,8 +1891,7 @@ class TestEvaluatePulses:
         assert builder.instructions[1].shape == MockPulseShapeType.HEXAGON
         assert isinstance(builder.instructions[2], CustomPulse)
 
-    def test_evaluate_injection_with_two_custom_ignores(self):
-        model = EchoModelLoader().load()
+    def test_evaluate_injection_with_two_custom_ignores(self, model):
         chan = model.qubits[0].get_drive_channel()
         builder = model.create_builder()
         builder.pulse(chan, shape=PulseShapeType.SQUARE, width=400e-9, amp=1.0)
@@ -1943,8 +1921,7 @@ class TestEvaluatePulses:
 
     @pytest.mark.parametrize("shape1", list(PulseShapeType) + list(MockPulseShapeType))
     @pytest.mark.parametrize("shape2", list(PulseShapeType) + list(MockPulseShapeType))
-    def test_hashing_for_different_shapes(self, shape1, shape2):
-        model = EchoModelLoader().load()
+    def test_hashing_for_different_shapes(self, shape1, shape2, model):
         chan = model.qubits[0].get_drive_channel()
         pulse1 = Pulse(chan, shape1, width=400e-9)
         pulse2 = Pulse(chan, shape2, width=400e-9)
@@ -1954,16 +1931,14 @@ class TestEvaluatePulses:
         else:
             assert pass_.hash_pulse(pulse1) != pass_.hash_pulse(pulse2)
 
-    def test_hashing_for_different_param(self):
-        model = EchoModelLoader().load()
+    def test_hashing_for_different_param(self, model):
         chan = model.qubits[0].get_drive_channel()
         pulse1 = Pulse(chan, PulseShapeType.SQUARE, width=254e-9)
         pulse2 = Pulse(chan, PulseShapeType.SQUARE, width=454e-9)
         pass_ = EvaluatePulses()
         assert pass_.hash_pulse(pulse1) != pass_.hash_pulse(pulse2)
 
-    def test_hashing_for_different_channels(self):
-        model = EchoModelLoader().load()
+    def test_hashing_for_different_channels(self, model):
         chan = model.qubits[0].get_drive_channel()
         chan2 = model.qubits[0].get_measure_channel()
         pulse1 = Pulse(chan, PulseShapeType.SQUARE, width=400e-9)
@@ -1974,7 +1949,9 @@ class TestEvaluatePulses:
 
 @pytest.mark.parametrize("explicit_close", [False, True])
 class TestRepeatTranslation:
-    hw = EchoModelLoader(1).load()
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(1, random_seed=class_seed).load()
 
     @staticmethod
     def _check_loop_start(ir: InstructionBuilder, indices: list[int]):
@@ -2012,8 +1989,8 @@ class TestRepeatTranslation:
             assert condition.right == var
             assert condition.left == repeat
 
-    def test_single_repeat(self, explicit_close):
-        builder = self.hw.create_builder()
+    def test_single_repeat(self, explicit_close, hw):
+        builder = hw.create_builder()
         builder.repeat(1000)
 
         if explicit_close:
@@ -2026,8 +2003,8 @@ class TestRepeatTranslation:
         self._check_loop_start(ir, [0])
         self._check_loop_close(ir, [3], [1000])
 
-    def test_multiple_repeat(self, explicit_close):
-        builder = self.hw.create_builder()
+    def test_multiple_repeat(self, explicit_close, hw):
+        builder = hw.create_builder()
         builder.repeat(1000).repeat(200)
 
         if explicit_close:
@@ -2046,14 +2023,14 @@ class TestRepeatTranslation:
     @pytest.mark.parametrize("fourth", [0, 1])
     @pytest.mark.parametrize("fifth", [0, 4])
     def test_with_other_instructions(
-        self, explicit_close, first, second, third, fourth, fifth
+        self, explicit_close, first, second, third, fourth, fifth, hw
     ):
         """Test all possible combinations of having additional instructions, before,
         between, and after the repeats, with and without explicitly closing scopes.
 
         [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>, <fifth>]
         """
-        builder = self.hw.create_builder()
+        builder = hw.create_builder()
         start_indices = [0, 3]
         close_indices = [8, 6]
 
@@ -2099,6 +2076,10 @@ class TestRepeatTranslation:
 
 
 class TestRepeatSanitisation:
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
     @pytest.mark.parametrize("default_shots", [10, 100, 1000])
     @pytest.mark.parametrize("default_passive_reset_time", [1e-03, 2])
     @pytest.mark.parametrize("missing_shots", [True, False])
@@ -2109,16 +2090,17 @@ class TestRepeatSanitisation:
         default_passive_reset_time,
         missing_shots,
         missing_passive_reset_time,
+        model,
+        function_seed,
     ):
-        model = EchoModelLoader().load()
         # TODO: Change to `passive_reset_time`. 428, 455
-        qubit_data = QubitDescription.random().model_copy(
+        qubit_data = QubitDescription.random(function_seed).model_copy(
             update={"passive_reset_time": default_passive_reset_time}
         )
         target_data = TargetData(
             max_shots=1000,
             default_shots=default_shots,
-            RESONATOR_DATA=ResonatorDescription.random(),
+            RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
         )
 
@@ -2158,8 +2140,7 @@ class TestRepeatSanitisation:
             ),
         ],
     )
-    def test_values_from_compiler_config(self, compiler_config, use_default):
-        model = EchoModelLoader().load()
+    def test_values_from_compiler_config(self, compiler_config, use_default, model):
         target_data = TargetData()
         expected_shots = (
             target_data.default_shots if use_default else compiler_config.repeats
@@ -2188,8 +2169,7 @@ class TestRepeatSanitisation:
             pytest.param([12], CompilerConfig(repeats=15), id="Single Repeat vs Config"),
         ],
     )
-    def test_fails_with_shot_mismatch(self, repeat_counts, compiler_config):
-        model = EchoModelLoader().load()
+    def test_fails_with_shot_mismatch(self, repeat_counts, compiler_config, model):
         target_data = TargetData()
         builder = QuantumInstructionBuilder(model).X(model.get_qubit(0))
         for count in repeat_counts:
@@ -2201,6 +2181,10 @@ class TestRepeatSanitisation:
 
 
 class TestFreqShiftSanitisation:
+    @pytest.fixture(scope="function")
+    def hw(self, function_seed):
+        return EchoModelLoader(random_seed=function_seed).load()
+
     @staticmethod
     def add_freq_shift_channels(hw, qubits: list[int] | int):
         """Adds frequency shift channels to given qubits and returns the set of new
@@ -2285,22 +2269,19 @@ class TestFreqShiftSanitisation:
         return builder
 
     @pytest.mark.parametrize("num_qubits", [0, 1, 2, 3])
-    def test_get_freq_shift_channels(self, num_qubits):
-        hw = EchoModelLoader().load()
+    def test_get_freq_shift_channels(self, num_qubits, hw):
         channels = self.add_freq_shift_channels(hw, list(range(num_qubits)))
         found_channels = FreqShiftSanitisation(hw).get_freq_shift_channels()
         assert channels == set(found_channels.keys())
         assert set(found_channels.values()) == set(hw.qubits[0:num_qubits])
 
-    def test_add_freq_shift_to_block_ignored_for_no_quantum_instructions(self):
-        hw = EchoModelLoader().load()
+    def test_add_freq_shift_to_block_ignored_for_no_quantum_instructions(self, hw):
         channels = self.add_freq_shift_channels(hw, [0, 1])
         builder = self.get_classical_builder(hw)
         builder = FreqShiftSanitisation(hw).add_freq_shift_to_ir(builder, channels)
         assert all([not isinstance(inst, Pulse) for inst in builder.instructions])
 
-    def test_add_freq_shift_to_block_ignored_for_no_duration(self):
-        hw = EchoModelLoader().load()
+    def test_add_freq_shift_to_block_ignored_for_no_duration(self, hw):
         channels = self.add_freq_shift_channels(hw, [0, 1])
         builder = hw.create_builder()
         qubit = hw.qubits[0]
@@ -2310,8 +2291,7 @@ class TestFreqShiftSanitisation:
         assert len(builder.instructions) == 1
         assert isinstance(builder.instructions[0], PhaseShift)
 
-    def test_active_results_updated(self):
-        hw = EchoModelLoader().load()
+    def test_active_results_updated(self, hw):
         channels = self.add_freq_shift_channels(hw, [0, 1])
         qubits = hw.qubits[0:2]
         builder = hw.create_builder()
@@ -2328,11 +2308,10 @@ class TestFreqShiftSanitisation:
     @pytest.mark.parametrize(
         "factory", [get_basic_builder, get_repeat_builder, get_jump_builder]
     )
-    def test_add_freq_shift(self, num_qubits, factory):
+    def test_add_freq_shift(self, num_qubits, factory, hw):
         """Considers builders that only have a single block with quantum instructions, and
         ensures the correct frequency shift pulses are added."""
 
-        hw = EchoModelLoader().load()
         channels = self.add_freq_shift_channels(hw, list(range(num_qubits)))
         builder = factory(self, hw)
         pass_ = FreqShiftSanitisation(hw)
@@ -2354,8 +2333,8 @@ class TestFreqShiftSanitisation:
             assert len(pulses) == 1
             assert pulses[0].duration == 480e-9
 
-    def test_no_freq_shift_pulse_channel(self):
-        hw = EchoModelLoader(8).load()
+    def test_no_freq_shift_pulse_channel(self, function_seed):
+        hw = EchoModelLoader(8, random_seed=function_seed).load()
         builder = QuantumInstructionBuilder(hw)
         for qubit in hw.qubits:
             builder.X(qubit)
@@ -2366,8 +2345,8 @@ class TestFreqShiftSanitisation:
         # No instructions added since we do not have freq shift pulse channels.
         assert builder.instructions == ref_instructions
 
-    def test_freq_shift_empty_target(self):
-        hw = EchoModelLoader(8).load()
+    def test_freq_shift_empty_target(self, function_seed):
+        hw = EchoModelLoader(8, random_seed=function_seed).load()
         res_mgr = ResultManager()
         ir = hw.create_builder()
         ir = FreqShiftSanitisation(hw).run(ir, res_mgr=res_mgr)
@@ -2375,8 +2354,11 @@ class TestFreqShiftSanitisation:
 
 
 class TestLowerSyncsToDelays:
-    def test_sync_with_two_channels(self):
-        model = EchoModelLoader().load()
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
+    def test_sync_with_two_channels(self, model):
         chan1 = model.qubits[0].get_drive_channel()
         chan2 = model.qubits[1].get_drive_channel()
 
@@ -2399,8 +2381,7 @@ class TestLowerSyncsToDelays:
         times = [inst.duration for inst in builder.instructions]
         assert times[0] + times[1] + times[4] == times[2] + times[3]
 
-    def test_with_sync_with_no_channels(self):
-        model = EchoModelLoader().load()
+    def test_with_sync_with_no_channels(self, model):
         chan1 = model.qubits[0].get_drive_channel()
 
         builder = model.create_builder()
@@ -2414,11 +2395,14 @@ class TestLowerSyncsToDelays:
 
 
 class TestSquashDelaysOptimisation:
+    @pytest.fixture(scope="class")
+    def hw(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
     @pytest.mark.parametrize("num_delays", [1, 2, 3, 4])
     @pytest.mark.parametrize("with_phase", [True, False])
-    def test_multiple_delays_on_one_channel(self, num_delays, with_phase):
+    def test_multiple_delays_on_one_channel(self, hw, num_delays, with_phase):
         delay_times = np.random.rand(num_delays)
-        hw = EchoModelLoader().load()
         chan = hw.qubits[0].get_drive_channel()
         builder = hw.create_builder()
         for delay in delay_times:
@@ -2438,9 +2422,9 @@ class TestSquashDelaysOptimisation:
     @pytest.mark.parametrize("num_channels", [1, 2, 3, 4])
     @pytest.mark.parametrize("with_phase", [True, False])
     def test_multiple_delays_on_multiple_channels(
-        self, num_delays, num_channels, with_phase
+        self, num_delays, num_channels, with_phase, function_seed
     ):
-        hw = EchoModelLoader(num_channels).load()
+        hw = EchoModelLoader(num_channels, random_seed=function_seed).load()
         chans = [qubit.get_drive_channel() for qubit in hw.qubits]
         builder = hw.create_builder()
         accumulated_delays = defaultdict(float)
@@ -2462,9 +2446,8 @@ class TestSquashDelaysOptimisation:
         for delay in delay_instructions:
             assert delay.time == accumulated_delays[delay.quantum_targets[0]]
 
-    def test_optimize_with_pulse(self):
+    def test_optimize_with_pulse(self, hw):
         delay_times = np.random.rand(5)
-        hw = EchoModelLoader().load()
         chan = hw.qubits[0].get_drive_channel()
         builder = hw.create_builder()
         builder.delay(chan, delay_times[0])
@@ -2481,9 +2464,8 @@ class TestSquashDelaysOptimisation:
         assert isinstance(builder.instructions[2], Delay)
         assert np.isclose(builder.instructions[2].time, np.sum(delay_times[2:5]))
 
-    def test_delay_with_multiple_channels(self):
+    def test_delay_with_multiple_channels(self, hw):
         delay_times = np.random.rand(2)
-        hw = EchoModelLoader().load()
         chan1 = hw.qubits[0].get_drive_channel()
         chan2 = hw.qubits[0].get_measure_channel()
         builder = hw.create_builder()
@@ -2497,11 +2479,13 @@ class TestSquashDelaysOptimisation:
 
 
 class TestBatchedShots:
-    model = EchoModelLoader().load()
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
 
-    def test_with_no_repeat(self):
-        builder = self.model.create_builder()
-        builder.delay(self.model.qubits[0].get_drive_channel(), 80e-9)
+    def test_with_no_repeat(self, model):
+        builder = model.create_builder()
+        builder.delay(model.qubits[0].get_drive_channel(), 80e-9)
         target_data = AbstractTargetData(max_shots=10000, default_shots=100)
         ir = BatchedShots(target_data).run(builder)
         assert len([inst for inst in ir.instructions if isinstance(inst, Repeat)]) == 0
@@ -2509,8 +2493,8 @@ class TestBatchedShots:
         assert not hasattr(ir, "compiled_shots")
 
     @pytest.mark.parametrize("num_shots", [1, 1000, 999, 10000])
-    def test_not_batched_with_possible_amount(self, num_shots):
-        builder = self.model.create_builder()
+    def test_not_batched_with_possible_amount(self, model, num_shots):
+        builder = model.create_builder()
         builder.repeat(num_shots)
         target_data = AbstractTargetData(max_shots=10000)
         ir = BatchedShots(target_data).run(builder)
@@ -2521,8 +2505,8 @@ class TestBatchedShots:
         assert ir.compiled_shots == num_shots
 
     @pytest.mark.parametrize("num_shots", [1001, 1999, 2000, 4254])
-    def test_shots_are_batched(self, num_shots):
-        builder = self.model.create_builder()
+    def test_shots_are_batched(self, model, num_shots):
+        builder = model.create_builder()
         builder.repeat(num_shots)
         target_data = AbstractTargetData(max_shots=1000)
         ir = BatchedShots(target_data).run(builder)
@@ -2537,10 +2521,12 @@ class TestBatchedShots:
 
 
 class TestScopeSanitisation:
-    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
-    def test_repeats_are_shifted_to_the_beginning(self, num_repeats):
-        model = EchoModelLoader().load()
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
 
+    @pytest.mark.parametrize("num_repeats", [1, 2, 3])
+    def test_repeats_are_shifted_to_the_beginning(self, model, num_repeats):
         builder = model.create_builder()
         builder.X(model.qubits[0])
         for i in range(num_repeats):
@@ -2552,8 +2538,7 @@ class TestScopeSanitisation:
             assert builder.instructions[i].repeat_count == i + 1
 
     @pytest.mark.parametrize("num_repeats", [1, 2, 3])
-    def test_repeat_scopes_are_closed(self, num_repeats):
-        model = EchoModelLoader().load()
+    def test_repeat_scopes_are_closed(self, model, num_repeats):
         builder = model.create_builder()
         for i in range(num_repeats):
             builder.repeat(1000)

@@ -52,9 +52,12 @@ from tests.unit.utils.qasm_qir import (
 
 
 class TestEchoPipelines:
-    def test_build_pipeline(self):
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return EchoModelLoader(random_seed=class_seed).load()
+
+    def test_build_pipeline(self, model):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = EchoModelLoader().load()
         pipeline = LegacyEchoPipeline._build_pipeline(
             config=PipelineConfig(name="legacy_echo"),
             model=model,
@@ -69,9 +72,8 @@ class TestEchoPipelines:
         assert isinstance(pipeline.runtime, LegacyRuntime)
         assert isinstance(pipeline.engine, EchoEngine)
 
-    def test_build_compile_pipeline(self):
+    def test_build_compile_pipeline(self, model):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = EchoModelLoader().load()
         pipeline = LegacyEchoCompilePipeline._build_pipeline(
             config=PipelineConfig(name="legacy_echo_compile"),
             model=model,
@@ -84,9 +86,8 @@ class TestEchoPipelines:
         assert isinstance(pipeline.middleend, CustomMiddleend)
         assert isinstance(pipeline.backend, FallthroughBackend)
 
-    def test_build_execute_pipeline(self):
+    def test_build_execute_pipeline(self, model):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = EchoModelLoader().load()
         pipeline = LegacyEchoExecutePipeline._build_pipeline(
             config=PipelineConfig(name="legacy_echo_execute"),
             model=model,
@@ -173,7 +174,7 @@ files = [get_qir_path("bell_psi_minus.ll"), get_qasm2_path("logic_example.qasm")
 )
 @pytest.mark.parametrize(
     "source_file",
-    qasm2_files | qasm3_files | qir_files,
+    sorted(qasm2_files | qasm3_files | qir_files),
     ids=short_file_name,
     scope="class",
 )

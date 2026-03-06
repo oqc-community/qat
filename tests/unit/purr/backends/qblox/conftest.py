@@ -2,7 +2,6 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 import os
-import uuid
 from dataclasses import dataclass
 from typing import Dict, List
 
@@ -27,6 +26,7 @@ from qat.purr.backends.qblox.device import (
 from qat.purr.backends.qblox.dummy import DummyQbloxControlHardware
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.utils.logger import get_default_logger
+from qat.utils.uuid import temporary_uuid_seed, uuid4
 
 log = get_default_logger()
 
@@ -194,9 +194,10 @@ class ClusterSetup:
 
 
 @pytest.fixture()
-def cluster_setup(request):
-    address = request.param
-    name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+def cluster_setup(request, function_seed):
+    with temporary_uuid_seed(function_seed):
+        address = request.param
+        name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
 
     if address is None:
         return ClusterSetup(name=name, dummy_cfg=DUMMY_CONFIG)
@@ -205,20 +206,21 @@ def cluster_setup(request):
 
 
 @pytest.fixture()
-def model(request):
-    name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
-    if isinstance(request.param, Dict):
-        address = request.param.get("address", None)
-    elif isinstance(request.param, List) and len(request.param) > 0:
-        address = request.param[0]
-    else:
-        address = request.param
+def model(request, function_seed):
+    with temporary_uuid_seed(function_seed):
+        name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
+        if isinstance(request.param, Dict):
+            address = request.param.get("address", None)
+        elif isinstance(request.param, List) and len(request.param) > 0:
+            address = request.param[0]
+        else:
+            address = request.param
 
-    cluster_setup = ClusterSetup(name=name, address=address, dummy_cfg=DUMMY_CONFIG)
+        cluster_setup = ClusterSetup(name=name, address=address, dummy_cfg=DUMMY_CONFIG)
 
-    model = QbloxLiveHardwareModel()
-    cluster_setup.configure(model)
-    model.control_hardware.connect()
+        model = QbloxLiveHardwareModel()
+        cluster_setup.configure(model)
+        model.control_hardware.connect()
     yield model
     model.control_hardware.disconnect()
 

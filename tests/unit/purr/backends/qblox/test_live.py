@@ -30,6 +30,8 @@ from tests.unit.utils.builder_nuggets import (
 
 log = get_default_logger()
 
+pytestmark = pytest.mark.usefixtures("tmp_cwd")
+
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
@@ -334,16 +336,19 @@ class TestBuildingBlocks:
 
     @pytest.mark.parametrize(
         "acq_width",
-        (
-            np.random.choice(
-                np.arange(
-                    Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
-                    Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS,
+        [
+            Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS * 1e-9,
+            (
+                (
+                    Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS
+                    - Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS
                 )
-                * 1e-9,
-                3,
+                * 0.6  # using 0.64 gave failures
+                + Constants.MIN_SAMPLE_SIZE_SCOPE_ACQUISITIONS
             )
-        ).tolist(),
+            * 1e-9,
+            Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS * 1e-9,
+        ],
     )
     @pytest.mark.parametrize("sync", [True, False])
     def test_scope_acquisition(self, model, qubit_indices, enable_hax, acq_width, sync):

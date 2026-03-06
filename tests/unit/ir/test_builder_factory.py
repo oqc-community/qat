@@ -19,7 +19,7 @@ class TestBuilderFactory:
         assert isinstance(builder, PurrInstructionBuilder)
 
     def test_create_builder_with_pyd_hw(self):
-        pyd_hw: PydHardwareModel = generate_hw_model(4)
+        pyd_hw: PydHardwareModel = generate_hw_model(4, seed=73)
         builder = BuilderFactory.create_builder(pyd_hw)
         assert builder is not None
         assert isinstance(builder, PydInstructionBuilder)

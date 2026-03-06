@@ -52,9 +52,9 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 
 
 class TestAnalysisPasses:
-    def test_triage_pass(self):
+    def test_triage_pass(self, function_seed):
         index = 0
-        model = EchoModelLoader().load()
+        model = EchoModelLoader(random_seed=function_seed).load()
         qubit = model.get_qubit(index)
         builder = resonator_spect(model, [index])
 
@@ -122,8 +122,10 @@ class TestAnalysisPasses:
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1], [0, 1, 2]])
     @pytest.mark.parametrize("enable_hw_averaging", [True, False])
-    def test_binding_pass(self, num_points, qubit_indices, enable_hw_averaging):
-        model = EchoModelLoader().load()
+    def test_binding_pass(
+        self, num_points, qubit_indices, enable_hw_averaging, function_seed
+    ):
+        model = EchoModelLoader(random_seed=function_seed).load()
         builder = resonator_spect(model, qubit_indices=qubit_indices, num_points=num_points)
 
         sweeps = [inst for inst in builder.instructions if isinstance(inst, Sweep)]
@@ -219,8 +221,8 @@ class TestAnalysisPasses:
                     name in set(rw_result.writes.keys())
                 )
 
-    def test_ti_legalisation_pass(self):
-        model = EchoModelLoader().load()
+    def test_ti_legalisation_pass(self, function_seed):
+        model = EchoModelLoader(random_seed=function_seed).load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 
@@ -266,8 +268,8 @@ class TestAnalysisPasses:
                 else:
                     assert legal_bound == bound
 
-    def test_cfg_pass(self):
-        model = EchoModelLoader().load()
+    def test_cfg_pass(self, function_seed):
+        model = EchoModelLoader(random_seed=function_seed).load()
         builder = resonator_spect(model)
         res_mgr = ResultManager()
 
@@ -281,10 +283,10 @@ class TestAnalysisPasses:
 
 
 class TestTimelineAnalysis:
-    def test_timelines_match(self):
+    def test_timelines_match(self, function_seed):
         """Test the results of the timeline analyis match with the expectation."""
-        model = EchoModelLoader().load()
-        target_data = TargetData.random()
+        model = EchoModelLoader(random_seed=function_seed).load()
+        target_data = TargetData.random(seed=function_seed)
 
         qubits = model.qubits[0:2]
         drive_channels = [qubit.get_drive_channel() for qubit in qubits]
@@ -349,7 +351,7 @@ class TestTimelineAnalysis:
     @pytest.mark.parametrize("control_delay", [None, 103e-9, 104e-9, 106e-9])
     @pytest.mark.parametrize("target_delay", [None, 74e-9, 80e-9, 85e-9])
     def test_ECR_timings_integrated_with_granularity_sanitisation(
-        self, drive_width, cr_width, control_delay, target_delay
+        self, drive_width, cr_width, control_delay, target_delay, function_seed
     ):
         """Checks that the timings of an ECR gate are still as expected if the timings do
         not exactly match the granularity.
@@ -383,8 +385,8 @@ class TestTimelineAnalysis:
         the pulse.
         """
 
-        model = EchoModelLoader().load()
-        target_data = TargetData.random()
+        model = EchoModelLoader(random_seed=function_seed).load()
+        target_data = TargetData.random(seed=function_seed)
 
         qubit1 = model.qubits[0]
         qubit2 = model.qubits[1]
@@ -462,8 +464,8 @@ class TestTimelineAnalysis:
 
 
 class TestIntermediateFrequencyAnalysis:
-    def test_different_frequencies_with_fixed_if_yields_error(self):
-        model = EchoModelLoader().load()
+    def test_different_frequencies_with_fixed_if_yields_error(self, function_seed):
+        model = EchoModelLoader(random_seed=function_seed).load()
         physical_channel = next(iter(model.physical_channels.values()))
         pulse_channels = iter(
             model.get_pulse_channels_from_physical_channel(physical_channel)
@@ -498,8 +500,8 @@ class TestIntermediateFrequencyAnalysis:
         with pytest.raises(ValueError):
             IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
-    def test_same_frequencies_with_fixed_if_passes(self):
-        model = EchoModelLoader().load()
+    def test_same_frequencies_with_fixed_if_passes(self, function_seed):
+        model = EchoModelLoader(random_seed=function_seed).load()
         physical_channel = next(iter(model.physical_channels.values()))
         pulse_channels = iter(
             model.get_pulse_channels_from_physical_channel(physical_channel)
@@ -522,8 +524,8 @@ class TestIntermediateFrequencyAnalysis:
         # run the pass
         IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
-    def test_fixed_if_returns_frequencies(self):
-        model = EchoModelLoader().load()
+    def test_fixed_if_returns_frequencies(self, function_seed):
+        model = EchoModelLoader(random_seed=function_seed).load()
 
         # Find two pulse channels with different physical channels
         pulse_channels = iter(model.pulse_channels.values())

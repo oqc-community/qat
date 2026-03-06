@@ -19,12 +19,12 @@ from qat.model.target_data import TargetData
 
 
 class TestTimelineAnalysis:
-    def test_timelines_match(self):
+    def test_timelines_match(self, function_seed):
         """Test the results of the timeline analyis match with the expectation."""
-        loader = PydEchoModelLoader()
+        loader = PydEchoModelLoader(random_seed=function_seed)
         leg_model = loader._legacy.load()
         pyd_model = loader.load()
-        target_data = TargetData.random()
+        target_data = TargetData()
         sample_time = target_data.QUBIT_DATA.sample_time
 
         qubits = leg_model.qubits[0:2]
@@ -92,7 +92,7 @@ class TestTimelineAnalysis:
     @pytest.mark.parametrize("control_delay", [None, 103e-9, 104e-9, 106e-9])
     @pytest.mark.parametrize("target_delay", [None, 74e-9, 80e-9, 85e-9])
     def test_ECR_timings_integrated_with_granularity_sanitisation(
-        self, drive_width, cr_width, control_delay, target_delay
+        self, drive_width, cr_width, control_delay, target_delay, function_seed
     ):
         """Checks that the timings of an ECR gate are still as expected if the timings do
         not exactly match the granularity.
@@ -126,10 +126,10 @@ class TestTimelineAnalysis:
         the pulse.
         """
 
-        loader = PydEchoModelLoader()
+        loader = PydEchoModelLoader(random_seed=function_seed)
         leg_model = loader._legacy.load()
         pyd_model = loader.load()
-        target_data = TargetData.random()
+        target_data = TargetData.random(seed=function_seed)
 
         qubit1 = leg_model.qubits[0]
         qubit2 = leg_model.qubits[1]
@@ -215,9 +215,9 @@ class TestTimelineAnalysis:
 
 
 class TestTimelineAnalysisParity:
-    def test_timelines_match(self):
+    def test_timelines_match(self, function_seed):
         """Test the results of the timeline analyis match with the expectation."""
-        loader = PydEchoModelLoader()
+        loader = PydEchoModelLoader(random_seed=function_seed)
         leg_model = loader._legacy.load()
         pyd_model = loader.load()
         target_data = TargetData()

@@ -29,6 +29,8 @@ from qat.runtime import SimpleRuntime
 
 from tests.unit.utils.qasm_qir import get_pipeline_tests
 
+pytestmark = pytest.mark.qblox
+
 
 class TestQbloxPipeline:
     def test_build_pipeline(self):

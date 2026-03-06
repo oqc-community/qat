@@ -19,7 +19,7 @@ HwModel = TypeVar(
 class BaseModelLoader(Generic[HwModel], ABC):
     """ModelLoaders load HardwareModels from a source configured on initialisation."""
 
-    def __init__(self): ...
+    def __init__(self, **kwarg): ...
 
     @abstractmethod
     def load(self) -> HwModel:

@@ -154,7 +154,7 @@ def get_default_qasm3_gate_qasms():
             qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
             gate_string = f"{name}{arg_string} {qubit_string};"
             qasm3_gates[name] = (N, gate_string)
-    return list(qasm3_gates.values())
+    return sorted(list(qasm3_gates.values()))
 
 
 qasm2_base = """
@@ -185,7 +185,7 @@ def get_default_qasm2_gate_qasms():
             qubit_string = ", ".join([f"q[{i}]" for i in range(N)])
             gate_string = f"{name}{arg_string} {qubit_string};"
             qasm2_gates[name] = (N, gate_string)
-    return list(qasm2_gates.values())
+    return sorted(list(qasm2_gates.values()))
 
 
 def get_pulses_from_builder(builder, shape_type=PulseShapeType.GAUSSIAN):

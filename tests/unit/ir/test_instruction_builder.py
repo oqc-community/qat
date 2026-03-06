@@ -28,7 +28,7 @@ from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
 
-hw_model = generate_hw_model(n_qubits=8)
+hw_model = generate_hw_model(n_qubits=8, seed=10)
 
 
 class TestInstructionBuilder:
@@ -240,7 +240,7 @@ class TestPauliGates:
     @pytest.mark.parametrize("add_xpi_pulse", [True])
     @pytest.mark.parametrize("use_xpi_pulse", [True])
     def test_X_pi(self, qubit_index, add_xpi_pulse, use_xpi_pulse):
-        model = generate_hw_model(n_qubits=8)
+        model = generate_hw_model(n_qubits=8, seed=49)
 
         if add_xpi_pulse:
             model.qubit_with_index(
@@ -268,7 +268,7 @@ class TestPauliGates:
     @pytest.mark.parametrize("add_xpi_pulse", [False, True])
     @pytest.mark.parametrize("use_xpi_pulse", [False, True])
     def test_X_min_pi(self, qubit_index, add_xpi_pulse, use_xpi_pulse):
-        model = generate_hw_model(n_qubits=8)
+        model = generate_hw_model(n_qubits=8, seed=28)
 
         if add_xpi_pulse:
             model.qubit_with_index(
@@ -287,14 +287,14 @@ class TestPauliGates:
             # 2 Z pulses to rotate to -pi
             # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 2 Z pulses`.
             ref_number_of_instructions = (
-                1 + 2 + len(hw_model.logical_connectivity[qubit_index]) * 2 * 2
+                1 + 2 + len(model.logical_connectivity[qubit_index]) * 2 * 2
             )
         else:
             # 2 pulses on the drive pulse channel, (two phaseshifts on the drive channel,
             # 3 Z pulses in U gate
             # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 3 Z pulses`.
             ref_number_of_instructions = (
-                2 + 3 + len(hw_model.logical_connectivity[qubit_index]) * 6
+                2 + 3 + len(model.logical_connectivity[qubit_index]) * 6
             )
 
         assert builder.number_of_instructions == ref_number_of_instructions
@@ -373,7 +373,7 @@ class TestPauliGates:
     @pytest.mark.parametrize("add_xpi_pulse", [False, True])
     @pytest.mark.parametrize("use_xpi_pulse", [False, True])
     def test_Y_pi(self, qubit_index, theta, add_xpi_pulse, use_xpi_pulse):
-        model = generate_hw_model(n_qubits=8)
+        model = generate_hw_model(n_qubits=8, seed=13)
         if add_xpi_pulse:
             model.qubit_with_index(
                 qubit_index
@@ -808,7 +808,7 @@ class TestMeasure:
         assert measure_block.duration == max_duration
 
     def test_measure_with_weights(self):
-        model = generate_hw_model(n_qubits=1)
+        model = generate_hw_model(n_qubits=1, seed=12)
         acquire = model.qubit_with_index(0).acquire_pulse_channel.acquire
         acquire.width = 800e-9
         acquire.weights = np.random.rand(800)

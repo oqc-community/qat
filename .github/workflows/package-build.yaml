@@ -142,7 +142,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           codebase: legacy
-          pytest-args: --legacy-only
+          pytest-args: "-n auto --legacy-only"
 
   unit-tests:
     name: Stable Unit Tests
@@ -165,7 +165,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           codebase: stable
-          pytest-args: ""
+          pytest-args: "-n auto"
   
   experimental-unit-tests:
     name: Experimental Unit Tests
@@ -181,7 +181,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           codebase: experimental
-          pytest-args: "--experimental-only"
+          pytest-args: "-n auto --experimental-only"
 
   notebook-validation-tests:
     name: Notebook Validation Tests
@@ -197,7 +197,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           codebase: notebooks
-          pytest-args: "notebooks/ipynb --nbmake"
+          pytest-args: "-n auto notebooks/ipynb --nbmake"
 
   generate-report:
     name: Generate report

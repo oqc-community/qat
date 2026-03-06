@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-import uuid
 from dataclasses import dataclass
 
 import numpy as np
@@ -17,6 +16,7 @@ from qat.purr.backends.qblox.config import (
     SequencerConfig,
 )
 from qat.purr.backends.qblox.constants import Constants
+from qat.utils.uuid import temporary_uuid_seed, uuid4
 
 from tests.unit.purr.backends.qblox.conftest import random_resource
 
@@ -94,12 +94,15 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("gain_ratio", mixer_values.gain_ratios)
     @pytest.mark.parametrize("i_offset", mixer_values.qcm_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qcm_q_offsets)
-    def test_qcm_mixer_config(self, request, phase_offset, gain_ratio, i_offset, q_offset):
+    def test_qcm_mixer_config(
+        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
+    ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
-        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        with temporary_uuid_seed(function_seed):
+            name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
         module, sequencer = random_resource(ClusterType.CLUSTER_QCM, name)
 
         self.setup_qcm_mixer_config(module_config, i_offset, q_offset)
@@ -116,13 +119,14 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("i_offset", mixer_values.qcm_rf_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qcm_rf_q_offsets)
     def test_qcm_rf_mixer_config(
-        self, request, phase_offset, gain_ratio, i_offset, q_offset
+        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
     ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
-        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        with temporary_uuid_seed(function_seed):
+            name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
         module, sequencer = random_resource(ClusterType.CLUSTER_QCM_RF, name)
 
         self.setup_qcm_rf_mixer_config(module_config, i_offset, q_offset)
@@ -139,12 +143,15 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("gain_ratio", mixer_values.gain_ratios)
     @pytest.mark.parametrize("i_offset", mixer_values.qrm_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qrm_q_offsets)
-    def test_qrm_mixer_config(self, request, phase_offset, gain_ratio, i_offset, q_offset):
+    def test_qrm_mixer_config(
+        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
+    ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
-        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        with temporary_uuid_seed(function_seed):
+            name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
         module, sequencer = random_resource(ClusterType.CLUSTER_QRM, name)
 
         self.setup_qrm_mixer_config(module_config, i_offset, q_offset)
@@ -161,13 +168,14 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("i_offset", mixer_values.qrm_rf_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qrm_rf_q_offsets)
     def test_qrm_rf_mixer_config(
-        self, request, phase_offset, gain_ratio, i_offset, q_offset
+        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
     ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
-        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        with temporary_uuid_seed(function_seed):
+            name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
         module, sequencer = random_resource(ClusterType.CLUSTER_QRM_RF, name)
 
         self.setup_qrm_rf_mixer_config(module_config, i_offset, q_offset)
@@ -185,18 +193,21 @@ class TestMixerConfig(TestQbloxConfigMixin):
             assert module.in0_offset_path1() == module_config.offset.in0_path1
 
 
+acq_random = np.random.default_rng(256)
+
+
 @dataclass
 class AcqTestValues:
     num_points = 5  # Low value for testing to reduce the size of the cartesian products
 
-    int_lengths = np.random.choice(
+    int_lengths = acq_random.choice(
         np.arange(
             Constants.MIN_ACQ_INTEGRATION_LENGTH, Constants.MAX_ACQ_INTEGRATION_LENGTH, 4
         ),
         size=num_points,
     )
-    rotations = np.random.choice(np.arange(0, 360), size=num_points).astype(float)
-    thresholds = np.random.choice(
+    rotations = acq_random.choice(np.arange(0, 360), size=num_points).astype(float)
+    thresholds = acq_random.choice(
         np.arange(Constants.MIN_ACQ_THRESHOLD, Constants.MAX_ACQ_THRESHOLD), size=num_points
     ).astype(float)
 
@@ -205,12 +216,13 @@ class TestAcqConfig(TestQbloxConfigMixin):
     acq_values = AcqTestValues()
 
     @pytest.mark.parametrize("int_length", acq_values.int_lengths)
-    def test_qrm_rf_square_acq(self, request, int_length):
+    def test_qrm_rf_square_acq(self, request, int_length, function_seed):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
-        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        with temporary_uuid_seed(function_seed):
+            name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
         module, sequencer = random_resource(ClusterType.CLUSTER_QRM_RF, name)
 
         sequencer_config.square_weight_acq.integration_length = int_length
@@ -225,12 +237,13 @@ class TestAcqConfig(TestQbloxConfigMixin):
 
     @pytest.mark.parametrize("rotation", acq_values.rotations)
     @pytest.mark.parametrize("threshold", acq_values.thresholds)
-    def test_qrm_rf_thresholded_acq(self, request, rotation, threshold):
+    def test_qrm_rf_thresholded_acq(self, request, rotation, threshold, function_seed):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
         # The qcodes package generates a warning if the name of the cluster contains dashes.
-        name = f"{request.node.originalname}_{uuid.uuid4()}".replace("-", "_")
+        with temporary_uuid_seed(function_seed):
+            name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
         module, sequencer = random_resource(ClusterType.CLUSTER_QRM_RF, name)
 
         sequencer_config.thresholded_acq.rotation = rotation

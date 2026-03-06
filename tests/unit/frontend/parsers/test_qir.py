@@ -34,7 +34,7 @@ pyd_hw_model = convert_purr_echo_hw_to_pydantic(leg_hw_model)
 class TestQIRParser:
     @pytest.mark.parametrize(
         "qir_file",
-        list(qir_files),
+        sorted(qir_files),
         ids=short_file_name,
     )
     @pytest.mark.parametrize(
@@ -66,7 +66,7 @@ class TestQIRParser:
 
     @pytest.mark.parametrize(
         "qir_file",
-        list(qir_files),
+        sorted(qir_files),
         ids=short_file_name,
     )
     def test_qir_legacy_vs_pyd_parse(self, qir_file):

@@ -28,6 +28,7 @@ from qat.purr.compiler.instructions import (
 )
 from qat.purr.compiler.interrupt import Interrupt, NullInterrupt
 from qat.purr.utils.logger import get_default_logger
+from qat.utils.uuid import SeedType, temporary_uuid_seed
 
 from ..compiler.execution import QuantumExecutionEngine, SweepIterator
 from ..compiler.hardware_models import QuantumHardwareModel
@@ -535,107 +536,112 @@ def add_qubit_coupling(hw, qubit1, qubit2, frequency):
     )
 
 
-def apply_setup_to_hardware(hw, rotating_frame=True):
+def apply_setup_to_hardware(hw, rotating_frame=True, seed: SeedType | None = None):
     """Apply the default real-time chip sim hardware setup to the passed-in hardware."""
-    bb1 = PhysicalBaseband("L1", 5.0e9)
-    bb2 = PhysicalBaseband("L2", 8.0e9)
-    bb3 = PhysicalBaseband("L3", 5.09e9)
-    bb4 = PhysicalBaseband("L4", 8.5e9)
-    hw.add_physical_baseband(bb1, bb2, bb3, bb4)
+    with temporary_uuid_seed(seed):
+        bb1 = PhysicalBaseband("L1", 5.0e9)
+        bb2 = PhysicalBaseband("L2", 8.0e9)
+        bb3 = PhysicalBaseband("L3", 5.09e9)
+        bb4 = PhysicalBaseband("L4", 8.5e9)
+        hw.add_physical_baseband(bb1, bb2, bb3, bb4)
 
-    ch1 = PhysicalChannel("CH1", 0.5e-9, bb1, 1)
-    ch2 = PhysicalChannel("CH2", 1.0e-9, bb2, 1, acquire_allowed=True)
-    ch3 = PhysicalChannel("CH3", 0.5e-9, bb3, 1)
-    ch4 = PhysicalChannel("CH4", 1.0e-9, bb4, 1, acquire_allowed=True)
-    hw.add_physical_channel(ch1, ch2, ch3, ch4)
+        ch1 = PhysicalChannel("CH1", 0.5e-9, bb1, 1)
+        ch2 = PhysicalChannel("CH2", 1.0e-9, bb2, 1, acquire_allowed=True)
+        ch3 = PhysicalChannel("CH3", 0.5e-9, bb3, 1)
+        ch4 = PhysicalChannel("CH4", 1.0e-9, bb4, 1, acquire_allowed=True)
+        hw.add_physical_channel(ch1, ch2, ch3, ch4)
 
-    r0 = RTCSResonator(0, ch2, 8.0e9, 1.0e6)
-    r0.create_pulse_channel(ChannelType.measure, frequency=8.0e9)
-    r0.create_pulse_channel(ChannelType.acquire, frequency=8.0e9)
+        r0 = RTCSResonator(0, ch2, 8.0e9, 1.0e6)
+        r0.create_pulse_channel(ChannelType.measure, frequency=8.0e9)
+        r0.create_pulse_channel(ChannelType.acquire, frequency=8.0e9)
 
-    q0_freq = 5.0e9
-    q0 = RTCSQubit(
-        0,
-        r0,
-        ch1,
-        q0_freq,
-        anharmonicity=-250.0e6,
-        N=2 if rotating_frame else 3,
-        rotating_frame_frequency=q0_freq if rotating_frame else 0,
-    )
-    q0.create_pulse_channel(ChannelType.drive, frequency=5.0e9, scale=1.0 + 0.0j)
-    q0.create_pulse_channel(ChannelType.second_state, frequency=5.00e9 - 250.0e6)
-    q0.mean_z_map_args = [2.136329226009086, -1.0254571168804927]
-    q0.pulse_hw_x_pi_2["amp"] = 4368000.007595086
+        q0_freq = 5.0e9
+        q0 = RTCSQubit(
+            0,
+            r0,
+            ch1,
+            q0_freq,
+            anharmonicity=-250.0e6,
+            N=2 if rotating_frame else 3,
+            rotating_frame_frequency=q0_freq if rotating_frame else 0,
+        )
+        q0.create_pulse_channel(ChannelType.drive, frequency=5.0e9, scale=1.0 + 0.0j)
+        q0.create_pulse_channel(ChannelType.second_state, frequency=5.00e9 - 250.0e6)
+        q0.mean_z_map_args = [2.136329226009086, -1.0254571168804927]
+        q0.pulse_hw_x_pi_2["amp"] = 4368000.007595086
 
-    r1 = RTCSResonator(1, ch4, 8.5e9, 1.0e6)
-    r1.create_pulse_channel(ChannelType.measure, frequency=8.5e9)
-    r1.create_pulse_channel(ChannelType.acquire, frequency=8.5e9)
+        r1 = RTCSResonator(1, ch4, 8.5e9, 1.0e6)
+        r1.create_pulse_channel(ChannelType.measure, frequency=8.5e9)
+        r1.create_pulse_channel(ChannelType.acquire, frequency=8.5e9)
 
-    q1_freq = 5.09e9
-    q1 = RTCSQubit(
-        1,
-        r1,
-        ch3,
-        q1_freq,
-        anharmonicity=-250.0e6,
-        N=2 if rotating_frame else 3,
-        rotating_frame_frequency=q1_freq if rotating_frame else 0,
-    )
-    q1.create_pulse_channel(ChannelType.drive, frequency=5.09e9, scale=1.0 + 0.0j)
-    q1.create_pulse_channel(ChannelType.second_state, frequency=5.09e9 - 250e6)
-    q1.mean_z_map_args = [2.1330969344627744, -1.0223925761549326]
-    q1.pulse_hw_x_pi_2["amp"] = 4368197.314536925
+        q1_freq = 5.09e9
+        q1 = RTCSQubit(
+            1,
+            r1,
+            ch3,
+            q1_freq,
+            anharmonicity=-250.0e6,
+            N=2 if rotating_frame else 3,
+            rotating_frame_frequency=q1_freq if rotating_frame else 0,
+        )
+        q1.create_pulse_channel(ChannelType.drive, frequency=5.09e9, scale=1.0 + 0.0j)
+        q1.create_pulse_channel(ChannelType.second_state, frequency=5.09e9 - 250e6)
+        q1.mean_z_map_args = [2.1330969344627744, -1.0223925761549326]
+        q1.pulse_hw_x_pi_2["amp"] = 4368197.314536925
 
-    q1.add_coupled_qubit(q0)
-    q0.add_coupled_qubit(q1)
-    q0_r0_coupling = RTCSCoupling("r0<->q0", r0, q0, 10.0e6, CouplingType.CrossKerr)
-    q0_q1_coupling = RTCSCoupling("q0<->q1", q0, q1, 4.5e6, CouplingType.Exchange)
-    q1_r1_coupling = RTCSCoupling("q1<->r1", q1, r1, 10.0e6, CouplingType.CrossKerr)
-    hw.add_couplings(q0_r0_coupling, q0_q1_coupling, q1_r1_coupling)
+        q1.add_coupled_qubit(q0)
+        q0.add_coupled_qubit(q1)
+        q0_r0_coupling = RTCSCoupling("r0<->q0", r0, q0, 10.0e6, CouplingType.CrossKerr)
+        q0_q1_coupling = RTCSCoupling("q0<->q1", q0, q1, 4.5e6, CouplingType.Exchange)
+        q1_r1_coupling = RTCSCoupling("q1<->r1", q1, r1, 10.0e6, CouplingType.CrossKerr)
+        hw.add_couplings(q0_r0_coupling, q0_q1_coupling, q1_r1_coupling)
 
-    q1drive = q1.get_pulse_channel(ChannelType.drive)
-    q0drive = q0.get_pulse_channel(ChannelType.drive)
+        q1drive = q1.get_pulse_channel(ChannelType.drive)
+        q0drive = q0.get_pulse_channel(ChannelType.drive)
 
-    q0.create_pulse_channel(
-        auxiliary_devices=[q1],
-        channel_type=ChannelType.cross_resonance,
-        frequency=q1drive.frequency,
-        scale=20.43888303393216 + 1.9018783700527548j,
-    )
+        q0.create_pulse_channel(
+            auxiliary_devices=[q1],
+            channel_type=ChannelType.cross_resonance,
+            frequency=q1drive.frequency,
+            scale=20.43888303393216 + 1.9018783700527548j,
+        )
 
-    q1.create_pulse_channel(
-        auxiliary_devices=[q0],
-        channel_type=ChannelType.cross_resonance,
-        frequency=q0drive.frequency,
-        scale=-19.960910767291143 + 1.7755801175916415j,
-    )
+        q1.create_pulse_channel(
+            auxiliary_devices=[q0],
+            channel_type=ChannelType.cross_resonance,
+            frequency=q0drive.frequency,
+            scale=-19.960910767291143 + 1.7755801175916415j,
+        )
 
-    q1.create_pulse_channel(
-        auxiliary_devices=[q0],
-        channel_type=ChannelType.cross_resonance_cancellation,
-        frequency=q1drive.frequency,
-        scale=-0.0006383792131791451 - 0.0018484650690712681j,
-    )
+        q1.create_pulse_channel(
+            auxiliary_devices=[q0],
+            channel_type=ChannelType.cross_resonance_cancellation,
+            frequency=q1drive.frequency,
+            scale=-0.0006383792131791451 - 0.0018484650690712681j,
+        )
 
-    q0.create_pulse_channel(
-        auxiliary_devices=[q1],
-        channel_type=ChannelType.cross_resonance_cancellation,
-        frequency=q0drive.frequency,
-        scale=-0.002608579454171639 + 0.006639464852534781j,
-    )
+        q0.create_pulse_channel(
+            auxiliary_devices=[q1],
+            channel_type=ChannelType.cross_resonance_cancellation,
+            frequency=q0drive.frequency,
+            scale=-0.002608579454171639 + 0.006639464852534781j,
+        )
 
-    hw.add_quantum_device(q0, r0, q1, r1)
+        hw.add_quantum_device(q0, r0, q1, r1)
 
-    # Simulators don't need automatic calibration.
-    hw.is_calibrated = True
+        # Simulators don't need automatic calibration.
+        hw.is_calibrated = True
     return hw
 
 
 # noinspection PyPep8Naming
-def get_default_RTCS_hardware(repeats=1000, rotating_frame=True):
+def get_default_RTCS_hardware(
+    repeats=1000, rotating_frame=True, seed: SeedType | None = 42
+):
     model = apply_setup_to_hardware(
-        RealtimeSimHardwareModel(repeat_count=repeats), rotating_frame=rotating_frame
+        RealtimeSimHardwareModel(repeat_count=repeats),
+        rotating_frame=rotating_frame,
+        seed=seed,
     )
     return model
 

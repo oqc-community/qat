@@ -124,7 +124,7 @@ def test_get_qasm_version(qasm_str, version):
 
 class TestLoadQasmFile:
     @pytest.mark.parametrize(
-        "qasm_path", (get_all_qasm2_paths() | qasm3_tests), ids=filename_ids
+        "qasm_path", sorted(get_all_qasm2_paths() | qasm3_tests), ids=filename_ids
     )
     def test_files_load(self, qasm_path: str):
         src = load_qasm_file(qasm_path)
@@ -142,7 +142,7 @@ class TestQasm2Frontend:
         model = EchoModelLoader(32, connectivity=Connectivity.Ring).load()
         return Qasm2Frontend(model)
 
-    @pytest.mark.parametrize("qasm_path", get_all_qasm2_paths(), ids=filename_ids)
+    @pytest.mark.parametrize("qasm_path", sorted(get_all_qasm2_paths()), ids=filename_ids)
     def test_check_and_return_source_with_qasm_2_files(self, qasm_path):
         # TODO: Update frontends to work with `Path`s, COMPILER-404
         qasm_path = str(qasm_path)
@@ -239,7 +239,7 @@ class TestQasm3Frontend:
         model = EchoModelLoader(32, connectivity=Connectivity.Ring).load()
         return Qasm3Frontend(model)
 
-    @pytest.mark.parametrize("qasm_path", qasm3_tests, ids=filename_ids)
+    @pytest.mark.parametrize("qasm_path", sorted(qasm3_tests), ids=filename_ids)
     def test_check_and_return_source_with_qasm_3_files(self, qasm_path):
         # TODO: Update frontends to work with `Path`s, COMPILER-404
         qasm_path = str(qasm_path)

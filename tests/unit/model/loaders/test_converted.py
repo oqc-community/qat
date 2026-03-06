@@ -6,16 +6,16 @@ from qat.utils.hardware_model import random_error_mitigation
 
 
 class TestJaggedEchoModelLoader:
-    def test_seed_reproducibility(self):
+    def test_seed_reproducibility(self, function_seed):
         loader1 = JaggedEchoModelLoader(
             qubit_count=32,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model1 = loader1.load()
 
         loader2 = JaggedEchoModelLoader(
             qubit_count=32,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model2 = loader2.load()
 
@@ -23,10 +23,10 @@ class TestJaggedEchoModelLoader:
         assert model1.physical_connectivity == model2.physical_connectivity
         assert model1.logical_connectivity == model2.logical_connectivity
 
-    def test_different_seeds_give_different_model(self):
+    def test_different_seeds_give_different_model(self, function_seed):
         loader1 = JaggedEchoModelLoader(
             qubit_count=32,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model1 = loader1.load()
 
@@ -41,12 +41,12 @@ class TestJaggedEchoModelLoader:
             or model1.logical_connectivity != model2.logical_connectivity
         )
 
-    def test_serialisation_with_mitigation(self):
+    def test_serialisation_with_mitigation(self, function_seed):
         jagged_indices = {2, 3, 6, 8, 9, 10, 11, 12}
-        error_mit = random_error_mitigation(jagged_indices, seed=42)
+        error_mit = random_error_mitigation(jagged_indices, seed=function_seed)
         hw = JaggedEchoModelLoader(
             qubit_count=8,
-            random_seed=42,
+            random_seed=function_seed,
             qubit_indices=jagged_indices,
             error_mitigation=error_mit,
         ).load()

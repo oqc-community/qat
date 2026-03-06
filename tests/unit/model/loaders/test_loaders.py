@@ -15,7 +15,9 @@ from qat.utils.hardware_model import generate_connectivity_data
 
 class TestConversionLoaders:
     @pytest.fixture
-    def random_model(self, n_qubits=4, seed=42):
+    def random_model(self, function_seed, n_qubits=4, seed=None):
+        if seed is None:
+            seed = function_seed
         physical_connectivity, logical_connectivity, logical_connectivity_quality = (
             generate_connectivity_data(n_qubits, n_qubits, seed=seed)
         )

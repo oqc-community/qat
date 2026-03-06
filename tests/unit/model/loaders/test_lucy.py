@@ -44,12 +44,12 @@ class TestLucyModelLoader:
             assert i in coupling_directions
             assert coupling_directions[i] == {(i + 1) % qubit_count}
 
-    def test_random_coupling_direction(self):
+    def test_random_coupling_direction(self, function_seed):
         qubit_count = 8
         loader = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_direction=LucyCouplingDirection.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model = loader.load()
         coupling_directions = model.logical_connectivity
@@ -79,12 +79,12 @@ class TestLucyModelLoader:
         model2 = loader2.load()
         assert model1.logical_connectivity == model2.logical_connectivity
 
-    def test_random_gives_different_directions(self):
+    def test_random_gives_different_directions(self, function_seed):
         qubit_count = 8
         loader1 = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_direction=LucyCouplingDirection.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model1 = loader1.load()
         loader2 = LucyModelLoader(
@@ -95,18 +95,18 @@ class TestLucyModelLoader:
         model2 = loader2.load()
         assert model1.logical_connectivity != model2.logical_connectivity
 
-    def test_same_seed_gives_same_directions(self):
+    def test_same_seed_gives_same_directions(self, function_seed):
         qubit_count = 8
         loader1 = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_direction=LucyCouplingDirection.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model1 = loader1.load()
         loader2 = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_direction=LucyCouplingDirection.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model2 = loader2.load()
         assert model1.logical_connectivity == model2.logical_connectivity
@@ -119,12 +119,12 @@ class TestLucyModelLoader:
         model = loader.load()
         assert np.allclose(list(model.logical_connectivity_quality.values()), 1.0)
 
-    def test_random_qualities(self):
+    def test_random_qualities(self, function_seed):
         qubit_count = 8
         loader = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_qualities=LucyCouplingQuality.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model = loader.load()
         qualities = list(model.logical_connectivity_quality.values())
@@ -182,12 +182,12 @@ class TestLucyModelLoader:
                 coupling_direction=LucyCouplingDirection.LEFT,
             ).load()
 
-    def test_random_gives_different_qualities(self):
+    def test_random_gives_different_qualities(self, function_seed):
         qubit_count = 8
         loader1 = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_qualities=LucyCouplingQuality.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model1 = loader1.load()
         loader2 = LucyModelLoader(
@@ -198,18 +198,18 @@ class TestLucyModelLoader:
         model2 = loader2.load()
         assert model1.logical_connectivity_quality != model2.logical_connectivity_quality
 
-    def test_same_seed_gives_same_qualities(self):
+    def test_same_seed_gives_same_qualities(self, function_seed):
         qubit_count = 8
         loader1 = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_qualities=LucyCouplingQuality.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model1 = loader1.load()
         loader2 = LucyModelLoader(
             qubit_count=qubit_count,
             coupling_qualities=LucyCouplingQuality.RANDOM,
-            random_seed=42,
+            random_seed=function_seed,
         )
         model2 = loader2.load()
         assert model1.logical_connectivity_quality == model2.logical_connectivity_quality

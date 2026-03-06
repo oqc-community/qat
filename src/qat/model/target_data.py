@@ -16,6 +16,7 @@ from pydantic import (
 
 from qat.utils.piny import VeryStrictMatcher
 from qat.utils.pydantic import NoExtraFieldsFrozenModel
+from qat.utils.uuid import SeedType
 
 
 class DeviceDescription(NoExtraFieldsFrozenModel):
@@ -54,7 +55,7 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
         return self
 
     @classmethod
-    def random(cls, seed=42):
+    def random(cls, seed: SeedType | None = None):
         return cls(
             **{
                 "sample_time": random.Random(seed).choice([1e-09, 2e-09]),
@@ -89,7 +90,7 @@ class QubitDescription(DeviceDescription):
     passive_reset_time: NonNegativeFloat = 1e-03
 
     @classmethod
-    def random(cls, seed=42):
+    def random(cls, seed: SeedType | None = None):
         device_descr = DeviceDescription.random(seed).model_dump()
         device_descr.update(
             {"passive_reset_time": random.Random(seed).uniform(1e-06, 1e-04)}
@@ -174,7 +175,15 @@ class TargetData(AbstractTargetData):
         return self
 
     @classmethod
-    def random(cls, seed: int = 42) -> "TargetData":
+    def random(cls, seed: SeedType | None = None) -> "TargetData":
+        # Note: The random seed is used to ensure that the generated values are consistent
+        # across runs, which can be useful for testing and debugging.
+        # In order for the QubitDescription and ResonatorDescription to be compatible,
+        # they need to be generated with the same seed to ensure they have the same clock
+        # cycle. Hence, we generate a seed if none is provided and use it for both
+        # descriptions.
+        if seed is None:
+            seed = random.randint(0, 2**32 - 1)
         return cls(
             max_shots=random.Random(seed).randint(200, 1000),
             default_shots=random.Random(seed).randint(1, 100),

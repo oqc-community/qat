@@ -754,9 +754,12 @@ class TestFrequencySetupValidation:
 
 
 class TestPydHardwareConfigValidity:
+    @pytest.fixture(scope="class")
+    def hw_model(self):
+        return generate_hw_model(n_qubits=8, seed=51)
+
     @pytest.mark.parametrize("shots", [0, 100, None])
-    def test_shots_does_not_exceed_limit(self, shots):
-        hw_model = generate_hw_model(n_qubits=8)
+    def test_shots_does_not_exceed_limit(self, shots, hw_model):
         comp_config = CompilerConfig(repeats=shots)
         ir = "test"
 
@@ -766,8 +769,7 @@ class TestPydHardwareConfigValidity:
         assert ir_out == ir
 
     @pytest.mark.parametrize("max_shots", [qatconfig.MAX_REPEATS_LIMIT, None])
-    def test_max_shot_limit_exceeded(self, max_shots):
-        hw_model = generate_hw_model(n_qubits=8)
+    def test_max_shot_limit_exceeded(self, max_shots, hw_model):
         invalid_shots = (
             qatconfig.MAX_REPEATS_LIMIT + 1 if max_shots is None else max_shots + 1
         )
@@ -785,7 +787,7 @@ class TestPydHardwareConfigValidity:
 
     @pytest.mark.parametrize("n_qubits", [2, 4, 8, 32, 64])
     def test_error_mitigation(self, n_qubits):
-        hw_model = generate_hw_model(n_qubits=n_qubits)
+        hw_model = generate_hw_model(n_qubits=n_qubits, seed=72)
         comp_config = CompilerConfig(
             repeats=10,
             error_mitigation=ErrorMitigationConfig.LinearMitigation,

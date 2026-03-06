@@ -9,7 +9,7 @@ from qat.ir.gates.gates_1q import Gate1Q, Hadamard, X
 from qat.ir.gates.gates_2q import CNOT, Gate2Q
 from qat.ir.gates.operation import Barrier, Measure, Reset
 
-from tests.unit.utils.gates import get_non_abstract_subgates
+from tests.unit.utils.gates import cls_name, get_non_abstract_subgates
 
 
 class TestCircuitBuilder:
@@ -67,7 +67,11 @@ class TestCircuitBuilder:
         ]
 
     @pytest.mark.parametrize(
-        "gate", get_non_abstract_subgates(Gate1Q).union(get_non_abstract_subgates(Gate2Q))
+        "gate",
+        sorted(
+            get_non_abstract_subgates(Gate1Q).union(get_non_abstract_subgates(Gate2Q)),
+            key=cls_name,
+        ),
     )
     def test_gates(self, gate):
         method = getattr(CircuitBuilder, gate.__name__, None)

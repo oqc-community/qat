@@ -27,15 +27,18 @@ def parse_qasm2_and_apply_optimisations(qasm, hw, filename=True):
     return parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
 
 
-@pytest.mark.parametrize("n_qubits", [8, 32, 64])
-@pytest.mark.parametrize("seed", [8, 16])
+@pytest.mark.parametrize("n_qubits", [8, 32, 64], scope="class")
+@pytest.mark.parametrize("seed", [8, 16], scope="class")
 class TestQasm2Parser:
-    def test_invalid_gates(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
+    @pytest.fixture(scope="class")
+    def hardware_model(self, n_qubits, seed):
+        return generate_hw_model(n_qubits, seed=seed)
 
+    def test_invalid_gates(self, n_qubits, seed, hardware_model):
         with pytest.raises(ValueError):
             RestrictedQasm2Parser({"cx"}).parse(
-                QuantumInstructionBuilder(hardware_model=hw), get_qasm2("example.qasm")
+                QuantumInstructionBuilder(hardware_model=hardware_model),
+                get_qasm2("example.qasm"),
             )
 
     @pytest.mark.parametrize(
@@ -54,68 +57,61 @@ class TestQasm2Parser:
             "valid_custom_gate.qasm",
         ],
     )
-    def test_basic(self, qasm_file, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations(qasm_file, hw)
+    def test_basic(self, qasm_file, n_qubits, seed, hardware_model):
+        builder = parse_qasm2_and_apply_optimisations(qasm_file, hardware_model)
         assert builder.number_of_instructions > 0
         assert count_number_of_pulses(builder, "measure") >= 1
 
-    def test_example(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations("example.qasm", hw)
+    def test_example(self, n_qubits, seed, hardware_model):
+        builder = parse_qasm2_and_apply_optimisations("example.qasm", hardware_model)
         assert 351 == builder.number_of_instructions
 
-    def test_parallel(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations("parallel_test.qasm", hw)
+    def test_parallel(self, n_qubits, seed, hardware_model):
+        builder = parse_qasm2_and_apply_optimisations("parallel_test.qasm", hardware_model)
         assert count_number_of_pulses(builder, "drive") == 100  # we have 100 'sx gates
         assert count_number_of_pulses(builder, "measure") == 2
 
-    def test_mid_circuit_measurements(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
+    def test_mid_circuit_measurements(self, n_qubits, seed, hardware_model):
         with pytest.raises(ValueError, match="No mid-circuit measurements allowed."):
-            parse_qasm2_and_apply_optimisations("mid_circuit_measure.qasm", hw)
+            parse_qasm2_and_apply_optimisations("mid_circuit_measure.qasm", hardware_model)
 
-    def test_example_if(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
+    def test_example_if(self, n_qubits, seed, hardware_model):
         with pytest.raises(
             NotImplementedError, match="IfElseOp is not currently supported."
         ):
-            parse_qasm2_and_apply_optimisations("example_if.qasm", hw)
+            parse_qasm2_and_apply_optimisations("example_if.qasm", hardware_model)
 
-    def test_random_n5_d5(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations("random_n5_d5.qasm", hw)
+    def test_random_n5_d5(self, n_qubits, seed, hardware_model):
+        builder = parse_qasm2_and_apply_optimisations("random_n5_d5.qasm", hardware_model)
         assert count_number_of_pulses(builder, "Drive") >= 60
         assert count_number_of_pulses(builder, "CrossResonance") >= 60
         assert count_number_of_pulses(builder, "CrossResonanceCancellation") >= 60
         assert count_number_of_pulses(builder, "Measure") == 5
 
-    def test_restrict_if(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
+    def test_restrict_if(self, n_qubits, seed, hardware_model):
         with pytest.raises(ValueError, match="If's are currently unable to be used."):
             RestrictedQasm2Parser(disable_if=True).parse(
-                QuantumInstructionBuilder(hardware_model=hw), get_qasm2("example_if.qasm")
+                QuantumInstructionBuilder(hardware_model=hardware_model),
+                get_qasm2("example_if.qasm"),
             )
 
-    def test_invalid_arbitrary_gate(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
+    def test_invalid_arbitrary_gate(self, n_qubits, seed, hardware_model):
         with pytest.raises(ValueError):
             Qasm2Parser().parse(
-                QuantumInstructionBuilder(hardware_model=hw),
+                QuantumInstructionBuilder(hardware_model=hardware_model),
                 get_qasm2("invalid_custom_gate.qasm"),
             )
 
-    def test_valid_arbitrary_gate(self, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations("valid_custom_gate.qasm", hw)
+    def test_valid_arbitrary_gate(self, n_qubits, seed, hardware_model):
+        builder = parse_qasm2_and_apply_optimisations(
+            "valid_custom_gate.qasm", hardware_model
+        )
         assert count_number_of_pulses(builder, "drive") == 3
         assert count_number_of_pulses(builder, "measure") == 3
 
     @pytest.mark.parametrize("qasm_file", ["ecr.qasm", "ecr_exists.qasm"])
-    def test_ecr(self, qasm_file, n_qubits, seed):
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations(qasm_file, hw)
+    def test_ecr(self, qasm_file, n_qubits, seed, hardware_model):
+        builder = parse_qasm2_and_apply_optimisations(qasm_file, hardware_model)
         assert count_number_of_pulses(builder, "CrossResonance") == 2
         assert count_number_of_pulses(builder, "CrossResonanceCancellation") == 2
 
@@ -125,20 +121,19 @@ class TestQasm2Parser:
     @pytest.mark.parametrize(
         "gate_tup", get_default_qasm2_gate_qasms(), ids=lambda val: val[-1]
     )
-    def test_default_gates(self, gate_tup, n_qubits, seed):
+    def test_default_gates(self, gate_tup, n_qubits, seed, hardware_model):
         """Check that each default gate can be parsed individually."""
         N, gate_string = gate_tup
         if gate_string.startswith(self._unsupported_gates):
             pytest.skip("Gate not yet supported.")
         qasm = qasm2_base.format(N=N, gate_strings=gate_string)
 
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations(qasm, hw, filename=False)
+        builder = parse_qasm2_and_apply_optimisations(qasm, hardware_model, filename=False)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert builder.number_of_instructions > 0
         assert isinstance(builder._ir.tail, Return)
 
-    def test_default_gates_together(self, n_qubits, seed):
+    def test_default_gates_together(self, n_qubits, seed, hardware_model):
         """Check that all default gates can be parsed together."""
         Ns, strings = zip(*get_default_qasm2_gate_qasms())
         N = max(Ns)
@@ -147,16 +142,15 @@ class TestQasm2Parser:
         gate_strings = "\n".join(strings)
         qasm = qasm2_base.format(N=N, gate_strings=gate_strings)
 
-        hw = generate_hw_model(n_qubits, seed=seed)
-        builder = parse_qasm2_and_apply_optimisations(qasm, hw, filename=False)
+        builder = parse_qasm2_and_apply_optimisations(qasm, hardware_model, filename=False)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert builder.number_of_instructions > 0
         assert isinstance(builder._ir.tail, Return)
 
 
-def test_move_measurements():
+def test_move_measurements(function_seed):
     # Expensive test is put separately.
-    hw = generate_hw_model(16)
+    hw = generate_hw_model(16, seed=function_seed)
     parse_qasm2_and_apply_optimisations("move_measurements.qasm", hw)
 
 
@@ -195,13 +189,17 @@ mapping_setup3 = (
 )
 
 
+@pytest.fixture(scope="module")
+def three_qubit_hw(module_seed):
+    return generate_hw_model(3, seed=module_seed)
+
+
 @pytest.mark.parametrize(
     "qasm, expected_mapping", [mapping_setup1, mapping_setup2, mapping_setup3]
 )
-def test_cl2qu_index_mapping(qasm, expected_mapping):
-    hw = generate_hw_model(3)
-    builder = parse_qasm2_and_apply_optimisations(qasm, hw, filename=False)
-    mapping = get_cl2qu_index_mapping(builder._ir, hw)
+def test_cl2qu_index_mapping(qasm, expected_mapping, three_qubit_hw):
+    builder = parse_qasm2_and_apply_optimisations(qasm, three_qubit_hw, filename=False)
+    mapping = get_cl2qu_index_mapping(builder._ir, three_qubit_hw)
     assert mapping == expected_mapping
 
 

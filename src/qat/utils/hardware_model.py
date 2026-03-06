@@ -26,9 +26,12 @@ from qat.purr.compiler.hardware_models import (
     ReadoutMitigation,
 )
 from qat.utils.pydantic import CalibratableUnitInterval2x2Array
+from qat.utils.uuid import SeedType
 
 
-def random_connectivity(n, max_degree=3, seed=42):
+def random_connectivity(
+    n, max_degree: int = 3, seed: SeedType | random.Random | None = None
+):
     """
     Generates a random undirected graph but enforcing that the resulting graph is connected.
     """
@@ -47,7 +50,7 @@ def random_connectivity(n, max_degree=3, seed=42):
     return {node: set(neighbors) for node, neighbors in G.adjacency()}
 
 
-def random_directed_connectivity(n, max_degree=3, seed=42):
+def random_directed_connectivity(n, max_degree: int = 3, seed: SeedType | None = None):
     """
     Generates a random directed graph but enforcing that the resulting graph is connected.
     """
@@ -65,7 +68,12 @@ def random_directed_connectivity(n, max_degree=3, seed=42):
     return {node: set(neighbors) for node, neighbors in G.adjacency()}
 
 
-def random_quality_map(connectivity, seed=42, min_quality=0.0, max_quality=1.0):
+def random_quality_map(
+    connectivity,
+    seed: SeedType | random.Random | None = None,
+    min_quality: float = 0.0,
+    max_quality: float = 1.0,
+):
     seeded_random = seed if isinstance(seed, random.Random) else random.Random(seed)
     coupling_map = {}
     for q1_index, connected_qubits in connectivity.items():
@@ -76,7 +84,9 @@ def random_quality_map(connectivity, seed=42, min_quality=0.0, max_quality=1.0):
     return coupling_map
 
 
-def random_error_mitigation(physicaal_indices, seed: int | None = None) -> ErrorMitigation:
+def random_error_mitigation(
+    physicaal_indices, seed: SeedType | None = None
+) -> ErrorMitigation:
     seeded_random = random.Random(seed)
     linear: dict = {}
     for q_id in physicaal_indices:
@@ -92,7 +102,9 @@ def random_error_mitigation(physicaal_indices, seed: int | None = None) -> Error
     return ErrorMitigation(readout_mitigation=ReadoutMitigation(linear=linear))
 
 
-def pick_subconnectivity(connectivity, n, seed=42):
+def pick_subconnectivity(
+    connectivity, n: int, seed: SeedType | random.Random | None = None
+):
     seeded_random = seed if isinstance(seed, random.Random) else random.Random(seed)
     sub_qubits = seeded_random.sample(list(connectivity.keys()), n)
     sub_connectivity = defaultdict(set)
@@ -160,7 +172,9 @@ def ensure_connected_connectivity(connectivity: dict, qubit_indices: list | set)
     return new_connectivity
 
 
-def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
+def generate_connectivity_data(
+    n_qubits, n_logical_qubits, seed: SeedType | random.Random | None = None
+):
     physical_connectivity = random_connectivity(n=n_qubits, seed=seed)
     logical_connectivity = pick_subconnectivity(
         physical_connectivity, n=n_logical_qubits, seed=seed
@@ -171,10 +185,12 @@ def generate_connectivity_data(n_qubits, n_logical_qubits, seed=42):
     return (physical_connectivity, logical_connectivity, logical_connectivity_quality)
 
 
-def generate_hw_model(n_qubits, seed=42):
+def generate_hw_model(n_qubits, seed: SeedType | None = None):
     physical_connectivity, _, _ = generate_connectivity_data(n_qubits, n_qubits, seed=seed)
 
-    builder = PhysicalHardwareModelBuilder(physical_connectivity=physical_connectivity)
+    builder = PhysicalHardwareModelBuilder(
+        physical_connectivity=physical_connectivity, seed=seed
+    )
     return builder.model
 
 

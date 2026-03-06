@@ -174,18 +174,21 @@ class TestMixerConfig(TestQbloxConfigMixin):
             assert module.in0_offset_path1() == module_config.offset.in0_path1
 
 
+acq_random = np.random.default_rng(42)  # Seed for reproducibility
+
+
 @dataclass
 class AcqTestValues:
     num_points = 5  # Low value for testing to reduce the size of the cartesian products
 
-    int_lengths = np.random.choice(
+    int_lengths = acq_random.choice(
         np.arange(
             Constants.MIN_ACQ_INTEGRATION_LENGTH, Constants.MAX_ACQ_INTEGRATION_LENGTH, 4
         ),
         size=num_points,
     )
-    rotations = np.random.choice(np.arange(0, 360), size=num_points).astype(float)
-    thresholds = np.random.choice(
+    rotations = acq_random.choice(np.arange(0, 360), size=num_points).astype(float)
+    thresholds = acq_random.choice(
         np.arange(Constants.MIN_ACQ_THRESHOLD, Constants.MAX_ACQ_THRESHOLD), size=num_points
     ).astype(float)
 

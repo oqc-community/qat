@@ -42,8 +42,18 @@ from tests.unit.utils.instruction import count_number_of_pulses
 from tests.unit.utils.qasm_qir import get_default_qasm3_gate_qasms, get_qasm3, qasm3_base
 
 
-@pytest.mark.parametrize("n_qubits", [8, 16, 32, 64])
+@pytest.mark.parametrize("n_qubits", [8, 16, 32, 64], scope="class")
 class TestQasm3Parser:
+    @pytest.fixture(scope="class")
+    def hardware_model(self, n_qubits, class_seed):
+        return generate_hw_model(n_qubits, seed=class_seed)
+
+    @pytest.fixture(scope="class")
+    def cyclic_hardware_model(self, n_qubits):
+        connectivity = generate_cyclic_connectivity(n_qubits)
+        hw_builder = PhysicalHardwareModelBuilder(physical_connectivity=connectivity)
+        return hw_builder.model
+
     @pytest.mark.parametrize(
         "qasm_file",
         [
@@ -74,14 +84,12 @@ class TestQasm3Parser:
             "waveform_tests/waveform_test_sum.qasm",
         ],
     )
-    def test_parsing_instructions(self, qasm_file, n_qubits):
-        connectivity = generate_cyclic_connectivity(n_qubits)
-        hw_builder = PhysicalHardwareModelBuilder(physical_connectivity=connectivity)
-        hw = hw_builder.model
-
+    def test_parsing_instructions(self, qasm_file, n_qubits, cyclic_hardware_model):
         parser = Qasm3Parser()
         qasm = get_qasm3(qasm_file)
-        builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+        builder = parser.parse(
+            QuantumInstructionBuilder(hardware_model=cyclic_hardware_model), qasm
+        )
         assert len(builder.instructions) > 0
 
     @pytest.mark.parametrize("seed", [1, 10, 100])
@@ -98,74 +106,63 @@ class TestQasm3Parser:
             if isinstance(instruction, Pulse):
                 assert not isinstance(instruction.waveform, SoftSquareWaveform)
 
-    def test_ghz(self, n_qubits):
-        connectivity = generate_cyclic_connectivity(n_qubits)
-        hw_builder = PhysicalHardwareModelBuilder(physical_connectivity=connectivity)
-        hw = hw_builder.model
-
+    def test_ghz(self, n_qubits, cyclic_hardware_model):
         v3_qasm = get_qasm3("ghz.qasm")
         v2_qasm = get_qasm3("ghz_v2.qasm")
 
         v3_builder = get_qasm_parser(v3_qasm).parse(
-            QuantumInstructionBuilder(hardware_model=hw), v3_qasm
+            QuantumInstructionBuilder(hardware_model=cyclic_hardware_model), v3_qasm
         )
         v2_builder = get_qasm_parser(v2_qasm).parse(
-            QuantumInstructionBuilder(hardware_model=hw), v2_qasm
+            QuantumInstructionBuilder(hardware_model=cyclic_hardware_model), v2_qasm
         )
 
         assert v3_builder.number_of_instructions == v2_builder.number_of_instructions
 
-    def test_complex_gates(self, n_qubits):
-        hw = generate_hw_model(n_qubits)
+    def test_complex_gates(self, n_qubits, hardware_model):
         qasm = get_qasm3("complex_gates_test.qasm")
         parser = Qasm3Parser()
 
-        builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+        builder = parser.parse(
+            QuantumInstructionBuilder(hardware_model=hardware_model), qasm
+        )
 
         assert builder.number_of_instructions > 0
 
-    def test_ecr(self, n_qubits):
-        connectivity = generate_cyclic_connectivity(n_qubits)
-        hw_builder = PhysicalHardwareModelBuilder(physical_connectivity=connectivity)
-        hw = hw_builder.model
-
+    def test_ecr(self, n_qubits, cyclic_hardware_model):
         qasm = get_qasm3("ecr_test.qasm")
         parser = Qasm3Parser()
 
-        builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+        builder = parser.parse(
+            QuantumInstructionBuilder(hardware_model=cyclic_hardware_model), qasm
+        )
         assert count_number_of_pulses(builder, "CrossResonance") == 2
         assert count_number_of_pulses(builder, "CrossResonanceCancellation") == 2
 
-    def test_no_header(self, n_qubits):
-        hw = generate_hw_model(n_qubits)
+    def test_no_header(self, n_qubits, hardware_model):
         qasm = get_qasm3("no_header.qasm")
         parser = Qasm3Parser()
         with pytest.raises(ValueError):
-            parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+            parser.parse(QuantumInstructionBuilder(hardware_model=hardware_model), qasm)
 
-    def test_invalid_syntax(self, n_qubits):
-        hw = generate_hw_model(n_qubits)
+    def test_invalid_syntax(self, n_qubits, hardware_model):
         qasm = get_qasm3("invalid_syntax.qasm")
         parser = Qasm3Parser()
         with pytest.raises(ValueError):
-            parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+            parser.parse(QuantumInstructionBuilder(hardware_model=hardware_model), qasm)
 
     # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
     # not support cX.
     @pytest.mark.parametrize(
         "test, gate", [("cx", "cnot"), ("cnot", "cnot"), ("ecr", "ECR")]
     )
-    def test_override(self, test, gate, n_qubits):
+    def test_override(self, test, gate, n_qubits, cyclic_hardware_model):
         # Tests overriding gates using openpulse: checks the overridden gate
         # yields the correct pulses, and that the unchanged gates are the same
         # as those created by the circuit builder.
-        connectivity = generate_cyclic_connectivity(n_qubits)
-        hw_builder = PhysicalHardwareModelBuilder(physical_connectivity=connectivity)
-        hw = hw_builder.model
-
         parser = Qasm3Parser()
         builder = parser.parse(
-            QuantumInstructionBuilder(hardware_model=hw),
+            QuantumInstructionBuilder(hardware_model=cyclic_hardware_model),
             get_qasm3(f"{test}_override_test.qasm"),
         )
         qasm_inst = builder.instructions
@@ -181,16 +178,22 @@ class TestQasm3Parser:
         assert all([len(inst.targets) == 1 for inst in ess_pulses])
 
         # Test the ecrs on (0, 1) and (2, 3) are unchanged by the override.
-        circuit = QuantumInstructionBuilder(hardware_model=hw)
+        circuit = QuantumInstructionBuilder(hardware_model=cyclic_hardware_model)
         func = getattr(circuit, gate)
-        func(hw.qubit_with_index(0), hw.qubit_with_index(1))
+        func(
+            cyclic_hardware_model.qubit_with_index(0),
+            cyclic_hardware_model.qubit_with_index(1),
+        )
         circ_inst = circuit.instructions
         circ_inst_names = [str(inst) for inst in circ_inst]
         assert qasm_inst_names[0 : len(circ_inst_names)] == circ_inst_names
 
-        circuit = QuantumInstructionBuilder(hardware_model=hw)
+        circuit = QuantumInstructionBuilder(hardware_model=cyclic_hardware_model)
         func = getattr(circuit, gate)
-        func(hw.qubit_with_index(2), hw.qubit_with_index(3))
+        func(
+            cyclic_hardware_model.qubit_with_index(2),
+            cyclic_hardware_model.qubit_with_index(3),
+        )
         circ_inst = circuit.instructions
         circ_inst_names = [str(inst) for inst in circ_inst]
         assert (
@@ -208,26 +211,27 @@ class TestQasm3Parser:
             ["2*pi", "-pi/2", 0.0, 0.0, "pi/2", "-2*pi"],
         ],
     )
-    def test_u_gate(self, params, n_qubits):
+    def test_u_gate(self, params, hardware_model):
         """
         Tests the validty of the U gate with OpenPulse by checking that the
         parsed circuit matches the same circuit created with the circuit builder.
         """
-        hw = generate_hw_model(n_qubits)
 
         # build the circuit from QASM
         qasm = get_qasm3("u_gate.qasm")
         for i in range(6):
             qasm = qasm.replace(f"param{i}", str(params[i]))
         parser = Qasm3Parser()
-        builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+        builder = parser.parse(
+            QuantumInstructionBuilder(hardware_model=hardware_model), qasm
+        )
         qasm_inst = builder.instructions
 
         # create the circuit using the circuit builder
-        circuit = QuantumInstructionBuilder(hardware_model=hw)
+        circuit = QuantumInstructionBuilder(hardware_model=hardware_model)
         params = [eval(str(param).replace("pi", "np.pi")) for param in params]
-        q1 = hw.qubit_with_index(0)
-        q2 = hw.qubit_with_index(1)
+        q1 = hardware_model.qubit_with_index(0)
+        q2 = hardware_model.qubit_with_index(1)
         (
             circuit.Z(q1, params[2])
             .Y(q1, params[0])
@@ -285,14 +289,15 @@ class TestQasm3Parser:
         assert len(builder.instructions) > 0
         assert isinstance(builder.instructions[-1], Return)
 
-    def test_frame_creation(self, n_qubits):
+    def test_frame_creation(self, n_qubits, hardware_model):
         """Tests that frames can be created and used in a simple circuit."""
-        hw = generate_hw_model(n_qubits)
         qasm = get_qasm3("openpulse_tests/frames.qasm")
         parser = Qasm3Parser()
-        builder = parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+        builder = parser.parse(
+            QuantumInstructionBuilder(hardware_model=hardware_model), qasm
+        )
         assert isinstance(builder, QuantumInstructionBuilder)
-        channel_1 = hw.physical_channel_map[1]
+        channel_1 = hardware_model.physical_channel_map[1]
 
         pulse_instructions = [
             inst for inst in builder.instructions if isinstance(inst, Pulse)
@@ -310,10 +315,12 @@ class TestQasm3Parser:
         assert len(uuids) == 3
         assert channels[0].physical_channel_id == channel_1.uuid
         assert (
-            channels[1].physical_channel_id == hw.qubit_with_index(1).physical_channel.uuid
+            channels[1].physical_channel_id
+            == hardware_model.qubit_with_index(1).physical_channel.uuid
         )
         assert (
-            channels[2].physical_channel_id == hw.qubit_with_index(1).physical_channel.uuid
+            channels[2].physical_channel_id
+            == hardware_model.qubit_with_index(1).physical_channel.uuid
         )
 
 

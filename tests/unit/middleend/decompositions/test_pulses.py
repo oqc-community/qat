@@ -11,16 +11,16 @@ from qat.utils.hardware_model import generate_hw_model
 
 
 class TestDefaultPulseDecompositions:
-    def test_X_pi_2_decomposition(self):
-        model = generate_hw_model(4, seed=42)
+    def test_X_pi_2_decomposition(self, function_seed):
+        model = generate_hw_model(4, seed=function_seed)
         decomps = DefaultPulseDecompositions()
         instrs = decomps.decompose(X_pi_2(qubit=0), model)
         assert len(instrs) == 1
         assert isinstance(instrs[0], Pulse)
         assert instrs[0].pulse_channel == model.qubit_with_index(0).drive_pulse_channel.uuid
 
-    def test_Z_phase_decomposition(self):
-        model = generate_hw_model(4, seed=42)
+    def test_Z_phase_decomposition(self, function_seed):
+        model = generate_hw_model(4, seed=function_seed)
         decomps = DefaultPulseDecompositions()
         instrs = decomps.decompose(Z_phase(qubit=0, theta=0.521), model)
         num_instructions = 1 + 2 * len(
@@ -29,11 +29,11 @@ class TestDefaultPulseDecompositions:
         assert len(instrs) == num_instructions
         assert all([isinstance(instr, PhaseShift) for instr in instrs])
 
-    def test_ECR_decomposition(self):
+    def test_ECR_decomposition(self, function_seed):
         """Tests that the ECR decomposes into native pulse instructions, and ZX_pi_4 gives
         the correct too."""
 
-        model = generate_hw_model(4, seed=42)
+        model = generate_hw_model(4, seed=function_seed)
         decomps = DefaultPulseDecompositions()
         qubit2 = next(iter(model.physical_connectivity[0]))
         instrs = decomps.decompose(ECR(qubit1=0, qubit2=qubit2), model)

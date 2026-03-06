@@ -78,8 +78,8 @@ class TestQIRLoadingMethods:
 
 class TestQIRFrontend:
     @pytest.fixture(scope="class")
-    def legacy_model(self):
-        return EchoModelLoader(32).load()
+    def legacy_model(self, class_seed):
+        return EchoModelLoader(32, random_seed=class_seed).load()
 
     @pytest.fixture(scope="class")
     def pyd_model(self, legacy_model):
@@ -159,7 +159,7 @@ class TestQIRFrontend:
         assert isinstance(builder, builder_type)
         assert len(builder.instructions) == instruction_count
 
-    @pytest.mark.parametrize("qir_path", get_all_qir_paths(), ids=filename_ids)
+    @pytest.mark.parametrize("qir_path", sorted(get_all_qir_paths()), ids=filename_ids)
     def test_check_and_return_source_with_qir_files(self, qir_path, legacy_model):
         if qir_path.suffix == "":
             # TODO: Support for base64 encoded files with no suffix, COMPILER-904

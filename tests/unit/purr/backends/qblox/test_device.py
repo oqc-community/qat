@@ -21,6 +21,8 @@ from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
+pytestmark = pytest.mark.usefixtures("tmp_cwd")
+
 
 @pytest.mark.parametrize("model", [None], indirect=True)
 class TestQbloxControlHardware(InvokerMixin):

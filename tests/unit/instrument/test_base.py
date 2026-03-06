@@ -17,6 +17,8 @@ from tests.unit.utils.builder_nuggets import resonator_spect
 
 log = get_default_logger()
 
+pytestmark = pytest.mark.usefixtures("tmp_cwd")
+
 
 class TestInstrument:
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)

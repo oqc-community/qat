@@ -71,6 +71,20 @@ from tests.unit.utils.qasm_qir import (
 )
 
 
+@pytest.fixture(scope="module")
+def jagged_echo_hardware(module_seed):
+    return get_jagged_echo_hardware(8, seed=module_seed)
+
+
+_echo_hws = {}
+
+
+def get_echo_hardware(n: int = 4):
+    if n not in _echo_hws.keys():
+        _echo_hws[n] = get_default_echo_hardware(n)
+    return _echo_hws[n]
+
+
 class TestQASM2:
     qasm2_base = """
     OPENQASM 2.0;
@@ -136,7 +150,7 @@ class TestQASM3:
 
     @pytest.mark.legacy
     def test_named_defcal_arg(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         comp = CompilerConfig()
         comp.results_format.binary_count()
         results = execute_qasm(get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp)
@@ -161,13 +175,13 @@ class TestQASM3:
 
     @pytest.mark.legacy
     def test_zmap(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         results = execute_qasm(get_qasm3("openpulse_tests/zmap.qasm"), hw)
         assert not isinstance(results, dict)
 
     @pytest.mark.legacy
     def test_frequency(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         execute_qasm(get_qasm3("openpulse_tests/freq.qasm"), hw)
 
     @pytest.mark.parametrize(
@@ -175,7 +189,7 @@ class TestQASM3:
         [1, 2, 3],  # 2 includes a generic qubit def, should be separate test
     )
     def test_expr_list_defcal(self, arg_count):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw),
@@ -187,7 +201,7 @@ class TestQASM3:
         assert instructions[1].shape.value == PulseShapeType.SOFT_SQUARE.value
 
     def test_expr_list_defcal_different_arg(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw),
@@ -200,7 +214,7 @@ class TestQASM3:
                 assert instruction.shape.value != PulseShapeType.SOFT_SQUARE.value
 
     def test_ghz(self):
-        hw = get_default_echo_hardware(4)
+        hw = get_echo_hardware(4)
         v3_qasm = get_qasm3("ghz.qasm")
         v2_qasm = get_qasm3("ghz_v2.qasm")
 
@@ -211,17 +225,17 @@ class TestQASM3:
 
     @pytest.mark.legacy
     def test_complex_gates(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         execute_qasm(get_qasm3("complex_gates_test.qasm"), hw)
 
     @pytest.mark.legacy
     def test_execution(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         execute_qasm(get_qasm3("lark_parsing_test.qasm"), hw)
 
     @pytest.mark.legacy
     def test_invalid_qasm_version(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         with pytest.raises(ValueError) as context:
             execute_qasm(get_qasm3("invalid_version.qasm"), hw)
 
@@ -232,25 +246,25 @@ class TestQASM3:
         assert "Qasm3" in message
 
     def test_parsing(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         parser = Qasm3Parser()
         parser.parse(get_builder(hw), get_qasm3("lark_parsing_test.qasm"))
 
     def test_no_header(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         parser = Qasm3Parser()
         with pytest.raises(ValueError):
             parser.parse(get_builder(hw), get_qasm3("no_header.qasm"))
 
     def test_invalid_syntax(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         parser = Qasm3Parser()
         with pytest.raises(ValueError):
             parser.parse(get_builder(hw), get_qasm3("invalid_syntax.qasm"))
 
     @pytest.mark.skip("Test incomplete.")
     def test_wave_forms(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("waveform_test_sum.qasm"))
         instructions = result.instructions
@@ -258,7 +272,7 @@ class TestQASM3:
         assert instructions[0].shape.value == PulseShapeType.GAUSSIAN
 
     def test_ecr(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("ecr_test.qasm"))
         assert any(isinstance(inst, CrossResonancePulse) for inst in result.instructions)
@@ -272,7 +286,7 @@ class TestQASM3:
         # Tests overriding gates using openpulse: checks the overridden gate
         # yields the correct pulses, and that the unchanged gates are the same
         # as those created by the circuit builder.
-        hw = get_default_echo_hardware(4)
+        hw = get_echo_hardware(4)
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3(f"{test}_override_test.qasm"))
         qasm_inst = result.instructions
@@ -312,7 +326,7 @@ class TestQASM3:
         [
             ["pi", "2*pi", "-pi/2", "-7*pi/2", "0", "pi/4"],
             [np.pi, 2 * np.pi, -np.pi / 2, -7 * np.pi / 2, 0.0, np.pi / 4],
-            np.random.uniform(low=-2 * np.pi, high=2 * np.pi, size=(6)),
+            (np.random.uniform, {"low": -2 * np.pi, "high": 2 * np.pi, "size": (6)}),
             [0.0, 0.0, 0.0, 0.0, "pi/2", 0.0],
             ["2*pi", "-pi/2", 0.0, 0.0, "pi/2", "-2*pi"],
         ],
@@ -322,7 +336,9 @@ class TestQASM3:
         Tests the validty of the U gate with OpenPulse by checking that the
         parsed circuit matches the same circuit created with the circuit builder.
         """
-        hw = get_default_echo_hardware(2)
+        if isinstance(params, tuple):
+            params = params[0](**params[1])
+        hw = get_echo_hardware(2)
 
         # build the circuit from QASM
         qasm = get_qasm3("u_gate.qasm")
@@ -353,28 +369,28 @@ class TestQASM3:
             assert str(qasm_inst[i]) == str(circ_inst[i])
 
     def test_invalid_frames(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         with pytest.raises(ValueError) as context:
             parser.parse(get_builder(hw), get_qasm3("invalid_frames.qasm"))
         assert "q42_drive" in str(context.value)
 
     def test_invalid_port(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         with pytest.raises(ValueError) as context:
             parser.parse(get_builder(hw), get_qasm3("invalid_port.qasm"))
         assert "channel_42" in str(context.value)
 
     def test_invalid_waveform(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         with pytest.raises(ValueError) as context:
             parser.parse(get_builder(hw), get_qasm3("invalid_waveform.qasm"))
         assert "waves_for_days" in str(context.value)
 
     def test_arb_waveform(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("arb_waveform.qasm"))
         pluses = [val for val in result.instructions if isinstance(val, CustomPulse)]
@@ -385,7 +401,7 @@ class TestQASM3:
         assert pulse.samples == [1, 1j, -1, -1j] * 16
 
     def test_delay(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("delay.qasm"))
         delays = [val for val in result.instructions if isinstance(val, Delay)]
@@ -396,7 +412,7 @@ class TestQASM3:
         assert delay.time == 42e-9
 
     def test_redefine_cal(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(get_builder(hw), get_qasm3("redefine_defcal.qasm"))
         pulses = [val for val in result.instructions if isinstance(val, Pulse)]
@@ -406,7 +422,7 @@ class TestQASM3:
 
     @pytest.mark.legacy
     def test_excessive_pulse_width_fails(self):
-        hw = get_default_echo_hardware(8)
+        hw = get_echo_hardware(8)
         with pytest.raises(ValueError):
             execute_qasm(get_qasm3("invalid_pulse_length.qasm"), hardware=hw)
         # pulse width within limits
@@ -416,7 +432,7 @@ class TestQASM3:
         "Double-check that you should be able to call gates this way. Seems dubious."
     )
     def test_simultaneous_frame_gates_fail(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3("openpulse_tests/frame_collision_test.qasm")
@@ -428,7 +444,7 @@ class TestQASM3:
         "Timing isn't considered in pulse definition, only after scheduling. Fix or remove."
     )
     def test_pulse_timing(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3("openqasm_tests/gate_timing_test.qasm")
@@ -440,7 +456,7 @@ class TestQASM3:
         "Timing isn't considered in pulse definition, only after scheduling. Fix or remove."
     )
     def test_barrier_timing(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3("openqasm_tests/barrier_timing_test.qasm")
@@ -450,7 +466,7 @@ class TestQASM3:
 
     @pytest.mark.skip("Test incomplete.")
     def test_phase_tracking(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3("openpulse_tests/phase_tracking_test.qasm")
@@ -462,7 +478,7 @@ class TestQASM3:
 
     @pytest.mark.skip("Test incomplete.")
     def test_cross_res(self):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3("openpulse_tests/cross_resonance.qasm")
@@ -480,7 +496,7 @@ class TestQASM3:
         ),
     )
     def test_waveform_processing(self, file_name, test_value):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3(f"waveform_tests/waveform_test_{file_name}.qasm")
@@ -494,7 +510,7 @@ class TestQASM3:
         (("scale", "scale_factor", 42), ("phase_shift", "phase", 4 + 2j)),
     )
     def test_waveform_processing_single_waveform(self, file_name, attribute, test_value):
-        hw = get_default_echo_hardware()
+        hw = get_echo_hardware()
         parser = Qasm3Parser()
         result = parser.parse(
             get_builder(hw), get_qasm3(f"waveform_tests/waveform_test_{file_name}.qasm")
@@ -518,7 +534,7 @@ class TestQASM3:
     @pytest.mark.legacy
     def test_op(self, qasm_name):
         qasm_string = get_qasm3(f"openpulse_tests/{qasm_name}.qasm")
-        hardware = get_default_echo_hardware(8)
+        hardware = get_echo_hardware(8)
         config = CompilerConfig(
             repeats=10,
             results_format=QuantumResultsFormat(),
@@ -529,7 +545,7 @@ class TestQASM3:
     @pytest.mark.legacy
     def test_internal_pulses(self):
         qasm_string = get_qasm3("waveform_tests/internal_waveform_tests.qasm")
-        hardware = get_default_echo_hardware(8)
+        hardware = get_echo_hardware(8)
         config = CompilerConfig(
             repeats=10,
             results_format=QuantumResultsFormat(),
@@ -544,11 +560,10 @@ class TestQASM3:
             "ghz.qasm",
         ],
     )
-    def test_on_jagged_hardware(self, qasm_file):
-        hw = get_jagged_echo_hardware(8)
+    def test_on_jagged_hardware(self, qasm_file, jagged_echo_hardware):
         qasm_string = get_qasm3(qasm_file)
         parser = Qasm3Parser()
-        result = parser.parse(get_builder(hw), qasm_string)
+        result = parser.parse(get_builder(jagged_echo_hardware), qasm_string)
         assert len(result.instructions) > 0
 
     @pytest.mark.parametrize(
@@ -581,19 +596,20 @@ class TestQASM3:
             "waveform_tests/waveform_test_sum.qasm",
         ],
     )
-    def test_dollar_on_jagged_hardware(self, qasm_file):
-        hw = get_jagged_echo_hardware(8)
+    def test_dollar_on_jagged_hardware(self, qasm_file, jagged_echo_hardware):
         parser = Qasm3Parser()
         qasm_string = get_qasm3(qasm_file)
         with pytest.raises(ValueError):
-            parser.parse(get_builder(hw), qasm_string)
-        qasm_string = update_qubit_indices(qasm_string, [q.index for q in hw.qubits])
-        result = parser.parse(get_builder(hw), qasm_string)
+            parser.parse(get_builder(jagged_echo_hardware), qasm_string)
+        qasm_string = update_qubit_indices(
+            qasm_string, [q.index for q in jagged_echo_hardware.qubits]
+        )
+        result = parser.parse(get_builder(jagged_echo_hardware), qasm_string)
         assert len(result.instructions) > 0
 
     @pytest.mark.legacy
     def test_execute_different_qat_input_types(self):
-        hw = get_default_echo_hardware(5)
+        hw = get_echo_hardware(5)
         qubit = hw.get_qubit(0)
         phase_shift_1 = 0.2
         phase_shift_2 = 0.1
@@ -609,9 +625,7 @@ class TestQASM3:
         with pytest.raises(TypeError):
             execute_qasm(qat_input=builder.instructions, hardware=hw)
 
-    @pytest.mark.parametrize(
-        "hw", [get_default_echo_hardware(2), get_default_RTCS_hardware()]
-    )
+    @pytest.mark.parametrize("hw", [get_echo_hardware(2), get_default_RTCS_hardware()])
     def test_capture_with_delay(self, hw):
         # Tests that capture v2 in openpulse makes use of the qubit delay for an acquire channel.
         qubit = hw.get_qubit(0)
@@ -624,7 +638,7 @@ class TestQASM3:
 
     def test_gaussian_square(self):
         # Checks that the Gaussian Square pulses parse correectly.
-        hw = get_default_echo_hardware(2)
+        hw = get_echo_hardware(2)
         qasm_string = get_qasm3("waveform_tests/gaussian_square.qasm")
         parser = Qasm3Parser()
         builder = parser.parse(get_builder(hw), qasm_string)
@@ -642,7 +656,7 @@ class TestQASM3:
 
     def test_sech(self):
         # Checks that the sech waveforms parse correctly.
-        hw = get_default_echo_hardware(2)
+        hw = get_echo_hardware(2)
         qasm_string = get_qasm3("waveform_tests/sech_waveform.qasm")
         parser = Qasm3Parser()
         builder = parser.parse(get_builder(hw), qasm_string)
@@ -690,7 +704,7 @@ class TestQASM3:
         N = max(Ns)
         gate_strings = "\n".join(strings)
         qasm = qasm3_base.format(N=N, gate_strings=gate_strings)
-        hw = get_default_echo_hardware(max(N, 2))
+        hw = get_echo_hardware(max(N, 2))
         parser = Qasm3Parser()
         builder = parser.parse(hw.create_builder(), qasm)
         assert isinstance(builder, InstructionBuilder)
@@ -744,9 +758,9 @@ class TestQASM3Features:
         """Fixture to provide the path to the test files."""
         return testpath / "files" / "qasm" / "qasm3" / "feature_tests"
 
-    @pytest.fixture
-    def model(self):
-        return get_default_echo_hardware(32)
+    @pytest.fixture(scope="class")
+    def model(self, class_seed):
+        return get_default_echo_hardware(32, seed=class_seed)
 
     @staticmethod
     def load_source(model, feature_testpath, filename, **kwargs):
@@ -1495,9 +1509,11 @@ class TestQASM3Features:
 
 
 class TestParsing:
-    echo = get_default_echo_hardware(6)
+    echo = get_echo_hardware(6)
 
-    @pytest.mark.parametrize("file_name", get_all_qasm2_paths(), ids=lambda val: val.name)
+    @pytest.mark.parametrize(
+        "file_name", sorted(get_all_qasm2_paths()), ids=lambda val: val.name
+    )
     def test_compare_tket_parser(self, file_name):
         if file_name.name == "example_if.qasm":
             pytest.skip(reason="If's not supported")
@@ -1605,11 +1621,10 @@ class TestParsing:
             "valid_custom_gate.qasm",
         ],
     )
-    def test_on_jagged_hardware(self, qasm_file):
-        hw = get_jagged_echo_hardware(8)
+    def test_on_jagged_hardware(self, qasm_file, jagged_echo_hardware):
         qasm_string = get_qasm2(qasm_file)
         parser = Qasm2Parser()
-        result = parser.parse(get_builder(hw), qasm_string)
+        result = parser.parse(get_builder(jagged_echo_hardware), qasm_string)
         assert len(result.instructions) > 0
 
     # TODO: Remove gates from list as support is added.

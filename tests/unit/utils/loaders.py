@@ -54,18 +54,17 @@ class EchoModelLoaderWithErrorMitigation(EchoModelLoader):
     """A model loader that applies a random error mitigation configuration to the loaded
     model."""
 
-    def load(self, seed=None):
+    def load(self):
         """Load the Echo model and apply error mitigation."""
         hw = super().load()
-        return self.apply_error_mitigation_setup(hw, seed=seed)
+        return self.apply_error_mitigation_setup(hw, seed=self._random_seed)
 
     def generate_random_linear(self, qubit_indices, random_data=True, seed=None):
-        if seed is not None:
-            random.seed(seed)
+        local_random = random.Random(seed)
         output = {}
         for index in qubit_indices:
-            random_0 = random.random() if random_data else 1
-            random_1 = random.random() if random_data else 1
+            random_0 = local_random.random() if random_data else 1
+            random_1 = local_random.random() if random_data else 1
             output[str(index)] = {
                 "0|0": random_0,
                 "1|0": 1 - random_0,

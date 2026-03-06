@@ -27,6 +27,11 @@ def same_up_to_phase(gate1, gate2):
     return np.isclose(gate / gate[0, 0], np.eye(np.shape(gate1)[0])).all()
 
 
+def cls_name(cls):
+    """Returns the name of a class, without the module."""
+    return cls.__qualname__
+
+
 def get_non_abstract_subgates(cls: type):
     """Finds all non-abstract subclasses of a class."""
     classes = set()
@@ -47,7 +52,7 @@ def one_q_gate_tests():
     """Creates a list of 1Q gates to use for testings.
 
     Gates that are parameterised are generated for many different angles."""
-    one_q_gates = get_non_abstract_subgates(Gate1Q)
+    one_q_gates = sorted(get_non_abstract_subgates(Gate1Q), key=cls_name)
     tests = []
     for gate in one_q_gates:
         params = {}
@@ -66,7 +71,7 @@ def two_q_gate_tests():
     """Creates a list of 2Q gates to use for testings.
 
     Gates that are parameterised are generated for many different angles."""
-    two_q_gates = get_non_abstract_subgates(Gate2Q)
+    two_q_gates = sorted(get_non_abstract_subgates(Gate2Q), key=cls_name)
     tests = []
     for gate in two_q_gates:
         params = {}

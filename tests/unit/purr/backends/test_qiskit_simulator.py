@@ -56,11 +56,15 @@ class TestQiskitSimulator:
         """Includes a regression test with a seed that has caused problems in the past."""
         if with_seed:
             seed(454)
-        hardware = get_default_qiskit_hardware(35)
-        builder = self.parse_and_apply_optimiziations(hardware, "15qb.qasm")
-        runtime = hardware.create_runtime()
-        results = runtime.execute(builder)
-        assert len(results) > 0
+        try:
+            hardware = get_default_qiskit_hardware(35)
+            builder = self.parse_and_apply_optimiziations(hardware, "15qb.qasm")
+            runtime = hardware.create_runtime()
+            results = runtime.execute(builder)
+            assert len(results) > 0
+        finally:
+            if with_seed:
+                seed(None)
 
     def test_bitflip_noise_model(self):
         # Example error probabilities
@@ -530,14 +534,18 @@ class TestQiskitSimulator:
         the past."""
         if with_seed:
             seed(254)
-        model = get_default_qiskit_hardware(10)
-        qasm_str = get_qasm2("qft_5q.qasm")
-        config = CompilerConfig(optimizations=Tket().default())
-        results = execute_qasm(qasm_str, model, config)
-        assert len(results) == 1
-        assert "c" in results
-        assert "00000" in results["c"]
-        assert len(results["c"]) == 1
+        try:
+            model = get_default_qiskit_hardware(10)
+            qasm_str = get_qasm2("qft_5q.qasm")
+            config = CompilerConfig(optimizations=Tket().default())
+            results = execute_qasm(qasm_str, model, config)
+            assert len(results) == 1
+            assert "c" in results
+            assert "00000" in results["c"]
+            assert len(results["c"]) == 1
+        finally:
+            if with_seed:
+                seed(None)
 
 
 class TestQatBackend:

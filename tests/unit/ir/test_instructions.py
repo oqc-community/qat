@@ -61,19 +61,21 @@ class TestInstructionBlock:
         assert instr.number_of_instructions == c_from_list.number_of_instructions
         assert instr.number_of_instructions == 1
 
-    def test_number_of_instructions(self):
+    @pytest.mark.parametrize("seed", [21, 58])
+    def test_number_of_instructions(self, seed):
         c = InstructionBlock()
 
         ref_number_of_instructions = 0
         # Test with a random composite isntruction with max. depth = 2.
         # This fits our needs for now, but can be expanded later into
         # a more elaborate randomly generated composite pattern.
+        local_random = random.Random(seed)
         while c.number_of_instructions < 20:
-            new_instr = random.choices(
+            new_instr = local_random.choices(
                 [Instruction(), InstructionBlock()], weights=[0.5, 0.5]
             )[0]
             if isinstance(new_instr, InstructionBlock):
-                k = random.randint(1, 3)
+                k = local_random.randint(1, 3)
                 leaves = [Instruction()] * k
                 new_instr.add(*leaves)
                 ref_number_of_instructions += k
@@ -237,7 +239,7 @@ class TestResults:
             ResultsProcessing(variable="test", results_processing=res_processing)
 
 
-hw_model = generate_hw_model(4)
+hw_model = generate_hw_model(4, seed=26)
 qubits = [qubit.uuid for qubit in hw_model.qubits.values()]
 pulse_channels = [
     pulse_channel.uuid
@@ -330,7 +332,7 @@ class TestQuantumInstructionBlock:
 
 class TestPhaseShift:
     @pytest.mark.parametrize("pulse_channel", pulse_channels)
-    @pytest.mark.parametrize("val", [0.0, -np.pi, 0.235, np.random.rand()])
+    @pytest.mark.parametrize("val", [0.0, -np.pi, 0.235, 0.8720314362675243])
     def test_initiation(self, pulse_channel, val):
         inst = PhaseShift(targets=pulse_channel, phase=val)
         assert inst.target == pulse_channel
@@ -348,7 +350,7 @@ class TestPhaseShift:
 class TestFrequencyShift:
     @pytest.mark.parametrize(
         ["pulse_channel", "val"],
-        product(pulse_channels, [0.0, -np.pi, 0.235, np.random.rand()]),
+        product(pulse_channels, [0.0, -np.pi, 0.235, 0.8720314362675243]),
     )
     def test_initiation(self, pulse_channel, val):
         inst = FrequencyShift(targets=pulse_channel, frequency=val)

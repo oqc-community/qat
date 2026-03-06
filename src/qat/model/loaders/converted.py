@@ -14,6 +14,7 @@ from qat.utils.hardware_model import (
     random_connectivity,
     random_quality_map,
 )
+from qat.utils.uuid import SeedType
 
 from .purr.echo import EchoModelLoader as LegacyEchoModelLoader
 
@@ -24,11 +25,13 @@ class EchoModelLoader(BasePhysicalModelLoader):
         qubit_count: int = 4,
         connectivity: Connectivity | list[(int, int)] | None = None,
         error_mitigation: ErrorMitigation | None = None,
+        random_seed: SeedType | None = None,
     ):
         self._legacy = LegacyEchoModelLoader(
-            qubit_count=qubit_count, connectivity=connectivity
+            qubit_count=qubit_count, connectivity=connectivity, random_seed=random_seed
         )
         self._error_mitigation = error_mitigation
+        self._random_seed = random_seed
 
     def load(self) -> PhysicalHardwareModel:
         legacy_model = self._legacy.load()
@@ -43,7 +46,7 @@ class JaggedEchoModelLoader(BasePhysicalModelLoader):
         qubit_indices: list[int] = None,
         connectivity: list[(int, int)] | None = None,
         error_mitigation: ErrorMitigation | None = None,
-        random_seed: int | None = None,
+        random_seed: SeedType | None = None,
     ):
         """Load a converted Echo hardware model with non-sequential physical qubit indices.
 

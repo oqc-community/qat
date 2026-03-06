@@ -28,6 +28,8 @@ from tests.unit.utils.builder_nuggets import (
 
 log = get_default_logger()
 
+pytestmark = pytest.mark.usefixtures("tmp_cwd")
+
 target_data = QbloxTargetData()
 
 
@@ -325,16 +327,10 @@ class TestExecutionSuite:
 
     @pytest.mark.parametrize(
         "acq_width",
-        (
-            np.random.choice(
-                np.arange(
-                    target_data.QRM_DATA.min_sample_size_scope_acquisitions,
-                    target_data.QRM_DATA.max_sample_size_scope_acquisitions,
-                )
-                * 1e-9,
-                3,
-            )
-        ).tolist(),
+        [
+            target_data.QRM_DATA.min_sample_size_scope_acquisitions * 1e-9,
+            target_data.QRM_DATA.max_sample_size_scope_acquisitions * 1e-9,
+        ],
     )
     @pytest.mark.parametrize("sync", [True, False])
     def test_scope_acquisition(

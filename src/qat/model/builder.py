@@ -19,6 +19,7 @@ from qat.model.device import (
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.utils.pydantic import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
+from qat.utils.uuid import SeedType, temporary_uuid_seed
 
 
 class PhysicalHardwareModelBuilder:
@@ -39,12 +40,14 @@ class PhysicalHardwareModelBuilder:
         logical_connectivity_quality: FrozenDict[
             tuple[QubitId, QubitId], CalibratableUnitInterval
         ] = None,
+        seed: SeedType | None = None,
     ):
-        self._current_model = self._build_uncalibrated_hardware_model(
-            physical_connectivity=physical_connectivity,
-            logical_connectivity_quality=logical_connectivity_quality,
-            logical_connectivity=logical_connectivity,
-        )
+        with temporary_uuid_seed(seed):
+            self._current_model = self._build_uncalibrated_hardware_model(
+                physical_connectivity=physical_connectivity,
+                logical_connectivity_quality=logical_connectivity_quality,
+                logical_connectivity=logical_connectivity,
+            )
 
     @property
     def model(self) -> PhysicalHardwareModel:

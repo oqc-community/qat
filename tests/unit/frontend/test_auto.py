@@ -34,13 +34,15 @@ from tests.unit.utils.qasm_qir import (
 )
 
 # TODO: Update frontends to work with `Path`s, COMPILER-404
-qasm2_tests = [str(path) for path in get_all_qasm2_paths()]
-qasm3_tests = [str(path) for path in qasm3_tests]
-qir_tests = [
-    str(path)
-    for path in get_all_qir_paths()
-    if path.name not in ["base64_bitcode_ghz", "nonsense"]
-]
+qasm2_tests = sorted([str(path) for path in get_all_qasm2_paths()])
+qasm3_tests = sorted([str(path) for path in qasm3_tests])
+qir_tests = sorted(
+    [
+        str(path)
+        for path in get_all_qir_paths()
+        if path.name not in ["base64_bitcode_ghz", "nonsense"]
+    ]
+)
 
 
 class TestAutoFrontend:

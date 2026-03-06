@@ -266,7 +266,9 @@ class Test_HW_Serialisation:
         assert hw2.version == VERSION
 
 
-def randomly_calibrate(hardware_model: PhysicalHardwareModel, seed=42):
+def randomly_calibrate(hardware_model: PhysicalHardwareModel, seed=None):
+    if seed is None:
+        seed = 0
     for qubit in hardware_model.qubits.values():
         # Calibrate physical channel.
         for physical_channel in [qubit.physical_channel, qubit.resonator.physical_channel]:

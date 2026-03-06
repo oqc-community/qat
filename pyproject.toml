@@ -73,6 +73,7 @@ coverage = "~7.9.1"
 pytest = "~8.3.5"
 pytest-cov = ">=6.2.1"
 pytest-mock = "^3.14.0"
+pytest-xdist = { version = "^3.8.0", extras = ["psutil"] }
 docplex = "^2.21.207"
 pre-commit = "^4.2.0"
 pytest-benchmark = "^4.0.0"
@@ -215,6 +216,7 @@ markers = [
   "ab_test",
   "experimental",
   "legacy",
+  "qblox",
 ]
 
 # The syncing rules are dispatched in the order defined here; if in the docs sub-directory,

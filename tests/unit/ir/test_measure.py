@@ -25,7 +25,7 @@ from qat.purr.compiler.instructions import (
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet
 
-model = generate_hw_model(4)
+model = generate_hw_model(4, seed=12)
 qubits = [qubit for qubit in model.qubits.values()]
 qubits_uuid = [qubit.uuid for qubit in qubits]
 
