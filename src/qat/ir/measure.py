@@ -22,12 +22,11 @@ from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet, _validate_s
 
 
 class Acquire(QuantumInstruction):
-    suffix_incrementor: int = 0
     duration: float = 1e-6
     mode: AcquireMode = AcquireMode.INTEGRATOR
     delay: float | None = 0.0
     filter: Pulse | None = Field(default=None)
-    output_variable: str | None = None
+    output_variable: str = Field(min_length=1)
     rotation: float | None = 0.0
     threshold: float | None = 0.0
 

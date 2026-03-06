@@ -871,7 +871,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return self
 
-    def _generate_output_variable(self, target: Component):
+    @staticmethod
+    def _generate_output_variable(target: Component):
         return "out_" + target.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"
 
     def _find_valid_measure_block(self, target_ids: QubitId | set[QubitId]):
@@ -953,6 +954,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         self,
         target: Qubit,
         delay: float = 1e-06,
+        output_variable: str | None = None,
         **kwargs,
     ):
         pulse_channel = target.acquire_pulse_channel
@@ -960,7 +962,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         if delay is None:
             kwargs["delay"] = pulse_channel.acquire.delay
 
-        return self.add(Acquire(target=pulse_channel.uuid, **kwargs))
+        output_variable = output_variable or self._generate_output_variable(target)
+
+        return self.add(
+            Acquire(target=pulse_channel.uuid, output_variable=output_variable, **kwargs)
+        )
 
     def delay(self, target: Qubit | PulseChannel, duration: float):
         delays = []

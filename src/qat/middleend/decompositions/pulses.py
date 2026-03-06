@@ -5,6 +5,7 @@ from functools import singledispatchmethod
 from qat.ir.gates.base import GateBase
 from qat.ir.gates.native import X_pi_2, Z_phase, ZX_pi_4
 from qat.ir.gates.operation import Barrier, Measure, Reset
+from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import PhaseShift, QuantumInstruction, Synchronize
 from qat.ir.measure import Acquire
 from qat.ir.waveforms import Pulse, SampledWaveform, Waveform
@@ -208,7 +209,9 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
             mode=gate.mode,
             delay=acquire_channel.acquire.delay,
             filter=filter,
-            output_variable=None,
+            output_variable=QuantumInstructionBuilder._generate_output_variable(
+                acquire_channel
+            ),
         )
 
         return [

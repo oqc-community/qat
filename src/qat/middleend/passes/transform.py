@@ -707,18 +707,20 @@ class ReturnSanitisation(TransformPass):
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
-        returns = [inst for inst in ir if isinstance(inst, Return)]
-        measure_blocks = [inst for inst in ir if isinstance(inst, MeasureBlock)]
+        returns = []
+        unique_variables = set()
+        for instruction in ir.instructions:
+            if isinstance(instruction, Return):
+                returns.append(instruction)
+            elif isinstance(instruction, Acquire):
+                unique_variables.add(instruction.output_variable)
+            elif isinstance(instruction, MeasureBlock):
+                unique_variables.update(instruction.output_variables)
 
         if returns:
             unique_variables = set(itertools.chain(*[ret.variables for ret in returns]))
             for ret in returns:
                 ir.instructions.remove(ret)
-        else:
-            # If we do not have an explicit return, imply all results.
-            unique_variables = set(
-                itertools.chain(*[mb.output_variables for mb in measure_blocks])
-            )
 
         ir.returns(list(unique_variables))
         return ir

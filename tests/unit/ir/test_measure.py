@@ -33,9 +33,10 @@ qubits_uuid = [qubit.uuid for qubit in qubits]
 class TestAcquire:
     def test_initiate(self):
         acquire_channel = qubits[0].acquire_pulse_channel
-        inst = Acquire(targets=acquire_channel.uuid)
+        inst = Acquire(targets=acquire_channel.uuid, output_variable="test")
         assert inst.duration == 1e-6
         assert list(inst.targets)[0] == acquire_channel.uuid  # We only supplied one target.
+        assert inst.output_variable == "test"
 
     def test_filter(self):
         acquire_channel = qubits[0].acquire_pulse_channel
@@ -43,7 +44,12 @@ class TestAcquire:
             targets=acquire_channel.uuid,
             waveform=GaussianWaveform(width=1e-6),
         )
-        inst = Acquire(targets=acquire_channel.uuid, duration=1e-6, filter=filter)
+        inst = Acquire(
+            targets=acquire_channel.uuid,
+            duration=1e-6,
+            filter=filter,
+            output_variable="test",
+        )
         assert inst.filter == filter
 
     @pytest.mark.parametrize("time", [0, 5e-7, 1.01e-6, 2e-6])
@@ -54,7 +60,12 @@ class TestAcquire:
             waveform=GaussianWaveform(width=time),
         )
         with pytest.raises(ValidationError):
-            Acquire(targets=acquire_channel.uuid, duration=1e-6, filter=filter)
+            Acquire(
+                targets=acquire_channel.uuid,
+                duration=1e-6,
+                filter=filter,
+                output_variable="test",
+            )
 
     @pytest.mark.parametrize("qubit_idx", list(model.qubits.keys()))
     def test_output_variable(self, qubit_idx):
@@ -78,6 +89,9 @@ class TestAcquire:
 
         with pytest.raises(ValidationError):
             Acquire(targets="mock", output_variable=["output_var"])
+
+        with pytest.raises(ValidationError):
+            Acquire(targets="mock", output_variable="")
 
 
 class TestPostProcessing:
@@ -205,7 +219,9 @@ class TestMeasureBlock:
         )
         assert mb.number_of_instructions == 1
 
-        mb.add(Acquire(targets=acquire_channel.uuid, duration=1e-09))
+        mb.add(
+            Acquire(targets=acquire_channel.uuid, duration=1e-09, output_variable="test")
+        )
         assert mb.number_of_instructions == 2
 
     def test_add_instruction_with_delay(self):
@@ -226,7 +242,14 @@ class TestMeasureBlock:
         )
         assert mb.number_of_instructions == 1
 
-        mb.add(Acquire(targets=acquire_channel.uuid, duration=1e-09, delay=1e-09))
+        mb.add(
+            Acquire(
+                targets=acquire_channel.uuid,
+                duration=1e-09,
+                delay=1e-09,
+                output_variable="test",
+            )
+        )
         assert mb.number_of_instructions == 3
 
     def add_invalid_instruction(self):
@@ -298,7 +321,9 @@ class TestMeasureBlock:
             )
             custom_mb.add(measure)
 
-            acquire = Acquire(targets=acquire_channel.uuid, duration=1e-09)
+            acquire = Acquire(
+                targets=acquire_channel.uuid, duration=1e-09, output_variable="test"
+            )
             custom_mb.add(acquire)
             # Synchronise all pulse channels within a qubit after measurement.
             custom_mb.add(Synchronize(targets=qubit_pulse_channels))
@@ -321,7 +346,11 @@ class TestMeasureBlock:
 
         mb = MeasureBlock(qubit_targets=qubit_id)
 
-        mb.add(Acquire(targets=acquire_chan.uuid, duration=10, delay=0.0))
+        mb.add(
+            Acquire(
+                targets=acquire_chan.uuid, duration=10, delay=0.0, output_variable="test"
+            )
+        )
 
         assert mb.number_of_instructions == 1
         assert isinstance(mb.instructions[0], Acquire)
@@ -331,7 +360,11 @@ class TestMeasureBlock:
         acquire_chan = qubit.acquire_pulse_channel
 
         mb = MeasureBlock(qubit_targets=qubit_id)
-        mb.add(Acquire(targets=acquire_chan.uuid, duration=10, delay=10))
+        mb.add(
+            Acquire(
+                targets=acquire_chan.uuid, duration=10, delay=10, output_variable="test"
+            )
+        )
 
         assert mb.number_of_instructions == 2
         assert isinstance(mb.instructions[0], Delay)
@@ -347,7 +380,10 @@ class TestMeasureBlock:
             acquire_chan = qubits[qubit].acquire_pulse_channel
             mb.add(
                 Acquire(
-                    targets=acquire_chan.uuid, duration=10 + qubit, delay=10 + 2 * qubit
+                    targets=acquire_chan.uuid,
+                    duration=10 + qubit,
+                    delay=10 + 2 * qubit,
+                    output_variable="test",
                 )
             )
 

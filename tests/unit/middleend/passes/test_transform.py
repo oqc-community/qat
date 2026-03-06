@@ -941,6 +941,7 @@ class TestPydInstructionGranularitySanitisation:
                     duration=acquire_time,
                     waveform=SampledWaveform(samples=[1.0 + 2.0j] * n_samples_weights),
                 ),
+                output_variable="test",
             )
         )
         ir = PopulateWaveformSampleTime(self.hw, self.target_data).run(builder)
@@ -1016,7 +1017,11 @@ class TestPydInstructionGranularitySanitisation:
         )
 
         acquire = Acquire(
-            target=self.acquire_chan.uuid, duration=acquire_time, delay=0.0, filter=filter
+            target=self.acquire_chan.uuid,
+            duration=acquire_time,
+            delay=0.0,
+            filter=filter,
+            output_variable="test",
         )
 
         builder.add(acquire)
@@ -1057,7 +1062,11 @@ class TestPydInstructionGranularitySanitisation:
             waveform=SampledWaveform(samples=np.random.rand(num_samples)),
         )
         acquire = Acquire(
-            target=self.acquire_chan.uuid, duration=acquire_time, delay=0.0, filter=filter
+            target=self.acquire_chan.uuid,
+            duration=acquire_time,
+            delay=0.0,
+            filter=filter,
+            output_variable="test",
         )
         builder.add(acquire)
         filter.waveform.samples = filter.waveform.samples[: num_samples - 5]
@@ -1095,7 +1104,11 @@ class TestPydInstructionGranularitySanitisation:
             target=self.acquire_chan.uuid, waveform=SquareWaveform(width=acquire_time)
         )
         acquire = Acquire(
-            target=self.acquire_chan.uuid, duration=acquire_time, delay=0.0, filter=filter
+            target=self.acquire_chan.uuid,
+            duration=acquire_time,
+            delay=0.0,
+            filter=filter,
+            output_variable="test",
         )
         builder.add(acquire)
 
@@ -1261,7 +1274,7 @@ class TestInstructionLengthSanitisation:
         )
 
 
-class TestPydReturnSanitisation:
+class TestReturnSanitisation:
     hw = LucyModelLoader(8).load()
 
     def test_empty_builder(self):
@@ -1318,6 +1331,23 @@ class TestPydReturnSanitisation:
         assert isinstance(return_instr, Return)
         for var in return_instr.variables:
             assert var in output_vars
+
+    def test_acquires_and_measure_blocks_are_collected(self):
+        q0 = self.hw.qubit_with_index(0)
+        q1 = self.hw.qubit_with_index(1)
+
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        builder.measure_single_shot_z(target=q0, output_variable="out_q0")
+        builder.acquire(target=q1, delay=0.0, duration=800e-9, output_variable="out_q1")
+
+        assert len([instr for instr in builder if isinstance(instr, Return)]) == 0
+
+        res_mgr = ResultManager()
+        ReturnSanitisation().run(builder, res_mgr)
+
+        return_instr = builder._ir.tail
+        assert isinstance(return_instr, Return)
+        assert set(return_instr.variables) == {"out_q0", "out_q1"}
 
 
 class TestPydBatchedShots:
@@ -1525,7 +1555,7 @@ class TestResetsToDelays:
         builder.pulse(
             target=qubit.measure_pulse_channel.uuid, waveform=SquareWaveform(width=80e-9)
         )
-        builder.acquire(qubit, duration=80e-9, delay=0.0)
+        builder.acquire(qubit, duration=80e-9, delay=0.0, output_variable="test")
         builder.add(Reset(qubit_target=qubit_idx))
 
         res = ActivePulseChannelResults()
@@ -1811,7 +1841,7 @@ class TestFreqShiftSanitisation:
         new_builder.pulse(
             target=measure_pulse_ch.uuid, waveform=SquareWaveform(width=400e-9)
         )
-        new_builder.acquire(qubit, delay=48e-9, duration=352e-9)
+        new_builder.acquire(qubit, delay=48e-9, duration=352e-9, output_variable="test")
         new_builder.delay(drive_pulse_ch, 400e-9)
         return new_builder
 
@@ -2040,7 +2070,7 @@ class TestLowerSyncsToDelays:
         [
             Delay(target="test", duration=1e-6),
             Pulse(target="test", waveform=SquareWaveform(width=1e-6)),
-            Acquire(target="test", duration=1e-6, delay=0.0),
+            Acquire(target="test", duration=1e-6, delay=0.0, output_variable="test"),
         ],
     )
     def test_process_quantum_instruction(self, inst):
@@ -2317,6 +2347,7 @@ class TestEvaluateWaveforms:
             duration=1e-6,
             delay=0.0,
             filter=Pulse(target=target, waveform=SquareWaveform(width=1e-6, amp=0.5)),
+            output_variable="test",
         )
         ir = QuantumInstructionBuilder(model).add(acquire)
         new_instruction = pass_.process_instruction(
@@ -2346,6 +2377,7 @@ class TestEvaluateWaveforms:
             filter=Pulse(
                 target=acquire_target.uuid, waveform=SquareWaveform(width=200e-9, amp=0.5)
             ),
+            output_variable="test",
         )
 
         waveform_lookup = defaultdict(dict)

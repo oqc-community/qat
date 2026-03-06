@@ -95,7 +95,7 @@ class TestInstructionValidation:
     def test_acquire_on_drive_channel(self):
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         drive_pulse_ch = self.hw.qubits[0].drive_pulse_channel.uuid
-        builder.add(Acquire(target=drive_pulse_ch, duration=1e-8))
+        builder.add(Acquire(target=drive_pulse_ch, duration=1e-8, output_variable="test"))
 
         with pytest.raises(ValueError, match="Cannot perform an acquire on the"):
             PydInstructionValidation(self.hw, self.target_data).run(builder)
