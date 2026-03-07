@@ -209,6 +209,8 @@ filterwarnings = [
     # TODO - remove when purr is dropped COMPILER-844
     'default:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning',
     'default:WaveformV1 support is deprecated:DeprecationWarning:qat.*.purr',
+    # TODO - remove when ConvertIR pass is removed COMPILER-1000
+    'default:ConvertToPydanticIR is deprecated:DeprecationWarning',
     # TODO - remove for next version of TargetData COMPILER-966
     'default:`.*TargetData.instruction_memory_size` is deprecated:DeprecationWarning:qat.middleend.passes.purr.validation',
 ]

@@ -1,10 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from compiler_config.config import CompilerConfig
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.frontend.base import BaseFrontend
+from qat.frontend.builder import BuilderFrontend
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.frontend.passes.purr.transform import FlattenIR
 from qat.frontend.passes.transform import PydFlattenIR
@@ -78,7 +79,10 @@ class AutoFrontend(BaseFrontend):
 
         # TODO: The default_frontends methods should eventually be replaced with this.
         # (COMPILER-724)
-        frontends = cls.default_frontends(model) + [QatFrontend(model)]
+        frontends = cls.default_frontends(model) + [
+            QatFrontend(model),
+            BuilderFrontend(model),
+        ]
         return cls(model, *frontends)
 
     @classmethod

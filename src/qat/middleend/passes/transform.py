@@ -4,6 +4,7 @@ import itertools
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from functools import singledispatchmethod
+from warnings import warn
 
 import numpy as np
 from compiler_config.config import CompilerConfig, MetricsType
@@ -13,6 +14,9 @@ from numpy.typing import NDArray
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import TransformPass
 from qat.core.result_base import ResultManager
+from qat.frontend.passes.transform import (
+    PostProcessingSanitisation as FrontendPostProcessingSanitisation,
+)
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import (
     Assign,
@@ -34,13 +38,12 @@ from qat.ir.instructions import (
     Synchronize,
     Variable,
 )
-from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
+from qat.ir.measure import Acquire, MeasureBlock
 from qat.ir.waveforms import Pulse, SampledWaveform, SquareWaveform, Waveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
-from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
@@ -260,79 +263,20 @@ class PhaseOptimisationHandler:
         self.optimized_instructions.append(instruction)
 
 
-class PostProcessingSanitisation(TransformPass):
+class PostProcessingSanitisation(FrontendPostProcessingSanitisation):
     """Checks that the :class:`PostProcessing` instructions that follow an acquisition are
-    suitable for the acquisition mode, and removes them if not.
-    """
+    suitable for the acquisition mode, and removes them if not."""
 
-    def run(
-        self,
-        ir: InstructionBuilder,
-        _: ResultManager,
-        met_mgr: MetricsManager,
-        *args,
-        **kwargs,
-    ):
-        """
-        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
-        :param met_mgr: The metrics manager to store the number of instructions after
-            optimisation.
-        """
-
-        acquire_mode_output_var_map = {}
-        discarded_pp = []
-        for instr in ir:
-            if isinstance(instr, Acquire):
-                if instr.mode == AcquireMode.RAW:
-                    raise ValueError(
-                        "Invalid acquire mode. The target machine does not support "
-                        "a RAW acquire mode."
-                    )
-
-                if instr.output_variable:
-                    acquire_mode_output_var_map[instr.output_variable] = instr.mode
-
-            elif isinstance(instr, PostProcessing):
-                acq_mode = acquire_mode_output_var_map.get(instr.output_variable, None)
-
-                if not acq_mode:
-                    log.warning(
-                        f"Post-processing output variable {instr.output_variable} is not associated with any acquire output variable."
-                    )
-                    discarded_pp.append(instr)
-
-                else:
-                    if not self._valid_pp(acq_mode, instr):
-                        discarded_pp.append(instr)
-
-        ir.instructions = [instr for instr in ir.instructions if instr not in discarded_pp]
-        met_mgr.record_metric(
-            MetricsType.OptimizedInstructionCount, ir.number_of_instructions
+    def __init__(self):
+        # TODO: Remove this pass from the middleend with the next release (COMPILER-1001)
+        warn(
+            "The post processing sanitisation pass has been moved to the frontend, and can "
+            "be found at qat.frontend.passes.transform.PostProcessingSanitisation. This "
+            "import is now deprecated and will be removed in version 4.0.0.",
+            DeprecationWarning,
+            stacklevel=2,
         )
-        return ir
-
-    def _valid_pp(self, acquire_mode: AcquireMode, pp: PostProcessing) -> bool:
-        """
-        Validate whether the post-processing instruction is valid with a given
-        acquire mode.
-        """
-
-        if acquire_mode == AcquireMode.SCOPE:
-            if (
-                pp.process_type == PostProcessType.MEAN
-                and ProcessAxis.SEQUENCE in pp.axes
-                and len(pp.axes) <= 1
-            ):
-                return False
-
-        elif acquire_mode == AcquireMode.INTEGRATOR:
-            if (
-                pp.process_type == PostProcessType.MEAN
-                and ProcessAxis.TIME in pp.axes
-                and len(pp.axes) <= 1
-            ):
-                return False
-        return True
+        super().__init__()
 
 
 class MeasurePhaseResetSanitisation(TransformPass):

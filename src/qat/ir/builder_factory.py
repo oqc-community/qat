@@ -16,7 +16,9 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 class BuilderFactory:
     @singledispatchmethod
     @staticmethod
-    def create_builder(model):
+    def create_builder(
+        model,
+    ) -> PydQuantumInstructionBuilder | PurrQuantumInstructionBuilder:
         raise TypeError(
             f"Cannot find a builder for hardware model with type {type(model)}."
         )

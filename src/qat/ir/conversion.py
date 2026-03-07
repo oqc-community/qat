@@ -5,6 +5,7 @@ from functools import singledispatchmethod
 from numbers import Number
 from pydoc import locate
 from types import NoneType
+from warnings import warn
 
 import numpy as np
 
@@ -48,6 +49,14 @@ class ConvertToPydanticIR(TransformPass):
         *args,
         **kwargs,
     ):
+        # TODO: remove this pass with next release (COMPILER-1000)
+        warn(
+            "ConvertToPydanticIR is deprecated and will be removed version 4.0.0. "
+            "Please see the BuilderFrontend for accepting legacy instruction builders as "
+            "an input.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.legacy_model = legacy_model
         self.pyd_model = pyd_model
         self._create_pulse_channel_map()

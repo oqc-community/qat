@@ -14,9 +14,20 @@ from compiler_config.config import (
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.frontend.passes.analysis import InputAnalysisResult
-from qat.frontend.passes.transform import PydInputOptimisation, PydParse
-from qat.ir.instruction_builder import InstructionBuilder
+from qat.frontend.passes.transform import (
+    PostProcessingSanitisation,
+    PydInputOptimisation,
+    PydParse,
+)
+from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import ResultsProcessing
+from qat.ir.measure import (
+    AcquireMode,
+    MeasureBlock,
+    PostProcessing,
+    PostProcessType,
+    ProcessAxis,
+)
 from qat.model.loaders.lucy import LucyModelLoader
 
 from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3, get_qir
@@ -152,3 +163,86 @@ class TestPydParse:
                 assert inst.results_processing == InlineResultsProcessing.Binary
             else:
                 assert inst.results_processing == results_format.format
+
+
+class TestPostProcessingSanitisation:
+    hw = LucyModelLoader(32).load()
+
+    def test_meas_acq_with_pp(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        for i, qubit in self.hw.qubits.items():
+            builder.measure(
+                targets=qubit, mode=AcquireMode.SCOPE, output_variable=f"test{i}"
+            )
+            builder.post_processing(
+                target=qubit, process_type=PostProcessType.MEAN, output_variable=f"test{i}"
+            )
+        n_instr_before = builder.number_of_instructions
+
+        met_mgr = MetricsManager()
+        PostProcessingSanitisation().run(builder, ResultManager(), met_mgr)
+
+        assert builder.number_of_instructions == met_mgr.get_metric(
+            MetricsType.OptimizedInstructionCount
+        )
+        assert builder.number_of_instructions == n_instr_before
+
+    @pytest.mark.parametrize(
+        "acq_mode,pp_type,pp_axes",
+        [
+            (AcquireMode.SCOPE, PostProcessType.MEAN, [ProcessAxis.SEQUENCE]),
+            (AcquireMode.INTEGRATOR, PostProcessType.MEAN, [ProcessAxis.TIME]),
+        ],
+    )
+    def test_invalid_acq_pp(self, acq_mode, pp_type, pp_axes):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+
+        builder.measure(targets=qubit, mode=acq_mode, output_variable="test")
+        builder.post_processing(
+            target=qubit, process_type=pp_type, axes=pp_axes, output_variable="test"
+        )
+        assert isinstance(builder._ir.tail, PostProcessing)
+
+        # Pass should remove the invalid post-processing instruction from the IR.
+        assert not PostProcessingSanitisation()._valid_pp(acq_mode, builder._ir.tail)
+
+        PostProcessingSanitisation().run(builder, ResultManager(), MetricsManager())
+        assert not isinstance(builder._ir.tail, PostProcessing)
+
+    def test_mid_circuit_measurement_two_diff_post_processing(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(2)
+
+        # Mid-circuit measurement with some manual (different) post-processing options.
+        builder.measure(targets=qubit, mode=AcquireMode.SCOPE)
+        assert isinstance(builder._ir.tail, MeasureBlock)
+        builder.X(target=qubit)
+        builder.measure(targets=qubit, mode=AcquireMode.INTEGRATOR)
+        assert isinstance(builder._ir.tail, MeasureBlock)
+        builder.post_processing(
+            target=qubit,
+            output_variable=builder._ir.tail.output_variables[0],
+            process_type=PostProcessType.MEAN,
+        )
+
+        PostProcessingSanitisation().run(builder, ResultManager(), MetricsManager())
+
+        # Make sure no instructions get discarded in the post-processing sanitisation for a mid-circuit measurement.
+        pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
+        assert len(pp) == 1
+
+    def test_down_convert_is_removed(self):
+        builder = QuantumInstructionBuilder(hardware_model=self.hw)
+        qubit = self.hw.qubit_with_index(0)
+
+        builder.measure(targets=qubit, mode=AcquireMode.SCOPE, output_variable="test")
+        builder.post_processing(
+            target=qubit,
+            output_variable="test",
+            process_type=PostProcessType.DOWN_CONVERT,
+            axes=[ProcessAxis.TIME],
+        )
+        PostProcessingSanitisation().run(builder, ResultManager(), MetricsManager())
+        pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
+        assert len(pp) == 0

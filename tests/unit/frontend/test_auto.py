@@ -8,6 +8,7 @@ from compiler_config.config import CompilerConfig, Languages, Tket
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager, ResultModel
 from qat.frontend.auto import AutoFrontend
+from qat.frontend.builder import BuilderFrontend
 from qat.frontend.fallthrough import FallthroughFrontend
 from qat.frontend.purr import PurrFrontend
 from qat.frontend.qasm import Qasm2Frontend, Qasm3Frontend, load_qasm_file
@@ -244,6 +245,7 @@ class TestAutoFrontend:
         frontend = AutoFrontend.default_for_pydantic(model)
         assert isinstance(frontend, AutoFrontend)
         assert any(isinstance(f, QatFrontend) for f in frontend.frontends)
+        assert any(isinstance(f, BuilderFrontend) for f in frontend.frontends)
 
     def test_default_for_legacy(self):
         model = EchoModelLoader(32).load()

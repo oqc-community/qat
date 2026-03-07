@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import os
 import tempfile
+from collections import OrderedDict
 
 from compiler_config.config import (
     CompilerConfig,
@@ -27,8 +28,16 @@ from qat.frontend.passes.analysis import InputAnalysisResult
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.builder_factory import BuilderFactory
 from qat.ir.instruction_builder import (
+    InstructionBuilder,
     PydQuantumInstructionBuilder,
     QuantumInstructionBuilder,
+)
+from qat.ir.measure import (
+    Acquire,
+    AcquireMode,
+    PostProcessing,
+    PostProcessType,
+    ProcessAxis,
 )
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.utils.logger import get_default_logger
@@ -170,6 +179,94 @@ class FlattenIR(TransformPass):
 
     def run(self, ir: PydQuantumInstructionBuilder, *args, **kwargs):
         return ir.flatten()
+
+
+class PostProcessingSanitisation(TransformPass):
+    """Checks that the :class:`PostProcessing` instructions that follow an acquisition are
+    suitable for the acquisition mode, and removes them if not.
+    """
+
+    def run(
+        self,
+        ir: InstructionBuilder,
+        _: ResultManager,
+        met_mgr: MetricsManager,
+        *args,
+        **kwargs,
+    ):
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param met_mgr: The metrics manager to store the number of instructions after
+            optimisation.
+        """
+
+        instructions = list(ir)
+        acquire_mode_output_var_map = {}
+        discarded_pp: dict[int, PostProcessing] = OrderedDict()
+
+        for index, instruction in enumerate(instructions):
+            if isinstance(instruction, Acquire):
+                acquire_mode_output_var_map[instruction.output_variable] = instruction.mode
+            elif isinstance(instruction, PostProcessing):
+                discarded_pp[index] = instruction
+
+        for index, pp in reversed(discarded_pp.items()):
+            acquire_mode = acquire_mode_output_var_map.get(pp.output_variable, None)
+            if not self._valid_pp(acquire_mode, pp):
+                del instructions[index]
+
+        ir.instructions = instructions
+        met_mgr.record_metric(
+            MetricsType.OptimizedInstructionCount, ir.number_of_instructions
+        )
+        return ir
+
+    def _valid_pp(self, acquire_mode: AcquireMode, pp: PostProcessing) -> bool:
+        """
+        Validate whether the post-processing instruction is valid with a given
+        acquire mode.
+        """
+
+        if acquire_mode is None:
+            log.warning(
+                f"Post-processing output variable {pp.output_variable} is not "
+                "associated with any acquire output variable. It will be ignored."
+            )
+            return False
+
+        if pp.process_type == PostProcessType.DOWN_CONVERT:
+            log.warning(
+                f"Post-processing instruction {pp} is invalid because it has a "
+                "DOWN_CONVERT process type, which is not supported. It will be ignored."
+            )
+            return False
+
+        if acquire_mode == AcquireMode.INTEGRATOR:
+            if (
+                pp.process_type == PostProcessType.MEAN
+                and ProcessAxis.TIME in pp.axes
+                and len(pp.axes) <= 1
+            ):
+                log.warning(
+                    f"Post-processing instruction {pp} is invalid because it has a TIME "
+                    "axis but the associated acquire instruction has an INTEGRATOR mode. "
+                    "It will be ignored."
+                )
+                return False
+
+        if acquire_mode == AcquireMode.SCOPE:
+            if (
+                pp.process_type == PostProcessType.MEAN
+                and ProcessAxis.SEQUENCE in pp.axes
+                and len(pp.axes) <= 1
+            ):
+                log.warning(
+                    f"Post-processing instruction {pp} is invalid because it has a "
+                    "SEQUENCE axis but the associated acquire instruction has an "
+                    "SCOPE mode. It will be ignored."
+                )
+                return False
+        return True
 
 
 PydInputOptimisation = InputOptimisation

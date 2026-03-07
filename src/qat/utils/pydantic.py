@@ -275,6 +275,9 @@ class ValidatedList(PydListBase, PydValidatedBase):
     def remove(self, value: V):
         self.root.remove(value)
 
+    def __delitem__(self, index: int | slice):
+        del self.root[index]
+
 
 def _validate_set(value: float | int | str | Iterable | None):
     if isinstance(value, (float, int, str)):

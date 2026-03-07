@@ -18,7 +18,6 @@ from qat.middleend.passes.transform import (
     MeasurePhaseResetSanitisation,
     PhaseOptimisation,
     PopulateWaveformSampleTime,
-    PostProcessingSanitisation,
     RepeatSanitisation,
     RepeatTranslation,
     ResetsToDelays,
@@ -83,7 +82,6 @@ class DefaultMiddleend(CustomMiddleend):
             | RepeatSanitisation(target_data)
             | ReturnSanitisation()
             | SynchronizeTask()
-            | PostProcessingSanitisation()
             | ReadoutValidation()
             | MeasurePhaseResetSanitisation(model)
             | InstructionValidation(model, target_data)
