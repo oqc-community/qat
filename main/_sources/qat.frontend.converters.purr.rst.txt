@@ -1,0 +1,7 @@
+qat.frontend.converters.purr module
+===================================
+
+.. automodule:: qat.frontend.converters.purr
+   :members:
+   :undoc-members:
+   :show-inheritance:

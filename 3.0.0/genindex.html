@@ -3102,6 +3102,8 @@
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run.params.ir">(qat.core.pass_base.PassModel.run parameter)</a>
 </li>
+        <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.frontend.passes.transform.PostProcessingSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.ir">(qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.Decompose2QToCNOTs.run.params.ir">(qat.middleend.passes.gates.transform.Decompose2QToCNOTs.run parameter)</a>
@@ -3133,8 +3135,6 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.LowerSyncsToDelays.run.params.ir">(qat.middleend.passes.transform.LowerSyncsToDelays.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.ir">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
-</li>
-        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.middleend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run.params.ir">(qat.middleend.passes.transform.RepeatSanitisation.run parameter)</a>
 </li>
@@ -3796,13 +3796,13 @@
 </li>
         <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.InputOptimisation.run.params.met_mgr">(qat.frontend.passes.transform.InputOptimisation.run parameter)</a>
 </li>
+        <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run.params.met_mgr">(qat.frontend.passes.transform.PostProcessingSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit.params.met_mgr">(qat.frontend.qasm.BaseQasmFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.emit.params.met_mgr">(qat.frontend.qir.QIRFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
-</li>
-        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run.params.met_mgr">(qat.middleend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.SquashDelaysOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.SquashDelaysOptimisation.run parameter)</a>
 </li>
@@ -5322,9 +5322,11 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.middleend.passes.transform)</a>
+      <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.frontend.passes.transform)</a>
 
       <ul>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation">(class in qat.middleend.passes.transform)</a>
+</li>
         <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation">(class in qat.purr.compiler.transform_passes)</a>
 </li>
       </ul></li>
@@ -5334,10 +5336,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass">PreCodegenPass (class in qat.purr.backends.qblox.codegen)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult">PreCodegenResult (class in qat.purr.backends.qblox.codegen)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult">PreCodegenResult (class in qat.purr.backends.qblox.codegen)</a>
+</li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.predict_pulse_amplitude">predict_pulse_amplitude() (in module qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.prefix">prefix (qat.purr.utils.logger.LogFolder parameter)</a>
@@ -7672,7 +7674,7 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PopulateWaveformSampleTime.run">(PopulateWaveformSampleTime method)</a>
 </li>
-        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run">(PostProcessingSanitisation method)</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation.run">[1]</a>
+        <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run">(PostProcessingSanitisation method)</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation.run">[1]</a>
 </li>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass.run">(PreCodegenPass method)</a>
 </li>

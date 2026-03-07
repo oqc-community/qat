@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post170.dev20260306163120 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post171.dev20260307150135 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -156,6 +156,10 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.converters.html">qat.frontend.converters package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.converters.purr.html">qat.frontend.converters.purr module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.base.html">qat.frontend.parsers.qasm.base module</a></li>
@@ -181,6 +185,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.builder.html">qat.frontend.builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
@@ -1241,14 +1246,14 @@
         <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAcqData">(class in qat.purr.backends.qblox.acquisition)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAndScopeAcqData">BinnedAndScopeAcqData (class in qat.backend.qblox.acquisition)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAndScopeAcqData">(class in qat.purr.backends.qblox.acquisition)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAndScopeAcqData.bins">bins (BinnedAndScopeAcqData attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAndScopeAcqData.bins">[1]</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
@@ -1365,15 +1370,19 @@
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.UntargetedPulse.build_with_target">build_with_target() (UntargetedPulse method)</a>
 </li>
-      <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.SweepFlattener.params.builder">builder (qat.pipelines.purr.sweep.flattener.SweepFlattener parameter)</a>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.PurrConverter.convert.params.builder">builder (qat.frontend.converters.purr.PurrConverter.convert parameter)</a>
 
       <ul>
+        <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.SweepFlattener.params.builder">(qat.pipelines.purr.sweep.flattener.SweepFlattener parameter)</a>
+</li>
         <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.SweepInstance.builder">(SweepInstance attribute)</a>
 </li>
         <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketQIRParser.builder">(TketQIRParser property)</a>
 </li>
       </ul></li>
       <li><a href="qat.ir.builder_factory.html#qat.ir.builder_factory.BuilderFactory">BuilderFactory (class in qat.ir.builder_factory)</a>
+</li>
+      <li><a href="qat.frontend.builder.html#qat.frontend.builder.BuilderFrontend">BuilderFrontend (class in qat.frontend.builder)</a>
 </li>
       <li><a href="qat.purr.backends.calibrations.remote.html#qat.purr.backends.calibrations.remote.BuiltinRemoteCalibration">BuiltinRemoteCalibration (class in qat.purr.backends.calibrations.remote)</a>
 </li>
@@ -1517,6 +1526,8 @@
         <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.check_and_return_source">(BaseFrontend method)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.check_and_return_source">(BaseQasmFrontend method)</a>
+</li>
+        <li><a href="qat.frontend.builder.html#qat.frontend.builder.BuilderFrontend.check_and_return_source">(BuilderFrontend method)</a>
 </li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.check_and_return_source">(CustomFrontend method)</a>
 </li>
@@ -2115,8 +2126,12 @@
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.ControlType">ControlType (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-      <li><a href="qat.integrations.tket.html#qat.integrations.tket.TketToQatIRConverter.convert">convert() (TketToQatIRConverter method)</a>, <a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter.convert">[1]</a>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.PurrConverter.convert">convert() (PurrConverter method)</a>
+
+      <ul>
+        <li><a href="qat.integrations.tket.html#qat.integrations.tket.TketToQatIRConverter.convert">(TketToQatIRConverter method)</a>, <a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter.convert">[1]</a>
 </li>
+      </ul></li>
       <li><a href="qat.utils.graphs.html#qat.utils.graphs.convert_edges_into_connectivity_dict">convert_edges_into_connectivity_dict() (in module qat.utils.graphs)</a>
 </li>
       <li><a href="qat.integrations.tket.html#qat.integrations.tket.TketToQatIRConverter.convert_parameter">convert_parameter() (TketToQatIRConverter static method)</a>, <a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter.convert_parameter">[1]</a>
@@ -2827,6 +2842,8 @@
         <li><a href="qat.middleend.base.html#qat.middleend.base.BaseMiddleend.emit">(BaseMiddleend method)</a>
 </li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit">(BaseQasmFrontend method)</a>
+</li>
+        <li><a href="qat.frontend.builder.html#qat.frontend.builder.BuilderFrontend.emit">(BuilderFrontend method)</a>
 </li>
         <li><a href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.emit">(CircuitBuilder method)</a>
 </li>
@@ -3857,6 +3874,8 @@
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_pulse_channel_from_id">get_pulse_channel_from_id() (QuantumHardwareModel method)</a>
 </li>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.HardwareModelMapper.get_pulse_channel_id">get_pulse_channel_id() (HardwareModelMapper method)</a>
+</li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_pulse_channels_from_physical_channel">get_pulse_channels_from_physical_channel() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.get_qasm_parser">get_qasm_parser() (in module qat.purr.integrations.qasm)</a>
@@ -4004,6 +4023,8 @@
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.HardwareLoaders">HardwareLoaders (class in qat.core.pipeline)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.HardwareModel">HardwareModel (class in qat.purr.compiler.hardware_models)</a>
+</li>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.HardwareModelMapper">HardwareModelMapper (class in qat.frontend.converters.purr)</a>
 </li>
       <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.SweepInstance.has_device_assigns">has_device_assigns (SweepInstance property)</a>
 </li>
@@ -4406,6 +4427,8 @@
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run.params.ir">(qat.core.pass_base.PassModel.run parameter)</a>
 </li>
+        <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.frontend.passes.transform.PostProcessingSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.base.html#qat.middleend.base.BaseMiddleend.emit.params.ir">(qat.middleend.base.BaseMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.middleend.base.html#qat.middleend.base.CustomMiddleend.emit.params.ir">(qat.middleend.base.CustomMiddleend.emit parameter)</a>
@@ -4503,8 +4526,6 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.LowerSyncsToDelays.run.params.ir">(qat.middleend.passes.transform.LowerSyncsToDelays.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.ir">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
-</li>
-        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.middleend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.run.params.ir">(qat.middleend.passes.transform.RepeatSanitisation.run parameter)</a>
 </li>
@@ -5568,6 +5589,8 @@
 </li>
         <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.InputOptimisation.run.params.met_mgr">(qat.frontend.passes.transform.InputOptimisation.run parameter)</a>
 </li>
+        <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run.params.met_mgr">(qat.frontend.passes.transform.PostProcessingSanitisation.run parameter)</a>
+</li>
         <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.BaseQasmFrontend.emit.params.met_mgr">(qat.frontend.qasm.BaseQasmFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.emit.params.met_mgr">(qat.frontend.qir.QIRFrontend.emit parameter)</a>
@@ -5585,8 +5608,6 @@
         <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.SquashDelaysOptimisation.run.params.met_mgr">(qat.middleend.passes.purr.transform.SquashDelaysOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
-</li>
-        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run.params.met_mgr">(qat.middleend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.SquashDelaysOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.SquashDelaysOptimisation.run parameter)</a>
 </li>
@@ -5811,6 +5832,8 @@
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontendWithFlattenedIR.params.model">(qat.frontend.auto.AutoFrontendWithFlattenedIR parameter)</a>
 </li>
         <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.params.model">(qat.frontend.base.BaseFrontend parameter)</a>
+</li>
+        <li><a href="qat.frontend.builder.html#qat.frontend.builder.BuilderFrontend.params.model">(qat.frontend.builder.BuilderFrontend parameter)</a>
 </li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.params.model">(qat.frontend.custom.CustomFrontend parameter)</a>
 </li>
@@ -6617,7 +6640,13 @@
 </li>
         <li><a href="qat.frontend.base.html#module-qat.frontend.base">qat.frontend.base</a>
 </li>
+        <li><a href="qat.frontend.builder.html#module-qat.frontend.builder">qat.frontend.builder</a>
+</li>
         <li><a href="qat.frontend.circuit_builder.html#module-qat.frontend.circuit_builder">qat.frontend.circuit_builder</a>
+</li>
+        <li><a href="qat.frontend.converters.html#module-qat.frontend.converters">qat.frontend.converters</a>
+</li>
+        <li><a href="qat.frontend.converters.purr.html#module-qat.frontend.converters.purr">qat.frontend.converters.purr</a>
 </li>
         <li><a href="qat.frontend.custom.html#module-qat.frontend.custom">qat.frontend.custom</a>
 </li>
@@ -7814,8 +7843,12 @@
         <li><a href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxPackage.physical_channel_id">(QbloxPackage attribute)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxPackage.physical_channel_id">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_channel_map">physical_channel_map (PhysicalHardwareModel property)</a>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.HardwareModelMapper.physical_channel_map">physical_channel_map (HardwareModelMapper property)</a>
+
+      <ul>
+        <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_channel_map">(PhysicalHardwareModel property)</a>
 </li>
+      </ul></li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_channel_with_id">physical_channel_with_id() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.physical_connectivity">physical_connectivity (PhysicalHardwareModel attribute)</a>
@@ -8004,9 +8037,11 @@
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.middleend.passes.purr.transform)</a>
+      <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.frontend.passes.transform)</a>
 
       <ul>
+        <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.PostProcessingSanitisation">(class in qat.middleend.passes.purr.transform)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation">(class in qat.middleend.passes.transform)</a>
 </li>
         <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation">(class in qat.purr.compiler.transform_passes)</a>
@@ -8286,6 +8321,8 @@
         <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.pulse_channel_lo_freq_min">(qat.model.target_data.DeviceDescription parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.HardwareModelMapper.pulse_channel_mapping_exists">pulse_channel_mapping_exists() (HardwareModelMapper method)</a>
+</li>
       <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults.pulse_channel_to_qubit_map">pulse_channel_to_qubit_map (ActivePulseChannelResults attribute)</a>
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.pulse_channel_with_id">pulse_channel_with_id() (PhysicalHardwareModel method)</a>
@@ -8359,6 +8396,8 @@
       <li><a href="qat.middleend.decompositions.pulses.html#qat.middleend.decompositions.pulses.PulseDecompositionBase">PulseDecompositionBase (class in qat.middleend.decompositions.pulses)</a>
 </li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType">PulseShapeType (class in qat.purr.compiler.devices)</a>
+</li>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.PurrConverter">PurrConverter (class in qat.frontend.converters.purr)</a>
 </li>
       <li><a href="qat.frontend.purr.html#qat.frontend.purr.PurrFrontend">PurrFrontend (class in qat.frontend.purr)</a>
 
@@ -8992,10 +9031,31 @@
 </li>
       </ul></li>
       <li>
+    qat.frontend.builder
+
+      <ul>
+        <li><a href="qat.frontend.builder.html#module-qat.frontend.builder">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.frontend.circuit_builder
 
       <ul>
         <li><a href="qat.frontend.circuit_builder.html#module-qat.frontend.circuit_builder">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.frontend.converters
+
+      <ul>
+        <li><a href="qat.frontend.converters.html#module-qat.frontend.converters">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.frontend.converters.purr
+
+      <ul>
+        <li><a href="qat.frontend.converters.purr.html#module-qat.frontend.converters.purr">module</a>
 </li>
       </ul></li>
       <li>
@@ -9824,6 +9884,8 @@
         <li><a href="qat.pipelines.purr.sweep.flattener.html#module-qat.pipelines.purr.sweep.flattener">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.purr.sweep.passes
 
@@ -9838,8 +9900,6 @@
         <li><a href="qat.pipelines.purr.waveform_v1.html#module-qat.pipelines.purr.waveform_v1">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.purr.waveform_v1.compile
 
@@ -11804,7 +11864,7 @@
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PopulateWaveformSampleTime.run">(PopulateWaveformSampleTime method)</a>
 </li>
-        <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.PostProcessingSanitisation.run">(PostProcessingSanitisation method)</a>, <a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PostProcessingSanitisation.run">[1]</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation.run">[2]</a>
+        <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run">(PostProcessingSanitisation method)</a>, <a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.PostProcessingSanitisation.run">[1]</a>, <a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation.run">[2]</a>
 </li>
         <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.PreCodegenPass.run">(PreCodegenPass method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass.run">[1]</a>
 </li>
@@ -12491,6 +12551,8 @@
         <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontendWithFlattenedIR.emit.params.src">(qat.frontend.auto.AutoFrontendWithFlattenedIR.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.base.html#qat.frontend.base.BaseFrontend.emit.params.src">(qat.frontend.base.BaseFrontend.emit parameter)</a>
+</li>
+        <li><a href="qat.frontend.builder.html#qat.frontend.builder.BuilderFrontend.emit.params.src">(qat.frontend.builder.BuilderFrontend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.custom.html#qat.frontend.custom.CustomFrontend.emit.params.src">(qat.frontend.custom.CustomFrontend.emit parameter)</a>
 </li>
@@ -13323,6 +13385,8 @@
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity_symmetry">validate_physical_connectivity_symmetry() (PhysicalHardwareModel class method)</a>
 </li>
+      <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.HardwareModelMapper.validate_physical_properties">validate_physical_properties() (HardwareModelMapper method)</a>
+</li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_qubit_coupling">validate_qubit_coupling() (in module qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydValidatedBase.validate_value">validate_value() (PydValidatedBase method)</a>
@@ -13363,10 +13427,10 @@
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>
-      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.values">values() (PydDictBase method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.values">values() (PydDictBase method)</a>
+</li>
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_executable">var_to_physical_channel_executable() (IndexMappingAnalysis static method)</a>, <a href="qat.runtime.passes.purr.analysis.html#qat.runtime.passes.purr.analysis.IndexMappingAnalysis.var_to_physical_channel_executable">[1]</a>
 </li>
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingAnalysis.var_to_physical_channel_qat_ir">var_to_physical_channel_qat_ir() (IndexMappingAnalysis method)</a>
