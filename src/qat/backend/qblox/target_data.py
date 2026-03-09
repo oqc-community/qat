@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from importlib.metadata import version
 from warnings import warn
 
 from pydantic import NegativeFloat, NegativeInt, PositiveFloat, PositiveInt
+from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.model.target_data import TargetData
 from qat.utils.pydantic import NoExtraFieldsFrozenModel
@@ -187,6 +189,9 @@ class QbloxTargetData(TargetData):
     :param QRM_RF_DATA: Constants related to the QRM module.
     """
 
+    # COMPILER-1004, COMPILER-1005
+    driver_version: SemanticVersion = SemanticVersion.parse(version("qblox_instruments"))
+    fw_version: SemanticVersion = SemanticVersion.parse("0.13.0")
     Q1ASM_DATA: Q1asmDescription = Q1asmDescription()
     CONTROL_SEQUENCER_DATA: ControlSequencerDescription = ControlSequencerDescription()
     READOUT_SEQUENCER_DATA: ReadoutSequencerDescription = ReadoutSequencerDescription()

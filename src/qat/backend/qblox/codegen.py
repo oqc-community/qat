@@ -979,7 +979,11 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
                     seq_idx, slot_idx = self.allocate(target)
                     package = context.create_package(target, seq_idx, slot_idx)
                     packages[target.full_id()] = package
-            return QbloxProgram(packages=packages)
+            return QbloxProgram(
+                packages=packages,
+                driver_version=QbloxTargetData().driver_version,
+                fw_version=QbloxTargetData().fw_version,
+            )
         finally:
             self.allocations.clear()
 

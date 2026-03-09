@@ -528,9 +528,19 @@ class TestQbloxBackend1:
                 assert pkg.timeline is not None
                 assert isinstance(pkg.timeline, np.ndarray)
                 assert pkg.timeline.size > 0
-                assert not np.all(pkg.timeline == None)
+                assert not np.all(pkg.timeline is None)
                 assert not np.all(pkg.timeline == np.nan)
             plot_program(program)
+
+    def test_driver_fw_version(self, qblox_model):
+        qubit_indices = [0]
+        builder = resonator_spect(qblox_model, qubit_indices)
+        executable = do_emit(qblox_model, QbloxBackend1, builder)
+
+        target_data = QbloxTargetData()
+        for program in executable.programs:
+            assert program.driver_version == target_data.driver_version
+            assert program.fw_version == target_data.fw_version
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

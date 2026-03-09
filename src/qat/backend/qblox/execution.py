@@ -4,6 +4,7 @@
 from dataclasses import dataclass, field
 
 from pydantic import ConfigDict
+from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.backend.qblox.ir import Sequence
@@ -29,6 +30,10 @@ class QbloxProgram(AbstractProgram):
 
     # COMPILER 828: change to pydantic objects (not dataclasses)
     packages: dict[str, QbloxPackage]
+
+    # COMPILER-1004, COMPILER-1005
+    driver_version: SemanticVersion
+    fw_version: SemanticVersion
 
     @property
     def acquire_shapes(self) -> dict[str, tuple[int, ...]]:
