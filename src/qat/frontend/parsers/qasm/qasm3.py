@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-
 import math
+import re
 from copy import deepcopy
 from functools import singledispatchmethod
 from importlib.util import find_spec
@@ -59,6 +59,7 @@ from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import ValidatedList
 
 log = get_default_logger()
+WAVEFORM_RE = re.compile(r"\bwaveform\s.*?\s*=\s*\[([^\]]*)\]")
 
 
 class OpenPulseContext(QasmContext):
@@ -490,7 +491,8 @@ def _create_lark_parser():
 class Qasm3Parser(Interpreter, AbstractParser):
     lark_parser = _create_lark_parser()
 
-    def __init__(self):
+    # TODO modifiy configurability of max_count_operator_within_waveform_elements: see ID COMPILER-1002
+    def __init__(self, max_count_operator_within_waveform_elements: int = 50):
         super().__init__()
         self.builder: QuantumInstructionBuilder | None = None
         self._general_context: OpenPulseContext | None = None
@@ -504,6 +506,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._has_qasm_version = False
         self._has_calibration_version = False
         self._has_open_pulse = False
+        self._max_count_operator_within_waveform_elements = (
+            max_count_operator_within_waveform_elements
+        )
 
     def parser_language(self) -> Languages:
         return Languages.Qasm3
@@ -513,8 +518,24 @@ class Qasm3Parser(Interpreter, AbstractParser):
         qasm_id = hash(qasm_str)
         if (cached_value := self._cached_parses.get(qasm_id, None)) is not None:
             return cached_value
-
         try:
+            for matched_expression in WAVEFORM_RE.finditer(qasm_str):
+                if matched_expression:
+                    inside_array = matched_expression.group(1)
+                    elements = [e.strip() for e in inside_array.split(",") if e.strip()]
+                    for element in elements:
+                        operators = "+-*/"
+                        count_operators = sum(element.count(ops) for ops in operators)
+                        # default _max_count_operator_within_waveform_elements set to 50 to ensure poly-time overhead
+                        # does not negatively affect runtime performance
+                        if (
+                            count_operators
+                            > self._max_count_operator_within_waveform_elements
+                        ):
+                            raise ValueError(
+                                f"Too many arithmetic operations within waveform element."
+                                f"={count_operators}>{self._max_count_operator_within_waveform_elements}"
+                            )
             program = self.lark_parser.parse(qasm_str)
         except UnexpectedCharacters as e:
             invalid_string = e._context.strip(" ^\t\n\r")

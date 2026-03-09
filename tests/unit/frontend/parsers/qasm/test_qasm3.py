@@ -65,6 +65,7 @@ class TestQasm3Parser:
             "tmp.qasm",
             "cx_override_test.qasm",
             "ecr_test.qasm",
+            "openpulse_tests/waveform_arithmetic_ops.qasm",
             "openpulse_tests/acquire.qasm",
             "openpulse_tests/expr_list_defcal_different_arg.qasm",
             "openpulse_tests/set_frequency.qasm",
@@ -150,6 +151,20 @@ class TestQasm3Parser:
         parser = Qasm3Parser()
         with pytest.raises(ValueError):
             parser.parse(QuantumInstructionBuilder(hardware_model=hardware_model), qasm)
+
+    def test_compiler_crashout(self, n_qubits):
+        hw = generate_hw_model(n_qubits)
+        qasm = get_qasm3("nonsense/qasm_file.qasm")
+        parser = Qasm3Parser()
+        with pytest.raises(ValueError):
+            parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+
+    def test_max_count_operator_within_waveform_elements(self, n_qubits):
+        hw = generate_hw_model(n_qubits)
+        qasm = get_qasm3("lark_parsing_test.qasm")
+        parser = Qasm3Parser(max_count_operator_within_waveform_elements=0)
+        with pytest.raises(ValueError):
+            parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
 
     # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
     # not support cX.
