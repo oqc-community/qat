@@ -22,9 +22,12 @@ class EchoModelLoader(BaseLegacyModelLoader):
     def load(self) -> QuantumHardwareModel:
         """Build the default Echo hardware model.
 
-        :param seed: Seed passed to `get_default_echo_hardware`. Use `False` to omit
-            the argument and keep that function's default seed. This differs from
-            `None`, which is forwarded explicitly as `seed=None`.
+        The ``random_seed`` value provided at initialization is forwarded to
+        :func:`get_default_echo_hardware` as its ``seed`` argument, except when
+        it is the boolean value ``False``. In that case, the ``seed`` argument is
+        omitted entirely. This differs from passing ``None``, which is forwarded
+        as ``seed=None`` and allows the callee to apply its own default seeding
+        behaviour.
         """
         return get_default_echo_hardware(
             qubit_count=self.qubit_count,
