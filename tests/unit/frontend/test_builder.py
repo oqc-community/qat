@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 import pytest
+from compiler_config.config import CompilerConfig
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
@@ -27,7 +28,16 @@ class TestBuilderFrontend:
         result = self.frontend.check_and_return_source(purr_builder)
         assert result is purr_builder
 
-    def test_emit(self):
+    @pytest.mark.parametrize("with_args", [True, False])
+    def test_emit(self, with_args):
         purr_builder = PurrBuilder(self.purr_model)
-        qat_ir_builder = self.frontend.emit(purr_builder, ResultManager(), MetricsManager())
+        if with_args:
+            qat_ir_builder = self.frontend.emit(
+                purr_builder,
+                res_mgr=ResultManager(),
+                met_mgr=MetricsManager(),
+                compiler_config=CompilerConfig(),
+            )
+        else:
+            qat_ir_builder = self.frontend.emit(purr_builder)
         assert isinstance(qat_ir_builder, QuantumInstructionBuilder)
