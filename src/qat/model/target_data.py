@@ -56,6 +56,11 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
 
     @classmethod
     def random(cls, seed: SeedType | None = None):
+        """Build a randomized device description for testing and demos.
+
+        :param seed: Optional seed used to make the generated values reproducible.
+        :return: A :class:`DeviceDescription` with randomized, valid hardware limits.
+        """
         return cls(
             **{
                 "sample_time": random.Random(seed).choice([1e-09, 2e-09]),
@@ -91,6 +96,14 @@ class QubitDescription(DeviceDescription):
 
     @classmethod
     def random(cls, seed: SeedType | None = None):
+        """Build a randomized qubit description for testing and demos.
+
+        This method starts from :meth:`DeviceDescription.random` and adds a
+        randomized ``passive_reset_time``.
+
+        :param seed: Optional seed used to make the generated values reproducible.
+        :return: A :class:`QubitDescription` instance with randomized valid fields.
+        """
         device_descr = DeviceDescription.random(seed).model_dump()
         device_descr.update(
             {"passive_reset_time": random.Random(seed).uniform(1e-06, 1e-04)}
@@ -153,6 +166,14 @@ class TargetData(AbstractTargetData):
 
     @cached_property
     def instruction_memory_size(self):
+        """
+        .. deprecated:: 3.3.0
+            This property will be removed in version 4.0.0.
+            Use :attr:`TargetData.QUBIT_DATA` (then
+            ``TargetData().QUBIT_DATA.instruction_memory_size``) or
+            :attr:`TargetData.RESONATOR_DATA` (then
+            ``TargetData().RESONATOR_DATA.instruction_memory_size``) instead.
+        """
         warn(
             f"`{type(self).__name__}.instruction_memory_size` is deprecated; use "
             "`QUBIT_DATA.instruction_memory_size` or "
@@ -176,12 +197,14 @@ class TargetData(AbstractTargetData):
 
     @classmethod
     def random(cls, seed: SeedType | None = None) -> "TargetData":
-        # Note: The random seed is used to ensure that the generated values are consistent
-        # across runs, which can be useful for testing and debugging.
-        # In order for the QubitDescription and ResonatorDescription to be compatible,
-        # they need to be generated with the same seed to ensure they have the same clock
-        # cycle. Hence, we generate a seed if none is provided and use it for both
-        # descriptions.
+        """Build randomized target data for testing and synthetic examples.
+
+        When ``seed`` is ``None``, a seed is generated and reused for both qubit
+        and resonator descriptions so they remain clock-cycle compatible.
+
+        :param seed: Optional seed used to make the generated values reproducible.
+        :return: A randomized :class:`TargetData` instance.
+        """
         if seed is None:
             seed = random.randint(0, 2**32 - 1)
         return cls(
@@ -199,6 +222,10 @@ class TargetData(AbstractTargetData):
     ) -> "TargetData":
         """Returns a default TargetData instance, allowing configuration over user-level
         parameters.
+
+        .. deprecated:: 3.3.0
+            This method will be removed in version 4.0.0.
+            Use :func:`TargetData` with appropriate keyword arguments instead.
 
         :param max_shots: The maximum amount of shots possible on this target.
         :param default_shots: The default amount of shots on this target if none specified
@@ -221,7 +248,12 @@ class TargetData(AbstractTargetData):
 
     @classmethod
     def default(cls) -> "TargetData":
-        """Returns a default TargetData instance."""
+        """Returns a default TargetData instance.
+
+        .. deprecated:: 3.3.0
+            This method will be removed in version 4.0.0.
+            Use :func:`TargetData` instead.
+        """
         warn(
             f"`{cls.__name__}.default()` is deprecated; use `{cls.__name__}()` instead. "
             "This will be removed in v4.0.0.",
@@ -232,7 +264,12 @@ class TargetData(AbstractTargetData):
 
 
 def DefaultTargetData() -> TargetData:
-    """Returns a default TargetData instance."""
+    """Returns a default TargetData instance.
+
+    .. deprecated:: 3.3.0
+        This will be removed in version 4.0.0.
+        Use :func:`TargetData` instead.
+    """
     warn(
         "`DefaultTargetData()` is deprecated; use `TargetData()` instead. "
         "This will be removed in v4.0.0.",
@@ -247,6 +284,10 @@ def CustomTargetData(
 ) -> TargetData:
     """Returns a default TargetData instance, allowing configuration over user-level
     parameters.
+
+    .. deprecated:: 3.3.0
+        This will be removed in version 4.0.0.
+        Use :func:`TargetData` with appropriate keyword arguments instead.
 
     :param max_shots: The maximum amount of shots possible on this target.
     :param default_shots: The default amount of shots on this target if none specified

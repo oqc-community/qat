@@ -38,12 +38,12 @@ from qat.engines.waveform import EchoEngine
 from qat.frontend import AutoFrontend
 from qat.middleend.default import DefaultMiddleend
 from qat.model.loaders.lucy import LucyModelLoader
-from qat.model.target_data import DefaultTargetData
+from qat.model.target_data import TargetData
 from qat.runtime import SimpleRuntime
 from qat.runtime.results_pipeline import get_results_pipeline
 
 model = LucyModelLoader(qubit_count=8).load()
-target_data = DefaultTargetData()
+target_data = TargetData()
 results_pipeline = get_results_pipeline(model=model, target_data=target_data)
 new_echo8 = Pipeline(
     name="new_echo8",
@@ -65,7 +65,7 @@ from qat.engines.waveform import EchoEngine
 from qat.frontend import AutoFrontend
 from qat.middleend.default import DefaultMiddleend
 from qat.model.loaders.lucy import LucyModelLoader
-from qat.model.target_data import DefaultTargetData, TargetData
+from qat.model.target_data import TargetData
 from qat.pipelines.updateable import Model, PipelineConfig, UpdateablePipeline
 from qat.runtime import SimpleRuntime
 from qat.runtime.results_pipeline import get_results_pipeline
@@ -93,7 +93,7 @@ class MyCoolPipeline(UpdateablePipeline):
 
 
 model = LucyModelLoader(qubit_count=8).load()
-target_data = DefaultTargetData()
+target_data = TargetData()
 pipeline_instance = MyCoolPipeline(
     config=dict(name="my_pipeline"), model=model, target_data=target_data
 )

@@ -112,5 +112,5 @@ Unlike the hardware model, the target data contains configurational information 
 * Constants of the control hardware, such as the sampling rates and clock speeds.
 * Limits on allowed quantities, such as frequencies and pulse durations.
 
-The standard target data can be found at :class:`TargetData <qat.model.target_data.TargetData>`. that can be customized through :class:`CustomTargetData <qat.model.target_data.CustomTargetData>`.
+The standard target data can be found at :class:`TargetData <qat.model.target_data.TargetData>`, and customised with keyword arguments.
 Each type of control hardware has its own target data, which might contain information unique to that set up. An instance of each target data is expected to exist for each QPU.

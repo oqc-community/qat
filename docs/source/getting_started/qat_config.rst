@@ -92,9 +92,10 @@ See the example below for defining pipelines
       pipeline: qat.pipelines.waveform.WaveformCompilePipeline
       hardware_loader: lucy8
       target_data:
-        type: qat.model.target_data.CustomTargetData
+        type: qat.model.target_data.TargetData
         config:
-          passive_reset_time: 5e-4
+          QUBIT_DATA:
+            passive_reset_time: 5e-4
     - name: echo16-compile
       pipeline: qat.pipelines.waveform.WaveformCompilePipeline
       hardware_loader: lucy16
@@ -150,9 +151,10 @@ Putting it all together, we can define a complete QAT config as such:
       pipeline: qat.pipelines.waveform.WaveformCompilePipeline
       hardware_loader: lucy8
       target_data:
-        type: qat.model.target_data.CustomTargetData
+        type: qat.model.target_data.TargetData
         config:
-          passive_reset_time: 5e-4
+          QUBIT_DATA:
+            passive_reset_time: 5e-4
       default: true
 
     EXECUTE:
