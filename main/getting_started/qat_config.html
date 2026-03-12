@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QAT Config &mdash; qat-compiler 3.0.0.post174.dev20260312104735 documentation</title>
+  <title>QAT Config &mdash; qat-compiler 3.0.0.post175.dev20260312122145 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -63,6 +63,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/target_data.html">TargetData Demo</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a><ul>
@@ -608,9 +609,10 @@
 <span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.pipelines.waveform.WaveformCompilePipeline</span>
 <span class="w">  </span><span class="nt">hardware_loader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lucy8</span>
 <span class="w">  </span><span class="nt">target_data</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.model.target_data.CustomTargetData</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.model.target_data.TargetData</span>
 <span class="w">    </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">passive_reset_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-4</span>
+<span class="w">      </span><span class="nt">QUBIT_DATA</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">passive_reset_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-4</span>
 <span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo16-compile</span>
 <span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.pipelines.waveform.WaveformCompilePipeline</span>
 <span class="w">  </span><span class="nt">hardware_loader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lucy16</span>
@@ -662,16 +664,17 @@
 <span class="linenos">17</span><span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.pipelines.waveform.WaveformCompilePipeline</span>
 <span class="linenos">18</span><span class="w">  </span><span class="nt">hardware_loader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lucy8</span>
 <span class="linenos">19</span><span class="w">  </span><span class="nt">target_data</span><span class="p">:</span>
-<span class="linenos">20</span><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.model.target_data.CustomTargetData</span>
+<span class="linenos">20</span><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.model.target_data.TargetData</span>
 <span class="linenos">21</span><span class="w">    </span><span class="nt">config</span><span class="p">:</span>
-<span class="linenos">22</span><span class="w">      </span><span class="nt">passive_reset_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-4</span>
-<span class="linenos">23</span><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="linenos">24</span>
-<span class="linenos">25</span><span class="nt">EXECUTE</span><span class="p">:</span>
-<span class="linenos">26</span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo8-execute</span>
-<span class="linenos">27</span><span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.pipelines.waveform.EchoExecutePipeline</span>
-<span class="linenos">28</span><span class="w">  </span><span class="nt">hardware_loader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lucy8</span>
-<span class="linenos">29</span><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="linenos">22</span><span class="w">      </span><span class="nt">QUBIT_DATA</span><span class="p">:</span>
+<span class="linenos">23</span><span class="w">        </span><span class="nt">passive_reset_time</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5e-4</span>
+<span class="linenos">24</span><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="nt">EXECUTE</span><span class="p">:</span>
+<span class="linenos">27</span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo8-execute</span>
+<span class="linenos">28</span><span class="w">  </span><span class="nt">pipeline</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">qat.pipelines.waveform.EchoExecutePipeline</span>
+<span class="linenos">29</span><span class="w">  </span><span class="nt">hardware_loader</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lucy8</span>
+<span class="linenos">30</span><span class="w">  </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 </pre></div>
 </div>
 </section>

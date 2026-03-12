@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Creating custom pipelines in QAT &mdash; qat-compiler 3.0.0.post174.dev20260312104735 documentation</title>
+  <title>Creating custom pipelines in QAT &mdash; qat-compiler 3.0.0.post175.dev20260312122145 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -63,6 +63,7 @@
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Creating custom pipelines in QAT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qiskit.html">Using the Qiskit simulator in new QAT</a></li>
 <li class="toctree-l2"><a class="reference internal" href="rtcs.html">Using the real-time chip simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="target_data.html">TargetData Demo</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a><ul>
@@ -536,12 +537,12 @@ See below.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.frontend</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoFrontend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.middleend.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultMiddleend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.loaders.lucy</span><span class="w"> </span><span class="kn">import</span> <span class="n">LucyModelLoader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.target_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultTargetData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.target_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleRuntime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.runtime.results_pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_results_pipeline</span>
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">LucyModelLoader</span><span class="p">(</span><span class="n">qubit_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-<span class="n">target_data</span> <span class="o">=</span> <span class="n">DefaultTargetData</span><span class="p">()</span>
+<span class="n">target_data</span> <span class="o">=</span> <span class="n">TargetData</span><span class="p">()</span>
 <span class="n">results_pipeline</span> <span class="o">=</span> <span class="n">get_results_pipeline</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="n">target_data</span><span class="p">)</span>
 <span class="n">new_echo8</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;new_echo8&quot;</span><span class="p">,</span>
@@ -555,12 +556,6 @@ See below.</p>
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2864/4210752094.py:12: DeprecationWarning: `DefaultTargetData()` is deprecated; use `TargetData()` instead. This will be removed in v4.0.0.
-  target_data = DefaultTargetData()
-</pre></div>
-</div>
-</div>
 </div>
 <p>If we want to make this an updateable pipeline, we can do so as shown below. The <code class="docutils literal notranslate"><span class="pre">_build_pipeline</span></code> acts a factory method with the recipe to build a pipeline provided the model and target data.</p>
 <div class="cell docutils container">
@@ -571,7 +566,7 @@ See below.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.frontend</span><span class="w"> </span><span class="kn">import</span> <span class="n">AutoFrontend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.middleend.default</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultMiddleend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.loaders.lucy</span><span class="w"> </span><span class="kn">import</span> <span class="n">LucyModelLoader</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.target_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DefaultTargetData</span><span class="p">,</span> <span class="n">TargetData</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.target_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">TargetData</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.pipelines.updateable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">PipelineConfig</span><span class="p">,</span> <span class="n">UpdateablePipeline</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.runtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimpleRuntime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.runtime.results_pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_results_pipeline</span>
@@ -599,16 +594,10 @@ See below.</p>
 
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">LucyModelLoader</span><span class="p">(</span><span class="n">qubit_count</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
-<span class="n">target_data</span> <span class="o">=</span> <span class="n">DefaultTargetData</span><span class="p">()</span>
+<span class="n">target_data</span> <span class="o">=</span> <span class="n">TargetData</span><span class="p">()</span>
 <span class="n">pipeline_instance</span> <span class="o">=</span> <span class="n">MyCoolPipeline</span><span class="p">(</span>
     <span class="n">config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;my_pipeline&quot;</span><span class="p">),</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">target_data</span><span class="o">=</span><span class="n">target_data</span>
 <span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/tmp/ipykernel_2864/4073348843.py:35: DeprecationWarning: `DefaultTargetData()` is deprecated; use `TargetData()` instead. This will be removed in v4.0.0.
-  target_data = DefaultTargetData()
 </pre></div>
 </div>
 </div>
