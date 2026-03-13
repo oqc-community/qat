@@ -1202,16 +1202,18 @@ files = [
 
 [[package]]
 name = "docplex"
-version = "2.32.257"
+version = "2.32.259"
 description = "The IBM Decision Optimization CPLEX Modeling for Python"
 optional = false
 python-versions = "*"
 groups = ["dev"]
 files = [
-    {file = "docplex-2.32.257.tar.gz", hash = "sha256:0eaf4cb400d7a1c1d6e398a5f2c46268b3d3005e42b6fceb1ac69544dd80277a"},
+    {file = "docplex-2.32.259.tar.gz", hash = "sha256:84e3ba28e9237e279435f3b3a63ee41f0b508d2082c05ee8a50c9b50bf2179d1"},
 ]
 
 [package.dependencies]
+hashable-list = "*"
+ordered-set = "*"
 six = "*"
 
 [[package]]
@@ -1754,6 +1756,18 @@ files = [
 
 [package.dependencies]
 numpy = ">=1.21.2"
+
+[[package]]
+name = "hashable-list"
+version = "0.2.0"
+description = "A hashable list type in Python"
+optional = false
+python-versions = ">=3.9"
+groups = ["dev"]
+files = [
+    {file = "hashable_list-0.2.0-py3-none-any.whl", hash = "sha256:90cb878017adfb9a548ce7d02b0095211290f3bdf0d3970936b384db4879582a"},
+    {file = "hashable_list-0.2.0.tar.gz", hash = "sha256:111b6b7b43826379924a28feb8038aa3e1120788d66b263dfb846b333cce3d55"},
+]
 
 [[package]]
 name = "httpcore"
@@ -3702,6 +3716,21 @@ files = [
 [package.dependencies]
 importlib-metadata = ">=6.0,<8.8.0"
 typing-extensions = ">=4.5.0"
+
+[[package]]
+name = "ordered-set"
+version = "4.1.0"
+description = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
+optional = false
+python-versions = ">=3.7"
+groups = ["dev"]
+files = [
+    {file = "ordered-set-4.1.0.tar.gz", hash = "sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8"},
+    {file = "ordered_set-4.1.0-py3-none-any.whl", hash = "sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562"},
+]
+
+[package.extras]
+dev = ["black", "mypy", "pytest"]
 
 [[package]]
 name = "overrides"
