@@ -119,7 +119,39 @@ class ModuleDescription(NoExtraFieldsFrozenModel):
         return cls()
 
 
-class QcmDescription(ModuleDescription):
+class ReadoutModuleDescription(ModuleDescription):
+    """
+    Constants related to Qblox Readout Modules.
+
+    :param min_sample_size_scope_acquisitions: Minimum amount of scope trace acquisition
+                                    datapoints returned.
+    :param max_sample_size_scope_acquisitions: Maximal amount of scope trace acquisition
+                                    datapoints returned.
+    :param max_binned_acquisitions: Each readout module has a maximum of 3M memory bins.
+                                    This memory can be dynamically allocated by each of the
+                                    sequencers. For example, in a module with 6 sequencers,
+                                    the sequencers can evenly allocate 500K bins
+                                    simultaneously, or a single sequencer can allocate the
+                                    whole 3M bins, leaving nothing for other sequencers.
+    """
+
+    min_sample_size_scope_acquisitions: PositiveInt = 4
+    max_sample_size_scope_acquisitions: PositiveInt = 16384
+    max_binned_acquisitions: PositiveInt = 3_000_000
+
+
+class ControlModuleDescription(ModuleDescription):
+    """
+    Constants related to Qblox Control Modules.
+
+    Currently, there are no constants specific to control modules, but this class is defined for
+    consistency and future extensibility.
+    """
+
+    pass
+
+
+class QcmDescription(ControlModuleDescription):
     """
     Constants related to Qblox QCM Module.
 
@@ -131,7 +163,7 @@ class QcmDescription(ModuleDescription):
     max_qcm_offset_v: PositiveFloat = 2.5
 
 
-class QcmRfDescription(QcmDescription):
+class QcmRfDescription(ControlModuleDescription):
     """
     Constants related to Qblox QCM-RF Module.
 
@@ -143,28 +175,19 @@ class QcmRfDescription(QcmDescription):
     max_qcm_rf_offset_mv: PositiveInt = 73
 
 
-class QrmDescription(ModuleDescription):
+class QrmDescription(ReadoutModuleDescription):
     """
     Constants related to Qblox QRM Module.
 
     :param min_qrm_offset_v: Minimum offset for QRM.
     :param max_qrm_offset_v: Maximum offset for QRM.
-    :param min_sample_size_scope_acquisitions: Minimum amount of scope trace acquisition datapoints returned.
-    :param max_sample_size_scope_acquisitions: Maximal amount of scope trace acquisition datapoints returned.
-    :param max_binned_acquisitions: Each QRM(-RF) module has a maximum of 3M memory bins. This memory can be
-                                    dynamically allocated by each of the 6 sequencers. For example, all 6 sequencers
-                                    can evenly allocate 500K bins simultaneously or a single sequencers can allocate
-                                    the whole 3M and leaves nothing for other sequencers.
     """
 
     min_qrm_offset_v: NegativeFloat = -0.09
     max_qrm_offset_v: PositiveFloat = 0.09
-    min_sample_size_scope_acquisitions: PositiveInt = 4
-    max_sample_size_scope_acquisitions: PositiveInt = 16384
-    max_binned_acquisitions: PositiveInt = 3_000_000
 
 
-class QrmRfDescription(QrmDescription):
+class QrmRfDescription(ReadoutModuleDescription):
     """
     Constants related to Qblox QRM-RF Module.
 
@@ -174,6 +197,25 @@ class QrmRfDescription(QrmDescription):
 
     min_qrm_rf_offset_v: NegativeFloat = -0.09
     max_qrm_rf_offset_v: PositiveFloat = 0.09
+
+
+class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
+    """Constants related to Qblox QRC Module.
+
+    :param number_of_sequencers: Number of sequencers in total.
+    :param number_of_readout_sequencers: Number of readout sequencers.
+    :param number_of_control_sequencers: Number of control sequencers.
+    :param max_binned_acquisitions: Each QRC module has a maximum of 3M memory bins. This
+                                    memory can be dynamically allocated by each of the 8
+                                    readout sequencers. For example, all 8 readout
+                                    sequencers can evenly allocate 375K bins simultaneously,
+                                    or a single sequencer can allocate the whole 3M bins,
+                                    leaving nothing for other sequencers.
+    """
+
+    number_of_sequencers: PositiveInt = 12  # 8 readout + 4 control
+    number_of_readout_sequencers: PositiveInt = 8
+    number_of_control_sequencers: PositiveInt = 4
 
 
 class QbloxTargetData(TargetData):
@@ -186,7 +228,8 @@ class QbloxTargetData(TargetData):
     :param QCM_DATA: Constants related to the QCM module.
     :param QCM_RF_DATA: Constants related to the QCM-RF module.
     :param QRM_DATA: Constants related to the QRM module.
-    :param QRM_RF_DATA: Constants related to the QRM module.
+    :param QRM_RF_DATA: Constants related to the QRM-RF module.
+    :param QRC_DATA: Constants related to the QRC module.
     """
 
     # COMPILER-1004, COMPILER-1005
@@ -199,3 +242,4 @@ class QbloxTargetData(TargetData):
     QCM_RF_DATA: QcmRfDescription = QcmRfDescription()
     QRM_DATA: QrmDescription = QrmDescription()
     QRM_RF_DATA: QrmRfDescription = QrmRfDescription()
+    QRC_DATA: QrcDescription = QrcDescription()

@@ -6,6 +6,7 @@ from qat.backend.qblox.target_data import (
     Q1asmDescription,
     QcmDescription,
     QcmRfDescription,
+    QrcDescription,
     QrmDescription,
     QrmRfDescription,
     ReadoutSequencerDescription,
@@ -135,3 +136,12 @@ class TestSpecifiedTargetDataFields:
         assert default_qrm_rf_description.max_binned_acquisitions == 3_000_000
         assert default_qrm_rf_description.min_qrm_rf_offset_v == -0.09
         assert default_qrm_rf_description.max_qrm_rf_offset_v == 0.09
+
+    def test_qrc_description(self):
+        qrc_description = QrcDescription()
+        assert qrc_description.number_of_sequencers == 12
+        assert qrc_description.number_of_readout_sequencers == 8
+        assert qrc_description.number_of_control_sequencers == 4
+        assert qrc_description.min_sample_size_scope_acquisitions == 4
+        assert qrc_description.max_sample_size_scope_acquisitions == 16384
+        assert qrc_description.max_binned_acquisitions == 3_000_000
