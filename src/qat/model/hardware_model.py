@@ -71,8 +71,11 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     """Class for calibrating our QPU hardware.
 
     :param qubits: The superconducting qubits on the chip.
-    :param physical_connectivity: The connectivities of the physical qubits on the QPU (undirected graph).
-    :param logical_connectivity: The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of `physical_connectivity`.
+    :param physical_connectivity: The graph of physical connections between the qubits,
+        representing all available couplings (possibly sparse) and supporting bidirectional
+        and unidirectional connections.
+    :param logical_connectivity: The graph of logical connections supported by the compiler.
+        Logical connections are the connections that 2Q gates are supported on.
     :param logical_connectivity_quality: Quality of the connections between the qubits.
     :param error_mitigation: Error mitigation strategy for this hardware model.
     """
@@ -118,11 +121,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
                     self._pulse_channel_ids_to_device[pulse_channel.uuid] = device
 
     def _physical_channel_to_device_mapping(self, qubit: Qubit):
-        """
-        populated the mapping from physical channel ids to devices (qubits and resonators)
-        in the hardware model.
-        The qubit mapping will also map the resonator physical channels to the qubit connected to
-        the resonator.
+        """Populated the mapping from physical channel ids to devices (qubits and
+        resonators) in the hardware model.
+        The qubit mapping will also map the resonator physical channels to the qubit
+        connected to the resonator.
         While the resonator mapping will only map the physical channels to the resonator.
         """
         self._physical_channel_ids_to_qubit.update(
@@ -153,97 +155,130 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
         return data
 
-    @field_validator("physical_connectivity")
-    def validate_physical_connectivity_symmetry(cls, physical_connectivity):
-        for q, connected_qs in physical_connectivity.items():
-            for connected_q in connected_qs:
-                if (
-                    physical_connectivity.get(connected_q, None)
-                    and q not in physical_connectivity[connected_q]
-                ):
-                    raise ValueError(
-                        f"The topology is not symmetric, qubit {q} not present in connected qubits of {connected_q}."
-                    )
-        return physical_connectivity
+    @model_validator(mode="after")
+    def validate_physical_connectivity(self):
+        """Validates that physical connectivity graph matches the cross-resonance pulse
+        channels used in couplings."""
+
+        connectivity_edges = set(
+            [
+                (q1, q2)
+                for q1, connections in self.physical_connectivity.items()
+                for q2 in connections
+            ]
+        )
+        cr_edges = set(
+            [
+                (q1, q2)
+                for q1, qubit in self.qubits.items()
+                for q2 in qubit.cross_resonance_pulse_channels
+            ]
+        )
+        crc_edges = set(
+            [
+                (q2, q1)
+                for q1, qubit in self.qubits.items()
+                for q2 in qubit.cross_resonance_cancellation_pulse_channels
+            ]
+        )
+
+        if connectivity_edges != cr_edges:
+            raise ValueError(
+                f"Cross resonance pulse channels {cr_edges} do not match physical "
+                f"connectivity edges {connectivity_edges}."
+            )
+        if connectivity_edges != crc_edges:
+            raise ValueError(
+                f"Cross resonance cancellation pulse channels {crc_edges} do not match "
+                f"physical connectivity edges {connectivity_edges}."
+            )
+        return self
 
     @model_validator(mode="after")
-    def validate_connectivity(self):
-        # Check if all qubits exist in physical connectivity.
-        if len(self.qubits) > 1:  # 1Q-systems do not have any connectivity.
-            assert self.qubits.keys() == self.physical_connectivity.keys(), (
-                f"Inconsistent qubit ids for {self.qubits} and {self.physical_connectivity}."
+    def validate_logical_connectivity(self):
+        """Validates that logical connectivity is a subgraph of physical connectivity.
+        Pulse channels are checked as part of physical channel connectivity, and thus do not
+        need to be checked here.
+        """
+        invalid_edges = set()
+        for q1_index, connected_qubits in self.logical_connectivity.items():
+            q1_physical_connections = self.physical_connectivity.get(q1_index, set())
+            for q2_index in connected_qubits:
+                if q2_index not in q1_physical_connections:
+                    invalid_edges.add((q1_index, q2_index))
+
+        if len(invalid_edges) > 0:
+            raise ValueError(
+                "The logical connectivity contains edges that are not present in the "
+                f"physical connectivity: {invalid_edges}."
             )
+        return self
 
-        # Check if logical connectivity is subset of physical connectivity.
-        for qubit_index in self.logical_connectivity:
-            if (
-                self.logical_connectivity[qubit_index]
-                and not self.logical_connectivity[qubit_index]
-                <= self.physical_connectivity[qubit_index]
-            ):
-                raise ValueError(
-                    "Logical connectivity must be a subgraph of the physical connectivity."
-                )
+    @model_validator(mode="after")
+    def validate_physical_channel_naming(self):
+        """Validates that physical channel indices are unique across all devices in the
+        hardware model."""
 
-        # Check if qubit cross resonance (cancellation) pulse channels agree with the physical connectivity.
-        physical_connectivities = {
-            (src, tgt) for (src, tgts) in self.physical_connectivity.items() for tgt in tgts
-        }
-        cross_resonance_edges = {
-            (src, chan.auxiliary_qubit)
-            for src, qubit in self.qubits.items()
-            for chan in qubit.cross_resonance_pulse_channels.values()
-        }
-        cross_cancellation_edges = {
-            (src, chan.auxiliary_qubit)
-            for src, qubit in self.qubits.items()
-            for chan in qubit.cross_resonance_cancellation_pulse_channels.values()
-        }
-
-        assert cross_resonance_edges == cross_cancellation_edges, (
-            "Cross resonance channels mismatch cross resonance cancellation channels."
-        )
-        assert physical_connectivities == cross_resonance_edges, (
-            "Cross resonance channels mismatch physical connectivity."
-        )
-        assert physical_connectivities == cross_cancellation_edges, (
-            "Cross resonance cancellation channels mismatch physical connectivity."
-        )
-
-        # Check unique physical channel indices.
         physical_channel_indices = [
-            qubit.physical_channel.name_index for qubit in self.quantum_devices
+            device.physical_channel.name_index for device in self.quantum_devices
         ]
-        assert len(physical_channel_indices) == len(set(physical_channel_indices)), (
-            f"Physical channel indices must be unique, found {physical_channel_indices}."
-        )
-
+        if len(physical_channel_indices) != len(set(physical_channel_indices)):
+            raise ValueError(
+                "Physical channel indices must be unique, found "
+                f"{physical_channel_indices}."
+            )
         return self
 
     @model_validator(mode="after")
     def validate_connectivity_quality(self):
+        """Validates that the logical connectivity quality is provided for all edges in the
+        logical connectivity, and the graphs have the same edges."""
+
         for q1_index, q2_index in self.logical_connectivity_quality:
             if not self.logical_connectivity.get(q1_index, None):
                 raise IndexError(
-                    f"The coupling ({q1_index}, {q2_index}) is not present in `logical_connectivity`."
+                    f"The coupling ({q1_index}, {q2_index}) is not present in "
+                    "`logical_connectivity`."
                 )
 
         for q1_index, connected_qubits in self.logical_connectivity.items():
             for q2_index in connected_qubits:
                 if (q1_index, q2_index) not in self.logical_connectivity_quality:
                     raise IndexError(
-                        f"The coupling ({q1_index}, {q2_index}) is not present in `logical_connectivity_quality`."
+                        f"The coupling ({q1_index}, {q2_index}) is not present in "
+                        "`logical_connectivity_quality`."
                     )
 
         return self
 
     @model_validator(mode="after")
     def validate_error_mitigation(self):
-        if self.error_mitigation.is_enabled and not all(
-            [q_id in self.qubits.keys() for q_id in self.error_mitigation.qubits]
-        ):
+        """Raises if the error mitigation has an error mitigation strategy for qubits that
+        are not in the hardware model, and warns if qubits are missing.
+
+        Warnings are preferred over errors here for missing qubits, which take an assumed
+        success rate of 0.0 as per the `qubit_quality` method. Additionally, poor performing
+        qubits might not appear in the logical connectivity, and are thus not characterised.
+        """
+
+        if not self.error_mitigation.is_enabled:
+            return self
+
+        expected_qubit_indices = set(self.qubits.keys())
+        mitigation_qubit_indices = set(self.error_mitigation.qubits)
+
+        if mitigation_qubit_indices - expected_qubit_indices:
             raise ValueError(
-                "Please provide an error mitigation strategy for all qubits in the hardware model."
+                "Error mitigation strategy provided for qubits "
+                f"{mitigation_qubit_indices - expected_qubit_indices} that are not in the "
+                "hardware model."
+            )
+
+        if expected_qubit_indices - mitigation_qubit_indices:
+            log.warning(
+                "No error mitigation strategy provided for qubits "
+                f"{expected_qubit_indices - mitigation_qubit_indices} that are in the "
+                "hardware model."
             )
 
         return self

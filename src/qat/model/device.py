@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 import numpy as np
-from pydantic import Field, field_validator, model_validator
+from pydantic import Field, field_validator
 
 from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform
 from qat.utils.pydantic import (
@@ -82,8 +82,8 @@ class PhysicalBaseband(Component):
     frequency of a carrier signal.
 
     :param frequency: The frequency of the LO.
-    :param if_frequency: The intermediate frequency (IF) resulting from
-                      mixing the baseband with the carrier signal.
+    :param if_frequency: The intermediate frequency (IF) resulting from mixing the baseband
+        with the carrier signal.
     """
 
     frequency: CalibratablePositiveFloat = Field(default=np.nan)
@@ -94,8 +94,8 @@ class IQBias(NoExtraFieldsModel):
     """
     Models the bias in voltages V_I / V_Q for the I and Q components in a physical channel.
 
-    :param bias: The bias as a complex number, where the real part is the I component
-                and the imaginary part is the Q component.
+    :param bias: The bias as a complex number, where the real part is the I component and
+        the imaginary part is the Q component.
     """
 
     bias: complex | float = 0 + 0j
@@ -105,15 +105,10 @@ class PhysicalChannel(Component):
     """
     Models a physical channel that can carry one or multiple pulses.
 
-    Attributes:
-        baseband: The physical baseband.
-
-        block_size: The number of samples within a single block.
-        iq_voltage_bias: The bias in voltages V_I / V_Q for the I and Q components.
-
-        acquire_allowed: Whether the physical channel allows acquire operations.
-        swap_readout_iq: Whether to swap the I and Q components for readout operations.
-        name_index: integer used in human readable name, `channel_<index>`.
+    :param baseband: The physical baseband.
+    :param block_size: The number of samples within a single block.
+    :param iq_voltage_bias: The bias in voltages V_I / V_Q for the I and Q components.
+    :param name_index: integer used in human readable name, `channel_<index>`.
     """
 
     baseband: PhysicalBaseband = Field(frozen=True)
@@ -332,7 +327,8 @@ class Resonator(Component):
     """
     Models a resonator on a chip. Can be connected to multiple qubits.
 
-    :param physical_channel: The physical channel that carries the pulses to the physical resonator.
+    :param physical_channel: The physical channel that carries the pulses to the physical
+        resonator.
     :param pulse_channels: The pulse channels for controlling the resonator.
     :param measure_pulse: Calibrated parameters for the measure pulse on the resonator.
     :param acquire: Calibrated parameters for the acquire instruction.
@@ -364,11 +360,11 @@ class QubitPulseChannels(PulseChannelSet):
     freq_shift: FreqShiftPulseChannel = Field(frozen=True, default=FreqShiftPulseChannel())
 
     cross_resonance_channels: FrozenDict[QubitId, CrossResonancePulseChannel] = Field(
-        frozen=True, max_length=3, default=FrozenDict({})
+        frozen=True, default=FrozenDict({})
     )
     cross_resonance_cancellation_channels: FrozenDict[
         QubitId, CrossResonanceCancellationPulseChannel
-    ] = Field(frozen=True, max_length=3, default=FrozenDict({}))
+    ] = Field(frozen=True, default=FrozenDict({}))
 
     @field_validator("cross_resonance_channels", "cross_resonance_cancellation_channels")
     def validate_channels_qubit_mapping(cls, channels):
@@ -377,16 +373,6 @@ class QubitPulseChannels(PulseChannelSet):
                 f"Mismatch in mapping for qubit id in {channels}."
             )
         return channels
-
-    @model_validator(mode="after")
-    def validate_cross_resonance_pulse_channels(self):
-        assert (
-            self.cross_resonance_channels.keys()
-            == self.cross_resonance_cancellation_channels.keys()
-        ), (
-            "Mismatch between auxiliary qubit ids for cross resonance and cross resonance cancellation channels."
-        )
-        return self
 
     @property
     def all_pulse_channels(self):

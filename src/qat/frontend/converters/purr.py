@@ -29,7 +29,7 @@ from qat.purr.utils.logger import get_default_logger
 
 logger = get_default_logger()
 
-waveform_map: dict[PulseShapeType, type[WaveformInstructions.AbstractWaveform]] = {
+WAVEFORM_MAP: dict[PulseShapeType, type[WaveformInstructions.AbstractWaveform]] = {
     PulseShapeType.SQUARE: WaveformInstructions.SquareWaveform,
     PulseShapeType.GAUSSIAN: WaveformInstructions.GaussianWaveform,
     PulseShapeType.SOFT_SQUARE: WaveformInstructions.SoftSquareWaveform,
@@ -583,7 +583,7 @@ class PurrConverter:
                 waveform_data[name] = var
 
         waveform_class = waveform_data.pop("shape")
-        if waveform_class not in waveform_map:
+        if waveform_class not in WAVEFORM_MAP:
             raise ValueError(
                 f"Unsupported waveform shape {waveform_class} found when converting "
                 "Pulse instruction."
@@ -591,7 +591,7 @@ class PurrConverter:
 
         return [
             WaveformInstructions.Pulse(
-                waveform=waveform_map[waveform_class](**waveform_data),
+                waveform=WAVEFORM_MAP[waveform_class](**waveform_data),
                 **pulse_data,
             )
         ]
