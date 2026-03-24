@@ -603,8 +603,8 @@ validated to form a valid model.</p>
 <p>Models the bias in voltages V_I / V_Q for the I and Q components in a physical channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.model.device.IQBias.params.bias"></span><strong>bias</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.IQBias.params.bias">¶</a> – The bias as a complex number, where the real part is the I component
-and the imaginary part is the Q component.</p>
+<dd class="field-odd"><p><span class="target" id="qat.model.device.IQBias.params.bias"></span><strong>bias</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.IQBias.params.bias">¶</a> – The bias as a complex number, where the real part is the I component and
+the imaginary part is the Q component.</p>
 </dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -677,8 +677,8 @@ frequency of a carrier signal.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.model.device.PhysicalBaseband.params.frequency"></span><strong>frequency</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalBaseband.params.frequency">¶</a> – The frequency of the LO.</p></li>
-<li><p><span class="target" id="qat.model.device.PhysicalBaseband.params.if_frequency"></span><strong>if_frequency</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalBaseband.params.if_frequency">¶</a> – The intermediate frequency (IF) resulting from
-mixing the baseband with the carrier signal.</p></li>
+<li><p><span class="target" id="qat.model.device.PhysicalBaseband.params.if_frequency"></span><strong>if_frequency</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalBaseband.params.if_frequency">¶</a> – The intermediate frequency (IF) resulting from mixing the baseband
+with the carrier signal.</p></li>
 </ul>
 </dd>
 </dl>
@@ -709,13 +709,14 @@ validated to form a valid model.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhysicalChannel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.PhysicalChannel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.device.Component" title="qat.model.device.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
 <p>Models a physical channel that can carry one or multiple pulses.</p>
-<dl>
-<dt>Attributes:</dt><dd><p>baseband: The physical baseband.</p>
-<p>block_size: The number of samples within a single block.
-iq_voltage_bias: The bias in voltages V_I / V_Q for the I and Q components.</p>
-<p>acquire_allowed: Whether the physical channel allows acquire operations.
-swap_readout_iq: Whether to swap the I and Q components for readout operations.
-name_index: integer used in human readable name, <cite>channel_&lt;index&gt;</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.model.device.PhysicalChannel.params.baseband"></span><strong>baseband</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalChannel.params.baseband">¶</a> – The physical baseband.</p></li>
+<li><p><span class="target" id="qat.model.device.PhysicalChannel.params.block_size"></span><strong>block_size</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalChannel.params.block_size">¶</a> – The number of samples within a single block.</p></li>
+<li><p><span class="target" id="qat.model.device.PhysicalChannel.params.iq_voltage_bias"></span><strong>iq_voltage_bias</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalChannel.params.iq_voltage_bias">¶</a> – The bias in voltages V_I / V_Q for the I and Q components.</p></li>
+<li><p><span class="target" id="qat.model.device.PhysicalChannel.params.name_index"></span><strong>name_index</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.PhysicalChannel.params.name_index">¶</a> – integer used in human readable name, <cite>channel_&lt;index&gt;</cite>.</p></li>
+</ul>
 </dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -1052,11 +1053,6 @@ validated to form a valid model.</p>
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_channels_qubit_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.QubitPulseChannels.validate_channels_qubit_mapping" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.model.device.QubitPulseChannels.validate_cross_resonance_pulse_channels">
-<span class="sig-name descname"><span class="pre">validate_cross_resonance_pulse_channels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.QubitPulseChannels.validate_cross_resonance_pulse_channels" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
@@ -1067,7 +1063,8 @@ validated to form a valid model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.device.Resonator.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.physical_channel">¶</a> – The physical channel that carries the pulses to the physical resonator.</p></li>
+<li><p><span class="target" id="qat.model.device.Resonator.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.physical_channel">¶</a> – The physical channel that carries the pulses to the physical
+resonator.</p></li>
 <li><p><span class="target" id="qat.model.device.Resonator.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.pulse_channels">¶</a> – The pulse channels for controlling the resonator.</p></li>
 <li><p><span class="target" id="qat.model.device.Resonator.params.measure_pulse"></span><strong>measure_pulse</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.measure_pulse">¶</a> – Calibrated parameters for the measure pulse on the resonator.</p></li>
 <li><p><span class="target" id="qat.model.device.Resonator.params.acquire"></span><strong>acquire</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.acquire">¶</a> – Calibrated parameters for the acquire instruction.</p></li>

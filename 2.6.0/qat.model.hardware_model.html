@@ -389,8 +389,11 @@ validated to form a valid model.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.qubits"></span><strong>qubits</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.qubits">¶</a> – The superconducting qubits on the chip.</p></li>
-<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity"></span><strong>physical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity">¶</a> – The connectivities of the physical qubits on the QPU (undirected graph).</p></li>
-<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity">¶</a> – The connectivities (directed graph) of the qubits used for compilation, which can be a subgraph of <cite>physical_connectivity</cite>.</p></li>
+<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity"></span><strong>physical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.physical_connectivity">¶</a> – The graph of physical connections between the qubits,
+representing all available couplings (possibly sparse) and supporting bidirectional
+and unidirectional connections.</p></li>
+<li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity"></span><strong>logical_connectivity</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity">¶</a> – The graph of logical connections supported by the compiler.
+Logical connections are the connections that 2Q gates are supported on.</p></li>
 <li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity_quality"></span><strong>logical_connectivity_quality</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.logical_connectivity_quality">¶</a> – Quality of the connections between the qubits.</p></li>
 <li><p><span class="target" id="qat.model.hardware_model.PhysicalHardwareModel.params.error_mitigation"></span><strong>error_mitigation</strong><a class="paramlink headerlink reference internal" href="#qat.model.hardware_model.PhysicalHardwareModel.params.error_mitigation">¶</a> – Error mitigation strategy for this hardware model.</p></li>
 </ul>
@@ -537,24 +540,43 @@ in this hardware model as a list.</p>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity">
-<span class="sig-name descname"><span class="pre">validate_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity_quality">
 <span class="sig-name descname"><span class="pre">validate_connectivity_quality</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity_quality" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validates that the logical connectivity quality is provided for all edges in the
+logical connectivity, and the graphs have the same edges.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_error_mitigation">
 <span class="sig-name descname"><span class="pre">validate_error_mitigation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_error_mitigation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Raises if the error mitigation has an error mitigation strategy for qubits that
+are not in the hardware model, and warns if qubits are missing.</p>
+<p>Warnings are preferred over errors here for missing qubits, which take an assumed
+success rate of 0.0 as per the <cite>qubit_quality</cite> method. Additionally, poor performing
+qubits might not appear in the logical connectivity, and are thus not characterised.</p>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity_symmetry">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_physical_connectivity_symmetry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">physical_connectivity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity_symmetry" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_logical_connectivity">
+<span class="sig-name descname"><span class="pre">validate_logical_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_logical_connectivity" title="Link to this definition"></a></dt>
+<dd><p>Validates that logical connectivity is a subgraph of physical connectivity.
+Pulse channels are checked as part of physical channel connectivity, and thus do not
+need to be checked here.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_physical_channel_naming">
+<span class="sig-name descname"><span class="pre">validate_physical_channel_naming</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_channel_naming" title="Link to this definition"></a></dt>
+<dd><p>Validates that physical channel indices are unique across all devices in the
+hardware model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity">
+<span class="sig-name descname"><span class="pre">validate_physical_connectivity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity" title="Link to this definition"></a></dt>
+<dd><p>Validates that physical connectivity graph matches the cross-resonance pulse
+channels used in couplings.</p>
+</dd></dl>
 
 </dd></dl>
 

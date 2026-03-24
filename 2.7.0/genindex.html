@@ -830,6 +830,8 @@
       <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.baseband">baseband (PhysicalChannel attribute)</a>
 
       <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.params.baseband">(qat.model.device.PhysicalChannel parameter)</a>
+</li>
         <li><a href="qat.purr.backends.qblox.device.html#qat.purr.backends.qblox.device.QbloxPhysicalChannel.baseband">(QbloxPhysicalChannel attribute)</a>
 </li>
       </ul></li>
@@ -931,6 +933,8 @@
 
       <ul>
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.block_size">(PulseChannel property)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.params.block_size">(qat.model.device.PhysicalChannel parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.block_time">block_time (PhysicalChannel property)</a>
@@ -3092,7 +3096,11 @@
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.InvokerMixin">InvokerMixin (class in qat.core.pass_base)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.iq_voltage_bias">iq_voltage_bias (PhysicalChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.params.iq_voltage_bias">(qat.model.device.PhysicalChannel parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.IQBias">IQBias (class in qat.model.device)</a>
 </li>
       <li><a href="qat.backend.passes.analysis.html#qat.backend.passes.analysis.TimelineAnalysis.run.params.ir">ir (qat.backend.passes.analysis.TimelineAnalysis.run parameter)</a>
@@ -4747,7 +4755,11 @@
 </li>
       </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.name_index">name_index (PhysicalChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.PhysicalChannel.params.name_index">(qat.model.device.PhysicalChannel parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale.NANO">NANO (Scale attribute)</a>
 </li>
       <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.DecomposeToNativeGates.params.native_gates">native_gates (qat.middleend.passes.gates.transform.DecomposeToNativeGates parameter)</a>
@@ -4770,10 +4782,10 @@
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_PHASE_STEPS_PER_DEG">NCO_PHASE_STEPS_PER_DEG (Constants attribute)</a>
 </li>
-      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig">NcoConfig (class in qat.purr.backends.qblox.config)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter">NewQbloxEmitter (class in qat.purr.backends.qblox.codegen)</a>
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime">NewQuantumRuntime (class in qat.purr.compiler.runtime)</a>
@@ -8763,11 +8775,7 @@
 </li>
       <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.validate_channels_qubit_mapping">validate_channels_qubit_mapping() (QubitPulseChannels class method)</a>
 </li>
-      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity">validate_connectivity() (PhysicalHardwareModel method)</a>
-</li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_connectivity_quality">validate_connectivity_quality() (PhysicalHardwareModel method)</a>
-</li>
-      <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.validate_cross_resonance_pulse_channels">validate_cross_resonance_pulse_channels() (QubitPulseChannels method)</a>
 </li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.validate_duration">validate_duration() (Pulse class method)</a>
 </li>
@@ -8779,9 +8787,13 @@
 </li>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.validate_linear">validate_linear() (ReadoutMitigation class method)</a>
 </li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_logical_connectivity">validate_logical_connectivity() (PhysicalHardwareModel method)</a>
+</li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative">validate_non_negative() (in module qat.utils.pydantic)</a>
 </li>
-      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity_symmetry">validate_physical_connectivity_symmetry() (PhysicalHardwareModel class method)</a>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_channel_naming">validate_physical_channel_naming() (PhysicalHardwareModel method)</a>
+</li>
+      <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_connectivity">validate_physical_connectivity() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_qubit_coupling">validate_qubit_coupling() (in module qat.utils.pydantic)</a>
 </li>
