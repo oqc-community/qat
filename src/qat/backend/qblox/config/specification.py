@@ -15,6 +15,11 @@ class ConnectionConfig:
     out1: str | None = None  # Enum: {‘I’, ‘Q’, ‘off’}
     out2: str | None = None  # Enum: {‘I’, ‘Q’, ‘off’}
     out3: str | None = None  # Enum: {‘I’, ‘Q’, ‘off’}
+    out4: str | None = None
+    out5: str | None = None
+
+    in0: str | None = None
+    in1: str | None = None
     acq: str | None = None  # Enum: {False, ‘in0’, True, ‘off’}
     acq_I: str | None = None  # Enum: {‘in0’, ‘in1’, ‘off’}
     acq_Q: str | None = None  # Enum: {‘in0’, ‘in1’, ‘off’}
@@ -122,6 +127,70 @@ class OffsetConfig:
     in0_path1: float | None = None
 
 
+class FirConfig:
+    out0: str | None = None
+    out1: str | None = None
+    out2: str | None = None
+    out3: str | None = None
+    out5: str | None = None
+    out4: str | None = None
+
+    marker0: str | None = None
+
+
+class ExpOvershoot0Config:
+    out0: str | None = None
+    out1: str | None = None
+    out2: str | None = None
+    out3: str | None = None
+    out4: str | None = None
+    out5: str | None = None
+
+    marker0: str | None = None
+
+
+class ExpOvershoot1Config:
+    out0: str | None = None
+    out1: str | None = None
+    out2: str | None = None
+    out3: str | None = None
+    out4: str | None = None
+    out5: str | None = None
+
+    marker0: str | None = None
+
+
+class ExpOvershoot2Config:
+    out0: str | None = None
+    out1: str | None = None
+    out2: str | None = None
+    out3: str | None = None
+    out4: str | None = None
+    out5: str | None = None
+
+    marker0: str | None = None
+
+
+class ExpOvershoot3Config:
+    out0: str | None = None
+    out1: str | None = None
+    out2: str | None = None
+    out3: str | None = None
+    out4: str | None = None
+    out5: str | None = None
+
+    marker0: str | None = None
+
+
+class LatencyConfig:
+    out0: float | None = None
+    out1: float | None = None
+    out2: float | None = None
+    out3: float | None = None
+    out4: float | None = None
+    out5: float | None = None
+
+
 @dataclass
 class LoConfig:
     out0_en: bool | None = None
@@ -129,15 +198,28 @@ class LoConfig:
     out1_en: bool | None = None
     out1_freq: float | None = None
 
+    out2_freq: float | None = None
+    out3_freq: float | None = None
+    out4_freq: float | None = None
+    out5_freq: float | None = None
+
     out0_in0_en: bool | None = None
     out0_in0_freq: float | None = None
+
+    out1_in1_freq: float | None = None
 
 
 @dataclass
 class AttConfig:
-    out0: int | None = None
-    out1: int | None = None
-    in0: int | None = None
+    out0: float | None = None
+    out1: float | None = None
+    out2: float | None = None
+    out3: float | None = None
+    out4: float | None = None
+    out5: float | None = None
+
+    in0: float | None = None
+    in1: float | None = None
 
 
 @dataclass
@@ -151,10 +233,16 @@ class ScopeAcqConfig:
     sequencer_select: int | None = None
     trigger_mode_path0: str | None = None  # Enum: {‘sequencer’, ‘level’}
     trigger_mode_path1: str | None = None  # Enum: {‘sequencer’, ‘level’}
+    trigger_mode_path2: str | None = None  # Enum: {‘sequencer’, ‘level’}
+    trigger_mode_path3: str | None = None  # Enum: {‘sequencer’, ‘level’}
     trigger_level_path0: float | None = None
     trigger_level_path1: float | None = None
+    trigger_level_path2: float | None = None
+    trigger_level_path3: float | None = None
     avg_mode_en_path0: bool | None = None
     avg_mode_en_path1: bool | None = None
+    avg_mode_en_path2: bool | None = None
+    avg_mode_en_path3: bool | None = None
 
 
 @dataclass
@@ -166,6 +254,12 @@ class ModuleConfig:
     attenuation: AttConfig = field(default_factory=lambda: AttConfig())
     gain: GainConfig = field(default_factory=lambda: GainConfig())
     scope_acq: ScopeAcqConfig = field(default_factory=lambda: ScopeAcqConfig())
+    fir: FirConfig = field(default_factory=lambda: FirConfig())
+    exp0: ExpOvershoot0Config = field(default_factory=lambda: ExpOvershoot0Config())
+    exp1: ExpOvershoot1Config = field(default_factory=lambda: ExpOvershoot1Config())
+    exp2: ExpOvershoot2Config = field(default_factory=lambda: ExpOvershoot2Config())
+    exp3: ExpOvershoot3Config = field(default_factory=lambda: ExpOvershoot3Config())
+    latency: LatencyConfig = field(default_factory=lambda: LatencyConfig())
 
 
 @dataclass

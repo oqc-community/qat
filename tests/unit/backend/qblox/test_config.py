@@ -10,25 +10,17 @@ from qblox_instruments import ClusterType
 from qat.backend.qblox.config.helpers import (
     QcmConfigHelper,
     QcmRfConfigHelper,
+    QrcConfigHelper,
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
 from qat.purr.backends.qblox.constants import Constants
 
+rng = np.random.default_rng(42)  # Seed for reproducibility
+
 
 class TestQbloxConfigMixin:
-    @staticmethod
-    def extract_lo_and_nco_freqs(target):
-        if target.fixed_if:  # NCO freq constant
-            nco_freq = target.baseband_if_frequency
-            lo_freq = target.frequency - nco_freq
-        else:  # LO freq constant
-            lo_freq = target.baseband_frequency
-            nco_freq = target.frequency - lo_freq
-
-        return lo_freq, nco_freq
-
     @staticmethod
     def setup_qcm_mixer_config(module_config: ModuleConfig, i_offset, q_offset):
         module_config.offset.out0 = i_offset
@@ -62,35 +54,125 @@ class TestQbloxConfigMixin:
         seq_config.mixer.gain_ratio = gain_ratio
         seq_config.mixer.phase_offset = phase_offset
 
+    @staticmethod
+    def setup_qrc_attenuation_config(module_config: ModuleConfig, attenuation):
+        module_config.attenuation.out0 = attenuation
+        module_config.attenuation.out1 = attenuation
+        module_config.attenuation.out2 = attenuation
+        module_config.attenuation.out3 = attenuation
+        module_config.attenuation.out4 = attenuation
+        module_config.attenuation.out5 = attenuation
+
+        module_config.attenuation.in0 = attenuation
+        module_config.attenuation.in1 = attenuation
+
+    @staticmethod
+    def setup_qrc_latency_config(module_config: ModuleConfig, latency):
+        module_config.latency.out0 = latency
+        module_config.latency.out1 = latency
+        module_config.latency.out2 = latency
+        module_config.latency.out3 = latency
+        module_config.latency.out4 = latency
+        module_config.latency.out5 = latency
+
+    @staticmethod
+    def setup_qrc_lo_config(module_config: ModuleConfig, lo_freq):
+        module_config.lo.out0_in0_freq = lo_freq
+        module_config.lo.out1_in1_freq = lo_freq
+
+        module_config.lo.out2_freq = lo_freq
+        module_config.lo.out3_freq = lo_freq
+        module_config.lo.out4_freq = lo_freq
+        module_config.lo.out5_freq = lo_freq
+
 
 @dataclass
-class MixerTestValues:
-    num_points = 2  # Low value for testing to reduce the size of the cartesian products
+class ConfigTestValues:
+    max_num_points = 50
+
+
+@dataclass
+class MixerTestValues(ConfigTestValues):
+    num_points = 2
 
     # Module values
-    qcm_i_offsets = np.linspace(-2.5, 2.5, num_points)  # I offsets (Volt)
-    qcm_q_offsets = np.linspace(-2.5, 2.5, num_points)  # Q offsets (Volt)
-    qcm_rf_i_offsets = np.linspace(-84, 73, num_points)  # I offsets (mVolt)
-    qcm_rf_q_offsets = np.linspace(-84, 73, num_points)  # Q offsets (mVolt)
-    qrm_i_offsets = np.linspace(-0.09, 0.09, num_points)  # I offsets (Volt)
-    qrm_q_offsets = np.linspace(-0.09, 0.09, num_points)  # Q offsets (Volt)
-    qrm_rf_i_offsets = np.linspace(-0.09, 0.09, num_points)  # I offsets (Volt)
-    qrm_rf_q_offsets = np.linspace(-0.09, 0.09, num_points)  # Q offsets (Volt)
+    qcm_i_offsets = rng.choice(np.linspace(-2.5, 2.5), size=num_points)  # fmt: skip # I offsets (Volt)
+    qcm_q_offsets = rng.choice(np.linspace(-2.5, 2.5), size=num_points)  # fmt: skip # Q offsets (Volt)
+    qcm_rf_i_offsets = rng.choice(np.linspace(-84, 73), size=num_points)  # fmt: skip # I offsets (mVolt)
+    qcm_rf_q_offsets = rng.choice(np.linspace(-84, 73), size=num_points)  # fmt: skip # Q offsets (mVolt)
+    qrm_i_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # I offsets (Volt)
+    qrm_q_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # Q offsets (Volt)
+    qrm_rf_i_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # I offsets (Volt)
+    qrm_rf_q_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # Q offsets (Volt)
 
     # Sequencer values
-    phase_offsets = np.linspace(-45, 45, num_points)  # Phase offsets (Degree)
-    gain_ratios = np.linspace(0.5, 2, num_points)  # Gain ratios
+    phase_offsets = rng.choice(np.linspace(-45, 45), size=num_points)  # fmt: skip # Phase offsets (Degree)
+    gain_ratios = rng.choice(np.linspace(0.5, 2), size=num_points)  # fmt: skip # Gain ratios
+
+
+@dataclass
+class AcqTestValues:
+    num_points = 5
+
+    int_lengths = rng.choice(
+        np.arange(
+            Constants.MIN_ACQ_INTEGRATION_LENGTH, Constants.MAX_ACQ_INTEGRATION_LENGTH, 4
+        ),
+        size=num_points,
+    )
+    rotations = rng.choice(np.arange(0, 360), size=num_points).astype(float)
+    thresholds = rng.choice(
+        np.arange(Constants.MIN_ACQ_THRESHOLD, Constants.MAX_ACQ_THRESHOLD), size=num_points
+    ).astype(float)
+
+
+@dataclass
+class AttenuationTestValues:
+    """
+    Attenuation values (dB)
+    """
+
+    num_points = 5
+
+    qcm_rf_attenuations = rng.choice(np.arange(0, 60 + 2, 2), size=num_points)
+    qrm_rf_in_attenuations = rng.choice(np.arange(0, 30 + 2, 2), size=num_points)
+    qrm_rf_out_attenuations = rng.choice(np.arange(0, 60 + 2, 2), size=num_points)
+    qrc_attenuations = rng.choice(np.arange(0, 31.5 + 0.5, 0.5), size=num_points)
+
+
+@dataclass
+class LatencyTestValues:
+    """
+    Latency values (s)
+    """
+
+    num_points = 3
+
+    latencies = rng.choice(np.linspace(0, 11), size=num_points)
+
+
+@dataclass
+class LoTestValues:
+    """
+    LO frequencies (Hz)
+    """
+
+    num_points = 3
+
+    qcm_rf_lo_freqs = rng.choice(np.linspace(2e9, 18e9), size=num_points)
+    qrm_rf_lo_freqs = rng.choice(np.linspace(2e9, 18e9), size=num_points)
+    qrc_lo_freqs = rng.choice(np.arange(500e6, 10.1e9 + 100e6, 100e6), size=num_points)
 
 
 @pytest.mark.parametrize("qblox_resource", [None], indirect=True)
 class TestMixerConfig(TestQbloxConfigMixin):
-    mixer_values = MixerTestValues()
+    test_values = MixerTestValues()
 
     @pytest.mark.skip("Needs config implementation for QCM")
-    @pytest.mark.parametrize("phase_offset", mixer_values.phase_offsets)
-    @pytest.mark.parametrize("gain_ratio", mixer_values.gain_ratios)
-    @pytest.mark.parametrize("i_offset", mixer_values.qcm_i_offsets)
-    @pytest.mark.parametrize("q_offset", mixer_values.qcm_q_offsets)
+    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets)
+    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios)
+    @pytest.mark.parametrize("i_offset", test_values.qcm_i_offsets)
+    @pytest.mark.parametrize("q_offset", test_values.qcm_q_offsets)
     def test_qcm_mixer_config(
         self, qblox_resource, phase_offset, gain_ratio, i_offset, q_offset
     ):
@@ -107,10 +189,10 @@ class TestMixerConfig(TestQbloxConfigMixin):
         assert module.out2_offset() == module_config.offset.out2
         assert module.out3_offset() == module_config.offset.out3
 
-    @pytest.mark.parametrize("phase_offset", mixer_values.phase_offsets)
-    @pytest.mark.parametrize("gain_ratio", mixer_values.gain_ratios)
-    @pytest.mark.parametrize("i_offset", mixer_values.qcm_rf_i_offsets)
-    @pytest.mark.parametrize("q_offset", mixer_values.qcm_rf_q_offsets)
+    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets)
+    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios)
+    @pytest.mark.parametrize("i_offset", test_values.qcm_rf_i_offsets)
+    @pytest.mark.parametrize("q_offset", test_values.qcm_rf_q_offsets)
     def test_qcm_rf_mixer_config(
         self, qblox_resource, phase_offset, gain_ratio, i_offset, q_offset
     ):
@@ -128,10 +210,10 @@ class TestMixerConfig(TestQbloxConfigMixin):
         assert module.out1_offset_path1() == module_config.offset.out1_path1
 
     @pytest.mark.skip("Needs config implementation for QRM")
-    @pytest.mark.parametrize("phase_offset", mixer_values.phase_offsets)
-    @pytest.mark.parametrize("gain_ratio", mixer_values.gain_ratios)
-    @pytest.mark.parametrize("i_offset", mixer_values.qrm_i_offsets)
-    @pytest.mark.parametrize("q_offset", mixer_values.qrm_q_offsets)
+    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets)
+    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios)
+    @pytest.mark.parametrize("i_offset", test_values.qrm_i_offsets)
+    @pytest.mark.parametrize("q_offset", test_values.qrm_q_offsets)
     def test_qrm_mixer_config(
         self, qblox_resource, phase_offset, gain_ratio, i_offset, q_offset
     ):
@@ -148,10 +230,10 @@ class TestMixerConfig(TestQbloxConfigMixin):
         assert module.in0_offset() == module_config.offset.in0
         assert module.in1_offset() == module_config.offset.in1
 
-    @pytest.mark.parametrize("phase_offset", mixer_values.phase_offsets)
-    @pytest.mark.parametrize("gain_ratio", mixer_values.gain_ratios)
-    @pytest.mark.parametrize("i_offset", mixer_values.qrm_rf_i_offsets)
-    @pytest.mark.parametrize("q_offset", mixer_values.qrm_rf_q_offsets)
+    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets)
+    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios)
+    @pytest.mark.parametrize("i_offset", test_values.qrm_rf_i_offsets)
+    @pytest.mark.parametrize("q_offset", test_values.qrm_rf_q_offsets)
     def test_qrm_rf_mixer_config(
         self, qblox_resource, phase_offset, gain_ratio, i_offset, q_offset
     ):
@@ -174,30 +256,11 @@ class TestMixerConfig(TestQbloxConfigMixin):
             assert module.in0_offset_path1() == module_config.offset.in0_path1
 
 
-acq_random = np.random.default_rng(42)  # Seed for reproducibility
-
-
-@dataclass
-class AcqTestValues:
-    num_points = 5  # Low value for testing to reduce the size of the cartesian products
-
-    int_lengths = acq_random.choice(
-        np.arange(
-            Constants.MIN_ACQ_INTEGRATION_LENGTH, Constants.MAX_ACQ_INTEGRATION_LENGTH, 4
-        ),
-        size=num_points,
-    )
-    rotations = acq_random.choice(np.arange(0, 360), size=num_points).astype(float)
-    thresholds = acq_random.choice(
-        np.arange(Constants.MIN_ACQ_THRESHOLD, Constants.MAX_ACQ_THRESHOLD), size=num_points
-    ).astype(float)
-
-
 @pytest.mark.parametrize("qblox_resource", [None], indirect=True)
 class TestAcqConfig(TestQbloxConfigMixin):
-    acq_values = AcqTestValues()
+    test_values = AcqTestValues()
 
-    @pytest.mark.parametrize("int_length", acq_values.int_lengths)
+    @pytest.mark.parametrize("int_length", test_values.int_lengths)
     def test_qrm_rf_square_acq(self, qblox_resource, int_length):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
@@ -213,8 +276,8 @@ class TestAcqConfig(TestQbloxConfigMixin):
             == sequencer.integration_length_acq()
         )
 
-    @pytest.mark.parametrize("rotation", acq_values.rotations)
-    @pytest.mark.parametrize("threshold", acq_values.thresholds)
+    @pytest.mark.parametrize("rotation", test_values.rotations)
+    @pytest.mark.parametrize("threshold", test_values.thresholds)
     def test_qrm_rf_thresholded_acq(self, qblox_resource, rotation, threshold):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
@@ -235,3 +298,78 @@ class TestAcqConfig(TestQbloxConfigMixin):
             sequencer.thresholded_acq_threshold(),
             sequencer_config.thresholded_acq.threshold,
         )
+
+
+@pytest.mark.parametrize("qblox_resource", [None], indirect=True)
+class TestAttenuationConfig(TestQbloxConfigMixin):
+    test_values = AttenuationTestValues()
+
+    @pytest.mark.parametrize("attenuation_values", test_values.qrc_attenuations)
+    def test_qrc_attenuation_config(self, qblox_resource, attenuation_values):
+        module_config = ModuleConfig()
+        sequencer_config = SequencerConfig()
+        module, sequencer = qblox_resource(ClusterType.CLUSTER_QRC)
+
+        self.setup_qrc_attenuation_config(module_config, attenuation_values)
+        QrcConfigHelper(module_config, sequencer_config).configure(module, sequencer)
+
+        assert module.out0_att() == module_config.attenuation.out0
+        assert module.out1_att() == module_config.attenuation.out1
+        assert module.out2_att() == module_config.attenuation.out2
+        assert module.out3_att() == module_config.attenuation.out3
+        assert module.out4_att() == module_config.attenuation.out4
+        assert module.out5_att() == module_config.attenuation.out5
+
+        with pytest.raises(AssertionError):
+            # TODO - QBlox bug: Dummy cluster fails to update input attenuation values: COMPILER-1052
+            assert module.in0_att() == module_config.attenuation.in0
+            assert module.in1_att() == module_config.attenuation.in1
+
+
+@pytest.mark.parametrize("qblox_resource", [None], indirect=True)
+class TestLatencyConfig(TestQbloxConfigMixin):
+    test_values = LatencyTestValues()
+
+    @pytest.mark.parametrize("latency", test_values.latencies)
+    def test_qrc_latency_config(self, qblox_resource, latency):
+        module_config = ModuleConfig()
+        sequencer_config = SequencerConfig()
+        module, sequencer = qblox_resource(ClusterType.CLUSTER_QRC)
+
+        self.setup_qrc_latency_config(module_config, latency)
+
+        with pytest.raises(NotImplementedError):
+            # TODO - latency commands fail on both live and dummy cluster: COMPILER-1054
+            QrcConfigHelper(module_config, sequencer_config).configure(module, sequencer)
+
+        with pytest.raises(AssertionError):
+            # TODO - latency commands fail on both live and dummy cluster: COMPILER-1054
+            assert module.out0_latency() == module_config.latency.out0
+            assert module.out1_latency() == module_config.latency.out1
+            assert module.out2_latency() == module_config.latency.out2
+            assert module.out3_latency() == module_config.latency.out3
+            assert module.out4_latency() == module_config.latency.out4
+            assert module.out5_latency() == module_config.latency.out5
+
+
+@pytest.mark.parametrize("qblox_resource", [None], indirect=True)
+class TestLoConfig(TestQbloxConfigMixin):
+    test_values = LoTestValues()
+
+    @pytest.mark.parametrize("lo_frequency", test_values.qrc_lo_freqs)
+    def test_qrc_lo_config(self, qblox_resource, lo_frequency):
+        module_config = ModuleConfig()
+        sequencer_config = SequencerConfig()
+        module, sequencer = qblox_resource(ClusterType.CLUSTER_QRC)
+
+        self.setup_qrc_lo_config(module_config, lo_frequency)
+
+        QrcConfigHelper(module_config, sequencer_config).configure(module, sequencer)
+
+        assert module.out0_in0_lo_freq() == module_config.lo.out0_in0_freq
+        assert module.out1_in1_lo_freq() == module_config.lo.out1_in1_freq
+
+        assert module.out2_lo_freq() == module_config.lo.out2_freq
+        assert module.out3_lo_freq() == module_config.lo.out3_freq
+        assert module.out4_lo_freq() == module_config.lo.out4_freq
+        assert module.out5_lo_freq() == module_config.lo.out5_freq

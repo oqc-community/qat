@@ -23,7 +23,7 @@ class QbloxConfigHelper(ABC):
         sequencer_config: SequencerConfig = None,
     ):
         self.sequencer_config = sequencer_config or SequencerConfig()
-        self.module_config = module_config or SequencerConfig()
+        self.module_config = module_config or ModuleConfig()
 
     def configure(self, module: Module, sequencer: Sequencer):
         self.configure_module(module)
@@ -300,3 +300,187 @@ class QrmRfConfigHelper(QrmConfigHelper):
             in0_path0=module.in0_offset_path0(),
             in0_path1=module.in0_offset_path1(),
         )
+
+
+class QrcConfigHelper(QrmRfConfigHelper):
+    def configure_module(self, module: Module):
+        self.configure_lo(module)
+        self.configure_attenuation(module)
+        self.configure_latency(module)
+        self.configure_fir(module)
+        self.configure_exp0(module)
+        self.configure_exp1(module)
+        self.configure_exp2(module)
+        self.configure_exp3(module)
+        self.configure_scope_acq(module)
+
+    def configure_sequencer(self, sequencer: Sequencer):
+        self.configure_connection(sequencer)
+        self.configure_nco(sequencer)
+        self.configure_awg(sequencer)
+        self.configure_mixer(sequencer)
+        self.configure_acq(sequencer)
+
+    def calibrate_lo_leakage(self, module: Module):
+        log.warning("LO leakage calibration is not implemented for QRC modules.")
+        pass
+
+    def configure_lo(self, module: Module):
+        if self.module_config.lo.out0_in0_freq:
+            module.out0_in0_lo_freq(self.module_config.lo.out0_in0_freq)
+        if self.module_config.lo.out1_in1_freq:
+            module.out1_in1_lo_freq(self.module_config.lo.out1_in1_freq)
+        if self.module_config.lo.out2_freq:
+            module.out2_lo_freq(self.module_config.lo.out2_freq)
+        if self.module_config.lo.out3_freq:
+            module.out3_lo_freq(self.module_config.lo.out3_freq)
+        if self.module_config.lo.out4_freq:
+            module.out4_lo_freq(self.module_config.lo.out4_freq)
+        if self.module_config.lo.out5_freq:
+            module.out5_lo_freq(self.module_config.lo.out5_freq)
+
+    def configure_attenuation(self, module: Module):
+        if self.module_config.attenuation.out0:
+            module.out0_att(self.module_config.attenuation.out0)
+        if self.module_config.attenuation.out1:
+            module.out1_att(self.module_config.attenuation.out1)
+        if self.module_config.attenuation.out2:
+            module.out2_att(self.module_config.attenuation.out2)
+        if self.module_config.attenuation.out3:
+            module.out3_att(self.module_config.attenuation.out3)
+        if self.module_config.attenuation.out4:
+            module.out4_att(self.module_config.attenuation.out4)
+        if self.module_config.attenuation.out5:
+            module.out5_att(self.module_config.attenuation.out5)
+
+        if self.module_config.attenuation.in0:
+            module.in0_att(self.module_config.attenuation.in0)
+        if self.module_config.attenuation.in1:
+            module.in1_att(self.module_config.attenuation.in1)
+
+    def configure_latency(self, module: Module):
+        # TODO - latency commands fail on both live and dummy cluster: COMPILER-1054
+        if self.module_config.latency.out0:
+            module.out0_latency(self.module_config.latency.out0)
+        if self.module_config.latency.out1:
+            module.out1_latency(self.module_config.latency.out1)
+        if self.module_config.latency.out2:
+            module.out2_latency(self.module_config.latency.out2)
+        if self.module_config.latency.out3:
+            module.out3_latency(self.module_config.latency.out3)
+        if self.module_config.latency.out4:
+            module.out4_latency(self.module_config.latency.out4)
+        if self.module_config.latency.out5:
+            module.out5_latency(self.module_config.latency.out5)
+
+    def configure_fir(self, module: Module):
+        if self.module_config.fir.out0:
+            module.out0_fir_config(self.module_config.fir.out0)
+        if self.module_config.fir.out1:
+            module.out1_fir_config(self.module_config.fir.out1)
+        if self.module_config.fir.out2:
+            module.out2_fir_config(self.module_config.fir.out2)
+        if self.module_config.fir.out3:
+            module.out3_fir_config(self.module_config.fir.out3)
+        if self.module_config.fir.out4:
+            module.out4_fir_config(self.module_config.fir.out4)
+        if self.module_config.fir.out5:
+            module.out5_fir_config(self.module_config.fir.out5)
+
+        if self.module_config.fir.marker0:
+            module.marker0_fir_config(self.module_config.fir.marker0)
+
+    def configure_exp0(self, module: Module):
+        if self.module_config.exp0.out0:
+            module.out0_exp0_config(self.module_config.exp0.out0)
+        if self.module_config.exp0.out1:
+            module.out1_exp0_config(self.module_config.exp0.out1)
+        if self.module_config.exp0.out2:
+            module.out2_exp0_config(self.module_config.exp0.out2)
+        if self.module_config.exp0.out3:
+            module.out3_exp0_config(self.module_config.exp0.out3)
+        if self.module_config.exp0.out4:
+            module.out4_exp0_config(self.module_config.exp0.out4)
+        if self.module_config.exp0.out5:
+            module.out5_exp0_config(self.module_config.exp0.out5)
+
+        if self.module_config.exp0.marker0:
+            module.marker0_exp0_config(self.module_config.exp0.marker0)
+
+    def configure_exp1(self, module: Module):
+        if self.module_config.exp1.out0:
+            module.out0_exp1_config(self.module_config.exp1.out0)
+        if self.module_config.exp1.out1:
+            module.out1_exp1_config(self.module_config.exp1.out1)
+        if self.module_config.exp1.out2:
+            module.out2_exp1_config(self.module_config.exp1.out2)
+        if self.module_config.exp1.out3:
+            module.out3_exp1_config(self.module_config.exp1.out3)
+        if self.module_config.exp1.out4:
+            module.out4_exp1_config(self.module_config.exp1.out4)
+        if self.module_config.exp1.out5:
+            module.out5_exp1_config(self.module_config.exp1.out5)
+
+        if self.module_config.exp1.marker0:
+            module.marker0_exp1_config(self.module_config.exp1.marker0)
+
+    def configure_exp2(self, module: Module):
+        if self.module_config.exp2.out0:
+            module.out0_exp2_config(self.module_config.exp2.out0)
+        if self.module_config.exp2.out1:
+            module.out1_exp2_config(self.module_config.exp2.out1)
+        if self.module_config.exp2.out2:
+            module.out2_exp2_config(self.module_config.exp2.out2)
+        if self.module_config.exp2.out3:
+            module.out3_exp2_config(self.module_config.exp2.out3)
+        if self.module_config.exp2.out4:
+            module.out4_exp2_config(self.module_config.exp2.out4)
+        if self.module_config.exp2.out5:
+            module.out5_exp2_config(self.module_config.exp2.out5)
+
+        if self.module_config.exp2.marker0:
+            module.marker0_exp2_config(self.module_config.exp2.marker0)
+
+    def configure_exp3(self, module: Module):
+        if self.module_config.exp3.out0:
+            module.out0_exp3_config(self.module_config.exp3.out0)
+        if self.module_config.exp3.out1:
+            module.out1_exp3_config(self.module_config.exp3.out1)
+        if self.module_config.exp3.out2:
+            module.out2_exp3_config(self.module_config.exp3.out2)
+        if self.module_config.exp3.out3:
+            module.out3_exp3_config(self.module_config.exp3.out3)
+        if self.module_config.exp3.out4:
+            module.out4_exp3_config(self.module_config.exp3.out4)
+        if self.module_config.exp3.out5:
+            module.out5_exp3_config(self.module_config.exp3.out5)
+
+        if self.module_config.exp3.marker0:
+            module.marker0_exp3_config(self.module_config.exp3.marker0)
+
+    def configure_scope_acq(self, module: Module):
+        super().configure_scope_acq(module)
+        if self.module_config.scope_acq.trigger_mode_path2:
+            module.scope_acq_trigger_mode_path2(
+                self.module_config.scope_acq.trigger_mode_path2
+            )
+        if self.module_config.scope_acq.trigger_mode_path3:
+            module.scope_acq_trigger_mode_path3(
+                self.module_config.scope_acq.trigger_mode_path3
+            )
+        if self.module_config.scope_acq.trigger_level_path2:
+            module.scope_acq_trigger_level_path2(
+                self.module_config.scope_acq.trigger_level_path2
+            )
+        if self.module_config.scope_acq.trigger_level_path3:
+            module.scope_acq_trigger_level_path3(
+                self.module_config.scope_acq.trigger_level_path3
+            )
+        if self.module_config.scope_acq.avg_mode_en_path2:
+            module.scope_acq_avg_mode_en_path2(
+                self.module_config.scope_acq.avg_mode_en_path2
+            )
+        if self.module_config.scope_acq.avg_mode_en_path3:
+            module.scope_acq_avg_mode_en_path3(
+                self.module_config.scope_acq.avg_mode_en_path3
+            )

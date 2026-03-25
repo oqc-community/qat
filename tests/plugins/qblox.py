@@ -17,11 +17,13 @@ _QBLOX_DUMMY_CONFIG = {
     1: ClusterType.CLUSTER_QCM,
     2: ClusterType.CLUSTER_QCM_RF,
     4: ClusterType.CLUSTER_QCM_RF,
+    6: ClusterType.CLUSTER_QRC,  # slots 6-7 are reserved for QRC module
     12: ClusterType.CLUSTER_QCM_RF,
     13: ClusterType.CLUSTER_QRM,
     14: ClusterType.CLUSTER_QRM_RF,
     16: ClusterType.CLUSTER_QRM_RF,
     18: ClusterType.CLUSTER_QRM_RF,
+    19: ClusterType.CLUSTER_QRC,  # slots 19-20 are reserved for QRC module
 }
 
 
@@ -95,17 +97,23 @@ def qblox_resource(request, legacy_qblox_instrument_factory, function_seed):
     def _qblox_resource(type: ClusterType):
         qcm_type = type in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
         qrm_type = type in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
-        rf_type = type in [ClusterType.CLUSTER_QCM_RF, ClusterType.CLUSTER_QRM_RF]
-        modules = [
-            module
-            for module in instrument.driver.get_connected_modules(
-                filter_fn=lambda mod: mod.is_qcm_type == qcm_type
-                and mod.is_qrm_type == qrm_type
-                and mod.is_rf_type == rf_type
-            ).values()
+        rf_type = type in [
+            ClusterType.CLUSTER_QCM_RF,
+            ClusterType.CLUSTER_QRM_RF,
+            ClusterType.CLUSTER_QRC,
         ]
+        qrc_type = type in [ClusterType.CLUSTER_QRC]
+        modules = instrument.driver.get_connected_modules(
+            filter_fn=lambda mod: mod.is_qcm_type == qcm_type
+            and mod.is_qrm_type == qrm_type
+            and mod.is_rf_type == rf_type
+            and mod.is_qrc_type == qrc_type
+        ).values()
+
         rng = np.random.default_rng(function_seed)
-        module = rng.choice(modules)
+        module = rng.choice(list(modules))
+
+        # TODO - sequencers are not the same on a QRC, need special handling
         sequencer = rng.choice(module.sequencers)
 
         return module, sequencer
