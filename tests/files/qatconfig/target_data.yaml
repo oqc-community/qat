@@ -15,7 +15,7 @@ COMPILE:
   target_data:
     type: qat.model.target_data.TargetData
     config:
-      max_shots: 2_540
+      max_acquisitions: 2_540
       default_shots: 254
       QUBIT_DATA:
         passive_reset_time: 1e-2
@@ -26,7 +26,7 @@ COMPILE:
   target_data:
     type: qat.model.target_data.TargetData
     config:
-      max_shots: 2_540
+      max_acquisitions: 2_540
       default_shots: 254
       QUBIT_DATA:
         passive_reset_time: 1e-2

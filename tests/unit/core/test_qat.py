@@ -214,7 +214,7 @@ class TestQATPipelineSetup:
             pipeline = q.pipelines.get_compile_pipeline(pipeline_name)
             target_data = pipeline.target_data
             assert target_data.default_shots == 254
-            assert target_data.max_shots == 2540
+            assert target_data.max_acquisitions == 2540
             assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
 
     def test_FallthroughFrontend(self):

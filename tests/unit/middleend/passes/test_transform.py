@@ -324,7 +324,7 @@ class TestRepeatSanitisation:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=shots,
             RESONATOR_DATA=ResonatorDescription.random(seed=function_seed),
             QUBIT_DATA=qubit_data,
@@ -784,7 +784,7 @@ class TestPydInstructionGranularitySanitisation:
     @pytest.fixture(scope="class")
     def target_data(self, class_seed):
         return TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=10,
             QUBIT_DATA=QubitDescription.random(seed=class_seed),
             RESONATOR_DATA=ResonatorDescription.random(seed=class_seed),
@@ -1045,7 +1045,7 @@ class TestInstructionLengthSanitisation:
     @staticmethod
     def get_target_data(seed):
         return TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=10,
             QUBIT_DATA=QubitDescription.random(seed),
             RESONATOR_DATA=ResonatorDescription.random(seed),
@@ -1277,7 +1277,7 @@ class TestPydBatchedShots:
     def test_with_no_repeat(self, model):
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.delay(model.qubit_with_index(0).drive_pulse_channel, 80e-9)
-        target_data = AbstractTargetData(max_shots=10000, default_shots=100)
+        target_data = AbstractTargetData(max_acquisitions=10000, default_shots=100)
         ir = BatchedShots(target_data).run(builder)
         assert len([inst for inst in ir if isinstance(inst, Repeat)]) == 0
         assert ir.shots is None
@@ -1287,7 +1287,7 @@ class TestPydBatchedShots:
     def test_not_batched_with_possible_amount(self, num_shots, model):
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.repeat(num_shots)
-        target_data = AbstractTargetData(max_shots=10000)
+        target_data = AbstractTargetData(max_acquisitions=10000)
         ir = BatchedShots(target_data).run(builder)
         repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         assert len(repeats) == 1
@@ -1299,7 +1299,7 @@ class TestPydBatchedShots:
     def test_shots_are_batched(self, num_shots, model):
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.repeat(num_shots)
-        target_data = AbstractTargetData(max_shots=1000)
+        target_data = AbstractTargetData(max_acquisitions=1000)
         ir = BatchedShots(target_data).run(builder)
         repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         assert len(repeats) == 1
@@ -1309,6 +1309,60 @@ class TestPydBatchedShots:
         num_batches = np.ceil(ir.shots / ir.compiled_shots)
         assert num_batches * ir.compiled_shots >= num_shots
         assert (num_batches - 1) * ir.compiled_shots < num_shots
+
+    @pytest.mark.parametrize("num_measurements", [2, 3, 6])
+    @pytest.mark.parametrize("max_acquisitions", [5, 1000, 9999])
+    def test_multiple_measurements_on_single_qubit(
+        self, model, num_measurements, max_acquisitions
+    ):
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        num_shots = 10000
+        target_data = TargetData(max_acquisitions=max_acquisitions)
+        qubit_1 = model.qubit_with_index(0)
+        qubit_2 = model.qubit_with_index(1)
+        builder.repeat(num_shots)
+        builder.measure_single_shot_z(qubit_1)
+        for _ in range(num_measurements):
+            builder.measure_single_shot_z(qubit_2)
+        if num_measurements <= max_acquisitions:
+            ir = BatchedShots(target_data).run(builder)
+            assert ir.shots == num_shots
+            assert ir.compiled_shots * num_measurements <= max_acquisitions
+            effective_max_shots = int(np.floor(max_acquisitions / num_measurements))
+            num_batches = int(np.ceil(num_shots / effective_max_shots))
+            assert ir.compiled_shots * num_batches >= num_shots
+        else:
+            # when num_measurements=6 > max_acquisitions=5,
+            # even a single shot would exceed the max acquisitions limit,
+            # so an error should be raise,
+            with pytest.raises(ValueError):
+                BatchedShots(target_data).run(builder)
+
+    def test_multiple_measurements_on_single_qubit_in_measure_block(self, model):
+        """Tests that BatchedShots correctly counts Acquires nested inside a MeasureBlock."""
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        num_shots = 1000
+        max_acquisitions = 1500
+        target_data = TargetData(max_acquisitions=max_acquisitions)
+        builder.repeat(num_shots)
+        channel = model.qubit_with_index(0).acquire_pulse_channel.uuid
+        measure_block = MeasureBlock(
+            instructions=[
+                Acquire(target=channel, duration=1e-6, output_variable="m0"),
+                Acquire(target=channel, duration=1e-6, output_variable="m1"),
+            ]
+        )
+        builder.add(measure_block)
+        builder.repeat(num_shots)
+        ir = BatchedShots(target_data).run(builder)
+        assert ir.shots == num_shots
+        # number of acquisitions per shot is 2 as
+        # there are two Acquires in the MeasureBlock.
+        effective_max_shots = int(np.floor(max_acquisitions / 2))
+        num_batches = int(np.ceil(num_shots / effective_max_shots))
+        shots_per_batch = int(np.ceil(num_shots / num_batches))
+        assert ir.compiled_shots == shots_per_batch
 
 
 class TestResetsToDelays:
@@ -1325,7 +1379,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(seed=function_seed),
             QUBIT_DATA=qubit_data,
@@ -1381,7 +1435,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": td_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(seed=function_seed),
             QUBIT_DATA=qubit_data,
@@ -1426,7 +1480,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(seed=function_seed),
             QUBIT_DATA=qubit_data,
@@ -1466,7 +1520,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(seed=function_seed),
             QUBIT_DATA=qubit_data,

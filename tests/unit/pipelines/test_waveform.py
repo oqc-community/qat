@@ -188,7 +188,7 @@ class TestEchoPipelineWithCircuits:
         cumulative_shots = 0
         for program in executable.programs:
             cumulative_shots += program.shots
-            assert program.shots <= self.target_data.max_shots
+            assert program.shots <= self.target_data.max_acquisitions
         assert cumulative_shots == shots
 
     def test_shot_period(self, executable):
@@ -670,3 +670,62 @@ class TestEchoPipelineParity:
 
     def test_results_formatting(self, purr_results, pydantic_results):
         assert purr_results == pydantic_results
+
+
+class TestMidCircuitMeasurements:
+    """Tests that the full pipeline correctly compiles a mid-circuit measurement
+    circuit, and that BatchedShots accounts for multiple acquires per channel
+    when calculating the batch size.
+
+    TKET is disabled as it does not support mid-circuit measurements,
+    thus we are testing qasm2 strings with only single qubit gates, in separate
+    test class to TestEchoPipelineWithCircuits"""
+
+    target_data = TargetData(max_acquisitions=1500)
+    model = LucyModelLoader(qubit_count=32).load()
+    pipeline = PydanticEchoPipeline(
+        config=PipelineConfig(name="pydantic"), model=model, target_data=target_data
+    )
+    program_file = get_qasm2_path("6qp_midcirc_measure_single_qubit_gates_only.qasm")
+
+    SHOTS = 1000
+
+    @pytest.mark.parametrize(
+        "program_file, max_acquires_per_shot",
+        [
+            (get_qasm2_path("6qp_midcirc_measure_single_qubit_gates_only.qasm"), 2),
+        ],
+    )
+    def test_mid_circuit_measurement_batching(self, program_file, max_acquires_per_shot):
+        compiler_config = CompilerConfig(
+            repeats=self.SHOTS,
+            results_format=QuantumResultsFormat().binary_count(),
+            optimizations=Tket().disable(),
+        )
+        executable = QAT().compile(
+            str(program_file), compiler_config, pipeline=self.pipeline
+        )[0]
+
+        assert isinstance(executable, Executable)
+        for program in executable.programs:
+            assert isinstance(program, WaveformProgram)
+
+        cumulative_shots = 0
+        for program in executable.programs:
+            cumulative_shots += program.shots
+            assert (
+                program.shots <= self.target_data.max_acquisitions / max_acquires_per_shot
+            )
+            with pytest.warns(DeprecationWarning):
+                assert program.shots <= self.target_data.max_shots / max_acquires_per_shot
+
+        assert cumulative_shots == self.SHOTS
+        results = QAT().execute(executable, compiler_config, pipeline=self.pipeline)[0]
+
+        assert isinstance(results, dict)
+
+        assert len(results) == len(executable.returns)
+        for output_variable, result in results.items():
+            assert isinstance(result, dict)
+            assert all(isinstance(key, str) for key in result)
+            assert sum(result.values()) == self.SHOTS

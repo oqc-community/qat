@@ -519,7 +519,7 @@ class TestQatSessionConfigForPipelines:
             target_data = partial()
             assert isinstance(target_data, TargetData)
             assert target_data.default_shots == 254
-            assert target_data.max_shots == 2540
+            assert target_data.max_acquisitions == 2540
             assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
 
 
@@ -556,11 +556,11 @@ class TestSpecifiedTargetDataFields:
         self, target_data_dict, default_qubit_data, default_resonator_data
     ):
         """
-        Test that target data with top-level adjustments has the correct values for max_shots,
+        Test that target data with top-level adjustments has the correct values for max_acquisitions,
         default_shots, QUBIT_DATA, and RESONATOR_DATA.
         """
         target_data = target_data_dict["top_level_info"]
-        assert target_data.max_shots == 2540
+        assert target_data.max_acquisitions == 2540
         assert target_data.default_shots == 425
         assert target_data.QUBIT_DATA == default_qubit_data
         assert target_data.RESONATOR_DATA == default_resonator_data
@@ -602,10 +602,10 @@ class TestSpecifiedTargetDataFields:
     def test_combined(self, target_data_dict):
         """
         Test that a target data object with combined field adjustments has all expected values set
-        for max_shots, default_shots, QUBIT_DATA.passive_reset_time, and RESONATOR_DATA IF fields.
+        for max_acquisitions, default_shots, QUBIT_DATA.passive_reset_time, and RESONATOR_DATA IF fields.
         """
         target_data = target_data_dict["combined"]
-        assert target_data.max_shots == 2540
+        assert target_data.max_acquisitions == 2540
         assert target_data.default_shots == 425
         assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
         assert target_data.RESONATOR_DATA.pulse_channel_if_freq_min == 400

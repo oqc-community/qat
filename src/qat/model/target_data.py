@@ -7,6 +7,7 @@ from warnings import warn
 
 import piny
 from pydantic import (
+    Field,
     NonNegativeFloat,
     NonNegativeInt,
     PositiveFloat,
@@ -123,12 +124,42 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
     """
     Data related to a general target machine.
 
-    :param max_shots: The maximum amount of shots possible on this target.
+    :param max_acquisitions: The maximum amount of acquisitions possible on this target.
+    :param max_shots: (deprecated) Use `max_acquisitions` instead.
     :param default_shots: The default amount of shots on this target if none specified through the instructions.
     """
 
-    max_shots: PositiveInt = 10_000
+    max_acquisitions: PositiveInt = Field(
+        10_000,
+        alias="max_shots",
+        description=(
+            "Max acquisitions per memory channel. "
+            "(max_shots is deprecated, use this instead.)"
+        ),
+    )
     default_shots: PositiveInt = 1
+
+    class Config:
+        populate_by_name = True
+
+    @model_validator(mode="before")
+    def warn_on_max_shots(cls, values):
+        if "max_shots" in values:
+            warn(
+                "`max_shots` is deprecated; use `max_acquisitions` instead.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
+        return values
+
+    @property
+    def max_shots(self) -> PositiveInt:
+        warn(
+            "`max_shots` is deprecated; use `max_acquisitions` instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.max_acquisitions
 
     def __getattribute__(self, name: str):
         if name in ["QUBIT_DATA", "RESONATOR_DATA"]:
@@ -149,8 +180,7 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
 class TargetData(AbstractTargetData):
     """
     Data related to a general target machine.
-
-    :param max_shots: The maximum amount of shots possible on this target.
+    :param max_acquisitions: The maximum amount of acquisitions per channel possible on this target.
     :param default_shots: The default amount of shots on this target if none specified through the instructions.
     :param QUBIT_DATA: Qubit-related target description.
     :param RESONATOR_DATA: Resonator-related target description.
@@ -208,7 +238,7 @@ class TargetData(AbstractTargetData):
         if seed is None:
             seed = random.randint(0, 2**32 - 1)
         return cls(
-            max_shots=random.Random(seed).randint(200, 1000),
+            max_acquisitions=random.Random(seed).randint(200, 1000),
             default_shots=random.Random(seed).randint(1, 100),
             QUBIT_DATA=QubitDescription.random(seed),
             RESONATOR_DATA=ResonatorDescription.random(seed),
@@ -280,7 +310,9 @@ def DefaultTargetData() -> TargetData:
 
 
 def CustomTargetData(
-    max_shots: int = 10_000, default_shots: int = 1_000, passive_reset_time: float = 1e-03
+    max_shots: int = 10_000,
+    default_shots: int = 1_000,
+    passive_reset_time: float = 1e-03,
 ) -> TargetData:
     """Returns a default TargetData instance, allowing configuration over user-level
     parameters.

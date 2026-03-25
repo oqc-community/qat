@@ -871,7 +871,7 @@ class TestInstructionGranularitySanitisation:
     @pytest.fixture(scope="class")
     def target_data(self, class_seed):
         return TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=10,
             QUBIT_DATA=QubitDescription.random(seed=class_seed),
             RESONATOR_DATA=ResonatorDescription.random(seed=class_seed),
@@ -1242,7 +1242,7 @@ class TestInstructionLengthSanitisation:
     @staticmethod
     def get_target_data(seed):
         return TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=10,
             QUBIT_DATA=QubitDescription.random(seed),
             RESONATOR_DATA=ResonatorDescription.random(seed),
@@ -1540,7 +1540,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
@@ -1596,7 +1596,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": td_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
@@ -1641,7 +1641,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
@@ -1683,7 +1683,7 @@ class TestResetsToDelays:
             update={"passive_reset_time": passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=100,
             RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
@@ -2098,7 +2098,7 @@ class TestRepeatSanitisation:
             update={"passive_reset_time": default_passive_reset_time}
         )
         target_data = TargetData(
-            max_shots=1000,
+            max_acquisitions=1000,
             default_shots=default_shots,
             RESONATOR_DATA=ResonatorDescription.random(function_seed),
             QUBIT_DATA=qubit_data,
@@ -2486,7 +2486,7 @@ class TestBatchedShots:
     def test_with_no_repeat(self, model):
         builder = model.create_builder()
         builder.delay(model.qubits[0].get_drive_channel(), 80e-9)
-        target_data = AbstractTargetData(max_shots=10000, default_shots=100)
+        target_data = AbstractTargetData(max_acquisitions=10000, default_shots=100)
         ir = BatchedShots(target_data).run(builder)
         assert len([inst for inst in ir.instructions if isinstance(inst, Repeat)]) == 0
         assert not hasattr(ir, "shots")
@@ -2496,7 +2496,7 @@ class TestBatchedShots:
     def test_not_batched_with_possible_amount(self, model, num_shots):
         builder = model.create_builder()
         builder.repeat(num_shots)
-        target_data = AbstractTargetData(max_shots=10000)
+        target_data = AbstractTargetData(max_acquisitions=10000)
         ir = BatchedShots(target_data).run(builder)
         repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         assert len(repeats) == 1
@@ -2508,7 +2508,7 @@ class TestBatchedShots:
     def test_shots_are_batched(self, model, num_shots):
         builder = model.create_builder()
         builder.repeat(num_shots)
-        target_data = AbstractTargetData(max_shots=1000)
+        target_data = AbstractTargetData(max_acquisitions=1000)
         ir = BatchedShots(target_data).run(builder)
         repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         assert len(repeats) == 1

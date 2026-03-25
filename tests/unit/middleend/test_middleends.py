@@ -125,7 +125,7 @@ class TestDefaultMiddleend:
         target_data_blob = target_data.model_dump()
         target_data_blob["QUBIT_DATA"]["passive_reset_time"] = 1e-3
         target_data_blob["QUBIT_DATA"]["pulse_duration_max"] = 1e-4
-        target_data_blob["max_shots"] = 8192
+        target_data_blob["max_acquisitions"] = 8192
         target_data = TargetData(**target_data_blob)
         return DefaultMiddleend(model=model, target_data=target_data)
 
@@ -295,6 +295,21 @@ class TestDefaultMiddleend:
         assert ir.compiled_shots < 8192
         jump = [inst for inst in ir.instructions if isinstance(inst, Jump)][0]
         assert jump.condition.left == ir.compiled_shots
+
+    def test_max_shots_deprecation_warnings(self):
+        # Test warning at instantiation
+        with pytest.warns(
+            DeprecationWarning,
+            match="`max_shots` is deprecated; use `max_acquisitions` instead.",
+        ):
+            td = TargetData(max_shots=42)
+
+        # Test warning at property access
+        with pytest.warns(
+            DeprecationWarning,
+            match="`max_shots` is deprecated; use `max_acquisitions` instead.",
+        ):
+            _ = td.max_shots
 
 
 class TestFallthroughMiddleend:

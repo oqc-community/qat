@@ -166,7 +166,7 @@ class TestEchoPipelineWithCircuits:
         cumulative_shots = 0
         for program in executable.programs:
             cumulative_shots += program.shots
-            assert program.shots <= self.target_data.max_shots
+            assert program.shots <= self.target_data.max_acquisitions
         assert cumulative_shots == shots
 
     def test_repetition_period(self, executable, passive_reset_time):

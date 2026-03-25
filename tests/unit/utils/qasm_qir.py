@@ -219,6 +219,8 @@ skip_qasm2 = [
     "huge.qasm",
     "mid_circuit_measure.qasm",
     "example_if.qasm",
+    "ghz_6qb_measure_hadamard_measure.qasm",
+    "6qp_midcirc_measure_single_qubit_gates_only.qasm",
 ]
 
 

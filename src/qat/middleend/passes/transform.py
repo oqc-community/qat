@@ -714,46 +714,65 @@ class RepeatSanitisation(TransformPass):
 
 
 class BatchedShots(TransformPass):
-    """Determines how shots should be grouped when the total number exceeds that maximum
-    allowed.
+    """Determines how shots should be grouped when the total number of acquisitions
+    exceeds the maximum allowed.
 
-    The target machine might have an allowed number of shots that can be executed by a
-    single execution call. To execute a number of shots greater than this value, shots can
-    be batched, with each batch executed by its own "execute" call on the target machine.
-    For example, if the maximum number of shots for a target machine is 2000, but you
-    required 4000 shots, then this could be done as [2000, 2000] shots.
+    The target machine might have an allowed number of acquisitions that can be
+    executed by a single execution call. To execute a number of shots with
+    acquisitions greater than this value, shots must be batched, with each batch
+    executed by its own "execute" call on the target machine.
 
-    Now consider the more complex scenario where  4001 shots are required. Clearly this can
-    be done in three batches. While it is tempting to do this in batches of [2000, 2000, 1],
-    for some target machines, specification of the number of shots can only be achieved at
-    compilation (as opposed to runtime). Batching as described above would result in us
-    needing to compile two separate programs. Instead, it makes more sense to batch the
-    shots as three lots of 1334 shots, which gives a total of 4002 shots. The extra two
-    shots can just be discarded at run time.
+    For example, if the maximum number of acquisitions per batch for a target
+    machine is 2000, and a task requires 4000 shots with 1 acquisition per shot,
+    batching would be [2000, 2000] shots.
+
+    Now consider the more complex scenario where 4001 shots are required. Clearly
+    this can be done in three batches. While it is tempting to do this in batches
+    of [2000, 2000, 1], for some target machines, specification of the number of
+    shots can only be achieved at compilation (as opposed to runtime). Batching
+    as described above would result in us needing to compile two separate
+    programs. Instead, it makes more sense to batch the shots as three lots of
+    1334 shots, which gives a total of 4002 shots. The extra two shots can be
+    discarded at run time.
+
+    This approach generalizes to the case where each shot involves multiple
+    acquisitions on the same channel, such as is required for mid-circuit
+    measurements. The batching logic ensures that the number of shots per batch
+    is adjusted so that the number of acquisitions on that channel in a single
+    batch does not exceed the per-channel hardware limit. In practice, the
+    effective batch-size limit is determined by the channel with the largest
+    number of acquisitions per shot.
+
+    For instance, if each shot involves at most 3 acquisitions on the same channel
+    (e.g. measuring the same qubit three times), and the per-batch acquisition
+    limit is 2000, then the maximum shots per batch is floor(2000 / 3) = 666.
+    For a total of 4000 shots, the number of batches is ceil(4000 / 666) = 7,
+    so batching would be [572, 572, 572, 572, 572, 572, 572].
 
     .. warning::
 
-        This pass makes certain assumptions about the IR, including that there is only
-        at most one :class:`Repeat` instruction that contributes to the number of readouts,
-        and there is at most one readout per shot. It will change the number of shots in
-        the :class:`Repeat` instruction to the decided batch size, and store the total
-        required shots in the IR, which is less than ideal. It would be nice to save this
-        as an analysis result, but an unfortante side effect of the decoupled nature of
-        the middle- and back-end is that the results manager might not necessarily be
-        passed along.
+        This pass makes certain assumptions about the IR, including that there
+        is only at most one :class:`Repeat` instruction that contributes to the
+        total number of readouts (acquisitions). It will change the number of
+        shots in the :class:`Repeat` instruction to the decided batch size, and
+        store the total required shots in the IR, which is less than ideal. It
+        would be nice to save this as an analysis result, but an unfortunate
+        side effect of the decoupled nature of the middle- and back-end is that
+        the results manager might not necessarily be passed along.
     """
 
     def __init__(self, target_data: TargetData):
         """
         :param target_data: Target-related information.
         """
-        self.max_shots = target_data.max_shots
+        self.max_acquisitions = target_data.max_acquisitions
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
         repeats = [inst for inst in ir if isinstance(inst, Repeat)]
         if len(repeats) == 0:
+            log.warning("No repeats found.")
             return ir
 
         if len(repeats) > 1:
@@ -764,12 +783,36 @@ class BatchedShots(TransformPass):
 
         repeat = repeats[0]
         num_shots = repeat.repeat_count
-        num_batches = int(np.ceil(num_shots / self.max_shots))
+
+        acquire_counts = defaultdict(int)
+        for instruction in ir:
+            if isinstance(instruction, Acquire):
+                acquire_counts[instruction.target] += 1
+
+        if not acquire_counts:
+            log.warning(
+                "No acquire instructions found. Assuming 1 acquire per shot for batching of shots."
+            )
+            num_acquire = 1
+        else:
+            num_acquire = max(acquire_counts.values())
+            if num_acquire > self.max_acquisitions:
+                raise ValueError(
+                    "The number of acquires per shot exceeds the maximum acquires allowed on the "
+                    "target machine, batching cannot be performed."
+                )
+
+        total_num_acquire = num_acquire * num_shots
+
+        effective_max_shots = int(np.floor(self.max_acquisitions / num_acquire))
+
+        num_batches = int(np.ceil(num_shots / effective_max_shots))
+
         shots_per_batch = int(np.ceil(num_shots / num_batches))
 
         if num_batches > 1:
             log.info(
-                f"The number of shots {num_shots} exceeds the maximum allowed on the "
+                f"The number of acquisitions {total_num_acquire} exceeds the maximum allowed on the "
                 f"target. Batching as {num_batches} batches of {shots_per_batch} shots."
             )
 

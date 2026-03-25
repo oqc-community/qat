@@ -1,4 +1,4 @@
-max_shots: 100_000
+max_acquisitions: 100_000
 default_shots: 100
 
 QUBIT_DATA:

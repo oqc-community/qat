@@ -46,7 +46,7 @@ warnings.simplefilter("always", DeprecationWarning)
 # %%
 target_data = TargetData()
 
-print("max_shots:", target_data.max_shots)
+print("max_acquisitions:", target_data.max_acquisitions)
 print("default_shots:", target_data.default_shots)
 print("clock_cycle:", target_data.clock_cycle)
 print("qubit passive_reset_time:", target_data.QUBIT_DATA.passive_reset_time)
@@ -63,7 +63,7 @@ print(sorted(target_data.model_dump().keys()))
 
 # %%
 custom_target_data = TargetData(
-    max_shots=20_000,
+    max_acquisitions=20_000,
     default_shots=2_048,
     QUBIT_DATA=QubitDescription(
         passive_reset_time=5e-4,
@@ -155,7 +155,7 @@ print(payload_json[:250] + "...")
 
 # YAML loading from disk via TargetData.from_yaml(...)
 yaml_text = """
-max_shots: 12000
+max_acquisitions: 12000
 default_shots: 512
 QUBIT_DATA:
   sample_time: 1e-09

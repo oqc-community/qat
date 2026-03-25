@@ -40,7 +40,7 @@ warnings.simplefilter("always", DeprecationWarning)
 # %%
 target_data = TargetData()
 
-print("max_shots:", target_data.max_shots)
+print("max_acquisitions:", target_data.max_acquisitions)
 print("default_shots:", target_data.default_shots)
 print("qubit passive_reset_time:", target_data.QUBIT_DATA.passive_reset_time)
 print("qubit instruction_memory_size:", target_data.QUBIT_DATA.instruction_memory_size)

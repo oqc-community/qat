@@ -1420,7 +1420,7 @@ class BatchedShots(TransformPass):
         """
         :param target_data: Target-related information.
         """
-        self.max_shots = target_data.max_shots
+        self.max_acquisitions = target_data.max_acquisitions
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
@@ -1437,7 +1437,7 @@ class BatchedShots(TransformPass):
 
         repeat = repeats[0]
         num_shots = repeat.repeat_count
-        num_batches = int(np.ceil(num_shots / self.max_shots))
+        num_batches = int(np.ceil(num_shots / self.max_acquisitions))
         shots_per_batch = int(np.ceil(num_shots / num_batches))
 
         if num_batches > 1:
