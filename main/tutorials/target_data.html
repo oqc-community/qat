@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TargetData Demo &mdash; qat-compiler 3.0.0.post186.dev20260325133147 documentation</title>
+  <title>TargetData Demo &mdash; qat-compiler 3.0.0.post187.dev20260325145446 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -558,7 +558,7 @@
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">target_data</span> <span class="o">=</span> <span class="n">TargetData</span><span class="p">()</span>
 
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max_shots:&quot;</span><span class="p">,</span> <span class="n">target_data</span><span class="o">.</span><span class="n">max_shots</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max_acquisitions:&quot;</span><span class="p">,</span> <span class="n">target_data</span><span class="o">.</span><span class="n">max_acquisitions</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;default_shots:&quot;</span><span class="p">,</span> <span class="n">target_data</span><span class="o">.</span><span class="n">default_shots</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;clock_cycle:&quot;</span><span class="p">,</span> <span class="n">target_data</span><span class="o">.</span><span class="n">clock_cycle</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;qubit passive_reset_time:&quot;</span><span class="p">,</span> <span class="n">target_data</span><span class="o">.</span><span class="n">QUBIT_DATA</span><span class="o">.</span><span class="n">passive_reset_time</span><span class="p">)</span>
@@ -571,7 +571,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max_shots: 10000
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max_acquisitions: 10000
 default_shots: 1000
 clock_cycle: 1e-09
 qubit passive_reset_time: 0.001
@@ -579,7 +579,7 @@ qubit sample_time: 1e-09
 resonator sample_time: 1e-09
 
 Top-level model keys:
-[&#39;QUBIT_DATA&#39;, &#39;RESONATOR_DATA&#39;, &#39;default_shots&#39;, &#39;max_shots&#39;]
+[&#39;QUBIT_DATA&#39;, &#39;RESONATOR_DATA&#39;, &#39;default_shots&#39;, &#39;max_acquisitions&#39;]
 </pre></div>
 </div>
 </div>
@@ -591,7 +591,7 @@ Top-level model keys:
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">custom_target_data</span> <span class="o">=</span> <span class="n">TargetData</span><span class="p">(</span>
-    <span class="n">max_shots</span><span class="o">=</span><span class="mi">20_000</span><span class="p">,</span>
+    <span class="n">max_acquisitions</span><span class="o">=</span><span class="mi">20_000</span><span class="p">,</span>
     <span class="n">default_shots</span><span class="o">=</span><span class="mi">2_048</span><span class="p">,</span>
     <span class="n">QUBIT_DATA</span><span class="o">=</span><span class="n">QubitDescription</span><span class="p">(</span>
         <span class="n">passive_reset_time</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">,</span>
@@ -702,8 +702,8 @@ Clock-cycle mismatch caught:
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Unseeded call 1 clock_cycle: 1.4000000000000001e-08
-Unseeded call 2 clock_cycle: 1.4000000000000001e-08
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Unseeded call 1 clock_cycle: 5e-09
+Unseeded call 2 clock_cycle: 1e-08
 Unseeded reproducible: False
 
 Seeded call 1 clock_cycle: 5e-09
@@ -729,7 +729,7 @@ CompilePipelineDescription.target_data default:
 
 <span class="c1"># YAML loading from disk via TargetData.from_yaml(...)</span>
 <span class="n">yaml_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">max_shots: 12000</span>
+<span class="s2">max_acquisitions: 12000</span>
 <span class="s2">default_shots: 512</span>
 <span class="s2">QUBIT_DATA:</span>
 <span class="s2">  sample_time: 1e-09</span>
@@ -781,7 +781,7 @@ CompilePipelineDescription.target_data default:
 <div class="cell_output docutils container">
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Serialised JSON (first 250 chars):
 {
-  &quot;max_shots&quot;: 10000,
+  &quot;max_acquisitions&quot;: 10000,
   &quot;default_shots&quot;: 1000,
   &quot;QUBIT_DATA&quot;: {
     &quot;sample_time&quot;: 1e-9,
@@ -789,15 +789,16 @@ CompilePipelineDescription.target_data default:
     &quot;instruction_memory_size&quot;: 50000,
     &quot;waveform_memory_size&quot;: 1500,
     &quot;pulse_duration_min&quot;: 6.4e-8,
-    &quot;pulse_duratio...
+    &quot;pulse_...
 
 Loaded from YAML default_shots: 512
 
-Deprecation warnings captured: 4
+Deprecation warnings captured: 5
 - `TargetData.default()` is deprecated; use `TargetData()` instead. This will be removed in v4.0.0.
 - `TargetData.create_with()` is deprecated; use `TargetData()` with appropriate keyword arguments instead. This will be removed in v4.0.0.
 - `DefaultTargetData()` is deprecated; use `TargetData()` instead. This will be removed in v4.0.0.
 - `CustomTargetData()` is deprecated; use `TargetData()` with appropriate keyword arguments instead. This will be removed in v4.0.0.
+- `max_shots` is deprecated; use `max_acquisitions` instead.
 </pre></div>
 </div>
 </div>

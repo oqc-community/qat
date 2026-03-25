@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post186.dev20260325133147 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post187.dev20260325145446 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -568,6 +568,8 @@
 </li>
       <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData">AbstractTargetData (class in qat.model.target_data)</a>
 </li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.Config">AbstractTargetData.Config (class in qat.model.target_data)</a>
+</li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.AbstractWaveform">AbstractWaveform (class in qat.ir.waveforms)</a>
 
       <ul>
@@ -822,10 +824,10 @@
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_pulse_channel">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.add_qreg">add_qreg() (Qasm3ParserBase method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.add_qreg">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.add_qreg">add_qreg() (Qasm3ParserBase method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3ParserBase.add_qreg">[1]</a>
+</li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.add_quantum_device">add_quantum_device() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.add_qubit_coupling">add_qubit_coupling() (in module qat.purr.backends.realtime_chip_simulator)</a>
@@ -5444,6 +5446,14 @@
         <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.max_acq_threshold">(SequencerDescription attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.max_acquisitions">max_acquisitions (AbstractTargetData attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.params.max_acquisitions">(qat.model.target_data.AbstractTargetData parameter)</a>
+</li>
+        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.params.max_acquisitions">(qat.model.target_data.TargetData parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_BINNED_ACQUISITIONS">MAX_BINNED_ACQUISITIONS (Constants attribute)</a>
 </li>
       <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrcDescription.params.max_binned_acquisitions">max_binned_acquisitions (qat.backend.qblox.target_data.QrcDescription parameter)</a>
@@ -5552,7 +5562,7 @@
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseConstraints.max_scale">(OpenPulseConstraints attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.max_shots">max_shots (AbstractTargetData attribute)</a>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.max_shots">max_shots (AbstractTargetData property)</a>
 
       <ul>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.HardwareConfigValidity.params.max_shots">(qat.middleend.passes.validation.HardwareConfigValidity parameter)</a>
@@ -5560,8 +5570,6 @@
         <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.params.max_shots">(qat.model.target_data.AbstractTargetData parameter)</a>
 </li>
         <li><a href="qat.model.target_data.html#qat.model.target_data.CustomTargetData.params.max_shots">(qat.model.target_data.CustomTargetData parameter)</a>
-</li>
-        <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.params.max_shots">(qat.model.target_data.TargetData parameter)</a>
 </li>
         <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData.create_with.params.max_shots">(qat.model.target_data.TargetData.create_with parameter)</a>
 </li>
@@ -8281,6 +8289,8 @@
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedSet.pop">(ValidatedSet method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.Config.populate_by_name">populate_by_name (AbstractTargetData.Config attribute)</a>
+</li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PopulateWaveformSampleTime">PopulateWaveformSampleTime (class in qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseFrame.port_id">port_id (OpenPulseFrame attribute)</a>
@@ -13882,6 +13892,8 @@
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase.walk_node">(Qasm3ParserBase method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.model.target_data.html#qat.model.target_data.AbstractTargetData.warn_on_max_shots">warn_on_max_shots() (AbstractTargetData class method)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.WARNING">WARNING (LoggerLevel attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.warning">warning() (CompositeLogger method)</a>

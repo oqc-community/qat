@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.target_data module &mdash; qat-compiler 3.0.0.post186.dev20260325133147 documentation</title>
+  <title>qat.model.target_data module &mdash; qat-compiler 3.0.0.post187.dev20260325145446 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -530,7 +530,8 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.target_data.AbstractTargetData.params.max_shots"></span><strong>max_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.AbstractTargetData.params.max_shots">¶</a> – The maximum amount of shots possible on this target.</p></li>
+<li><p><span class="target" id="qat.model.target_data.AbstractTargetData.params.max_acquisitions"></span><strong>max_acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.AbstractTargetData.params.max_acquisitions">¶</a> – The maximum amount of acquisitions possible on this target.</p></li>
+<li><p><span class="target" id="qat.model.target_data.AbstractTargetData.params.max_shots"></span><strong>max_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.AbstractTargetData.params.max_shots">¶</a> – (deprecated) Use <cite>max_acquisitions</cite> instead.</p></li>
 <li><p><span class="target" id="qat.model.target_data.AbstractTargetData.params.default_shots"></span><strong>default_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.AbstractTargetData.params.default_shots">¶</a> – The default amount of shots on this target if none specified through the instructions.</p></li>
 </ul>
 </dd>
@@ -539,6 +540,17 @@
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Config</span></span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.Config" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.Config.populate_by_name">
+<span class="sig-name descname"><span class="pre">populate_by_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.Config.populate_by_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.default_shots">
 <span class="sig-name descname"><span class="pre">default_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.default_shots" title="Link to this definition"></a></dt>
@@ -550,15 +562,25 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.max_acquisitions">
+<span class="sig-name descname"><span class="pre">max_acquisitions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.max_acquisitions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.max_shots">
-<span class="sig-name descname"><span class="pre">max_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.max_shots" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_shots</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Annotated</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Gt</span><span class="p"><span class="pre">(</span></span><span class="n"><span class="pre">gt</span></span><span class="o"><span class="pre">=</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.max_shots" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'populate_by_name':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True,</span> <span class="pre">'validate_by_alias':</span> <span class="pre">True,</span> <span class="pre">'validate_by_name':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.target_data.AbstractTargetData.warn_on_max_shots">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">warn_on_max_shots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.AbstractTargetData.warn_on_max_shots" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -769,17 +791,11 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TargetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.target_data.TargetData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.target_data.AbstractTargetData" title="qat.model.target_data.AbstractTargetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractTargetData</span></code></a></p>
-<p>Data related to a general target machine.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.target_data.TargetData.params.max_shots"></span><strong>max_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.params.max_shots">¶</a> – The maximum amount of shots possible on this target.</p></li>
-<li><p><span class="target" id="qat.model.target_data.TargetData.params.default_shots"></span><strong>default_shots</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.params.default_shots">¶</a> – The default amount of shots on this target if none specified through the instructions.</p></li>
-<li><p><span class="target" id="qat.model.target_data.TargetData.params.QUBIT_DATA"></span><strong>QUBIT_DATA</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.params.QUBIT_DATA">¶</a> – Qubit-related target description.</p></li>
-<li><p><span class="target" id="qat.model.target_data.TargetData.params.RESONATOR_DATA"></span><strong>RESONATOR_DATA</strong><a class="paramlink headerlink reference internal" href="#qat.model.target_data.TargetData.params.RESONATOR_DATA">¶</a> – Resonator-related target description.</p></li>
-</ul>
-</dd>
-</dl>
+<p>Data related to a general target machine.
+:param _sphinx_paramlinks_qat.model.target_data.TargetData.max_acquisitions: The maximum amount of acquisitions per channel possible on this target.
+:param _sphinx_paramlinks_qat.model.target_data.TargetData.default_shots: The default amount of shots on this target if none specified through the instructions.
+:param _sphinx_paramlinks_qat.model.target_data.TargetData.QUBIT_DATA: Qubit-related target description.
+:param _sphinx_paramlinks_qat.model.target_data.TargetData.RESONATOR_DATA: Resonator-related target description.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -854,7 +870,7 @@ Use <a class="reference internal" href="#qat.model.target_data.TargetData.QUBIT_
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.target_data.TargetData.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.target_data.TargetData.model_config" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'populate_by_name':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True,</span> <span class="pre">'validate_by_alias':</span> <span class="pre">True,</span> <span class="pre">'validate_by_name':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.target_data.TargetData.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 

@@ -60,7 +60,7 @@
    "source": [
     "target_data = TargetData()\n",
     "\n",
-    "print(\"max_shots:\", target_data.max_shots)\n",
+    "print(\"max_acquisitions:\", target_data.max_acquisitions)\n",
     "print(\"default_shots:\", target_data.default_shots)\n",
     "print(\"clock_cycle:\", target_data.clock_cycle)\n",
     "print(\"qubit passive_reset_time:\", target_data.QUBIT_DATA.passive_reset_time)\n",
@@ -89,7 +89,7 @@
    "outputs": [],
    "source": [
     "custom_target_data = TargetData(\n",
-    "    max_shots=20_000,\n",
+    "    max_acquisitions=20_000,\n",
     "    default_shots=2_048,\n",
     "    QUBIT_DATA=QubitDescription(\n",
     "        passive_reset_time=5e-4,\n",
@@ -217,7 +217,7 @@
     "\n",
     "# YAML loading from disk via TargetData.from_yaml(...)\n",
     "yaml_text = \"\"\"\n",
-    "max_shots: 12000\n",
+    "max_acquisitions: 12000\n",
     "default_shots: 512\n",
     "QUBIT_DATA:\n",
     "  sample_time: 1e-09\n",
