@@ -6,9 +6,10 @@ import re
 from typing import Any
 
 import numpy as np
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 
 from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform
+from qat.model.post_processing import PostProcessMethod
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
     ComplexNDArray,
@@ -394,30 +395,45 @@ class QubitPulseChannels(PulseChannelSet):
 
 class Qubit(Component):
     """
-    Models a superconducting qubit on a chip, and holds all information relating to it.
+    Model for a superconducting qubit on a chip.
 
-    :param physical_channel: The physical channel that carries the pulses to the physical qubit.
-    :param pulse_channels: The pulse channels for controlling the qubit.
-    :param resonator: The measure device of the qubit.
-    :param pulse: Calibrated parameters for the X(pi/2) pulse.
+    .. note::
+        ``post_process_method`` replaces ``mean_z_map_args`` by providing a future-proof mechanism to define arbitrary
+        post-process methods. ``mean_z_map_args`` is still supported but may be removed in future.
+
+    :param physical_channel: The physical channel carrying pulses to the qubit.
+    :param pulse_channels: Channels for controlling the qubit.
+    :param resonator: Measurement device for the qubit.
+    :param mean_z_map_args: (deprecated) Arguments for linear mapping (mutually exclusive with ``post_process_method``).
+    :param discriminator: Discriminator value for measurement.
+    :param post_process_method: Post-processing method used to map complex IQ values to states.
+    :param direct_x_pi: Whether direct X(pi) pulse is used.
+
+    :raises ValueError: If neither or both of ``mean_z_map_args`` and ``post_process_method`` are provided.
     """
 
     physical_channel: QubitPhysicalChannel
     pulse_channels: QubitPulseChannels = Field(frozen=True, default=QubitPulseChannels())
     resonator: Resonator
 
-    mean_z_map_args: list[complex | float] = Field(max_length=2, default=[1.0, 0.0])
-    discriminator: complex | float = 0.0
+    mean_z_map_args: list[complex] | None = Field(max_length=2, default=[1 + 0j, 0j])
+    discriminator: complex | None = 0j
+
+    post_process_method: PostProcessMethod | None = Field(
+        discriminator="method", default=None
+    )
 
     direct_x_pi: bool = False
 
-    def model_post_init(self, context: Any, /) -> None:
-        if isinstance(self.discriminator, np.complexfloating):
-            self.discriminator = complex(self.discriminator)
-
-        for i in range(len(self.mean_z_map_args)):
-            if isinstance(self.mean_z_map_args[i], np.complexfloating):
-                self.mean_z_map_args[i] = complex(self.mean_z_map_args[i])
+    @model_validator(mode="after")
+    def validate_mean_z_map_args_or_post_process_method(self):
+        has_mean_z_map_args = self.mean_z_map_args is not None
+        has_state_post_process = self.post_process_method is not None
+        if has_mean_z_map_args == has_state_post_process:
+            raise ValueError(
+                "Exactly one of 'mean_z_map_args' or 'post_process_method' must be provided, but not both or neither."
+            )
+        return self
 
     @property
     def all_pulse_channels(self):
