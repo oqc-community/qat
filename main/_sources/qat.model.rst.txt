@@ -25,5 +25,6 @@ Submodules
    qat.model.device
    qat.model.error_mitigation
    qat.model.hardware_model
+   qat.model.post_processing
    qat.model.target_data
    qat.model.validators

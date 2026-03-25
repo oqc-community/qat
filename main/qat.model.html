@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model package &mdash; qat-compiler 3.0.0.post185.dev20260325120609 documentation</title>
+  <title>qat.model package &mdash; qat-compiler 3.0.0.post186.dev20260325133147 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.post_processing.html">qat.model.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.validators.html">qat.model.validators module</a></li>
 </ul>
@@ -710,11 +711,12 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.mean_z_map_args"><code class="docutils literal notranslate"><span class="pre">Qubit.mean_z_map_args</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.measure_pulse_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.measure_pulse_channel</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.model_config"><code class="docutils literal notranslate"><span class="pre">Qubit.model_config</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.model_post_init"><code class="docutils literal notranslate"><span class="pre">Qubit.model_post_init()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.physical_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.physical_channel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.post_process_method"><code class="docutils literal notranslate"><span class="pre">Qubit.post_process_method</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.pulse_channels"><code class="docutils literal notranslate"><span class="pre">Qubit.pulse_channels</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.resonator"><code class="docutils literal notranslate"><span class="pre">Qubit.resonator</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.second_state_pulse_channel"><code class="docutils literal notranslate"><span class="pre">Qubit.second_state_pulse_channel</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit.validate_mean_z_map_args_or_post_process_method"><code class="docutils literal notranslate"><span class="pre">Qubit.validate_mean_z_map_args_or_post_process_method()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.model.device.html#qat.model.device.QubitPhysicalChannel"><code class="docutils literal notranslate"><span class="pre">QubitPhysicalChannel</span></code></a><ul>
@@ -830,6 +832,39 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PydLogicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">PydLogicalHardwareModel</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PydPhysicalHardwareModel"><code class="docutils literal notranslate"><span class="pre">PydPhysicalHardwareModel</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.model.post_processing.html">qat.model.post_processing module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod"><code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args"><code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod.mean_z_map_args</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.method"><code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod.method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.model_config"><code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap"><code class="docutils literal notranslate"><span class="pre">MLStateMap</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.location"><code class="docutils literal notranslate"><span class="pre">MLStateMap.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.model_config"><code class="docutils literal notranslate"><span class="pre">MLStateMap.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.state"><code class="docutils literal notranslate"><span class="pre">MLStateMap.state</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.val"><code class="docutils literal notranslate"><span class="pre">MLStateMap.val</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod"><code class="docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.method"><code class="docutils literal notranslate"><span class="pre">MaxLikelihoodMethod.method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.model_config"><code class="docutils literal notranslate"><span class="pre">MaxLikelihoodMethod.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.noise_est"><code class="docutils literal notranslate"><span class="pre">MaxLikelihoodMethod.noise_est</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.states"><code class="docutils literal notranslate"><span class="pre">MaxLikelihoodMethod.states</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MethodBase"><code class="docutils literal notranslate"><span class="pre">MethodBase</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MethodBase.method"><code class="docutils literal notranslate"><span class="pre">MethodBase.method</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MethodBase.model_config"><code class="docutils literal notranslate"><span class="pre">MethodBase.model_config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MethodIndicator"><code class="docutils literal notranslate"><span class="pre">MethodIndicator</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL"><code class="docutils literal notranslate"><span class="pre">MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MethodIndicator.MAX_LIKELIHOOD"><code class="docutils literal notranslate"><span class="pre">MethodIndicator.MAX_LIKELIHOOD</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a><ul>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.device module &mdash; qat-compiler 3.0.0.post185.dev20260325120609 documentation</title>
+  <title>qat.model.device module &mdash; qat-compiler 3.0.0.post186.dev20260325133147 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -287,6 +287,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.model.device module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.post_processing.html">qat.model.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.model.validators.html">qat.model.validators module</a></li>
 </ul>
@@ -1043,15 +1044,26 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.model.device.Qubit">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.Qubit" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.device.Component" title="qat.model.device.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
-<p>Models a superconducting qubit on a chip, and holds all information relating to it.</p>
+<p>Model for a superconducting qubit on a chip.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> replaces <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> by providing a future-proof mechanism to define arbitrary
+post-process methods. <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> is still supported but may be removed in future.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.device.Qubit.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.physical_channel">¶</a> – The physical channel that carries the pulses to the physical qubit.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.pulse_channels">¶</a> – The pulse channels for controlling the qubit.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.resonator"></span><strong>resonator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.resonator">¶</a> – The measure device of the qubit.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.pulse"></span><strong>pulse</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.pulse">¶</a> – Calibrated parameters for the X(pi/2) pulse.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.physical_channel">¶</a> – The physical channel carrying pulses to the qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.pulse_channels">¶</a> – Channels for controlling the qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.resonator"></span><strong>resonator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.resonator">¶</a> – Measurement device for the qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.mean_z_map_args"></span><strong>mean_z_map_args</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.mean_z_map_args">¶</a> – (deprecated) Arguments for linear mapping (mutually exclusive with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code>).</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.discriminator"></span><strong>discriminator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.discriminator">¶</a> – Discriminator value for measurement.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.post_process_method"></span><strong>post_process_method</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.post_process_method">¶</a> – Post-processing method used to map complex IQ values to states.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.direct_x_pi"></span><strong>direct_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.direct_x_pi">¶</a> – Whether direct X(pi) pulse is used.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If neither or both of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> and <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> are provided.</p>
 </dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -1090,7 +1102,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.discriminator">
-<span class="sig-name descname"><span class="pre">discriminator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">complex</span> <span class="pre">|</span> <span class="pre">float</span></em><a class="headerlink" href="#qat.model.device.Qubit.discriminator" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">discriminator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">complex</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.model.device.Qubit.discriminator" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1105,7 +1117,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.mean_z_map_args">
-<span class="sig-name descname"><span class="pre">mean_z_map_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[complex</span> <span class="pre">|</span> <span class="pre">float]</span></em><a class="headerlink" href="#qat.model.device.Qubit.mean_z_map_args" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mean_z_map_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[complex]</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.model.device.Qubit.mean_z_map_args" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -1119,21 +1131,14 @@ validated to form a valid model.</p>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.model.device.Qubit.model_post_init">
-<span class="sig-name descname"><span class="pre">model_post_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.Qubit.model_post_init" title="Link to this definition"></a></dt>
-<dd><p>Override this method to perform additional initialization after <cite>__init__</cite> and <cite>model_construct</cite>.
-This is useful if you want to do some validation that requires the entire model to be initialized.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.physical_channel">
 <span class="sig-name descname"><span class="pre">physical_channel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">QubitPhysicalChannel</span></em><a class="headerlink" href="#qat.model.device.Qubit.physical_channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.Qubit.post_process_method">
+<span class="sig-name descname"><span class="pre">post_process_method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PostProcessMethod</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.model.device.Qubit.post_process_method" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1149,6 +1154,11 @@ This is useful if you want to do some validation that requires the entire model 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.second_state_pulse_channel">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">second_state_pulse_channel</span></span><a class="headerlink" href="#qat.model.device.Qubit.second_state_pulse_channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.model.device.Qubit.validate_mean_z_map_args_or_post_process_method">
+<span class="sig-name descname"><span class="pre">validate_mean_z_map_args_or_post_process_method</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.Qubit.validate_mean_z_map_args_or_post_process_method" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
