@@ -14,9 +14,10 @@ from compiler_config.config import (
 
 from qat.core.config.configure import get_config
 from qat.core.result_base import ResultManager
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.ir.instructions import FrequencySet
-from qat.ir.measure import Acquire, AcquireMode, ProcessAxis
+from qat.ir.measure import Acquire
 from qat.ir.waveforms import GaussianWaveform, SquareWaveform
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.middleend.passes.purr.validation import HardwareConfigValidity
@@ -34,7 +35,6 @@ from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.instructions import PostProcessType
 from qat.utils.hardware_model import generate_hw_model, generate_random_linear
 
 qatconfig = get_config()

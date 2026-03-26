@@ -4,8 +4,8 @@ import pytest
 
 from qat.core.result_base import ResultManager
 from qat.executables import AcquireData, Executable
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instruction_builder import QuantumInstructionBuilder
-from qat.ir.measure import AcquireMode
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.runtime.passes.analysis import IndexMappingAnalysis, IndexMappingResult
 

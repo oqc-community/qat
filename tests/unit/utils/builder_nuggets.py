@@ -4,15 +4,13 @@ import numbers
 
 import numpy as np
 
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType, Qubit
 from qat.purr.compiler.instructions import (
     Acquire,
-    AcquireMode,
     CustomPulse,
     MeasurePulse,
-    PostProcessType,
-    ProcessAxis,
     Pulse,
     SweepValue,
     Variable,

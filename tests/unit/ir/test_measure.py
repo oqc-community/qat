@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from pydantic import Field, ValidationError
 
+from qat.ir.instruction_basetypes import PostProcessType, ProcessAxis
 from qat.ir.instructions import (
     Delay,
     PhaseReset,
@@ -19,8 +20,6 @@ from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.instructions import (
     Acquire as LegacyAcquire,
     PostProcessing as LegacyPostProcessing,
-    PostProcessType,
-    ProcessAxis,
 )
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet

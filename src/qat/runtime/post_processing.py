@@ -4,8 +4,8 @@ from numbers import Number
 
 import numpy as np
 
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.measure import PostProcessing
-from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 
 # TODO: move to QAT config?
 UPCONVERT_SIGN = 1.0

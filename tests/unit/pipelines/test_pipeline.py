@@ -6,8 +6,9 @@ from qat.backend.base import BaseBackend
 from qat.backend.waveform.codegen import PydWaveformBackend
 from qat.core.metrics_base import MetricsManager
 from qat.engines import ZeroEngine
-from qat.executables import AbstractProgram, AcquireData, AcquireMode, Executable
+from qat.executables import AbstractProgram, AcquireData, Executable
 from qat.frontend import AutoFrontend, FallthroughFrontend
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.middleend import DefaultMiddleend, FallthroughMiddleend, PydDefaultMiddleend
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader

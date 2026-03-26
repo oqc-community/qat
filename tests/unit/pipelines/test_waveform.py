@@ -17,8 +17,9 @@ from qat.backend.waveform.executable import WaveformChannelData, WaveformProgram
 from qat.engines.waveform import EchoEngine
 from qat.executables import Executable
 from qat.frontend import AutoFrontend
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType
 from qat.ir.instructions import Variable as PydVariable
-from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
+from qat.ir.measure import PostProcessing
 from qat.middleend import PydDefaultMiddleend
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.lucy import LucyModelLoader

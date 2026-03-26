@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from qat.executables import AcquireData, Executable
-from qat.ir.measure import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 
 from tests.unit.utils.executables import MockProgram, MockProgram2
 

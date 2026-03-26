@@ -3,7 +3,8 @@
 import numpy as np
 import pytest
 
-from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType, ProcessAxis
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
+from qat.ir.measure import PostProcessing
 from qat.runtime.post_processing import (
     apply_post_processing,
     discriminate,

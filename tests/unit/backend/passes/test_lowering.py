@@ -7,16 +7,11 @@ from qat.backend.passes.lowering import PydPartitionByPulseChannel
 from qat.backend.passes.purr.lowering import (
     PartitionByPulseChannel as LegPartitionByPulseChannel,
 )
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instruction_builder import PydQuantumInstructionBuilder
 from qat.ir.instructions import Assign, Delay, ResultsProcessing, Return
 from qat.ir.lowered import PartitionedIR
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    PostProcessing,
-    PostProcessType,
-    ProcessAxis,
-)
+from qat.ir.measure import Acquire, PostProcessing
 from qat.ir.waveforms import Pulse, SquareWaveform
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader as LegEchoModelLoader

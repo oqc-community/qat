@@ -9,6 +9,7 @@ import pytest
 from jinja2 import Environment, FileSystemLoader, meta
 
 from qat.frontend.parsers.qasm import Qasm3Parser
+from qat.ir.instruction_basetypes import PostProcessType
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
     Delay,
@@ -19,7 +20,7 @@ from qat.ir.instructions import (
     Return,
     Synchronize,
 )
-from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, PostProcessType
+from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
 from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     DragGaussianWaveform,

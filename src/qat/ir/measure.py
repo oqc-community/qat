@@ -7,6 +7,8 @@ from typing import Annotated
 import numpy as np
 from pydantic import BeforeValidator, Field, PrivateAttr, field_validator, model_validator
 
+# The following things from legacy instructions are unchanged, so just import for now.
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instructions import (
     Delay,
     Instruction,
@@ -15,9 +17,6 @@ from qat.ir.instructions import (
     Synchronize,
 )
 from qat.ir.waveforms import Pulse
-
-# The following things from legacy instructions are unchanged, so just import for now.
-from qat.purr.compiler.instructions import AcquireMode, PostProcessType, ProcessAxis
 from qat.utils.pydantic import QubitId, ValidatedList, ValidatedSet, _validate_set
 
 

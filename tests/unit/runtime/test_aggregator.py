@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from qat.executables import AcquireData
-from qat.ir.measure import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.runtime.aggregator import ResultsAggregator
 
 

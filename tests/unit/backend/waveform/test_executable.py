@@ -9,7 +9,7 @@ from qat.backend.waveform_v1.executable import (
     WaveformV1ChannelData,
     WaveformV1Program,
 )
-from qat.ir.measure import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 
 
 class TestWaveformV1Program:

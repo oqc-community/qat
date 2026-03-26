@@ -14,6 +14,7 @@ from compiler_config.config import InlineResultsProcessing
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
+from qat.ir import instruction_basetypes
 from qat.ir.conversion import ConvertToPydanticIR
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import (
@@ -351,9 +352,9 @@ class TestConvertToPydanticIRPass:
     @pytest.mark.parametrize(
         "legacy_enum",
         [
-            *[val for val in instructions.AcquireMode],
-            *[val for val in instructions.PostProcessType],
-            *[val for val in instructions.ProcessAxis],
+            *[val for val in instruction_basetypes.AcquireMode],
+            *[val for val in instruction_basetypes.PostProcessType],
+            *[val for val in instruction_basetypes.ProcessAxis],
         ],
     )
     def test_convert_enums(self, legacy_enum):
@@ -470,7 +471,7 @@ class TestConvertToPydanticIRPass:
                 "CH2.R0.acquire",
                 {
                     "time": 200e-9,
-                    "mode": instructions.AcquireMode.INTEGRATOR,
+                    "mode": instruction_basetypes.AcquireMode.INTEGRATOR,
                     "output_variable": "test_var",
                     "delay": 0.0,
                     "rotation": 0.5,
@@ -765,25 +766,25 @@ class TestConvertToPydanticIRPass:
         "pp_type, axes",
         [
             pytest.param(
-                instructions.PostProcessType.MEAN,
-                [instructions.ProcessAxis.TIME],
+                instruction_basetypes.PostProcessType.MEAN,
+                [instruction_basetypes.ProcessAxis.TIME],
                 id="Mean-Time",
             ),
             pytest.param(
-                instructions.PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
-                [instructions.ProcessAxis.SEQUENCE],
+                instruction_basetypes.PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                [instruction_basetypes.ProcessAxis.SEQUENCE],
                 id="LinearMapComplexToReal-Sequence",
             ),
             pytest.param(
-                instructions.PostProcessType.DISCRIMINATE,
-                [instructions.ProcessAxis.SEQUENCE],
+                instruction_basetypes.PostProcessType.DISCRIMINATE,
+                [instruction_basetypes.ProcessAxis.SEQUENCE],
                 id="Discriminate-Sequence",
             ),
             pytest.param(
-                instructions.PostProcessType.MUL,
+                instruction_basetypes.PostProcessType.MUL,
                 [
-                    instructions.ProcessAxis.SEQUENCE,
-                    instructions.ProcessAxis.TIME,
+                    instruction_basetypes.ProcessAxis.SEQUENCE,
+                    instruction_basetypes.ProcessAxis.TIME,
                 ],
                 id="Mul-Sequence-Time",
             ),
@@ -794,7 +795,7 @@ class TestConvertToPydanticIRPass:
         acquire = instructions.Acquire(
             self.legacy_model.get_pulse_channel_from_id("CH2.R0.acquire"),
             time=200e-9,
-            mode=instructions.AcquireMode.INTEGRATOR,
+            mode=instruction_basetypes.AcquireMode.INTEGRATOR,
             output_variable="test_var",
             delay=0.0,
             rotation=0.5,
@@ -828,19 +829,19 @@ class TestConvertToPydanticIRPass:
         [
             pytest.param(
                 [0],
-                instructions.AcquireMode.INTEGRATOR,
+                instruction_basetypes.AcquireMode.INTEGRATOR,
                 ["test_var"],
                 id="single-qubit",
             ),
             pytest.param(
                 [0, 1],
-                instructions.AcquireMode.SCOPE,
+                instruction_basetypes.AcquireMode.SCOPE,
                 ["test_var_1", "test_var_2"],
                 id="multiple-qubits",
             ),
             pytest.param(
                 8,
-                instructions.AcquireMode.RAW,
+                instruction_basetypes.AcquireMode.RAW,
                 ["test_var"],
                 id="single-qubit-int",
             ),

@@ -10,7 +10,7 @@ from qat.backend.waveform.executable import (
     WaveformProgram,
 )
 from qat.engines.waveform import EchoEngine
-from qat.purr.compiler.instructions import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 
 
 class TestEchoEngine:

@@ -19,15 +19,10 @@ from qat.frontend.passes.transform import (
     PydInputOptimisation,
     PydParse,
 )
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import ResultsProcessing
-from qat.ir.measure import (
-    AcquireMode,
-    MeasureBlock,
-    PostProcessing,
-    PostProcessType,
-    ProcessAxis,
-)
+from qat.ir.measure import MeasureBlock, PostProcessing
 from qat.model.loaders.lucy import LucyModelLoader
 
 from tests.unit.utils.qasm_qir import get_qasm2, get_qasm3, get_qir

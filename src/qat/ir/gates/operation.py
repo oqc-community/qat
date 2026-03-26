@@ -4,7 +4,7 @@
 from pydantic import NonNegativeInt
 
 from qat.ir.gates.base import QubitInstruction
-from qat.ir.measure import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 
 
 class Measure(QubitInstruction):

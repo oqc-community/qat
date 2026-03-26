@@ -21,6 +21,7 @@ from openqasm3.visitor import QASMVisitor
 
 from qat.frontend.parsers.qasm.base import AbstractParser, ParseResults, QasmContext
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
     FrequencyShift,
@@ -29,7 +30,7 @@ from qat.ir.instructions import (
     QuantumInstruction,
     Variable,
 )
-from qat.ir.measure import Acquire, AcquireMode, PostProcessType
+from qat.ir.measure import Acquire
 from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     AbstractWaveform,

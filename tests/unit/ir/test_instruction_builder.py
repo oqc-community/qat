@@ -5,16 +5,10 @@ import random
 import numpy as np
 import pytest
 
+from qat.ir.instruction_basetypes import AcquireMode, ProcessAxis
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import Delay, PhaseShift, Synchronize
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    MeasureBlock,
-    PostProcessing,
-    ProcessAxis,
-    acq_mode_process_axis,
-)
+from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, acq_mode_process_axis
 from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import GaussianWaveform, Pulse, SampledWaveform
 from qat.model.device import (

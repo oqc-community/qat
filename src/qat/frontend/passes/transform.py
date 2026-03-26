@@ -27,18 +27,13 @@ from qat.frontend.parsers import (
 from qat.frontend.passes.analysis import InputAnalysisResult
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.builder_factory import BuilderFactory
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instruction_builder import (
     InstructionBuilder,
     PydQuantumInstructionBuilder,
     QuantumInstructionBuilder,
 )
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    PostProcessing,
-    PostProcessType,
-    ProcessAxis,
-)
+from qat.ir.measure import Acquire, PostProcessing
 from qat.model.hardware_model import PhysicalHardwareModel as PydHardwareModel
 from qat.purr.utils.logger import get_default_logger
 

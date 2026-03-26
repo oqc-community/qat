@@ -9,7 +9,7 @@ import qat.ir.measure as MeasureInstructions
 import qat.ir.waveforms as Waveforms
 import qat.purr.compiler.instructions as PurrInstructions
 from qat.frontend.converters.purr import HardwareModelMapper, PurrConverter
-from qat.ir.measure import AcquireMode, PostProcessType, ProcessAxis
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.validators import MismatchingHardwareModelException

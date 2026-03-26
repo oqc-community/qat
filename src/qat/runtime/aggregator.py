@@ -10,7 +10,7 @@ import numpy as np
 
 from qat.backend.qblox.acquisition import Acquisition
 from qat.executables import AcquireData
-from qat.purr.compiler.instructions import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 
 
 class ResultsAggregator:

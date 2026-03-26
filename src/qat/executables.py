@@ -7,9 +7,9 @@ from compiler_config.config import InlineResultsProcessing
 from pydantic import BaseModel, PositiveInt, field_validator
 from pydantic_core import from_json
 
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instructions import Assign
 from qat.ir.measure import PostProcessing
-from qat.purr.compiler.instructions import AcquireMode
 from qat.utils.pydantic import RehydratableModel
 
 

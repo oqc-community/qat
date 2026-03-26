@@ -11,6 +11,7 @@ from uuid import uuid4
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
 
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instructions import (
     Assign,
     BinaryOperator,
@@ -28,15 +29,7 @@ from qat.ir.instructions import (
     Return,
     Synchronize,
 )
-from qat.ir.measure import (
-    Acquire,
-    AcquireMode,
-    MeasureBlock,
-    PostProcessing,
-    PostProcessType,
-    ProcessAxis,
-    acq_mode_process_axis,
-)
+from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, acq_mode_process_axis
 from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import Pulse, SampledWaveform
 from qat.model.device import Component, PhysicalChannel, Qubit

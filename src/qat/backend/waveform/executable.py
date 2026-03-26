@@ -4,7 +4,7 @@ import numpy as np
 from pydantic import BaseModel, Field
 
 from qat.executables import AbstractProgram
-from qat.ir.measure import AcquireMode
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.utils.pydantic import ComplexNDArray
 
 
