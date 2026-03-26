@@ -7,6 +7,7 @@ from warnings import warn
 
 import piny
 from pydantic import (
+    ConfigDict,
     Field,
     NonNegativeFloat,
     NonNegativeInt,
@@ -139,8 +140,7 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
     )
     default_shots: PositiveInt = 1
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(validate_by_name=True, validate_by_alias=True)
 
     @model_validator(mode="before")
     def warn_on_max_shots(cls, values):
