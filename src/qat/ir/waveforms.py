@@ -53,7 +53,7 @@ class Waveform(AbstractWaveform):
     drag: float = 0.0
     rise: float = 0.0
     amp_setup: float = 0.0
-    scale_factor: float = 1.0
+    scale_factor: float | complex = 1.0
     zero_at_edges: bool = False
     beta: float = 0.0
     frequency: float = 0.0

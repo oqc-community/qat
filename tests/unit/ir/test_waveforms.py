@@ -29,8 +29,8 @@ class TestWaveformHashing:
 
     def test_different_parameters(self):
         for cls in self.class_names:
-            waveform = cls(width=80e-9, amp=1.0)
-            other_waveform = cls(width=100e-9, amp=1.0)
+            waveform = cls(width=80e-9, amp=1.0, scale_factor=1.0)
+            other_waveform = cls(width=100e-9, amp=1.0, scale_factor=0.5 + 0.5j)
             assert hash(waveform) != hash(other_waveform)
 
             other_waveform = cls(width=80e-9, amp=0.5)
