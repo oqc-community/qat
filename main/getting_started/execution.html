@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Execution &mdash; qat-compiler 3.0.0.post189.dev20260326125056 documentation</title>
+  <title>Execution &mdash; qat-compiler 3.0.0.post190.dev20260326184437 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -219,6 +219,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.conversion.html">qat.ir.conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.instruction_basetypes.html">qat.ir.instruction_basetypes module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.instructions.html">qat.ir.instructions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../qat.ir.lowered.html">qat.ir.lowered module</a></li>
@@ -623,7 +624,7 @@ to the readouts at compilation, in this case, it has the format <code class="cod
 where <code class="code docutils literal notranslate"><span class="pre">clbit</span></code> corresponds to the bit specified in the QASM program, and the
 <code class="code docutils literal notranslate"><span class="pre">qubit</span></code> denotes the qubit that is read out (note this may differ to what is
 specified in the QASM program if optimizations are used). Since the
-<a class="reference internal" href="../qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.AcquireMode" title="qat.purr.compiler.instructions.AcquireMode"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code></a> is used by
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquireMode.INTEGRATOR</span></code> is used by
 default for readout acquisitions, the values in the dictionary are arrays with one readout
 per shot. For this example, the results are:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">results</span> <span class="o">=</span> <span class="p">{</span>

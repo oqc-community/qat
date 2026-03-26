@@ -1,0 +1,7 @@
+qat.ir.instruction\_basetypes module
+====================================
+
+.. automodule:: qat.ir.instruction_basetypes
+   :members:
+   :undoc-members:
+   :show-inheritance:

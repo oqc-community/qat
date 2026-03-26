@@ -22,6 +22,7 @@ Submodules
 
    qat.ir.builder_factory
    qat.ir.conversion
+   qat.ir.instruction_basetypes
    qat.ir.instruction_builder
    qat.ir.instructions
    qat.ir.lowered
