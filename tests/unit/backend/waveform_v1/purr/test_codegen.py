@@ -125,7 +125,7 @@ class TestWaveformV1Backend:
 
     def test_partitioned_ir_shots(self, partitioned_ir):
         assert partitioned_ir.shots == 1254
-        assert partitioned_ir.passive_reset_time == None
+        assert partitioned_ir.passive_reset_time is None
 
     def test_partitioned_ir_has_returns(self, partitioned_ir):
         assert len(partitioned_ir.returns) == 1

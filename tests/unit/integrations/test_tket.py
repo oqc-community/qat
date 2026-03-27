@@ -262,16 +262,16 @@ class TestTketToQatIRConverter:
             qat_inst = builder2.instructions[i]
             if isinstance(inst, Acquire):
                 # output_variable might be different, but check other things
-                assert type(inst) == type(qat_inst)
+                assert type(inst) is type(qat_inst)
                 assert inst.target == qat_inst.target
                 assert inst.mode == qat_inst.mode
                 assert inst.duration == qat_inst.duration
             elif isinstance(inst, PostProcessing):
-                assert type(inst) == type(qat_inst)
+                assert type(inst) is type(qat_inst)
                 assert inst.process_type == qat_inst.process_type
                 assert inst.axes == qat_inst.axes
             elif isinstance(inst, (PhaseShift, PhaseSet)):
-                assert type(inst) == type(qat_inst)
+                assert type(inst) is type(qat_inst)
                 assert inst.target == qat_inst.target
                 assert isclose(inst.phase, qat_inst.phase)
             else:

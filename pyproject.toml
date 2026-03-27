@@ -174,8 +174,6 @@ extend-select = ["I"]
 [tool.ruff.lint.per-file-ignores]
 # Ignore imports not at top of notebook files
 "notebooks/**" = ["E402"]
-# Ignore a == b comparisons for tests
-"tests/**" = ["E711", "E712", "E721"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["qat"]

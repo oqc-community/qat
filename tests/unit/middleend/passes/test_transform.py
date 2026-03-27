@@ -2291,7 +2291,7 @@ class TestEvaluateWaveforms:
         )
         assert isinstance(new_instruction, Pulse)
         assert new_instruction.target == qubit.drive_pulse_channel.uuid
-        assert new_instruction.ignore_channel_scale == True
+        assert new_instruction.ignore_channel_scale
         assert new_instruction.waveform.amp == (0.5 if ignore_channel_scale else 1.0)
         if ignore_channel_scale:
             assert new_instruction.waveform == waveform
@@ -2315,7 +2315,7 @@ class TestEvaluateWaveforms:
         assert isinstance(new_instruction, Pulse)
         assert isinstance(new_instruction.waveform, SampledWaveform)
         assert new_instruction.target == qubit.drive_pulse_channel.uuid
-        assert new_instruction.ignore_channel_scale == True
+        assert new_instruction.ignore_channel_scale
         if ignore_channel_scale:
             assert np.all(new_instruction.waveform.samples == samples)
         else:

@@ -528,8 +528,8 @@ class TestQbloxBackend1:
                 assert pkg.timeline is not None
                 assert isinstance(pkg.timeline, np.ndarray)
                 assert pkg.timeline.size > 0
-                assert not np.all(pkg.timeline is None)
-                assert not np.all(pkg.timeline == np.nan)
+                assert not np.any(np.equal(pkg.timeline, None))
+                assert not np.any(np.isnan(pkg.timeline))
             plot_program(program)
 
     def test_driver_fw_version(self, qblox_model):
@@ -615,8 +615,9 @@ class TestQbloxBackend2:
         builder = qubit_spect(qblox_model, qubit_indices, num_points)
 
         remaining, static_dus = partition(
-            lambda inst: isinstance(inst, DeviceUpdate)
-            and not isinstance(inst.value, Variable),
+            lambda inst: (
+                isinstance(inst, DeviceUpdate) and not isinstance(inst.value, Variable)
+            ),
             builder.instructions,
         )
         remaining, static_dus = list(remaining), list(static_dus)
@@ -751,8 +752,8 @@ class TestQbloxBackend2:
                 assert pkg.timeline is not None
                 assert isinstance(pkg.timeline, np.ndarray)
                 assert pkg.timeline.size > 0
-                assert not np.all(pkg.timeline == None)
-                assert not np.all(pkg.timeline == np.nan)
+                assert not np.any(np.equal(pkg.timeline, None))
+                assert not np.any(np.isnan(pkg.timeline))
             plot_program(program)
 
         # Dynamic settings
@@ -774,5 +775,5 @@ class TestQbloxBackend2:
                     assert pkg.timeline is not None
                     assert isinstance(pkg.timeline, np.ndarray)
                     assert pkg.timeline.size > 0
-                    assert not np.all(pkg.timeline == None)
-                    assert not np.all(pkg.timeline == np.nan)
+                    assert not np.any(np.equal(pkg.timeline, None))
+                    assert not np.any(np.isnan(pkg.timeline))

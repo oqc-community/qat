@@ -74,7 +74,7 @@ class TestIsQasmPath:
         "path", ["test.ll", "test.bc", "qasm.qir", "test.qasm.ll", "OPENQASM 2.0;", "test"]
     )
     def test_is_qasm_path_returns_false(self, path):
-        assert is_qasm_path(path) == False
+        assert not is_qasm_path(path)
 
 
 class TestIsQasmStr:
@@ -262,7 +262,7 @@ class TestQasm3Frontend:
         # TODO: Update frontends to work with `Path`s, COMPILER-404
         qasm_path = qasm_path
         res = self.qasm3_frontend().check_and_return_source(qasm_path)
-        assert res == False
+        assert not res
 
     def test_emit_qasm_3_files(self):
         """Tests frontend-relevant details, such as successful parsing. Doesn't check the

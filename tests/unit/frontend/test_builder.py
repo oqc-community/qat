@@ -21,7 +21,7 @@ class TestBuilderFrontend:
         "src", ["not an instruction builder", 123, QuantumInstructionBuilder(pyd_model)]
     )
     def test_builder_frontend_rejects_non_builders(self, src):
-        assert self.frontend.check_and_return_source(src) == False
+        assert not self.frontend.check_and_return_source(src)
 
     def test_builder_frontend_accepts_purr_builders(self):
         purr_builder = PurrBuilder(self.purr_model)

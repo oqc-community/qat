@@ -28,10 +28,10 @@ class TestLegacyRuntime:
     )
     def test_connect_with_connect_at_beginning(self, mode):
         engine = self.MockConnectedEngine()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         # Ignore F841 as the connection is automatically closed on __del__
         runtime = LegacyRuntime(engine, connection_mode=mode)  # noqa: F841
-        assert engine.is_connected == True
+        assert engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -43,9 +43,9 @@ class TestLegacyRuntime:
     )
     def test_connect_without_connect_at_beginning(self, mode):
         engine = self.MockConnectedEngine()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         LegacyRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -59,18 +59,18 @@ class TestLegacyRuntime:
         engine = self.MockConnectedEngine()
         engine.startup()
         runtime = LegacyRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         del runtime
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize("mode", [ConnectionMode.MANUAL, ConnectionMode.DEFAULT])
     def test_disconnect_without_disconnect_at_end(self, mode):
         engine = self.MockConnectedEngine()
         engine.startup()
         runtime = LegacyRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         del runtime
-        assert engine.is_connected == True
+        assert engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -82,19 +82,19 @@ class TestLegacyRuntime:
     )
     def test_connect_with_connect_before_execute(self, mode):
         engine = self.MockConnectedEngine()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         runtime = LegacyRuntime(engine, connection_mode=mode)
         runtime.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
-        assert engine.is_connected == True
+        assert engine.is_connected
 
     @pytest.mark.parametrize("mode", [ConnectionMode.ALWAYS, ConnectionMode.MANUAL])
     def test_connect_without_connect_before_execute(self, mode):
         engine = self.MockConnectedEngine()
         runtime = LegacyRuntime(engine, connection_mode=mode)
         engine.shutdown()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         runtime.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize(
         "mode", [ConnectionMode.DISCONNECT_AFTER_EXECUTE, ConnectionMode.DEFAULT]
@@ -103,9 +103,9 @@ class TestLegacyRuntime:
         engine = self.MockConnectedEngine()
         engine.startup()
         runtime = LegacyRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         runtime.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -119,6 +119,6 @@ class TestLegacyRuntime:
         engine = self.MockConnectedEngine()
         engine.startup()
         runtime = LegacyRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         runtime.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
-        assert engine.is_connected == True
+        assert engine.is_connected

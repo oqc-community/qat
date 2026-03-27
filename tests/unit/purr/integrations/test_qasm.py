@@ -647,12 +647,12 @@ class TestQASM3:
         assert np.isclose(pulses[0].width, 100e-9)
         assert np.isclose(pulses[0].amp, 1)
         assert np.isclose(pulses[0].square_width, 50e-9)
-        assert pulses[0].zero_at_edges == True
+        assert pulses[0].zero_at_edges is True
         # Check the properties of the second pulse
         assert np.isclose(pulses[1].width, 200e-9)
         assert np.isclose(pulses[1].amp, 2.5)
         assert np.isclose(pulses[1].square_width, 50e-9)
-        assert pulses[1].zero_at_edges == False
+        assert pulses[1].zero_at_edges is False
 
     def test_sech(self):
         # Checks that the sech waveforms parse correctly.

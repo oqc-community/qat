@@ -26,8 +26,8 @@ class TestConnectionMixin:
     def test_disconnect_on_delete(self):
         obj = self.MockObject()
         connection = self.MockConnection(obj)
-        assert obj.val == False
+        assert obj.val is False
         connection.connect()
-        assert obj.val == True
+        assert obj.val is True
         del connection
-        assert obj.val == False
+        assert obj.val is False

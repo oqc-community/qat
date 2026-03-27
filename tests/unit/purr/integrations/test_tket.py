@@ -240,7 +240,7 @@ class TestTketToQatIRConverter:
             q0, q1
         )
         for i, inst in enumerate(builder.instructions):
-            assert type(inst) == type(direct_builder.instructions[i])
+            assert type(inst) is type(direct_builder.instructions[i])
             if isinstance(inst, PhaseShift):
                 assert np.isclose(
                     inst.phase % (2 * np.pi),

@@ -19,12 +19,12 @@ class TestMetricsManager:
         if MetricsType.OptimizedCircuit in flag:
             assert met_mgr.optimized_circuit == "Some qasm string"
         else:
-            assert met_mgr.optimized_circuit == None
+            assert met_mgr.optimized_circuit is None
 
         if MetricsType.OptimizedInstructionCount in flag:
             assert met_mgr.optimized_instruction_count == 42
         else:
-            assert met_mgr.optimized_instruction_count == None
+            assert met_mgr.optimized_instruction_count is None
 
     @pytest.mark.parametrize(
         "records",

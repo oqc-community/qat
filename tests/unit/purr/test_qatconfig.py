@@ -31,7 +31,7 @@ def test_default_disable_pulse_duration_limits(monkeypatch):
     newconfig = QatSessionConfig()
     assert (
         isinstance(newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS, bool)
-        and newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS == True
+        and newconfig.INSTRUCTION_VALIDATION.PULSE_DURATION_LIMITS
     )
 
 

@@ -509,7 +509,7 @@ class TestUpdateablePipeline:
         new_model = EchoModelLoader(qubit_count=5).load()
         model, loader, refresh = pipeline._resolve_model(new_model, None, False)
         assert model is new_model
-        assert refresh == True
+        assert refresh
         assert loader is (model_loader if has_loader else None)
 
     @pytest.mark.parametrize("has_loader", [True, False])
@@ -529,7 +529,7 @@ class TestUpdateablePipeline:
         new_loader = EchoModelLoader(qubit_count=5)
         model, loader, refresh = pipeline._resolve_model(None, new_loader, False)
         assert len(model.qubits) == 5
-        assert refresh == True
+        assert refresh
         assert loader is new_loader
 
     def test_resolve_with_model_and_loader(self):
@@ -545,7 +545,7 @@ class TestUpdateablePipeline:
         model, loader, refresh = pipeline._resolve_model(new_model, new_loader, False)
         assert model is not pipeline.model
         assert len(model.qubits) == 5
-        assert refresh == True
+        assert refresh
         assert loader is new_loader
 
     def test_resolve_with_reload(self):
@@ -560,5 +560,5 @@ class TestUpdateablePipeline:
         assert model is not pipeline.model
         assert len(pipeline.model.qubits) == 2
         assert len(model.qubits) == 3
-        assert refresh == True
+        assert refresh
         assert loader is model_loader

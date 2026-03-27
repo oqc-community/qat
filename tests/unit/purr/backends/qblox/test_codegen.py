@@ -579,8 +579,8 @@ class TestQbloxEmitter(InvokerMixin):
                 assert pkg.timeline is not None
                 assert isinstance(pkg.timeline, np.ndarray)
                 assert pkg.timeline.size > 0
-                assert not np.all(pkg.timeline == None)
-                assert not np.all(pkg.timeline == np.nan)
+                assert not np.any(np.equal(pkg.timeline, None))
+                assert not np.any(np.isnan(pkg.timeline))
             plot_packages(packages)
 
 
@@ -688,8 +688,9 @@ class TestNewQbloxEmitter(InvokerMixin):
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
         remaining, static_dus = partition(
-            lambda inst: isinstance(inst, DeviceUpdate)
-            and not isinstance(inst.value, Variable),
+            lambda inst: (
+                isinstance(inst, DeviceUpdate) and not isinstance(inst.value, Variable)
+            ),
             builder.instructions,
         )
         remaining, static_dus = list(remaining), list(static_dus)
@@ -852,8 +853,8 @@ class TestNewQbloxEmitter(InvokerMixin):
             assert pkg.timeline is not None
             assert isinstance(pkg.timeline, np.ndarray)
             assert pkg.timeline.size > 0
-            assert not np.all(pkg.timeline == None)
-            assert not np.all(pkg.timeline == np.nan)
+            assert not np.any(np.equal(pkg.timeline, None))
+            assert not np.any(np.isnan(pkg.timeline))
         plot_packages(packages)
 
         # Dynamic settings
@@ -880,5 +881,5 @@ class TestNewQbloxEmitter(InvokerMixin):
                 assert pkg.timeline is not None
                 assert isinstance(pkg.timeline, np.ndarray)
                 assert pkg.timeline.size > 0
-                assert not np.all(pkg.timeline == None)
-                assert not np.all(pkg.timeline == np.nan)
+                assert not np.any(np.equal(pkg.timeline, None))
+                assert not np.any(np.isnan(pkg.timeline))

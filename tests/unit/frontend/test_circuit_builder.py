@@ -82,13 +82,11 @@ class TestCircuitBuilder:
         params = {}
         qubit = 0
         for param, ty in inspect.getfullargspec(method).annotations.items():
-            if ty == int:
+            if ty is int:
                 params[param] = qubit
                 qubit += 1
-            elif ty == float:
+            elif ty is float:
                 params[param] = 0.254
-            elif ty == float | None:
-                pass
         method(circ, **params)
         assert len(circ.instructions) == 1
         assert isinstance(circ.instructions[0], gate)

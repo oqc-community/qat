@@ -760,7 +760,7 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert isinstance(pulses[0].waveform, SampledWaveform)
         assert np.allclose(pulses[0].waveform.samples, samples)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
     def test_constant_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
@@ -781,7 +781,7 @@ class TestQASM3Features:
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
         assert isinstance(pulses[0].waveform, SquareWaveform)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
     def test_drag_waveform(self, model, feature_testpath):
         index, qubit = next(iter(model.qubits.items()))
@@ -803,7 +803,7 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, DragGaussianWaveform)
@@ -830,7 +830,7 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, GaussianSquareWaveform)
@@ -856,7 +856,7 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, GaussianZeroEdgeWaveform)
@@ -881,7 +881,7 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, SechWaveform)
@@ -907,7 +907,7 @@ class TestQASM3Features:
         assert len(pulses) == 1
         assert pulses[0].target == channel.uuid
         assert np.isclose(pulses[0].duration, 80e-9)
-        assert pulses[0].ignore_channel_scale == True
+        assert pulses[0].ignore_channel_scale
 
         waveform = pulses[0].waveform
         assert isinstance(waveform, SinWaveform)

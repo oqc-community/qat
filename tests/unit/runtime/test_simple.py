@@ -29,11 +29,11 @@ class TestSimpleRuntime:
         runtime = SimpleRuntime(
             engine, results_pipeline=PassManager(), connection_mode=ConnectionMode.DEFAULT
         )
-        assert engine.is_connected == False
+        assert not engine.is_connected
         assert engine.connections == 0
 
         runtime.execute(Executable(programs=[]))
-        assert engine.is_connected == False
+        assert not engine.is_connected
         assert engine.connections == 1
 
     def test_execute_with_programs_and_batched_acquisitions(self):

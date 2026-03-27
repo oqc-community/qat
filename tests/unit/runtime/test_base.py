@@ -18,10 +18,10 @@ class TestBaseRuntime:
     def test_connect_on_startup_with_connect_at_beginning(self, monkeypatch, mode):
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
         engine = MockConnectedEngine()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         # Ignore F841 as the connection is automatically closed on __del__
         runtime = BaseRuntime(engine, connection_mode=mode)  # noqa: F841
-        assert engine.is_connected == True
+        assert engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -34,9 +34,9 @@ class TestBaseRuntime:
     def test_connect_on_startup_without_connect_at_beginning(self, monkeypatch, mode):
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
         engine = MockConnectedEngine()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         BaseRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -51,9 +51,9 @@ class TestBaseRuntime:
         engine = MockConnectedEngine()
         engine.connect()
         runtime = BaseRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         del runtime
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize("mode", [ConnectionMode.MANUAL, ConnectionMode.DEFAULT])
     def test_disconnect_on_exit_without_disconnect_at_end(self, monkeypatch, mode):
@@ -61,9 +61,9 @@ class TestBaseRuntime:
         engine = MockConnectedEngine()
         engine.connect()
         runtime = BaseRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         del runtime
-        assert engine.is_connected == True
+        assert engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -76,10 +76,10 @@ class TestBaseRuntime:
     def test_connect_with_connect_before_execute(self, monkeypatch, mode):
         monkeypatch.setattr(BaseRuntime, "__abstractmethods__", set())
         engine = MockConnectedEngine()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         runtime = BaseRuntime(engine, connection_mode=mode)
         runtime.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
-        assert engine.is_connected == True
+        assert engine.is_connected
 
     @pytest.mark.parametrize("mode", [ConnectionMode.ALWAYS, ConnectionMode.MANUAL])
     def test_connect_without_connect_before_execute(self, monkeypatch, mode):
@@ -87,9 +87,9 @@ class TestBaseRuntime:
         engine = MockConnectedEngine()
         runtime = BaseRuntime(engine, connection_mode=mode)
         engine.disconnect()
-        assert engine.is_connected == False
+        assert not engine.is_connected
         runtime.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize(
         "mode", [ConnectionMode.DISCONNECT_AFTER_EXECUTE, ConnectionMode.DEFAULT]
@@ -99,9 +99,9 @@ class TestBaseRuntime:
         engine = MockConnectedEngine()
         engine.connect()
         runtime = BaseRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         runtime.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
-        assert engine.is_connected == False
+        assert not engine.is_connected
 
     @pytest.mark.parametrize(
         "mode",
@@ -116,6 +116,6 @@ class TestBaseRuntime:
         engine = MockConnectedEngine()
         engine.connect()
         runtime = BaseRuntime(engine, connection_mode=mode)
-        assert engine.is_connected == True
+        assert engine.is_connected
         runtime.disconnect_engine(ConnectionMode.DISCONNECT_AFTER_EXECUTE)
-        assert engine.is_connected == True
+        assert engine.is_connected

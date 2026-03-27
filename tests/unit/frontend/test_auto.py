@@ -173,8 +173,8 @@ class TestAutoFrontend:
         for inst_qasm2, inst_qasm3, inst_qir in zip(
             builder_qasm2.instructions, builder_qasm3.instructions, builder_qir.instructions
         ):
-            assert type(inst_qasm2) == type(inst_qasm3)
-            assert type(inst_qasm2) == type(inst_qir)
+            assert type(inst_qasm2) is type(inst_qasm3)
+            assert type(inst_qasm2) is type(inst_qir)
             if isinstance(inst_qasm2, Pulse):
                 assert inst_qasm2.shape == inst_qasm3.shape
                 assert inst_qasm2.shape == inst_qir.shape

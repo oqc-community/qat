@@ -259,7 +259,7 @@ class TestDefaultMiddleend:
         # and the number of instructions are not accounted for. Could be handled with a
         # mixin of explicit pass type that specifies the number of instructions might be
         # altered
-        assert met_mgr.optimized_instruction_count != None
+        assert met_mgr.optimized_instruction_count is not None
 
     def test_delay_and_sync(self, model, middleend):
         """Regression test to test that a Delay on an inactive channel, followed by a sync
