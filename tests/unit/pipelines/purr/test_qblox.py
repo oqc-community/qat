@@ -16,7 +16,7 @@ from qat.frontend import AutoFrontend
 from qat.instrument.base import CsvInstrumentBuilder
 from qat.ir.measure import AcquireMode, PostProcessing, PostProcessType
 from qat.middleend import CustomMiddleend
-from qat.model.loaders.purr import QbloxDummyModelLoader
+from qat.model.loaders.purr import QbloxModelLoader
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.purr.qblox import (
     PipelineConfig,
@@ -27,6 +27,7 @@ from qat.pipelines.purr.qblox import (
 from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
 from qat.runtime import SimpleRuntime
 
+from tests.unit.backend.qblox.utils import QBLOX_TARGET_DATA
 from tests.unit.utils.qasm_qir import get_pipeline_tests
 
 pytestmark = pytest.mark.qblox
@@ -35,7 +36,7 @@ pytestmark = pytest.mark.qblox
 class TestQbloxPipeline:
     def test_build_pipeline(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = QbloxDummyModelLoader(qubit_count=4).load()
+        model = QbloxModelLoader(qubit_count=4).load()
         pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox"), model=model, target_data=None
         )
@@ -53,7 +54,7 @@ class TestQbloxPipeline:
 
     def test_build_compile_pipeline(self):
         """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
-        model = QbloxDummyModelLoader(qubit_count=4).load()
+        model = QbloxModelLoader(qubit_count=4).load()
         compile_pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
         )
@@ -75,7 +76,7 @@ class TestQbloxPipeline:
             "instrument_info.csv",
         )
         instrument = CsvInstrumentBuilder(file_path=filepath).build()
-        model = QbloxDummyModelLoader(qubit_count=4).load()
+        model = QbloxModelLoader(qubit_count=4).load()
         engine = QbloxEngine(instrument)
         execute_pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox_execute"),
@@ -93,7 +94,7 @@ class TestQbloxPipeline:
 class TestQbloxCompilePipeline:
     def test_build_pipeline1(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = QbloxDummyModelLoader(qubit_count=4).load()
+        model = QbloxModelLoader(qubit_count=4).load()
         compile_pipeline = QbloxCompilePipeline1._build_pipeline(
             config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
         )
@@ -108,7 +109,7 @@ class TestQbloxCompilePipeline:
 
     def test_build_pipeline2(self):
         """Test the build_pipeline method to ensure it constructs the pipeline correctly."""
-        model = QbloxDummyModelLoader(qubit_count=4).load()
+        model = QbloxModelLoader(qubit_count=4).load()
         compile_pipeline = QbloxCompilePipeline2._build_pipeline(
             config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
         )
@@ -132,7 +133,7 @@ class TestQbloxExecutePipeline:
             "instrument_info.csv",
         )
         instrument = CsvInstrumentBuilder(file_path=filepath).build()
-        model = QbloxDummyModelLoader(qubit_count=4).load()
+        model = QbloxModelLoader(qubit_count=4).load()
         engine = QbloxEngine(instrument)
         execute_pipeline = QbloxExecutePipeline._build_pipeline(
             config=PipelineConfig(name="echo_execute"),
@@ -190,11 +191,10 @@ class TestQbloxPipelineWithCircuits:
     the executable and the results returned by the QbloxLiveEngineAdapter.
     """
 
-    target_data = QbloxTargetData()
     # TODO: 32Q support: COMPILER-728
-    model = QbloxDummyModelLoader(qubit_count=16).load()
+    model = QbloxModelLoader(qubit_count=16).load()
     pipeline = QbloxPipeline2(
-        config=PipelineConfig(name="stable"), model=model, target_data=target_data
+        config=PipelineConfig(name="stable"), model=model, target_data=QBLOX_TARGET_DATA
     )
 
     @pytest.fixture(scope="class")

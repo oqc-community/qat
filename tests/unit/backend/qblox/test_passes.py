@@ -20,13 +20,13 @@ from qat.backend.qblox.passes.analysis import (
     PreCodegenResult,
     QbloxLegalisationPass,
 )
-from qat.backend.qblox.target_data import QbloxTargetData
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
 from qat.middleend.passes.purr.transform import RepeatSanitisation, ScopeSanitisation
 from qat.purr.compiler.instructions import DeviceUpdate
 
+from tests.unit.backend.qblox.utils import QBLOX_TARGET_DATA
 from tests.unit.utils.builder_nuggets import resonator_spect
 
 
@@ -37,10 +37,9 @@ class TestAnalysisPasses:
         met_mgr = MetricsManager()
         builder = resonator_spect(qblox_model)
 
-        target_data = QbloxTargetData()
         pipeline = (
             PassManager()
-            | RepeatSanitisation(qblox_model, target_data)
+            | RepeatSanitisation(qblox_model, QBLOX_TARGET_DATA)
             | ScopeSanitisation()
             | DesugaringPass()
             | TriagePass()

@@ -135,23 +135,17 @@ class TestBuildingBlocks:
     to trigger certain aspects that have acquired attention over the
     """
 
-    @pytest.mark.parametrize("amp", [0.1, 0.5, 1])
-    @pytest.mark.parametrize("num_shots", [1, 10_000, 500_000, 1_000_000, 3_000_000])
-    @pytest.mark.parametrize("rep_period", [0, 1e-6, 2e-6])
-    def test_measure_amp_sweep(
-        self, model, qubit_indices, enable_hax, amp, num_shots, rep_period
-    ):
-        if num_shots == 3_000_000:
-            pytest.skip("Disables until Qblox fix their dummy/mock cluster")
-
+    @pytest.mark.skip(reason="Space/time expensive")
+    @pytest.mark.parametrize("num_shots", [1, 3_000_000])
+    def test_measure_amp_sweep(self, model, qubit_indices, enable_hax, num_shots):
         engine = model.create_engine()
         engine.enable_hax = enable_hax
 
         builder = get_builder(model)
-        builder.repeat(num_shots, rep_period)
+        builder.repeat(num_shots, 1e-6)
         for index in qubit_indices:
             qubit = model.get_qubit(index)
-            qubit.pulse_measure["amp"] = amp
+            qubit.pulse_measure["amp"] = 0.5
             builder.measure(qubit, output_variable=f"Q{index}")
 
         results, _ = execute_instructions(engine, builder)

@@ -6,13 +6,12 @@ import pytest
 
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.target_data import QbloxTargetData
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.unit.backend.qblox.utils import do_emit, do_execute
+from tests.unit.backend.qblox.utils import QRM_DATA, create_parameters, do_emit, do_execute
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     hidden_mode,
@@ -30,12 +29,14 @@ log = get_default_logger()
 
 pytestmark = pytest.mark.usefixtures("tmp_cwd")
 
-target_data = QbloxTargetData()
+test_parameters = create_parameters(["model", "instrument", "qubit_count"], [0, 1])
 
 
-@pytest.mark.parametrize("qblox_model", [None], indirect=True)
-@pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
-@pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+@pytest.mark.parametrize(
+    "qblox_model,qblox_instrument,qubit_count",
+    test_parameters,
+    indirect=["qblox_model", "qblox_instrument"],
+)
 @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
 class Test1QMeasurements:
     """
@@ -43,8 +44,9 @@ class Test1QMeasurements:
     """
 
     def test_resonator_spect(
-        self, qblox_model, qblox_instrument, backend_type, qubit_indices
+        self, qblox_model, qblox_instrument, backend_type, qubit_count
     ):
+        qubit_indices = list(range(qubit_count))
         builder = resonator_spect(qblox_model, qubit_indices)
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
@@ -53,7 +55,8 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (10,)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_qubit_spect(self, qblox_model, qblox_instrument, backend_type, qubit_indices):
+    def test_qubit_spect(self, qblox_model, qblox_instrument, backend_type, qubit_count):
+        qubit_indices = list(range(qubit_count))
         builder = qubit_spect(qblox_model, qubit_indices)
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
@@ -62,10 +65,11 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (10,)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_xpi2amp(self, qblox_model, qblox_instrument, backend_type, qubit_indices):
+    def test_xpi2amp(self, qblox_model, qblox_instrument, backend_type, qubit_count):
         if backend_type == QbloxBackend2:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
+        qubit_indices = list(range(qubit_count))
         builder = xpi2amp(qblox_model, qubit_indices)
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
@@ -75,10 +79,11 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (2, 10)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_readout_freq(self, qblox_model, qblox_instrument, backend_type, qubit_indices):
+    def test_readout_freq(self, qblox_model, qblox_instrument, backend_type, qubit_count):
         if backend_type == QbloxBackend2:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
+        qubit_indices = list(range(qubit_count))
         builder = readout_freq(qblox_model, qubit_indices)
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
@@ -88,10 +93,11 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (10, 2, 1000)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_zmap(self, qblox_model, qblox_instrument, backend_type, qubit_indices):
+    def test_zmap(self, qblox_model, qblox_instrument, backend_type, qubit_count):
         if backend_type == QbloxBackend2:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
+        qubit_indices = list(range(qubit_count))
         builder = zmap(qblox_model, qubit_indices, do_X=True)
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
@@ -101,7 +107,8 @@ class Test1QMeasurements:
             assert results[f"Q{index}"].shape == (1, 1000)
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
-    def test_t1(self, qblox_model, qblox_instrument, backend_type, qubit_indices):
+    def test_t1(self, qblox_model, qblox_instrument, backend_type, qubit_count):
+        qubit_indices = list(range(qubit_count))
         builder = delay_iteration(qblox_model, qubit_indices)
         executable = do_emit(qblox_model, backend_type, builder)
         results = do_execute(qblox_model, qblox_instrument, executable)
@@ -111,9 +118,11 @@ class Test1QMeasurements:
             assert not np.any(np.isnan(results[f"Q{index}"]))
 
 
-@pytest.mark.parametrize("qblox_model", [None], indirect=True)
-@pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
-@pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+@pytest.mark.parametrize(
+    "qblox_model,qblox_instrument,qubit_count",
+    test_parameters,
+    indirect=["qblox_model", "qblox_instrument"],
+)
 @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
 class TestExecutionSuite:
     """
@@ -121,32 +130,17 @@ class TestExecutionSuite:
     to trigger certain aspects that have acquired attention over the
     """
 
-    @pytest.mark.parametrize("amp", [0.1, 0.5, 1])
-    @pytest.mark.parametrize("num_shots", [1, 10_000, 500_000, 1_000_000, 3_000_000])
-    @pytest.mark.parametrize("passive_reset", [0, 1e-6, 2e-6])
+    @pytest.mark.skip(reason="Space/time expensive")
+    @pytest.mark.parametrize("num_shots", [1, 3_000_000])
     def test_measure_amp_sweep(
-        self,
-        qblox_model,
-        qblox_instrument,
-        qubit_indices,
-        backend_type,
-        amp,
-        num_shots,
-        passive_reset,
+        self, qblox_model, qblox_instrument, qubit_count, backend_type, num_shots
     ):
-        if num_shots == 3_000_000:
-            pytest.skip("Disables until Qblox fix their dummy/mock cluster - COMPILER-986")
-
-        if amp != 0.5 or passive_reset != 2e-6:
-            pytest.skip(
-                "Skipped to reduce latency of the unit test as it takes too long to run"
-            )
-
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
-        builder.repeat(repeat_value=num_shots, passive_reset_time=passive_reset)
+        builder.repeat(repeat_value=num_shots, passive_reset_time=1e-6)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
-            qubit.pulse_measure["amp"] = amp
+            qubit.pulse_measure["amp"] = 0.5
             builder.measure(qubit, output_variable=f"Q{index}")
 
         executable = do_emit(qblox_model, backend_type, builder)
@@ -156,12 +150,13 @@ class TestExecutionSuite:
             assert results[f"Q{index}"].shape == (1, num_shots)
 
     def test_measure_freq_sweep(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type
+        self, qblox_model, qblox_instrument, qubit_count, backend_type
     ):
         center = 9.7772e9
         size = 10
         freqs = center + np.linspace(-100e6, 100e6, size)
 
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         builder.repeat(1000)
         for index in qubit_indices:
@@ -181,13 +176,14 @@ class TestExecutionSuite:
         assert results is not None
 
     def test_instruction_execution(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type
+        self, qblox_model, qblox_instrument, qubit_count, backend_type
     ):
         amp = 1
         rise = 1.0 / 3.0
         phase = 0.72
         frequency = 500
 
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
@@ -201,10 +197,11 @@ class TestExecutionSuite:
         results = do_execute(qblox_model, qblox_instrument, executable)
         assert results is not None
 
-    def test_one_channel(self, qblox_model, qblox_instrument, qubit_indices, backend_type):
+    def test_one_channel(self, qblox_model, qblox_instrument, qubit_count, backend_type):
         amp = 1
         rise = 1.0 / 3.0
 
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
@@ -224,10 +221,11 @@ class TestExecutionSuite:
         results = do_execute(qblox_model, qblox_instrument, executable)
         assert results is not None
 
-    def test_two_channels(self, qblox_model, qblox_instrument, qubit_indices, backend_type):
+    def test_two_channels(self, qblox_model, qblox_instrument, qubit_count, backend_type):
         amp = 1
         rise = 1.0 / 3.0
 
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
@@ -259,11 +257,12 @@ class TestExecutionSuite:
         assert results is not None
 
     def test_sync_two_channel(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type
+        self, qblox_model, qblox_instrument, qubit_count, backend_type
     ):
         amp = 1
         rise = 1.0 / 3.0
 
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
@@ -294,8 +293,9 @@ class TestExecutionSuite:
         assert results is not None
 
     def test_play_very_long_pulse(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type
+        self, qblox_model, qblox_instrument, qubit_count, backend_type
     ):
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
@@ -309,9 +309,10 @@ class TestExecutionSuite:
             results = do_execute(qblox_model, qblox_instrument, executable)
             assert results is not None
 
-    def test_bare_measure(self, qblox_model, qblox_instrument, qubit_indices, backend_type):
+    def test_bare_measure(self, qblox_model, qblox_instrument, qubit_count, backend_type):
         amp = 1
 
+        qubit_indices = list(range(qubit_count))
         builder = get_builder(qblox_model)
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
@@ -328,14 +329,15 @@ class TestExecutionSuite:
     @pytest.mark.parametrize(
         "acq_width",
         [
-            target_data.QRM_DATA.min_sample_size_scope_acquisitions * 1e-9,
-            target_data.QRM_DATA.max_sample_size_scope_acquisitions * 1e-9,
+            QRM_DATA.min_sample_size_scope_acquisitions * 1e-9,
+            QRM_DATA.max_sample_size_scope_acquisitions * 1e-9,
         ],
     )
     @pytest.mark.parametrize("sync", [True, False])
     def test_scope_acquisition(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type, acq_width, sync
+        self, qblox_model, qblox_instrument, qubit_count, backend_type, acq_width, sync
     ):
+        qubit_indices = list(range(qubit_count))
         for index in qubit_indices:
             qubit = qblox_model.get_qubit(index)
             qubit.measure_acquire["width"] = acq_width
@@ -360,12 +362,13 @@ class TestExecutionSuite:
 
     @pytest.mark.parametrize("num_acquires", [1, 2, 3])
     def test_multi_readout(
-        self, qblox_model, qblox_instrument, qubit_indices, backend_type, num_acquires
+        self, qblox_model, qblox_instrument, qubit_count, backend_type, num_acquires
     ):
         old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
         try:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = False
 
+            qubit_indices = list(range(qubit_count))
             builder = multi_readout(
                 qblox_model, qubit_indices, do_X=True, num_acquires=num_acquires
             )
@@ -385,12 +388,14 @@ class TestExecutionSuite:
         finally:
             qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT = old_value
 
-    def test_hidden_mode(self, qblox_model, qblox_instrument, qubit_indices, backend_type):
+    def test_hidden_mode(self, qblox_model, qblox_instrument, qubit_count, backend_type):
         if backend_type == QbloxBackend2:
             pytest.skip("Needs more alignment as JIT execution work advances")
 
-        qubit_indices = [0]
-
+        if qubit_count <= 1:
+            pytest.skip("Needs more qubits for the mode qubits. See hidden_mode()")
+        qubit_count = 1
+        qubit_indices = list(range(qubit_count))
         builder = hidden_mode(qblox_model, qubit_indices, num_points=3)
 
         executable = do_emit(qblox_model, backend_type, builder)
@@ -411,7 +416,7 @@ class TestExecutionSuite:
         self,
         qblox_model,
         qblox_instrument,
-        qubit_indices,
+        qubit_count,
         backend_type,
         num_points,
         signal,
@@ -419,6 +424,7 @@ class TestExecutionSuite:
         expected_shape,
         expected_dtype,
     ):
+        qubit_indices = list(range(qubit_count))
         builder = sweep_and_measure(
             qblox_model, qubit_indices, num_points, signal, single_shot
         )

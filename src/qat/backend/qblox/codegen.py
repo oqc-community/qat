@@ -149,24 +149,42 @@ class QbloxContext(ABC):
         lo_freq, nco_freq = TILegalisationPass.decompose_freq(target.frequency, target)
 
         qblox_config = target.physical_channel.config
+        mod_config: ModuleConfig = qblox_config.module
+        seq_config: SequencerConfig = qblox_config.sequencers[seq_idx]
+        connections = set(seq_config.connection.bulk_value)
 
         # Customise Module config
-        mod_config: ModuleConfig = qblox_config.module
-        if mod_config.lo.out0_en:
+        if {"out0"} <= connections and mod_config.lo.out0_en:
             mod_config.lo.out0_freq = lo_freq
-        if mod_config.lo.out1_en:
+        if {"out1"} <= connections and mod_config.lo.out1_en:
             mod_config.lo.out1_freq = lo_freq
-        if mod_config.lo.out0_in0_en:
+        if {"out0", "in0"} <= connections and mod_config.lo.out0_in0_en:
             mod_config.lo.out0_in0_freq = lo_freq
+        if {"out1", "in1"} <= connections:
+            mod_config.lo.out1_in1_freq = lo_freq
+        if {"out2"} <= connections:
+            mod_config.lo.out2_freq = lo_freq
+        if {"out3"} <= connections:
+            mod_config.lo.out3_freq = lo_freq
+        if {"out4"} <= connections:
+            mod_config.lo.out4_freq = lo_freq
+        if {"out5"} <= connections:
+            mod_config.lo.out5_freq = lo_freq
 
         mod_config.scope_acq.sequencer_select = seq_idx
-        mod_config.scope_acq.trigger_mode_path0 = "sequencer"
-        mod_config.scope_acq.avg_mode_en_path0 = True
-        mod_config.scope_acq.trigger_mode_path1 = "sequencer"
-        mod_config.scope_acq.avg_mode_en_path1 = True
+        if {"in0"} <= connections:
+            mod_config.scope_acq.trigger_mode_path0 = "sequencer"
+            mod_config.scope_acq.trigger_mode_path1 = "sequencer"
+            mod_config.scope_acq.avg_mode_en_path0 = True
+            mod_config.scope_acq.avg_mode_en_path1 = True
+
+        if {"in1"} <= connections:
+            mod_config.scope_acq.trigger_mode_path2 = "sequencer"
+            mod_config.scope_acq.trigger_mode_path3 = "sequencer"
+            mod_config.scope_acq.avg_mode_en_path2 = True
+            mod_config.scope_acq.avg_mode_en_path3 = True
 
         # Customise Sequencer config
-        seq_config: SequencerConfig = qblox_config.sequencers[seq_idx]
         seq_config.nco.freq = nco_freq
         seq_config.nco.prop_delay_comp_en = True
         seq_config.square_weight_acq.integration_length = (

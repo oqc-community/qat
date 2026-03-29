@@ -7,7 +7,7 @@ PIPELINES:
 # TODO: 32Q support: COMPILER-728
 HARDWARE:
 - name: qblox16loader
-  type: qat.model.loaders.purr.QbloxDummyModelLoader
+  type: qat.model.loaders.purr.QbloxModelLoader
   config:
     qubit_count: 16
 

@@ -13,6 +13,7 @@ from qat.backend.qblox.codegen import QbloxPackage
 from qat.backend.qblox.config.helpers import (
     QcmConfigHelper,
     QcmRfConfigHelper,
+    QrcConfigHelper,
     QrmConfigHelper,
     QrmRfConfigHelper,
 )
@@ -50,7 +51,7 @@ class QbloxLeafInstrument(LeafInstrument):
         for mod in modules:
             log.debug(f"Resetting sequencer connections for module {mod}")
             mod.disconnect_outputs()
-            if mod.is_qrm_type:
+            if mod.is_qrm_type or mod.is_qrc_type:
                 mod.disconnect_inputs()
             self._modules[mod] = False  # Mark as clean
 
@@ -84,6 +85,8 @@ class QbloxLeafInstrument(LeafInstrument):
                 config_helper = QrmRfConfigHelper(mod_config, seq_config)
             else:
                 config_helper = QrmConfigHelper(mod_config, seq_config)
+        elif module.is_qrc_type:
+            config_helper = QrcConfigHelper(mod_config, seq_config)
         else:
             raise ValueError(f"Unknown module type {module.module_type}")
 

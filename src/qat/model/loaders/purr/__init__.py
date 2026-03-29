@@ -7,13 +7,13 @@ __all__ = [
     "QiskitModelLoader",
     "RTCSModelLoader",
     "LucyModelLoader",
-    "QbloxDummyModelLoader",
+    "QbloxModelLoader",
     "QbloxFileModelLoader",
 ]
 
-from .dummy import QbloxDummyModelLoader
 from .echo import EchoModelLoader
 from .file import FileModelLoader, QbloxFileModelLoader
 from .lucy import LucyModelLoader
+from .qblox import QbloxModelLoader
 from .qiskit import QiskitModelLoader
 from .rtcs import RTCSModelLoader

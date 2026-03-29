@@ -182,15 +182,6 @@ class ExpOvershoot3Config:
     marker0: str | None = None
 
 
-class LatencyConfig:
-    out0: float | None = None
-    out1: float | None = None
-    out2: float | None = None
-    out3: float | None = None
-    out4: float | None = None
-    out5: float | None = None
-
-
 @dataclass
 class LoConfig:
     out0_en: bool | None = None
@@ -235,10 +226,12 @@ class ScopeAcqConfig:
     trigger_mode_path1: str | None = None  # Enum: {‘sequencer’, ‘level’}
     trigger_mode_path2: str | None = None  # Enum: {‘sequencer’, ‘level’}
     trigger_mode_path3: str | None = None  # Enum: {‘sequencer’, ‘level’}
+
     trigger_level_path0: float | None = None
     trigger_level_path1: float | None = None
     trigger_level_path2: float | None = None
     trigger_level_path3: float | None = None
+
     avg_mode_en_path0: bool | None = None
     avg_mode_en_path1: bool | None = None
     avg_mode_en_path2: bool | None = None
@@ -259,7 +252,6 @@ class ModuleConfig:
     exp1: ExpOvershoot1Config = field(default_factory=lambda: ExpOvershoot1Config())
     exp2: ExpOvershoot2Config = field(default_factory=lambda: ExpOvershoot2Config())
     exp3: ExpOvershoot3Config = field(default_factory=lambda: ExpOvershoot3Config())
-    latency: LatencyConfig = field(default_factory=lambda: LatencyConfig())
 
 
 @dataclass

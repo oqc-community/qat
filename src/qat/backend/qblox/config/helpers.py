@@ -214,16 +214,27 @@ class QcmRfConfigHelper(QcmConfigHelper):
 class QrmConfigHelper(QbloxConfigHelper):
     def configure_scope_acq(self, module: Module):
         scope_acq = self.module_config.scope_acq
-        if scope_acq.sequencer_select:
+        if scope_acq.sequencer_select is not None:
             module.scope_acq_sequencer_select(scope_acq.sequencer_select)
-        if scope_acq.trigger_mode_path0:
-            module.scope_acq_trigger_mode_path0(scope_acq.trigger_mode_path0)
+
         if scope_acq.avg_mode_en_path0:
             module.scope_acq_avg_mode_en_path0(scope_acq.avg_mode_en_path0)
-        if scope_acq.trigger_mode_path1:
-            module.scope_acq_trigger_mode_path1(scope_acq.trigger_mode_path1)
         if scope_acq.avg_mode_en_path1:
             module.scope_acq_avg_mode_en_path1(scope_acq.avg_mode_en_path1)
+
+        if scope_acq.trigger_mode_path0:
+            module.scope_acq_trigger_mode_path0(scope_acq.trigger_mode_path0)
+        if scope_acq.trigger_mode_path1:
+            module.scope_acq_trigger_mode_path1(scope_acq.trigger_mode_path1)
+
+        if scope_acq.trigger_level_path0:
+            module.scope_acq_trigger_level_path0(
+                self.module_config.scope_acq.trigger_level_path0
+            )
+        if scope_acq.trigger_level_path1:
+            module.scope_acq_trigger_level_path1(
+                self.module_config.scope_acq.trigger_level_path1
+            )
 
 
 class QrmRfConfigHelper(QrmConfigHelper):
@@ -306,7 +317,6 @@ class QrcConfigHelper(QrmRfConfigHelper):
     def configure_module(self, module: Module):
         self.configure_lo(module)
         self.configure_attenuation(module)
-        self.configure_latency(module)
         self.configure_fir(module)
         self.configure_exp0(module)
         self.configure_exp1(module)
@@ -357,21 +367,6 @@ class QrcConfigHelper(QrmRfConfigHelper):
             module.in0_att(self.module_config.attenuation.in0)
         if self.module_config.attenuation.in1:
             module.in1_att(self.module_config.attenuation.in1)
-
-    def configure_latency(self, module: Module):
-        # TODO - latency commands fail on both live and dummy cluster: COMPILER-1054
-        if self.module_config.latency.out0:
-            module.out0_latency(self.module_config.latency.out0)
-        if self.module_config.latency.out1:
-            module.out1_latency(self.module_config.latency.out1)
-        if self.module_config.latency.out2:
-            module.out2_latency(self.module_config.latency.out2)
-        if self.module_config.latency.out3:
-            module.out3_latency(self.module_config.latency.out3)
-        if self.module_config.latency.out4:
-            module.out4_latency(self.module_config.latency.out4)
-        if self.module_config.latency.out5:
-            module.out5_latency(self.module_config.latency.out5)
 
     def configure_fir(self, module: Module):
         if self.module_config.fir.out0:
@@ -459,28 +454,49 @@ class QrcConfigHelper(QrmRfConfigHelper):
             module.marker0_exp3_config(self.module_config.exp3.marker0)
 
     def configure_scope_acq(self, module: Module):
-        super().configure_scope_acq(module)
-        if self.module_config.scope_acq.trigger_mode_path2:
-            module.scope_acq_trigger_mode_path2(
-                self.module_config.scope_acq.trigger_mode_path2
-            )
-        if self.module_config.scope_acq.trigger_mode_path3:
-            module.scope_acq_trigger_mode_path3(
-                self.module_config.scope_acq.trigger_mode_path3
-            )
-        if self.module_config.scope_acq.trigger_level_path2:
-            module.scope_acq_trigger_level_path2(
-                self.module_config.scope_acq.trigger_level_path2
-            )
-        if self.module_config.scope_acq.trigger_level_path3:
-            module.scope_acq_trigger_level_path3(
-                self.module_config.scope_acq.trigger_level_path3
-            )
-        if self.module_config.scope_acq.avg_mode_en_path2:
+        scope_acq = self.module_config.scope_acq
+        if scope_acq.sequencer_select is not None:
+            module.scope_acq_sequencer_select(scope_acq.sequencer_select)
+
+        if scope_acq.avg_mode_en_path0:
+            module.scope_acq_avg_mode_en_path0(scope_acq.avg_mode_en_path0)
+        if scope_acq.avg_mode_en_path1:
+            module.scope_acq_avg_mode_en_path1(scope_acq.avg_mode_en_path1)
+        if scope_acq.avg_mode_en_path2:
             module.scope_acq_avg_mode_en_path2(
                 self.module_config.scope_acq.avg_mode_en_path2
             )
-        if self.module_config.scope_acq.avg_mode_en_path3:
+        if scope_acq.avg_mode_en_path3:
             module.scope_acq_avg_mode_en_path3(
                 self.module_config.scope_acq.avg_mode_en_path3
+            )
+
+        if scope_acq.trigger_mode_path0:
+            module.scope_acq_trigger_mode_path0(scope_acq.trigger_mode_path0)
+        if scope_acq.trigger_mode_path1:
+            module.scope_acq_trigger_mode_path1(scope_acq.trigger_mode_path1)
+        if scope_acq.trigger_mode_path2:
+            module.scope_acq_trigger_mode_path2(
+                self.module_config.scope_acq.trigger_mode_path2
+            )
+        if scope_acq.trigger_mode_path3:
+            module.scope_acq_trigger_mode_path3(
+                self.module_config.scope_acq.trigger_mode_path3
+            )
+
+        if scope_acq.trigger_level_path0:
+            module.scope_acq_trigger_level_path0(
+                self.module_config.scope_acq.trigger_level_path0
+            )
+        if scope_acq.trigger_level_path1:
+            module.scope_acq_trigger_level_path1(
+                self.module_config.scope_acq.trigger_level_path1
+            )
+        if scope_acq.trigger_level_path2:
+            module.scope_acq_trigger_level_path2(
+                self.module_config.scope_acq.trigger_level_path2
+            )
+        if scope_acq.trigger_level_path3:
+            module.scope_acq_trigger_level_path3(
+                self.module_config.scope_acq.trigger_level_path3
             )

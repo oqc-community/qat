@@ -19,7 +19,7 @@ from qat.engines.qblox.execution import QbloxEngine
 from qat.engines.qblox.live import QbloxCompositeInstrument, QbloxLeafInstrument
 from qat.instrument.base import ConfigInstrumentBuilder
 from qat.model.loaders.cache import CacheAccessLoader
-from qat.model.loaders.purr import EchoModelLoader, QbloxDummyModelLoader
+from qat.model.loaders.purr import EchoModelLoader, QbloxModelLoader
 from qat.model.target_data import QubitDescription, ResonatorDescription, TargetData
 from qat.pipelines.updateable import UpdateablePipeline
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
@@ -280,7 +280,7 @@ class TestQatSessionConfigForPipelines:
         hardware_loader_desc = qatconfig.HARDWARE[0]
         assert isinstance(hardware_loader_desc, HardwareLoaderDescription)
         hardware_loader = hardware_loader_desc.construct()
-        assert isinstance(hardware_loader, QbloxDummyModelLoader)
+        assert isinstance(hardware_loader, QbloxModelLoader)
         model = hardware_loader.load()
         assert isinstance(model, QbloxLiveHardwareModel)
 
@@ -311,7 +311,7 @@ class TestQatSessionConfigForPipelines:
         hardware_loader_desc = qatconfig.HARDWARE[0]
         assert isinstance(hardware_loader_desc, HardwareLoaderDescription)
         hardware_loader = hardware_loader_desc.construct()
-        assert isinstance(hardware_loader, QbloxDummyModelLoader)
+        assert isinstance(hardware_loader, QbloxModelLoader)
         model = hardware_loader.load()
         assert isinstance(model, QbloxLiveHardwareModel)
 

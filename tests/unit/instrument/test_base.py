@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+from uuid import uuid4
 
 import pytest
 from qblox_instruments import (
@@ -10,7 +11,9 @@ from qblox_instruments import (
 )
 
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
+from qat.model.loaders.qblox import create_instrument
 from qat.purr.utils.logger import get_default_logger
+from qat.utils.uuid import temporary_uuid_seed
 
 from tests.unit.backend.qblox.utils import do_emit
 from tests.unit.utils.builder_nuggets import resonator_spect
@@ -21,22 +24,23 @@ pytestmark = pytest.mark.usefixtures("tmp_cwd")
 
 
 class TestInstrument:
-    @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
-    def test_instrument_lifecycle(self, qblox_instrument):
-        assert (
-            qblox_instrument.is_connected
-        )  # connected already after resolution of the fixture
-        assert qblox_instrument.driver is not None
-        assert isinstance(qblox_instrument.driver, Cluster)
+    @pytest.mark.parametrize("address", [None])
+    def test_instrument_lifecycle(self, function_seed, address):
+        with temporary_uuid_seed(function_seed):
+            id = f"test_{uuid4()}".replace("-", "_")
 
-        qblox_instrument.disconnect()
-        assert not qblox_instrument.is_connected
-        assert qblox_instrument.driver is None
+        instrument = create_instrument(id, id, address)
+        assert not instrument.is_connected
+        assert instrument.driver is None
 
-        qblox_instrument.connect()
-        assert qblox_instrument.is_connected
-        assert qblox_instrument.driver is not None
-        assert isinstance(qblox_instrument.driver, Cluster)
+        instrument.connect()
+        assert instrument.is_connected
+        assert instrument.driver is not None
+        assert isinstance(instrument.driver, Cluster)
+
+        instrument.disconnect()
+        assert not instrument.is_connected
+        assert instrument.driver is None
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)
     @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)

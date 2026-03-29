@@ -9,8 +9,7 @@ from qblox_instruments import (
     Sequencer,
 )
 
-from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.ir import Sequence
+from qat.backend.qblox.execution import QbloxPackage, QbloxProgram
 from qat.backend.qblox.target_data import QbloxTargetData
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.compiler.devices import ChannelType
@@ -24,28 +23,32 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
     target_data = QbloxTargetData()
     qrm_data = target_data.QRM_DATA
 
-    def __init__(self, id, name, address, dummy_config):
-        super().__init__(id, name, address)
+    def __init__(self, id, name, dummy_config):
+        super().__init__(id, name, None)
         self.dummy_config = dummy_config
 
-    def _setup_dummy_scope_acq_data(self, sequencer: Sequencer, sequence: Sequence):
-        shot_match = next(self.shot_pattern.finditer(sequence.program), None)
+    def _setup_dummy_scope_acq_data(self, sequencer: Sequencer, package: QbloxPackage):
+        shot_match = next(self.shot_pattern.finditer(package.sequence.program), None)
         avg_count = int(shot_match.group(3)) if shot_match else 1
 
-        dummy_data = np.random.random(
-            size=(self.qrm_data.max_sample_size_scope_acquisitions, 2)
-        )
-        dummy_data = [(iq[0], iq[1]) for iq in dummy_data]
+        num_paths = 4
+        paths = [
+            np.random.random(size=self.qrm_data.max_sample_size_scope_acquisitions)
+            / avg_count
+            for _ in range(num_paths)
+        ]
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(
-            data=dummy_data, out_of_range=(False, False), avg_cnt=(avg_count, avg_count)
+            data=zip(*paths),
+            out_of_range=(False,) * num_paths,
+            avg_cnt=(avg_count,) * num_paths,
         )
         sequencer.set_dummy_scope_acquisition_data(data=dummy_scope_acquisition_data)
 
-    def _setup_dummy_binned_acq_data(self, sequencer: Sequencer, sequence: Sequence):
-        shot_match = next(self.shot_pattern.finditer(sequence.program), None)
+    def _setup_dummy_binned_acq_data(self, sequencer: Sequencer, package: QbloxPackage):
+        shot_match = next(self.shot_pattern.finditer(package.sequence.program), None)
         avg_count = int(shot_match.group(3)) if shot_match else 1
 
-        for name, acquisition in sequence.acquisitions.items():
+        for name, acquisition in package.sequence.acquisitions.items():
             dummy_binned_acquisition_data = [
                 DummyBinnedAcquisitionData(
                     data=(np.random.random(), np.random.random()),
@@ -80,5 +83,5 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
             if ChannelType.macq.name in pulse_channel_id:
                 package = program.packages[pulse_channel_id]
                 if package.sequence.acquisitions:
-                    self._setup_dummy_scope_acq_data(sequencer, package.sequence)
-                    self._setup_dummy_binned_acq_data(sequencer, package.sequence)
+                    self._setup_dummy_scope_acq_data(sequencer, package)
+                    self._setup_dummy_binned_acq_data(sequencer, package)
