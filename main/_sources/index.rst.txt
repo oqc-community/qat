@@ -13,7 +13,7 @@
    :hidden:
    :maxdepth: 4
    :caption: Contents:
-   
+
    getting_started/index
    tutorials/index
    modules
@@ -22,7 +22,7 @@
    contribute
 
 .. include:: ../../README.rst
-   :start-after: .. readme_text_start_label 
+   :start-after: .. readme_text_start_label
 
 Indices and tables
 ==================

@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.pipelines.legacy.base module &mdash; qat-compiler 3.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -401,8 +401,8 @@ to later refresh the hardware model. Defaults to None.</p></li>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipeline</span></code></p>
 <p>A pipeline that compiles programs using the legacy backend and executes them using
 the <code class="xref py py-class docutils literal notranslate"><span class="pre">LegacyRuntime</span></code>.</p>
-<p>The piepline uses the engine provided by the legacy model, and cannot be provided to
-the factory.</p>
+<p>The piepline uses the engine provided by the legacy model, and cannot be provided to the
+factory.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -453,7 +453,8 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.pipelines.legacy.base.PipelineConfig">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.legacy.base.PipelineConfig" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Base class for configuring updateable pipelines. Subclasses of
+<p>Base class for configuring updateable pipelines.</p>
+<p>Subclasses of
 <code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipeline</span></code> should be paried with their own configuration class which
 specifies custom configuration parameters, and/or sets custom defaults.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>

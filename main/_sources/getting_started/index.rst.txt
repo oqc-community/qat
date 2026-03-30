@@ -13,19 +13,19 @@ aspects:
 #. **Execute**: Runtime of quantum programs to assist with execution, interpretation and
    results post-processing.
 
-It also contains utility for simulation (typically used for testing purposes), such as 
+It also contains utility for simulation (typically used for testing purposes), such as
 an adapter to Qiskit's AerSimulator and our realistic (but limited) real time chip simulator.
 
 
 
 .. toctree::
    :maxdepth: 4
-   
+
    first_program
    hardware_models
    input
    pipelines
    qat_config
-   compilation 
-   execution 
+   compilation
+   execution
    simulators

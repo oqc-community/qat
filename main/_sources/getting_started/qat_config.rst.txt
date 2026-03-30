@@ -1,4 +1,4 @@
-QAT Config 
+QAT Config
 =========================
 
 The QAT Config is a configuration YAML file that can be used to configure compilation and execution through QAT. It allows us to specify the source of a hardware model, engines that execute the compiled code against hardware or simulators, and complete compilation and execution pipelines.
@@ -39,7 +39,7 @@ Hardware
 
 The hardware loaders allow us to load in a hardware model. They can be specified in the QAT config under a **HARDWARE** section, like so:
 
-.. code-block:: YAML 
+.. code-block:: YAML
 
     HARDWARE:
     - name: lucy8
@@ -49,16 +49,16 @@ The hardware loaders allow us to load in a hardware model. They can be specified
     - name: lucy16
       type: qat.model.loaders.lucy.LucyModelLoader
       config:
-        qubit_count: 16 
+        qubit_count: 16
     - name: file_model
       type: qat.model.loaders.file.FileModelLoader
       config:
         path: path_to_calibration.json
 
-Notice each hardware is given a unique name, which can be referenced later when defining pipelines. They also contain a config with arguments that correspond to the :code:`__init__` method of each loader. 
+Notice each hardware is given a unique name, which can be referenced later when defining pipelines. They also contain a config with arguments that correspond to the :code:`__init__` method of each loader.
 
 
-Engines 
+Engines
 --------------------------------------
 
 Engines are the components of execution pipelines that communicate with the hardware or a simulator. Since we might want to define multiple execution pipelines that target the same hardware, it is convenient to define a single engine. This is even more so if the hardware / simulator only allows a single engine to maintain a connection. We can define engines as such:
@@ -68,22 +68,22 @@ Engines are the components of execution pipelines that communicate with the hard
     ENGINES:
     - name: zero
       type: qat.engines.zero.ZeroEngine
-    - name: echo 
+    - name: echo
       type: qat.engines.waveform.echo.EchoEngine
 
 Should the engines require it, the hardware can also be provided with a `hardware` attribute.
 
 
-Pipelines 
+Pipelines
 --------------------------------------
 
-Pipelines can be configured in the QAT config. They can be provided as explicit compile and execute pipelines using the `COMPILE` and `EXECUTE` sections, or as a combined pipeline using the `PIPELINES` section. 
+Pipelines can be configured in the QAT config. They can be provided as explicit compile and execute pipelines using the `COMPILE` and `EXECUTE` sections, or as a combined pipeline using the `PIPELINES` section.
 
-.. warning:: 
+.. warning::
 
     While full pipelines can be configured, it is preferred to define `COMPILE` and `EXECUTE` pipelines instead. Full pipelines might not be supported in future versions.
 
-See the example below for defining pipelines 
+See the example below for defining pipelines
 
 .. code-block:: YAML
 
@@ -103,7 +103,7 @@ See the example below for defining pipelines
 
     EXECUTE:
     - name: echo8-execute
-      pipeline: qat.pipelines.waveform.EchoExecutePipeline 
+      pipeline: qat.pipelines.waveform.EchoExecutePipeline
       hardware_loader: lucy8
     - name: echo16-execute
       pipeline: qat.pipelines.waveform.EchoExecutePipeline
@@ -143,7 +143,7 @@ Putting it all together, we can define a complete QAT config as such:
         qubit_count: 8
 
     ENGINES:
-    - name: echo 
+    - name: echo
       type: qat.engines.waveform.echo.EchoEngine
 
     COMPILE:
@@ -159,6 +159,6 @@ Putting it all together, we can define a complete QAT config as such:
 
     EXECUTE:
     - name: echo8-execute
-      pipeline: qat.pipelines.waveform.EchoExecutePipeline 
+      pipeline: qat.pipelines.waveform.EchoExecutePipeline
       hardware_loader: lucy8
       default: true

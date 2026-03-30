@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.qblox.target_data module &mdash; qat-compiler 3.0.0.post191.dev20260327150645 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.backend.qblox.target_data module &mdash; qat-compiler 3.0.0.post193.dev20260330090408 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -267,10 +267,10 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.dummy.html">qat.model.loaders.purr.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qblox.html">qat.model.loaders.purr.qblox module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qiskit.html">qat.model.loaders.purr.qiskit module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.rtcs.html">qat.model.loaders.purr.rtcs module</a></li>
 </ul>
@@ -280,6 +280,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.qblox.html">qat.model.loaders.qblox module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
 </ul>
 </li>
@@ -529,8 +530,8 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ControlModuleDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.target_data.ControlModuleDescription" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.backend.qblox.target_data.ModuleDescription" title="qat.backend.qblox.target_data.ModuleDescription"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleDescription</span></code></a></p>
 <p>Constants related to Qblox Control Modules.</p>
-<p>Currently, there are no constants specific to control modules, but this class is defined for
-consistency and future extensibility.</p>
+<p>Currently, there are no constants specific to control modules, but this class is defined
+for consistency and future extensibility.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -609,8 +610,8 @@ validated to form a valid model.</p>
 <li><p><span class="target" id="qat.backend.qblox.target_data.Q1asmDescription.params.min_offset"></span><strong>min_offset</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.Q1asmDescription.params.min_offset">¶</a> – Minimum offset in Q1ASM programs.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.Q1asmDescription.params.max_offset"></span><strong>max_offset</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.Q1asmDescription.params.max_offset">¶</a> – Maximum offset in Q1ASM programs.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.Q1asmDescription.params.max_wait_time"></span><strong>max_wait_time</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.Q1asmDescription.params.max_wait_time">¶</a> – Max size of wait instruction immediate operands in Q1ASM programs.
-Max value allowed by assembler is 2**16-1, but this is the largest
-that is a multiple of 4 ns.</p></li>
+Max value allowed by assembler is 2**16-1, but this is the largest that is a
+multiple of 4 ns.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.Q1asmDescription.params.register_size"></span><strong>register_size</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.Q1asmDescription.params.register_size">¶</a> – Size of registers in Q1ASM programs.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.Q1asmDescription.params.loop_unroll_threshold"></span><strong>loop_unroll_threshold</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.Q1asmDescription.params.loop_unroll_threshold">¶</a> – Size above which loops have tolerable overhead.</p></li>
 </ul>
@@ -831,11 +832,10 @@ validated to form a valid model.</p>
 <li><p><span class="target" id="qat.backend.qblox.target_data.QrcDescription.params.number_of_readout_sequencers"></span><strong>number_of_readout_sequencers</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.QrcDescription.params.number_of_readout_sequencers">¶</a> – Number of readout sequencers.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.QrcDescription.params.number_of_control_sequencers"></span><strong>number_of_control_sequencers</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.QrcDescription.params.number_of_control_sequencers">¶</a> – Number of control sequencers.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.QrcDescription.params.max_binned_acquisitions"></span><strong>max_binned_acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.QrcDescription.params.max_binned_acquisitions">¶</a> – Each QRC module has a maximum of 3M memory bins. This
-memory can be dynamically allocated by each of the 8
-readout sequencers. For example, all 8 readout
-sequencers can evenly allocate 375K bins simultaneously,
-or a single sequencer can allocate the whole 3M bins,
-leaving nothing for other sequencers.</p></li>
+memory can be dynamically allocated by each of the 8 readout sequencers. For
+example, all 8 readout sequencers can evenly allocate 375K bins simultaneously, or a
+single sequencer can allocate the whole 3M bins, leaving nothing for other
+sequencers.</p></li>
 </ul>
 </dd>
 </dl>
@@ -949,11 +949,10 @@ datapoints returned.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.ReadoutModuleDescription.params.max_sample_size_scope_acquisitions"></span><strong>max_sample_size_scope_acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.ReadoutModuleDescription.params.max_sample_size_scope_acquisitions">¶</a> – Maximal amount of scope trace acquisition
 datapoints returned.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.ReadoutModuleDescription.params.max_binned_acquisitions"></span><strong>max_binned_acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.ReadoutModuleDescription.params.max_binned_acquisitions">¶</a> – Each readout module has a maximum of 3M memory bins.
-This memory can be dynamically allocated by each of the
-sequencers. For example, in a module with 6 sequencers,
-the sequencers can evenly allocate 500K bins
-simultaneously, or a single sequencer can allocate the
-whole 3M bins, leaving nothing for other sequencers.</p></li>
+This memory can be dynamically allocated by each of the sequencers. For example, in
+a module with 6 sequencers, the sequencers can evenly allocate 500K bins
+simultaneously, or a single sequencer can allocate the whole 3M bins, leaving
+nothing for other sequencers.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1013,20 +1012,24 @@ validated to form a valid model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.grid_time"></span><strong>grid_time</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.grid_time">¶</a> – Clock period of the sequencers. All time intervals used must be multiples of this value.</p></li>
+<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.grid_time"></span><strong>grid_time</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.grid_time">¶</a> – Clock period of the sequencers. All time intervals used must be
+multiples of this value.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_min_freq"></span><strong>nco_min_freq</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_min_freq">¶</a> – Minimum NCO frequency.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_max_freq"></span><strong>nco_max_freq</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_max_freq">¶</a> – Maximum NCO frequency.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_max_phase_steps"></span><strong>nco_max_phase_steps</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_max_phase_steps">¶</a> – Maximum NCO phase steps.</p></li>
-<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_phase_steps_per_deg"></span><strong>nco_phase_steps_per_deg</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_phase_steps_per_deg">¶</a> – The number of steps per degree for NCO phase instructions arguments.</p></li>
-<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_steps_per_hz"></span><strong>nco_freq_steps_per_hz</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_steps_per_hz">¶</a> – The number of steps per Hz for the NCO set_freq instruction.</p></li>
-<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_limit_steps"></span><strong>nco_freq_limit_steps</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_limit_steps">¶</a> – The maximum and minimum frequency expressed in steps for the NCO set_freq instruction.
-For the minimum we multiply by -1.</p></li>
+<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_phase_steps_per_deg"></span><strong>nco_phase_steps_per_deg</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_phase_steps_per_deg">¶</a> – The number of steps per degree for NCO phase
+instructions arguments.</p></li>
+<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_steps_per_hz"></span><strong>nco_freq_steps_per_hz</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_steps_per_hz">¶</a> – The number of steps per Hz for the NCO set_freq
+instruction.</p></li>
+<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_limit_steps"></span><strong>nco_freq_limit_steps</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_limit_steps">¶</a> – The maximum and minimum frequency expressed in steps for
+the NCO set_freq instruction. For the minimum we multiply by -1.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.number_of_registers"></span><strong>number_of_registers</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.number_of_registers">¶</a> – Number of registers available in the Qblox sequencers.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.min_acq_integration_length"></span><strong>min_acq_integration_length</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.min_acq_integration_length">¶</a> – Minimum integration lengths.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.max_acq_integration_length"></span><strong>max_acq_integration_length</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.max_acq_integration_length">¶</a> – Maximum integration lengths.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.min_acq_threshold"></span><strong>min_acq_threshold</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.min_acq_threshold">¶</a> – Minimum thresholds for the thresholded acquisition.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.max_acq_threshold"></span><strong>max_acq_threshold</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.max_acq_threshold">¶</a> – Maximum thresholds for the thresholded acquisition.</p></li>
-<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.max_sample_size_waveforms"></span><strong>max_sample_size_waveforms</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.max_sample_size_waveforms">¶</a> – Maximal amount of samples in the waveforms to be uploaded to a sequencer.</p></li>
+<li><p><span class="target" id="qat.backend.qblox.target_data.SequencerDescription.params.max_sample_size_waveforms"></span><strong>max_sample_size_waveforms</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.target_data.SequencerDescription.params.max_sample_size_waveforms">¶</a> – Maximal amount of samples in the waveforms to be
+uploaded to a sequencer.</p></li>
 </ul>
 </dd>
 </dl>

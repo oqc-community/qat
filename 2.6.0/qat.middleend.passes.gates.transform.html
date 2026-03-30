@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.middleend.passes.gates.transform module &mdash; qat-compiler 2.6.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -391,13 +391,13 @@ appear sequentially.</p>
 <p>A simple pass proof-of-concept pass that decomposes gates to pulse instructions.</p>
 <p>Each native gate can be written a sequence of pulse instructions. This pass decomposes
 each gate into the correct instructions. Note that this method will not be supported in
-the long-term, and will be replaced by something more performant once Qat IR is
-better established.</p>
+the long-term, and will be replaced by something more performant once Qat IR is better
+established.</p>
 <p>A simple first step might be to write an analysis pass that extracts a set of unique
 gates + qubit(s) targets. For each gate+target pair, it could then determine the set of
-instructions for pair just once. There is the complication of how to deal with the
-Rz-gate, which is parameterised. This pass could then be adapted to use the results of
-this pass to more effeciently decompose instructions.</p>
+instructions for pair just once. There is the complication of how to deal with the Rz-
+gate, which is parameterised. This pass could then be adapted to use the results of this
+pass to more effeciently decompose instructions.</p>
 <p>Initiate the pass with the hardware model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

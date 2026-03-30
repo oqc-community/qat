@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.backends.qblox.live module &mdash; qat-compiler 3.0.0.post191.dev20260327150645 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.purr.backends.qblox.live module &mdash; qat-compiler 3.0.0.post193.dev20260330090408 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -267,10 +267,10 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.dummy.html">qat.model.loaders.purr.dummy module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qblox.html">qat.model.loaders.purr.qblox module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qiskit.html">qat.model.loaders.purr.qiskit module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.rtcs.html">qat.model.loaders.purr.rtcs module</a></li>
 </ul>
@@ -280,6 +280,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.qblox.html">qat.model.loaders.qblox module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
 </ul>
 </li>
@@ -532,13 +533,14 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.combine_playbacks">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">combine_playbacks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playbacks</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.combine_playbacks" title="Link to this definition"></a></dt>
-<dd><p>Combines acquisition objects from multiple acquire instructions in multiple readout targets.
-Notice that <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby()</span></code> preserves (original) relative order, which makes it honour
-the (sequential) lexicographical order of the loop nest:</p>
-<p>playback[target][“acq_0”] contains (potentially) a list of acquisitions collected in the same
-order as the order in which the packages were sent to the FPGA.</p>
-<p>Although acquisition names are enough for unicity in practice, the playback’s structure
-distinguishes different (multiple) acquisitions per readout target, thus making it more robust.</p>
+<dd><p>Combines acquisition objects from multiple acquire instructions in multiple
+readout targets. Notice that <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby()</span></code> preserves (original) relative order,
+which makes it honour the (sequential) lexicographical order of the loop nest:</p>
+<p>playback[target][“acq_0”] contains (potentially) a list of acquisitions collected in
+the same order as the order in which the packages were sent to the FPGA.</p>
+<p>Although acquisition names are enough for unicity in practice, the playback’s
+structure distinguishes different (multiple) acquisitions per readout target, thus
+making it more robust.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -565,8 +567,9 @@ distinguishes different (multiple) acquisitions per readout target, thus making 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.process_playback">
 <span class="sig-name descname"><span class="pre">process_playback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.process_playback" title="Link to this definition"></a></dt>
-<dd><p>Now that the combined playback is ready, we can compute and process results as required
-by customers. This requires loop nest information as well as post-processing and shaping
+<dd><p>Now that the combined playback is ready, we can compute and process results as
+required by customers.</p>
+<p>This requires loop nest information as well as post-processing and shaping
 requirements.</p>
 </dd></dl>
 
@@ -594,8 +597,9 @@ requirements.</p>
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine1">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLiveEngine1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine1" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine" title="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractQbloxLiveEngine</span></code></a></p>
-<p>Legacy engine that runs a loop nest statically. It pregenerates packages for each iteration and runs
-them in the same lexicographical order. This generates lots of playbacks that are then combined later.</p>
+<p>Legacy engine that runs a loop nest statically. It pregenerates packages for each
+iteration and runs them in the same lexicographical order. This generates lots of
+playbacks that are then combined later.</p>
 <p>See QbloxBackend1</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine1.build_pass_pipeline">
@@ -618,10 +622,12 @@ them in the same lexicographical order. This generates lots of playbacks that ar
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine2">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLiveEngine2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngine2" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine" title="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractQbloxLiveEngine</span></code></a></p>
-<p>Not all algorithms fall within Q1’s capabilities. While this remains an analysis issue we saw great
-flexibility in forking out this engine to allow R&amp;D without compromising existing execution environment.</p>
-<p>Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
-It leverages Q1’s programming model to accelerate a handful of pulse-level algorithms.</p>
+<p>Not all algorithms fall within Q1’s capabilities. While this remains an analysis
+issue we saw great flexibility in forking out this engine to allow R&amp;D without
+compromising existing execution environment.</p>
+<p>Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection
+mechanism. It leverages Q1’s programming model to accelerate a handful of pulse-level
+algorithms.</p>
 <p>See QbloxBackend2</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngine2.build_pass_pipeline">
@@ -644,10 +650,10 @@ It leverages Q1’s programming model to accelerate a handful of pulse-level alg
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngineAdapter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxLiveEngineAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startup_engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_hax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine" title="qat.purr.backends.qblox.live.AbstractQbloxLiveEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractQbloxLiveEngine</span></code></a></p>
-<p>A manual adapter of the new and legacy engines. Users can switch on and off HW acceleration by using
-the <cite>enable_hax</cite> flag.</p>
-<p>There should be a proper hybrid, dynamic, JIT-like engine in the future that can leverage the HW to accelerate
-programs whenever possible.</p>
+<p>A manual adapter of the new and legacy engines. Users can switch on and off HW
+acceleration by using the <cite>enable_hax</cite> flag.</p>
+<p>There should be a proper hybrid, dynamic, JIT-like engine in the future that can
+leverage the HW to accelerate programs whenever possible.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.build_pass_pipeline">
 <span class="sig-name descname"><span class="pre">build_pass_pipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.live.QbloxLiveEngineAdapter.build_pass_pipeline" title="Link to this definition"></a></dt>
