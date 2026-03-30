@@ -12,14 +12,12 @@ from qat.ir.instructions import Instruction
 
 class QubitInstruction(Instruction, ABC):
     """Denotes that an instruction is done at the level of a qubit (as opposed to a pulse
-    channel level instruction).
-    """
+    channel level instruction)."""
 
 
 class GateBase(QubitInstruction, ABC):
     """Base implementation of a gate in a quantum circuit that acts on some qubits, and if
-    needed, defined by some parameters.
-    """
+    needed, defined by some parameters."""
 
     def __repr__(self):
         params = tuple(

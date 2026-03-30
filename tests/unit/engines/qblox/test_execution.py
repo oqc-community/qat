@@ -39,9 +39,7 @@ test_parameters = create_parameters(["model", "instrument", "qubit_count"], [0, 
 )
 @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
 class Test1QMeasurements:
-    """
-    Tests execution of a standard 1Q measurements.
-    """
+    """Tests execution of a standard 1Q measurements."""
 
     def test_resonator_spect(
         self, qblox_model, qblox_instrument, backend_type, qubit_count
@@ -125,9 +123,10 @@ class Test1QMeasurements:
 )
 @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
 class TestExecutionSuite:
-    """
-    Tests execution of a plethora of IRs and combinations. These are specific programs
-    to trigger certain aspects that have acquired attention over the
+    """Tests execution of a plethora of IRs and combinations.
+
+    These are specific programs to trigger certain aspects that have acquired attention over
+    the
     """
 
     @pytest.mark.skip(reason="Space/time expensive")

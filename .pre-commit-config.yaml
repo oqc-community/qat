@@ -1,34 +1,105 @@
+# Pre-commit configuration summary:
+#
+# - pre-commit-hooks: General code hygiene (trailing whitespace, end-of-file, YAML/TOML/JSON validity, large files,
+#   merge conflicts, debug statements, case conflicts, line endings, symlinks, illegal Windows names, shebang executability)
+# - mdformat: Consistent Markdown formatting (with GFM, frontmatter, footnote support)
+# - jupytext: Sync Jupyter notebooks and Python scripts, auto-format notebooks with Ruff
+# - nbstripout: Remove output and extra metadata from Jupyter notebooks
+# - docformatter: Auto-format Python docstrings for line length and style
+# - ruff-pre-commit: Python linting and formatting (Ruff linter and formatter)
+# - poetry: Ensure poetry.lock is up to date with pyproject.toml
+# - taplo-pre-commit: Autoformat TOML files for consistent style
+# - actionlint: Lint GitHub Actions workflow files
+#
+# Currently disabled pending team approval:
+#
+# - doc8: Lint reStructuredText (.rst) files for documentation style and formatting
+# - pretty-format-json: Autoformat JSON files (excluding .ipynb notebooks) for consistent style
+#
+
 default_language_version:
   python: python3
 
 repos:
+  # General code hygiene and file checks for many file types
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
-      - id: check-merge-conflict
-        stages: [pre-commit, manual]
+      - id: trailing-whitespace  # Remove trailing whitespace from all files
+      - id: end-of-file-fixer    # Ensure files end with a newline
+      - id: check-yaml           # Validate YAML files (with --unsafe for anchors/aliases)
+        args: [--unsafe]
+      - id: check-toml           # Validate TOML files (no autoformat)
+      - id: check-json           # Validate JSON files (no autoformat)
+#      - id: pretty-format-json   # Autoformat JSON files (excluding .ipynb notebooks)
+#        args: [--autofix]
+#        exclude: ".*\\.ipynb$"
+      - id: check-added-large-files  # Prevent large files from being committed
+      - id: check-merge-conflict     # Detect unresolved merge conflict markers
+      - id: debug-statements         # Prevent debug statements (e.g., print, pdb) in code
+      - id: check-case-conflict      # Detect files with names differing only in case
+      - id: mixed-line-ending        # Ensure consistent line endings
+      - id: check-symlinks           # Prevent committing symlinks that may not work across platforms
+      - id: check-illegal-windows-names # Prevent committing files with names that are illegal on Windows
+      - id: check-shebang-scripts-are-executable # Ensure scripts with shebangs have executable permissions
+  # Format Markdown files consistently (GFM, frontmatter, footnote)
+  - repo: https://github.com/hukkin/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat  # Format Markdown files with line wrap at 100 chars
+        args: [--wrap, "100"]
+        additional_dependencies:
+          - mdformat-gfm         # GitHub Flavored Markdown support
+          - mdformat-frontmatter # YAML frontmatter support
+          - mdformat-footnote    # Footnote support
+  # Sync Jupyter notebooks and Python scripts, auto-format with Ruff
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.19.1  # CURRENT_TAG/COMMIT_HASH
+    rev: v1.19.1
     hooks:
-      - id: jupytext
+      - id: jupytext  # Sync .ipynb and .py, run Ruff check/format on notebooks
         args: [--sync, --pre-commit-mode, --pipe, "ruff check --fix {}", --pipe, "ruff format {}"]
         additional_dependencies:
-          - ruff==v0.12.12
-        exclude: ^docs/
+          - ruff==0.15.8
+        exclude: ^docs/  # Exclude docs directory
+  # Strip Jupyter notebook output and extra metadata
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.8.1
+    rev: 0.9.1
     hooks:
-    - id: nbstripout
-      args: [--extra-keys=metadata.kernelspec]
+      - id: nbstripout  # Remove output and extra metadata from notebooks
+        args: [--extra-keys=metadata.kernelspec]
+  # Auto-format Python docstrings for line length and style
+  - repo: https://github.com/PyCQA/docformatter
+    rev: v1.7.7
+    hooks:
+      - id: docformatter
+        args: ["--in-place", "--wrap-summaries=92", "--wrap-descriptions=92", "--recursive", "."]
+        files: \.(py)$
+  # Python linting and formatting using Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.7
+    rev: v0.15.8
     hooks:
-      # Run the linter.
-      - id: ruff-check
+      - id: ruff-check   # Run Ruff linter (with autofix)
         args: ["--fix"]
-      # Run the formatter.
-      - id: ruff-format
+      - id: ruff-format  # Run Ruff formatter
+  # Ensure poetry.lock is up to date with pyproject.toml
   - repo: https://github.com/python-poetry/poetry
-    rev: 2.3.1
+    rev: 2.3.2
     hooks:
-      - id: poetry-lock
+      - id: poetry-lock  # Check that poetry.lock matches pyproject.toml
+  # Lint reStructuredText (.rst) files for documentation quality (no autoformat)
+#  - repo: https://github.com/pycqa/doc8
+#    rev: v2.0.0
+#    hooks:
+#      - id: doc8  # Lint .rst files for style, line length, and formatting issues
+#        args: [--max-line-length=100]
+#        files: ".*\\.rst$"
+  # Autoformat TOML files for consistent style
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format  # Format TOML files automatically
+  # Lint GitHub Actions workflow files
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.11
+    hooks:
+      - id: actionlint  # Lint GitHub Actions workflow YAML files

@@ -10,10 +10,8 @@ log = get_default_logger()
 
 
 class _FlagFieldValidation(type):
-    """
-    Validate that the CompilationsMetrics class has type hints for all the metrics,
-    which'll be dynamically assigned later.
-    """
+    """Validate that the CompilationsMetrics class has type hints for all the metrics,
+    which'll be dynamically assigned later."""
 
     def __new__(mcs, name, inheritance, attributes):
         hint_names = set(attributes.get("__annotations__", {}).keys())
@@ -32,9 +30,9 @@ class _FlagFieldValidation(type):
 
 
 class CompilationMetrics(metaclass=_FlagFieldValidation):
-    """
-    Container object for all metrics generated during the compilation pipeline. All
-    fields are generated from the MetricsType flag after the names are snake-cased and
+    """Container object for all metrics generated during the compilation pipeline.
+
+    All fields are generated from the MetricsType flag after the names are snake-cased and
     hold the value associated with that particular flag.
     """
 
@@ -58,9 +56,9 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
         ]
 
     def enable(self, enabled_metrics: MetricsType, overwrite=False):
-        """
-        Enable these sets of metrics for collection. If overwrite is True then the
-        passed-in values will overwrite existing ones.
+        """Enable these sets of metrics for collection.
+
+        If overwrite is True then the passed-in values will overwrite existing ones.
         """
         if enabled_metrics is None:
             return
@@ -107,25 +105,21 @@ class MetricsMixin:
         self.compilation_metrics: Optional[CompilationMetrics] = None
 
     def are_metrics_enabled(self, metric_type: MetricsType = None):
-        """
-        Do we have a metrics collection, and if so does it have any active metrics.
-        """
+        """Do we have a metrics collection, and if so does it have any active metrics."""
         return self.compilation_metrics is not None and (
             metric_type is None or self.compilation_metrics.are_enabled(metric_type)
         )
 
     def record_metric(self, metric: MetricsType, value):
-        """
-        Records a metric value if the collection has this sort of metric enabled.
-        """
+        """Records a metric value if the collection has this sort of metric enabled."""
         if self.are_metrics_enabled(metric):
             self.compilation_metrics.record_metric(metric, value)
 
     def enable_metrics(self, enabled_metrics=None, overwrite=True):
-        """
-        Enables the set of metrics in the current collection. If overwrite is set to
-        true, or there are no compilation metrics it'll create a new collection, if
-        overwrite is false it'll enable these metrics in the currently-active
+        """Enables the set of metrics in the current collection.
+
+        If overwrite is set to true, or there are no compilation metrics it'll create a new
+        collection, if overwrite is false it'll enable these metrics in the currently-active
         collection.
         """
         if enabled_metrics is None:

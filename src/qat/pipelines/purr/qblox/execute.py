@@ -41,8 +41,8 @@ def get_results_pipeline(model: QuantumHardwareModel) -> PassManager:
 
 class QbloxExecutePipeline(UpdateablePipeline):
     """A pipeline that executes :class:`Executable <qat.executable.Executable>`s with
-    :class:`QbloxProgram <qat.backend.qblox.execution.QbloxProgram>`s
-    packages using the :class:`QbloxLiveEngineAdapter`.
+    :class:`QbloxProgram <qat.backend.qblox.execution.QbloxProgram>`s packages using the
+    :class:`QbloxLiveEngineAdapter`.
 
     .. warning::
 

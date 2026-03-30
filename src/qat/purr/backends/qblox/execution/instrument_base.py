@@ -12,8 +12,9 @@ log = get_default_logger()
 
 
 class InstrumentModel(BaseModel):
-    """
-    Used to parse JSON/CSV entries. An instrument has an id, name, and IP address
+    """Used to parse JSON/CSV entries.
+
+    An instrument has an id, name, and IP address
     """
 
     id: str = Field(frozen=True, alias="ID")
@@ -22,9 +23,7 @@ class InstrumentModel(BaseModel):
 
 
 class InstrumentConcept(ABC):
-    """
-    Basic APIs through which an instrument must be able to interact with
-    """
+    """Basic APIs through which an instrument must be able to interact with."""
 
     def connect(self):
         pass

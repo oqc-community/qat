@@ -108,8 +108,11 @@ class TestAutoFrontend:
         [get_qasm2("basic.qasm"), get_qasm3("basic.qasm"), get_qir("bell_psi_plus.ll")],
     )
     def test_emit(self, program):
-        """Tests frontend-relevant details, such as successful parsing. Doesn't check the
-        details of the IR as this is the responsibility of the respective parser tests."""
+        """Tests frontend-relevant details, such as successful parsing.
+
+        Doesn't check the details of the IR as this is the responsibility of the respective
+        parser tests.
+        """
         builder = self.frontend.emit(program)
         assert isinstance(builder, QuantumInstructionBuilder)
         assert isinstance(builder.instructions[0], Repeat)
@@ -124,8 +127,11 @@ class TestAutoFrontend:
     def test_emit_contains_correct_default_gates(
         self, program, n_gaussian, n_soft_square, reader, ext
     ):
-        """Tests frontend-relevant details, such as successful parsing. Doesn't check the
-        details of the IR as this is the responsibility of the respective parser tests."""
+        """Tests frontend-relevant details, such as successful parsing.
+
+        Doesn't check the details of the IR as this is the responsibility of the respective
+        parser tests.
+        """
         compiler_config = CompilerConfig(optimizations=Tket().disable())
         builder = self.frontend.emit(reader(program + ext), compiler_config=compiler_config)
 

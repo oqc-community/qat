@@ -51,9 +51,9 @@ class ReadoutMitigation(NoExtraFieldsModel):
 
 
 class ErrorMitigation(NoExtraFieldsModel):
-    """
-    A collection of error mitigation strategies. Currently, this holds a single mitigation strategy,
-    but this can be expanded in the future as we add more error correction schemes.
+    """A collection of error mitigation strategies. Currently, this holds a single
+    mitigation strategy, but this can be expanded in the future as we add more error
+    correction schemes.
 
     :param readout_mitigation: Linear readout mitigation.
     """

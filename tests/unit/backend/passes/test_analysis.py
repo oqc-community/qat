@@ -98,7 +98,7 @@ class TestTimelineAnalysis:
         not exactly match the granularity.
 
         The test checks the following circuit
-
+        ```
                     |‾‾‾‾‾‾‾‾‾‾‾|           |‾‾‾‾‾|
         Q1  --------|   Delay   |-----------|     |-------
                     |___________|           |     |
@@ -106,13 +106,13 @@ class TestTimelineAnalysis:
                     |‾‾‾‾‾‾‾|               |     |
         Q2  --------| Delay |---------------|     |-------
                     |_______|               |_____|
-
+        ```
         with varying drive and CR pulse widths. It varys the widths slightly so they either
 
-        #. they are integer multiples of the granularity of the channels,
-        #. they are slightly lower than an integer multiple of the granularity of the
+        1. they are integer multiples of the granularity of the channels,
+        1. they are slightly lower than an integer multiple of the granularity of the
            channels,
-        #. they are slightly higher than an integer multiple of the channels.
+        1. they are slightly higher than an integer multiple of the channels.
 
         All three situations for each pulse type are matrix tested.
 

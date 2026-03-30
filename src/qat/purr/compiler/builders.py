@@ -60,10 +60,8 @@ class Axis(Enum):
 
 
 class InstructionBuilder:
-    """
-    Base instruction builder class that leaves unimplemented the methods that vary on a
-    hardware-by-hardware basis.
-    """
+    """Base instruction builder class that leaves unimplemented the methods that vary on a
+    hardware-by-hardware basis."""
 
     def __init__(
         self,
@@ -105,8 +103,9 @@ class InstructionBuilder:
         return builder
 
     def serialize(self):
-        """
-        Currently only serializes the instructions, not the supporting objects of the builder itself.
+        """Currently only serializes the instructions, not the supporting objects of the
+        builder itself.
+
         This could be supported pretty easily, but not required right now.
         """
         with log_duration("Serialization of the instruction builder completed in {}s."):
@@ -134,10 +133,10 @@ class InstructionBuilder:
     def _fix_clashing_label_names(
         self, invalid_label_names: Set[str], existing_names: Set[str]
     ):
-        """
-        Fixes up auto-generated label names if there are clashes. invalid_label_names is
-        a set of names to be re-generated, existing_names is the full set of existing
-        names (union of all builders names' who are being merged).
+        """Fixes up auto-generated label names if there are clashes.
+
+        invalid_label_names is a set of names to be re-generated, existing_names is the full
+        set of existing names (union of all builders names' who are being merged).
         """
         regenerated_names = dict()
         for inst in self._instructions:
@@ -153,8 +152,7 @@ class InstructionBuilder:
             inst.name = new_name
 
     def merge_builder(self, other_builder: "InstructionBuilder", index: int = None) -> int:
-        """
-        Merge this builder into the current instance. Checks for label name clashes and
+        """Merge this builder into the current instance. Checks for label name clashes and
         resolves them if any are found.
 
         :param index: index of self at which to insert the instructions of `other_builder`.
@@ -183,10 +181,10 @@ class InstructionBuilder:
             List[Union["InstructionBuilder", Instruction]],
         ],
     ):
-        """
-        Adds an instruction to this builder. All methods should use this instead of
-        accessing the instructions list directly as it deals with nested builders and
-        merging.
+        """Adds an instruction to this builder.
+
+        All methods should use this instead of accessing the instructions list directly as
+        it deals with nested builders and merging.
         """
         return self.insert(components, len(self._instructions))
 
@@ -199,10 +197,10 @@ class InstructionBuilder:
         ],
         index: int,
     ):
-        """
-        Inserts one or more instruction(s) into this builder, starting at index. All methods
-        should use this instead of accessing the instructions list directly as it deals with
-        nested builders and merging.
+        """Inserts one or more instruction(s) into this builder, starting at index.
+
+        All methods should use this instead of accessing the instructions list directly as
+        it deals with nested builders and merging.
         """
         if components is None:
             return self
@@ -230,9 +228,10 @@ class InstructionBuilder:
         return self
 
     def _get_entangled_qubits(self, inst):
-        """
-        Gets qubit ID's in relation to quantum entanglement for the current instruction.
-        Important to note that it will route up or out to a qubit from things like resonators and pulse channels.
+        """Gets qubit ID's in relation to quantum entanglement for the current instruction.
+
+        Important to note that it will route up or out to a qubit from things like
+        resonators and pulse channels.
         """
         if not isinstance(inst, CrossResonancePulse):
             # Crossress pulses are the only mechanism by which entanglement is generated.
@@ -385,14 +384,13 @@ class InstructionBuilder:
         return self.add(PhaseReset(qubits))
 
     def device_assign(self, target, attribute, value):
-        """
-        Special node that allows manipulation of device attributes during execution.
-        """
+        """Special node that allows manipulation of device attributes during execution."""
         return self.add(DeviceUpdate(target, attribute, value))
 
     def create_label(self, name=None):
-        """
-        Creates and returns a label. Generates a non-clashing name if none is provided.
+        """Creates and returns a label.
+
+        Generates a non-clashing name if none is provided.
         """
         if name is None:
             name = Label.generate_name(self.existing_names)
@@ -404,10 +402,9 @@ class InstructionBuilder:
 
 
 class FluidBuilderWrapper(tuple):
-    """
-    Wrapper to allow builders to return a tuple of values while also allowing fluid API
-    consumption if those values are not required. Think of it like optional return
-    values that don't require unpacking to discard.
+    """Wrapper to allow builders to return a tuple of values while also allowing fluid API
+    consumption if those values are not required. Think of it like optional return values
+    that don't require unpacking to discard.
 
     Examples of the two ways you should be able to call a builder when using this class.
 
@@ -424,7 +421,6 @@ class FluidBuilderWrapper(tuple):
 
             builder.builder_method(value)
                 .builder_method()
-
     """
 
     def __new__(cls, *args, **kwargs):
@@ -534,8 +530,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return self.post_processing(acquire, PostProcessType.DISCRIMINATE, qubit=target)
 
     def _get_entangled_qubits(self, inst):
-        """
-        Gets qubit ID's in relation to quantum entanglement for the current instruction.
+        """Gets qubit ID's in relation to quantum entanglement for the current instruction.
+
         Important to note that it will route up or out to a qubit from things like
         resonators and pulse channels.
         """
@@ -607,8 +603,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
         output_variable: str = None,
         **kwargs,
     ) -> "QuantumInstructionBuilder":
-        """
-        Adds a measure instruction. Important note: this only adds the instruction, not
+        """Adds a measure instruction.
+
+        Important note: this only adds the instruction, not
         any post-processing instructions as well. If you're wanting to perform generic
         common operations use the more specific measurement types, as they add all the
         additional information.

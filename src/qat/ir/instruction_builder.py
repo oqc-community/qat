@@ -196,9 +196,10 @@ class InstructionBuilder(ABC):
         return self.add(ResultsProcessing(variable=variable, results_processing=res_format))
 
     def add(self, *instructions: Instruction, flatten: bool = False):
-        """
-        Add one or more instruction(s) into this builder. All methods should use this
-        instead of accessing the instructions tree directly as it deals with composite instructions.
+        """Add one or more instruction(s) into this builder.
+
+        All methods should use this instead of accessing the instructions tree directly as
+        it deals with composite instructions.
         """
         self._ir.add(*instructions, flatten=flatten)
         return self
@@ -217,16 +218,14 @@ class InstructionBuilder(ABC):
 
     @staticmethod
     def constrain(angle: float):
-        """
-        Constrain the rotation angle to avoid redundant rotations around the Bloch sphere.
-        """
+        """Constrain the rotation angle to avoid redundant rotations around the Bloch
+        sphere."""
         return (angle + np.pi) % (2 * np.pi) - np.pi
 
     @classmethod
     def _check_identity_operation(cls, f):
-        """
-        Wrapper method to constrain the rotation angle and to determine whether to avoid redundant rotations around the Bloch sphere.
-        """
+        """Wrapper method to constrain the rotation angle and to determine whether to avoid
+        redundant rotations around the Bloch sphere."""
 
         def wrapper(self, target, theta=np.pi, *args, **kwargs):
             theta = self.constrain(theta)
@@ -253,9 +252,8 @@ class InstructionBuilder(ABC):
         return self._ir.__reversed__()
 
     def flatten(self):
-        """
-        Flatten the instruction builder by removing nested structures like InstructionBlocks.
-        """
+        """Flatten the instruction builder by removing nested structures like
+        InstructionBlocks."""
         self._ir.flatten()
         return self
 
@@ -296,8 +294,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     @InstructionBuilder._check_identity_operation
     def X(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
-        """
-        Adds a gate that drives the qubit with a rotation angle `theta` to the builder.
+        """Adds a gate that drives the qubit with a rotation angle `theta` to the builder.
 
         :param target: The qubit to be rotated.
         :param theta: The applied rotation angle.
@@ -331,8 +328,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     @InstructionBuilder._check_identity_operation
     def Y(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
-        """
-        Adds a gate that drives the qubit with a rotation angle `theta` to the builder.
+        """Adds a gate that drives the qubit with a rotation angle `theta` to the builder.
 
         :param target: The qubit to be rotated.
         :param theta: The applied rotation angle.
@@ -360,9 +356,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     @InstructionBuilder._check_identity_operation
     def Z(self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None):
-        """
-        Adds a virtual gate that rotates the reference frame of the qubit with a phase `theta`
-        to the builder.
+        """Adds a virtual gate that rotates the reference frame of the qubit with a phase
+        `theta` to the builder.
 
         :param target: The qubit to be rotated.
         :param theta: The applied rotation angle.
@@ -402,8 +397,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
     def ZX(self, target1: Qubit, target2: Qubit, theta: float = np.pi / 4.0):
-        """
-        Adds a two-qubit interaction gate exp(-i \theta Z x X) to the builder.
+        """Adds a two-qubit interaction gate exp(-i \theta Z x X) to the builder.
 
         :param target1: The qubit to which Z gets applied to.
         :param target2: The qubit to which X gets applied to.
@@ -618,8 +612,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         output_variable: str = None,
         sync_qubits: bool = True,
     ) -> QuantumInstructionBuilder:
-        """
-        Measure one or more qubits.
+        """Measure one or more qubits.
 
         :param targets: The qubit(s) to be measured.
         :param mode: The type of acquisition at the level of the control hardware.
@@ -677,13 +670,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target: Qubit | set[Qubit],
         output_variable: str,
     ):
-        """
-        Takes the mean of the acquired data.
-        If the acquire mode is INTEGRATOR, it returns the builder without any changes
+        """Takes the mean of the acquired data. If the acquire mode is INTEGRATOR, it
+        returns the builder without any changes.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         if acquire_mode == AcquireMode.INTEGRATOR:
             return self
@@ -698,13 +691,14 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target: Qubit | set[Qubit],
         output_variable: str,
     ):
-        """
-        Applies the mean post-processing to the acquired data along the sequence axis. If the acquire mode is SCOPE,
-        the mean post-processing is not needed, so it returns the builder without any changes.
+        """Applies the mean post-processing to the acquired data along the sequence axis. If
+        the acquire mode is SCOPE, the mean post-processing is not needed, so it returns the
+        builder without any changes.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         if acquire_mode == AcquireMode.SCOPE:
             return self
@@ -719,16 +713,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """
-        Measure a single qubit along the z-axis.
-        Execution results in an array of floats centred around 0, where anything above 0 shows a bias towards a
-        +Z measurement, and below 0 shows a bias towards a -Z measurement.
-        The array is an ndarray, where the first dimension is for each of the qubits measured, the second dimension is
-        for each shot run.
+        """Measure a single qubit along the z-axis. Execution results in an array of floats
+        centred around 0, where anything above 0 shows a bias towards a +Z measurement, and
+        below 0 shows a bias towards a -Z measurement. The array is an ndarray, where the
+        first dimension is for each of the qubits measured, the second dimension is for each
+        shot run.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
@@ -744,15 +738,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """
-        Measure the signal of a single qubit.
-        Execution results in an array of complex numbers that show the war signal output form the hardware.
-        The array is an ndarray, where the first dimension is for each of the qubits measured, the second dimension is
-        for each shot run.
+        """Measure the signal of a single qubit. Execution results in an array of complex
+        numbers that show the war signal output form the hardware. The array is an ndarray,
+        where the first dimension is for each of the qubits measured, the second dimension
+        is for each shot run.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
@@ -765,15 +759,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """
-        Measure a single qubit along the z-axis.
-        Execution results in an array of floats centred around 0, where anything above 0 shows a bias towards a
-        +Z measurement, and below 0 shows a bias towards a -Z measurement.
-        Each entry is for each qubit measured, and is the mean of the results from `measure_single_shot_z`.
+        """Measure a single qubit along the z-axis. Execution results in an array of floats
+        centred around 0, where anything above 0 shows a bias towards a +Z measurement, and
+        below 0 shows a bias towards a -Z measurement. Each entry is for each qubit
+        measured, and is the mean of the results from `measure_single_shot_z`.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
@@ -785,13 +779,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
     def measure_mean_signal(self, target: Qubit, output_variable: str = None):
-        """
-        Measure the signal of a single qubit.
-        Execution results in an array of complex numbers that show the war signal output form the hardware.
-        Each entry is for each qubit measured, and is the mean of the results from `measure_single_signal_shot`.
+        """Measure the signal of a single qubit. Execution results in an array of complex
+        numbers that show the war signal output form the hardware. Each entry is for each
+        qubit measured, and is the mean of the results from `measure_single_signal_shot`.
 
         :param target: The qubit to be measured.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[ProcessAxis.SEQUENCE]
@@ -800,11 +794,11 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
     def measure_scope_mode(self, target: Qubit, output_variable: str = None):
-        """
-        Measure the scope mode
+        """Measure the scope mode.
 
         :param target: The qubit to be measured.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         acquire_mode = acq_mode_process_axis[ProcessAxis.TIME]
         return self.measure(target, acquire_mode, output_variable)
@@ -815,16 +809,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """
-        Measure a single qubit along the z-axis.
-        Execution results in an array of ±1s, where 1 indicates a +Z measurement, and -1 indicates a -Z measurement.
-        It takes the results from `measure_single_shot_z` and applies a binning operation to round the results to ±1.
-        The array is an ndarray, where the first dimension is for each of the qubits measured, the second dimension is
-        for each shot run.
+        """Measure a single qubit along the z-axis. Execution results in an array of ±1s,
+        where 1 indicates a +Z measurement, and -1 indicates a -Z measurement. It takes the
+        results from `measure_single_shot_z` and applies a binning operation to round the
+        results to ±1. The array is an ndarray, where the first dimension is for each of the
+        qubits measured, the second dimension is for each shot run.
 
         :param target: The qubit to be measured.
         :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be saved.
+        :param output_variable: The variable where the output of the acquire should be
+            saved.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
@@ -869,8 +863,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return "out_" + target.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"
 
     def _find_valid_measure_block(self, target_ids: QubitId | set[QubitId]):
-        """
-        Finds the previous :class:`MeasureBlock` where the given qubits are not measured yet.
+        """Finds the previous :class:`MeasureBlock` where the given qubits are not measured
+        yet.
 
         :param target_ids: The indices of the qubits to be measured.
         """

@@ -86,8 +86,8 @@ class Sequence:
 
 
 class SequenceBuilder:
-    """
-    High-level builder apis for sequence codegen.
+    """High-level builder apis for sequence codegen.
+
     This includes q1asm, waveforms, weights, and acquisitions.
     """
 

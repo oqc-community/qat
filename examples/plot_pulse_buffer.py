@@ -94,8 +94,8 @@ def plot_physical_buffers(
     figsize=None,
     name=None,
 ):
-    """
-    Plot the physical channel buffers generated from a qat instruction builder
+    """Plot the physical channel buffers generated from a qat instruction builder.
+
     Parameters
     ----------
     builder: the qat builder object to be plotted

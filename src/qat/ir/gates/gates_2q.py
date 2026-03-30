@@ -27,7 +27,7 @@ class Gate2Q(GateBase, ABC):
 class ControlGate2Q(Gate2Q, ABC):
     r"""Base class for controlled two-qubit gates. The convention is :attr:`qubit1` is the
     control qubit and :attr:`qubit` is the target qubit. For some single qubit gate
-    :math:`G`, the controlled gate is
+    :math:`G`, the controlled gate is.
 
     .. math:: CG = \ket{1}\bra{1} \otimes G + \ket{0}\bra{0} \otimes I
 
@@ -48,9 +48,9 @@ class ControlGate2Q(Gate2Q, ABC):
 class CNOT(ControlGate2Q):
     r"""Implements a CNOT with the control gate on :param:`qubit1` and target gate on
     :param:`qubit2`.
-    
+
     Matrix representation:
-    
+
     .. math:: {\rm CNOT}_{c, t} = \begin{bmatrix}
         1 & 0 & 0 & 0 \\
         0 & 1 & 0 & 0 \\
@@ -69,9 +69,9 @@ CX = CNOT
 
 class ECR(Gate2Q):
     r"""Implements the ECR gate.
-    
+
     Matrix representation:
-    
+
     .. math:: {\rm ECR} = \begin{bmatrix}
         0 & 0 & 1 & i \\
         0 & 0 & i & 1 \\
@@ -89,9 +89,9 @@ class ECR(Gate2Q):
 
 class SWAP(Gate2Q):
     r"""Implements the SWAP gate.
-    
+
     Matrix representation:
-    
+
     .. math:: {\rm SWAP} = \begin{bmatrix}
         1 & 0 & 0 & 0 \\
         0 & 0 & 1 & 0 \\

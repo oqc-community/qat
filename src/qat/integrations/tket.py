@@ -37,8 +37,7 @@ def run_tket_optimizations(
     hardware: PydHardwareModel,
     return_as_qasm_str: bool = True,
 ) -> str | QuantumInstructionBuilder:
-    """
-    Runs tket-based optimizations and modifications given a Pydantic hardware model.
+    """Runs tket-based optimizations and modifications given a Pydantic hardware model.
     Routing will always happen no matter the level.
 
     Will run optimizations in sections if a full suite fails until a minimal subset of
@@ -57,9 +56,7 @@ def run_tket_optimizations(
 
 
 class TketOptimisationHelper:
-    """
-    Helper class to run pydantic tket optimizations
-    """
+    """Helper class to run pydantic tket optimizations."""
 
     def __init__(
         self, circuit: Circuit | str, opts: TketOptimizations, hardware: PydHardwareModel
@@ -153,16 +150,14 @@ class TketOptimisationHelper:
         return couplings
 
     def _get_logical_qubit_map(self):
-        """
-        Without default remapping pass multi-qubit gates don't get moved around, so
-        trying to apply them to a limited subset of qubits provides no value.
-        """
+        """Without default remapping pass multi-qubit gates don't get moved around, so
+        trying to apply them to a limited subset of qubits provides no value."""
         return {q_i: i for i, q_i in enumerate(self.hardware.qubits.keys())}
 
     @staticmethod
     def _get_circuit_from_qasm(qasm_string: str) -> Circuit | None:
-        """
-        Runs tket-based optimizations and modifications given a Pydantic hardware model.
+        """Runs tket-based optimizations and modifications given a Pydantic hardware model.
+
         Routing will always happen no matter the level.
         """
         try:
@@ -180,9 +175,7 @@ class TketOptimisationHelper:
             )
 
     def _calculate_multi_qubit_qualities(self, use_1q_quality: bool = False):
-        """
-        Calculate couplings and coupling qualities from the hardware model.
-        """
+        """Calculate couplings and coupling qualities from the hardware model."""
         for q, coupled_qs in self.hardware.logical_connectivity.items():
             logical_q = self.logical_qubit_map[q]
             for coupled_q in coupled_qs:
@@ -200,8 +193,8 @@ class TketOptimisationHelper:
         return not optimize_circuit(self.circ, self.architecture, self.opts)
 
     def _handle_failed_optimisation(self):
-        """
-        Check if the optimizations failed.
+        """Check if the optimizations failed.
+
         If our optimizations failed, but we want the mapping pass, apply that by itself.
         """
         if self.architecture is None:
@@ -365,9 +358,11 @@ class TketToQatIRConverter:
 
     @staticmethod
     def convert_parameter(arg: str):
-        r"""A parameter stored in a Tket operation is in units of :math:`\pi`. Parameters
-        are returned as a string expression, e.g. sometimes containing multiplication and
-        division. These expressions are parsed using sympy."""
+        r"""A parameter stored in a Tket operation is in units of :math:`\pi`.
+
+        Parameters are returned as a string expression, e.g. sometimes containing
+        multiplication and division. These expressions are parsed using sympy.
+        """
 
         return float(sympy_pi * sympify(arg))
 

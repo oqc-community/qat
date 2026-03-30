@@ -14,9 +14,9 @@ class AbstractPipeline(ABC):
     """An abstraction of pipelines used in QAT to compile and execute quantum programs.
 
     Abstractly a pipeline needs to be given a hardware model and some target data that
-    contains the parameters of the target device needed to correctly compile and execute.
-    In the future, this might be relaxed so that the model and/or target data is not
-    concretely needed to define a pipeline.
+    contains the parameters of the target device needed to correctly compile and execute. In
+    the future, this might be relaxed so that the model and/or target data is not concretely
+    needed to define a pipeline.
     """
 
     @property
@@ -37,8 +37,8 @@ class AbstractPipeline(ABC):
 
 
 class BasePipeline(AbstractPipeline, ABC):
-    """A base implementation of the abstract pipeline that provides access to the
-    components of the pipeline.
+    """A base implementation of the abstract pipeline that provides access to the components
+    of the pipeline.
 
     Subclasses should implement the `copy` and `copy_with_name` methods.
     """

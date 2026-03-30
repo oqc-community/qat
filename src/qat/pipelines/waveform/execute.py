@@ -14,9 +14,8 @@ log = get_default_logger()
 
 class EchoExecutePipeline(UpdateablePipeline):
     """A pipeline that executes :class:`Executable <qat.executables.Executable>` with
-    :class:`WaveformProgram <qat.backend.waveform.executable.WaveformProgram>`
-    packages using the :class:`EchoEngine`, which simply passes through the waveform
-    buffers.
+    :class:`WaveformProgram <qat.backend.waveform.executable.WaveformProgram>` packages
+    using the :class:`EchoEngine`, which simply passes through the waveform buffers.
 
     An engine cannot be provided to the pipeline, as the EchoEngine is used directly.
 
@@ -33,8 +32,8 @@ class EchoExecutePipeline(UpdateablePipeline):
         target_data: TargetData | None,
         engine: None = None,
     ) -> ExecutePipeline:
-        """Constructs a pipeline equipped with the :class:`PydWaveformBackend`
-        and :class:`EchoEngine`."""
+        """Constructs a pipeline equipped with the :class:`PydWaveformBackend` and
+        :class:`EchoEngine`."""
 
         if engine is not None:
             log.warning(

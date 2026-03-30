@@ -45,8 +45,10 @@ class ResultsAggregator:
         self, mode: AcquireMode, shape: tuple[int, ...]
     ) -> tuple[int, ...]:
         """The outer dimensions of the results are treated as linear, allowing us to
-        aggregate the results by just adding them to the single dimension. This is reshaped
-        at the end to the correct shape."""
+        aggregate the results by just adding them to the single dimension.
+
+        This is reshaped at the end to the correct shape.
+        """
 
         if mode == AcquireMode.RAW or mode == AcquireMode.SCOPE:
             return (prod(shape[:-1]), shape[-1])
@@ -96,16 +98,16 @@ class ResultsAggregator:
 
 
 class QBloxAggregator:
-    """
-    Combines acquisition objects from multiple acquire instructions in multiple readout targets.
-    Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
-    the (sequential) lexicographical order of the loop nest:
+    """Combines acquisition objects from multiple acquire instructions in multiple readout
+    targets. Notice that :meth:`groupby` preserves (original) relative order, which makes it
+    honour the (sequential) lexicographical order of the loop nest:
 
-    playback[target]["acq_0"] contains (potentially) a list of acquisitions collected in the same
-    order as the order in which the packages were sent to the FPGA.
+    playback[target]["acq_0"] contains (potentially) a list of acquisitions collected in the
+    same order as the order in which the packages were sent to the FPGA.
 
     Although acquisition names are enough for unicity in practice, the playback's structure
-    distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
+    distinguishes different (multiple) acquisitions per readout target, thus making it more
+    robust.
     """
 
     def __init__(self):

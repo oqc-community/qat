@@ -26,12 +26,11 @@ from qat.purr.core.result_base import PreservedResults, ResultManager
 
 class ScopeSanitisation(TransformPass):
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Bubbles up all sweeps and repeats to the beginning of the list.
-        Adds delimiter instructions to the repeats and sweeps signifying the end of their scopes.
+        """Bubbles up all sweeps and repeats to the beginning of the list. Adds delimiter
+        instructions to the repeats and sweeps signifying the end of their scopes.
 
-        Intended for legacy existing builders and the relative order of instructions guarantees backwards
-        compatibility.
+        Intended for legacy existing builders and the relative order of instructions
+        guarantees backwards compatibility.
         """
 
         tail, head = partition(
@@ -51,10 +50,8 @@ class RepeatSanitisation(TransformPass):
         self.model = model
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Fixes repeat instructions if any with default values from the HW model
-        Adds a repeat instructions if none is found
-        """
+        """Fixes repeat instructions if any with default values from the HW model Adds a
+        repeat instructions if none is found."""
 
         repeats = [inst for inst in ir.instructions if isinstance(inst, Repeat)]
         if repeats:
@@ -104,13 +101,13 @@ class DesugaringPass(TransformPass):
 
 
 class ScopePeeling(TransformPass):
-    """
-    A transform pass to discard scopes assuming they’ve been identified.
+    """A transform pass to discard scopes assuming they’ve been identified.
 
-    This pass is particularly useful for the code generator as it helps peel away any unwanted scopes.
-    In fact, some sweeps are not lowerable and the user may choose to annotate certain sweeps and opt
-    for static injection of variables with a switerator-like emitter. These sweep loops will be handled
-    by the emitter statically while allowing it to lower nested constructs efficiently.
+    This pass is particularly useful for the code generator as it helps peel away any
+    unwanted scopes. In fact, some sweeps are not lowerable and the user may choose to
+    annotate certain sweeps and opt for static injection of variables with a switerator-like
+    emitter. These sweep loops will be handled by the emitter statically while allowing it
+    to lower nested constructs efficiently.
     """
 
     def run(

@@ -29,8 +29,8 @@ class WaveformCompilePipeline(UpdateablePipeline):
         target_data: TargetData | None,
         engine: None = None,
     ) -> CompilePipeline:
-        """Constructs a pipeline equipped with the :class:`PydWaveformBackend`
-        and :class:`EchoEngine`."""
+        """Constructs a pipeline equipped with the :class:`PydWaveformBackend` and
+        :class:`EchoEngine`."""
 
         if engine is not None:
             log.warning(

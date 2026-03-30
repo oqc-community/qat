@@ -7,7 +7,7 @@ HARDWARE:
 ENGINE:
 - name: mock
   type: tests.unit.utils.engine.InitableEngine
-  
+
 PIPELINES:
 - name: mock
   pipeline: tests.unit.utils.pipelines.MockPipeline

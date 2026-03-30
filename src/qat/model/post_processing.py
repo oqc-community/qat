@@ -1,5 +1,4 @@
-"""
-Post-processing method models for qubit measurement results.
+"""Post-processing method models for qubit measurement results.
 
 This module defines the post-processing methods available for qubit measurement discrimination. The main interface is the
 :class:`PostProcessMethod` union, which is a discriminated union over all supported post-processing method models.
@@ -35,17 +34,17 @@ from qat.utils.pydantic import NoExtraFieldsModel
 
 
 class MethodIndicator(str, Enum):
-    """
-    Enum for discriminating post-processing methods applied to qubit measurement results.
-    """
+    """Enum for discriminating post-processing methods applied to qubit measurement
+    results."""
 
     LINEAR_MAP_COMPLEX_TO_REAL = "linear_map_complex_to_real"
     MAX_LIKELIHOOD = "max_likelihood"
 
 
 class MethodBase(NoExtraFieldsModel):
-    """
-    Base class for all post-processing methods. Contains the discriminator field.
+    """Base class for all post-processing methods.
+
+    Contains the discriminator field.
     """
 
     method: MethodIndicator = Field(
@@ -54,9 +53,7 @@ class MethodBase(NoExtraFieldsModel):
 
 
 class LinearMapToRealMethod(MethodBase):
-    """
-    Model for linear mapping post-processing method.
-    """
+    """Model for linear mapping post-processing method."""
 
     method: Literal[MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL] = Field(
         MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL,
@@ -71,9 +68,7 @@ class LinearMapToRealMethod(MethodBase):
 
 
 class MLStateMap(NoExtraFieldsModel):
-    """
-    Model representing a mapping from a quantum state to a value and location.
-    """
+    """Model representing a mapping from a quantum state to a value and location."""
 
     state: str = Field(..., description="State label (e.g., '0', '1').")
     val: int = Field(
@@ -83,9 +78,7 @@ class MLStateMap(NoExtraFieldsModel):
 
 
 class MaxLikelihoodMethod(MethodBase):
-    """
-    Model for maximum likelihood post-processing method.
-    """
+    """Model for maximum likelihood post-processing method."""
 
     method: Literal[MethodIndicator.MAX_LIKELIHOOD] = Field(
         MethodIndicator.MAX_LIKELIHOOD,

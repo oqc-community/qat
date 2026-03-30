@@ -22,19 +22,21 @@ from qat.utils.uuid import SeedType
 
 
 class DeviceDescription(NoExtraFieldsFrozenModel):
-    """
-    Device-related target description.
+    """Device-related target description.
 
     :param sample_time: The rate at which the pulse is sampled (in s).
     :param samples_per_clock_cycle: The number of samples per clock cycle.
     :param instruction_memory_size: The max. allowed number of instructions.
-    :param waveform_memory_size: The max. memory that can be used for waveforms, in clock cycles.
+    :param waveform_memory_size: The max. memory that can be used for waveforms, in clock
+        cycles.
     :param pulse_duration_min: The minimal pulse duration for all pulse channels.
     :param pulse_duration_max: The maximal pulse duration for all pulse channels.
     :param pulse_channel_lo_freq_min: The minimal LO frequency for a pulse channel.
     :param pulse_channel_lo_freq_max: The maximal LO frequency for a pulse channel.
-    :param pulse_channel_if_freq_min: The minimal intermediate frequency for a pulse channel.
-    :param pulse_channel_if_freq_max: The maximal intermediate frequency for a pulse channel.
+    :param pulse_channel_if_freq_min: The minimal intermediate frequency for a pulse
+        channel.
+    :param pulse_channel_if_freq_max: The maximal intermediate frequency for a pulse
+        channel.
     """
 
     sample_time: PositiveFloat = 1e-09
@@ -88,8 +90,7 @@ class DeviceDescription(NoExtraFieldsFrozenModel):
 
 
 class QubitDescription(DeviceDescription):
-    """
-    Qubit-related target description.
+    """Qubit-related target description.
 
     :param passive_reset_time: The amount of time after each shot where the qubit is idle.
     """
@@ -114,16 +115,13 @@ class QubitDescription(DeviceDescription):
 
 
 class ResonatorDescription(DeviceDescription):
-    """
-    Resonator-related target description.
-    """
+    """Resonator-related target description."""
 
     ...
 
 
 class AbstractTargetData(NoExtraFieldsFrozenModel):
-    """
-    Data related to a general target machine.
+    """Data related to a general target machine.
 
     :param max_acquisitions: The maximum amount of acquisitions possible on this target.
     :param max_shots: (deprecated) Use `max_acquisitions` instead.
@@ -178,10 +176,12 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
 
 
 class TargetData(AbstractTargetData):
-    """
-    Data related to a general target machine.
-    :param max_acquisitions: The maximum amount of acquisitions per channel possible on this target.
-    :param default_shots: The default amount of shots on this target if none specified through the instructions.
+    """Data related to a general target machine.
+
+    :param max_acquisitions: The maximum amount of acquisitions per channel possible on this
+        target.
+    :param default_shots: The default amount of shots on this target if none specified
+        through the instructions.
     :param QUBIT_DATA: Qubit-related target description.
     :param RESONATOR_DATA: Resonator-related target description.
     """

@@ -17,9 +17,7 @@ def get_directory(dir):
 
 
 def load_results(benchmark_name, dir=".benchmarks/"):
-    """
-    Load only the QFT results.
-    """
+    """Load only the QFT results."""
     dir = get_directory(dir)
     with open(f"{dir}/{benchmark_name}.json", "r") as f:
         benchmarks = json.load(f)["benchmarks"]
@@ -44,9 +42,7 @@ def load_results(benchmark_name, dir=".benchmarks/"):
 
 
 def get_args():
-    """
-    Allow arguments to be parsed to the program.
-    """
+    """Allow arguments to be parsed to the program."""
 
     parser = argparse.ArgumentParser(
         prog="Plotting tool for QFT benchmarks",

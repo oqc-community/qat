@@ -14,7 +14,7 @@ calibration_results/
 **/*.temp
 **/tmp.*
 
-# Benchmarks 
+# Benchmarks
 .benchmarks/
 
 # Docs
@@ -38,7 +38,7 @@ build/*
 bin/
 obj/
 # Disabled as we want the QIR to be commited, for now.
-# qir/ 
+# qir/
 
 # C++
 Debug/

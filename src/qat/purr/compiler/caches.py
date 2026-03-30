@@ -8,9 +8,9 @@ from qat.purr.utils.logger import get_default_logger
 
 
 class QatCache:
-    """
-    Folder control object for the various caches of the toolchain. Consolidates
-    creation/deletion and validation.
+    """Folder control object for the various caches of the toolchain.
+
+    Consolidates creation/deletion and validation.
     """
 
     def __init__(self, root_folder=None):

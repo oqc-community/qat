@@ -1,6 +1,5 @@
 ENGINES:
 - name: mock
   type: tests.unit.utils.engines.InitableEngine
-- name: mock 
+- name: mock
   type: tests.unit.utils.engines.InitableEngine
-    

@@ -19,8 +19,7 @@ class PositionalAcquireData(BaseModel):
 
 
 class WaveformChannelData(BaseModel):
-    """
-    Contains the channel data for a :class:`WaveformV1Program`.
+    """Contains the channel data for a :class:`WaveformV1Program`.
 
     Stores the waveforms and acqusitions needed for execution. No control flow is possible.
 
@@ -49,7 +48,8 @@ class WaveformChannelData(BaseModel):
 
 
 class WaveformProgram(AbstractProgram):
-    """Contains the information to execute a task using the waveform buffer channel hardware.
+    """Contains the information to execute a task using the waveform buffer channel
+    hardware.
 
     Contains the buffers and acquire information for each channel, the repetition period for
     each shot and the number of shots to execute.

@@ -181,8 +181,10 @@ class LucyModelLoader(BasePhysicalModelLoader):
             }
 
     def _build_model(self, physical_connectivity, logical_connectivity, coupling_qualities):
-        """Uses the connectivity and coupling qualities to build the model. Intentionally
-        uses some indirection here so this can be adapted to other builders."""
+        """Uses the connectivity and coupling qualities to build the model.
+
+        Intentionally uses some indirection here so this can be adapted to other builders.
+        """
 
         return PhysicalHardwareModelBuilder(
             physical_connectivity=physical_connectivity,
@@ -220,7 +222,8 @@ class LucyModelLoader(BasePhysicalModelLoader):
     def _populate_pulse_channels(
         self, model: PhysicalHardwareModel
     ) -> PhysicalHardwareModel:
-        """Populates the model with pulse channels and their frequencies and sclae factors."""
+        """Populates the model with pulse channels and their frequencies and sclae
+        factors."""
 
         for qubit in model.qubits.values():
             qubit.drive_pulse_channel.frequency = self.drive_frequency

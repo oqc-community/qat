@@ -41,9 +41,7 @@ class AbstractWaveform(AllowExtraFieldsModel):
 
 
 class Waveform(AbstractWaveform):
-    """
-    Stores the attributes which define a waveform.
-    """
+    """Stores the attributes which define a waveform."""
 
     width: float = Field(ge=0, default=0)
     amp: float | complex = 0.0
@@ -125,9 +123,7 @@ class Waveform(AbstractWaveform):
 
 
 class SampledWaveform(AbstractWaveform):
-    """
-    Provide a list of amplitudes to define a sampled waveform.
-    """
+    """Provide a list of amplitudes to define a sampled waveform."""
 
     samples: ComplexNDArray | FloatNDArray
     sample_time: float | None = None  # Time between samples, in seconds
@@ -212,9 +208,10 @@ waveform_classes = tuple(find_all_subclasses(Waveform) + [SampledWaveform])
 
 
 class Pulse(QuantumInstruction):
-    """
-    Instructs a pulse channel to send a waveform. The intention of the waveform
-    (e.g. a drive or measure pulse) can be specified using the type.
+    """Instructs a pulse channel to send a waveform.
+
+    The intention of the waveform (e.g. a drive or measure pulse) can be specified using the
+    type.
     """
 
     ignore_channel_scale: bool = False

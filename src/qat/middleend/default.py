@@ -64,8 +64,8 @@ class DefaultMiddleend(CustomMiddleend):
         model: HardwareModel,
         target_data: TargetData = TargetData(),
     ) -> PassManager:
-        """
-        Builds the default middle end pass pipeline.
+        """Builds the default middle end pass pipeline.
+
         :param model: The hardware model that holds calibrated information on the qubits on
             the QPU.
         :return: A :class:`PassManager` containing a sequence of passes.

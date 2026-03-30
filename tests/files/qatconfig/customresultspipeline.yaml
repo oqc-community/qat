@@ -4,7 +4,7 @@ PIPELINES:
   middleend: qat.middleend.FallthroughMiddleend
   backend: qat.backend.WaveformV1Backend
   runtime: qat.runtime.SimpleRuntime
-  results_pipeline: 
+  results_pipeline:
     type: tests.unit.utils.resultsprocessing.get_pipeline
     config:
       some_int : 12

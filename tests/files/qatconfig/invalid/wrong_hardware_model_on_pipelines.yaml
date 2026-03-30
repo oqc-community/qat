@@ -5,6 +5,6 @@ HARDWARE:
     qubit_count: 6
 
 PIPELINES:
-- name: mock 
+- name: mock
   pipeline: tests.unit.utils.pipelines.MockPipeline
   hardware_loader: echo8loader

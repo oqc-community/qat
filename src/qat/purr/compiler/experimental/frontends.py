@@ -14,9 +14,7 @@ from qat.purr.compiler.runtime import (
 
 
 class InterruptableExecutingMixin:
-    """
-    Support experimental wait interrupt capabilities
-    """
+    """Support experimental wait interrupt capabilities."""
 
     def _execute(
         self,
@@ -39,16 +37,12 @@ class InterruptableExecutingMixin:
 
 
 class QIRFrontend(InterruptableExecutingMixin, core_frontends.QIRFrontend):
-    """
-    Static decorated QIR frontend for interruptibility
-    """
+    """Static decorated QIR frontend for interruptibility."""
 
     pass
 
 
 class QASMFrontend(InterruptableExecutingMixin, core_frontends.QASMFrontend):
-    """
-    Static decorated QASM frontend for interruptibility
-    """
+    """Static decorated QASM frontend for interruptibility."""
 
     pass

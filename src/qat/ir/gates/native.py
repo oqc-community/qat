@@ -31,8 +31,8 @@ class Z_phase(Rz, NativeGate):
 class X_pi_2(Gate1Q, NativeGate):
     r"""A native :math:`X(\pi/2)` gate.
 
-    Mathematically equivalent to :math:`R_{x}(\pi/2)`, but semantically represents part of
-    a decomposed gate.
+    Mathematically equivalent to :math:`R_{x}(\pi/2)`, but semantically represents part of a
+    decomposed gate.
 
     :param qubit: Index for the qubit that the gate acts on.
     """

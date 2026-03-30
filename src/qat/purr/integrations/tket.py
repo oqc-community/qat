@@ -54,9 +54,9 @@ log = get_default_logger()
 
 
 class TketBuilder:
-    """
-    Builds a Tket circuit using a builder API. No direct relation to our other builders
-    as the API is a little too different.
+    """Builds a Tket circuit using a builder API.
+
+    No direct relation to our other builders as the API is a little too different.
     """
 
     def __init__(self, *args, **kwargs):
@@ -109,9 +109,9 @@ class TketBuilder:
 
 
 class TketQasmParser(Qasm2Parser):
-    """
-    QASM parser that turns QASM into Tket structures. Switch to Tkets QASM parser when it's
-    more mature.
+    """QASM parser that turns QASM into Tket structures.
+
+    Switch to Tkets QASM parser when it's more mature.
     """
 
     def process_qreg(self, node, context: QasmContext, builder: TketBuilder, **kwargs):
@@ -321,8 +321,10 @@ class TketQIRParser(QIRParser):
 
     @builder.setter
     def builder(self, _):
-        """The QIR parser resets the builder after being parsed (possibly for reuse). This
-        setter is just to reset."""
+        """The QIR parser resets the builder after being parsed (possibly for reuse).
+
+        This setter is just to reset.
+        """
 
         self.circuit = Circuit(len(self.hardware.qubits), len(self.hardware.qubits))
 
@@ -347,9 +349,11 @@ class TketToQatIRConverter:
 
     @staticmethod
     def convert_parameter(arg: str):
-        r"""A parameter stored in a Tket operation is in units of :math:`\pi`. Parameters
-        are returned as a string, sometimes in fractional form: we need to convert it to an
-        absolute value."""
+        r"""A parameter stored in a Tket operation is in units of :math:`\pi`.
+
+        Parameters are returned as a string, sometimes in fractional form: we need to
+        convert it to an absolute value.
+        """
 
         return float(pi * sympify(arg))
 
@@ -494,9 +498,8 @@ def check_validity(circuit, architecture):
 
 
 def optimize_circuit(circ, architecture, opts):
-    """
-    Apply all Tket optimizations to the circuit provided as defined in the options flag.
-    """
+    """Apply all Tket optimizations to the circuit provided as defined in the options
+    flag."""
     try:
         # By default we want to decompose Tket-specific circuits and then rebase into
         # the form that Tket can optimize most efficiently.
@@ -578,10 +581,8 @@ def optimize_circuit(circ, architecture, opts):
 
 
 def get_coupling_subgraphs(couplings):
-    """
-    Given a list of connections which potentially describe a disconnected graph,
-    this returns a list of connected subgraphs
-    """
+    """Given a list of connections which potentially describe a disconnected graph, this
+    returns a list of connected subgraphs."""
     subgraphs = []
     for coupling in couplings:
         subgraph_added_to = None
@@ -711,15 +712,14 @@ def run_multiQ_tket_optimizations(
 
 
 def run_tket_optimizations(circ: Circuit, opts, hardware: QuantumHardwareModel) -> Circuit:
-    """
-    Runs tket-based optimizations and modifications. Routing will always happen no
-    matter the level.
+    """Runs tket-based optimizations and modifications. Routing will always happen no matter
+    the level.
 
     Will run optimizations in sections if a full suite fails until a minimal subset of
     passing optimizations is found.
 
-    :param circ: Tket circuit to optimize. The source file must be already parsed to a
-        TKET circuit.
+    :param circ: Tket circuit to optimize. The source file must be already parsed to a TKET
+        circuit.
     :param opts: Specifies which TKET optimizations to run.
     :param hardware: The hardware model is used for routing and placement purposes.
     """
@@ -732,9 +732,8 @@ def run_tket_optimizations(circ: Circuit, opts, hardware: QuantumHardwareModel) 
 
 
 def run_tket_optimizations_qasm(qasm_string, opts, hardware: QuantumHardwareModel) -> str:
-    """
-    Runs tket-based optimizations and modifications. Routing will always happen no
-    matter the level.
+    """Runs tket-based optimizations and modifications. Routing will always happen no matter
+    the level.
 
     Will run optimizations in sections if a full suite fails until a minimal subset of
     passing optimizations is found.
@@ -775,9 +774,8 @@ def run_tket_optimizations_qir(
     hardware: QuantumHardwareModel,
     results_format: InlineResultsProcessing = None,
 ) -> InstructionBuilder:
-    """
-    Runs tket-based optimizations and modifications. Routing will always happen no
-    matter the level.
+    """Runs tket-based optimizations and modifications. Routing will always happen no matter
+    the level.
 
     Will run optimizations in sections if a full suite fails until a minimal subset of
     passing optimizations is found.

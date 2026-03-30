@@ -43,9 +43,10 @@ AnyBuilder = TypeVar("AnyBuilder")
 
 
 class HardwareModel:
-    """
-    Base class for all hardware models. Every model should return the builder class that
-    should be used to build circuits/pulses for its particular back-end.
+    """Base class for all hardware models.
+
+    Every model should return the builder class that should be used to build circuits/pulses
+    for its particular back-end.
     """
 
     def __init__(self, shot_limit=-1):
@@ -69,9 +70,10 @@ class HardwareModel:
 
 
 def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardwareModel):
-    """
-    Returns a Dict[str, str] mapping creg to qreg indices.
-    Classical register indices are extracted following the pattern <clreg_name>[<clreg_index>]
+    """Returns a Dict[str, str] mapping creg to qreg indices.
+
+    Classical register indices are extracted following the pattern
+    <clreg_name>[<clreg_index>]
     """
     mapping = {}
     pattern = re.compile(r"(.*)\[([0-9]+)\]")
@@ -106,20 +108,14 @@ def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardw
 
 
 class ReadoutMitigation(Calibratable):
-    """
-    Linear maps each individual qubit to its <0/1> given <0/1> probability.
+    """Linear maps each individual qubit to its <0/1> given <0/1> probability.
+
     Note that linear assumes no cross-talk effects and considers each qubit independent.
-    linear = {
-        <qubit_number>: {
-            "0|0": 1,
-            "1|0": 1,
-            "0|1": 1,
-            "1|1": 1,
-        }
-    }
-    Matrix is the entire 2**n x 2**n process matrix of p(<bitstring_1>|<bitstring_2>).
-    M3 is a runtime mitigation strategy that builds up the calibration it needs at runtime,
-    hence a bool of available or not. For more info https://github.com/Qiskit-Partners/mthree.
+    linear = {     <qubit_number>: {         "0|0": 1,         "1|0": 1,         "0|1": 1,
+    "1|1": 1,     } } Matrix is the entire 2**n x 2**n process matrix of
+    p(<bitstring_1>|<bitstring_2>). M3 is a runtime mitigation strategy that builds up the
+    calibration it needs at runtime, hence a bool of available or not. For more info
+    https://github.com/Qiskit-Partners/mthree.
     """
 
     def __init__(
@@ -152,9 +148,10 @@ class ErrorMitigation(Calibratable):
 
 
 class QuantumHardwareModel(HardwareModel, Calibratable):
-    """
-    Object modelling our superconducting hardware. Holds up-to-date information about a
-    current piece of hardware, whether simulated or physical machine.
+    """Object modelling our superconducting hardware.
+
+    Holds up-to-date information about a current piece of hardware, whether simulated or
+    physical machine.
     """
 
     def __init__(
@@ -185,8 +182,8 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         )
 
     def qubit_quality(self, qubit_index: int):
-        """
-        Readout quality for a qubit with index `qubit_index`.
+        """Readout quality for a qubit with index `qubit_index`.
+
         Note that this does not take gate fidelity into account.
         """
         readout_quality = self.error_mitigation.readout_mitigation.linear.get(
@@ -238,9 +235,9 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         return id_ in self.quantum_devices
 
     def get_qubit(self, id_: Union[int, str, Qubit]) -> Qubit:
-        """
-        Returns a qubit based on id/index. If the passed-in object is already a Qubit
-        object just returns that.
+        """Returns a qubit based on id/index.
+
+        If the passed-in object is already a Qubit object just returns that.
         """
         if isinstance(id_, Qubit):
             return id_
@@ -528,8 +525,8 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         ]
 
     def get_gate_X(self, qubit, theta, pulse_channel: PulseChannel = None):
-        """
-        Provides pulses to perform an X rotation by angle theta on the given qubit.
+        """Provides pulses to perform an X rotation by angle theta on the given qubit.
+
         If theta is close to +/- pi/2, the standard x_pi_2 pulse is used, with some phase rotation in the case of - pi.
         If theta is close to +/- pi and the qubit has direct_x_pi set to True,
         the get_hw_x_pi method will return an x pi pulse.

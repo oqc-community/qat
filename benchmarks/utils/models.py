@@ -10,26 +10,21 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 def get_mock_live_hardware(num_qubits):
-    """
-    Returns a general hardware model that is set to create a mock live execution engine.
-    """
+    """Returns a general hardware model that is set to create a mock live execution
+    engine."""
     return apply_setup_to_hardware(MockLiveHardwareModel(), num_qubits)
 
 
 class MockLiveHardwareModel(QuantumHardwareModel):
-    """
-    A hardware model that will return a mock live execution engine to allow us to
-    test and benchmark features exclusive to the live engine.
-    """
+    """A hardware model that will return a mock live execution engine to allow us to test
+    and benchmark features exclusive to the live engine."""
 
     def create_engine(self):
         return MockQuantumExecution(self)
 
 
 class MockQuantumExecution(LiveDeviceEngine):
-    """
-    An execution engine that
-    """
+    """An execution engine that."""
 
     baseband_frequencies = {}
     buffers = {}

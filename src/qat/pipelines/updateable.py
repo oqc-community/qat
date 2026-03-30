@@ -17,9 +17,12 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 class PipelineConfig(BaseModel):
-    """Base class for configuring updateable pipelines. Subclasses of
+    """Base class for configuring updateable pipelines.
+
+    Subclasses of
     :class:`UpdateablePipeline` should be paried with their own configuration class which
-    specifies custom configuration parameters, and/or sets custom defaults."""
+    specifies custom configuration parameters, and/or sets custom defaults.
+    """
 
     name: str
 
@@ -158,8 +161,10 @@ class UpdateablePipeline(AbstractPipeline):
         reload_model: bool = False,
     ):
         """Update the pipeline configuration and rebuild the pipeline with updated
-        arguments. The whole pipeline is reinstantiated to avoid conflicts with changing
-        components."""
+        arguments.
+
+        The whole pipeline is reinstantiated to avoid conflicts with changing components.
+        """
 
         model, self._loader, reload_model = self._resolve_model(model, loader, reload_model)
 

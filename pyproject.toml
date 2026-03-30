@@ -8,16 +8,16 @@ license = "BSD-3-Clause"
 requires-python = ">=3.10,<3.13"
 dynamic = ["dependencies", "version"]
 authors = [
-    { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },
-    { name = "Harry Waring", email = "hwaring@oqc.tech" },
-    { name = "Jamie Friel", email = "jfriel@oqc.tech" },
-    { name = "John Dumbell", email = "jdumbell@oqc.tech" },
-    { name = "Kajsa Eriksson Rosenqvist", email = "keriksson.rosenqvist@oqc.tech" },
-    { name = "Owen Arnold", email = "oarnold@oqc.tech" },
-    { name = "Benjamin Sach", email = "bsach@oqc.tech" },
-    { name = "Daria Van Hende", email = "dvanhende@oqc.tech" },
-    { name = "Luke Causer", email = "lcauser@oqc.tech" },
-    { name = "Russell Rundle", email = "rrundle@oqc.tech"}
+  { name = "Hamid El Maazouz", email = "helmaazouz@oqc.tech" },
+  { name = "Harry Waring", email = "hwaring@oqc.tech" },
+  { name = "Jamie Friel", email = "jfriel@oqc.tech" },
+  { name = "John Dumbell", email = "jdumbell@oqc.tech" },
+  { name = "Kajsa Eriksson Rosenqvist", email = "keriksson.rosenqvist@oqc.tech" },
+  { name = "Owen Arnold", email = "oarnold@oqc.tech" },
+  { name = "Benjamin Sach", email = "bsach@oqc.tech" },
+  { name = "Daria Van Hende", email = "dvanhende@oqc.tech" },
+  { name = "Luke Causer", email = "lcauser@oqc.tech" },
+  { name = "Russell Rundle", email = "rrundle@oqc.tech" },
 ]
 
 [project.urls]
@@ -27,14 +27,12 @@ homepage = "https://oqc.tech/"
 
 [tool.poetry]
 requires-poetry = ">=2.0"
-packages = [
-    { include = "qat", from = "src/" }
-]
+packages = [{ include = "qat", from = "src/" }]
 version = "0.0.0"
 
 [tool.poetry.scripts]
 format-code = "scripts.poetry_scripts:format_code"
-generate-report =  "scripts.ci.generate_report:main"
+generate-report = "scripts.ci.generate_report:main"
 jupytext-sync = "scripts.poetry_scripts:jupytext_sync"
 build-docs = "scripts.poetry_scripts:build_docs"
 
@@ -63,7 +61,7 @@ pydantic-extra-types = "^2.10.4"
 numpydantic = ">=1.6.7"
 semver = "^3.0.2"
 frozendict = "^2.4.6"
-piny = {version = "^1.1.0"}
+piny = { version = "^1.1.0" }
 more-itertools = "^10.7.0"
 sympy = "^1.14.0"
 
@@ -142,13 +140,13 @@ copyright = "2025, Oxford Quantum Circuits Ltd"
 add_module_names = false
 autoclass_content = "both"
 extensions = [
-    "sphinx_multiversion",
-    "sphinx_rtd_theme",
-    "sphinx.ext.autodoc",
-    "sphinx_autodoc_typehints",
-    "sphinx_paramlinks",
-    "sphinx.ext.graphviz",
-    "myst_nb",
+  "sphinx_multiversion",
+  "sphinx_rtd_theme",
+  "sphinx.ext.autodoc",
+  "sphinx_autodoc_typehints",
+  "sphinx_paramlinks",
+  "sphinx.ext.graphviz",
+  "myst_nb",
 ]
 templates_path = ["_templates"]
 html_theme = "sphinx_rtd_theme"
@@ -160,9 +158,9 @@ html_theme_options.style_external_links = false
 html_theme_options.vcs_pageview_mode = ""
 html_theme_options.collapse_navigation = false
 html_theme_options.sticky_navigation = true
-html_theme_options.navigation_depth=6
-html_theme_options.includehidden=true
-html_theme_options.titles_only=false
+html_theme_options.navigation_depth = 6
+html_theme_options.includehidden = true
+html_theme_options.titles_only = false
 
 [tool.ruff]
 line-length = 92
@@ -182,54 +180,47 @@ combine-as-imports = true
 split-on-trailing-comma = false
 
 [tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib", "--doctest-modules"
-]
+addopts = ["--import-mode=importlib", "--doctest-modules"]
 testpaths = ['src', 'tests']
 filterwarnings = [
-    # Set warnings to raise errors in pytest runs.
-    "error",
-    # Specific warnings can be set to be handled differently if needed,
-    # E.g.:
-    # "default::DeprecationWarning", to show Deprecation Warnings
-    # "ignore:::qutip", to ignore warnings raised from the qutip package
-    # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
-    #
-    # Temporary default for pre-existing issues. Tickets exist for addressing these:
-    # Lark using deprecated version on sre_parse and sre_constants
-    'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
-    # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
-    'default:.*GlobalisePhasedX:DeprecationWarning',
-    # TODO: Change to passive_reset_time. 428, 455
-    'default:.*to modify the reset time of qubits to their ground state:UserWarning:',
-    # TODO - `qblox-instruments` to fix deprecation warnings regarding QCodes
-    'default::qcodes.utils.deprecate.QCoDeSDeprecationWarning:',
-    # TODO - remove when purr is dropped COMPILER-844
-    'default:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning',
-    'default:WaveformV1 support is deprecated:DeprecationWarning:qat.*.purr',
-    # TODO - remove when ConvertIR pass is removed COMPILER-1000
-    'default:ConvertToPydanticIR is deprecated:DeprecationWarning',
-    # TODO - remove for next version of TargetData COMPILER-966
-    'default:`.*TargetData.instruction_memory_size` is deprecated:DeprecationWarning:qat.middleend.passes.purr.validation',
+  # Set warnings to raise errors in pytest runs.
+  "error",
+  # Specific warnings can be set to be handled differently if needed,
+  # E.g.:
+  # "default::DeprecationWarning", to show Deprecation Warnings
+  # "ignore:::qutip", to ignore warnings raised from the qutip package
+  # see more options: https://docs.pytest.org/en/7.1.x/how-to/capture-warnings.html
+  #
+  # Temporary default for pre-existing issues. Tickets exist for addressing these:
+  # Lark using deprecated version on sre_parse and sre_constants
+  'default:.*sre_[parse|constants]:DeprecationWarning:lark.utils',
+  # The GlobalisePhasedX pass is unreliable and deprecated. Ticket added to resolve
+  'default:.*GlobalisePhasedX:DeprecationWarning',
+  # TODO: Change to passive_reset_time. 428, 455
+  'default:.*to modify the reset time of qubits to their ground state:UserWarning:',
+  # TODO - `qblox-instruments` to fix deprecation warnings regarding QCodes
+  'default::qcodes.utils.deprecate.QCoDeSDeprecationWarning:',
+  # TODO - remove when purr is dropped COMPILER-844
+  'default:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning',
+  'default:WaveformV1 support is deprecated:DeprecationWarning:qat.*.purr',
+  # TODO - remove when ConvertIR pass is removed COMPILER-1000
+  'default:ConvertToPydanticIR is deprecated:DeprecationWarning',
+  # TODO - remove for next version of TargetData COMPILER-966
+  'default:`.*TargetData.instruction_memory_size` is deprecated:DeprecationWarning:qat.middleend.passes.purr.validation',
 ]
-markers = [
-  "ab_test",
-  "experimental",
-  "legacy",
-  "qblox",
-]
+markers = ["ab_test", "experimental", "legacy", "qblox"]
 
 # The syncing rules are dispatched in the order defined here; if in the docs sub-directory,
 # it will sync to the docs source, else it will not.
 [[tool.jupytext.formats]]
 "notebooks/ipynb/tutorials" = "ipynb"
 "notebooks/scripts/tutorials" = "py:percent"
-"docs/source/tutorials" = "ipynb" # These will automatically appear in docs
+"docs/source/tutorials" = "ipynb"            # These will automatically appear in docs
 
 [[tool.jupytext.formats]]
 "notebooks/ipynb/docs" = "ipynb"
 "notebooks/scripts/docs" = "py:percent"
-"docs/source/notebooks" = "ipynb" # These will be available to use in the docs by reference
+"docs/source/notebooks" = "ipynb"       # These will be available to use in the docs by reference
 
 [[tool.jupytext.formats]]
 "notebooks/ipynb" = "ipynb"

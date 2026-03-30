@@ -37,8 +37,7 @@ log = get_default_logger()
 
 
 class PhysicalChannelAmplitudeValidation(ValidationPass):
-    """
-    Validates that the total amplitude of pulses on a physical channel does not exceed
+    """Validates that the total amplitude of pulses on a physical channel does not exceed
     allowed levels.
 
     Data is stored in a nested dict structure
@@ -353,8 +352,7 @@ class HardwareConfigValidity(ValidationPass):
 
 class FrequencySetupValidation(ValidationPass):
     """Validates the baseband frequencies and intermediate frequencies of pulse channels
-    against the target data.
-    """
+    against the target data."""
 
     def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """Instantiate the pass with a hardware model.
@@ -423,8 +421,8 @@ class FrequencySetupValidation(ValidationPass):
 
     @staticmethod
     def _create_pulse_channel_if_map(model: QuantumHardwareModel) -> dict[str, float]:
-        """Creates a map of pulse channel intermediate frequencies for each pulse channel
-        in the model."""
+        """Creates a map of pulse channel intermediate frequencies for each pulse channel in
+        the model."""
         return {
             pulse_channel.partial_id(): (
                 pulse_channel.frequency - pulse_channel.physical_channel.baseband_frequency
@@ -449,7 +447,8 @@ class FrequencySetupValidation(ValidationPass):
         qubit_lo_freq_limits: tuple[float, float],
         resonator_lo_freq_limits: tuple[float, float],
     ) -> dict[str, bool]:
-        """Validates that the frequencies in the dictionary are within the specified range."""
+        """Validates that the frequencies in the dictionary are within the specified
+        range."""
 
         baseband_validation = {}
         for key, frequency in frequencies.items():
@@ -620,8 +619,8 @@ class DynamicFrequencyValidation(ValidationPass):
 
 
 class FixedIntermediateFrequencyValidation(ValidationPass):
-    """Checks that no frequency shifts or sets are applied to pulse channels that have
-    a fixed intermediate frequency, or share a physical channel with a pulse channel."""
+    """Checks that no frequency shifts or sets are applied to pulse channels that have a
+    fixed intermediate frequency, or share a physical channel with a pulse channel."""
 
     def __init__(self, model: QuantumHardwareModel):
         """Instantiate the pass with a hardware model.
@@ -633,7 +632,8 @@ class FixedIntermediateFrequencyValidation(ValidationPass):
 
     @staticmethod
     def _create_fixed_if_map(model: QuantumHardwareModel) -> dict[str, bool]:
-        """Creates a map of fixed intermediate frequencies for each pulse channel in the model."""
+        """Creates a map of fixed intermediate frequencies for each pulse channel in the
+        model."""
         fixed_ifs = {}
         for pulse_channel in model.pulse_channels.values():
             fixed_ifs[pulse_channel.physical_channel.id] = (

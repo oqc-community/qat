@@ -73,8 +73,8 @@ class TestCustomMiddleend:
         return CustomMiddleend(model=EchoModelLoader().load(), pipeline=pass_manager)
 
     def test_custom_middleend_with_anlysis_pass(self):
-        """Test that the custom middleend runs an analysis pass and saves the result in
-        the result manager."""
+        """Test that the custom middleend runs an analysis pass and saves the result in the
+        result manager."""
         middleend = self.mock_middleend()
         ir = 42
         res_mgr = ResultManager()
@@ -99,7 +99,8 @@ class TestCustomMiddleend:
             middleend.emit(ir, res_mgr)
 
     def test_custom_middleend_with_wrong_compiler_config(self):
-        """Test that the custom middleend runs the validation pass with no compiler config."""
+        """Test that the custom middleend runs the validation pass with no compiler
+        config."""
         middleend = self.mock_middleend()
         ir = 42
         res_mgr = ResultManager()
@@ -108,12 +109,13 @@ class TestCustomMiddleend:
 
 
 class TestDefaultMiddleend:
-    """Some basic sanity checks on the DefaultMiddleend to ensure passes integrate to give
-    a valid pipeline, and passes run as expected. It doesn't do any deep testing of the
-    passes themselves, as those are tested in their own unit tests.
+    """Some basic sanity checks on the DefaultMiddleend to ensure passes integrate to give a
+    valid pipeline, and passes run as expected. It doesn't do any deep testing of the passes
+    themselves, as those are tested in their own unit tests.
 
     The DefaultMiddleend is likely to change, so this test is more of a smoke test that
-    checks passes that synergise work as expected."""
+    checks passes that synergise work as expected.
+    """
 
     @pytest.fixture(scope="class")
     def model(self):
@@ -184,8 +186,8 @@ class TestDefaultMiddleend:
         assert self.check_ir_has_type(processed_ir, Return)
 
     def test_ir_has_repeats(self, preprocessed_ir, processed_ir):
-        """Test that the default middleend adds a repeat instruction and it is lowered,
-        and wraps the whole IR."""
+        """Test that the default middleend adds a repeat instruction and it is lowered, and
+        wraps the whole IR."""
         for type in (Jump, Label, Repeat):
             assert not self.check_ir_has_type(preprocessed_ir, type)
         for type in (Jump, Label):
@@ -231,8 +233,8 @@ class TestDefaultMiddleend:
                 assert inst.shape == PulseShapeType.SQUARE
 
     def test_ir_has_no_syncs(self, preprocessed_ir, processed_ir):
-        """Test that the default middleend does not add any sync instructions, as they
-        are lowered to delays."""
+        """Test that the default middleend does not add any sync instructions, as they are
+        lowered to delays."""
         assert self.check_ir_has_type(preprocessed_ir, Synchronize)
         assert not self.check_ir_has_type(processed_ir, Synchronize)
 

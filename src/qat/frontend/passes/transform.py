@@ -78,7 +78,7 @@ class InputOptimisation:
         return program
 
     def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
-        """Extracted from DefaultOptimizers.optimize_qasm"""
+        """Extracted from DefaultOptimizers.optimize_qasm."""
 
         if (
             isinstance(optimizations, Tket)
@@ -148,7 +148,7 @@ class PydParse(TransformPass):
         )
 
     def parse_qir(self, qir_string, compiler_config):
-        """Extracted from QIRFrontend"""
+        """Extracted from QIRFrontend."""
         # TODO: Resolve circular import
         from qat.frontend.parsers import QIRParser
 
@@ -178,8 +178,7 @@ class FlattenIR(TransformPass):
 
 class PostProcessingSanitisation(TransformPass):
     """Checks that the :class:`PostProcessing` instructions that follow an acquisition are
-    suitable for the acquisition mode, and removes them if not.
-    """
+    suitable for the acquisition mode, and removes them if not."""
 
     def run(
         self,
@@ -217,10 +216,8 @@ class PostProcessingSanitisation(TransformPass):
         return ir
 
     def _valid_pp(self, acquire_mode: AcquireMode, pp: PostProcessing) -> bool:
-        """
-        Validate whether the post-processing instruction is valid with a given
-        acquire mode.
-        """
+        """Validate whether the post-processing instruction is valid with a given acquire
+        mode."""
 
         if acquire_mode is None:
             log.warning(

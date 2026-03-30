@@ -12,8 +12,11 @@ def testpath(pytestconfig):
 
 @pytest.fixture
 def tmp_cwd(monkeypatch, tmp_path):
-    """Use a unique temporary directory for each test. Allows concurrent runs that rely on
-    the same local files, e.g. tmp.hex and tmp.q1asm as used in qblox tests."""
+    """Use a unique temporary directory for each test.
+
+    Allows concurrent runs that rely on the same local files, e.g. tmp.hex and tmp.q1asm as
+    used in qblox tests.
+    """
     monkeypatch.chdir(tmp_path)
 
 

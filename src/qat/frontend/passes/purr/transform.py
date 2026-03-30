@@ -75,7 +75,7 @@ class InputOptimisation(TransformPass):
         return program
 
     def run_qasm_optimisation(self, qasm_string, optimizations, met_mgr, *args, **kwargs):
-        """Extracted from DefaultOptimizers.optimize_qasm"""
+        """Extracted from DefaultOptimizers.optimize_qasm."""
 
         if (
             isinstance(optimizations, Tket)
@@ -168,7 +168,7 @@ class Parse(TransformPass):
         )
 
     def parse_qir(self, qir_string, compiler_config):
-        """Extracted from QIRFrontend"""
+        """Extracted from QIRFrontend."""
         # TODO: Resolve circular import
         from qat.purr.integrations.qir import QIRParser
 

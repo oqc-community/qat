@@ -20,18 +20,16 @@ class FeatureMetadata:
     """Exposed metadata for various languages, integrations and features."""
 
     def to_json_dict(self):
-        """
-        Turn object into a JSON-amenable dictionary to return from a web service. All
-        returned dictionaries should be able to be merged together without additional
+        """Turn object into a JSON-amenable dictionary to return from a web service.
+
+        All returned dictionaries should be able to be merged together without additional
         effort, so make sure a root node with the name of the feature is available.
         """
         pass
 
 
 class Scale(Enum):
-    """
-    SI units of frequency
-    """
+    """SI units of frequency."""
 
     NANO = "ns"
     MICRO = "us"
@@ -44,9 +42,7 @@ class Scale(Enum):
 
 
 class Unit(Enum):
-    """
-    Physical SI units.
-    """
+    """Physical SI units."""
 
     TIME = "s"
     FREQUENCY = "Hz"

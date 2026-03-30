@@ -63,8 +63,7 @@ class TriageResult(ResultInfoMixin):
 
 
 class TriagePass(AnalysisPass):
-    """
-    Builds a view of instructions per quantum target AOT.
+    """Builds a view of instructions per quantum target AOT.
 
     Builds selections of instructions useful for subsequent analysis/transform passes, for
     code generation, and post-playback steps.
@@ -201,8 +200,7 @@ class BindingResult(ResultInfoMixin):
 
 
 class BindingPass(AnalysisPass):
-    """
-    Builds binding of variables, instructions, and a view of variables from/to scopes.
+    """Builds binding of variables, instructions, and a view of variables from/to scopes.
 
     Variables are implicitly declared in sweep instructions and are ultimately read from
     quantum instructions. Thus, every iteration variable is associated to all the scopes it
@@ -215,11 +213,10 @@ class BindingPass(AnalysisPass):
 
     @staticmethod
     def extract_iter_bound(value: Union[List, np.ndarray]):
-        """
-        Given a sequence of numbers (typically having been generated from
-        :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced,
-        in which case returns an IterBound instance holding the start, step, end, and count
-        of the numbers in the array, or else fail.
+        """Given a sequence of numbers (typically having been generated from
+        :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced, in
+        which case returns an IterBound instance holding the start, step, end, and count of
+        the numbers in the array, or else fail.
 
         In the future, we might be interested in relaxing this condition and return
         "interpolated" evenly spaced approximation of the input sequence.
@@ -390,8 +387,7 @@ class BindingPass(AnalysisPass):
 
 
 class TILegalisationPass(AnalysisPass):
-    """
-    An instruction is legal if it has a direct equivalent in the programming model
+    """An instruction is legal if it has a direct equivalent in the programming model
     implemented by the control stack. The notion of "legal" is highly determined by the
     hardware features of the control stack as well as its programming model. Control stacks
     such as Qblox have a direct ISA-level representation for basic RF instructions such as
@@ -547,9 +543,8 @@ class TILegalisationPass(AnalysisPass):
 class QbloxLegalisationPass(AnalysisPass):
     @staticmethod
     def phase_as_steps(phase_rad: float) -> int:
-        """
-        The instruction `set_ph_delta` expects the phase shift as a (potentially signed) integer operand.
-        """
+        """The instruction `set_ph_delta` expects the phase shift as a (potentially signed)
+        integer operand."""
 
         phase_deg = np.rad2deg(phase_rad)
         phase_deg %= 360
@@ -558,9 +553,8 @@ class QbloxLegalisationPass(AnalysisPass):
 
     @staticmethod
     def freq_as_steps(freq_hz: float) -> int:
-        """
-        The instruction `set_freq` expects the frequency as a (potentially signed) integer operand.
-        """
+        """The instruction `set_freq` expects the frequency as a (potentially signed)
+        integer operand."""
 
         steps = int(round(freq_hz * Constants.NCO_FREQ_STEPS_PER_HZ))
 
@@ -579,9 +573,8 @@ class QbloxLegalisationPass(AnalysisPass):
         return steps
 
     def amp_as_steps(self, amp: float) -> int:
-        """
-        The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand.
-        """
+        """The instruction `set_awg_offs` expects DAC ratio as a (potentially signed)
+        integer operand."""
 
         amp_steps = int(amp.real * Constants.MAX_OFFSET)
         if amp_steps < Constants.MIN_OFFSET or amp_steps > Constants.MAX_OFFSET:
@@ -690,8 +683,7 @@ class QbloxLegalisationPass(AnalysisPass):
         return legal_bound.astype(np.uint32)
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Performs target-dependent legalisation for QBlox.
+        """Performs target-dependent legalisation for QBlox.
 
             A) A repeat instruction with a very high repetition count is illegal because acquisition memory
         on a QBlox sequencer is limited. This requires optimal batching of the repeat instruction into maximally
@@ -770,11 +762,11 @@ class CFGPass(AnalysisPass):
         res_mgr.add(result)
 
     def _build_cfg(self, builder: InstructionBuilder, cfg: ControlFlowGraph):
-        """
-        Recursively (re)discovers (new) header nodes and flow information.
+        """Recursively (re)discovers (new) header nodes and flow information.
 
-        Supports Repeat, Sweep, EndRepeat, and EndSweep. More control flow and branching instructions
-        will follow in the future once these foundations sink in and get stabilised in the codebase
+        Supports Repeat, Sweep, EndRepeat, and EndSweep. More control flow and branching
+        instructions will follow in the future once these foundations sink in and get
+        stabilised in the codebase
         """
 
         flow = [(e.src.head(), e.dest.head()) for e in cfg.edges]

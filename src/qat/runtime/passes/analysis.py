@@ -86,9 +86,7 @@ class IndexMappingAnalysis(AnalysisPass):
         return mapping
 
     def var_to_qubit_map(self, mapping: dict[str, str]):
-        """
-        Maps the variables in the mapping to qubit indices.
-        """
+        """Maps the variables in the mapping to qubit indices."""
 
         var_to_qubit_map: dict[str, int] = {}
         for var, phys_ch_id in mapping.items():

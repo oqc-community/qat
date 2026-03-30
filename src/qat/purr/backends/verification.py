@@ -29,15 +29,16 @@ class QPUVersion:
 
     @staticmethod
     def with_version(version: str = None):
-        """Creates a QPU version with an empty QPU make. Only used in very special circumstances."""
+        """Creates a QPU version with an empty QPU make.
+
+        Only used in very special circumstances.
+        """
         return QPUVersion("", version)
 
 
 def inject_name(cls):
-    """
-    Decorator to inject class name into the QPU make/version fields
-    in our static make/model naming objects.
-    """
+    """Decorator to inject class name into the QPU make/version fields in our static
+    make/model naming objects."""
     for value in vars(cls).values():
         if isinstance(value, QPUVersion):
             if value.make is None or value.make == "":
@@ -67,13 +68,12 @@ class VerificationModel(LiveHardwareModel):
 
 
 def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
-    """
-    Runs instruction verification for the instructions in this builder.
+    """Runs instruction verification for the instructions in this builder.
 
-    Only run this on instructions that will go through no more transformations
-    before being sent to the driver, otherwise you cannot rely upon its results as
-    being accurate. In most situations this will only be fully truthful on instructions that
-    have already gone through the entire pipeline.
+    Only run this on instructions that will go through no more transformations before being
+    sent to the driver, otherwise you cannot rely upon its results as being accurate. In
+    most situations this will only be fully truthful on instructions that have already gone
+    through the entire pipeline.
     """
     model = get_verification_model(qpu_type)
     if model is None:
@@ -86,9 +86,8 @@ def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
 
 
 def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
-    """
-    Get verification model for a particular QPU make and model. Each make has its own class,
-    which has a field that is each individual version available for verification.
+    """Get verification model for a particular QPU make and model. Each make has its own
+    class, which has a field that is each individual version available for verification.
 
     For example, if you wanted to verify our Lucy machine, that'd be done with:
     ``

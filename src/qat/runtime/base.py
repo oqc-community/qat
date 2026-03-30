@@ -81,8 +81,8 @@ class BaseRuntime(abc.ABC):
         """Context manager to establish a connection which is held for the duration of the
         execution, according to the connection mode provided.
 
-        If required, the engine will always be disconnected at the end of the context,
-        even if execution is interrupted by an exception.
+        If required, the engine will always be disconnected at the end of the context, even
+        if execution is interrupted by an exception.
         """
 
         self.connect_engine(ConnectionMode.CONNECT_BEFORE_EXECUTE)

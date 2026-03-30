@@ -37,9 +37,7 @@ pytestmark = pytest.mark.usefixtures("tmp_cwd")
 @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
 @pytest.mark.parametrize("enable_hax", [True, False])
 class Test1QMeasurements:
-    """
-    Tests execution of a standard 1Q measurements.
-    """
+    """Tests execution of a standard 1Q measurements."""
 
     def test_resonator_spect(self, model, qubit_indices, enable_hax):
         runtime = model.create_runtime()
@@ -130,9 +128,10 @@ class Test1QMeasurements:
 @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
 @pytest.mark.parametrize("enable_hax", [True, False])
 class TestBuildingBlocks:
-    """
-    Tests execution of a plethora of IRs and combinations. These are specific programs
-    to trigger certain aspects that have acquired attention over the
+    """Tests execution of a plethora of IRs and combinations.
+
+    These are specific programs to trigger certain aspects that have acquired attention over
+    the
     """
 
     @pytest.mark.skip(reason="Space/time expensive")

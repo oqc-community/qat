@@ -24,9 +24,7 @@ VERSION = Version(0, 0, 1)
 
 
 class FeatureMetadata(NoExtraFieldsFrozenModel):
-    """
-    Exposed metadata for various languages, integrations and features.
-    """
+    """Exposed metadata for various languages, integrations and features."""
 
     name: str
     description: str
@@ -59,9 +57,7 @@ class OpenPulsePort(NoExtraFieldsModel):
 
 
 class OpenPulseFeatures(FeatureMetadata):
-    """
-    Features specific to OpenPulse.
-    """
+    """Features specific to OpenPulse."""
 
     ports: dict[str, OpenPulsePort]
     frames: dict[str, Any]

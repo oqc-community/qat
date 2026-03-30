@@ -7,9 +7,9 @@ HARDWARE:
 ENGINE:
 - name: mock
   type: tests.unit.utils.engine.InitableEngine
-  
+
 EXECUTE:
-- name: mock 
-  engine: not_found 
-  runtime: qat.runtime.SimpleRuntime 
+- name: mock
+  engine: not_found
+  runtime: qat.runtime.SimpleRuntime
   hardware_loader: echo6loader

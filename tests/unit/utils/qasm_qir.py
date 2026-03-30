@@ -104,10 +104,8 @@ def get_all_openpulse_paths() -> set[Path]:
 def parse_and_apply_optimizations(
     qasm_file_name, qubit_count=6, parser=None, opt_config=None
 ) -> InstructionBuilder:
-    """
-    Helper that builds a basic hardware, applies general optimizations, parses the QASM
-    then returns the resultant builder.
-    """
+    """Helper that builds a basic hardware, applies general optimizations, parses the QASM
+    then returns the resultant builder."""
     hardware = get_default_echo_hardware(qubit_count)
     qasm = get_qasm2(qasm_file_name)
 
@@ -189,7 +187,7 @@ def get_default_qasm2_gate_qasms():
 
 
 def get_pulses_from_builder(builder, shape_type=PulseShapeType.GAUSSIAN):
-    """Get the gaussian pulses from the builder"""
+    """Get the gaussian pulses from the builder."""
     return [
         inst
         for inst in builder.instructions
@@ -363,9 +361,9 @@ def get_pipeline_tests(
     openpulse: bool = False,
     skips: list[str] = None,
 ):
-    """Returns a dictionary of tests, with each item being a tuple containing the
-    factory for loading the file, the expected number of readouts, and the expected number
-    of registers."""
+    """Returns a dictionary of tests, with each item being a tuple containing the factory
+    for loading the file, the expected number of readouts, and the expected number of
+    registers."""
 
     skips = skips if skips is not None else []
 

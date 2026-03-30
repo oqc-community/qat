@@ -713,7 +713,7 @@ entry:
   %1 = inttoptr i32 3 to i32*
   call void @__quantum__rt__message(%String* %0)
   call void @__quantum__rt__string_update_reference_count(%String* %0, i32 -1)
-  
+
   call void @__quantum__rt__tuple_record_output(i64 2, i8* null)
   call void @__quantum__rt__result_record_output(%Result* null, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @5, i32 0, i32 0))
   call void @__quantum__rt__result_record_output(%Result* inttoptr (i64 1 to %Result*), i8* getelementptr inbounds ([3 x i8], [3 x i8]* @6, i32 0, i32 0))

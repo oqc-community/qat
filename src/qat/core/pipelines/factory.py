@@ -12,8 +12,10 @@ from qat.pipelines.updateable import Model, UpdateablePipeline
 
 class PipelineFactory(UpdateablePipeline):
     """An updateable pipeline that allows a pipeline factory (function) to be called.
+
     This will use the factory as a proxy for the _build_pipeline method, allowing the
-    pipeline to be refreshed with a new hardware model and/or config."""
+    pipeline to be refreshed with a new hardware model and/or config.
+    """
 
     @staticmethod
     def _build_pipeline(
@@ -22,8 +24,8 @@ class PipelineFactory(UpdateablePipeline):
         target_data: AbstractTargetData | None = None,
         engine: NativeEngine | None = None,
     ) -> BasePipeline:
-        """Wraps the pipeline factory function defined in the config, passing the
-        model and target data if required."""
+        """Wraps the pipeline factory function defined in the config, passing the model and
+        target data if required."""
 
         factory = config.pipeline
         kwargs = {}

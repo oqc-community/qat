@@ -27,9 +27,11 @@ from tests.unit.utils.pipelines import (
 
 @pytest.mark.filterwarnings("ignore:WaveformV1 support:DeprecationWarning")
 class TestUpdateablePipeline:
-    """Designed to test the infrastructure of the UpdateablePipeline. The implementation
-    of how the pipeline is built is the responsibility of the subclass, and should be tested
-    there."""
+    """Designed to test the infrastructure of the UpdateablePipeline.
+
+    The implementation of how the pipeline is built is the responsibility of the subclass,
+    and should be tested there.
+    """
 
     def test_initialization_with_loader(self):
         model_loader = MockModelLoader()

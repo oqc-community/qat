@@ -7,9 +7,7 @@ from qat.utils.pydantic import NoExtraFieldsFrozenModel
 
 
 class Scale(Enum):
-    """
-    SI unit scales.
-    """
+    """SI unit scales."""
 
     NANO = "n"
     MICRO = "u"

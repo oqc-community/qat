@@ -32,9 +32,8 @@ from qat.utils.uuid import SeedType
 def random_connectivity(
     n, max_degree: int = 3, seed: SeedType | random.Random | None = None
 ):
-    """
-    Generates a random undirected graph but enforcing that the resulting graph is connected.
-    """
+    """Generates a random undirected graph but enforcing that the resulting graph is
+    connected."""
     seeded_random = seed if isinstance(seed, random.Random) else random.Random(seed)
     edges = list(it.combinations(range(n), 2))
     seeded_random.shuffle(edges)
@@ -51,9 +50,8 @@ def random_connectivity(
 
 
 def random_directed_connectivity(n, max_degree: int = 3, seed: SeedType | None = None):
-    """
-    Generates a random directed graph but enforcing that the resulting graph is connected.
-    """
+    """Generates a random directed graph but enforcing that the resulting graph is
+    connected."""
     edges = list(it.combinations(range(n), 2))
     random.Random(seed).shuffle(edges)
     G = nx.DiGraph()

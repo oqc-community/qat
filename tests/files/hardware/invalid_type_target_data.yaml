@@ -13,7 +13,7 @@ QUBIT_DATA:
   pulse_channel_if_freq_min: 2_000
   pulse_channel_if_freq_max: 2_000_000_000
   passive_reset_time: 3e-03
-  
+
 
 RESONATOR_DATA:
   sample_time: 1e-08

@@ -31,9 +31,7 @@ log = get_default_logger()
 
 
 class PhaseOptimisation(TransformPass):
-    """
-    Extracted from QuantumExecutionEngine.optimize()
-    """
+    """Extracted from QuantumExecutionEngine.optimize()"""
 
     def run(
         self,
@@ -77,10 +75,7 @@ class PhaseOptimisation(TransformPass):
 
 
 class PostProcessingSanitisation(TransformPass):
-    """
-    Extracted from LiveDeviceEngine.optimize()
-    Better pass name/id ?
-    """
+    """Extracted from LiveDeviceEngine.optimize() Better pass name/id ?"""
 
     def run(
         self,
@@ -119,9 +114,8 @@ class PostProcessingSanitisation(TransformPass):
 
 
 class DeviceUpdateSanitisation(TransformPass):
-    """
-    Duplicate DeviceUpdate instructions upsets the device injection mechanism, which causes corruption
-    of the HW model.
+    """Duplicate DeviceUpdate instructions upsets the device injection mechanism, which
+    causes corruption of the HW model.
 
     In fact, a DeviceInjector is currently 1-1 associated with a DeviceUpdate instruction. When multiple
     DeviceUpdate instructions (sequentially) inject the same "target", the first DeviceInjector assigns the

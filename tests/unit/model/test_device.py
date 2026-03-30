@@ -48,8 +48,8 @@ class TestCalibratable:
 
 class TestCalibratablePulse:
     def test_defaults_give_valid_pulse(self):
-        """Regression test to ensure default values give a sensible waveform that is free
-        of errors and warnings."""
+        """Regression test to ensure default values give a sensible waveform that is free of
+        errors and warnings."""
         pulse = CalibratablePulse()
         assert pulse.waveform_type == GaussianWaveform
         assert pulse.amp > 0.0
@@ -336,8 +336,8 @@ class TestPulseChannel:
 
 # Test Qubit (de)serialization with mapper discriminator
 class TestQubitMapperDiscriminator:
-    """
-    Tests serialization, deserialization, and validation logic for the Qubit model's post-processing discriminator field.
+    """Tests serialization, deserialization, and validation logic for the Qubit model's
+    post-processing discriminator field.
 
     .. rubric:: Covers
 
@@ -347,8 +347,7 @@ class TestQubitMapperDiscriminator:
     """
 
     def _dummy_qubit(self, mean_z_map_args=None, post_process_method=None):
-        """
-        Helper to construct a Qubit instance for testing.
+        """Helper to construct a Qubit instance for testing.
 
         :param mean_z_map_args: List of arguments for linear mapping (or None).
         :param post_process_method: Post-processing method instance (or None).
@@ -376,8 +375,8 @@ class TestQubitMapperDiscriminator:
         )
 
     def test_qubit_mapper_linear_map_to_real_json(self):
-        """
-        Test JSON serialization/deserialization for Qubit with LinearMapToReal post-processing.
+        """Test JSON serialization/deserialization for Qubit with LinearMapToReal post-
+        processing.
 
         :raises AssertionError: If method discriminator or argument preservation fails.
         """
@@ -390,10 +389,11 @@ class TestQubitMapperDiscriminator:
         assert q2.post_process_method.mean_z_map_args == [1.0, 0.0]
 
     def test_qubit_mapper_max_likelihood_json(self):
-        """
-        Test JSON serialization/deserialization for Qubit with MaxLikelihood post-processing.
+        """Test JSON serialization/deserialization for Qubit with MaxLikelihood post-
+        processing.
 
-        :raises AssertionError: If method discriminator, noise estimate, or state mapping fails.
+        :raises AssertionError: If method discriminator, noise estimate, or state mapping
+            fails.
         """
         states = [
             MLStateMap(state="0", val=0, location=0.0),
@@ -409,8 +409,8 @@ class TestQubitMapperDiscriminator:
         assert len(q2.post_process_method.states) == 2
 
     def test_qubit_mapper_none_json(self):
-        """
-        Test Qubit JSON serialization/deserialization when no post-processing method is provided.
+        """Test Qubit JSON serialization/deserialization when no post-processing method is
+        provided.
 
         :raises AssertionError: If None is not preserved for post_process_method.
         """
@@ -421,8 +421,7 @@ class TestQubitMapperDiscriminator:
         assert q2.post_process_method is None
 
     def test_qubit_mapper_invalid_discriminator(self):
-        """
-        Test error handling for invalid post_process_method discriminator in Qubit.
+        """Test error handling for invalid post_process_method discriminator in Qubit.
 
         :raises Exception: If unknown method is accepted.
         """

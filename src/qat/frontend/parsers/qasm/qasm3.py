@@ -68,8 +68,8 @@ class OpenPulseContext(QasmContext):
 
 
 def get_frame_mappings(hw: PhysicalHardwareModel):
-    """
-    Generate the names for frames we allow in open pulse 'extern' statements.
+    """Generate the names for frames we allow in open pulse 'extern' statements.
+
     Returns a dictionary mapping name->pulse channel.
     """
     frames = {}
@@ -98,8 +98,8 @@ def get_frame_mappings(hw: PhysicalHardwareModel):
 
 
 def get_port_mappings(hw: PhysicalHardwareModel):
-    """
-    Generate the names for ports we allow in open pulse 'extern' statements.
+    """Generate the names for ports we allow in open pulse 'extern' statements.
+
     Returns a dictionary mapping name->physical channel.
     """
     ports = {}
@@ -171,10 +171,8 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         pass
 
     def modify(self, prog: ast.Program):
-        """
-        Allows children to transform the program before validation/transforming into our
-        AST occurs.
-        """
+        """Allows children to transform the program before validation/transforming into our
+        AST occurs."""
         pass
 
     def _walk_program(self, prog: ast.Program, context: QasmContext):
@@ -1143,10 +1141,8 @@ class Qasm3Parser(Interpreter, AbstractParser):
         qubits: list[Qubit],
         argument_values: list[Any] | None = None,
     ):
-        """
-        Returns whether this gate has been overriden, either in a generic
-        or qubit-specific manner.
-        """
+        """Returns whether this gate has been overriden, either in a generic or qubit-
+        specific manner."""
         argument_values = argument_values or []
         qubits = qubits if isinstance(qubits, list) else [qubits]
         qubit_specific_name = self._create_qb_specific_gate_suffix(name, qubits)

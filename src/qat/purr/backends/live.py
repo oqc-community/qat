@@ -199,8 +199,8 @@ class LiveHardwareModel(QuantumHardwareModel):
 
 
 class LiveDeviceEngine(QuantumExecutionEngine):
-    """
-    Backend that hooks up to our QPU's, currently hardcoded to particular fridges.
+    """Backend that hooks up to our QPU's, currently hardcoded to particular fridges.
+
     This will only work when run on a machine physically connected to a QPU.
     """
 

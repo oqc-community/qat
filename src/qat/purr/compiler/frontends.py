@@ -239,9 +239,9 @@ class QASMFrontend(LanguageFrontend):
         *args,
         **kwargs,
     ):
-        """
-        Execute a qasm string against a particular piece of hardware. Initializes a
-        default qubit simulator if no hardware provided.
+        """Execute a qasm string against a particular piece of hardware.
+
+        Initializes a default qubit simulator if no hardware provided.
         """
         instructions, parse_metrics = self.parse(qasm_string, hardware, compiler_config)
         result, execution_metrics = self.execute(

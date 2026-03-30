@@ -7,8 +7,8 @@ from qat.purr.compiler.instructions import PulseShapeType, SweepValue, Variable
 
 
 def sweep_pulse_widths(model: QuantumHardwareModel, qubit: int, times: list[float]):
-    """Factory for creating a builder that sweeps over a pulse width for a given qubit,
-    and a given set of times."""
+    """Factory for creating a builder that sweeps over a pulse width for a given qubit, and
+    a given set of times."""
 
     builder = model.create_builder()
     qubit = model.get_qubit(qubit)
@@ -57,8 +57,8 @@ def sweep_pulse_scales(model: QuantumHardwareModel, qubit: int, scales: list[flo
 def sweep_pulse_widths_and_amps(
     model: QuantumHardwareModel, qubit: int, times: list[float], amps: list[float]
 ):
-    """Factory for creating a builder that sweeps over both a pulse width and amplitude
-    for a given qubit, and a given set of times and amplitudes."""
+    """Factory for creating a builder that sweeps over both a pulse width and amplitude for
+    a given qubit, and a given set of times and amplitudes."""
 
     builder = model.create_builder()
     qubit = model.get_qubit(qubit)

@@ -24,15 +24,15 @@ class CompileSweepPipeline(AbstractPipeline):
 
     The underlying pipeline must be updateable. This is done because applying device assigns
     can change properties of the hardware model, and the pipeline must be rebuilt to ensure
-    it is not invalidated. Furthermore, even if device assigns aren't used, sweeps are
-    often done side-by-side with changes to the hardware model, so it is useful to ensure
-    its rebuilt as a precaution.
+    it is not invalidated. Furthermore, even if device assigns aren't used, sweeps are often
+    done side-by-side with changes to the hardware model, so it is useful to ensure its
+    rebuilt as a precaution.
 
     Eventually the risks associated with device assigns can be mitigated by mapping device
     assigns onto instructions in the IR, where possible. For example, a device assign that
     changes the frequency of a channel can be mapped onto a frequency set instruction.
-    Similar behaviour could implemented for pulse channel scales too, with an e.g.
-    "set scale" instruction, or appropriate mapping onto pulse amplitudes.
+    Similar behaviour could implemented for pulse channel scales too, with an e.g. "set
+    scale" instruction, or appropriate mapping onto pulse amplitudes.
     """
 
     def __init__(
@@ -74,8 +74,8 @@ class CompileSweepPipeline(AbstractPipeline):
         :param compiler_config: Optional compiler configuration to use for this compile
             call. If not provided, the compiler configuration from the pipeline will be
             used.
-        :return: A batched executable containing all instances of the sweeps, along with
-            the metrics from the final compile call.
+        :return: A batched executable containing all instances of the sweeps, along with the
+            metrics from the final compile call.
         """
         if not isinstance(program, InstructionBuilder):
             return self._base_pipeline.compile(program, compiler_config)
@@ -125,8 +125,10 @@ class CompileSweepPipeline(AbstractPipeline):
     @staticmethod
     def _build_preprocessing_pipeline() -> PassManager:
         """Builds a preprocessing pipeline that runs on the IR before sweeps are flattened
-        out, such as resolving device assigns onto other instructions. Currently only
-        sanitises frequencies, but more passes can be added as needed."""
+        out, such as resolving device assigns onto other instructions.
+
+        Currently only sanitises frequencies, but more passes can be added as needed.
+        """
 
         return PassManager() | FrequencyAssignSanitisation()
 
@@ -146,8 +148,8 @@ class CompileSweepPipeline(AbstractPipeline):
         compiler_config: CompilerConfig | None = None,
         **kwargs,
     ) -> tuple[Executable, MetricsManager]:
-        """Makes required changes to the hardware model using the device assigns,
-        compiles the builder, then restores the hardware model to its original state."""
+        """Makes required changes to the hardware model using the device assigns, compiles
+        the builder, then restores the hardware model to its original state."""
         with device_assigns.apply():
             self._rebuild_pipeline()
             return self._base_pipeline.compile(builder, compiler_config, **kwargs)

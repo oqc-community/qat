@@ -265,7 +265,8 @@ class TestRepeatTranslation:
         """Test all possible combinations of having additional instructions, before,
         between, and after the repeats, with and without explicitly closing scopes.
 
-        [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>, <fifth>]
+        [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>,
+        <fifth>]
         """
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         start_indices = [0, 3]
@@ -1339,7 +1340,8 @@ class TestPydBatchedShots:
                 BatchedShots(target_data).run(builder)
 
     def test_multiple_measurements_on_single_qubit_in_measure_block(self, model):
-        """Tests that BatchedShots correctly counts Acquires nested inside a MeasureBlock."""
+        """Tests that BatchedShots correctly counts Acquires nested inside a
+        MeasureBlock."""
 
         builder = QuantumInstructionBuilder(hardware_model=model)
         num_shots = 1000
@@ -2069,7 +2071,10 @@ class TestLowerSyncsToDelays:
 
     def test_process_sync(self):
         """Tests that a synchronize instruction is converted to delays, and the durations
-        dict is updated accordingly. Tests the case when a channel hasn't yet been seen."""
+        dict is updated accordingly.
+
+        Tests the case when a channel hasn't yet been seen.
+        """
         durations = defaultdict(float)
         durations["test1"] = 80e-9
         durations["test2"] = 120e-9

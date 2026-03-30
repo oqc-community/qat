@@ -68,14 +68,14 @@ class DecomposeToPulses(TransformPass):
 
     Each native gate can be written a sequence of pulse instructions. This pass decomposes
     each gate into the correct instructions. Note that this method will not be supported in
-    the long-term, and will be replaced by something more performant once Qat IR is
-    better established.
+    the long-term, and will be replaced by something more performant once Qat IR is better
+    established.
 
     A simple first step might be to write an analysis pass that extracts a set of unique
     gates + qubit(s) targets. For each gate+target pair, it could then determine the set of
-    instructions for pair just once. There is the complication of how to deal with the
-    Rz-gate, which is parameterised. This pass could then be adapted to use the results of
-    this pass to more effeciently decompose instructions.
+    instructions for pair just once. There is the complication of how to deal with the Rz-
+    gate, which is parameterised. This pass could then be adapted to use the results of this
+    pass to more effeciently decompose instructions.
     """
 
     def __init__(

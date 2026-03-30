@@ -38,8 +38,9 @@ class LoggerLevel(Enum):
 
 
 class BasicLogger(logging.Logger):
-    """
-    The basic logger class that should be used. Upon setup, this is provided to the
+    """The basic logger class that should be used.
+
+    Upon setup, this is provided to the
     built-in logging by calling ``logging.setLoggerClass``. This way, every new logger
     created will be of this class. This allows us to define custom fields and functions
     that we want to use with our loggers. This class should not be instantiated
@@ -65,8 +66,7 @@ class BasicLogger(logging.Logger):
         msg: str = "",
         section_level=1,
     ):
-        """
-        Displays the result of some experiment or computation. This logging function is
+        """Displays the result of some experiment or computation. This logging function is
         PuRR specific.
 
         The output depends on the :paramref:`cell_type` parameter:
@@ -104,8 +104,7 @@ class BasicLogger(logging.Logger):
         )
 
     def code(self, source: List[str]):
-        """
-        Outputs a section of executable code (used for Jupyter files). This logging
+        """Outputs a section of executable code (used for Jupyter files). This logging
         function is PuRR specific.
 
         :param source: The list of code lines as strings
@@ -113,13 +112,12 @@ class BasicLogger(logging.Logger):
         logging.Logger.log(self, level=LoggerLevel.CODE.value, msg="\n".join(source))
 
     def save_object(self, obj, name: str, numpy_arr: bool = False):
-        """
-        Serializes the specified object. This logging function is PuRR specific.
+        """Serializes the specified object. This logging function is PuRR specific.
 
         :param obj: The object to be serialized.
-        :param name: A name must be also provided, which will be used as the file name
-                     and in case of Jupyter loggers, also as the name of the variable
-                     which will contain the loaded object.
+        :param name: A name must be also provided, which will be used as the file name and
+            in case of Jupyter loggers, also as the name of the variable which will contain
+            the loaded object.
         """
         if numpy_arr:
             code = [
@@ -174,8 +172,8 @@ class BasicLogger(logging.Logger):
         extra: dict = None,
         sinfo=None,
     ):
-        """
-        Override that allows us to override record values via the extras dictionary.
+        """Override that allows us to override record values via the extras dictionary.
+
         Initially built to allow for printing out messages that look like they come from
         different places in the source code than where the logger was called.
         """
@@ -224,8 +222,9 @@ class BasicLogger(logging.Logger):
 
 
 class ConsoleLoggerHandler(logging.StreamHandler):
-    """
-    Basic console handler for the logger. It defaults to stdout.
+    """Basic console handler for the logger.
+
+    It defaults to stdout.
     """
 
     def __init__(self, stream: IO = sys.stdout):
@@ -237,10 +236,11 @@ class ConsoleLoggerHandler(logging.StreamHandler):
 
 
 class FileLoggerHandler(logging.FileHandler):
-    """
-    Basic file handler for the logger. A file path must be provided. The log file is
-    created with a delay, so the stream is None until the first emit. This also allows
-    to write some initial stuff to the log file when creating it.
+    """Basic file handler for the logger.
+
+    A file path must be provided. The log file is created with a delay, so the stream is
+    None until the first emit. This also allows to write some initial stuff to the log file
+    when creating it.
     """
 
     def __init__(self, file_path: str):
@@ -255,9 +255,10 @@ class FileLoggerHandler(logging.FileHandler):
         logging.FileHandler.emit(self, record)
 
     def create_initial_file(self):
-        """
-        Implement this method in the derived class to insert some initial text in the
-        log file. Use emit and flush while writing directly to the stream.
+        """Implement this method in the derived class to insert some initial text in the log
+        file.
+
+        Use emit and flush while writing directly to the stream.
         """
         pass
 
@@ -266,8 +267,9 @@ class FileLoggerHandler(logging.FileHandler):
 
 
 class JsonHandler(FileLoggerHandler):
-    """
-    The JSON file handler needed for logging in JSON format. In
+    """The JSON file handler needed for logging in JSON format.
+
+    In
     :class:`logging.FileHandler`, at each time something is written to the file, the
     emit function is called. By overriding the method, the JSON format can be ensured at
     each writing.
@@ -294,8 +296,9 @@ class JsonHandler(FileLoggerHandler):
 
 
 class JsonLoggerHandler(JsonHandler):
-    """
-    The basic JSON file handler logger. It is intended to generate the same output as
+    """The basic JSON file handler logger.
+
+    It is intended to generate the same output as
     :class:`FileLoggerHandler`, but in JSON format.
     """
 
@@ -317,12 +320,12 @@ class JsonLoggerHandler(JsonHandler):
 
 
 class CompositeLogger(BasicLogger):
-    """
-    The default logger class of PuRR. It is intended to store all the loggers in a list,
-    and when logging, the functions from here should be called, which iterate through
-    the list and apply the logging to each logger separately. This way, only one
-    function needs to be called when logging, and it is ensured, that all the enabled
-    loggers will log the message.
+    """The default logger class of PuRR.
+
+    It is intended to store all the loggers in a list, and when logging, the functions from
+    here should be called, which iterate through the list and apply the logging to each
+    logger separately. This way, only one function needs to be called when logging, and it
+    is ensured, that all the enabled loggers will log the message.
     """
 
     def __init__(
@@ -330,10 +333,10 @@ class CompositeLogger(BasicLogger):
         loggers_or_names: List[Union[str, logging.Logger]] = None,
         _log_folder=None,
     ):
-        """Creates the list of loggers on which the logging functions will iterate
+        """Creates the list of loggers on which the logging functions will iterate.
 
-        :param logger_names: List of loggers by their names
-            (e.g. ``["qat.purr.json", "qat.purr.file"]``) or actual logger instances.
+        :param logger_names: List of loggers by their names (e.g. ``["qat.purr.json",
+            "qat.purr.file"]``) or actual logger instances.
         """
         super().__init__("default", _log_folder)
 
@@ -360,10 +363,8 @@ class CompositeLogger(BasicLogger):
                     self.loggers.append(val)
 
     def _add_stack_levels(self, kwargs):
-        """
-        Due to the way the loggers work, we need to go back up the stack a few calls to
-        get the real caller.
-        """
+        """Due to the way the loggers work, we need to go back up the stack a few calls to
+        get the real caller."""
         kwargs["stacklevel"] = kwargs.get("stacklevel", 0) + 2
         return kwargs
 
@@ -415,10 +416,10 @@ class CompositeLogger(BasicLogger):
                 logger.code(source)
 
     def save_object(self, obj, name: str, numpy_arr: bool = False, overwrite=False):
-        """
-        Iterates through the list of loggers and calls the corresponding save_object
-        implementations for each of them. This is the method that should be called from
-        the code.
+        """Iterates through the list of loggers and calls the corresponding save_object
+        implementations for each of them.
+
+        This is the method that should be called from the code.
         """
         if numpy_arr:
             if not overwrite:
@@ -444,8 +445,9 @@ class CompositeLogger(BasicLogger):
 
 
 class LogFolder:
-    """
-    It is the main log folder in which all the log files are saved. It can be configured
+    """It is the main log folder in which all the log files are saved.
+
+    It can be configured
     multiple ways, like the base folder path, which can be a specified path of the disk
     or ``None`` to save the logs in the system temporary folder. The
     :paramref:`labber_style` specifies whether to create a Labber-style folder hierarchy
@@ -465,10 +467,9 @@ class LogFolder:
         prefix: str = None,
         suffix: str = None,
     ):
-        """
-        The constructor for the LogFolder. It can be configured by the parameters. If
-        the parameters are not provided, the default variables are used from the front
-        of the file (which can be also set by importing a configuration).
+        """The constructor for the LogFolder. It can be configured by the parameters. If the
+        parameters are not provided, the default variables are used from the front of the
+        file (which can be also set by importing a configuration).
 
         :param base_folder_path: Specifies the base directory, where the new log folder
             will be created. If it is ``None``, then it is set to the default value
@@ -561,10 +562,10 @@ class LogFolder:
 
 
 class KeywordFilter(logging.Filter):
-    """
-    A customized keyword filter that can be added to a log handler or a logger. Filters
-    all the log messages, and if the message content contains the keyword, the log will
-    not be printed.
+    """A customized keyword filter that can be added to a log handler or a logger.
+
+    Filters all the log messages, and if the message content contains the keyword, the log
+    will not be printed.
     """
 
     def __init__(self, keyword=""):
@@ -578,9 +579,9 @@ class KeywordFilter(logging.Filter):
 
 
 class ModuleFilter(logging.Filter):
-    """
-    A customized module filter that can be added to a log handler or a logger. Filters
-    all the log messages, and if the log was produced by a module with the specified
+    """A customized module filter that can be added to a log handler or a logger.
+
+    Filters all the log messages, and if the log was produced by a module with the specified
     module name, the log will not pass.
     """
 
@@ -595,10 +596,11 @@ class ModuleFilter(logging.Filter):
 
 
 class LevelFilter(logging.Filter):
-    """
-    Filter out the debug messages from the Jupyter logs. This is needed because the
-    specialized logging functions, like code or output have smaller level than the
-    DEBUG logging level (so that other than Jupyter handlers don't process them).
+    """Filter out the debug messages from the Jupyter logs.
+
+    This is needed because the specialized logging functions, like code or output have
+    smaller level than the DEBUG logging level (so that other than Jupyter handlers don't
+    process them).
     """
 
     def __init__(self, level):
@@ -612,10 +614,8 @@ class LevelFilter(logging.Filter):
 
 
 logging.setLoggerClass(BasicLogger)
-"""
-These specialized logging levels are registered with the logging system, so they can be
-retrieved by using for example logging.getLevelName('CODE').
-"""
+"""These specialized logging levels are registered with the logging system, so they can be
+retrieved by using for example logging.getLevelName('CODE')."""
 logging.addLevelName(LoggerLevel.OUTPUT.value, "OUTPUT")
 logging.addLevelName(LoggerLevel.CODE.value, "CODE")
 
@@ -690,16 +690,15 @@ def import_logger_configuration(logger_config: dict, log_folder: LogFolder = Non
 
 
 def get_logger_config(config_file=None, log_folder: LogFolder = None):
-    """
-    It imports the logger configuration from the provided JSON file. If this is not
+    """It imports the logger configuration from the provided JSON file. If this is not
     provided, then the current directory is searched for a logger_settings.json
     configuration file. If not found, then the default JSON file is read from
-    qat/purr/logger_settings.json
+    qat/purr/logger_settings.json.
 
     :param config_file: The path to the JSON file on the disk containing the logger
-                        configuration
+        configuration
     :param log_folder: The log folder to be used instead of the one specified in the
-                       configuration file
+        configuration file
     :return: A DefaultLogger instance configured with the names of the imported loggers
     """
 
@@ -726,8 +725,7 @@ def get_logger_config(config_file=None, log_folder: LogFolder = None):
 
 @atexit.register
 def close_logger():
-    """
-    This method is executed upon exit, and it closes all the file handlers from the
+    """This method is executed upon exit, and it closes all the file handlers from the
     default loggers.
 
     This allows to remove the log folder after the execution is finished. This is needed
@@ -740,8 +738,7 @@ def close_logger():
 
 
 def load_object_from_log_folder(file_path: str):
-    """
-    Loads and deserializes an object from its JSON representation from the disk.
+    """Loads and deserializes an object from its JSON representation from the disk.
 
     :param file_path: The JSON file on the disk
     :return: The loaded object after deserialization
@@ -758,9 +755,7 @@ def load_object_from_log_folder(file_path: str):
 
 
 def save_object_to_log_folder(obj, sub_folder_path: str):
-    """
-    Serializes the specified object.
-    """
+    """Serializes the specified object."""
     extension = Path(sub_folder_path).suffix
     if not extension == ".json":
         raise ValueError("Only JSON file paths are accepted!")
@@ -781,9 +776,7 @@ _default_logging_instance = None
 
 
 def get_default_logger():
-    """
-    Initializes the global logger or fetches one if it already exists.
-    """
+    """Initializes the global logger or fetches one if it already exists."""
     global _default_logging_instance
     if _default_logging_instance is None:
         _default_logging_instance = get_logger_config()

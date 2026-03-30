@@ -3,7 +3,7 @@
 import pytest
 
 from qat import QAT
-from qat.backend.waveform_v1 import WaveformV1Backend, WaveformV1Program 
+from qat.backend.waveform_v1 import WaveformV1Backend, WaveformV1Program
 from qat.executables import Executable
 from qat.engines.waveform_v1 import EchoEngine
 from qat.pipelines import EchoCompile, EchoExecute, EchoPostProcessing

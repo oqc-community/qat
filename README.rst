@@ -46,10 +46,10 @@ Once both of these are installed run this in the root folder to install all the 
 Notebooks
 ----------------------
 
-We use `jupytext https://jupytext.readthedocs.io/en/latest/` to store notebooks in both 'percent' format .py scripts (in notebooks/scripts) and .ipynb jupyter notebooks (in notebooks/ipynb). 
+We use `jupytext https://jupytext.readthedocs.io/en/latest/` to store notebooks in both 'percent' format .py scripts (in notebooks/scripts) and .ipynb jupyter notebooks (in notebooks/ipynb).
 
 For developers, the notebooks should be synced automatically by pre-commit (which you need to install, see above) and verified automatically in the GitHub pipeline.
-They will also be synced automatically on save in jupyterlab. Unfortunately VS code does not sync them automatically on save. They can be manually synced with 
+They will also be synced automatically on save in jupyterlab. Unfortunately VS code does not sync them automatically on save. They can be manually synced with
 `poetry run jupytext-sync`.
 
 Notebooks within the `notebooks/ipynb` folder will be tested as part of our CI to ensure they're functional and up-to-date. To run them locally, please use :code:`poetry run pytest notebooks/ipynb --nbmake`.
@@ -109,7 +109,7 @@ Benchmarking
 ----------------------
 
 The performance of QAT can be measured using our pre-defined benchmarks: :code:`poetry run pytest --benchmark-only`.
-To compare to main, checkout the main branch and run :code:`poetry run pytest benchmarks/run.py --benchmark-only --benchmark-save="<benchmark-name>"`. 
+To compare to main, checkout the main branch and run :code:`poetry run pytest benchmarks/run.py --benchmark-only --benchmark-save="<benchmark-name>"`.
 Then checkout back to the branch you are working and run :code:`poetry run pytest benchmarks/run.py --benchmark-only --benchmark-save="<benchmark-name>" --benchmark-compare --benchmark-compare-fail=min:50%`.
 If the test fails, it might indicate a performance regression: use the comparison table that is outputted to verify.
 The performance of pull requests to main will be automatically tested.

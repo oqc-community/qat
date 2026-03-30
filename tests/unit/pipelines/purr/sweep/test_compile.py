@@ -52,9 +52,11 @@ class TestCompileSweepPipeline:
             CompileSweepPipeline(base_pipeline=base_pipeline)
 
     def test_single_sweep(self, pipeline, model):
-        """Tests the sweeping over a pulse duration. Checks the buffers to make sure the
-        pulse is active at the expected times. It tests the order of programs are as
-        expected through the inspection of buffers."""
+        """Tests the sweeping over a pulse duration.
+
+        Checks the buffers to make sure the pulse is active at the expected times. It tests
+        the order of programs are as expected through the inspection of buffers.
+        """
         times = np.linspace(80e-9, 800e-9, 10)
         builder = sweep_pulse_widths(model, qubit=0, times=times)
         executable, _ = pipeline.compile(builder)
@@ -78,8 +80,11 @@ class TestCompileSweepPipeline:
 
     def test_single_sweep_with_device_assigns(self, pipeline, model):
         """Tests sweeping over a pulse amplitude scale, using a device assign to set the
-        scale on the drive channel. Checks the buffers to make sure the amplitude scales
-        correctly, and that the original scale is restored after compiling."""
+        scale on the drive channel.
+
+        Checks the buffers to make sure the amplitude scales correctly, and that the
+        original scale is restored after compiling.
+        """
 
         original_scale = model.get_qubit(0).get_drive_channel().scale
         scales = np.linspace(0.5, 1.5, 10)
@@ -108,8 +113,10 @@ class TestCompileSweepPipeline:
 
     def test_multiple_sweeps(self, pipeline, model):
         """Tests sweeping over both a pulse width and amplitude WITHOUT a device assign.
+
         Checks the buffers to make sure the timing of the pulse is correct, and the
-        amplitude scales correctly."""
+        amplitude scales correctly.
+        """
         times = np.linspace(80e-9, 800e-9, 5)
         amps = np.linspace(0.5, 1.5, 5)
         builder = sweep_pulse_widths_and_amps(model, qubit=0, times=times, amps=amps)
@@ -142,8 +149,10 @@ class TestCompileSweepPipeline:
 
     def test_one_sweep_on_multiple_instructions(self, pipeline, model):
         """Tests sweeping the duration of a pulse, immediately followed by a second pulse on
-        a different qubit. The timing of the second pulse is implemented by the dynamic
-        timing of a delay."""
+        a different qubit.
+
+        The timing of the second pulse is implemented by the dynamic timing of a delay.
+        """
         times = np.linspace(80e-9, 800e-9, 10)
         builder = sweep_sequential_pulse_widths(model, qubit1=0, qubit2=1, times=times)
         executable, _ = pipeline.compile(builder)

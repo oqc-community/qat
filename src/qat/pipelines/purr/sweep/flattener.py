@@ -106,8 +106,8 @@ class SweepFlattener:
     injected into the relevant instructions. This works by first extracting sweep
     instructions, and then locating all variables within instructions that match the sweep
     variable names. It only searches a single depth (e.g. within the top-level dictionary
-    describing the instruction). This may be adjusted in the future if we need to perform
-    a deeper search.
+    describing the instruction). This may be adjusted in the future if we need to perform a
+    deeper search.
     """
 
     def __init__(self, builder: QuantumInstructionBuilder):
@@ -180,16 +180,15 @@ class SweepFlattener:
         self._builder = self._create_new_builder(builder, instructions)
 
     def _locate_variables(self, names: list[str]):
-        """Locate all variables in the instruction builder with the given names, returning
-        a list of VariableAccesors that can be used to locate sweep variable instances.
-        """
+        """Locate all variables in the instruction builder with the given names, returning a
+        list of VariableAccesors that can be used to locate sweep variable instances."""
 
         self.accessors = []
         for i, instr in enumerate(self._builder._instructions):
             self.accessors.extend(VariableAccessor.create_accessors(instr, i, names))
 
     def _validate_device_assigns_variables(self, device_assigns: list[DeviceUpdate]):
-        """Checks that any variables in device assignments corerspon"""
+        """Checks that any variables in device assignments corerspon."""
         for assign in device_assigns:
             if (
                 isinstance(assign.value, Variable)
@@ -203,8 +202,8 @@ class SweepFlattener:
     def _copy_and_inject_builder(
         self, values: dict[str, complex | float]
     ) -> QuantumInstructionBuilder:
-        """Injects the given values into the instructions using the injectors, and returns
-        a copy of the builder with the modified instructions."""
+        """Injects the given values into the instructions using the injectors, and returns a
+        copy of the builder with the modified instructions."""
 
         instructions_copy = [copy(instr) for instr in self._builder._instructions]
         builder = self._create_new_builder(self._builder, instructions_copy)

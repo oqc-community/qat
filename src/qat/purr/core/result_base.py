@@ -6,8 +6,7 @@ from typing import Set, TypeVar
 
 
 class ResultConcept(ABC):
-    """
-    Base class describing the abstraction of an analysis result.
+    """Base class describing the abstraction of an analysis result.
 
     See :class:`ResultManager`.
     """
@@ -16,8 +15,7 @@ class ResultConcept(ABC):
 
 
 class ResultModel(ResultConcept):
-    """
-    Wrapper for any result object typically produced by an analysis pass.
+    """Wrapper for any result object typically produced by an analysis pass.
 
     See :class:`ResultManager`.
     """
@@ -41,8 +39,7 @@ class ResultModel(ResultConcept):
 
 
 class ResultInfoMixin(ABC):
-    """
-    Base mixin specifying result identification mechanism. A result has an :attr:`id`,
+    """Base mixin specifying result identification mechanism. A result has an :attr:`id`,
     :attr:`name`, and :attr:`value`.
 
     See :class:`ResultManager`.
@@ -62,8 +59,7 @@ ResultType = TypeVar("ResultType", bound=ResultInfoMixin)
 
 
 class ResultManager:
-    """
-    Represents a collection of analysis results with caching and aggregation
+    """Represents a collection of analysis results with caching and aggregation
     capabilities.
 
     Passes that merely compute analyses on the IR must not invalidate prior results. Passes
@@ -141,17 +137,19 @@ class ResultManager:
 
 
 class PreservedResults:
-    """
-    A mechanism for result invalidation and preservation. Similar to LLVM's new PassManager, we state
+    """A mechanism for result invalidation and preservation.
+
+    Similar to LLVM's new PassManager, we state
     that each transform pass must declare what analysis results it preserves. In this case, the pass returns
     a PreservedResults instance which is then used by the :class:`PassManager` for cache housekeeping.
     """
 
     @staticmethod
     def all():
-        """
-        Indicates that **all** of the previously computed results remain valid. The pass manager will do nothing
-        as analyses results are still safe and correct after the pass in question has finished running.
+        """Indicates that **all** of the previously computed results remain valid.
+
+        The pass manager will do nothing as analyses results are still safe and correct
+        after the pass in question has finished running.
         """
 
         # TODO - Implement PreservedResults [COMPILER-843]
@@ -159,9 +157,10 @@ class PreservedResults:
 
     @staticmethod
     def none():
-        """
-        Indicates that **none** of the previously computed results are valid. This will cause the pass manager
-        to evict cached results after the (transform) pass in question has finished running.
+        """Indicates that **none** of the previously computed results are valid.
+
+        This will cause the pass manager to evict cached results after the (transform) pass
+        in question has finished running.
         """
 
         # TODO - Implement PreservedResults [COMPILER-843]
@@ -169,10 +168,11 @@ class PreservedResults:
 
     @staticmethod
     def preserve(*res_obj):
-        """
-        Selective preservation of the results or indeed result sets indicated by the argument. This will
-        cause the pass manager to filter through the result cache and preserve **only** the ones that
-        the argument points to.
+        """Selective preservation of the results or indeed result sets indicated by the
+        argument.
+
+        This will cause the pass manager to filter through the result cache and preserve
+        **only** the ones that the argument points to.
         """
 
         # TODO - Implement PreservedResults [COMPILER-843]
@@ -180,9 +180,10 @@ class PreservedResults:
 
     @staticmethod
     def discard(*res_obj):
-        """
-        Convenient inverse selector for the :meth:`preserve()` API. This will cause the pass manager
-        to discard and evict **only** results pointed to by the argument.
+        """Convenient inverse selector for the :meth:`preserve()` API.
+
+        This will cause the pass manager to discard and evict **only** results pointed to by
+        the argument.
         """
 
         # TODO - Implement PreservedResults [COMPILER-843]

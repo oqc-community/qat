@@ -22,8 +22,8 @@ class LegacyPipeline(UpdateablePipeline):
     """A pipeline that compiles programs using the legacy backend and executes them using
     the :class:`LegacyRuntime`.
 
-    The piepline uses the engine provided by the legacy model, and cannot be provided to
-    the factory.
+    The piepline uses the engine provided by the legacy model, and cannot be provided to the
+    factory.
     """
 
     @staticmethod

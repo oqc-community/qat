@@ -15,8 +15,9 @@ log = get_default_logger()
 
 
 class InstrumentModel(BaseModel):
-    """
-    Used to parse JSON/CSV entries. An instrument has an id, name, and IP address
+    """Used to parse JSON/CSV entries.
+
+    An instrument has an id, name, and IP address
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -27,10 +28,8 @@ class InstrumentModel(BaseModel):
 
 
 class InstrumentConcept(ConnectionMixin):
-    """
-    The component interface, it defines what an instrument is and what APIs through which
-    customer code can interact with.
-    """
+    """The component interface, it defines what an instrument is and what APIs through which
+    customer code can interact with."""
 
     def connect(self):
         pass
@@ -141,9 +140,8 @@ class CsvInstrumentBuilder(InstrumentBuilder):
         self.linstr_type = linstr_type or LeafInstrument
 
     def build(self) -> CInstr:
-        """
-        A generic function that builds an InstrumentConcept object representing
-        an arbitrary fleet of leaf instruments defined as CSV.
+        """A generic function that builds an InstrumentConcept object representing an
+        arbitrary fleet of leaf instruments defined as CSV.
 
         :param cinstr_type: type of Composite Instrument to build
         :param linstr_type: type of Leaf Instrument to build
@@ -169,9 +167,8 @@ class CsvInstrumentBuilder(InstrumentBuilder):
 
 
 class ConfigInstrumentBuilder(InstrumentBuilder):
-    """
-    Builds an InstrumentConcept object representing an arbitrary fleet of leaf instruments
-    defined as a list of config dicts.
+    """Builds an InstrumentConcept object representing an arbitrary fleet of leaf
+    instruments defined as a list of config dicts.
 
     :param cinstr_type: type of Composite Instrument to build
     :param linstr_type: type of Leaf Instrument to build

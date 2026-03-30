@@ -324,16 +324,15 @@ class TestPydArray:
 
 
 class TestPydArrayNumpyInteroperability:
-    """
-    Tests interoperability between PydArray and Numpy arrays. If an operator isn't tested
-    or the test is skipped, it's safe to assume that support for that operator is missing.
+    """Tests interoperability between PydArray and Numpy arrays.
+
+    If an operator isn't tested or the test is skipped, it's safe to assume that support for
+    that operator is missing.
     """
 
     def test_equality(self):
-        """
-        Equality tested according to how it's been defined, which not exactly the same
-        as NumPy array equality.
-        """
+        """Equality tested according to how it's been defined, which not exactly the same as
+        NumPy array equality."""
 
         arr0 = PydArray(np.zeros(5))
         arr1 = PydArray(np.ones(5))

@@ -17,9 +17,9 @@ class QiskitErrorMitigation(TransformPass):
 
     Because the legacy Qiskit engine returns results in a format that is not consistent with
     other legacy engines (or refactored ones), it requires its own implementation. The
-    refactored engine will be written so that the output of the results are formatted
-    in a way that the runtime will expect to receive them. This is just a work around to
-    support legacy engines in the new pipelines API.
+    refactored engine will be written so that the output of the results are formatted in a
+    way that the runtime will expect to receive them. This is just a work around to support
+    legacy engines in the new pipelines API.
     """
 
     # the pattern assign variables should follow
@@ -84,8 +84,8 @@ class QiskitErrorMitigation(TransformPass):
 
 
 class QiskitStripMetadata(TransformPass):
-    """Detects if Qiskit is returning meta data associated with the simulation, and trims
-    it away if so."""
+    """Detects if Qiskit is returning meta data associated with the simulation, and trims it
+    away if so."""
 
     def run(self, acquisitions: dict[str, any], *args, **kwargs):
         """

@@ -35,9 +35,8 @@ class QbloxLegalisationPass(AnalysisPass):
 
     @staticmethod
     def phase_as_steps(phase_rad: float) -> int:
-        """
-        The instruction `set_ph_delta` expects the phase shift as a (potentially signed) integer operand.
-        """
+        """The instruction `set_ph_delta` expects the phase shift as a (potentially signed)
+        integer operand."""
 
         sequencer_data = QbloxTargetData().CONTROL_SEQUENCER_DATA
         phase_deg = np.rad2deg(phase_rad)
@@ -47,9 +46,8 @@ class QbloxLegalisationPass(AnalysisPass):
 
     @staticmethod
     def freq_as_steps(freq_hz: float) -> int:
-        """
-        The instruction `set_freq` expects the frequency as a (potentially signed) integer operand.
-        """
+        """The instruction `set_freq` expects the frequency as a (potentially signed)
+        integer operand."""
 
         sequencer_data = QbloxTargetData().CONTROL_SEQUENCER_DATA
         steps = int(round(freq_hz * sequencer_data.nco_freq_steps_per_hz))
@@ -69,9 +67,8 @@ class QbloxLegalisationPass(AnalysisPass):
         return steps
 
     def amp_as_steps(self, amp: float) -> int:
-        """
-        The instruction `set_awg_offs` expects DAC ratio as a (potentially signed) integer operand.
-        """
+        """The instruction `set_awg_offs` expects DAC ratio as a (potentially signed)
+        integer operand."""
 
         q1asm_data = QbloxTargetData().Q1ASM_DATA
         amp_steps = int(amp.real * q1asm_data.max_offset)
@@ -184,8 +181,7 @@ class QbloxLegalisationPass(AnalysisPass):
         return legal_bound.astype(np.uint32)
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
-        """
-        Performs target-dependent legalisation for QBlox.
+        """Performs target-dependent legalisation for QBlox.
 
             A) A repeat instruction with a very high repetition count is illegal because acquisition memory
         on a QBlox sequencer is limited. This requires optimal batching of the repeat instruction into maximally
@@ -285,9 +281,7 @@ class AllocationManager:
 
     @contextmanager
     def reg_borrow(self, name: str):
-        """
-        Short-lived register allocation
-        """
+        """Short-lived register allocation."""
 
         register = self.reg_alloc(name)
         yield register
@@ -309,9 +303,10 @@ class PreCodegenResult(ResultInfoMixin):
 
 
 class PreCodegenPass(AnalysisPass):
-    """
-    Precedes code generation. The context-based emitter needs registers pre-allocated for every
-    live variable in program. This pass performs a naive register allocation through a manager object.
+    """Precedes code generation.
+
+    The context-based emitter needs registers pre-allocated for every live variable in
+    program. This pass performs a naive register allocation through a manager object.
     """
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):

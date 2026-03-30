@@ -71,8 +71,7 @@ class CustomQatJsonDecoder(legacy_serialiser.CustomJsonDecoder):
 
 
 class CustomQatJsonEncoder(legacy_serialiser.CustomJSONEncoder):
-    """
-    It is a customised JSON encoder, which allows the serialization of the more complex
+    """It is a customised JSON encoder, which allows the serialization of the more complex
     objects.
 
     There are four major cases, based on the provided object to be serialized:

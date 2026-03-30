@@ -91,9 +91,7 @@ class InstructionExecutionEngine(abc.ABC):
         pass
 
     def shutdown(self):
-        """
-        Shuts down the underlying hardware when this instance is no longer in use.
-        """
+        """Shuts down the underlying hardware when this instance is no longer in use."""
         return True
 
 
@@ -112,9 +110,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             raise ValueError("Requires a loaded hardware model.")
 
     def _process_assigns(self, results, qfile: "QatFile"):
-        """
-        As assigns are classical instructions they are not processed as a part of the
+        """As assigns are classical instructions they are not processed as a part of the
         quantum execution (right now).
+
         Read through the results dictionary and perform the assigns directly, return the
         results.
         """
@@ -146,10 +144,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         return {key: assigns[key] for key in qfile.return_.variables}
 
     def _process_results(self, results, qfile: "QatFile"):
-        """
-        Process any software-driven results transformation, such as taking a raw
-        waveform result and turning it into a bit, or something else.
-        """
+        """Process any software-driven results transformation, such as taking a raw waveform
+        result and turning it into a bit, or something else."""
         results_processing = {
             val.variable: val
             for val in qfile.meta_instructions
@@ -273,10 +269,10 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                         )
 
     def _generate_repeat_batches(self, repeats):
-        """
-        Batches together executions if we have more than the amount the hardware can
-        handle at once. A repeat limit of -1 disables this functionality and just runs
-        everything at once.
+        """Batches together executions if we have more than the amount the hardware can
+        handle at once.
+
+        A repeat limit of -1 disables this functionality and just runs everything at once.
         """
         batch_limit = self.model.repeat_limit
         if batch_limit == -1:
@@ -298,6 +294,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     def _execute_with_interrupt(self, instructions, interrupt: Interrupt = NullInterrupt()):
         """Executes this qat file against this current hardware.
+
         Execution allows for interrupts triggered by events
         """
         return self._common_execute(instructions, interrupt)
@@ -413,10 +410,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         pass
 
     def create_duration_timeline(self, instructions: List[QuantumInstruction]):
-        """
-        Builds a dictionary mapping channels to a list of instructions and at what
-        precise sample time they should be associated with. It's important that the
-        times are absolute here, not relative.
+        """Builds a dictionary mapping channels to a list of instructions and at what
+        precise sample time they should be associated with. It's important that the times
+        are absolute here, not relative.
 
         :Example:
 
@@ -592,7 +588,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         return phase + position.instruction.phase
 
     def process_phasereset(self, position: PositionData, phase: float):
-        """Child hardware types might need to know the phase and instruction"""
+        """Child hardware types might need to know the phase and instruction."""
         return 0
 
     def process_reset(self, position: PositionData):
@@ -749,9 +745,8 @@ def _binary(results_list):
 
 
 def _binary_average(results_list):
-    """
-    Averages all repeat results and returns a definitive 1/0 for each qubit measurement.
-    """
+    """Averages all repeat results and returns a definitive 1/0 for each qubit
+    measurement."""
     # If we have many sweeps/repeats loop through all of them and sum.
     if all([isinstance(val, list) for val in results_list]):
         binary_results = [_binary_average(nested) for nested in results_list]
@@ -778,9 +773,9 @@ def _numpy_array_to_list(array):
 
 
 class DeviceInjector:
-    """
-    Injects a value into a device for the entirety of a sweeps duration. Analogous to
-    setting a device value before execution.
+    """Injects a value into a device for the entirety of a sweeps duration.
+
+    Analogous to setting a device value before execution.
     """
 
     def __init__(self, target: DeviceUpdate):
@@ -821,8 +816,7 @@ class ValueReplacement(abc.ABC):
 
 
 class VariableInjector(ValueReplacement):
-    """
-    All injected values are assumed to be in a list of len(sweep_length), this just
+    """All injected values are assumed to be in a list of len(sweep_length), this just
     fetches out the particular value of a list to inject as we're sweeping.
 
     So calling this with ``name='frequency', index=5``, from:
@@ -851,8 +845,7 @@ class VariableInjector(ValueReplacement):
 
 
 class IteratorInjector(ValueReplacement):
-    """
-    Value injector for objects in lists, tuples and dictionaries.
+    """Value injector for objects in lists, tuples and dictionaries.
 
     Currently when we inject an iteration into an iteration of the same type - resolving
     a ValueReplacer entry in a dictionary also returns a dictionary - it merges that
@@ -896,10 +889,9 @@ class IteratorInjector(ValueReplacement):
 
 
 class InjectionMetadata:
-    """
-    A class which is injected into an instruction to hold data about its state before
-    injection started, as well as objects that facilitate dynamic injection of values
-    into fields.
+    """A class which is injected into an instruction to hold data about its state before
+    injection started, as well as objects that facilitate dynamic injection of values into
+    fields.
 
     It'll replace fields in the object that hold ``Variable('X')`` with the value of ``X``. When revert is called it replaces
     the field with ``Variable('X')`` again, essentially reseting it for next execution.
@@ -925,11 +917,11 @@ class InjectionMetadata:
 
 
 class DeviceInjectors:
-    """
-    Special sort of injector that is a sort of double-injection. It takes an object that
-    needs to be modified during a sweep, replaces certain fields with Variable (and
-    others) and lets normal injection do it's work, then at the end of the sweep resets
-    the field with the original value.
+    """Special sort of injector that is a sort of double-injection.
+
+    It takes an object that needs to be modified during a sweep, replaces certain fields
+    with Variable (and others) and lets normal injection do it's work, then at the end of
+    the sweep resets the field with the original value.
     """
 
     def __init__(self, instructions):
@@ -947,8 +939,7 @@ class DeviceInjectors:
 
 
 class SweepIterator:
-    """
-    Acts as a controller for sweep-reliant values and iterates the amount of times
+    """Acts as a controller for sweep-reliant values and iterates the amount of times
     designated by the sweep.
 
     Every time ``do_sweep`` is called it will inject the current sweep values into the variable, so if passed
@@ -981,10 +972,8 @@ class SweepIterator:
 
     @property
     def accumulated_sweep_iteration(self):
-        """
-        The current number of total iterations this sweep as run as a whole, including
-        nested sweeps.
-        """
+        """The current number of total iterations this sweep as run as a whole, including
+        nested sweeps."""
         if self.nested_sweep is not None:
             return (
                 self.current_iteration * self.nested_sweep.length
@@ -994,10 +983,10 @@ class SweepIterator:
             return self.current_iteration + 1
 
     def get_current_sweep_iteration(self):
-        """
-        Returns the current iteration of the entire loop nest seen as a polyhedra.
-        The returned structure is a list representing a lattice point p where p[i]
-        indicates the current iteration of the sweep at level i
+        """Returns the current iteration of the entire loop nest seen as a polyhedra.
+
+        The returned structure is a list representing a lattice point p where p[i] indicates
+        the current iteration of the sweep at level i
         """
         if self.sweep is None:
             return []
@@ -1020,8 +1009,8 @@ class SweepIterator:
 
     @staticmethod
     def from_sweeps(sweeps: List[Sweep]):
-        """
-        Convenient helper that builds a SweepIterator from a collection of sweeps.
+        """Convenient helper that builds a SweepIterator from a collection of sweeps.
+
         This bypasses QatFile and is more suitable for the TriagePass.
         """
 
@@ -1031,10 +1020,10 @@ class SweepIterator:
         return sweep_iterator
 
     def _revert_sweep_values(self, node):
-        """
-        Reverts all changes made by injectors during running to their pre-sweep states.
-        The execution should be able to be re-run using the same Sweep object and
-        results should be the same.
+        """Reverts all changes made by injectors during running to their pre-sweep states.
+
+        The execution should be able to be re-run using the same Sweep object and results
+        should be the same.
         """
         # TODO: Only a very small amount of code is needed by the revert, pull out into
         #   new method.
@@ -1043,10 +1032,8 @@ class SweepIterator:
     def _inject_sweep_values(
         self, node, replacers, index, revert=False, recursion_guard=None
     ):
-        """
-        Injects values into objects, mostly making sure that Variable objects turn into
-        their actual values.
-        """
+        """Injects values into objects, mostly making sure that Variable objects turn into
+        their actual values."""
         # If we can't get its internal objects, skip.
         has_dict = getattr(node, "__dict__", None)
         if not has_dict:
@@ -1111,18 +1098,16 @@ class SweepIterator:
                 self._inject_sweep_values(value, replacers, index, revert, recursion_guard)
 
     def reset_iteration(self):
-        """
-        Resets iteration of this sweep and all children since we infer that if we've
-        finished, then our children have too.
-        """
+        """Resets iteration of this sweep and all children since we infer that if we've
+        finished, then our children have too."""
         self.current_iteration = -1
         if self.nested_sweep is not None:
             self.nested_sweep.reset_iteration()
 
     def do_sweep(self, instructions):
-        """
-        Start/continue sweeping. Injects values into the instructions appropriate for
-        this sweep.
+        """Start/continue sweeping.
+
+        Injects values into the instructions appropriate for this sweep.
         """
         if self.nested_sweep is not None:
             # Special-case where a parent sweep won't increment until its child is
@@ -1146,9 +1131,9 @@ class SweepIterator:
             self.nested_sweep.do_sweep(instructions)
 
     def add_sweep(self, nested: Sweep):
-        """
-        Adds a sweep onto this iterator. If it already has a sweep, adds it as a nested
-        one.
+        """Adds a sweep onto this iterator.
+
+        If it already has a sweep, adds it as a nested one.
         """
         if self.sweep is None:
             self.sweep = nested
@@ -1183,7 +1168,7 @@ class SweepIterator:
 
     @property
     def length(self):
-        """Returns actual length of the entire sweep, so
+        """Returns actual length of the entire sweep, so.
 
         ``sweep_length * nested_length * nested_length ...``
         """

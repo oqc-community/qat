@@ -1,4 +1,4 @@
-// Tests an if-else statement 
+// Tests an if-else statement
 
 OPENQASM 3;
 

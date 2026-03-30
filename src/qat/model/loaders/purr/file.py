@@ -21,9 +21,7 @@ class FileModelLoader(BaseLegacyModelLoader):
 
 
 class QbloxFileModelLoader(FileModelLoader):
-    """
-    File loader for the open source QbloxLiveHardwareModel
-    """
+    """File loader for the open source QbloxLiveHardwareModel."""
 
     def load(self) -> QbloxLiveHardwareModel:
         model = QbloxLiveHardwareModel().load_calibration_from_file(self.path)

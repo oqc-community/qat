@@ -111,7 +111,8 @@ class TestEngineSet:
         assert len(engine_set.get("engine").model.qubits) == 3
 
     def test_reload_model_with_no_model(self):
-        """Checks that reloading a model for an engine without a model does not raise an error."""
+        """Checks that reloading a model for an engine without a model does not raise an
+        error."""
         engine = InitableEngine()
         engine_set = EngineSet(dict(engine=engine), {})
         assert not hasattr(engine, "model")
@@ -427,7 +428,8 @@ class TestPipelineManager:
         assert manager.default_execute_pipeline == ("new" if execute else "execute")
 
     def test_set_default_full_with_only_compile_raises_error(self):
-        """Checks that setting a full pipeline as default with only compile raises an error."""
+        """Checks that setting a full pipeline as default with only compile raises an
+        error."""
         manager = self.setup_manager()
         loader = MockModelLoader()
 
@@ -439,13 +441,15 @@ class TestPipelineManager:
             manager.set_default("full_pipeline", compile=True, execute=False)
 
     def test_set_default_on_non_existent_compile_raises_error(self):
-        """Checks that setting a default compile pipeline that does not exist raises an error."""
+        """Checks that setting a default compile pipeline that does not exist raises an
+        error."""
         manager = self.setup_manager()
         with pytest.raises(ValueError, match="as default for compile pipelines"):
             manager.set_default("non_existent_compile", compile=True)
 
     def test_set_default_on_non_existent_execute_raises_error(self):
-        """Checks that setting a default execute pipeline that does not exist raises an error."""
+        """Checks that setting a default execute pipeline that does not exist raises an
+        error."""
         manager = self.setup_manager()
         with pytest.raises(ValueError, match="as default for execute pipelines"):
             manager.set_default("non_existent_execute", execute=True)

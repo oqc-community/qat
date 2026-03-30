@@ -30,9 +30,7 @@ def compare_tests(
     return_improvements=True,
     dir=".benchmarks/",
 ):
-    """
-    Generate a dictonary of tests that contains the key information for the report.
-    """
+    """Generate a dictonary of tests that contains the key information for the report."""
     # load in the two benchmarks
     dir = get_directory(dir)
     with open(f"{dir}/0001_{benchmark_name}.json", "r") as f:
@@ -77,9 +75,7 @@ def create_report(
     input_path="benchmarks/report_template.md",
     output_path=".benchmarks/summary.md",
 ):
-    """
-    Create the report using the template
-    """
+    """Create the report using the template."""
     env = Environment(loader=FileSystemLoader("."), autoescape=select_autoescape())
     template = env.get_template(input_path)
     summary = template.render(tests=benchmarks)
@@ -87,9 +83,7 @@ def create_report(
 
 
 def get_args():
-    """
-    Allow arguments to be parsed to the program.
-    """
+    """Allow arguments to be parsed to the program."""
 
     parser = argparse.ArgumentParser(
         prog="Performance regression report",

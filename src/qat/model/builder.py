@@ -23,8 +23,8 @@ from qat.utils.uuid import SeedType, temporary_uuid_seed
 
 
 class PhysicalHardwareModelBuilder:
-    """
-    A builder class that builds a physical hardware model based on the given connectivity.
+    """A builder class that builds a physical hardware model based on the given
+    connectivity.
 
     :param physical_connectivity: The connectivities of the physical qubits on the QPU
         (undirected graph).

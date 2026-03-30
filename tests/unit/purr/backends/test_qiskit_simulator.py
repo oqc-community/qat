@@ -207,10 +207,8 @@ class TestQiskitSimulator:
     def parse_and_apply_optimiziations(
         self, hardware, qasm_file_name, parser=None, opt_config=None
     ) -> InstructionBuilder:
-        """
-        Helper that builds a basic hardware, applies general optimizations, parses the QASM
-        then returns the resultant builder.
-        """
+        """Helper that builds a basic hardware, applies general optimizations, parses the
+        QASM then returns the resultant builder."""
         qasm = get_qasm2(qasm_file_name)
         if opt_config is None:
             opt_config = Qasm2Optimizations()
@@ -282,10 +280,8 @@ class TestQiskitSimulator:
         "qubits", [(q1, q2) for q1 in range(5) for q2 in range(q1 + 1, 6)]
     )
     def test_bitstring_ordering_qasm(self, qubits):
-        """
-        Test the execution of a QASM script using the qiskit backend to ensure
-        that the readouts are in the correct order.
-        """
+        """Test the execution of a QASM script using the qiskit backend to ensure that the
+        readouts are in the correct order."""
 
         num_qubits = 6
 
@@ -319,11 +315,11 @@ class TestQiskitSimulator:
         "qubits", [(q1, q2) for q1 in range(5) for q2 in range(q1 + 1, 6)]
     )
     def test_bitstring_out_of_order_qasm(self, qubits):
-        """
-        Test the execution of a QASM script using the qiskit backend to ensure
-        that the readouts are in the correct order. The QASM script will ask
-        the results of a bell state on various qubits to be stored in the first two
-        bits of the classical register.
+        """Test the execution of a QASM script using the qiskit backend to ensure that the
+        readouts are in the correct order.
+
+        The QASM script will ask the results of a bell state on various qubits to be stored
+        in the first two bits of the classical register.
         """
 
         num_qubits = 6
@@ -360,11 +356,11 @@ class TestQiskitSimulator:
         "qubits", [(q1, q2) for q1 in range(5) for q2 in range(q1 + 1, 6)]
     )
     def test_bitstring_limited_qasm(self, qubits):
-        """
-        Test the execution of a QASM script using the qiskit backend to ensure
-        that the readouts are in the correct order. The QASM script will ask
-        the results of a bell state on various qubits to be stored in just two
-        bits in a classical register.
+        """Test the execution of a QASM script using the qiskit backend to ensure that the
+        readouts are in the correct order.
+
+        The QASM script will ask the results of a bell state on various qubits to be stored
+        in just two bits in a classical register.
         """
 
         num_qubits = 6
@@ -514,8 +510,8 @@ class TestQiskitSimulator:
 
     @pytest.mark.parametrize("qubit_pair", [[1, 0]])
     def test_cx_on_wrong_direction(self, qubit_pair):
-        """Tests that a CX gates on a coupling with a wrong direction warns about the
-        wrong direction."""
+        """Tests that a CX gates on a coupling with a wrong direction warns about the wrong
+        direction."""
 
         model = get_default_qiskit_hardware(10)
         builder = model.create_builder()

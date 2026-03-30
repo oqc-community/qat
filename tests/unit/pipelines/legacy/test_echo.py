@@ -106,8 +106,8 @@ def equivalent_vars(self, other):
 
 
 def equivalent_generated(self, other):
-    """Like 'equivalent_vars' but does not care about the random number part of
-    generated names."""
+    """Like 'equivalent_vars' but does not care about the random number part of generated
+    names."""
 
     gen_name_pattern = re.compile(r"generated_name_[0-9]+")
 
@@ -186,9 +186,9 @@ class TestLegacyEchoPipelineParity:
     pipeline = LegacyEchoPipeline(config=PipelineConfig(name="legacy_echo"), model=model)
 
     def compiler_config(self, config_settings):
-        """The compiler config is instantiated in this way so that a new instance is
-        created each time, as the compiler has the ability to mutate the config, meaning
-        a different config could be passed from program-to-program."""
+        """The compiler config is instantiated in this way so that a new instance is created
+        each time, as the compiler has the ability to mutate the config, meaning a different
+        config could be passed from program-to-program."""
 
         if not config_settings["enabled"]:
             return None

@@ -13,9 +13,9 @@ class PartitionedIR:
     """Contains the IR that has been processed and reduced to a program per pulse channel.
     Also splits out any post-processing instructions to be used by the executor.
 
-    Programs are typically sent to hardware as a package per physical / logical channel,
-    and need to be partitioned out. They also need to be free of instructions that are not
-    used at runtime. This class does this.
+    Programs are typically sent to hardware as a package per physical / logical channel, and
+    need to be partitioned out. They also need to be free of instructions that are not used
+    at runtime. This class does this.
 
     This will eventually be replaced by some "partitoned module" approach, which might have
     a similar schema, or might just be many modules.
@@ -40,5 +40,6 @@ class PartitionedIR:
     def get_pulse_channel(self, id: str) -> PulseChannel | None:
         """Get a pulse channel by its ID.
 
-        Maintains API with the QuantumInstructionBuilder."""
+        Maintains API with the QuantumInstructionBuilder.
+        """
         return self.pulse_channels.get(id, None)

@@ -2028,7 +2028,8 @@ class TestRepeatTranslation:
         """Test all possible combinations of having additional instructions, before,
         between, and after the repeats, with and without explicitly closing scopes.
 
-        [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>, <fifth>]
+        [<first>, Repeat_a, <second>, Repeat_b, <third>, <close_b>, <fourth>, <close_a>,
+        <fifth>]
         """
         builder = hw.create_builder()
         start_indices = [0, 3]

@@ -168,8 +168,11 @@ class TestQasm2Frontend:
         assert not res
 
     def test_emit_qasm_2_files(self):
-        """Tests frontend-relevant details, such as successful parsing. Doesn't check the
-        details of the IR as this is the responsibility of the QasmParser tests."""
+        """Tests frontend-relevant details, such as successful parsing.
+
+        Doesn't check the details of the IR as this is the responsibility of the QasmParser
+        tests.
+        """
         qasm2_str = get_qasm2("basic.qasm")
 
         # Legacy hardware model.
@@ -198,8 +201,11 @@ class TestQasm2Frontend:
             self.qasm2_frontend().emit(qasm_path)
 
     def test_results_manager_collects_results(self):
-        """Tests frontend-relevant details, such as successful parsing. Doesn't check the
-        details of the IR as this is the responsibility of the respective parser tests."""
+        """Tests frontend-relevant details, such as successful parsing.
+
+        Doesn't check the details of the IR as this is the responsibility of the respective
+        parser tests.
+        """
         qasm2_str = get_qasm2("basic.qasm")
         result_manager = ResultManager()
         assert len(result_manager.results) == 0
@@ -265,8 +271,11 @@ class TestQasm3Frontend:
         assert not res
 
     def test_emit_qasm_3_files(self):
-        """Tests frontend-relevant details, such as successful parsing. Doesn't check the
-        details of the IR as this is the responsibility of the QasmParser tests."""
+        """Tests frontend-relevant details, such as successful parsing.
+
+        Doesn't check the details of the IR as this is the responsibility of the QasmParser
+        tests.
+        """
         qasm3_str = get_qasm3("basic.qasm")
 
         # Legacy hardware model.
@@ -294,9 +303,11 @@ class TestQasm3Frontend:
             self.qasm3_frontend().emit(qasm_path)
 
     def test_emit_has_one_repeat(self):
-        """Tests that the frontend correctly adds a Repeat instruction. Since we need not
-        currently support control flow from qasm, this will always be the case. By the time
-        we do support it, we will have departed form repeats and this test will be obsolete.
+        """Tests that the frontend correctly adds a Repeat instruction.
+
+        Since we need not currently support control flow from qasm, this will always be the
+        case. By the time we do support it, we will have departed form repeats and this test
+        will be obsolete.
         """
         model = LucyModelLoader().load()
         frontend = Qasm3Frontend(model)

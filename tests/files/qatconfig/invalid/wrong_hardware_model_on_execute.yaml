@@ -5,6 +5,6 @@ HARDWARE:
     qubit_count: 6
 
 EXECUTE:
-- name: echo 
+- name: echo
   pipeline: tests.unit.utils.pipelines.MockExecuteUpdateablePipeline
   hardware_loader: echo8loader

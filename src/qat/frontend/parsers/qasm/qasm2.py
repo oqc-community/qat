@@ -84,10 +84,8 @@ class Qasm2Parser(AbstractParser):
         pass
 
     def modify(self, circ: DAGCircuit):
-        """
-        Allows children to transform the program before validation/transforming into our
-        AST occurs.
-        """
+        """Allows children to transform the program before validation/transforming into our
+        AST occurs."""
         pass
 
     def _walk_program(
@@ -244,10 +242,8 @@ class Qasm2Parser(AbstractParser):
         builder: QuantumInstructionBuilder,
         **kwargs,
     ):
-        """
-        Process each individual QASM node, builds context or forwards processing to
-        relevant ``process_x`` method associated with each node type.
-        """
+        """Process each individual QASM node, builds context or forwards processing to
+        relevant ``process_x`` method associated with each node type."""
         if isinstance(node, (DAGInNode, DAGOutNode)):
             for register, _ in self._current_dag.find_bit(node.wire).registers:
                 if isinstance(register, QuantumRegister):
@@ -278,7 +274,10 @@ class Qasm2Parser(AbstractParser):
                     )
 
     def _get_parameters(self, node: DAGOpNode, context: QasmContext) -> list:
-        """Get the params of a gate. These are the non-qubit values of a gate."""
+        """Get the params of a gate.
+
+        These are the non-qubit values of a gate.
+        """
         if isinstance(node.op, Gate):
             return node.op.params
         if isinstance(node.op, Measure):
@@ -290,8 +289,7 @@ class Qasm2Parser(AbstractParser):
         return []
 
     def _get_qubits(self, node: DAGOpNode, context: QasmContext) -> list:
-        """
-        Resolve what qubits or qubit registers this node relates too.
+        """Resolve what qubits or qubit registers this node relates too.
 
         If a value was originally a qubit register, it will be appended as a list,
         otherwise if it was a single qubit target, just a normal object.
@@ -357,9 +355,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
 
 
 class CloudQasmParser(RestrictedQasm2Parser):
-    """
-    QASM parser used in our QCaaS system.
-    """
+    """QASM parser used in our QCaaS system."""
 
     def __init__(self):
         super().__init__(allowed_gates=None, disable_if=True, order_result_vars=True)

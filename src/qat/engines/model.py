@@ -12,9 +12,9 @@ class RequiresHardwareModelMixin(ABC):
     mixin for engines that require a hardware model to be set.
 
     Engines might require a hardware model to be set to execute. This might be because the
-    hardware model contains information about the control hardware of the target device
-    (for the case of legacy hardware models), or because the engine is a simulator that
-    makes use of the calibration data.
+    hardware model contains information about the control hardware of the target device (for
+    the case of legacy hardware models), or because the engine is a simulator that makes use
+    of the calibration data.
     """
 
     @property
@@ -23,22 +23,28 @@ class RequiresHardwareModelMixin(ABC):
 
     @model.setter
     def model(self, model: PhysicalHardwareModel | QuantumHardwareModel):
-        """Uses indirection for the model setter, so the child class can implement its
-        own logic for updating the model."""
+        """Uses indirection for the model setter, so the child class can implement its own
+        logic for updating the model."""
 
         if self._model != model:
             self._update_model(model)
 
     @abstractmethod
     def _update_model(self, model: PhysicalHardwareModel | QuantumHardwareModel):
-        """Method to update the model in the engine. This is to be implemented by the child
-        class, as changing the model might have different implications."""
+        """Method to update the model in the engine.
+
+        This is to be implemented by the child class, as changing the model might have
+        different implications.
+        """
         ...
 
 
 def requires_hardware_model(engine) -> bool:
-    """Checks if an engine requires a hardware model. This is used to allow backwards
-    compatibility with purr engines, but should be removed in the future."""
+    """Checks if an engine requires a hardware model.
+
+    This is used to allow backwards compatibility with purr engines, but should be removed
+    in the future.
+    """
 
     # TODO: Yeet this function in the bin for v4 (COMPILER-662)
 

@@ -9,8 +9,7 @@ from qat.purr.core.result_base import ResultManager
 
 
 class PassConcept(ABC):
-    """
-    Base class describing the abstraction of a pass.
+    """Base class describing the abstraction of a pass.
 
     See PassManager.
     """
@@ -28,8 +27,7 @@ class PassConcept(ABC):
 
 
 class PassModel(PassConcept):
-    """
-    Implements the polymorphic pass API. A wrapper for any object providing a run()
+    """Implements the polymorphic pass API. A wrapper for any object providing a run()
     method that accepts some unit of IR as well as a ResultManager.
 
     See PassManager.
@@ -50,11 +48,10 @@ class PassModel(PassConcept):
 
 
 class PassInfoMixin(ABC):
-    """
-    Base mixin specifying pass identification mechanism. A pass has an id and name.
+    """Base mixin specifying pass identification mechanism. A pass has an id and name.
 
-    Such identification is loosely specified as it related closely to how passes and their results
-    are managed throughout their lifecycle.
+    Such identification is loosely specified as it related closely to how passes and their
+    results are managed throughout their lifecycle.
 
     See PassManager.
     """
@@ -67,8 +64,8 @@ class PassInfoMixin(ABC):
 
 
 class AnalysisPass(PassInfoMixin):
-    """
-    Base class of all passes that compute some form of analysis on the IR.
+    """Base class of all passes that compute some form of analysis on the IR.
+
     The IR is imperatively left intact.
     """
 
@@ -84,9 +81,7 @@ class AnalysisPass(PassInfoMixin):
 
 
 class TransformPass(PassInfoMixin):
-    """
-    Base class for all passes that mutate the QatIR in-place.
-    """
+    """Base class for all passes that mutate the QatIR in-place."""
 
     def run(
         self,
@@ -100,9 +95,8 @@ class TransformPass(PassInfoMixin):
 
 
 class ValidationPass(PassInfoMixin):
-    """
-    Base class for all passes that verify or run some form of check (i.e semantics, legalisation, ...)
-    on the IR.
+    """Base class for all passes that verify or run some form of check (i.e semantics,
+    legalisation, ...) on the IR.
 
     Behaviour is loose as to what the result of the validation would be: either a result or an error raised.
     It can change according to circumstances.
@@ -120,10 +114,10 @@ class ValidationPass(PassInfoMixin):
 
 
 class PassManager(PassInfoMixin):
-    """
-    Represents a sequential composite of passes, which can be composites themselves. Although not explicitly
-    specified, the pass manager is best modelled as a DAG that acts as a pass itself. In doing so, it runs
-    a sequence of (composite or leaf) passes over some unit of IR and aggregates results from them.
+    """Represents a sequential composite of passes, which can be composites themselves.
+    Although not explicitly specified, the pass manager is best modelled as a DAG that acts
+    as a pass itself. In doing so, it runs a sequence of (composite or leaf) passes over
+    some unit of IR and aggregates results from them.
 
     Result aggregation (in general) can be achieved via side effects or simply return values. We adopted
     the latter approach where a ResultManager is passed in as argument. The rationale behind this choice
@@ -185,16 +179,16 @@ class PassManager(PassInfoMixin):
 
 
 class InvokerMixin(ABC):
-    """
-    Useful for compilation (global design-wise) stages/phases that are meant to invoke some
-    arbitrary formation of passes in the form of a pipeline.
+    """Useful for compilation (global design-wise) stages/phases that are meant to invoke
+    some arbitrary formation of passes in the form of a pipeline.
 
-    Organisation, registering, visibility, and discovery of pipelines w.r.t the global quantum compilation
-    workflow is hard to pin down early on in this design partly because today's needs are trivial and
-    the traditional "hand-me-down" cascade-like compilation stages is likely to shift as QAT matures.
+    Organisation, registering, visibility, and discovery of pipelines w.r.t the global
+    quantum compilation workflow is hard to pin down early on in this design partly because
+    today's needs are trivial and the traditional "hand-me-down" cascade-like compilation
+    stages is likely to shift as QAT matures.
 
-    However, we'll start by specifying that an invoker builds and runs its own pipeline, validates its
-    analyses results, and uses those results for its purpose.
+    However, we'll start by specifying that an invoker builds and runs its own pipeline,
+    validates its analyses results, and uses those results for its purpose.
     """
 
     @abstractmethod

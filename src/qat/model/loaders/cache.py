@@ -7,7 +7,8 @@ class CacheAccessLoader(BaseModelLoader):
     """A loader that loads a hardware model from a cache of hardware models.
 
     While primarily used for qatconfig, this loader can be applied to any cache that can be
-    indexed by a hardware model name."""
+    indexed by a hardware model name.
+    """
 
     def __init__(self, cache, name: str):
         """

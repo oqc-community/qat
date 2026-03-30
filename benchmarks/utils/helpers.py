@@ -22,9 +22,7 @@ def load_qasm(qasm_file):
 
 
 def all_qasm_files(num_qubits=2):
-    """
-    Returns a list of QASM file paths with a given number of qubits.
-    """
+    """Returns a list of QASM file paths with a given number of qubits."""
     path = benchmarks_path.joinpath(Path(f"qasm/{num_qubits}qb/"))
     return [Path(f"{num_qubits}qb/" + f) for f in listdir(path)]
 
@@ -37,10 +35,11 @@ def load_experiments(
     mock_live_hardware=True,
     rtcs_hardware=True,
 ):
-    """
-    Fetch each QASM file for the specified qubit numbers, and returns a dict of experiments
-    to use in benchmarking. Use the key word arguments to specify which hardware models to
-    use, and to specify whether the circuit or builder should be stored in the experiement.
+    """Fetch each QASM file for the specified qubit numbers, and returns a dict of
+    experiments to use in benchmarking.
+
+    Use the key word arguments to specify which hardware models to use, and to specify
+    whether the circuit or builder should be stored in the experiement.
     """
     experiments = {}
     for qubits in num_qubits:

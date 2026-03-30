@@ -73,8 +73,7 @@ class AutoFrontend(BaseFrontend):
     def default_for_pydantic(cls, model: PydHardwareModel) -> "AutoFrontend":
         """Temporary factory for creating an AutoFrontend that allows a QatFrontend.
 
-        :param model: The hardware model is needed to instantiate the default
-            frontends.
+        :param model: The hardware model is needed to instantiate the default frontends.
         """
 
         # TODO: The default_frontends methods should eventually be replaced with this.
@@ -87,8 +86,8 @@ class AutoFrontend(BaseFrontend):
 
     @classmethod
     def default_for_legacy(cls, model: QuantumHardwareModel) -> "AutoFrontend":
-        """Temporary factory for creating an AutoFrontend that has a fallthrough frontend
-        to allow any legacy source."""
+        """Temporary factory for creating an AutoFrontend that has a fallthrough frontend to
+        allow any legacy source."""
 
         # TODO: remove when legacy is fully deprecated (COMPILER-724)
         frontends = cls.default_frontends(model) + [FallthroughFrontend(model)]
@@ -146,9 +145,7 @@ class AutoFrontend(BaseFrontend):
 
 
 class AutoFrontendWithFlattenedIR(AutoFrontend):
-    """
-    An :class:`AutoFrontend` that flattens the IR after parsing.
-    """
+    """An :class:`AutoFrontend` that flattens the IR after parsing."""
 
     def emit(
         self,

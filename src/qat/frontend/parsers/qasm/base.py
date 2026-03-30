@@ -18,10 +18,8 @@ log = get_default_logger()
 
 
 class QasmContext(NoExtraFieldsModel):
-    """
-    Container object for all data relating to the scope/pass of QASM currently under
-    analysis.
-    """
+    """Container object for all data relating to the scope/pass of QASM currently under
+    analysis."""
 
     registers: Registers = Registers()
     variables: ValidatedDict[str, Variable] = Field(
@@ -31,9 +29,9 @@ class QasmContext(NoExtraFieldsModel):
 
 
 class ParseResults(NoExtraFieldsModel):
-    """
-    Results object for attempted parse. When coerced to a boolean matches
-    against if parse was successful.
+    """Results object for attempted parse.
+
+    When coerced to a boolean matches against if parse was successful.
     """
 
     success: bool
@@ -175,17 +173,16 @@ class AbstractParser(abc.ABC):
         return index_range
 
     def _is_register_target(self, values: list[Any]):
-        """
-        Does it look like the passed-in qubit or parameter list contains a register.
-        """
+        """Does it look like the passed-in qubit or parameter list contains a register."""
         return isinstance(values, Iterable) and any(
             isinstance(val, (QubitRegister, BitRegister)) for val in values
         )
 
     def _curate_register_input(self, input: list | Qubit) -> list:
-        """
-        If the input is a list of (qu)bit registers, curate the input such that
-        we are left with a list of (qu)bits. Do nothing if a list of (qu)bits is passed.
+        """If the input is a list of (qu)bit registers, curate the input such that we are
+        left with a list of (qu)bits.
+
+        Do nothing if a list of (qu)bits is passed.
         """
         if isinstance(input, list | ValidatedList):
             if len(input) == 1 and isinstance(
@@ -200,8 +197,7 @@ class AbstractParser(abc.ABC):
             raise TypeError("Please provide a list as input.")
 
     def _expand_to_match_registers(self, *args, tuple_return=True, flatten_results=False):
-        """
-        Expands and zips registers/non-registers together so they can be processed.
+        """Expands and zips registers/non-registers together so they can be processed.
 
         QASM treats any registers of bits or qubits as calling the gate * register size
         times with each individual register value. This is a helper method for

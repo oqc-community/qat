@@ -46,7 +46,6 @@ class X(Gate1Q):
     .. math:: X = \begin{bmatrix}0 & 1 \\ 1 & 0 \end{bmatrix}.
 
     :param qubit: Target qubit index.
-
     """
 
     @property
@@ -91,7 +90,7 @@ class Rx(Gate1Q):
     Matrix representation:
 
     .. math:: R_{x}(\theta) = \begin{bmatrix}
-        \cos(\theta/2) & -i\sin(\theta/2) \\ 
+        \cos(\theta/2) & -i\sin(\theta/2) \\
         -i\sin(\theta/2) & \cos(\theta/2)
         \end{bmatrix}.
 
@@ -115,7 +114,7 @@ class Ry(Gate1Q):
     Matrix representation:
 
     .. math:: R_{y}(\theta) = \begin{bmatrix}
-        \cos(\theta/2) & -\sin(\theta/2) \\ 
+        \cos(\theta/2) & -\sin(\theta/2) \\
         \sin(\theta/2) & \cos(\theta/2)
         \end{bmatrix}.
 
@@ -139,7 +138,7 @@ class Rz(Gate1Q):
     Matrix representation:
 
     .. math:: R_{z}(\theta) = \begin{bmatrix}
-        e^{-i\theta/2} & 0 \\ 
+        e^{-i\theta/2} & 0 \\
         0 & e^{i\theta/2}
         \end{bmatrix}.
 
@@ -182,7 +181,7 @@ class U(Gate1Q):
     The gate can be expressed as
 
     .. math::
-        U(\theta, \phi, \lambda) = 
+        U(\theta, \phi, \lambda) =
         e^{\frac{1}{2}i\pi(\lambda+\phi)}R_{z}(\phi)R_{y}(\theta)R_{z}(\lambda)
 
     Matrix representation:
@@ -193,7 +192,7 @@ class U(Gate1Q):
         e^{i\phi} \sin(\theta/2) & e^{i(\phi+\lambda)} \cos(\theta/2)
         \end{bmatrix}.
 
-    
+
     :param qubit: Target qubit index.
     :param theta: Rotation angle :math:`\theta` around the Y-axis.
     :param phi: Rotation angle :math:`\phi` around the Z-axis (final).
@@ -301,7 +300,8 @@ class Tdg(Gate1Q):
     This gate is identical to the :math:`R_{z}(-\pi/4)` gate up to global phase. Matrix
     representation:
 
-    .. math:: T^{\dagger} = \begin{bmatrix} 1 & 0 \\ 0 & (1 - i)/\sqrt{2} \end{bmatrix}."""
+    .. math:: T^{\dagger} = \begin{bmatrix} 1 & 0 \\ 0 & (1 - i)/\sqrt{2} \end{bmatrix}.
+    """
 
     @property
     def matrix(self):

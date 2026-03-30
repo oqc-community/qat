@@ -6,7 +6,7 @@ from qat.core.pass_base import AnalysisPass, PassManager
 
 
 class DummyAnalysisPass(AnalysisPass):
-    """Just a dummy testing pass that takes some values"""
+    """Just a dummy testing pass that takes some values."""
 
     @validate_call
     def __init__(self, model, some_int: int = 3):

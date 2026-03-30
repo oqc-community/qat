@@ -71,8 +71,7 @@ class HardwareLoaders:
     @property
     def models_up_to_date(self) -> bool:
         """Checks if all models are up-to-date, for loaders that implement
-        :class:`ModelUpdateChecker`.
-        """
+        :class:`ModelUpdateChecker`."""
         for key, loader in self._loaders.items():
             model = self._loaded_models.get(key, None)
             if model is None:
@@ -217,11 +216,11 @@ class PipelineSet:
 
     @property
     def default(self) -> str:
-        """Returns the name of the current default pipeline"""
+        """Returns the name of the current default pipeline."""
         return self._default_pipeline
 
     def add(self, pipeline: AbstractPipeline, default: bool = False):
-        """Adds a pipeline for subsequent use for compilation and execution
+        """Adds a pipeline for subsequent use for compilation and execution.
 
         :param pipeline: A pipeline instance to add, indexed by pipeline.name
         :param default: Set the added pipeline as the default, defaults to False
@@ -231,7 +230,7 @@ class PipelineSet:
             self.set_default(pipeline)
 
     def remove(self, pipeline: AbstractPipeline | str):
-        """Remove a pipeline
+        """Remove a pipeline.
 
         :param pipeline: The name of a pipeline or a pipeline instance to remove
         """
@@ -252,7 +251,7 @@ class PipelineSet:
         del self._pipelines[name]
 
     def get(self, pipeline: AbstractPipeline | str) -> AbstractPipeline:
-        """Gets a stored pipeline by name (str) or passes through a pipeline instance
+        """Gets a stored pipeline by name (str) or passes through a pipeline instance.
 
         :param pipeline: A pipeline instance or the string name of a stored pipeline
         """
@@ -292,7 +291,7 @@ class PipelineSet:
                 pipeline.update(reload_model=True)
 
     def list(self) -> list[str]:
-        """Returns a list of available pipeline names"""
+        """Returns a list of available pipeline names."""
         return list(self._pipelines.keys())
 
     def __repr__(self):
@@ -530,6 +529,7 @@ class PipelineManager:
         return cls(compile_set, execute_set, full_set)
 
     def _add_full_pipeline_to_compile_and_execute(self, P: Pipeline, default: bool = False):
-        """Adds a full pipeline to the manager, updating both compile and execute pipelines."""
+        """Adds a full pipeline to the manager, updating both compile and execute
+        pipelines."""
         self.compile_pipelines.add(CompilePipelineCache(P), default)
         self.execute_pipelines.add(ExecutePipelineCache(P), default)

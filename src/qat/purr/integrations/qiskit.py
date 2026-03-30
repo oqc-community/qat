@@ -23,8 +23,8 @@ def run_qasm_circuit(circuit):
     result = backend_sim.run(transpiled_qc).result()
 
     def _results_to_binary(results_dictionary):
-        """
-        Key value from Qiskit is in hex, aka ``0x2: 242``.
+        """Key value from Qiskit is in hex, aka ``0x2: 242``.
+
         Transform to binary, sort by actual integer value.
         """
         binary = {bin(int(key, 16))[2:]: val for key, val in results_dictionary.items()}
@@ -54,8 +54,7 @@ def run_qasm(qasm_str: str):
 
 
 class QatBackend(BasicSimulator):
-    """
-    Basic qiskit backend built to run QASM on our own target machines.
+    """Basic qiskit backend built to run QASM on our own target machines.
 
     TODO: Expand this to become a proper back-end, as I don't believe we need to inherit
         off the QASM simulator as it stands.

@@ -10,11 +10,12 @@ log = get_default_logger()
 
 
 class Instrument(Calibratable):
-    """
-    An interface for any live instrument. It requires a unique address (IP address, USB VISA address, etc.).
-    It is derived from Calibratable so the instruments will be saved in the calibration files. To avoid saving
-    driver specific data in the calibration files, the actual drivers should be a property of this object, so the
-    calibration will skip it.
+    """An interface for any live instrument.
+
+    It requires a unique address (IP address, USB VISA address, etc.). It is derived from
+    Calibratable so the instruments will be saved in the calibration files. To avoid saving
+    driver specific data in the calibration files, the actual drivers should be a property
+    of this object, so the calibration will skip it.
     """
 
     def __init__(self, address, id_=None):
@@ -72,9 +73,9 @@ class Instrument(Calibratable):
 
 
 class ControlHardwareChannel(PhysicalChannel):
-    """
-    Wrapper over a PhysicalChannel, that maps to a live instrument channel. This (and
-    derived) object should contain hardware specific information.
+    """Wrapper over a PhysicalChannel, that maps to a live instrument channel.
+
+    This (and derived) object should contain hardware specific information.
     """
 
     def __init__(
@@ -87,10 +88,11 @@ class ControlHardwareChannel(PhysicalChannel):
 
 
 class ControlHardware(Instrument):
-    """
-    The actual control hardware. For now, there is only one per LiveHardwareModel. It
-    contains all the physical channels, since in most of the cases, you interact with
-    the control unit rather than with the individual channels.
+    """The actual control hardware.
+
+    For now, there is only one per LiveHardwareModel. It contains all the physical channels,
+    since in most of the cases, you interact with the control unit rather than with the
+    individual channels.
     """
 
     def __init__(self, id_=None):
@@ -112,9 +114,7 @@ class ControlHardware(Instrument):
 
 
 class LivePhysicalBaseband(PhysicalBaseband):
-    """
-    A wrapper over the PhysicalBaseband, that connects to a live instrument.
-    """
+    """A wrapper over the PhysicalBaseband, that connects to a live instrument."""
 
     def __init__(
         self,
@@ -130,10 +130,8 @@ class LivePhysicalBaseband(PhysicalBaseband):
         super().__init__(id_, frequency, if_frequency)
 
     def connect_to_instrument(self):
-        """
-        Delayed connection to an instrument, in order to allow instantiating a
-        LivePhysicalBaseband without having the live instrument ready.
-        """
+        """Delayed connection to an instrument, in order to allow instantiating a
+        LivePhysicalBaseband without having the live instrument ready."""
         if self.instrument is None:
             raise ValueError(f"Cannot connect to instrument '{self.instrument}'!")
         if not self.instrument.is_connected:
@@ -156,10 +154,8 @@ class LivePhysicalBaseband(PhysicalBaseband):
 
 
 class DCBiasChannel(Calibratable):
-    """
-    This is generic DC Bias Channel class, It would ONLY accept DC bias card as
-    instrument which needs to have get_voltage and set_voltage function.
-    """
+    """This is generic DC Bias Channel class, It would ONLY accept DC bias card as
+    instrument which needs to have get_voltage and set_voltage function."""
 
     def __init__(
         self,

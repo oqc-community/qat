@@ -240,7 +240,8 @@ class TestConvertToPydanticIRPass:
     @_check_conversion.register(instructions.Variable)
     @_check_conversion.register(instructions.BinaryOperator)
     def _(self, legacy_value, converted_value):
-        """Check that the value of a legacy variable or binary operator matches the converted element."""
+        """Check that the value of a legacy variable or binary operator matches the
+        converted element."""
         self._check_updated_class(legacy_value, converted_value)
         for name, value in vars(legacy_value).items():
             assert hasattr(converted_value, name), (
@@ -280,7 +281,8 @@ class TestConvertToPydanticIRPass:
 
     @_check_conversion.register(instructions.Instruction)
     def _(self, legacy_value, converted_value):
-        """Check that the value of a legacy instruction matches the converted instruction."""
+        """Check that the value of a legacy instruction matches the converted
+        instruction."""
         assert converted_value.__class__.__name__ == legacy_value.__class__.__name__, (
             f"Converted instruction class does not match: {converted_value.__class__.__name__} != {legacy_value.__class__.__name__}"
         )
@@ -306,7 +308,8 @@ class TestConvertToPydanticIRPass:
 
     @_check_conversion.register(instructions.Repeat)
     def _(self, legacy_value, converted_value):
-        """Check that the value of a legacy repeat instruction matches the converted instruction."""
+        """Check that the value of a legacy repeat instruction matches the converted
+        instruction."""
         self._check_updated_class(legacy_value, converted_value)
         additional_data: dict = {}
         for name, value in vars(legacy_value).items():
@@ -552,7 +555,8 @@ class TestConvertToPydanticIRPass:
 
     @_check_conversion.register(instructions.Reset)
     def _(self, legacy_inst, converted_insts):
-        """Check that the converted reset instruction matches the legacy reset instruction."""
+        """Check that the converted reset instruction matches the legacy reset
+        instruction."""
         assert isinstance(converted_insts, list)
         assert len(converted_insts) == len(legacy_inst.quantum_targets)
         for converted_inst, target in zip(converted_insts, legacy_inst.quantum_targets):

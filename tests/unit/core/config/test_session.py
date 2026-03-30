@@ -36,7 +36,7 @@ def qatconfig_testfiles(testpath):
 
 
 class TestQatSessionConfigForPipelines:
-    """These are tests of QAT config features only used by QAT.pipelines"""
+    """These are tests of QAT config features only used by QAT.pipelines."""
 
     def test_make_qatconfig_list(self):
         pipelines = [
@@ -392,15 +392,17 @@ class TestQatSessionConfigForPipelines:
     def test_yaml_custom_config_invalid_type(self, qatconfig_testfiles):
         """Check that invalid config (types) raise exceptions.
 
-        Error is raised with config instantiation as import type is not found."""
+        Error is raised with config instantiation as import type is not found.
+        """
 
         with pytest.raises(ValidationError, match="No module"):
             QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / "type.yaml")
 
     def test_yaml_custom_config_invalid_arg(self, qatconfig_testfiles):
-        """Check that invalid config (types) raise exceptions
+        """Check that invalid config (types) raise exceptions.
 
-        Config is only validated on engine construction"""
+        Config is only validated on engine construction
+        """
 
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / "arg.yaml")
         desc = qatconfig.ENGINES[0]
@@ -449,7 +451,8 @@ class TestQatSessionConfigForPipelines:
             )
 
     def test_multiple_defaults(self, qatconfig_testfiles):
-        """Checks that multiple defaults on compile and execute pipelines raise exceptions."""
+        """Checks that multiple defaults on compile and execute pipelines raise
+        exceptions."""
         with pytest.raises(ValidationError, match="Expected exactly one default"):
             QatSessionConfig.from_yaml(
                 qatconfig_testfiles / "invalid" / "multiple_defaults.yaml"
@@ -545,9 +548,11 @@ class TestSpecifiedTargetDataFields:
         return ResonatorDescription()
 
     def test_all_target_datas_load(self, target_data_dict):
-        """
-        Test that all target data objects are loaded successfully from the configuration file.
-        Skips unsupported items. Asserts that each loaded object is an instance of TargetData.
+        """Test that all target data objects are loaded successfully from the configuration
+        file.
+
+        Skips unsupported items. Asserts that each loaded object is an instance of
+        TargetData.
         """
         for target_data in target_data_dict.values():
             assert isinstance(target_data, TargetData)
@@ -555,10 +560,8 @@ class TestSpecifiedTargetDataFields:
     def test_top_level_info(
         self, target_data_dict, default_qubit_data, default_resonator_data
     ):
-        """
-        Test that target data with top-level adjustments has the correct values for max_acquisitions,
-        default_shots, QUBIT_DATA, and RESONATOR_DATA.
-        """
+        """Test that target data with top-level adjustments has the correct values for
+        max_acquisitions, default_shots, QUBIT_DATA, and RESONATOR_DATA."""
         target_data = target_data_dict["top_level_info"]
         assert target_data.max_acquisitions == 2540
         assert target_data.default_shots == 425
@@ -566,19 +569,15 @@ class TestSpecifiedTargetDataFields:
         assert target_data.RESONATOR_DATA == default_resonator_data
 
     def test_passive_reset_time(self, target_data_dict, default_resonator_data):
-        """
-        Test that the passive_reset_time field in QUBIT_DATA is set correctly and that
-        RESONATOR_DATA matches the default.
-        """
+        """Test that the passive_reset_time field in QUBIT_DATA is set correctly and that
+        RESONATOR_DATA matches the default."""
         target_data = target_data_dict["passive_reset_time"]
         assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
         assert target_data.RESONATOR_DATA == default_resonator_data
 
     def test_different_memory_size(self, target_data_dict):
-        """
-        Test that accessing TargetData.instruction_memory_size warns, and returns the
-        larger value.
-        """
+        """Test that accessing TargetData.instruction_memory_size warns, and returns the
+        larger value."""
         target_data = target_data_dict["different_memory_size"]
         assert target_data.QUBIT_DATA.instruction_memory_size == 4096
         assert target_data.RESONATOR_DATA.instruction_memory_size == 1024
@@ -590,20 +589,18 @@ class TestSpecifiedTargetDataFields:
         assert max_size == 4096
 
     def test_resonator_if(self, target_data_dict, default_qubit_data):
-        """
-        Test that the RESONATOR_DATA fields pulse_channel_if_freq_min and pulse_channel_if_freq_max
-        are set correctly, and that QUBIT_DATA matches the default.
-        """
+        """Test that the RESONATOR_DATA fields pulse_channel_if_freq_min and
+        pulse_channel_if_freq_max are set correctly, and that QUBIT_DATA matches the
+        default."""
         target_data = target_data_dict["resonator_if"]
         assert target_data.RESONATOR_DATA.pulse_channel_if_freq_min == 400
         assert target_data.RESONATOR_DATA.pulse_channel_if_freq_max == 100_000_000_000
         assert target_data.QUBIT_DATA == default_qubit_data
 
     def test_combined(self, target_data_dict):
-        """
-        Test that a target data object with combined field adjustments has all expected values set
-        for max_acquisitions, default_shots, QUBIT_DATA.passive_reset_time, and RESONATOR_DATA IF fields.
-        """
+        """Test that a target data object with combined field adjustments has all expected
+        values set for max_acquisitions, default_shots, QUBIT_DATA.passive_reset_time, and
+        RESONATOR_DATA IF fields."""
         target_data = target_data_dict["combined"]
         assert target_data.max_acquisitions == 2540
         assert target_data.default_shots == 425

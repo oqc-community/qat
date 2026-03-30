@@ -11,16 +11,15 @@ from qat.utils.pydantic import NoExtraFieldsFrozenModel
 
 
 class Q1asmDescription(NoExtraFieldsFrozenModel):
-    """
-    Constants related to Q1asm.
+    """Constants related to Q1asm.
 
     :param min_gain: Minimum gain in Q1ASM programs.
     :param max_gain: Maximum gain in Q1ASM programs.
     :param min_offset: Minimum offset in Q1ASM programs.
     :param max_offset: Maximum offset in Q1ASM programs.
     :param max_wait_time: Max size of wait instruction immediate operands in Q1ASM programs.
-                          Max value allowed by assembler is 2**16-1, but this is the largest
-                          that is a multiple of 4 ns.
+        Max value allowed by assembler is 2**16-1, but this is the largest that is a
+        multiple of 4 ns.
     :param register_size: Size of registers in Q1ASM programs.
     :param loop_unroll_threshold: Size above which loops have tolerable overhead.
     """
@@ -45,23 +44,26 @@ class Q1asmDescription(NoExtraFieldsFrozenModel):
 
 
 class SequencerDescription(NoExtraFieldsFrozenModel):
-    """
-    Constants related to Qblox Sequencer.
+    """Constants related to Qblox Sequencer.
 
-    :param grid_time: Clock period of the sequencers. All time intervals used must be multiples of this value.
+    :param grid_time: Clock period of the sequencers. All time intervals used must be
+        multiples of this value.
     :param nco_min_freq: Minimum NCO frequency.
     :param nco_max_freq: Maximum NCO frequency.
     :param nco_max_phase_steps: Maximum NCO phase steps.
-    :param nco_phase_steps_per_deg: The number of steps per degree for NCO phase instructions arguments.
-    :param nco_freq_steps_per_hz: The number of steps per Hz for the NCO set_freq instruction.
-    :param nco_freq_limit_steps: The maximum and minimum frequency expressed in steps for the NCO set_freq instruction.
-                                 For the minimum we multiply by -1.
+    :param nco_phase_steps_per_deg: The number of steps per degree for NCO phase
+        instructions arguments.
+    :param nco_freq_steps_per_hz: The number of steps per Hz for the NCO set_freq
+        instruction.
+    :param nco_freq_limit_steps: The maximum and minimum frequency expressed in steps for
+        the NCO set_freq instruction. For the minimum we multiply by -1.
     :param number_of_registers: Number of registers available in the Qblox sequencers.
     :param min_acq_integration_length: Minimum integration lengths.
     :param max_acq_integration_length: Maximum integration lengths.
     :param min_acq_threshold: Minimum thresholds for the thresholded acquisition.
     :param max_acq_threshold: Maximum thresholds for the thresholded acquisition.
-    :param max_sample_size_waveforms: Maximal amount of samples in the waveforms to be uploaded to a sequencer.
+    :param max_sample_size_waveforms: Maximal amount of samples in the waveforms to be
+        uploaded to a sequencer.
     """
 
     grid_time: PositiveInt = 4
@@ -99,11 +101,9 @@ class ReadoutSequencerDescription(SequencerDescription):
 
 
 class ModuleDescription(NoExtraFieldsFrozenModel):
-    """
-    Common constants related to Qblox Modules.
+    """Common constants related to Qblox Modules.
 
     :param number_of_sequencers: Number of sequencers.
-
     """
 
     number_of_sequencers: PositiveInt = 6
@@ -120,19 +120,17 @@ class ModuleDescription(NoExtraFieldsFrozenModel):
 
 
 class ReadoutModuleDescription(ModuleDescription):
-    """
-    Constants related to Qblox Readout Modules.
+    """Constants related to Qblox Readout Modules.
 
     :param min_sample_size_scope_acquisitions: Minimum amount of scope trace acquisition
-                                    datapoints returned.
+        datapoints returned.
     :param max_sample_size_scope_acquisitions: Maximal amount of scope trace acquisition
-                                    datapoints returned.
+        datapoints returned.
     :param max_binned_acquisitions: Each readout module has a maximum of 3M memory bins.
-                                    This memory can be dynamically allocated by each of the
-                                    sequencers. For example, in a module with 6 sequencers,
-                                    the sequencers can evenly allocate 500K bins
-                                    simultaneously, or a single sequencer can allocate the
-                                    whole 3M bins, leaving nothing for other sequencers.
+        This memory can be dynamically allocated by each of the sequencers. For example, in
+        a module with 6 sequencers, the sequencers can evenly allocate 500K bins
+        simultaneously, or a single sequencer can allocate the whole 3M bins, leaving
+        nothing for other sequencers.
     """
 
     min_sample_size_scope_acquisitions: PositiveInt = 4
@@ -141,19 +139,17 @@ class ReadoutModuleDescription(ModuleDescription):
 
 
 class ControlModuleDescription(ModuleDescription):
-    """
-    Constants related to Qblox Control Modules.
+    """Constants related to Qblox Control Modules.
 
-    Currently, there are no constants specific to control modules, but this class is defined for
-    consistency and future extensibility.
+    Currently, there are no constants specific to control modules, but this class is defined
+    for consistency and future extensibility.
     """
 
     pass
 
 
 class QcmDescription(ControlModuleDescription):
-    """
-    Constants related to Qblox QCM Module.
+    """Constants related to Qblox QCM Module.
 
     :param min_qcm_offset_v: Minimum offset for QCM.
     :param max_qcm_offset_v: Maximum offset for QCM.
@@ -164,8 +160,7 @@ class QcmDescription(ControlModuleDescription):
 
 
 class QcmRfDescription(ControlModuleDescription):
-    """
-    Constants related to Qblox QCM-RF Module.
+    """Constants related to Qblox QCM-RF Module.
 
     :param min_qcm_rf_offset_mv: Minimum offset for QCM-RF.
     :param max_qcm_rf_offset_mv: Maximum offset for QCM-RF.
@@ -176,8 +171,7 @@ class QcmRfDescription(ControlModuleDescription):
 
 
 class QrmDescription(ReadoutModuleDescription):
-    """
-    Constants related to Qblox QRM Module.
+    """Constants related to Qblox QRM Module.
 
     :param min_qrm_offset_v: Minimum offset for QRM.
     :param max_qrm_offset_v: Maximum offset for QRM.
@@ -188,8 +182,7 @@ class QrmDescription(ReadoutModuleDescription):
 
 
 class QrmRfDescription(ReadoutModuleDescription):
-    """
-    Constants related to Qblox QRM-RF Module.
+    """Constants related to Qblox QRM-RF Module.
 
     :param min_qrm_rf_offset_v: Minimum offset for QRM-RF.
     :param max_qrm_rf_offset_v: Maximum offset for QRM-RF.
@@ -206,11 +199,10 @@ class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
     :param number_of_readout_sequencers: Number of readout sequencers.
     :param number_of_control_sequencers: Number of control sequencers.
     :param max_binned_acquisitions: Each QRC module has a maximum of 3M memory bins. This
-                                    memory can be dynamically allocated by each of the 8
-                                    readout sequencers. For example, all 8 readout
-                                    sequencers can evenly allocate 375K bins simultaneously,
-                                    or a single sequencer can allocate the whole 3M bins,
-                                    leaving nothing for other sequencers.
+        memory can be dynamically allocated by each of the 8 readout sequencers. For
+        example, all 8 readout sequencers can evenly allocate 375K bins simultaneously, or a
+        single sequencer can allocate the whole 3M bins, leaving nothing for other
+        sequencers.
     """
 
     number_of_sequencers: PositiveInt = 12  # 8 readout + 4 control
@@ -219,8 +211,7 @@ class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
 
 
 class QbloxTargetData(TargetData):
-    """
-    Taxonomy of constants for Qblox electronics.
+    """Taxonomy of constants for Qblox electronics.
 
     :param Q1ASM_DATA: Q1asm related constants.
     :param CONTROL_SEQUENCER_DATA: Control sequencer related constants.

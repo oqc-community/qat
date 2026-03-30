@@ -112,9 +112,7 @@ class AllocationManager:
 
     @contextmanager
     def reg_borrow(self, name: str):
-        """
-        Short-lived register allocation
-        """
+        """Short-lived register allocation."""
 
         register = self.reg_alloc(name)
         yield register
@@ -178,9 +176,7 @@ class QbloxContext(ABC):
         self._timeline: np.ndarray = np.empty(0, dtype=complex)
 
     def __enter__(self):
-        """
-        Serves as the prologue
-        """
+        """Serves as the prologue."""
 
         self.clear()
 
@@ -198,9 +194,7 @@ class QbloxContext(ABC):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        Serves as the epilogue
-        """
+        """Serves as the epilogue."""
 
         self.sequence_builder.stop()
 
@@ -268,10 +262,8 @@ class QbloxContext(ABC):
         )
 
     def is_empty(self):
-        """
-        Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
-        This is temporary and criteria will change with more features coming in
-        """
+        """Masks away yet-to-be-supported second-state, cancellation, and cross cancellation
+        targets This is temporary and criteria will change with more features coming in."""
         return not (
             self.sequence_builder.waveforms
             or self.sequence_builder.acquisitions
@@ -297,8 +289,7 @@ class QbloxContext(ABC):
         self.sequence_builder.q1asm_instructions.clear()
 
     def wait_imm(self, duration: int):
-        """
-        Waits for `duration` nanoseconds expressed as an immediate.
+        """Waits for `duration` nanoseconds expressed as an immediate.
 
         `duration` must be positive
         """
@@ -325,8 +316,7 @@ class QbloxContext(ABC):
         self.sequence_builder.wait(remainder)
 
     def wait_reg(self, duration: str):
-        """
-        A mere `wait RX` in general has undefined runtime behaviour.
+        """A mere `wait RX` in general has undefined runtime behaviour.
 
         This is a useful helper to dynamically wait for a `duration` nanoseconds expressed as a register.
         `iter_reg` is a short-lived register only used as an interator. Customer is responsible for (de)allocation.
@@ -363,11 +353,10 @@ class QbloxContext(ABC):
             self.sequence_builder.label(batch_exit)
 
     def ledger(self, duration: Union[int, str], pulse: np.ndarray = None):
-        """
-        A helper method to keep track of the durations and phase as the codegen runs.
+        """A helper method to keep track of the durations and phase as the codegen runs.
 
-        Every little bit of time is accounted for and a timeline object (in static cases)
-        is also kept up-to-date for debugging and visualisation purposes.
+        Every little bit of time is accounted for and a timeline object (in static cases) is
+        also kept up-to-date for debugging and visualisation purposes.
         """
 
         if isinstance(duration, int):
@@ -387,10 +376,9 @@ class QbloxContext(ABC):
 
     @contextmanager
     def _loop(self, label: str, count: int = 1):
-        """
-        This context can be used to avoid unrolling loops but needs manual addition of the 0 iteration
-        either immediately after the yield or immediately after the context has exited.
-        """
+        """This context can be used to avoid unrolling loops but needs manual addition of
+        the 0 iteration either immediately after the yield or immediately after the context
+        has exited."""
 
         label = self.alloc_mgr.label_gen(label)
         register = self.alloc_mgr.reg_alloc(label)
@@ -403,10 +391,8 @@ class QbloxContext(ABC):
 
     @contextmanager
     def _modulo_reg(self, a: str, n: int):
-        """
-        Helpful context that prepares a temporary register b such that a ≅ b [n] where
-        n is some immediate constant batch size.
-        """
+        """Helpful context that prepares a temporary register b such that a ≅ b [n] where n
+        is some immediate constant batch size."""
 
         if not isinstance(n, int) or n < 2:
             raise ValueError(
@@ -439,8 +425,8 @@ class QbloxContext(ABC):
         self.wait_imm(duration - Constants.GRID_TIME)
 
     def _upd_param_reg(self, duration: str):
-        """
-        Update latched parameters and wait for `duration` nanoseconds expressed as a register
+        """Update latched parameters and wait for `duration` nanoseconds expressed as a
+        register.
 
         If `duration` is less than the threshold Constants.GRID_TIME, the generates assembly rounds up
         and waits for Constants.GRID_TIME.
@@ -477,9 +463,10 @@ class QbloxContext(ABC):
             self.sequence_builder.label(batch_exit)
 
     def _evaluate_waveform(self, waveform: Waveform, target: PulseChannel):
-        """
-        The waveform is evaluated as a 1d complex array. In QBlox, the Real and Imag parts of the pulse
-        represent the digital offset on the AWG. They both must be within range [-1, 1].
+        """The waveform is evaluated as a 1d complex array.
+
+        In QBlox, the Real and Imag parts of the pulse represent the digital offset on the
+        AWG. They both must be within range [-1, 1].
         """
 
         num_samples = int(calculate_duration(waveform))
@@ -631,9 +618,7 @@ class QbloxContext(ABC):
 
     @contextmanager
     def _wrapper_cond(self, mask, operator, duration):
-        """
-        A wrapper for conditional regions
-        """
+        """A wrapper for conditional regions."""
 
         self.sequence_builder.set_cond(
             1, mask, operator, duration, "Start of conditional region"
@@ -767,9 +752,9 @@ class QbloxContext(ABC):
     def measure_acquire(
         self, measure: MeasurePulse, acquire: Acquire, target: PulseChannel
     ):
-        """
-        Regarding HW thresholding, `acquire.rotation` is in radians and `acquire.threshold` is uncorrected.
-        (Exactly as they've been computed during measure block construction)
+        """Regarding HW thresholding, `acquire.rotation` is in radians and
+        `acquire.threshold` is uncorrected. (Exactly as they've been computed during measure
+        block construction)
 
         Here at configuration time, we "legalise" these parameters to what Qblox requires:
             + `rotation` as degrees
@@ -785,7 +770,7 @@ class QbloxContext(ABC):
                 f"""
                 Minimum pulse width is {Constants.GRID_TIME} ns with a resolution of {1} ns.
                 Please round up the width to at least {Constants.GRID_TIME} nanoseconds.
-                This pulse will be ignored. 
+                This pulse will be ignored.
                 """
             )
             return
@@ -830,8 +815,8 @@ class QbloxContext(ABC):
 
     @staticmethod
     def synchronize(inst: Synchronize, contexts: Dict):
-        """
-        Favours static time padding whenever possible, or else uses SYNC.
+        """Favours static time padding whenever possible, or else uses SYNC.
+
         TODO - Default to SYNC when Qblox supports finer grained SYNC groups
         """
 
@@ -982,9 +967,10 @@ class PreCodegenResult(ResultInfoMixin):
 
 
 class PreCodegenPass(AnalysisPass):
-    """
-    Precedes code generation. The context-based emitter needs registers pre-allocated for every
-    live variable in program. This pass performs a naive register allocation through a manager object.
+    """Precedes code generation.
+
+    The context-based emitter needs registers pre-allocated for every live variable in
+    program. This pass performs a naive register allocation through a manager object.
     """
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):

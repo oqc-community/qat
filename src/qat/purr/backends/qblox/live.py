@@ -65,10 +65,10 @@ class QbloxLiveHardwareModel(LiveHardwareModel):
         return NewQuantumRuntime(existing_engine)
 
     def _reverse_coercion(self):
-        """
-        HwM pickler coerces primitive types into strings. This is a temporary
-        workaround to support in-memory, pickled, and un-pickled dict key types
-        of the qblox config
+        """HwM pickler coerces primitive types into strings.
+
+        This is a temporary workaround to support in-memory, pickled, and un-pickled dict
+        key types of the qblox config
         """
         for channel in self.physical_channels.values():
             config = channel.config
@@ -93,10 +93,8 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         pass
 
     def _process_results(self, results, triage_result: TriageResult):
-        """
-        Process any software-driven results transformation, such as taking a raw
-        waveform result and turning it into a bit, or something else.
-        """
+        """Process any software-driven results transformation, such as taking a raw waveform
+        result and turning it into a bit, or something else."""
 
         rp_map = triage_result.rp_map
 
@@ -127,9 +125,9 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         return results
 
     def _process_assigns(self, results, triage_result: TriageResult):
-        """
-        As assigns are classical instructions they are not processed as a part of the
+        """As assigns are classical instructions they are not processed as a part of the
         quantum execution (right now).
+
         Read through the results dictionary and perform the assigns directly, return the
         results.
         """
@@ -161,16 +159,16 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
     @staticmethod
     def combine_playbacks(playbacks: Dict[str, List[Acquisition]]):
-        """
-        Combines acquisition objects from multiple acquire instructions in multiple readout targets.
-        Notice that :meth:`groupby` preserves (original) relative order, which makes it honour
-        the (sequential) lexicographical order of the loop nest:
+        """Combines acquisition objects from multiple acquire instructions in multiple
+        readout targets. Notice that :meth:`groupby` preserves (original) relative order,
+        which makes it honour the (sequential) lexicographical order of the loop nest:
 
-        playback[target]["acq_0"] contains (potentially) a list of acquisitions collected in the same
-        order as the order in which the packages were sent to the FPGA.
+        playback[target]["acq_0"] contains (potentially) a list of acquisitions collected in
+        the same order as the order in which the packages were sent to the FPGA.
 
-        Although acquisition names are enough for unicity in practice, the playback's structure
-        distinguishes different (multiple) acquisitions per readout target, thus making it more robust.
+        Although acquisition names are enough for unicity in practice, the playback's
+        structure distinguishes different (multiple) acquisitions per readout target, thus
+        making it more robust.
         """
 
         playback: Dict[str, Dict[str, Acquisition]] = {}
@@ -191,9 +189,10 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     def process_playback(
         self, playback: Dict[str, Dict[str, Acquisition]], res_mgr: ResultManager
     ):
-        """
-        Now that the combined playback is ready, we can compute and process results as required
-        by customers. This requires loop nest information as well as post-processing and shaping
+        """Now that the combined playback is ready, we can compute and process results as
+        required by customers.
+
+        This requires loop nest information as well as post-processing and shaping
         requirements.
         """
 
@@ -270,9 +269,9 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
 
 class QbloxLiveEngine1(AbstractQbloxLiveEngine):
-    """
-    Legacy engine that runs a loop nest statically. It pregenerates packages for each iteration and runs
-    them in the same lexicographical order. This generates lots of playbacks that are then combined later.
+    """Legacy engine that runs a loop nest statically. It pregenerates packages for each
+    iteration and runs them in the same lexicographical order. This generates lots of
+    playbacks that are then combined later.
 
     See QbloxBackend1
     """
@@ -304,12 +303,13 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
 
 
 class QbloxLiveEngine2(AbstractQbloxLiveEngine):
-    """
-    Not all algorithms fall within Q1's capabilities. While this remains an analysis issue we saw great
-    flexibility in forking out this engine to allow R&D without compromising existing execution environment.
+    """Not all algorithms fall within Q1's capabilities. While this remains an analysis
+    issue we saw great flexibility in forking out this engine to allow R&D without
+    compromising existing execution environment.
 
-    Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection mechanism.
-    It leverages Q1's programming model to accelerate a handful of pulse-level algorithms.
+    Unlike vanilla QbloxLiveEngine, this engine does not use static iteration and injection
+    mechanism. It leverages Q1's programming model to accelerate a handful of pulse-level
+    algorithms.
 
     See QbloxBackend2
     """
@@ -331,8 +331,9 @@ class QbloxLiveEngine2(AbstractQbloxLiveEngine):
         # TODO - A skeptical usage of DeviceInjectors on static device updates
         # TODO - Figure out what they mean w/r to scopes and control flow
         remaining, static_dus = partition(
-            lambda inst: isinstance(inst, DeviceUpdate)
-            and not isinstance(inst.value, Variable),
+            lambda inst: (
+                isinstance(inst, DeviceUpdate) and not isinstance(inst.value, Variable)
+            ),
             ir.instructions,
         )
         remaining, static_dus = list(remaining), list(static_dus)
@@ -359,12 +360,11 @@ class QbloxLiveEngine2(AbstractQbloxLiveEngine):
 
 
 class QbloxLiveEngineAdapter(AbstractQbloxLiveEngine):
-    """
-    A manual adapter of the new and legacy engines. Users can switch on and off HW acceleration by using
-    the `enable_hax` flag.
+    """A manual adapter of the new and legacy engines. Users can switch on and off HW
+    acceleration by using the `enable_hax` flag.
 
-    There should be a proper hybrid, dynamic, JIT-like engine in the future that can leverage the HW to accelerate
-    programs whenever possible.
+    There should be a proper hybrid, dynamic, JIT-like engine in the future that can
+    leverage the HW to accelerate programs whenever possible.
     """
 
     def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager):

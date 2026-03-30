@@ -25,8 +25,10 @@ class TestQiskitErrorMitigation:
         assert results == results
 
     def test_multiple_registers_throws_error(self):
-        """Tests that results with many classical registers throws an error as expected. No
-        actual mitigation config is needed to test this, so we just mock it up."""
+        """Tests that results with many classical registers throws an error as expected.
+
+        No actual mitigation config is needed to test this, so we just mock it up.
+        """
         results = {"b": {"11": 500, "00": 500}, "c": {"1": 1000}}
         config = CompilerConfig(error_mitigation=True)
         with pytest.raises(ValueError):
@@ -36,7 +38,10 @@ class TestQiskitErrorMitigation:
 class TestQiskitStripMetadata:
     def test_metadata_is_removed(self):
         """When metadata is enabled, results are returned as a tuple of execution results
-        and metadata. Let's check they're stripped away!"""
+        and metadata.
+
+        Let's check they're stripped away!
+        """
         results = {"b": {"11": 500, "00": 500}}
         metadata = "test"  # the actual contents are irrelevent!
         new_results = QiskitStripMetadata().run((results, metadata))

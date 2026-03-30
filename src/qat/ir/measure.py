@@ -62,9 +62,9 @@ class Acquire(QuantumInstruction):
 
 
 class PostProcessing(Instruction):
-    """
-    States what post-processing should happen after data has been acquired. This can
-    happen in the FPGA's or a software post-process.
+    """States what post-processing should happen after data has been acquired.
+
+    This can happen in the FPGA's or a software post-process.
     """
 
     output_variable: str | None = None
@@ -103,10 +103,10 @@ VALID_MEASURE_INSTR = Synchronize | Acquire | Pulse | Delay
 
 
 class MeasureBlock(QuantumInstructionBlock):
-    """
-    Encapsulates a measurement of a single (or multiple) qubit(s).
-    It should only contain instructions that are associated with a
-    measurement such as a measure pulse, an acquire or a synchronize.
+    """Encapsulates a measurement of a single (or multiple) qubit(s).
+
+    It should only contain instructions that are associated with a measurement such as a
+    measure pulse, an acquire or a synchronize.
     """
 
     instructions: ValidatedList[VALID_MEASURE_INSTR] = Field(

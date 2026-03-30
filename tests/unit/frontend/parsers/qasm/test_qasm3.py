@@ -228,10 +228,8 @@ class TestQasm3Parser:
         ],
     )
     def test_u_gate(self, params, hardware_model):
-        """
-        Tests the validty of the U gate with OpenPulse by checking that the
-        parsed circuit matches the same circuit created with the circuit builder.
-        """
+        """Tests the validty of the U gate with OpenPulse by checking that the parsed
+        circuit matches the same circuit created with the circuit builder."""
 
         # build the circuit from QASM
         qasm = get_qasm3("u_gate.qasm")

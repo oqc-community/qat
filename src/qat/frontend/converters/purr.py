@@ -61,8 +61,8 @@ class HardwareModelMapper:
         self._pulse_channel_map: dict[str, str] = dict()
 
     def validate_physical_properties(self):
-        """Validates the physical properties of the hardware model in the IR against the model
-        provided to ensure compatibility."""
+        """Validates the physical properties of the hardware model in the IR against the
+        model provided to ensure compatibility."""
 
         self._validate_qubit_mapping()
         self._validate_coupling_mapping()
@@ -175,8 +175,10 @@ class HardwareModelMapper:
         self,
         target: PurrPulseChannel | PurrPulseChannelView,
     ) -> str:
-        """Matches the pulse channel to the physical model, if possible, and returns the
-        id. Otherwise, keeps the channel naming."""
+        """Matches the pulse channel to the physical model, if possible, and returns the id.
+
+        Otherwise, keeps the channel naming.
+        """
 
         if not isinstance(target, PurrPulseChannelView):
             return target.partial_id()

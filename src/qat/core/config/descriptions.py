@@ -62,7 +62,7 @@ class PipelineInstanceDescription(NoExtraFieldsModel):
     default: bool = False
 
     def construct(self) -> "Pipeline":
-        """Returns the requested Pipeline instance"""
+        """Returns the requested Pipeline instance."""
         return self.pipeline.copy_with_name(self.name)
 
     def is_subtype_of(self, ty: type) -> bool:
@@ -76,7 +76,7 @@ class HardwareLoaderDescription(NoExtraFieldsModel):
     type: ImportHardwareLoader
 
     def construct(self) -> "BaseModelLoader":
-        """Returns the described Hardware Loader"""
+        """Returns the described Hardware Loader."""
         return self.type(**self.config)
 
 
@@ -125,7 +125,7 @@ class ClassDescription(NoExtraFieldsModel, Generic[T]):
     config: dict = {}
 
     def partial(self):
-        """Returns a partially configured class"""
+        """Returns a partially configured class."""
         try:
             return partial(self.type, **self.config)
         except TypeError as t:
@@ -177,7 +177,7 @@ class PipelineFactoryDescription(NoExtraFieldsModel):
     def construct(
         self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
     ) -> "PipelineFactory":
-        """Constructs and returns a Pipeline from its description
+        """Constructs and returns a Pipeline from its description.
 
         :param loader: The hardware model loader to fetch the hardware model.
         :param engine: The engine to use for the pipeline, optional.
@@ -198,9 +198,11 @@ class PipelineFactoryDescription(NoExtraFieldsModel):
 
 
 class UpdateablePipelineDescription(NoExtraFieldsModel):
-    """A description pointing to an updateable pipeline, which can be configured with
-    a custom hardware model (loader), target data, and an engine. It also always custom
-    configuration (given by the concrete updateable pipeline class)."""
+    """A description pointing to an updateable pipeline, which can be configured with a
+    custom hardware model (loader), target data, and an engine.
+
+    It also always custom configuration (given by the concrete updateable pipeline class).
+    """
 
     name: str
     pipeline: ImportUpdateablePipeline
@@ -213,7 +215,7 @@ class UpdateablePipelineDescription(NoExtraFieldsModel):
     def construct(
         self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
     ) -> "UpdateablePipeline":
-        """Constructs and returns a Pipeline from its description
+        """Constructs and returns a Pipeline from its description.
 
         :param loader: The hardware model loader to fetch the hardware model.
         :param engine: The engine to use for the pipeline.
@@ -258,7 +260,7 @@ class CompilePipelineDescription(NoExtraFieldsModel):
     def construct(
         self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
     ) -> "ConfigurableCompilePipeline":
-        """Constructs and returns a CompilePipeline from its description
+        """Constructs and returns a CompilePipeline from its description.
 
         :param loader: The hardware model loader to fetch the hardware model.
         :return: The constructed pipeline
@@ -298,7 +300,7 @@ class ExecutePipelineDescription(NoExtraFieldsModel):
     def construct(
         self, loader: "BaseModelLoader", engine: "NativeEngine"
     ) -> "ConfigurableExecutePipeline":
-        """Constructs and returns a Pipeline from its description
+        """Constructs and returns a Pipeline from its description.
 
         :param loader: The hardware model loader to fetch the hardware model.
         :param engine: The engine to use for the pipeline.
@@ -334,7 +336,7 @@ class PipelineClassDescription(NoExtraFieldsModel):
     def construct(
         self, loader: "BaseModelLoader", engine: "NativeEngine | None" = None
     ) -> "ConfigurablePipeline":
-        """Constructs and returns a Pipeline from its description
+        """Constructs and returns a Pipeline from its description.
 
         :param loader: The hardware model loader to fetch the hardware model.
         :param engine: The engine to use for the pipeline.

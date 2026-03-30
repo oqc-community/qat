@@ -51,21 +51,17 @@ def remove_axes(original_dims, removed_axis_indices, axis_locations):
 
 
 class ComplexFunction:
-    """Function object used to represent Complex 1D functions"""
+    """Function object used to represent Complex 1D functions."""
 
     _dtype = np.complex128
     dt = 0.5e-9
 
     def eval(self, x: np.ndarray) -> np.ndarray:
-        """
-        Function evaluated in domain described by x
-        """
+        """Function evaluated in domain described by x."""
         pass
 
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        """
-        First order derivative
-        """
+        """First order derivative."""
         pass
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -90,16 +86,12 @@ def validate_input_array(func):
 
 
 class NumericFunction(ComplexFunction):
-    """
-    Base class for functions applying an numerical first derivative
-    """
+    """Base class for functions applying an numerical first derivative."""
 
     @validate_input_array
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        """
-        For a custom wave-pulse or pulse without analytic derivative compute it
-        numerically.
-        """
+        """For a custom wave-pulse or pulse without analytic derivative compute it
+        numerically."""
         if len(x) < 2:
             return np.zeros_like(y)
         else:
@@ -113,9 +105,7 @@ class NumericFunction(ComplexFunction):
 
 
 class SquareFunction(ComplexFunction):
-    """
-    Square function of fixed amplitude
-    """
+    """Square function of fixed amplitude."""
 
     @validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
@@ -127,9 +117,7 @@ class SquareFunction(ComplexFunction):
 
 
 class GaussianFunction(ComplexFunction):
-    """
-    Gaussian function
-    """
+    """Gaussian function."""
 
     def __init__(self, width, rise):
         self._k = width * rise
@@ -145,9 +133,7 @@ class GaussianFunction(ComplexFunction):
 
 
 class GaussianZeroEdgeFunction(ComplexFunction):
-    """
-    A Gaussian pulse that can be normalized to be zero at the edges.
-    """
+    """A Gaussian pulse that can be normalized to be zero at the edges."""
 
     def __init__(self, std_dev: float, width: float, zero_at_edges: bool):
         self.std_dev = std_dev
@@ -166,9 +152,7 @@ class GaussianZeroEdgeFunction(ComplexFunction):
 
 
 class GaussianSquareFunction(NumericFunction):
-    """
-    A square pulse with a Gaussian rise and fall at the edges.
-    """
+    """A square pulse with a Gaussian rise and fall at the edges."""
 
     def __init__(self, square_width: float, std_dev: float, zero_at_edges: bool):
         self.square_width = square_width
@@ -188,9 +172,7 @@ class GaussianSquareFunction(NumericFunction):
 
 
 class DragGaussianFunction(ComplexFunction):
-    """
-    Drag Gaussian, tighter on one side and long tail on the other.
-    """
+    """Drag Gaussian, tighter on one side and long tail on the other."""
 
     def __init__(self, width, beta, zero_at_edges):
         self.width = width
@@ -206,9 +188,9 @@ class DragGaussianFunction(ComplexFunction):
 
 
 class SechFunction(ComplexFunction):
-    """
-    Implements a sech pulse defined by sech(x / width). Note that it is not normalized to be
-    zero at the edges.
+    """Implements a sech pulse defined by sech(x / width).
+
+    Note that it is not normalized to be zero at the edges.
     """
 
     def __init__(self, width):
@@ -244,9 +226,11 @@ class Cos(ComplexFunction):
 class RoundedSquareFunction(ComplexFunction):
     """
     Rounded square.
+    ```
            ___
          /    \
      ___|      |___
+     ```
     """
 
     def __init__(self, width, std_dev, rise):

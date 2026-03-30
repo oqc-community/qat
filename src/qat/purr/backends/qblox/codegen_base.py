@@ -7,9 +7,7 @@ from qat.purr.backends.qblox.graph import BasicBlock, ControlFlowGraph
 
 
 class DfsTraversal(ABC):
-    """
-    Base Depth-first Search algorithm on the control flow graph
-    """
+    """Base Depth-first Search algorithm on the control flow graph."""
 
     def __init__(self):
         self._entered: List[BasicBlock] = []

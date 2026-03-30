@@ -67,8 +67,7 @@ class TriageResult(ResultInfoMixin):
 
 
 class TriagePass(AnalysisPass):
-    """
-    Builds a view of instructions per quantum target AOT.
+    """Builds a view of instructions per quantum target AOT.
 
     Builds selections of instructions useful for subsequent analysis/transform passes, for
     code generation, and post-playback steps.
@@ -203,8 +202,7 @@ class BindingResult(ResultInfoMixin):
 
 
 class BindingPass(AnalysisPass):
-    """
-    Builds binding of variables, instructions, and a view of variables from/to scopes.
+    """Builds binding of variables, instructions, and a view of variables from/to scopes.
 
     Variables are implicitly declared in sweep instructions and are ultimately read from
     quantum instructions. Thus, every iteration variable is associated to all the scopes it
@@ -217,11 +215,10 @@ class BindingPass(AnalysisPass):
 
     @staticmethod
     def extract_iter_bound(value: list | np.ndarray):
-        """
-        Given a sequence of numbers (typically having been generated from
-        :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced,
-        in which case returns an IterBound instance holding the start, step, end, and count
-        of the numbers in the array, or else fail.
+        """Given a sequence of numbers (typically having been generated from
+        :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced, in
+        which case returns an IterBound instance holding the start, step, end, and count of
+        the numbers in the array, or else fail.
 
         In the future, we might be interested in relaxing this condition and return
         "interpolated" evenly spaced approximation of the input sequence.
@@ -424,8 +421,7 @@ class BindingPass(AnalysisPass):
 
 
 class TILegalisationPass(AnalysisPass):
-    """
-    An instruction is legal if it has a direct equivalent in the programming model
+    """An instruction is legal if it has a direct equivalent in the programming model
     implemented by the control stack. The notion of "legal" is highly determined by the
     hardware features of the control stack as well as its programming model. Control stacks
     such as Qblox have a direct ISA-level representation for basic RF instructions such as
@@ -597,11 +593,11 @@ class CFGPass(AnalysisPass):
         return ir
 
     def _build_cfg(self, builder: InstructionBuilder, cfg: ControlFlowGraph):
-        """
-        Recursively (re)discovers (new) header nodes and flow information.
+        """Recursively (re)discovers (new) header nodes and flow information.
 
-        Supports Repeat, Sweep, EndRepeat, and EndSweep. More control flow and branching instructions
-        will follow in the future once these foundations sink in and get stabilised in the codebase
+        Supports Repeat, Sweep, EndRepeat, and EndSweep. More control flow and branching
+        instructions will follow in the future once these foundations sink in and get
+        stabilised in the codebase
         """
 
         flow = [(e.src.head(), e.dest.head()) for e in cfg.edges]
@@ -672,9 +668,9 @@ class CFGPass(AnalysisPass):
 
 
 class LifetimePass(AnalysisPass):
-    """
-    The end goal of this pass is to facilitate sequencer allocation on the control hardware. Much like classical
-    register allocation techniques, this pass is intended to perform "channel liveness" analysis.
+    """The end goal of this pass is to facilitate sequencer allocation on the control
+    hardware. Much like classical register allocation techniques, this pass is intended to
+    perform "channel liveness" analysis.
 
     A logical channel is alive at some point P1 in the builder (analogically to a classical program) if it is
     targeted by some quantum operation at some point P2 > P1 in the future relative to P1.
@@ -804,8 +800,8 @@ class IntermediateFrequencyResult(ResultInfoMixin):
 
 
 class IntermediateFrequencyAnalysis(AnalysisPass):
-    """
-    Adapted from :meth:`qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies`.
+    """Adapted from
+    :meth:`qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies`.
 
     Retrieves intermediate frequencies for all physical channels if they exist,
     and validates that pulse channels that share the same physical channel cannot
@@ -814,8 +810,7 @@ class IntermediateFrequencyAnalysis(AnalysisPass):
     """
 
     def __init__(self, model: QuantumHardwareModel):
-        """
-        Instantiate the pass with a hardware model.
+        """Instantiate the pass with a hardware model.
 
         :param model: The hardware model.
         """

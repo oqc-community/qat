@@ -726,9 +726,7 @@ class TestBaseQuantum:
         "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
     )
     def test_duration_timeline_aligns(self, hw):
-        """
-        For circuits where quantum targets are synced, check that instructions align.
-        """
+        """For circuits where quantum targets are synced, check that instructions align."""
         engine = hw.create_engine()
         q1 = hw.get_qubit(0)
         q2 = hw.get_qubit(1)
@@ -795,11 +793,9 @@ class TestBaseQuantum:
         "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
     )
     def test_duration_timeline_times(self, hw):
-        """
-        Tests that the creation of a duration timeline with a two-qubit circuit
-        gives a timeline where the position map for each pulse channel has instructions
-        that align
-        """
+        """Tests that the creation of a duration timeline with a two-qubit circuit gives a
+        timeline where the position map for each pulse channel has instructions that
+        align."""
         engine = hw.create_engine()
         q1 = hw.get_qubit(0)
         q2 = hw.get_qubit(1)
@@ -851,8 +847,8 @@ class TestBaseQuantum:
         "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
     )
     def test_duration_timeline_sync_ecr(self, hw):
-        """
-        Tests that a redundant sync has no effect on the circuit.
+        """Tests that a redundant sync has no effect on the circuit.
+
         In this example, the ECR adds a sync itself, so syncing before is redundant.
         """
         engine = hw.create_engine()
@@ -887,8 +883,8 @@ class TestBaseQuantum:
         "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
     )
     def test_duration_timeline_sync_x_pulses(self, hw):
-        """
-        Tests that a redundant sync has no effect on the circuit.
+        """Tests that a redundant sync has no effect on the circuit.
+
         In this example, the two x pulses on Q1 take the same time to execute as the single
         pulser in Q2, so the sync is redundant.
         """
@@ -934,10 +930,8 @@ class TestBaseQuantum:
         "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
     )
     def test_duration_timeline_compare(self, hw):
-        """
-        Tests that the duration of individual circuit elements matches that
-        of the full circuit.
-        """
+        """Tests that the duration of individual circuit elements matches that of the full
+        circuit."""
         engine = hw.create_engine()
         q1 = hw.get_qubit(0)
         q2 = hw.get_qubit(1)
@@ -972,10 +966,8 @@ class TestBaseQuantum:
         "hw", [get_test_model(), get_default_echo_hardware(), get_default_RTCS_hardware()]
     )
     def test_duration_timeline_compare_sync(self, hw):
-        """
-        Tests that the duration of individual circuit elements matches that
-        of the full circuit when syncs are used.
-        """
+        """Tests that the duration of individual circuit elements matches that of the full
+        circuit when syncs are used."""
         engine = hw.create_engine()
         q1 = hw.get_qubit(0)
         q2 = hw.get_qubit(1)
@@ -1024,10 +1016,8 @@ class TestBaseQuantum:
 
     @pytest.mark.parametrize("qbit", [0, 1])
     def test_mid_circuit_validation_pass(self, qbit):
-        """
-        Checks a circuit successfully validates when a measurement occurs on one qubit,
-        and subsequent gates on another.
-        """
+        """Checks a circuit successfully validates when a measurement occurs on one qubit,
+        and subsequent gates on another."""
 
         hw = get_test_model()
         engine = get_test_execution_engine(hw)

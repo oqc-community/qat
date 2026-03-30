@@ -55,9 +55,7 @@ def is_runtime(value: type):
 
 
 def is_instrument(value: type):
-    """
-    A validator which raises when the input not an Instrument.
-    """
+    """A validator which raises when the input not an Instrument."""
 
     if not (inspect.isclass(value) and issubclass(value, InstrumentConcept)):
         raise ValueError(f"{value} is not a valid Instrument builder")
@@ -65,9 +63,7 @@ def is_instrument(value: type):
 
 
 def is_instrument_builder(value: type):
-    """
-    A validator which raises when the input not an Instrument builder.
-    """
+    """A validator which raises when the input not an Instrument builder."""
 
     if not (inspect.isclass(value) and issubclass(value, InstrumentBuilder)):
         raise ValueError(f"{value} is not a valid Instrument builder")
@@ -77,8 +73,8 @@ def is_instrument_builder(value: type):
 def is_engine(value: type):
     """A validator which raises when the input not an Engine.
 
-    This permits NativeEngines and (legacy qat.purr) InstructionExecutionEngine.
-    In future we intend to only accept NativeEngines (once qat.purr is deprecated)
+    This permits NativeEngines and (legacy qat.purr) InstructionExecutionEngine. In future
+    we intend to only accept NativeEngines (once qat.purr is deprecated)
     """
     from qat.engines import NativeEngine
     from qat.purr.compiler.execution import InstructionExecutionEngine
@@ -95,8 +91,10 @@ def is_engine(value: type):
 
 
 def is_target_data(value: type):
-    """A validator which raises when the input not a TargetData. Allows both TargetData
-    classes and functions which return TargetData instances."""
+    """A validator which raises when the input not a TargetData.
+
+    Allows both TargetData classes and functions which return TargetData instances.
+    """
 
     from qat.model.target_data import AbstractTargetData
 
@@ -157,10 +155,10 @@ def is_updateable_pipeline(value: type):
 
 
 def requires_model(value: type) -> bool:
-    """Determines whether a class or function expects a model
+    """Determines whether a class or function expects a model.
 
-    In future we will also inspect the type is a hardware model but currently
-    we are not consistent enough with type hinting for this.
+    In future we will also inspect the type is a hardware model but currently we are not
+    consistent enough with type hinting for this.
     """
     return "model" in inspect.signature(value).parameters
 

@@ -6,8 +6,7 @@ from piny import StrictMatcher
 
 
 class VeryStrictMatcher(StrictMatcher):
-    """
-    Expand an environment variable of form ${VAR} with its value
+    """Expand an environment variable of form ${VAR} with its value.
 
     If value is not found, raises a ValueError
     """

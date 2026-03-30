@@ -8,7 +8,7 @@ on:
       - main
     tags:
       - '*.*.*'
-  
+
 jobs:
   deploy:
     uses: ./.github/workflows/doc-publish.yml

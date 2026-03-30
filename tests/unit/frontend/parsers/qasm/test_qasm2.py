@@ -204,9 +204,10 @@ def test_cl2qu_index_mapping(qasm, expected_mapping, three_qubit_hw):
 
 
 def get_cl2qu_index_mapping(instructions: InstructionBlock, hw: PhysicalHardwareModel):
-    """
-    Returns a dict[str, str] mapping creg to qreg indices.
-    Classical register indices are extracted following the pattern <clreg_name>[<clreg_index>]
+    """Returns a dict[str, str] mapping creg to qreg indices.
+
+    Classical register indices are extracted following the pattern
+    <clreg_name>[<clreg_index>]
     """
     mapping = {}
     pattern = re.compile(r"(.*)\[([0-9]+)\]")

@@ -71,8 +71,7 @@ class CircuitBuilder:
 
     def U(self, qubit: int, theta: float = 0.0, phi: float = 0.0, lambd: float = 0.0):
         """Apply a full rotation to a qubit around the Bloch sphere given three rotation
-        angles.
-        """
+        angles."""
         return self.add(U(qubit=qubit, theta=theta, phi=phi, lambd=lambd))
 
     def Phase(self, qubit: int, theta: float = 0.0):
@@ -128,8 +127,10 @@ class CircuitBuilder:
         return self.add(CPhase(qubit1=control, qubit2=target, theta=theta))
 
     def measure(self, qubit: int, clbit: int = None):
-        """Measures a qubit and saves the result in the specified classical bit. If the
-        classical bit isn't given, it will be decided automatically."""
+        """Measures a qubit and saves the result in the specified classical bit.
+
+        If the classical bit isn't given, it will be decided automatically.
+        """
         # TODO: implement a more sophisticed allocation procedure (COMPILER-305)
         if clbit is None:
             pass

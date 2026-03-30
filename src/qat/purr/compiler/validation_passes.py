@@ -26,9 +26,7 @@ from qat.purr.core.result_base import ResultManager
 
 
 class InstructionValidation(ValidationPass):
-    """
-    Extracted from QuantumExecutionEngine.validate()
-    """
+    """Extracted from QuantumExecutionEngine.validate()"""
 
     def __init__(
         self,
@@ -87,9 +85,7 @@ class InstructionValidation(ValidationPass):
 
 
 class ReadoutValidation(ValidationPass):
-    """
-    Extracted from LiveDeviceEngine.validate()
-    """
+    """Extracted from LiveDeviceEngine.validate()"""
 
     def __init__(
         self,

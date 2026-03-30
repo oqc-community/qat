@@ -12,8 +12,9 @@ log = get_default_logger()
 
 
 def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
-    """
-    Generate randomized benchmarks. Please see Qiskits ``randomized_benchmarking_seq``
+    """Generate randomized benchmarks.
+
+    Please see Qiskits ``randomized_benchmarking_seq``
     for argument documentation. Returns a dictionary holding the QuantumProcess that
     relates to the various benchmarking runs and a list of the sequence lengths.
     """

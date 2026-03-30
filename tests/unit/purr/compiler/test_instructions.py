@@ -63,8 +63,8 @@ class TestInstruction:
         assert label2.name in builder.existing_names
 
     def _get_sweep_size(self, sweep_iter: SweepIterator):
-        """
-        Returns the size of the entire loop nest seen as a polyhedra.
+        """Returns the size of the entire loop nest seen as a polyhedra.
+
         The returned structure is a list s where s[i] represents the sweep length at level i
         """
         if sweep_iter.sweep is None:
@@ -275,10 +275,8 @@ class TestDoubleGates:
         [(val[0], val[2], val[1]) for val in double_gate_rev_list().values()],
     )
     def test_two_gates_rev(self, func_name, args, gate, num_qubits):
-        """
-        Test the various two gates supported by our builders with qubit order
-        reversed.
-        """
+        """Test the various two gates supported by our builders with qubit order
+        reversed."""
         model = get_default_matrix_hardware(num_qubits)
         for pos in range(num_qubits - 1):
             builder = model.create_builder()
@@ -814,9 +812,9 @@ class TestInstructionValidation:
 class TestSerializationOfCustomPulses:
     """Regression tests that tests the serialization of custom pulses.
 
-    We have had problems across the two serialization modes regarding the type of samples
-    in a custom pulse. These tests ensure that we are able to serialize lists and numpy
-    arrays for both serialization modes.
+    We have had problems across the two serialization modes regarding the type of samples in
+    a custom pulse. These tests ensure that we are able to serialize lists and numpy arrays
+    for both serialization modes.
     """
 
     def test_custom_pulse_serialization(self, nparray, serialization_type):

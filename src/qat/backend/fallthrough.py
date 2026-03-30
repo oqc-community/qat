@@ -10,9 +10,8 @@ from qat.purr.compiler.builders import InstructionBuilder
 
 
 class FallthroughBackend(BaseBackend):
-    """
-    A backend that passes through an IR :class:`InstructionBuilder` and does not alter it.
-    """
+    """A backend that passes through an IR :class:`InstructionBuilder` and does not alter
+    it."""
 
     def __init__(self, model: None = None):
         """

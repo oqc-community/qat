@@ -15,9 +15,9 @@ test_angles = [0.0, np.pi / 2, -np.pi / 2, np.pi, -np.pi, 0.254, -25.4, 4.54]
 
 def same_up_to_phase(gate1, gate2):
     r"""If gates :math:`U_{1}` and :math:`U_{2}` are equivalent upto a global phase,
-    :math:`U_{2} = e^{i\alpha} U_{1}`, then
+    :math:`U_{2} = e^{i\alpha} U_{1}`, then.
 
-        :math:`U_{2}^{\dagger} U_{1} = e^{i\alpha}`.
+    :math:`U_{2}^{\dagger} U_{1} = e^{i\alpha}`.
 
     This fact can be used to test that this is true.
     """
@@ -51,7 +51,8 @@ def get_non_abstract_subgates(cls: type):
 def one_q_gate_tests():
     """Creates a list of 1Q gates to use for testings.
 
-    Gates that are parameterised are generated for many different angles."""
+    Gates that are parameterised are generated for many different angles.
+    """
     one_q_gates = sorted(get_non_abstract_subgates(Gate1Q), key=cls_name)
     tests = []
     for gate in one_q_gates:
@@ -70,7 +71,8 @@ def one_q_gate_tests():
 def two_q_gate_tests():
     """Creates a list of 2Q gates to use for testings.
 
-    Gates that are parameterised are generated for many different angles."""
+    Gates that are parameterised are generated for many different angles.
+    """
     two_q_gates = sorted(get_non_abstract_subgates(Gate2Q), key=cls_name)
     tests = []
     for gate in two_q_gates:
@@ -87,6 +89,7 @@ def two_q_gate_tests():
 
 def circuit_as_unitary(num_qubits, ir):
     """Calcualtes the unitary  for Qat IR composed of gates.
+
     Qubit operations are ignored, and control flow is not supported.
     """
 

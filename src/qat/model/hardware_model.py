@@ -30,7 +30,8 @@ class LogicalHardwareModel(NoExtraFieldsModel):
     """Models a hardware with a given connectivity.
 
     :param version: Semantic version of the hardware model.
-    :param logical_connectivity: Connectivity of the qubits in the hardware model (directed graph).
+    :param logical_connectivity: Connectivity of the qubits in the hardware model (directed
+        graph).
     """
 
     version: SemanticVersion = Field(frozen=True, repr=False, default=VERSION)
@@ -123,9 +124,10 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     def _physical_channel_to_device_mapping(self, qubit: Qubit):
         """Populated the mapping from physical channel ids to devices (qubits and
         resonators) in the hardware model.
+
         The qubit mapping will also map the resonator physical channels to the qubit
-        connected to the resonator.
-        While the resonator mapping will only map the physical channels to the resonator.
+        connected to the resonator. While the resonator mapping will only map the physical
+        channels to the resonator.
         """
         self._physical_channel_ids_to_qubit.update(
             {
@@ -197,6 +199,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
     @model_validator(mode="after")
     def validate_logical_connectivity(self):
         """Validates that logical connectivity is a subgraph of physical connectivity.
+
         Pulse channels are checked as part of physical channel connectivity, and thus do not
         need to be checked here.
         """
@@ -353,10 +356,8 @@ class PhysicalHardwareModel(LogicalHardwareModel):
 
     @property
     def quantum_devices(self) -> list[Qubit, Resonator]:
-        """
-        Returns all quantum (an)harmonic oscillator devices
-        in this hardware model as a list.
-        """
+        """Returns all quantum (an)harmonic oscillator devices in this hardware model as a
+        list."""
         qubits = list(self.qubits.values())
         resonators = [qubit.resonator for qubit in qubits]
         return qubits + resonators

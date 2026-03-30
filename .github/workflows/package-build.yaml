@@ -5,7 +5,6 @@ on:
     inputs:
       repository:
         type: string
-        required: true
         default: oqc-community/qat
       formatting-tests:
         type: boolean
@@ -24,7 +23,7 @@ on:
       notebook-result:
         description: "Notebook execution result"
         value: ${{ jobs.notebook-validation-tests.outputs.result }}
-  
+
 run-name: Units tests for QAT at ${{ github.ref }}
 
 env:
@@ -81,7 +80,7 @@ jobs:
         if: ${{ !cancelled() }}
         id: lint
         run: poetry run ruff check
-      
+
       - name: Ruff formatter check
         id: format
         if: ${{ !cancelled() }}
@@ -166,7 +165,7 @@ jobs:
           python-version: ${{ matrix.python }}
           codebase: stable
           pytest-args: "-n auto"
-  
+
   experimental-unit-tests:
     name: Experimental Unit Tests
     runs-on: ubuntu-22.04

@@ -6,14 +6,14 @@ HARDWARE:
   config:
     qubit_count: 6
 
-COMPILE: 
-- name: waveform-compile 
+COMPILE:
+- name: waveform-compile
   pipeline: qat.pipelines.waveform.WaveformCompilePipeline
   hardware_loader: echo6loader
   default: true
 
-EXECUTE: 
-- name: waveform-execute 
+EXECUTE:
+- name: waveform-execute
   pipeline: qat.pipelines.waveform.EchoExecutePipeline
   hardware_loader: echo6loader
   default: true

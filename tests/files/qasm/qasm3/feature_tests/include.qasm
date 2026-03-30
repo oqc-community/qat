@@ -5,6 +5,5 @@ include "{{lib}}";
 
 bit[1] c;
 
-y2 ${{ physical_index }}; 
+y2 ${{ physical_index }};
 measure ${{ physical_index }} -> c;
-

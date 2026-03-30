@@ -50,8 +50,8 @@ log = get_default_logger()
 
 
 class PopulateWaveformSampleTime(TransformPass):
-    """Populates instructions within the IR with the sample time from their coupled
-    physical channel.
+    """Populates instructions within the IR with the sample time from their coupled physical
+    channel.
 
     This is a symptom of the IR builder not having access to the target data when assembling
     the instructions; this will likely be addressed later.
@@ -111,8 +111,10 @@ class PopulateWaveformSampleTime(TransformPass):
 
 class RepeatTranslation(TransformPass):
     """Transform :class:`Repeat` instructions so that they are replaced with:
+
     :class:`Variable`, :class:`Assign`, and :class:`Label` instructions at the start,
-    and :class:`Assign` and :class:`Jump` instructions at the end."""
+    and :class:`Assign` and :class:`Jump` instructions at the end.
+    """
 
     def __init__(self, target_data: TargetData):
         self.target_data = target_data
@@ -132,9 +134,8 @@ class RepeatTranslation(TransformPass):
 
 
 class RepeatTranslationHandler:
-    """
-    Handler used by PydRepeatTranslation to manage the translation of Repeat and EndRepeat instructions.
-    """
+    """Handler used by PydRepeatTranslation to manage the translation of Repeat and
+    EndRepeat instructions."""
 
     def __init__(self):
         self.instructions: list[Instruction] = []
@@ -142,9 +143,8 @@ class RepeatTranslationHandler:
 
     @singledispatchmethod
     def run(self, instruction):
-        """
-        Default handler for instructions that do not have a specific repeat translation.
-        """
+        """Default handler for instructions that do not have a specific repeat
+        translation."""
         raise NotImplementedError(f"No repeat translation for {type(instruction)}")
 
     @run.register(Instruction)
@@ -184,8 +184,7 @@ class RepeatTranslationHandler:
 
 class PhaseOptimisation(TransformPass):
     """Iterates through the list of instructions and compresses contiguous
-    :class:`PhaseShift` instructions.
-    """
+    :class:`PhaseShift` instructions."""
 
     def run(
         self,
@@ -280,9 +279,7 @@ class PostProcessingSanitisation(FrontendPostProcessingSanitisation):
 
 
 class MeasurePhaseResetSanitisation(TransformPass):
-    """
-    Adds a phase reset before every measure pulse.
-    """
+    """Adds a phase reset before every measure pulse."""
 
     def __init__(self, hardware_model: PhysicalHardwareModel):
         """
@@ -293,9 +290,7 @@ class MeasurePhaseResetSanitisation(TransformPass):
 
     @staticmethod
     def _get_measure_pulse_channels(hardware_model: PhysicalHardwareModel):
-        """
-        Returns a list of pulse channels that are used for measure pulses.
-        """
+        """Returns a list of pulse channels that are used for measure pulses."""
         measure_pulse_channels = {}
         for qubit_id, qubit in hardware_model.qubits.items():
             measure_pulse_channels[qubit_id] = qubit.measure_pulse_channel.uuid
@@ -419,9 +414,7 @@ class InstructionGranularitySanitisation(TransformPass):
     def _clock_cycle_multiples(
         self, instructions: list[Pulse | Acquire | Delay]
     ) -> NDArray[float]:
-        """
-        Extracts the number of clock cycles for each instruction
-        """
+        """Extracts the number of clock cycles for each instruction."""
         durations = np.asarray([inst.duration for inst in instructions])
         return durations / self.clock_cycle
 
@@ -455,10 +448,8 @@ class InstructionGranularitySanitisation(TransformPass):
 
     @staticmethod
     def _sanitise_acquire_pulse(instruction: Acquire, new_duration: float):
-        """
-        Acquire instructions with filters have a duration equal to the filter duration,
-        so we need to update the filter as well.
-        """
+        """Acquire instructions with filters have a duration equal to the filter duration,
+        so we need to update the filter as well."""
         if (
             isinstance(instruction.filter.waveform, SampledWaveform)
             and new_duration < instruction.duration
@@ -476,8 +467,8 @@ class InstructionGranularitySanitisation(TransformPass):
         instruction.filter.update_duration(new_duration)
 
     def _sanitise_custom_pulses(self, instructions: list[Pulse]):
-        """Sanitises the durations of :class:`SampledWaveform`s by padding the
-        waveforms with zero amplitudes."""
+        """Sanitises the durations of :class:`SampledWaveform`s by padding the waveforms
+        with zero amplitudes."""
 
         multiples = self._clock_cycle_multiples(instructions)
         # 1e-10 for floating point errors
@@ -501,9 +492,7 @@ class InstructionGranularitySanitisation(TransformPass):
 
 
 class InstructionLengthSanitisation(TransformPass):
-    """
-    Checks if quantum instructions are too long and splits if necessary.
-    """
+    """Checks if quantum instructions are too long and splits if necessary."""
 
     def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
         """
@@ -645,8 +634,11 @@ class InstructionLengthSanitisation(TransformPass):
 
 
 class ReturnSanitisation(TransformPass):
-    """Squashes all :class:`Return` instructions into a single one. Adds a :class:`Return`
-    with all acquisitions if none is found."""
+    """Squashes all :class:`Return` instructions into a single one.
+
+    Adds a :class:`Return`
+    with all acquisitions if none is found.
+    """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
@@ -671,8 +663,10 @@ class ReturnSanitisation(TransformPass):
 
 
 class RepeatSanitisation(TransformPass):
-    """Adds repeat counts and repetition periods to :class:`Repeat` instructions. If none
-    is found, a repeat instruction is added."""
+    """Adds repeat counts and repetition periods to :class:`Repeat` instructions.
+
+    If none is found, a repeat instruction is added.
+    """
 
     def __init__(self, target_data: TargetData):
         """
@@ -714,8 +708,8 @@ class RepeatSanitisation(TransformPass):
 
 
 class BatchedShots(TransformPass):
-    """Determines how shots should be grouped when the total number of acquisitions
-    exceeds the maximum allowed.
+    """Determines how shots should be grouped when the total number of acquisitions exceeds
+    the maximum allowed.
 
     The target machine might have an allowed number of acquisitions that can be
     executed by a single execution call. To execute a number of shots with
@@ -823,8 +817,7 @@ class BatchedShots(TransformPass):
 
 
 class ResetsToDelays(TransformPass):
-    """
-    Transforms :class:`Reset` operations to :class:`Delay`s.
+    """Transforms :class:`Reset` operations to :class:`Delay`s.
 
     Note that the delays do not necessarily agree with the granularity of the underlying target machine.
     This can be enforced using the :class:`InstructionGranularitySanitisation` pass.
@@ -1035,8 +1028,7 @@ class EndOfTaskResetSanitisation(TransformPass):
 
 
 class FreqShiftSanitisation(TransformPass):
-    """
-    Looks for any active frequency shift pulse channels in the hardware model and adds
+    """Looks for any active frequency shift pulse channels in the hardware model and adds
     square pulses for the duration.
 
     .. warning::
@@ -1125,8 +1117,7 @@ class FreqShiftSanitisation(TransformPass):
 
 
 class InitialPhaseResetSanitisation(TransformPass):
-    """
-    Checks if every active pulse channel has a phase reset in the beginning.
+    """Checks if every active pulse channel has a phase reset in the beginning.
 
     .. warning::
 
@@ -1230,8 +1221,8 @@ class LowerSyncsToDelays(TransformPass):
 
 class EvaluateWaveforms(TransformPass):
     """Evaluates the amplitudes of :class:`Waveform`s within :class:`Pulse` instructions,
-    replacing them with a :class:`SampledWaveform` and accounting for the scale of the
-    pulse channel.
+    replacing them with a :class:`SampledWaveform` and accounting for the scale of the pulse
+    channel.
 
     :class:`Waveform` dataclasses are defined by (often many) parameters. With the exception
     of specific shapes, they cannot be implemented directly on hardware. Instead, we

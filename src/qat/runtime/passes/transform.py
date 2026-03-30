@@ -76,9 +76,10 @@ class QBloxAcquisitionPostProcessing(TransformPass):
         package: Executable,
         **kwargs,
     ):
-        """
-        Now that the combined playback is ready, we can compute and process results as required
-        by customers. This requires loop nest information as well as post-processing and array shaping
+        """Now that the combined playback is ready, we can compute and process results as
+        required by customers.
+
+        This requires loop nest information as well as post-processing and array shaping
         requirements.
         """
 
@@ -123,8 +124,7 @@ class QBloxAcquisitionPostProcessing(TransformPass):
 
 class InlineResultsProcessingTransform(TransformPass):
     """Uses :class:`InlineResultsProcessing` instructions from the executable package to
-    format the acquired results in the desired format.
-    """
+    format the acquired results in the desired format."""
 
     def run(self, acquisitions: dict[str, any], *args, package: Executable, **kwargs):
         """
@@ -230,8 +230,8 @@ class ResultTransform(TransformPass):
 
         def simplify_results(simplify_target):
             """To facilitate backwards compatability and being able to run low-level
-            experiments alongside quantum programs we make some assumptions based upon
-            form of the results.
+            experiments alongside quantum programs we make some assumptions based upon form
+            of the results.
 
             If all results have default variable names then the user didn't care about
             value assignment or this was a low-level experiment - in both cases, it

@@ -1,4 +1,4 @@
-// Tests function declaration 
+// Tests function declaration
 OPENQASM 3;
 
 def x_gate(qubit q) {

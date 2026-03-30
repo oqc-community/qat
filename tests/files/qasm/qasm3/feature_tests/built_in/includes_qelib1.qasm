@@ -1,5 +1,5 @@
 // Contains calls to all gates in qelib1.inc.
-// Done on logical qubits; will require hardware model with at least 5 qubits and an 
+// Done on logical qubits; will require hardware model with at least 5 qubits and an
 // appropriate connectivity
 
 OPENQASM 3;
@@ -7,7 +7,7 @@ include "qelib1.inc";
 bit[5] c;
 qubit[5] q;
 
-// 1q gates 
+// 1q gates
 u3({{ angle1 }}, {{ angle2 }}, {{angle3}}) q[0];
 u2({{ angle1 }}, {{ angle2 }}) q[1];
 u1({{ angle1 }}) q[2];
@@ -29,7 +29,7 @@ rz({{ angle3 }}) q[2];
 sx q[3];
 sxdg q[0];
 
-// 2q gates 
+// 2q gates
 cx q[0], q[1];
 cz q[0], q[1];
 swap q[0], q[1];
@@ -45,15 +45,15 @@ csx q[0], q[1];
 rxx({{ angle1 }}) q[0], q[1];
 rzz({{ angle2 }});
 
-// 3q gates 
+// 3q gates
 ccx q[0], q[1], q[2];
 cswap q[0], q[1], q[2];
 rccx q[0], q[1], q[2];
 
-// 4q gates 
+// 4q gates
 rc3x q[0], q[1], q[2], q[3];
 c3x q[0], q[1], q[2], q[3];
 c3sqrtx q[0], q[1], q[2], q[3];
 
-// 5q gates 
+// 5q gates
 c4x q[0], q[1], q[2], q[3], q[4];

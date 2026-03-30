@@ -151,10 +151,10 @@ def get_default_echo_hardware(
     add_direction_couplings: bool = False,
     seed: SeedType | None = 42,
 ) -> "QuantumHardwareModel":
-    """
-    Generate a default echo target optionally providing the type of connectivity. Either you pass a
-    pre-defined connectivity as defined in the Connectivity enum or a specific connectivity list of
-    which qubits connect to which.
+    """Generate a default echo target optionally providing the type of connectivity.
+
+    Either you pass a pre-defined connectivity as defined in the Connectivity enum or a
+    specific connectivity list of which qubits connect to which.
     """
 
     model = QuantumHardwareModel()
@@ -171,9 +171,9 @@ def get_default_echo_hardware(
 
 
 class EchoEngine(QuantumExecutionEngine):
-    """
-    A target machine that just returns default values. Primarily used for testing
-    and no-backend situations.
+    """A target machine that just returns default values.
+
+    Primarily used for testing and no-backend situations.
     """
 
     def run_calibrations(self, qubits_to_calibrate=None):

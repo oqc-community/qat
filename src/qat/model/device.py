@@ -78,9 +78,8 @@ class Component(NoExtraFieldsModel):
 
 
 class PhysicalBaseband(Component):
-    """
-    Models the Local Oscillator (LO) used with a mixer to change the
-    frequency of a carrier signal.
+    """Models the Local Oscillator (LO) used with a mixer to change the frequency of a
+    carrier signal.
 
     :param frequency: The frequency of the LO.
     :param if_frequency: The intermediate frequency (IF) resulting from mixing the baseband
@@ -92,8 +91,8 @@ class PhysicalBaseband(Component):
 
 
 class IQBias(NoExtraFieldsModel):
-    """
-    Models the bias in voltages V_I / V_Q for the I and Q components in a physical channel.
+    """Models the bias in voltages V_I / V_Q for the I and Q components in a physical
+    channel.
 
     :param bias: The bias as a complex number, where the real part is the I component and
         the imaginary part is the Q component.
@@ -103,8 +102,7 @@ class IQBias(NoExtraFieldsModel):
 
 
 class PhysicalChannel(Component):
-    """
-    Models a physical channel that can carry one or multiple pulses.
+    """Models a physical channel that can carry one or multiple pulses.
 
     :param baseband: The physical baseband.
     :param block_size: The number of samples within a single block.
@@ -138,13 +136,13 @@ pulse_channel_check = re.compile(r"PulseChannel$")
 
 
 class PulseChannel(Component):
-    """
-    Models a pulse channel on a particular device.
+    """Models a pulse channel on a particular device.
 
     :param physical_channel: Physical channel that carries the pulse.
     :param frequency: Frequency of the pulse.
     :param imbalance: Ratio between I and Q AC voltage that is sent out of the FPGA.
-    :param phase_iq_offset: Phase offset between the I and Q plane for AC voltage that is send out the FPGA.
+    :param phase_iq_offset: Phase offset between the I and Q plane for AC voltage that is
+        send out the FPGA.
     :param scale: Scale factor for mapping the voltage of the pulse to frequencies.
     """
 
@@ -197,8 +195,7 @@ class CalibratableAcquire(NoExtraFieldsModel):
 
 
 class DrivePulseChannel(QubitPulseChannel):
-    """
-    The pulse channel that drives the qubit from |0> -> |1>.
+    """The pulse channel that drives the qubit from |0> -> |1>.
 
     :param pulse: Calibratable parameters for the X(pi/2) drive pulse.
     """
@@ -214,8 +211,7 @@ class DrivePulseChannel(QubitPulseChannel):
 
 
 class MeasurePulseChannel(ResonatorPulseChannel):
-    """
-    The pulse channel that measures the quantum state of the resonator.
+    """The pulse channel that measures the quantum state of the resonator.
 
     :param pulse: Calibratable parameters for the measure pulse.
     """
@@ -269,9 +265,7 @@ class CrossResonanceCancellationPulseChannel(QubitPulseChannel):
 
 
 class PulseChannelSet(NoExtraFieldsModel):
-    """
-    Encapsulates a set of pulse channels.
-    """
+    """Encapsulates a set of pulse channels."""
 
     @property
     def is_calibrated(self):
@@ -325,8 +319,7 @@ class ResonatorPulseChannels(PulseChannelSet):
 
 
 class Resonator(Component):
-    """
-    Models a resonator on a chip. Can be connected to multiple qubits.
+    """Models a resonator on a chip. Can be connected to multiple qubits.
 
     :param physical_channel: The physical channel that carries the pulses to the physical
         resonator.
@@ -394,8 +387,7 @@ class QubitPulseChannels(PulseChannelSet):
 
 
 class Qubit(Component):
-    """
-    Model for a superconducting qubit on a chip.
+    """Model for a superconducting qubit on a chip.
 
     .. note::
         ``post_process_method`` replaces ``mean_z_map_args`` by providing a future-proof mechanism to define arbitrary

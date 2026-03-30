@@ -37,10 +37,8 @@ log = get_default_logger()
 
 
 class QbloxResonator(Resonator):
-    """
-    A hack around QBlox acquisition to use the same pulse channel
-    for MeasurePulse and Acquire instructions.
-    """
+    """A hack around QBlox acquisition to use the same pulse channel for MeasurePulse and
+    Acquire instructions."""
 
     def get_measure_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.macq)
@@ -94,8 +92,9 @@ class QbloxPhysicalChannel(PhysicalChannel):
         fixed_drive_if=False,
         qubit_id=None,
     ):
-        """
-        Helper method tp build a qubit with assumed default values on the channels. Modelled after the live hardware.
+        """Helper method tp build a qubit with assumed default values on the channels.
+
+        Modelled after the live hardware.
         """
         qubit = Qubit(index, resonator, self, drive_amp=measure_amp, id_=qubit_id)
         qubit.create_pulse_channel(

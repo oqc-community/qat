@@ -44,10 +44,10 @@ log = get_default_logger()
 
 
 class RemoteCalibration:
-    """
-    Base class for any remote calibration executions. These are far more complicated
-    blocks than purely a string of instructions and include nested executions and rely
-    on classic Python code.
+    """Base class for any remote calibration executions.
+
+    These are far more complicated blocks than purely a string of instructions and include
+    nested executions and rely on classic Python code.
     """
 
     def run(
@@ -100,9 +100,9 @@ class QuantumRuntime(MetricsMixin):
     def _transform_results(
         self, results, format_flags: ResultsFormatting, repeats: Optional[int] = None
     ):
-        """
-        Transform the raw results into the format that we've been asked to provide. Look
-        at individual transformation documentation for descriptions on what they do.
+        """Transform the raw results into the format that we've been asked to provide.
+
+        Look at individual transformation documentation for descriptions on what they do.
         """
         if len(results) == 0:
             return []
@@ -115,10 +115,9 @@ class QuantumRuntime(MetricsMixin):
             repeats = 1000
 
         def simplify_results(simplify_target):
-            """
-            To facilitate backwards compatability and being able to run low-level
-            experiments alongside quantum programs we make some assumptions based upon
-            form of the results.
+            """To facilitate backwards compatability and being able to run low-level
+            experiments alongside quantum programs we make some assumptions based upon form
+            of the results.
 
             If all results have default variable names then the user didn't care about
             value assignment or this was a low-level experiment - in both cases, it
@@ -201,9 +200,8 @@ class QuantumRuntime(MetricsMixin):
         repeats=None,
         error_mitigation=None,
     ):
-        """
-        Executes these instructions against the current engine and returns the results.
-        """
+        """Executes these instructions against the current engine and returns the
+        results."""
         if self.engine is None:
             raise ValueError("No execution engine available.")
 
@@ -239,9 +237,8 @@ class QuantumRuntime(MetricsMixin):
         interrupt: Interrupt = NullInterrupt(),
         error_mitigation=None,
     ):
-        """
-        Executes these instructions against the current engine and returns the results.
-        """
+        """Executes these instructions against the current engine and returns the
+        results."""
 
         def fexecute(instrs):
             return self.engine._execute_with_interrupt(instrs, interrupt)
@@ -253,9 +250,8 @@ class QuantumRuntime(MetricsMixin):
     def execute(
         self, instructions, results_format=None, repeats=None, error_mitigation=None
     ):
-        """
-        Executes these instructions against the current engine and returns the results.
-        """
+        """Executes these instructions against the current engine and returns the
+        results."""
 
         def fexecute(instrs):
             return self.engine.execute(instrs)
@@ -266,20 +262,21 @@ class QuantumRuntime(MetricsMixin):
 
 
 class NewQuantumRuntime(QuantumRuntime, InvokerMixin):
-    """
-    Uses the new pass infrastructure.
+    """Uses the new pass infrastructure.
 
-    Notice how polymorphic calls to XEngine.optimize() and XEngine.validate() are avoided. Instead, we have
-    a flat structure of passes. This allows developers to focus on efficiently implementing a pass and easily test,
-    demonstrate, and register passes without worrying too much about where it fits into the global compilation
-    workflow.
+    Notice how polymorphic calls to XEngine.optimize() and XEngine.validate() are avoided.
+    Instead, we have a flat structure of passes. This allows developers to focus on
+    efficiently implementing a pass and easily test, demonstrate, and register passes
+    without worrying too much about where it fits into the global compilation workflow.
 
-    The NewQuantumRuntime deliberately recognises the builder as the only acceptable form of input "IR" and refuses
-    to take in a bare list of instructions. This reduces the constant confusion of "builder" vs "instructions".
+    The NewQuantumRuntime deliberately recognises the builder as the only acceptable form of
+    input "IR" and refuses to take in a bare list of instructions. This reduces the constant
+    confusion of "builder" vs "instructions".
 
-    The NewQuantumRuntime is also deliberately stripped out of any handling of compilation metrics. In fact, ideas
-    similar to the new pass infrastructure can be applied to compilation metrics, that's why we're excluding them
-    during this iteration partly because other pieces need to come together and partly because the current iteration
+    The NewQuantumRuntime is also deliberately stripped out of any handling of compilation
+    metrics. In fact, ideas similar to the new pass infrastructure can be applied to
+    compilation metrics, that's why we're excluding them during this iteration partly
+    because other pieces need to come together and partly because the current iteration
     needs to be kept light-weight and technically tractable.
     """
 
@@ -319,8 +316,8 @@ def _binary_count(results_list, repeats):
     """
 
     def flatten(res):
-        """
-        Combine binary result from the QPU into composite key result.
+        """Combine binary result from the QPU into composite key result.
+
         Aka '0110' or '0001'
         """
         if isinstance(res, Iterable):

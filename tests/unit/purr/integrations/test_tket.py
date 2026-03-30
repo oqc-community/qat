@@ -148,10 +148,8 @@ class TestTketOptimization:
         return circ, architecture
 
     def _run_qasm2(self, tket_opt, qasm_filename=None):
-        """
-        Helper class for testing various optimization configs against a varied QASM
-        file.
-        """
+        """Helper class for testing various optimization configs against a varied QASM
+        file."""
         if not qasm_filename:
             qasm_string = get_qasm2("random_n5_d5.qasm")
         else:

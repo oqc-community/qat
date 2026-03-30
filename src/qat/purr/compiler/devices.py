@@ -53,9 +53,9 @@ def build_qubit(
     fixed_drive_if=False,
     qubit_id=None,
 ):
-    """
-    Helper method tp build a qubit with assumed default values on the channels. Modelled
-    after the live hardware.
+    """Helper method tp build a qubit with assumed default values on the channels.
+
+    Modelled after the live hardware.
     """
     qubit = Qubit(index, resonator, physical_channel, drive_amp=measure_amp, id_=qubit_id)
     qubit.create_pulse_channel(
@@ -133,19 +133,15 @@ class QuantumComponent:
 
 
 class Calibratable:
-    """
-    Allows this object to be loaded as a calibrated object when we get pickled.
-    """
+    """Allows this object to be loaded as a calibrated object when we get pickled."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.is_calibrated = False
 
     def _is_serializable(self, val):
-        """
-        Checks whether this field value/name should be serialized as a calibration
-        value.
-        """
+        """Checks whether this field value/name should be serialized as a calibration
+        value."""
         if isinstance(val, (List, tuple)):
             return all([self._is_serializable(val_) for val_ in val])
 
@@ -161,12 +157,10 @@ class Calibratable:
         return is_picklable("", val)
 
     def __getstate__(self) -> Dict:
-        """
-        Returns a dictionary that will be used to pickle the object. By default
+        """Returns a dictionary that will be used to pickle the object. By default
         everything that is considered valid by jsonpickle will be added.
 
-        Override this method if you want to explicitly remove things from the
-        serialization.
+        Override this method if you want to explicitly remove things from the serialization.
         """
         results = {}
         for key, value in self.__dict__.items():
@@ -187,11 +181,11 @@ class Calibratable:
         return reconstituted
 
     def save_calibration_to_file(self, file_path, use_cwd=False):
-        """
-        Saves calibration to passed-in file path.
+        """Saves calibration to passed-in file path.
+
         use_cwd appends the working directory to any non-absolute path, otherwise it'll
-        search for common calibration config folders before defaulting to the one in
-        source code.
+        search for common calibration config folders before defaulting to the one in source
+        code.
         """
         if use_cwd:
             file_path = os.path.join(os.getcwd(), file_path)
@@ -201,10 +195,8 @@ class Calibratable:
 
     @staticmethod
     def load_calibration_from_file(file_path):
-        """
-        Looks for this calibration in the passed-in directory or the default calibration
-        save location.
-        """
+        """Looks for this calibration in the passed-in directory or the default calibration
+        save location."""
         # Check to see if we're just trying to find a file on the working directory.
         cwd_path = os.path.join(os.getcwd(), file_path)
         if os.path.isfile(cwd_path):
@@ -215,10 +207,8 @@ class Calibratable:
 
 
 class CyclicRefPickler(Pickler):
-    """
-    Adds reference ID to each object that requires it, for use when re-pickling and
-    generating accurate circular references.
-    """
+    """Adds reference ID to each object that requires it, for use when re-pickling and
+    generating accurate circular references."""
 
     ref_field = "py/obj_ref_id"
 
@@ -242,16 +232,15 @@ class CyclicRefPickler(Pickler):
 
 
 class FakeList(dict):
-    """
-    This is a patch-up object because originally the reference-counting mechanism for
+    """This is a patch-up object because originally the reference-counting mechanism for
     jsonpickle used incrementing ID's and relied upon the graph to be deterministic.
 
     This isn't the case in some situations, so we want to be able to match up object
-    reference by their memory pointer instead. But we don't really want a list a few
-    billion elements long for many reasons.
+    reference by their memory pointer instead. But we don't really want a list a few billion
+    elements long for many reasons.
 
-    This simply exposes the methods and functionality jsonpickle relies upon in the
-    list, while also allowing us to use very large ints as lookup targets.
+    This simply exposes the methods and functionality jsonpickle relies upon in the list,
+    while also allowing us to use very large ints as lookup targets.
     """
 
     def append(self, val):
@@ -259,10 +248,8 @@ class FakeList(dict):
         self[len(self)] = val
 
     def __getitem__(self, item):
-        """
-        Gets the value, but transforms item-not-found error into an IndexError as
-        functionality is triggered upon this exception being thrown (and caught).
-        """
+        """Gets the value, but transforms item-not-found error into an IndexError as
+        functionality is triggered upon this exception being thrown (and caught)."""
         try:
             return super().__getitem__(item)
         except KeyError:
@@ -270,18 +257,18 @@ class FakeList(dict):
 
 
 class CyclicRefUnpickler(Unpickler):
-    """
-    Makes sure cyclic references are picked up correctly. Objects need to be pickled
-    with CyclicRefPickler otherwise the tags required for this more precise detection
-    won't exist.
+    """Makes sure cyclic references are picked up correctly.
+
+    Objects need to be pickled with CyclicRefPickler otherwise the tags required for this
+    more precise detection won't exist.
     """
 
     _objs: FakeList
 
     def reset(self):
-        """
-        Replace _objs with our own dictionary upon every reset. This is called from
-        the constructor.
+        """Replace _objs with our own dictionary upon every reset.
+
+        This is called from the constructor.
         """
         super().reset()
         self._objs = FakeList()
@@ -522,15 +509,13 @@ class QubitCoupling(Calibratable):
 
 
 class PulseChannelView(PulseChannel):
-    """
-    Each quantum device will have a unique view of a PulseChannel, which this class
-    helps encapsulate. For example, a PulseChannel may be the driving channel for one
-    qubit but to another qubit the same PulseChannel might be driving its second state.
-    We need to be able to share pulse channel instances with different usages in this
-    particular case.
+    """Each quantum device will have a unique view of a PulseChannel, which this class helps
+    encapsulate. For example, a PulseChannel may be the driving channel for one qubit but to
+    another qubit the same PulseChannel might be driving its second state. We need to be
+    able to share pulse channel instances with different usages in this particular case.
 
-    Functionally this acts as an opaque wrapper to PulseChannel, forwarding all calls to
-    the wrapped object.
+    Functionally this acts as an opaque wrapper to PulseChannel, forwarding all calls to the
+    wrapped object.
     """
 
     # noinspection PyMissingConstructor
@@ -728,7 +713,10 @@ class QuantumDevice(QuantumComponent, Calibratable):
 
 
 class Resonator(QuantumDevice):
-    """Models a resonator on a chip. Can be connected to multiple qubits."""
+    """Models a resonator on a chip.
+
+    Can be connected to multiple qubits.
+    """
 
     def get_measure_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.measure)
@@ -738,10 +726,8 @@ class Resonator(QuantumDevice):
 
 
 class Qubit(QuantumDevice):
-    """
-    Class modelling our superconducting qubit and holds all information relating to
-    them.
-    """
+    """Class modelling our superconducting qubit and holds all information relating to
+    them."""
 
     measure_device: Resonator
 
@@ -843,10 +829,8 @@ class Qubit(QuantumDevice):
         )
 
     def get_all_channels(self):
-        """
-        Returns all channels associated with this qubit, including resonator channel and
-        other auxiliary devices that act as if they are on this object.
-        """
+        """Returns all channels associated with this qubit, including resonator channel and
+        other auxiliary devices that act as if they are on this object."""
         return [
             *self.pulse_channels.values(),
             self.get_measure_channel(),

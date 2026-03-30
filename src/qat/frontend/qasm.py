@@ -83,7 +83,8 @@ class BaseQasmFrontend(BaseFrontend, ABC):
     Handles the parsing of QASM into QAT's intermediate representation (IR). Optionally, it
     can also run pipelines before to optimize and validate QASM files. The QASM2 and QASM3
     frontends are identical up to the language and its respective parser. This class
-    implements the base functionality."""
+    implements the base functionality.
+    """
 
     def __init__(
         self,
@@ -150,9 +151,8 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         return src
 
     def _check_source(self, src: str) -> str:
-        """
-        Checks that the source program (or file path) can be interpreted as a QASM file and raises and error if not.
-        """
+        """Checks that the source program (or file path) can be interpreted as a QASM file
+        and raises and error if not."""
         src = self.check_and_return_source(src)
         if not src:
             raise ValueError(
@@ -166,8 +166,9 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         src: str,
         compiler_config: CompilerConfig,
     ) -> InstructionBuilder | None:
-        """
-        Creates the instruction builder for execution from the base builder and compiler config.
+        """Creates the instruction builder for execution from the base builder and compiler
+        config.
+
         :param builder: The base instruction builder.
         :param compiler_config: The compiler config is used in both the pipeline and for
             parsing.

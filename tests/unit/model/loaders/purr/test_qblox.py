@@ -14,10 +14,11 @@ test_parameters = create_parameters(["model", "dummy_config", "qubit_count", "al
     indirect=["qblox_model"],
 )
 def test_module_allocation(qblox_model, dummy_config, qubit_count, allocation):
-    """During hw model construction, modules are allocated for qubits. This test
-    parametrizes the hw model's construction with different dummy configuration
-    scenarios where QCM-RF, QRM-RF, or QRC is chosen first for module allocation.
-    See the helper QbloxSlotAllocator.
+    """During hw model construction, modules are allocated for qubits.
+
+    This test parametrizes the hw model's construction with different dummy configuration
+    scenarios where QCM-RF, QRM-RF, or QRC is chosen first for module allocation. See the
+    helper QbloxSlotAllocator.
     """
 
     assert len(qblox_model.qubits) == qubit_count

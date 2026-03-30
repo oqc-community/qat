@@ -39,9 +39,9 @@ class MetricsManager(BaseModel):
         super().__init__(enabled_metrics=enabled_metrics, **kwargs)
 
     def enable(self, enabled_metrics: MetricsType, overwrite=False):
-        """
-        Enable these sets of metrics for collection. If overwrite is True then the
-        passed-in values will overwrite existing ones.
+        """Enable these sets of metrics for collection.
+
+        If overwrite is True then the passed-in values will overwrite existing ones.
         """
         if enabled_metrics is None:
             return
@@ -52,10 +52,10 @@ class MetricsManager(BaseModel):
             self.enabled_metrics = self.enabled_metrics | enabled_metrics
 
     def enable_metrics(self, enabled_metrics=None, overwrite=True):
-        """
-        Enables the set of metrics in the current collection. If overwrite is set to
-        true, or there are no compilation metrics it'll create a new collection, if
-        overwrite is false it'll enable these metrics in the currently-active
+        """Enables the set of metrics in the current collection.
+
+        If overwrite is set to true, or there are no compilation metrics it'll create a new
+        collection, if overwrite is false it'll enable these metrics in the currently-active
         collection.
         """
         if enabled_metrics is None:

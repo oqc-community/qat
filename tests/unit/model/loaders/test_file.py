@@ -14,7 +14,7 @@ class TestFileModelLoader:
         loader = QbloxFileModelLoader(path)
         model = loader.load()
         assert isinstance(model, QbloxLiveHardwareModel)
-        assert model.calibration_id == "ec25e471f50c62f437f6e96b44f8d2c5"
+        assert model.calibration_id == "1eca7d3573593d58d46c03561c7d6472"
         assert len(model.calibration_id) == 32
 
     @pytest.mark.parametrize("qblox_model", [None], indirect=True)

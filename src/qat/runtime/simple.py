@@ -12,11 +12,10 @@ from qat.runtime.connection import ConnectionMode
 
 
 class SimpleRuntime(BaseRuntime):
-    """
-    The entry point to the execution interface. Programs generated from the backend are wrapped
-    in a :class:Executable object which further specifies high level metadata about acquisition
-    restrictions such as the expected shape of any loop nest, the post-processing, and results
-    formatting. The runtime provides the following services.
+    """The entry point to the execution interface. Programs generated from the backend are
+    wrapped in a :class:Executable object which further specifies high level metadata about
+    acquisition restrictions such as the expected shape of any loop nest, the post-
+    processing, and results formatting. The runtime provides the following services.
 
     - Execution batching: Some programs require memory specifications beyond that of the control
       hardware. It important to slice and batch-execute large programs. Equally important is

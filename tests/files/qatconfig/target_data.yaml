@@ -3,12 +3,12 @@ HARDWARE:
   type: qat.model.loaders.purr.EchoModelLoader
   config:
     qubit_count: 6
-- name: lucy6loader 
+- name: lucy6loader
   type: qat.model.loaders.lucy.LucyModelLoader
   config:
     qubit_count: 6
 
-COMPILE: 
+COMPILE:
 - name: legacy-compile
   pipeline: qat.pipelines.purr.waveform_v1.WaveformV1CompilePipeline
   hardware_loader: echo6loader

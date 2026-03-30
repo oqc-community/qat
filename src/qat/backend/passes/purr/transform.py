@@ -34,13 +34,13 @@ class DesugaringPass(TransformPass):
 
 
 class ScopePeeling(TransformPass):
-    """
-    A transform pass to discard scopes assuming they’ve been identified.
+    """A transform pass to discard scopes assuming they’ve been identified.
 
-    This pass is particularly useful for the code generator as it helps peel away any unwanted scopes.
-    In fact, some sweeps are not lowerable and the user may choose to annotate certain sweeps and opt
-    for static injection of variables with a switerator-like emitter. These sweep loops will be handled
-    by the emitter statically while allowing it to lower nested constructs efficiently.
+    This pass is particularly useful for the code generator as it helps peel away any
+    unwanted scopes. In fact, some sweeps are not lowerable and the user may choose to
+    annotate certain sweeps and opt for static injection of variables with a switerator-like
+    emitter. These sweep loops will be handled by the emitter statically while allowing it
+    to lower nested constructs efficiently.
     """
 
     def run(

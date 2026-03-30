@@ -20,8 +20,7 @@ log = get_default_logger()
 
 class LegacyRTCSPipeline(UpdateablePipeline):
     """A pipeline that compiles programs using the legacy RTCS backend and executes them
-    using the RTCS engine with the :class:`LegacyRuntime`.
-    """
+    using the RTCS engine with the :class:`LegacyRuntime`."""
 
     @staticmethod
     def _build_pipeline(

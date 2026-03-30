@@ -4,8 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class QRPairModel(BaseModel):
-    """
-    Used to parse JSON/CSV entries. Qubit and Resonator are specified together in pairs.
+    """Used to parse JSON/CSV entries.
+
+    Qubit and Resonator are specified together in pairs.
     """
 
     label: str = Field(alias="LABEL")

@@ -121,9 +121,7 @@ class AcqTestValues:
 
 @dataclass
 class AttenuationTestValues:
-    """
-    Attenuation values (dB)
-    """
+    """Attenuation values (dB)"""
 
     num_points = 5
 
@@ -134,10 +132,17 @@ class AttenuationTestValues:
 
 
 @dataclass
+class LatencyTestValues:
+    """Latency values (s)"""
+
+    num_points = 3
+
+    latencies = rng.choice(np.linspace(0, 11), size=num_points)
+
+
+@dataclass
 class LoTestValues:
-    """
-    LO frequencies (Hz)
-    """
+    """LO frequencies (Hz)"""
 
     num_points = 3
 

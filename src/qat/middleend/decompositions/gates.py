@@ -28,8 +28,8 @@ from qat.middleend.decompositions.base import DecompositionBase
 
 
 class GateDecompositionBase(DecompositionBase):
-    """Base object for implementing decompositions of gates with :class:`NativeGate` for
-    end nodes.
+    """Base object for implementing decompositions of gates with :class:`NativeGate` for end
+    nodes.
 
     This handles decompositions of gates to gates, and should not be used to lower gates to
     pulse instructions. While it is recommended to use :class:`DefaultGateDecompositons`,
@@ -164,29 +164,25 @@ class DefaultGateDecompositions(GateDecompositionBase):
     @decompose_op.register(S)
     def _(self, gate: S):
         r"""Decompose the :math:`S` gate as a :math:`R_{z}(\pi/2)` gate (up to global
-        phase).
-        """
+        phase)."""
         return [Rz(qubit=gate.qubit, theta=np.pi / 2)]
 
     @decompose_op.register(Sdg)
     def _(self, gate: Sdg):
         r"""Decompose the :math:`S^{\dagger}` gate as a :math:`R_{z}(-\pi/2)` gate (up to
-        global phase).
-        """
+        global phase)."""
         return [Rz(qubit=gate.qubit, theta=-np.pi / 2)]
 
     @decompose_op.register(T)
     def _(self, gate: T):
         r"""Decompose the :math:`T` gate as a :math:`R_{z}(\pi/4)` gate (up to global
-        phase).
-        """
+        phase)."""
         return [Rz(qubit=gate.qubit, theta=np.pi / 4)]
 
     @decompose_op.register(Tdg)
     def _(self, gate: Tdg):
         r"""Decompose the :math:`T^{\dagger}` gate as a :math:`R_{z}(-\pi/4)` gate (up to
-        global phase).
-        """
+        global phase)."""
         return [Rz(qubit=gate.qubit, theta=-np.pi / 4)]
 
     @decompose_op.register(ECR)
@@ -204,9 +200,8 @@ class DefaultGateDecompositions(GateDecompositionBase):
 
     @decompose_op.register(CNOT)
     def _(self, gate: CNOT):
-        r"""Decompose a CNOT into an ECR gate as
-        :math:`R_{x}^{1}(-\pi/2) R_{Z}^{0}(-\pi/2) R_{x}^{0}(\pi) ECR^{0, 1}`.
-        """
+        r"""Decompose a CNOT into an ECR gate as :math:`R_{x}^{1}(-\pi/2) R_{Z}^{0}(-\pi/2)
+        R_{x}^{0}(\pi) ECR^{0, 1}`."""
         return [
             ECR(qubit1=gate.control, qubit2=gate.target),
             Rx(qubit=gate.control, theta=np.pi),
@@ -243,7 +238,7 @@ class DefaultGateDecompositions(GateDecompositionBase):
 
     @decompose_op.register(CRx)
     def _(self, gate: CRx):
-        """Decomposes a controlled-Rx gate via controlled-Rz gates and Hadamards"""
+        """Decomposes a controlled-Rx gate via controlled-Rz gates and Hadamards."""
         return [
             Hadamard(qubit=gate.target),
             CRz(qubit1=gate.control, qubit2=gate.target, theta=gate.theta),

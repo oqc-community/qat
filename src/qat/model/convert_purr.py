@@ -116,9 +116,11 @@ def _get_pulse_channel(
     channel_type: ChannelType,
     auxiliary_qubit: purr_devices.Qubit | None = None,
 ) -> purr_devices.PulseChannelView | None:
-    """PuRR implementation raises an error if we query for a channel that doesn't exist. We
-    want to be able to see if the channel exists, and handle exceptions otherwise. This is a
-    helper function to do that."""
+    """PuRR implementation raises an error if we query for a channel that doesn't exist.
+
+    We want to be able to see if the channel exists, and handle exceptions otherwise. This
+    is a helper function to do that.
+    """
 
     auxiliary_qubit = [auxiliary_qubit] if auxiliary_qubit is not None else None
 
@@ -129,11 +131,14 @@ def _get_pulse_channel(
 
 
 def _build_physical_topology(legacy_hw: QuantumHardwareModel) -> dict[int, set[int]]:
-    """Assemble the physical connectivity from the legacy hardware model. Connectivity is
+    """Assemble the physical connectivity from the legacy hardware model.
+
+    Connectivity is
     inferred from the ``coupled_qubits`` attribute of each qubit. For each pair of coupled
     qubits, a physical edge is added only if both a cross-resonance pulse channel and a
     corresponding cross-resonance-cancellation pulse channel are defined between the two
-    qubits in the PuRR hardware model."""
+    qubits in the PuRR hardware model.
+    """
 
     physical_connectivity = defaultdict(set)
     invalid_couplings = set()
@@ -163,9 +168,11 @@ def _build_physical_topology(legacy_hw: QuantumHardwareModel) -> dict[int, set[i
 def _build_inversed_physical_topology(
     physical_connectivity: dict[int, set[int]],
 ) -> dict[int, set[int]]:
-    """Inverses the physical connectivity to get the incoming couplings for each qubit. This is
-    used to check the logical connectivity against the physical connectivity, and to build
-    the qubits with their incoming couplings."""
+    """Inverses the physical connectivity to get the incoming couplings for each qubit.
+
+    This is used to check the logical connectivity against the physical connectivity, and to
+    build the qubits with their incoming couplings.
+    """
 
     inversed_physical_connectivity = defaultdict(set)
     for qubit_idx, coupled_qubits in physical_connectivity.items():
@@ -179,9 +186,12 @@ def _build_logical_topology(
     legacy_hw: QuantumHardwareModel, physical_connectivity: dict[int, set[int]]
 ) -> dict[int, set[int]] | None:
     """Assembles the logical connectivity from the legacy hardware model and the established
-    physical connectivity. This is done by looking at the qubit direction couplings if they
-    exist, otherwise we assume the logical connectivity is the same as the physical
-    connectivity. Filters out any couplings that do not include a zx_pi_4 gate."""
+    physical connectivity.
+
+    This is done by looking at the qubit direction couplings if they exist, otherwise we
+    assume the logical connectivity is the same as the physical connectivity. Filters out
+    any couplings that do not include a zx_pi_4 gate.
+    """
 
     couplings = getattr(legacy_hw, "qubit_direction_couplings", None)
 

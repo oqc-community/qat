@@ -8,8 +8,11 @@ from qat.pipelines.pipeline import ExecutePipeline
 
 def ExecuteSweepPipeline(base_pipeline: AbstractPipeline):
     """Runtimes now support execution of batched programs in an executable, so the old
-    ExecuteSweepPipeline is no longer necessary. This function is kept for backwards
-    compatibility, and simply returns the base pipeline after checking its type."""
+    ExecuteSweepPipeline is no longer necessary.
+
+    This function is kept for backwards compatibility, and simply returns the base pipeline
+    after checking its type.
+    """
 
     warn(
         "The behaviour of ExecuteSweepPipeline is now supported the SimpleRuntime, and an "

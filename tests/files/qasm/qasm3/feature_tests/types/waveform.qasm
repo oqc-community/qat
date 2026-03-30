@@ -1,4 +1,4 @@
-// Tests declaration of waveform; use cases are handled in other tests 
+// Tests declaration of waveform; use cases are handled in other tests
 
 OPENQASM 3;
 defcalgrammar "openpulse";

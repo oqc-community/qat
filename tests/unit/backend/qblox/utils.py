@@ -186,10 +186,12 @@ def qblox_resource(instrument, seed, type):
     ]
     qrc_type = type in [ClusterType.CLUSTER_QRC]
     modules = instrument.driver.get_connected_modules(
-        filter_fn=lambda mod: mod.is_qcm_type == qcm_type
-        and mod.is_qrm_type == qrm_type
-        and mod.is_rf_type == rf_type
-        and mod.is_qrc_type == qrc_type
+        filter_fn=lambda mod: (
+            mod.is_qcm_type == qcm_type
+            and mod.is_qrm_type == qrm_type
+            and mod.is_rf_type == rf_type
+            and mod.is_qrc_type == qrc_type
+        )
     ).values()
 
     rng = np.random.default_rng(seed)

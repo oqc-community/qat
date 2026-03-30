@@ -7,8 +7,8 @@ from qat.purr.compiler.instructions import DeviceUpdate, FrequencySet
 
 
 class FrequencyAssignSanitisation(TransformPass):
-    """Sanitises device assignments that changes the frequency of a channel, by replacing
-    it with a FrequencySet instruction.
+    """Sanitises device assignments that changes the frequency of a channel, by replacing it
+    with a FrequencySet instruction.
 
     If this is done for targets that can support frequency assignment as an IR instruction,
     (i.e. has support for :class:`FrequencySet`), then this pass can be used to avoid

@@ -24,8 +24,8 @@ log = get_default_logger()
 
 
 class InstructionValidation(ValidationPass):
-    """
-    Validates instructions against the hardware, including whether:
+    """Validates instructions against the hardware, including whether:
+
     - they fit in memory,
     - pulse durations are within the allowed limits and
     - acquire instructions are only performed on acquire channels..
@@ -240,10 +240,8 @@ class DynamicFrequencyValidation(ValidationPass):
 
 
 class NoMidCircuitMeasurementValidation(ValidationPass):
-    """
-    Validates that there are no mid-circuit measurements by checking that no qubit
-    has an acquire instruction that is later followed by a pulse instruction.
-    """
+    """Validates that there are no mid-circuit measurements by checking that no qubit has an
+    acquire instruction that is later followed by a pulse instruction."""
 
     def __init__(
         self,
@@ -345,8 +343,8 @@ class HardwareConfigValidity(ValidationPass):
         """Instantiate the pass with a hardware model.
 
         :param hardware_model: The hardware model.
-        :param max_shots: The maximum number of shots allowed for a single task.
-                If None, uses the default from the QatConfig.
+        :param max_shots: The maximum number of shots allowed for a single task. If None,
+            uses the default from the QatConfig.
         """
         self.hardware_model = hardware_model
         self.max_shots = (
@@ -390,8 +388,7 @@ class HardwareConfigValidity(ValidationPass):
 
 class FrequencySetupValidation(ValidationPass):
     """Validates the baseband frequencies and intermediate frequencies of pulse channels
-    against the target data.
-    """
+    against the target data."""
 
     def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
         """Instantiate the pass with a hardware model.
@@ -450,7 +447,8 @@ class FrequencySetupValidation(ValidationPass):
         return physical_channel_data
 
     def _validate_baseband_frequency(self, frequency, is_resonator: bool) -> bool:
-        """Validates that the frequencies in the dictionary are within the specified range."""
+        """Validates that the frequencies in the dictionary are within the specified
+        range."""
         lower, upper = self._get_lo_freq_range(is_resonator)
         return bool(lower <= frequency <= upper)
 

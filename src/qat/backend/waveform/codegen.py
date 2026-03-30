@@ -33,9 +33,8 @@ log = get_default_logger()
 
 
 class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
-    """
-    Target-machine code generation from an IR for targets that only require the explicit waveforms.
-    """
+    """Target-machine code generation from an IR for targets that only require the explicit
+    waveforms."""
 
     def __init__(
         self,
@@ -202,8 +201,8 @@ class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
         return physical_channel_buffers
 
     def create_acquires(self, ir: PartitionedIR, timeline_res: TimelineAnalysisResult):
-        """Assembles the acquire data needed to perform acquisition, and also the
-        acquire information needed at runtime.
+        """Assembles the acquire data needed to perform acquisition, and also the acquire
+        information needed at runtime.
 
         :param ir: The partitioned IR containing the acquire map.
         :param timeline_res: The timeline analysis result containing the number of samples

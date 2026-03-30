@@ -92,8 +92,7 @@ class LoweringPass(PassInfoMixin):
     """Base case for all passes that modify the IR, instrinsically changing its type and
     structure.
 
-    Acts as insulation between passes that that expect to see the IR in some
-    given format.
+    Acts as insulation between passes that that expect to see the IR in some given format.
     """
 
     def run(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager, *args, **kwargs):
@@ -162,11 +161,10 @@ class PassManager(PassInfoMixin):
         return ir
 
     def add(self, pass_obj):
-        """
-        Add a pass to the pass manager.
+        """Add a pass to the pass manager.
 
-        This can be achieved by either using :code:`pass_mgr.add(pass)`, or
-        :code:`pass_mgr | pass`.
+        This can be achieved by either using :code:`pass_mgr.add(pass)`, or :code:`pass_mgr
+        | pass`.
 
         :param pass_obj:
         """

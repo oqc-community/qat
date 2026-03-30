@@ -12,10 +12,8 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 class BaseMiddleend(abc.ABC):
-    """
-    Base class for a middle end that takes an intermediate representation (IR) :class:`QatIR`
-    and alters it based on optimisation and/or validation passes.
-    """
+    """Base class for a middle end that takes an intermediate representation (IR)
+    :class:`QatIR` and alters it based on optimisation and/or validation passes."""
 
     def __init__(self, model: None | QuantumHardwareModel):
         """
@@ -32,8 +30,8 @@ class BaseMiddleend(abc.ABC):
         compiler_config: CompilerConfig | None = None,
         **kwargs,
     ):
-        """
-        Converts an IR :class:`QatIR` to an optimised IR.
+        """Converts an IR :class:`QatIR` to an optimised IR.
+
         :param ir: The intermediate representation.
         :param res_mgr: Collection of analysis results with caching and aggregation
             capabilities, defaults to None.
@@ -45,9 +43,7 @@ class BaseMiddleend(abc.ABC):
 
 
 class CustomMiddleend(BaseMiddleend):
-    """
-    Middle end that uses a custom pipeline to convert the IR to an (optimised) IR.
-    """
+    """Middle end that uses a custom pipeline to convert the IR to an (optimised) IR."""
 
     def __init__(
         self, model: None | QuantumHardwareModel, pipeline: None | PassManager = None
@@ -63,8 +59,8 @@ class CustomMiddleend(BaseMiddleend):
         compiler_config: CompilerConfig | None = None,
         **kwargs,
     ):
-        """
-        Converts an IR :class:`QatIR` to an optimised IR with a custom pipeline.
+        """Converts an IR :class:`QatIR` to an optimised IR with a custom pipeline.
+
         :param ir: The intermediate representation.
         :param res_mgr: Collection of analysis results with caching and aggregation
             capabilities, defaults to None.

@@ -16,8 +16,8 @@ log = get_default_logger()
 
 
 class EchoPipeline(UpdateablePipeline):
-    """A pipeline that compiles programs using the :class:`PydWaveformBackend`
-    and executes them using the :class:`EchoEngine`.
+    """A pipeline that compiles programs using the :class:`PydWaveformBackend` and executes
+    them using the :class:`EchoEngine`.
 
     An engine cannot be provided to the pipeline, as the EchoEngine is used directly.
     """
@@ -29,8 +29,8 @@ class EchoPipeline(UpdateablePipeline):
         target_data: TargetData | None,
         engine: None = None,
     ) -> Pipeline:
-        """Constructs a pipeline equipped with the :class:`PydWaveformBackend`
-        and :class:`EchoEngine`."""
+        """Constructs a pipeline equipped with the :class:`PydWaveformBackend` and
+        :class:`EchoEngine`."""
 
         if engine is not None:
             log.warning(

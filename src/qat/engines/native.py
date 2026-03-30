@@ -10,8 +10,11 @@ from qat.executables import Program
 
 class NativeEngine(ABC, Generic[Program]):
     """:class:`NativeEngine` acts as an interface between some target machine and an
-    executable. They are used to connect to the target machine (if applicable), and execute
-    and return the results."""
+    executable.
+
+    They are used to connect to the target machine (if applicable), and execute and return
+    the results.
+    """
 
     @abstractmethod
     def execute(self, program: Program, **kwargs) -> dict[str, np.ndarray]:

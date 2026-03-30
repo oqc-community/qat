@@ -157,7 +157,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
 
     @decompose_op.register(Barrier)
     def _(self, gate: Barrier, model: PhysicalHardwareModel):
-        r"""Decomposes a :class:`Barrier` into a :class:`Synchronize` across pulse channels."""
+        r"""Decomposes a :class:`Barrier` into a :class:`Synchronize` across pulse
+        channels."""
 
         pulse_channel_ids = set()
         for qid in gate.qubits:

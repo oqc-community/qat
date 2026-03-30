@@ -98,8 +98,8 @@ class QIRFrontend(BaseFrontend):
             return PydQIRParser(results_format)
 
     def check_and_return_source(self, src: str | bytes) -> bool | str | bytes:
-        """Checks that the source program (or file path) can be interpreted as a QIR file
-        by checking against the language.
+        """Checks that the source program (or file path) can be interpreted as a QIR file by
+        checking against the language.
 
         :param src: The QIR program, or the file path to the program.
         :returns: If the program is determined to not be valid, False is returned.

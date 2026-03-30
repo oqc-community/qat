@@ -19,9 +19,7 @@ log = get_default_logger()
 
 
 class QiskitSimulationConfig(BaseModel):
-    """
-    The default settings for the Qiskit Simulator, including overridden MPS settings.
-    """
+    """The default settings for the Qiskit Simulator, including overridden MPS settings."""
 
     model_config = ConfigDict(validate_assignment=True)
     _allowed_methods: type = Literal[AerSimulator().available_methods()]
@@ -33,8 +31,9 @@ class QiskitSimulationConfig(BaseModel):
         "matrix_product_state_max_bond_dimension": 128,
         "matrix_product_state_truncation_threshold": 1e-12,
     }
-    """
-    Specify the options for a chosen AerSimulator backend. See
+    """Specify the options for a chosen AerSimulator backend.
+
+    See
     https://docs.quantum.ibm.com/api/qiskit/0.37/qiskit.providers.aer.AerSimulator
     for options you can provide.
     """
@@ -43,18 +42,14 @@ class QiskitSimulationConfig(BaseModel):
 
 
 class QatSimulationConfig(BaseModel):
-    """
-    The default settings for QATs simulation backends.
-    """
+    """The default settings for QATs simulation backends."""
 
     model_config = ConfigDict(validate_assignment=True)
     QISKIT: QiskitSimulationConfig = QiskitSimulationConfig()
 
 
 class InstructionValidationConfig(BaseModel):
-    """
-    The default settings for validation of instructions.
-    """
+    """The default settings for validation of instructions."""
 
     model_config = ConfigDict(validate_assignment=True)
     NO_MID_CIRCUIT_MEASUREMENT: bool = True
@@ -87,8 +82,9 @@ class InstructionValidationConfig(BaseModel):
 
 
 class QatConfig(BaseSettings):
-    """
-    Full settings for a single job. Allows environment variables to be overridden by direct assignment.
+    """Full settings for a single job.
+
+    Allows environment variables to be overridden by direct assignment.
     """
 
     model_config = SettingsConfigDict(

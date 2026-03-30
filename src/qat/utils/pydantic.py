@@ -34,11 +34,11 @@ log = get_default_logger()
 
 
 class NoExtraFieldsModel(BaseModel):
-    """
-    A Pydantic `BaseModel` with the extra constraints:
-        #. Assignment of fields after initialisation is checked again.
-        #. Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
-          but raise an error now.
+    """A Pydantic `BaseModel` with the extra constraints:
+
+    #. Assignment of fields after initialisation is checked again.
+    #. Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
+      but raise an error now.
     """
 
     model_config = ConfigDict(
@@ -53,22 +53,22 @@ class NoExtraFieldsModel(BaseModel):
 
 
 class NoExtraFieldsFrozenModel(NoExtraFieldsModel):
-    """
-    A Pydantic `BaseModel` with the extra constraints:
-        #. Assignment of fields after initialisation is checked again.
-        #. Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
-          but raise an error now.
-        # All fields are frozen upon instantiation.
+    """A Pydantic `BaseModel` with the extra constraints:
+
+    #. Assignment of fields after initialisation is checked again.
+    #. Extra fields given to the model are not ignored (default behaviour in `BaseModel`),
+      but raise an error now.
+    # All fields are frozen upon instantiation.
     """
 
     model_config = ConfigDict(frozen=True)
 
 
 class AllowExtraFieldsModel(BaseModel):
-    """
-    A Pydantic `BaseModel` with the extra constraints:
-        #. Assignment of fields after initialisation is checked again.
-        #. Extra fields given to the model are ignored (default behaviour in `BaseModel`).
+    """A Pydantic `BaseModel` with the extra constraints:
+
+    #. Assignment of fields after initialisation is checked again.
+    #. Extra fields given to the model are ignored (default behaviour in `BaseModel`).
     """
 
     model_config = ConfigDict(
@@ -83,9 +83,7 @@ class RehydratableModel(BaseModel):
     @computed_field
     @cached_property
     def object_type(self) -> str:
-        """
-        Returns the type of the object, which is the class name.
-        """
+        """Returns the type of the object, which is the class name."""
         return self.__class__.__module__ + "." + self.__class__.__name__
 
     @classmethod
@@ -180,15 +178,11 @@ V = TypeVar("GeneralValue")
 
 
 class PydValidatedBase(RootModel):
-    """
-    Base class for validated Pydantic containers.
-    """
+    """Base class for validated Pydantic containers."""
 
     @model_validator(mode="after")
     def validation_setup(self):
-        """
-        Setup validation for the container.
-        """
+        """Setup validation for the container."""
         annotation_args = get_args(self.__class__.model_fields["root"].annotation)
         value_type = annotation_args[0]
         annotation_type, allowed_types, validation_funcs = self._determine_validation_info(
@@ -257,11 +251,10 @@ class PydListBase(RootModel[list[V]]):
 
 
 class ValidatedList(PydListBase, PydValidatedBase):
-    """
-    A list object that validates the input appended/extended after instantiation.
-    This way, we are sure that the elements in a list are only of a certain type.
-    Pydantic containers only validate upon instantiation, not when modifying the
-    container.
+    """A list object that validates the input appended/extended after instantiation.
+
+    This way, we are sure that the elements in a list are only of a certain type. Pydantic
+    containers only validate upon instantiation, not when modifying the container.
     """
 
     def append(self, value: V):
@@ -343,19 +336,16 @@ class PydSetBase(RootModel[set[V]]):
 
 
 class FrozenSet(PydSetBase):
-    """
-    A Pydantic set that is immutable after instantiation.
-    """
+    """A Pydantic set that is immutable after instantiation."""
 
     root: frozenset[V] = Field(default_factory=frozenset)
 
 
 class ValidatedSet(PydSetBase, PydValidatedBase):
-    """
-    A set object that validates the input added after instantiation.
-    This way, we are sure that the elements in a set are only of a certain type.
-    Pydantic containers only validate upon instantiation, not when modifying the
-    container.
+    """A set object that validates the input added after instantiation.
+
+    This way, we are sure that the elements in a set are only of a certain type. Pydantic
+    containers only validate upon instantiation, not when modifying the container.
     """
 
     def add(self, value: V):
@@ -428,9 +418,8 @@ class PydDictBase(RootModel[dict[K, V]]):
 
 
 class _PydanticFrozenDictAnnotation:
-    """
-    Helper class since Pydantic `V2` does only offer support for `frozenset`, not `frozendict`.
-    """
+    """Helper class since Pydantic `V2` does only offer support for `frozenset`, not
+    `frozendict`."""
 
     @classmethod
     def __get_pydantic_core_schema__(cls, source_type, handler):
@@ -456,26 +445,21 @@ pyd_frozendict = Annotated[frozendict[K, V], _PydanticFrozenDictAnnotation]
 
 
 class FrozenDict(PydDictBase):
-    """
-    A Pydantic dict that is immutable after instantiation.
-    """
+    """A Pydantic dict that is immutable after instantiation."""
 
     root: pyd_frozendict[K, V] = Field(default_factory=frozendict)
 
 
 class ValidatedDict(PydDictBase, PydValidatedBase):
-    """
-    A dict object that validates the input added after instantiation.
-    This way, we are sure that the elements in a dict are only of a certain type.
-    Pydantic containers only validate upon instantiation, not when modifying the
-    container.
+    """A dict object that validates the input added after instantiation.
+
+    This way, we are sure that the elements in a dict are only of a certain type. Pydantic
+    containers only validate upon instantiation, not when modifying the container.
     """
 
     @model_validator(mode="after")
     def validation_setup(self):
-        """
-        Validate the types of keys and values in the dictionary.
-        """
+        """Validate the types of keys and values in the dictionary."""
         annotation_args = get_args(self.__class__.model_fields["root"].annotation)
         key_type = annotation_args[0]
         annotation_type, allowed_types, validation_funcs = self._determine_validation_info(
@@ -534,9 +518,7 @@ WaveformType = Annotated[
 
 
 def find_all_subclasses(cls: Type) -> list[Type]:
-    """
-    Recursively finds nested subclasses of a class.
-    """
+    """Recursively finds nested subclasses of a class."""
     subclasses = cls.__subclasses__()
     for subclass in subclasses:
         subclasses.extend(find_all_subclasses(subclass))
@@ -593,10 +575,10 @@ def _serializer(obj, ty: type):
 
 
 def _validator(payload, ty: type):
-    """
-    Plain validator function for annotated numpy array types.
-    The payload is assumed to be consumed as a string, a numpy array, or a dictionary
-    and a PydArray is created from it.
+    """Plain validator function for annotated numpy array types.
+
+    The payload is assumed to be consumed as a string, a numpy array, or a dictionary and a
+    PydArray is created from it.
     """
 
     if isinstance(payload, PydArray):
@@ -711,8 +693,7 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
         return self._wrap(out)
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
-        """
-        Implements special methods for almost all of Python's built-in operators.
+        """Implements special methods for almost all of Python's built-in operators.
 
         Implementation inspired by
         https://numpy.org/doc/2.2/reference/generated/numpy.lib.mixins.NDArrayOperatorsMixin.html
@@ -757,8 +738,8 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
 
     # Other niceties from the ndarray interface we'd like to support for PydArrays.
     def __getattr__(self, name):
-        """
-        Delegate attribute access to the underlying ndarray.
+        """Delegate attribute access to the underlying ndarray.
+
         This will handle .shape, .size, .reshape, etc. automatically.
         """
         attr = getattr(self.value, name)

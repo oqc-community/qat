@@ -99,14 +99,15 @@ class MeasurementStatistics:
         options=None,
         branch_number=-1,
     ):
-        """
-        Simulate the dynamics of initial condition using the section of the Hamiltonian
-        specified by the level. Perform a measurement on the specified qubits in the
-        Hamiltonian section and for each result calculate the probability of it occuring
-        and the resultant state. For each result perform a new simulation with the next
-        Hamiltonian section to create a branching structure of all possible outcomes for
-        a given initial condition and Hamiltonian sections dictionary. Continue until
-        all Hamiltonian sections have been simulated.
+        """Simulate the dynamics of initial condition using the section of the Hamiltonian
+        specified by the level.
+
+        Perform a measurement on the specified qubits in the Hamiltonian section and for
+        each result calculate the probability of it occuring and the resultant state. For
+        each result perform a new simulation with the next Hamiltonian section to create a
+        branching structure of all possible outcomes for a given initial condition and
+        Hamiltonian sections dictionary. Continue until all Hamiltonian sections have been
+        simulated.
         """
         if self.level == len(simulation_sections) or self.probability.real <= 0:
             branch_number += 1
@@ -408,9 +409,9 @@ class CouplingType(Enum):
 
 
 class RTCSCoupling(QuantumComponent, Calibratable):
-    """
-    Resonators/Qubits are coupled in a very particular way in this model. This object
-    holds information about those couplings.
+    """Resonators/Qubits are coupled in a very particular way in this model.
+
+    This object holds information about those couplings.
     """
 
     def __init__(
@@ -657,11 +658,9 @@ class RealtimeSimHardwareModel(QuantumHardwareModel):
 
 
 class RealtimeChipSimEngine(QuantumExecutionEngine):
-    """
-    Simulation that is built to be as close to our hardware as possible to allow for
-    developers, quantum engineers and the fabrication team to be able to run simulations
-    and be confident that the results are close to reality.
-    """
+    """Simulation that is built to be as close to our hardware as possible to allow for
+    developers, quantum engineers and the fabrication team to be able to run simulations and
+    be confident that the results are close to reality."""
 
     model: RealtimeSimHardwareModel
 
@@ -677,17 +676,13 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         self.channel_pulse_data: Optional[dict] = None
 
     def process_reset(self, position: PositionData):
-        """
-        When the superclass process_reset is implemented, it should remain empty for the
-        simulator.
-        """
+        """When the superclass process_reset is implemented, it should remain empty for the
+        simulator."""
         pass
 
     def build_simulator_resets(self, position_map: Dict[str, List[PositionData]]):
-        """
-        Qubit resets are handled in a unqiue way for the simulator so require their own
-        function.
-        """
+        """Qubit resets are handled in a unqiue way for the simulator so require their own
+        function."""
         resets = {}
         for pulse_channel_id, positions in position_map.items():
             for pos in positions:
@@ -717,21 +712,18 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         package: QatFile,
         interrupt: Interrupt = NullInterrupt(),
     ) -> Dict[str, np.ndarray]:
-        """
-        Derivation of the mathematics behind this simulation can be found in the docs
-        folder, "Realtime chip simulator mathematical derivation.pdf". Emulate the
-        effects of the firmware and quantum hardware for a given input. Before
-        instructions are passed to execute they are optimised for this specific function
-        so that all measurements occur consecutively and never at the same time across
-        all channels.
+        """Derivation of the mathematics behind this simulation can be found in the docs
+        folder, "Realtime chip simulator mathematical derivation.pdf". Emulate the effects
+        of the firmware and quantum hardware for a given input. Before instructions are
+        passed to execute they are optimised for this specific function so that all
+        measurements occur consecutively and never at the same time across all channels.
 
-        Before a measurement is made all quantum channels executing instructions up to
-        the measurement must have finished operating and only one one measurement
-        channel executes at time. This is achieved by synchronising a measurement
-        channel with qubit channels before measurement. This may not be how the hardware
-        will handle measurements as it is an inefficent use of time but it makes
-        splicing up the simulation into sections between measurements easier for the
-        emulator.
+        Before a measurement is made all quantum channels executing instructions up to the
+        measurement must have finished operating and only one one measurement channel
+        executes at time. This is achieved by synchronising a measurement channel with qubit
+        channels before measurement. This may not be how the hardware will handle
+        measurements as it is an inefficent use of time but it makes splicing up the
+        simulation into sections between measurements easier for the emulator.
         """
         results = {}
         while not sweep_iterator.is_finished():
@@ -1101,8 +1093,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         return results
 
     def plot_pulses(self, channels: List[str] = None):
-        """
-        Plot pulses used to drive the system. Pulses are shown before being transformed
+        """Plot pulses used to drive the system. Pulses are shown before being transformed
         by the baseband frequnecy.
 
         :param channels: List of channel ids to plot. If None then all channels are plotted.
@@ -1134,25 +1125,23 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         branches: List[int] = None,
         step: int = 1,
     ):
-        """
-        Plot the dynamics of operator expectation values for a simulation run on this
+        """Plot the dynamics of operator expectation values for a simulation run on this
         hardware. By default the pauli operators will be plot for each qubit but custom
         operators can be specified.
 
-        :param operator_info: Use the OperatorInfo object to specify an operator to
-            plot, the id of the qubit the operator should act on and the name of the
-            operator. Alternatively qubit indices (int) can be specified in which case
-            the Pauli x, y and z expectations will be plotted for these qubits. If None
-            then the Pauli operators for every qubit will be plotted. Defaults to None.
-        :param branches: Specify a list of indices for the branches you wish to plot.
-            This is only really relevent if the circuit includes mid-circuit
-            measurements, in which case there will be a different trajectory for each
-            possible measurement outcome. If None then the first trajectory will be
-            plotted which is identical to all other trajectories for circuits without
-            mid-circuit measurements. Defaults to None.
-        :param step: The step length between expectation calculations along the
-            trajectory. 1 gives the highest resolution but takes longer to calculate.
-            Defaults to 1.
+        :param operator_info: Use the OperatorInfo object to specify an operator to plot,
+            the id of the qubit the operator should act on and the name of the operator.
+            Alternatively qubit indices (int) can be specified in which case the Pauli x, y
+            and z expectations will be plotted for these qubits. If None then the Pauli
+            operators for every qubit will be plotted. Defaults to None.
+        :param branches: Specify a list of indices for the branches you wish to plot. This
+            is only really relevent if the circuit includes mid-circuit measurements, in
+            which case there will be a different trajectory for each possible measurement
+            outcome. If None then the first trajectory will be plotted which is identical to
+            all other trajectories for circuits without mid-circuit measurements. Defaults
+            to None.
+        :param step: The step length between expectation calculations along the trajectory.
+            1 gives the highest resolution but takes longer to calculate. Defaults to 1.
         """
         if branches is None:
             branches = [0]
@@ -1270,10 +1259,8 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
 
 def spline_time(dt, sim_t, buffer):
-    """
-    Perform a cubic spline on the buffer to make the number of points the same as the
-    number of points in the simulation time
-    """
+    """Perform a cubic spline on the buffer to make the number of points the same as the
+    number of points in the simulation time."""
     t = np.linspace(0.0, (len(buffer) - 1) * dt, len(buffer))
     if t[-1] < sim_t[-1]:
         extra_t = np.arange(t[-1] + dt, sim_t[-1], dt)
@@ -1337,10 +1324,8 @@ def get_resonator_response_segments(buffers, resets):
 
 
 def get_resonator_response_splicing_indices(buffer_segments):
-    """
-    Take the buffer segments and parse them to find where the qubit buffer needs to be
-    split in order to perform mid-circuit measurements.
-    """
+    """Take the buffer segments and parse them to find where the qubit buffer needs to be
+    split in order to perform mid-circuit measurements."""
     previous_start_indice = 0
     section_num = -1
     simulation_sections: Dict[Section] = {}

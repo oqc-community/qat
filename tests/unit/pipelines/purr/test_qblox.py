@@ -53,7 +53,8 @@ class TestQbloxPipeline:
         assert pipeline.backend.pipeline is not None
 
     def test_build_compile_pipeline(self):
-        """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
+        """Test the build_compile_pipeline method to ensure it constructs the compile
+        pipeline correctly."""
         model = QbloxModelLoader(qubit_count=4).load()
         compile_pipeline = QbloxPipeline2._build_pipeline(
             config=PipelineConfig(name="qblox_compile"), model=model, target_data=None
@@ -68,7 +69,8 @@ class TestQbloxPipeline:
         assert compile_pipeline.backend.pipeline is not None
 
     def test_build_execute_pipeline(self, testpath):
-        """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
+        """Test the build_execute_pipeline method to ensure it constructs the execute
+        pipeline correctly."""
         filepath = Path(
             testpath,
             "files",
@@ -187,8 +189,8 @@ class TestQbloxPipelineWithCircuits:
     """A class that tests the compilation and execution of the QbloxPipeline with a
     QbloxBackend2 against circuit programs.
 
-    It tests the expectations of the compilation pipelines, inspecting the properties of
-    the executable and the results returned by the QbloxLiveEngineAdapter.
+    It tests the expectations of the compilation pipelines, inspecting the properties of the
+    executable and the results returned by the QbloxLiveEngineAdapter.
     """
 
     # TODO: 32Q support: COMPILER-728
@@ -263,8 +265,8 @@ class TestQbloxPipelineWithCircuits:
             assert len(channel_data.buffer) * sample_time <= executable.repetition_time
 
     def test_channel_data(self, executable):
-        """QbloxExecutables are expected to have channel data for each physical
-        channel available, regardless of if they're used."""
+        """QbloxExecutables are expected to have channel data for each physical channel
+        available, regardless of if they're used."""
 
         for program in executable.programs:
             assert len(program.channel_data) == len(self.model.physical_channels)
@@ -282,7 +284,10 @@ class TestQbloxPipelineWithCircuits:
         self, returned_acquires, num_readouts
     ):
         """Check that the executable has a number of acquires that matches the provided
-        value. In the future, this might need adjusting to account of active reset."""
+        value.
+
+        In the future, this might need adjusting to account of active reset.
+        """
 
         assert len(returned_acquires) == num_readouts
 
@@ -300,7 +305,10 @@ class TestQbloxPipelineWithCircuits:
         self, executable: Executable[QbloxProgram], num_registers: int
     ):
         """Check that the executable has a number of returns that matches the provided
-        value. In the future, this might need adjusting to account of active reset."""
+        value.
+
+        In the future, this might need adjusting to account of active reset.
+        """
 
         assert len(executable.returns) == num_registers
 
@@ -308,8 +316,10 @@ class TestQbloxPipelineWithCircuits:
         self, executable: Executable[QbloxProgram], request
     ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
-        correctly post-processing to be discriminated as a bit. We can assume the acquire
-        mode is INTEGRATOR."""
+        correctly post-processing to be discriminated as a bit.
+
+        We can assume the acquire mode is INTEGRATOR.
+        """
 
         if "openpulse" in request.node.callspec.id:
             pytest.mark.skip("Openpulse has more expressive use of acquires.")

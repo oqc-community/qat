@@ -13,7 +13,7 @@ _session_config: ContextVar[QatSessionConfig | None] = ContextVar(
 
 
 def get_qatconfig() -> QatConfig:
-    """Returns the global QatConfig"""
+    """Returns the global QatConfig."""
     global _global_config
     if _global_config is None:
         _global_config = QatConfig()
@@ -21,7 +21,7 @@ def get_qatconfig() -> QatConfig:
 
 
 def get_config() -> QatSessionConfig | QatConfig:
-    """Returns the session config if set or the global QatConfig if not"""
+    """Returns the session config if set or the global QatConfig if not."""
     if (session_config := _session_config.get()) is not None:
         return session_config
 

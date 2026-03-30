@@ -50,7 +50,8 @@ class TestEchoPipeline:
         assert isinstance(pipeline.engine, EchoEngine)
 
     def test_build_compile_pipeline(self):
-        """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
+        """Test the build_compile_pipeline method to ensure it constructs the compile
+        pipeline correctly."""
         model = EchoModelLoader(qubit_count=4).load()
         compile_pipeline = EchoPipeline._build_pipeline(
             config=PipelineConfig(name="echo_compile"), model=model, target_data=None
@@ -63,7 +64,8 @@ class TestEchoPipeline:
         assert isinstance(compile_pipeline.target_data, TargetData)
 
     def test_build_execute_pipeline(self):
-        """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
+        """Test the build_execute_pipeline method to ensure it constructs the execute
+        pipeline correctly."""
         model = EchoModelLoader(qubit_count=4).load()
         execute_pipeline = EchoPipeline._build_pipeline(
             config=PipelineConfig(name="echo_execute"), model=model, target_data=None
@@ -100,8 +102,8 @@ class TestEchoPipelineWithCircuits:
     """A class that tests the compilation and execution of the EchoPipeline with a
     WaveformV1Backend against circuit programs.
 
-    It tests the expectations of the compilation pipelines, inspecting the properties of
-    the executable and the results returned by the EchoEngine.
+    It tests the expectations of the compilation pipelines, inspecting the properties of the
+    executable and the results returned by the EchoEngine.
     """
 
     target_data = TargetData()
@@ -192,8 +194,8 @@ class TestEchoPipelineWithCircuits:
                 assert program.repetition_time == 0
 
     def test_channel_data(self, executable):
-        """WaveformV1Programs are expected to have channel data for each physical
-        channel available, regardless of if they're used."""
+        """WaveformV1Programs are expected to have channel data for each physical channel
+        available, regardless of if they're used."""
 
         for program in executable.programs:
             assert len(program.channel_data) == len(self.model.physical_channels)
@@ -210,7 +212,10 @@ class TestEchoPipelineWithCircuits:
         self, returned_acquires, num_readouts
     ):
         """Check that the executable has a number of acquires that matches the provided
-        value. In the future, this might need adjusting to account of active reset."""
+        value.
+
+        In the future, this might need adjusting to account of active reset.
+        """
 
         assert len(returned_acquires) == num_readouts
 
@@ -228,7 +233,10 @@ class TestEchoPipelineWithCircuits:
         self, executable: Executable[WaveformV1Program], num_registers: int
     ):
         """Check that the executable has a number of returns that matches the provided
-        value. In the future, this might need adjusting to account of active reset."""
+        value.
+
+        In the future, this might need adjusting to account of active reset.
+        """
 
         assert len(executable.returns) == num_registers
 
@@ -236,8 +244,10 @@ class TestEchoPipelineWithCircuits:
         self, executable: Executable[WaveformV1Program], request
     ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
-        correctly post-processing to be discriminated as a bit. We can assume the acquire
-        mode is INTEGRATOR."""
+        correctly post-processing to be discriminated as a bit.
+
+        We can assume the acquire mode is INTEGRATOR.
+        """
 
         if "openpulse" in request.node.callspec.id:
             pytest.mark.skip("Openpulse has more expressive use of acquires.")
@@ -329,8 +339,9 @@ class TestEchoPipelineWithCircuits:
 class TestEchoPipelineWithErrorMitigation:
     """A class that tests the compilation and execution of the EchoPipeline with a
     WaveformV1Backend against circuit programs with error mitigation enabled.
-    It tests the expectations of the compilation pipelines, inspecting the properties of
-    the executable and the results returned by the EchoEngine.
+
+    It tests the expectations of the compilation pipelines, inspecting the properties of the
+    executable and the results returned by the EchoEngine.
     """
 
     target_data = TargetData()

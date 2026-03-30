@@ -121,7 +121,8 @@ class TestPipelineFactory:
         assert PipelineFactory._has_argument(create_mock_pipeline, "target_data") is False
 
     def test_has_argument_returns_true_if_target_data_required(self):
-        """Tests that the factory creates target data if the factory function requires it."""
+        """Tests that the factory creates target data if the factory function requires
+        it."""
 
         assert PipelineFactory._has_argument(
             create_mock_pipeline_with_target_data, "target_data"
@@ -133,7 +134,8 @@ class TestPipelineFactory:
         assert PipelineFactory._has_argument(create_mock_pipeline, "engine") is False
 
     def test_has_argument_returns_true_if_engine_required(self):
-        """Tests that the factory creates target data if the factory function requires it."""
+        """Tests that the factory creates target data if the factory function requires
+        it."""
 
         assert PipelineFactory._has_argument(create_mock_pipeline_with_engine, "engine")
 

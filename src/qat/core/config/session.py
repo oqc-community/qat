@@ -23,8 +23,7 @@ from qat.utils.piny import VeryStrictMatcher
 
 
 class QatSessionConfig(QatConfig):
-    """
-    Configuration for QAT() sessions extending qat.purr.qatconfig configuration.
+    """Configuration for QAT() sessions extending qat.purr.qatconfig configuration.
 
     >>> import os
     >>> os.environ["QAT_MAX_REPEATS_LIMIT"] = "654321"
@@ -54,13 +53,13 @@ class QatSessionConfig(QatConfig):
     )
 
     EXTENSIONS: list[ImportString] = []
-    """ QAT Extensions to initialise on start-up"""
+    """QAT Extensions to initialise on start-up."""
 
     HARDWARE: list[HardwareLoaderDescription] = []
-    """ QAT Hardware Models to load on start-up """
+    """QAT Hardware Models to load on start-up."""
 
     ENGINES: list[EngineDescription] = []
-    """ QAT Engines to add on start-up """
+    """QAT Engines to add on start-up."""
 
     PIPELINES: (
         list[
@@ -71,8 +70,8 @@ class QatSessionConfig(QatConfig):
         ]
         | None
     ) = None
-    """ QAT Pipelines for compilation and execution to add on start-up, None adds default
-    pipelines"""
+    """QAT Pipelines for compilation and execution to add on start-up, None adds default
+    pipelines."""
 
     COMPILE: (
         list[
@@ -83,7 +82,7 @@ class QatSessionConfig(QatConfig):
         ]
         | None
     ) = None
-    """ QAT Pipelines for compilation to add on start-up, None adds default pipelines"""
+    """QAT Pipelines for compilation to add on start-up, None adds default pipelines."""
 
     EXECUTE: (
         list[
@@ -94,7 +93,7 @@ class QatSessionConfig(QatConfig):
         ]
         | None
     ) = None
-    """ QAT Pipelines for execution to add on start-up, None adds default pipelines"""
+    """QAT Pipelines for execution to add on start-up, None adds default pipelines."""
 
     @field_validator("EXTENSIONS")
     def load_extensions(values):
@@ -172,8 +171,10 @@ class QatSessionConfig(QatConfig):
     @classmethod
     def no_duplicate_pipeline_names(cls, val, info: ValidationInfo):
         """For each of the PIPELINES, COMPILE, and EXECUTE fields, this checks that there
-        are no duplicate names in the list of descriptions. Also checks there are no shared
-        names between PIPELINES and COMPILE/EXECUTE."""
+        are no duplicate names in the list of descriptions.
+
+        Also checks there are no shared names between PIPELINES and COMPILE/EXECUTE.
+        """
         from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline
 
         pipeline_ty = CompilePipeline if info.field_name == "COMPILE" else ExecutePipeline

@@ -58,9 +58,7 @@ def direct_x(qubit, channel=None, theta=None, amp=None, drag=None, width=None, r
 
 
 def empty(model, qubit_indices=None):
-    """
-    Not literally empty, just contains stalling instructions.
-    """
+    """Not literally empty, just contains stalling instructions."""
 
     qubit_indices = qubit_indices if qubit_indices is not None else [0]
     builder = get_builder(model)
@@ -157,9 +155,8 @@ def qubit_spect(model, qubit_indices=None, num_points=None):
 
 
 def delay_iteration(model, qubit_indices=None, num_points=None, width=None):
-    """
-    Typically found in T1 measurement where an X gate is applied followed by a variable delay.
-    """
+    """Typically found in T1 measurement where an X gate is applied followed by a variable
+    delay."""
 
     qubit_indices = qubit_indices or [0]
     num_points = num_points or 100
@@ -244,9 +241,7 @@ def measure_acquire(
 
 
 def pulse_width_iteration(model, qubit_indices=None, num_points=None):
-    """
-    A variation of Rabi where the pulse amplitude is fixed and its width is variable.
-    """
+    """A variation of Rabi where the pulse amplitude is fixed and its width is variable."""
 
     qubit_indices = qubit_indices or [0]
     num_points = num_points or 10
@@ -288,9 +283,7 @@ def pulse_width_iteration(model, qubit_indices=None, num_points=None):
 
 
 def pulse_amplitude_iteration(model, qubit_indices=None, num_points=None):
-    """
-    A variation of Rabi where the pulse width is fixed and its amplitude is variable.
-    """
+    """A variation of Rabi where the pulse width is fixed and its amplitude is variable."""
 
     qubit_indices = qubit_indices or [0]
     num_points = num_points or 10
@@ -332,9 +325,7 @@ def pulse_amplitude_iteration(model, qubit_indices=None, num_points=None):
 
 
 def time_and_phase_iteration(model, qubit_indices=None, num_points=None):
-    """
-    Typical in Ramsey measurement where both time and phase are variable.
-    """
+    """Typical in Ramsey measurement where both time and phase are variable."""
 
     qubit_indices = qubit_indices or [0]
     num_points = num_points or 10

@@ -7,10 +7,8 @@ import networkx as nx
 
 
 def get_connected_subgraphs(edges: list[tuple[int, int]]):
-    """
-    Given a list of edges in a graph, which can be disconnected,
-    construct the connected subgraph(s) within a given graph.
-    """
+    """Given a list of edges in a graph, which can be disconnected, construct the connected
+    subgraph(s) within a given graph."""
     G = nx.DiGraph(edges)
 
     subgraphs_nodes = []

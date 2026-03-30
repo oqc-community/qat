@@ -24,10 +24,8 @@ log = get_default_logger()
 
 
 class QbloxPipeline1(UpdateablePipeline):
-    """
-    A pipeline that compiles programs using the :class:`QbloxBackend1` and executes
-    them using the :class:`QbloxEngine`.
-    """
+    """A pipeline that compiles programs using the :class:`QbloxBackend1` and executes them
+    using the :class:`QbloxEngine`."""
 
     @staticmethod
     def _build_pipeline(
@@ -60,10 +58,8 @@ class QbloxPipeline1(UpdateablePipeline):
 
 
 class QbloxPipeline2(UpdateablePipeline):
-    """
-    A pipeline that compiles programs using the :class:`QbloxBackend2` and executes
-    them using the :class:`QbloxEngine`.
-    """
+    """A pipeline that compiles programs using the :class:`QbloxBackend2` and executes them
+    using the :class:`QbloxEngine`."""
 
     @staticmethod
     def _build_pipeline(

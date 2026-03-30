@@ -4,7 +4,7 @@ HARDWARE:
   config:
     qubit_count: 6
 
-ENGINES: 
-- name: mock 
-  type: tests.unit.utils.engines.MockEngineWithModel 
+ENGINES:
+- name: mock
+  type: tests.unit.utils.engines.MockEngineWithModel
   hardware_loader: echo8loader

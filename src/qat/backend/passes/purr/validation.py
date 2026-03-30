@@ -35,8 +35,11 @@ class NCOFrequencyVariability(ValidationPass):
 
 
 class NoAcquireWeightsValidation(ValidationPass):
-    """Some target machines do not support :class:`Acquire` instructions that contain weights.
-    This pass can be used to validate that this is the case."""
+    """Some target machines do not support :class:`Acquire` instructions that contain
+    weights.
+
+    This pass can be used to validate that this is the case.
+    """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """
@@ -53,7 +56,10 @@ class NoAcquireWeightsValidation(ValidationPass):
 
 class NoMultipleAcquiresValidation(ValidationPass):
     """Some target machines do not support multiple :class:`Acquire` instructions on the
-    same channel. This validation pass should be used to verify this."""
+    same channel.
+
+    This validation pass should be used to verify this.
+    """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
@@ -71,8 +77,10 @@ class NoMultipleAcquiresValidation(ValidationPass):
 
 
 class NoAcquiresWithDifferentWeightsValidation(ValidationPass):
-    """Some target machines do not support multiple :class:`Acquire` instructions with different
-    filters on the same pulse channel. This validation pass should be used to verify this.
+    """Some target machines do not support multiple :class:`Acquire` instructions with
+    different filters on the same pulse channel.
+
+    This validation pass should be used to verify this.
     """
 
     def run(self, ir: PartitionedIR, *args, **kwargs):

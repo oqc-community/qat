@@ -1,10 +1,10 @@
 HARDWARE:
-- name: lucy6loader 
+- name: lucy6loader
   type: qat.model.loaders.lucy.LucyModelLoader
   config:
     qubit_count: 6
 
-COMPILE: 
+COMPILE:
 - name: top_level_info
   pipeline: qat.pipelines.waveform.WaveformCompilePipeline
   hardware_loader: lucy6loader

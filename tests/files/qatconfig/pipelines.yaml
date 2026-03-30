@@ -41,6 +41,6 @@ ENGINES:
   type: tests.unit.utils.engines.InitableEngine
   config:
     x : 10
-    cblam: 
+    cblam:
       host: someurl.com
       timeout: 60

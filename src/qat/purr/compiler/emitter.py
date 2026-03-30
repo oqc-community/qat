@@ -98,9 +98,9 @@ class QatFile:
 
 
 class InstructionEmitter:
-    """
-    Interface to the LLVM-driven QAT optimization and construction passes. For now we
-    simulate what it might do in the future and ust output a Python object that
+    """Interface to the LLVM-driven QAT optimization and construction passes.
+
+    For now we simulate what it might do in the future and ust output a Python object that
     simulates what our instruction set might look like.
     """
 

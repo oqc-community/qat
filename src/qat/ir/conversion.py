@@ -150,7 +150,9 @@ class ConvertToPydanticIR(TransformPass):
 
     @singledispatchmethod
     def _convert_element(self, value, *args, **kwargs):
-        """Default method for converting elements. This will raise an error if no specific
+        """Default method for converting elements.
+
+        This will raise an error if no specific
         conversion is defined for the type of `value`.
         """
         raise TypeError(f"Unsupported type for conversion: {type(value)}")

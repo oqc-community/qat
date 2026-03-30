@@ -56,8 +56,8 @@ Program = TypeVar("Program", bound=AbstractProgram)
 class Executable(BaseModel, Generic[Program]):
     """:class:`Executable`s are packages of instructions that will be executed by the
     runtime. They contain a :class:`Program`, or a number of :class:`Program`s to be
-    executed by the engine. They also contain the acquire information, such as
-    post-processing and result assignments.
+    executed by the engine. They also contain the acquire information, such as post-
+    processing and result assignments.
 
     :param programs: The program(s) to be executed against the engine.
     :param assigns: Assigns results to given variables.

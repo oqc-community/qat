@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-
+import numpy as np
 import pytest
+from qblox_instruments import ClusterType
 
 from qat.model.loaders.purr import QbloxModelLoader
 from qat.model.loaders.purr.qblox import DEFAULT_DUMMY_CONFIG, DEFAULT_QUBIT_COUNT
@@ -44,3 +45,43 @@ def qblox_model(request, module_seed):
         qubit_count=qubit_count,
     ).load()
     yield hw_model
+
+
+@pytest.fixture()
+def qblox_resource(request, legacy_qblox_instrument_factory, function_seed):
+    with temporary_uuid_seed(function_seed):
+        id = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
+        name = id
+        address = request.param
+
+    instrument = legacy_qblox_instrument_factory(id, name, address)
+    instrument.connect()
+
+    def _qblox_resource(type: ClusterType):
+        qcm_type = type in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
+        qrm_type = type in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
+        rf_type = type in [
+            ClusterType.CLUSTER_QCM_RF,
+            ClusterType.CLUSTER_QRM_RF,
+            ClusterType.CLUSTER_QRC,
+        ]
+        qrc_type = type in [ClusterType.CLUSTER_QRC]
+        modules = instrument.driver.get_connected_modules(
+            filter_fn=lambda mod: (
+                mod.is_qcm_type == qcm_type
+                and mod.is_qrm_type == qrm_type
+                and mod.is_rf_type == rf_type
+                and mod.is_qrc_type == qrc_type
+            )
+        ).values()
+
+        rng = np.random.default_rng(function_seed)
+        module = rng.choice(list(modules))
+
+        # TODO - sequencers are not the same on a QRC, need special handling
+        sequencer = rng.choice(module.sequencers)
+
+        return module, sequencer
+
+    yield _qblox_resource
+    instrument.disconnect()

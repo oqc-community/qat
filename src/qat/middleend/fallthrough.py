@@ -7,9 +7,8 @@ from qat.middleend.base import CustomMiddleend
 
 
 class FallthroughMiddleend(CustomMiddleend):
-    """
-    A middle end that passes through an input :class:`InstructionBuilder` and does not alter it.
-    """
+    """A middle end that passes through an input :class:`InstructionBuilder` and does not
+    alter it."""
 
     def __init__(self, model: None = None):
         super().__init__(model=None, pipeline=PassManager())

@@ -25,8 +25,7 @@ class EchoEngine(NativeEngine[WaveformProgram]):
         super().__init__(*args, **kwargs)
 
     def execute(self, program: WaveformProgram, **kwargs) -> dict[str, np.ndarray]:
-        """
-        Execute a :class:`WaveformProgram`.
+        """Execute a :class:`WaveformProgram`.
 
         :param program: The compiled program.
         :returns: The execution results.
@@ -56,8 +55,7 @@ class EchoEngine(NativeEngine[WaveformProgram]):
 
 
 def process_readout(readout: np.ndarray, shots: int, mode: AcquireMode):
-    """
-    Processes a single readout into the expected format for a given acquire mode.
+    """Processes a single readout into the expected format for a given acquire mode.
 
     For :attr:`AcquireMode.RAW`, this means repeating the readout for a given number of
     shots. The :attr:`AcquireMode.INTEGRATOR` emulates the averaging on hardware by

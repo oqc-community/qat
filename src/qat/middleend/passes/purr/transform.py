@@ -97,8 +97,7 @@ class QiskitInstructionsWrapper(TransformPass):
 
 class LegacyPhaseOptimisation(TransformPass):
     """Iterates through the list of instructions and compresses contiguous
-    :class:`PhaseShift` instructions.
-    """
+    :class:`PhaseShift` instructions."""
 
     def run(
         self,
@@ -154,8 +153,10 @@ class LoopCount(int): ...
 
 class RepeatTranslation(TransformPass):
     """Transform :class:`Repeat` instructions so that they are replaced with:
+
     :class:`Variable`, :class:`Assign`, and :class:`Label` instructions at the start,
-    and :class:`Assign` and :class:`Jump` instructions at the end."""
+    and :class:`Assign` and :class:`Jump` instructions at the end.
+    """
 
     def __init__(self, target_data: TargetData):
         self.target_data = target_data
@@ -209,7 +210,9 @@ class RepeatTranslation(TransformPass):
 
 class PhaseOptimisation(TransformPass):
     """Iterates through the list of instructions and compresses contiguous
-    :class:`PhaseShift` instructions. This pass will change :class:`PhaseReset` to
+    :class:`PhaseShift` instructions.
+
+    This pass will change :class:`PhaseReset` to
     :class:`PhaseSet` instructions.
     """
 
@@ -509,8 +512,11 @@ class InstructionGranularitySanitisation(TransformPass):
 
     def sanitise_acquire_filters(self, instructions: list[Acquire]):
         """Sanitises the durations of :class:`Acquire` filters by matching it to the
-        duration of the :class:`Acquire`. For :class:`CustomPulse` filters, this strips
-        away the samples that are not needed."""
+        duration of the :class:`Acquire`.
+
+        For :class:`CustomPulse` filters, this strips
+        away the samples that are not needed.
+        """
         for instruction in instructions:
             if isinstance(instruction.filter, Pulse):
                 new_filter = copy(instruction.filter)
@@ -538,8 +544,7 @@ class InstructionGranularitySanitisation(TransformPass):
 
 
 class InitialPhaseResetSanitisation(TransformPass):
-    """
-    Checks if every active pulse channel has a phase reset in the beginning.
+    """Checks if every active pulse channel has a phase reset in the beginning.
 
     .. warning::
 
@@ -562,9 +567,7 @@ class InitialPhaseResetSanitisation(TransformPass):
 
 
 class MeasurePhaseResetSanitisation(TransformPass):
-    """
-    Adds a phase reset before every measure pulse.
-    """
+    """Adds a phase reset before every measure pulse."""
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         new_instructions = []
@@ -632,9 +635,7 @@ class InactivePulseChannelSanitisation(TransformPass):
 
 
 class InstructionLengthSanitisation(TransformPass):
-    """
-    Checks if quantum instructions are too long and splits if necessary.
-    """
+    """Checks if quantum instructions are too long and splits if necessary."""
 
     def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """
@@ -843,8 +844,7 @@ class EndOfTaskResetSanitisation(TransformPass):
 
 
 class ResetsToDelays(TransformPass):
-    """
-    Transforms :class:`Reset` operations to :class:`Delay`s.
+    """Transforms :class:`Reset` operations to :class:`Delay`s.
 
     Note that the delays do not necessarily agree with the granularity of the underlying target machine.
     This can be enforced using the :class:`InstructionGranularitySanitisation`
@@ -1077,8 +1077,11 @@ class EvaluatePulses(TransformPass):
 
 
 class ReturnSanitisation(TransformPass):
-    """Squashes all :class:`Return` instructions into a single one. Adds a :class:`Return`
-    with all acquisitions if none is found."""
+    """Squashes all :class:`Return` instructions into a single one.
+
+    Adds a :class:`Return`
+    with all acquisitions if none is found.
+    """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
@@ -1099,8 +1102,10 @@ class ReturnSanitisation(TransformPass):
 
 
 class RepeatSanitisation(TransformPass):
-    """Adds repeat counts and repetition periods to :class:`Repeat` instructions. If none
-    is found, a repeat instruction is added."""
+    """Adds repeat counts and repetition periods to :class:`Repeat` instructions.
+
+    If none is found, a repeat instruction is added.
+    """
 
     def __init__(self, model: QuantumHardwareModel, target_data: TargetData):
         """
@@ -1172,8 +1177,7 @@ class RepeatSanitisation(TransformPass):
 
 
 class FreqShiftSanitisation(TransformPass):
-    """
-    Looks for any active frequency shift pulse channels in the hardware model and adds
+    """Looks for any active frequency shift pulse channels in the hardware model and adds
     square pulses for the duration.
 
     .. warning::
@@ -1480,9 +1484,8 @@ class ScopeSanitisation(TransformPass):
 
 
 class DeviceUpdateSanitisation(TransformPass):
-    """
-    Duplicate DeviceUpdate instructions upsets the device injection mechanism, which causes corruption
-    of the HW model.
+    """Duplicate DeviceUpdate instructions upsets the device injection mechanism, which
+    causes corruption of the HW model.
 
     In fact, a DeviceInjector is currently 1-1 associated with a DeviceUpdate instruction. When multiple
     DeviceUpdate instructions (sequentially) inject the same "target", the first DeviceInjector assigns the

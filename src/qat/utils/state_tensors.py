@@ -58,8 +58,11 @@ class StateVector(StateTensor):
 
     def _apply_op(self, matrix: np.ndarray, qubits: tuple[int, ...]):
         """Applies a matrix to the tensor, permuting the dimensions back into the correct
-        order. Has computational cost O(2^(N+k)) where k is the number of qubits the matrix
-        acts on."""
+        order.
+
+        Has computational cost O(2^(N+k)) where k is the number of qubits the matrix acts
+        on.
+        """
 
         qubits = (qubits,) if not isinstance(qubits, (tuple, list)) else qubits
         matrix = np.reshape(matrix, (2,) * (2 * len(qubits)))
@@ -93,8 +96,11 @@ class StateOperator(StateTensor):
 
     def _apply_op(self, matrix: np.ndarray, qubits: tuple[int, ...]):
         """Applies a matrix to the tensor, permuting the dimensions back into the correct
-        order. Has computational cost O(2^(2N+k)) where k is the number of qubits the matrix
-        acts on."""
+        order.
+
+        Has computational cost O(2^(2N+k)) where k is the number of qubits the matrix acts
+        on.
+        """
 
         qubits = (qubits,) if not isinstance(qubits, (tuple, list)) else qubits
         matrix = np.reshape(matrix, (2,) * (2 * len(qubits)))

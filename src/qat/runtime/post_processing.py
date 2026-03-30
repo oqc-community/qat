@@ -12,8 +12,7 @@ UPCONVERT_SIGN = 1.0
 
 
 def get_axis_map(mode: AcquireMode, response: np.ndarray) -> dict[ProcessAxis, int]:
-    """
-    Given the acquisition mode, determine what each axis corresponds to.
+    """Given the acquisition mode, determine what each axis corresponds to.
 
     The way the results are returned are defined by the acquisition mode: this could be
     averaged over shots, averaged over time, or neither. We must determine how to unpack
@@ -40,8 +39,7 @@ def get_axis_map(mode: AcquireMode, response: np.ndarray) -> dict[ProcessAxis, i
 def apply_post_processing(
     response: np.ndarray, post_processing: PostProcessing, axes: dict[ProcessAxis, int]
 ) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
-    """
-    Applies software post processing to the results.
+    """Applies software post processing to the results.
 
     Uses the information in the :class:`PostProcessing` instruction to determine what method
     to  apply.
@@ -71,8 +69,7 @@ def mean(
     axes: dict[ProcessAxis, int],
     target_axes: ProcessAxis | list[ProcessAxis],
 ):
-    """
-    Calculates the mean over the given axes.
+    """Calculates the mean over the given axes.
 
     :param response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
@@ -94,8 +91,7 @@ def linear_map_complex_to_real(
     multiplier: Number,
     constant: Number,
 ):
-    """
-    Maps complex values onto a real z-projection using a provided linear mapping.
+    """Maps complex values onto a real z-projection using a provided linear mapping.
 
     :param np.ndarray response: Readout results from an execution engine.
     :param axes: A dictionary containing which axes contain the shots and which contain time
@@ -110,8 +106,7 @@ def linear_map_complex_to_real(
 
 
 def discriminate(response: np.ndarray, axes: dict[ProcessAxis, int], threshold: float):
-    """
-    Discriminates a real value to a classical bit by comparison to a supplied
+    """Discriminates a real value to a classical bit by comparison to a supplied
     discrimination threshold.
 
     :param np.ndarray response: Readout results from an execution engine.
@@ -125,8 +120,7 @@ def discriminate(response: np.ndarray, axes: dict[ProcessAxis, int], threshold: 
 
 
 def _remove_axes(original_dims, removed_axis_indices, axis_locations):
-    """
-    Extracted from `purr/backends/utilities.py`.
+    """Extracted from `purr/backends/utilities.py`.
 
     Returns the new axis map after axes have been removed, e.g., from calculating a mean.
     """

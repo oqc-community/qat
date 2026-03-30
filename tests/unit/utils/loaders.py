@@ -36,8 +36,10 @@ class BrokenLoader(EchoModelLoader):
 
 
 class MockModelLoader(BaseLegacyModelLoader, ModelUpdateChecker):
-    """A mock model loader used to test the UpdateablePipeline infrastructure. Each load
-    will add an extra qubit."""
+    """A mock model loader used to test the UpdateablePipeline infrastructure.
+
+    Each load will add an extra qubit.
+    """
 
     def __init__(self, num_qubits: int = 1):
         self.num_qubits = num_qubits

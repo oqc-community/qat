@@ -54,9 +54,11 @@ def random_resource(type: ClusterType, name: str, address: str = None):
     modules = [
         module
         for module in cluster.get_connected_modules(
-            filter_fn=lambda mod: mod.is_qcm_type == qcm_type
-            and mod.is_qrm_type == qrm_type
-            and mod.is_rf_type == rf_type
+            filter_fn=lambda mod: (
+                mod.is_qcm_type == qcm_type
+                and mod.is_qrm_type == qrm_type
+                and mod.is_rf_type == rf_type
+            )
         ).values()
     ]
     module = np.random.choice(modules)

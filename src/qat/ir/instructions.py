@@ -48,9 +48,7 @@ class Instruction(AllowExtraFieldsModel):
     @computed_field
     @cached_property
     def instr_type(self) -> str:
-        """
-        Returns the type of the instruction, which is the class name.
-        """
+        """Returns the type of the instruction, which is the class name."""
         return self.__class__.__module__ + "." + self.__class__.__name__
 
     def __iter__(self):
@@ -161,9 +159,9 @@ class InstructionBlock(Instruction, Iterable):
 
 
 class Repeat(Instruction):
-    """
-    Global meta-instruction that applies to the entire list of instructions. Repeat
-    value of the current operations, also known as shots.
+    """Global meta-instruction that applies to the entire list of instructions.
+
+    Repeat value of the current operations, also known as shots.
     """
 
     repeat_count: int | None = None
@@ -189,9 +187,7 @@ class Return(Instruction):
 
 
 class ResultsProcessing(Instruction):
-    """
-    A meta-instruction that stores how the results are processed.
-    """
+    """A meta-instruction that stores how the results are processed."""
 
     variable: str
     results_processing: InlineResultsProcessing = InlineResultsProcessing.Raw
@@ -206,9 +202,7 @@ class ResultsProcessing(Instruction):
 
 ### Variables
 class Variable(Instruction):
-    """
-    States that this value is actually a variable that should be fetched instead.
-    """
+    """States that this value is actually a variable that should be fetched instead."""
 
     name: str
     var_type: type | None = None
@@ -245,8 +239,9 @@ class Variable(Instruction):
 
 
 class Label(Instruction):
-    """
-    Label to apply to a line of code. Used as anchors for other instructions like jumps.
+    """Label to apply to a line of code.
+
+    Used as anchors for other instructions like jumps.
     """
 
     name: str
@@ -260,9 +255,7 @@ class Label(Instruction):
 
 
 class Jump(Instruction):
-    """
-    Classic jump instruction, should be linked to label with an optional condition.
-    """
+    """Classic jump instruction, should be linked to label with an optional condition."""
 
     label: Label | str
     condition: BinaryOperator | None = None
@@ -341,8 +334,7 @@ RecursiveAssignTypes = TypeAliasType(
 
 
 class Assign(Instruction):
-    """
-    Assigns a value to a variable.
+    """Assigns a value to a variable.
 
     This is used to assign some value (e.g. the results from an acquisition) to a variable.
     In the legacy instructions, `Assign` could be given a `Variable` that declares the value
@@ -391,10 +383,10 @@ class Assign(Instruction):
 
 ### Quantum Instructions
 class QuantumInstruction(Instruction):
-    """
-    Any node that deals particularly with quantum operations. All quantum operations
-    must have some sort of target on the quantum computer, such as a qubit, channel, or
-    another form of component.
+    """Any node that deals particularly with quantum operations.
+
+    All quantum operations must have some sort of target on the quantum computer, such as a
+    qubit, channel, or another form of component.
     """
 
     targets: Annotated[FrozenSet[str], BeforeValidator(_validate_set)] | None = Field(
@@ -434,10 +426,8 @@ class QuantumInstructionBlock(QuantumInstruction, InstructionBlock):
 
 
 class PhaseShift(QuantumInstruction):
-    """
-    A PhaseShift instruction is used to change the phase of waveforms sent down
-    the pulse channel.
-    """
+    """A PhaseShift instruction is used to change the phase of waveforms sent down the pulse
+    channel."""
 
     phase: float = 0.0
 
@@ -459,10 +449,8 @@ class Delay(QuantumInstruction):
 
 
 class Synchronize(QuantumInstruction):
-    """
-    Tells the QPU to wait for all the target channels to be free before continuing
-    execution on any of them.
-    """
+    """Tells the QPU to wait for all the target channels to be free before continuing
+    execution on any of them."""
 
     duration: Literal[0] = 0
 

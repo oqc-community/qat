@@ -10,10 +10,9 @@ from qat.utils.pydantic import FloatNDArray, IntNDArray
 
 
 class PathData(BaseModel):
-    """
-    This object wraps the actual data as a list of samples, the number
-    of averages performed by the hardware (if any), and whether the hw observed any out-of-range samples.
-    """
+    """This object wraps the actual data as a list of samples, the number of averages
+    performed by the hardware (if any), and whether the hw observed any out-of-range
+    samples."""
 
     avg_cnt: int = None
     oor: bool = Field(alias="out-of-range", default=False)
@@ -32,9 +31,7 @@ class PathData(BaseModel):
 
 
 class IntegData(BaseModel):
-    """
-    Path 0 refers to I while Path 1 refers to Q
-    """
+    """Path 0 refers to I while Path 1 refers to Q."""
 
     path0: FloatNDArray = Field(default_factory=lambda: FloatNDArray([]))
     path1: FloatNDArray = Field(default_factory=lambda: FloatNDArray([]))
@@ -50,8 +47,9 @@ class IntegData(BaseModel):
 
 
 class ScopeAcqData(BaseModel):
-    """
-    Path 0 refers to I while Path 1 refers to Q. Their lengths are statically equal
+    """Path 0 refers to I while Path 1 refers to Q.
+
+    Their lengths are statically equal
     to :class:`Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS`
     """
 
@@ -60,10 +58,11 @@ class ScopeAcqData(BaseModel):
 
 
 class BinnedAcqData(BaseModel):
-    """
-    Binned data is data that's been acquired and processed via different routes such as squared acquisition,
-    weighed integration. Processing here refers to steps like averaging, rotation, and thresholding
-    which are executed by the hardware.
+    """Binned data is data that's been acquired and processed via different routes such as
+    squared acquisition, weighed integration.
+
+    Processing here refers to steps like averaging, rotation, and thresholding which are
+    executed by the hardware.
     """
 
     avg_cnt: IntNDArray = Field(default_factory=lambda: IntNDArray([]))
@@ -85,9 +84,10 @@ class BinnedAcqData(BaseModel):
 
 
 class BinnedAndScopeAcqData(BaseModel):
-    """
-    The actual acquisition data, it represents the value associated with the key "acquisition"
-    in the acquisition blob returned by Qblox. This object contains scope data and binned data.
+    """The actual acquisition data, it represents the value associated with the key
+    "acquisition" in the acquisition blob returned by Qblox.
+
+    This object contains scope data and binned data.
     """
 
     bins: BinnedAcqData = BinnedAcqData()
@@ -95,9 +95,9 @@ class BinnedAndScopeAcqData(BaseModel):
 
 
 class Acquisition(BaseModel):
-    """
-    Represents a single acquisition. In Qblox terminology, this object contains scope, integrated, and threshold
-    data all at once. It's up to the SW layer to pick up what it needs and adapt it to its flow.
+    """Represents a single acquisition. In Qblox terminology, this object contains scope,
+    integrated, and threshold data all at once. It's up to the SW layer to pick up what it
+    needs and adapt it to its flow.
 
     An acquisition contains is described by a name, index, and blob data represented by :class:`AcqData`
     """
@@ -107,8 +107,9 @@ class Acquisition(BaseModel):
     acquisition: BinnedAndScopeAcqData = BinnedAndScopeAcqData()
 
     def __add__(self, other: "Acquisition") -> "Acquisition":
-        """
-        Acquisition addition follows concatenation semantics such as the case for strings.
+        """Acquisition addition follows concatenation semantics such as the case for
+        strings.
+
         A few important details that might be adjusted in the future:
             + Resulting scope_data.path0.avg_cnt is taken as the minimum of the two
                 Reason for the underestimation is to remain conservative and on the safe side

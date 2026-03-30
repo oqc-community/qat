@@ -81,6 +81,8 @@ class TestAcquisition:
         file_path = Path(testpath, "files", "payload", acquisition)
         with open(file_path) as f:
             blob = f.read()
+            # On-disk datafile has an trailing linefeed due to pre-commmit formatting
+            blob = blob.strip()
             acquisition = Acquisition.model_validate_json(blob)
             assert acquisition.model_dump_json(indent=2) == blob
 

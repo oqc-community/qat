@@ -132,7 +132,8 @@ def get_jagged_echo_hardware(
 
 
 def update_qubit_indices(program: str, qubit_indices: list[int]) -> str:
-    """Adjust the physical qubit references in the program to use ones from qubit_indices."""
+    """Adjust the physical qubit references in the program to use ones from
+    qubit_indices."""
     patterns = [
         r"(\$)(?P<dollar_index>\d+)",
         r"(q)(?P<control>\d+)(_q)(?P<target>\d+)(_cross_resonance)",

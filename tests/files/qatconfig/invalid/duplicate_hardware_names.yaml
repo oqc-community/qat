@@ -7,5 +7,3 @@ HARDWARE:
   type: qat.model.loaders.purr.EchoModelLoader
   config:
     qubit_count: 6
-
-    

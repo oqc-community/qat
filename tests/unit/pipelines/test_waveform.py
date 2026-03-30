@@ -62,7 +62,8 @@ class TestEchoPipeline:
         assert isinstance(pipeline.engine, EchoEngine)
 
     def test_build_compile_pipeline(self):
-        """Test the build_compile_pipeline method to ensure it constructs the compile pipeline correctly."""
+        """Test the build_compile_pipeline method to ensure it constructs the compile
+        pipeline correctly."""
         model = LucyModelLoader(qubit_count=4).load()
         compile_pipeline = PydanticWaveformCompilePipeline._build_pipeline(
             config=PipelineConfig(name="compile"),
@@ -76,7 +77,8 @@ class TestEchoPipeline:
         assert isinstance(compile_pipeline.backend, PydWaveformBackend)
 
     def test_build_execute_pipeline(self):
-        """Test the build_execute_pipeline method to ensure it constructs the execute pipeline correctly."""
+        """Test the build_execute_pipeline method to ensure it constructs the execute
+        pipeline correctly."""
         model = LucyModelLoader(qubit_count=4).load()
         execute_pipeline = PydanticEchoExecutePipeline._build_pipeline(
             config=PipelineConfig(name="execute"),
@@ -118,8 +120,8 @@ class TestEchoPipelineWithCircuits:
     """A class that tests the compilation and execution of the PydanticEchoPipeline with a
     WaveformBackend against circuit programs.
 
-    It tests the expectations of the compilation pipelines, inspecting the properties of
-    the executable and the results returned by the EchoEngine.
+    It tests the expectations of the compilation pipelines, inspecting the properties of the
+    executable and the results returned by the EchoEngine.
     """
 
     target_data = TargetData()
@@ -222,8 +224,8 @@ class TestEchoPipelineWithCircuits:
                 assert program.repetition_time == 0
 
     def test_channel_data(self, executable):
-        """WaveformPrograms are expected to have channel data for each physical
-        channel available, regardless of if they're used."""
+        """WaveformPrograms are expected to have channel data for each physical channel
+        available, regardless of if they're used."""
 
         for program in executable.programs:
             assert len(program.channel_data) == 2 * len(self.model.qubits)
@@ -244,7 +246,10 @@ class TestEchoPipelineWithCircuits:
         self, returned_acquires, num_readouts
     ):
         """Check that the executable has a number of acquires that matches the provided
-        value. In the future, this might need adjusting to account of active reset."""
+        value.
+
+        In the future, this might need adjusting to account of active reset.
+        """
 
         assert len(returned_acquires) == num_readouts
 
@@ -262,7 +267,10 @@ class TestEchoPipelineWithCircuits:
         self, executable: Executable[WaveformProgram], num_registers: int
     ):
         """Check that the executable has a number of returns that matches the provided
-        value. In the future, this might need adjusting to account of active reset."""
+        value.
+
+        In the future, this might need adjusting to account of active reset.
+        """
 
         assert len(executable.returns) == num_registers
 
@@ -270,8 +278,10 @@ class TestEchoPipelineWithCircuits:
         self, executable: Executable[WaveformProgram], request
     ):
         """Each acquisition will be acquired using the INTEGRATOR mode, and will need
-        correctly post-processing to be discriminated as a bit. We can assume the acquire
-        mode is INTEGRATOR."""
+        correctly post-processing to be discriminated as a bit.
+
+        We can assume the acquire mode is INTEGRATOR.
+        """
 
         if "openpulse" in request.node.callspec.id:
             pytest.mark.skip("Openpulse has more expressive use of acquires.")
@@ -363,8 +373,9 @@ class TestEchoPipelineWithCircuits:
 class TestEchoPipelineWithErrorMitigation:
     """A class that tests the compilation and execution of the EchoPipeline with a
     WaveformV1Backend against circuit programs with error mitigation enabled.
-    It tests the expectations of the compilation pipelines, inspecting the properties of
-    the executable and the results returned by the EchoEngine.
+
+    It tests the expectations of the compilation pipelines, inspecting the properties of the
+    executable and the results returned by the EchoEngine.
     """
 
     target_data = TargetData()
@@ -508,9 +519,8 @@ parity_test_files = get_pipeline_tests(openpulse=True)
     scope="class",
 )
 class TestEchoPipelineParity:
-    """
-    Parity tests specifically targeted at the echo engine in new QAT and the
-    Pydantic stack. Aims to test:
+    """Parity tests specifically targeted at the echo engine in new QAT and the Pydantic
+    stack. Aims to test:
 
     - New echo pipelines: Does compile and execute work in the way we expect using the new
       QAT infrastructure?
@@ -674,13 +684,14 @@ class TestEchoPipelineParity:
 
 
 class TestMidCircuitMeasurements:
-    """Tests that the full pipeline correctly compiles a mid-circuit measurement
-    circuit, and that BatchedShots accounts for multiple acquires per channel
-    when calculating the batch size.
+    """Tests that the full pipeline correctly compiles a mid-circuit measurement circuit,
+    and that BatchedShots accounts for multiple acquires per channel when calculating the
+    batch size.
 
-    TKET is disabled as it does not support mid-circuit measurements,
-    thus we are testing qasm2 strings with only single qubit gates, in separate
-    test class to TestEchoPipelineWithCircuits"""
+    TKET is disabled as it does not support mid-circuit measurements, thus we are testing
+    qasm2 strings with only single qubit gates, in separate test class to
+    TestEchoPipelineWithCircuits
+    """
 
     target_data = TargetData(max_acquisitions=1500)
     model = LucyModelLoader(qubit_count=32).load()

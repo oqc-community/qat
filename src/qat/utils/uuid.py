@@ -27,9 +27,8 @@ uuid4 = uuid
 # Context manager for temporary seeding
 @contextmanager
 def temporary_uuid_seed(seed: SeedType | None = None):
-    """
-    Context manager to temporarily seed the uuid generation for reproducibility.
-    Only affects uuid() and uuid4() in this module, for the current context.
+    """Context manager to temporarily seed the uuid generation for reproducibility. Only
+    affects uuid() and uuid4() in this module, for the current context.
 
     This is re-entrant and thread-safe: nested contexts are supported and random
     state is isolated between concurrent contexts.

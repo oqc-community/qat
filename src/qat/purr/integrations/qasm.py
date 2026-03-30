@@ -65,9 +65,9 @@ log = get_default_logger()
 
 
 class ParseResults:
-    """
-    Results object for attempted parse. When coerced to a boolean matches
-    against if parse was successful.
+    """Results object for attempted parse.
+
+    When coerced to a boolean matches against if parse was successful.
     """
 
     def __init__(self, success, errors=None):
@@ -131,10 +131,8 @@ class Registers:
 
 
 class QasmContext:
-    """
-    Container object for all data relating to the scope/pass of QASM currently under
-    analysis.
-    """
+    """Container object for all data relating to the scope/pass of QASM currently under
+    analysis."""
 
     def __init__(self, registers=None, gates=None, variables=None):
         self.registers: Registers = registers or Registers()
@@ -143,9 +141,7 @@ class QasmContext:
 
 
 class CregIndexValue:
-    """
-    Used to reference when we're looking at a particular index in a creg variable.
-    """
+    """Used to reference when we're looking at a particular index in a creg variable."""
 
     def __init__(self, register_name: str, index: int, value: Any):
         self.register_name = register_name
@@ -268,16 +264,13 @@ class AbstractParser:
         return index_range
 
     def _is_register_target(self, values: List[Any]):
-        """
-        Does it look like the passed-in qubit or parameter list contains a register.
-        """
+        """Does it look like the passed-in qubit or parameter list contains a register."""
         return isinstance(values, Iterable) and any(
             isinstance(val, (QubitRegister, BitRegister)) for val in values
         )
 
     def _expand_to_match_registers(self, *args, tuple_return=True, flatten_results=False):
-        """
-        Expands and zips registers/non-registers together so they can be processed.
+        """Expands and zips registers/non-registers together so they can be processed.
 
         QASM treats any registers of bits or qubits as calling the gate * register size
         times with each individual register value. This is a helper method for
@@ -410,10 +403,8 @@ class Qasm2Parser(AbstractParser):
         pass
 
     def modify(self, circ: DAGCircuit):
-        """
-        Allows children to transform the program before validation/transforming into our
-        AST occurs.
-        """
+        """Allows children to transform the program before validation/transforming into our
+        AST occurs."""
         pass
 
     def _walk_program(
@@ -538,10 +529,8 @@ class Qasm2Parser(AbstractParser):
     def walk_node(
         self, node: DAGNode, context: QasmContext, builder: InstructionBuilder, **kwargs
     ):
-        """
-        Process each individual QASM node, builds context or forwards processing to
-        relevant ``process_x`` method associated with each node type.
-        """
+        """Process each individual QASM node, builds context or forwards processing to
+        relevant ``process_x`` method associated with each node type."""
         if isinstance(node, (DAGInNode, DAGOutNode)):
             for register, _ in self._current_dag.find_bit(node.wire).registers:
                 if isinstance(register, QuantumRegister):
@@ -572,7 +561,10 @@ class Qasm2Parser(AbstractParser):
                     )
 
     def _get_parameters(self, node: DAGOpNode, context: QasmContext) -> list:
-        """Get the params of a gate. These are the non-qubit values of a gate."""
+        """Get the params of a gate.
+
+        These are the non-qubit values of a gate.
+        """
         if isinstance(node.op, Gate):
             return node.op.params
         if isinstance(node.op, Measure):
@@ -584,8 +576,7 @@ class Qasm2Parser(AbstractParser):
         return []
 
     def _get_qubits(self, node: DAGOpNode, context: QasmContext) -> list:
-        """
-        Resolve what qubits or qubit registers this node relates too.
+        """Resolve what qubits or qubit registers this node relates too.
 
         If a value was originally a qubit register, it will be appended as a list,
         otherwise if it was a single qubit target, just a normal object.
@@ -651,9 +642,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
 
 
 class CloudQasmParser(RestrictedQasm2Parser):
-    """
-    QASM parser used in our QCaaS system.
-    """
+    """QASM parser used in our QCaaS system."""
 
     def __init__(self):
         super().__init__(allowed_gates=None, disable_if=True, order_result_vars=True)
@@ -682,8 +671,8 @@ class OpenPulseContext(QasmContext):
 
 
 def get_frame_mappings(model: QuantumHardwareModel):
-    """
-    Generate the names for frames we allow in open pulse 'extern' statements.
+    """Generate the names for frames we allow in open pulse 'extern' statements.
+
     Returns a dictionary mapping name->pulse channel.
     """
     frames = {}
@@ -709,8 +698,8 @@ def extern_port_name(physical_channel):
 
 
 def get_port_mappings(model: QuantumHardwareModel):
-    """
-    Generate the names for ports we allow in open pulse 'extern' statements.
+    """Generate the names for ports we allow in open pulse 'extern' statements.
+
     Returns a dictionary mapping name->physical channel.
     """
     ports = {}
@@ -810,10 +799,8 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         pass
 
     def modify(self, prog: ast.Program):
-        """
-        Allows children to transform the program before validation/transforming into our
-        AST occurs.
-        """
+        """Allows children to transform the program before validation/transforming into our
+        AST occurs."""
         pass
 
     def _walk_program(self, prog: ast.Program, context: QasmContext):
@@ -1718,10 +1705,8 @@ class Qasm3Parser(Interpreter, AbstractParser):
         qubits: List[Qubit],
         argument_values: Optional[List[Any]] = None,
     ):
-        """
-        Returns whether this gate has been overriden, either in a generic
-        or qubit-specific manner.
-        """
+        """Returns whether this gate has been overriden, either in a generic or qubit-
+        specific manner."""
         argument_values = argument_values or []
         qubits = qubits if isinstance(qubits, List) else [qubits]
         qubit_specific_name = self._create_qb_specific_gate_suffix(name, qubits)

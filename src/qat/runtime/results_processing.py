@@ -10,8 +10,7 @@ import numpy as np
 
 
 def binary_average(results_list):
-    """
-    Extracted from `purr.compiler.execution`.
+    """Extracted from `purr.compiler.execution`.
 
     Averages all repeat results and returns a definitive 1/0 for each qubit measurement.
     """
@@ -25,8 +24,7 @@ def binary_average(results_list):
 
 
 def binary(results_list):
-    """
-    Extracted from `purr.compiler.execution`.
+    """Extracted from `purr.compiler.execution`.
 
     Changes all measurements to binary format.
     """
@@ -47,8 +45,7 @@ def binary(results_list):
 
 
 def complex_to_binary(number: complex):
-    """
-    Extracted from `purr.compiler.execution`.
+    """Extracted from `purr.compiler.execution`.
 
     Base calculation for changing a complex measurement to binary form.
     """
@@ -56,8 +53,7 @@ def complex_to_binary(number: complex):
 
 
 def numpy_array_to_list(array):
-    """
-    Extracted from `purr.compiler.execution`.
+    """Extracted from `purr.compiler.execution`.
 
     Transform numpy arrays to a normal list.
     """
@@ -76,16 +72,15 @@ def numpy_array_to_list(array):
 
 
 def binary_count(results_list, repeats):
-    """
-    Extracted from `qat.purr.compiler.runtime`.
+    """Extracted from `qat.purr.compiler.runtime`.
 
     Returns a dictionary of binary number: count. So for a two qubit register it'll return
         the various counts for ``00``, ``01``, ``10`` and ``11``.
     """
 
     def flatten(res):
-        """
-        Combine binary result from the QPU into composite key result.
+        """Combine binary result from the QPU into composite key result.
+
         Aka '0110' or '0001'
         """
         if isinstance(res, Iterable):

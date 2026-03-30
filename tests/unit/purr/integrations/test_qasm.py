@@ -141,11 +141,10 @@ def qasm3_gates():
 
 
 class TestQASM3:
-    """
-    Tests for the parsing and instruction generation of OPENQASM3.0.
+    """Tests for the parsing and instruction generation of OPENQASM3.0.
 
-    In particular these tests currently only operate on a subset of OQ3
-    and focus on the OpenPulse side of the language definition.
+    In particular these tests currently only operate on a subset of OQ3 and focus on the
+    OpenPulse side of the language definition.
     """
 
     @pytest.mark.legacy
@@ -332,10 +331,8 @@ class TestQASM3:
         ],
     )
     def test_u_gate(self, params):
-        """
-        Tests the validty of the U gate with OpenPulse by checking that the
-        parsed circuit matches the same circuit created with the circuit builder.
-        """
+        """Tests the validty of the U gate with OpenPulse by checking that the parsed
+        circuit matches the same circuit created with the circuit builder."""
         if isinstance(params, tuple):
             params = params[0](**params[1])
         hw = get_echo_hardware(2)

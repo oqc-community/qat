@@ -34,8 +34,8 @@ class ConfigurableCompilePipeline(UpdateablePipeline):
     """A pipeline that allows each constituent to be defined in a granular fashion, and
     updated. The config is provided via the :class:`CompilePipelineDescription`.
 
-    Allows a config to be provided that configures each component of the pipeline via
-    the qatconfig.
+    Allows a config to be provided that configures each component of the pipeline via the
+    qatconfig.
     """
 
     @staticmethod
@@ -66,8 +66,8 @@ class ConfigurableExecutePipeline(UpdateablePipeline):
     """A pipeline that allows each constituent to be defined in a granular fashion, and
     updated. The config is provided via the :class:`ExecutePipelineDescription`.
 
-    Allows a config to be provided that configures each component of the pipeline via
-    the qatconfig.
+    Allows a config to be provided that configures each component of the pipeline via the
+    qatconfig.
     """
 
     @staticmethod
@@ -102,8 +102,8 @@ class ConfigurablePipeline(UpdateablePipeline):
     """A pipeline that allows each constituent to be defined in a granular fashion, and
     updated. The config is provided via the :class:`PipelineClassDescription`.
 
-    Allows a config to be provided that configures each component of the pipeline via
-    the qatconfig.
+    Allows a config to be provided that configures each component of the pipeline via the
+    qatconfig.
     """
 
     @staticmethod

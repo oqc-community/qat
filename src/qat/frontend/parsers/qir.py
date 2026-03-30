@@ -59,8 +59,7 @@ try:
             expected_types: list["ArgumentType"],
         ) -> list:
             """Converts QIR arguments to appropriate types for the instruction builder,
-            given expected argument types.
-            """
+            given expected argument types."""
 
             for i, (arg, expected_type) in enumerate(zip(args, expected_types)):
                 if expected_type == ArgumentType.Qubit:
@@ -101,8 +100,8 @@ class QIRParser:
     """Used to parse QIR files and walk the AST to assemble a quantum program.
 
     The parser makes API calls to the instruction builder passed at instantiation to allow
-    for dynamic building of programs. This object is only responsible for interpreting
-    and walking the QIR program.
+    for dynamic building of programs. This object is only responsible for interpreting and
+    walking the QIR program.
     """
 
     def __init__(
@@ -150,9 +149,9 @@ class QIRParser:
     def _process_instruction(self, builder: InstructionBuilder, instruction):
         """Dispatches the correct calls to the builder given the type of instruction.
 
-        Considered using a state dispatch approach, but the details get a little tricky
-        and might add confusion. The benefit would be being able to write the instrinsic
-        name next to explicit arguments and builder calls.
+        Considered using a state dispatch approach, but the details get a little tricky and
+        might add confusion. The benefit would be being able to write the instrinsic name
+        next to explicit arguments and builder calls.
         """
         if not isinstance(instruction, Call):
             return

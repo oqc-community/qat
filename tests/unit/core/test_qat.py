@@ -404,9 +404,9 @@ class TestQATHardwareModelReloading:
         )
 
     def test_reload_models(self, qat, full_pipelines):
-        """This tests that hardware models in the pipeline are the expected instances,
-        and the number of qubits is only incremented by, the number of loads is the number
-        of hardware loaders, and not the number of pipelines."""
+        """This tests that hardware models in the pipeline are the expected instances, and
+        the number of qubits is only incremented by, the number of loads is the number of
+        hardware loaders, and not the number of pipelines."""
         qat.reload_all_models()
         hardware = qat._available_hardware
         pipelines = qat.pipelines
@@ -423,5 +423,7 @@ class TestQATHardwareModelReloading:
 
     def test_models_up_to_date(self, qat):
         """Just delegates a call to the HardwareLoaders, so just test that this works.
-        Extensive testing of the feature is done in the HardwareLoaders tests."""
+
+        Extensive testing of the feature is done in the HardwareLoaders tests.
+        """
         assert qat.models_up_to_date

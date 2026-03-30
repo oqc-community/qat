@@ -86,7 +86,8 @@ class TestEchoHardwareModelConversion:
         assert pyd_hw.physical_connectivity == coupling_map
 
     def test_unidirectional_physical_coupling(self):
-        """Test that the physical connectivity is correctly represented as unidirectional."""
+        """Test that the physical connectivity is correctly represented as
+        unidirectional."""
         leg_hw = EchoModelLoader(qubit_count=4).load()
         qubit_0 = leg_hw.get_qubit(0)
         qubit_1 = leg_hw.get_qubit(1)

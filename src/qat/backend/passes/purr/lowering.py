@@ -28,15 +28,15 @@ from qat.purr.compiler.instructions import (
 class PartitionByPulseChannel(LoweringPass):
     """Separates a list of instructions into their respective pulse channels.
 
-    For targets that do not have native support for
-    :class:`Synchronize <qat.purr.compiler.instructions.Synchronize>`, we can separate the
-    instruction list into many lists of instructions, with each list only containing
-    instructions that act on a single channel.
+    For targets that do not have native support for :class:`Synchronize
+    <qat.purr.compiler.instructions.Synchronize>`, we can separate the instruction list into
+    many lists of instructions, with each list only containing instructions that act on a
+    single channel.
 
-    This pass achieves the same as the :class:`TriagePass <qat.backend.passes.legacy.analysis.TriagePass>`,
-    but instead of saving the results in the results manager, returns the partitioned
-    instructions. The only reason I've changed the name is to not confuse it with the
-    TriagePass :)
+    This pass achieves the same as the :class:`TriagePass
+    <qat.backend.passes.legacy.analysis.TriagePass>`, but instead of saving the results in
+    the results manager, returns the partitioned instructions. The only reason I've changed
+    the name is to not confuse it with the TriagePass :)
     """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> PartitionedIR:

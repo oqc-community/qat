@@ -23,16 +23,12 @@ class ComplexFunction(AllowExtraFieldsModel, abc.ABC):
 
     @abc.abstractmethod
     def eval(self, x: np.ndarray) -> np.ndarray:
-        """
-        Function evaluated in domain described by x.
-        """
+        """Function evaluated in domain described by x."""
         pass
 
     @abc.abstractmethod
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        """
-        First order derivative.
-        """
+        """First order derivative."""
         pass
 
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -40,9 +36,7 @@ class ComplexFunction(AllowExtraFieldsModel, abc.ABC):
 
 
 def _validate_input_array(func):
-    """
-    Wrapper method to validate the input array.
-    """
+    """Wrapper method to validate the input array."""
 
     def validator(*args, **kwargs):
         max_size = 1e6
@@ -61,16 +55,12 @@ def _validate_input_array(func):
 
 
 class NumericFunction(ComplexFunction):
-    """
-    Base class for functions applying an numerical first derivative.
-    """
+    """Base class for functions applying an numerical first derivative."""
 
     @_validate_input_array
     def derivative(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
-        """
-        For a custom wave-pulse or pulse without analytic derivative compute it
-        numerically.
-        """
+        """For a custom wave-pulse or pulse without analytic derivative compute it
+        numerically."""
         if len(x) < 2:
             return np.zeros_like(y)
         else:
@@ -84,9 +74,7 @@ class NumericFunction(ComplexFunction):
 
 
 class SquareFunction(ComplexFunction):
-    """
-    Square function of fixed amplitude.
-    """
+    """Square function of fixed amplitude."""
 
     @_validate_input_array
     def eval(self, x: np.ndarray) -> np.ndarray:
@@ -98,9 +86,7 @@ class SquareFunction(ComplexFunction):
 
 
 class GaussianFunction(ComplexFunction):
-    """
-    Gaussian function.
-    """
+    """Gaussian function."""
 
     width: float
     rise: float
@@ -120,9 +106,7 @@ class GaussianFunction(ComplexFunction):
 
 
 class GaussianZeroEdgeFunction(ComplexFunction):
-    """
-    A Gaussian pulse that can be normalized to be zero at the edges.
-    """
+    """A Gaussian pulse that can be normalized to be zero at the edges."""
 
     std_dev: float
     width: float
@@ -145,9 +129,7 @@ class GaussianZeroEdgeFunction(ComplexFunction):
 
 
 class GaussianSquareFunction(NumericFunction):
-    """
-    A square pulse with a Gaussian rise and fall at the edges.
-    """
+    """A square pulse with a Gaussian rise and fall at the edges."""
 
     square_width: float
     std_dev: float
@@ -166,9 +148,7 @@ class GaussianSquareFunction(NumericFunction):
 
 
 class DragGaussianFunction(ComplexFunction):
-    """
-    Drag Gaussian, tighter on one side and long tail on the other.
-    """
+    """Drag Gaussian, tighter on one side and long tail on the other."""
 
     std_dev: float
     beta: float
@@ -191,9 +171,9 @@ class DragGaussianFunction(ComplexFunction):
 
 
 class SechFunction(ComplexFunction):
-    """
-    Implements a sech pulse defined by sech(x / width). Note that it is not normalized to be
-    zero at the edges.
+    """Implements a sech pulse defined by sech(x / width).
+
+    Note that it is not normalized to be zero at the edges.
     """
 
     std_dev: float
@@ -244,9 +224,11 @@ class Cos(ComplexFunction):
 class RoundedSquareFunction(ComplexFunction):
     """
     Rounded square.
+    ```
            ___
          /    \
      ___|      |___
+     ```
     """
 
     width: float

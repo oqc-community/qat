@@ -33,10 +33,10 @@ class QuantumMetadata(Instruction):
 
 
 class QuantumInstruction(Instruction):
-    """
-    Any node that deals particularly with quantum operations. All quantum operations
-    must have some sort of target on the quantum computer, such as a qubit, channel, or
-    another form of component.
+    """Any node that deals particularly with quantum operations.
+
+    All quantum operations must have some sort of target on the quantum computer, such as a
+    qubit, channel, or another form of component.
     """
 
     def __init__(
@@ -69,7 +69,7 @@ def _add_channels(
     instruction: QuantumInstruction,
     channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
 ):
-    """Returns the union of `channels` and `instruction`'s quantum targets"""
+    """Returns the union of `channels` and `instruction`'s quantum targets."""
     if channels is None:
         return instruction.quantum_targets
 
@@ -92,9 +92,9 @@ def _add_channels(
 
 
 class Repeat(Instruction):
-    """
-    Global meta-instruction that applies to the entire list of instructions. Repeat
-    value of the current operations, also known as shots.
+    """Global meta-instruction that applies to the entire list of instructions.
+
+    Repeat value of the current operations, also known as shots.
     """
 
     def __init__(self, repeat_count, repetition_period=None, passive_reset_time=None):
@@ -119,8 +119,9 @@ class Repeat(Instruction):
 
 
 class EndRepeat(Instruction):
-    """
-    Basic scoping. Marks the end of the most recent repeat
+    """Basic scoping.
+
+    Marks the end of the most recent repeat
     """
 
     def __repr__(self):
@@ -131,7 +132,8 @@ class PhaseSet(QuantumInstruction):
     """Sets the phase for a pulse channel.
 
     This sets the absolute phase of an NCO, unlike the :class:`PhaseShift`, which changes
-    the phase relative to the current phase."""
+    the phase relative to the current phase.
+    """
 
     def __init__(self, channel: PulseChannel, phase: float):
         """
@@ -209,10 +211,8 @@ class Delay(QuantumInstruction):
 
 
 class Synchronize(QuantumInstruction):
-    """
-    Tells the QPU to wait for all the related channels to be free before continuing
-    execution on any of them.
-    """
+    """Tells the QPU to wait for all the related channels to be free before continuing
+    execution on any of them."""
 
     quantum_targets: List[PulseChannel]
 
@@ -244,9 +244,9 @@ class Synchronize(QuantumInstruction):
 
 
 class Assign(Instruction):
-    """
-    Assigns the variable 'x' the value 'y'. This can be performed as a part of running
-    on the QPU or by a post-processing pass.
+    """Assigns the variable 'x' the value 'y'.
+
+    This can be performed as a part of running on the QPU or by a post-processing pass.
     """
 
     def __init__(self, name, value):
@@ -264,9 +264,7 @@ class Waveform(QuantumInstruction):
 
 
 class CustomPulse(Waveform):
-    """
-    Send a pulse down this particular channel.
-    """
+    """Send a pulse down this particular channel."""
 
     def __init__(
         self,
@@ -289,9 +287,7 @@ class CustomPulse(Waveform):
 
 
 class Pulse(Waveform):
-    """
-    Send a pulse down this particular channel.
-    """
+    """Send a pulse down this particular channel."""
 
     def __init__(
         self,
@@ -433,9 +429,9 @@ class Acquire(QuantumComponent, QuantumInstruction):
 
 
 class PostProcessing(QuantumInstruction):
-    """
-    States what post-processing should happen after data has been acquired. This can
-    happen in the FPGA's or a software post-process.
+    """States what post-processing should happen after data has been acquired.
+
+    This can happen in the FPGA's or a software post-process.
     """
 
     def __init__(self, acquire: Acquire, process, axes=None, args=None):
@@ -490,9 +486,7 @@ class Reset(QuantumInstruction):
 
 
 class PhaseReset(QuantumInstruction):
-    """
-    Reset the phase shift of all the channels
-    """
+    """Reset the phase shift of all the channels."""
 
     quantum_targets: List[PulseChannel]
 
@@ -553,8 +547,7 @@ class SweepValue(SweepOperation):
 
 
 class DeviceUpdate(QuantumInstruction):
-    """
-    Dynamically assigns a value to a particular symbol or hardware attribute during
+    """Dynamically assigns a value to a particular symbol or hardware attribute during
     execution.
 
     .. note:: It's still unknown how this will be represented in the instructions themselves, but that'll come later.
@@ -572,13 +565,12 @@ class DeviceUpdate(QuantumInstruction):
 
 
 class Sweep(Instruction):
-    """
-    This is a global meta-instruction that performs a sweep over values, effectively
-    performing a loop over the instructions replacing a variable with a specific value
-    per time.
+    """This is a global meta-instruction that performs a sweep over values, effectively
+    performing a loop over the instructions replacing a variable with a specific value per
+    time.
 
-    Nested sweeps are run in the order they're added and are performed after repeats. So
-    a 1000 repeat with a 4 sweep followed by a 2 will run a total of 8000 iterations.
+    Nested sweeps are run in the order they're added and are performed after repeats. So a
+    1000 repeat with a 4 sweep followed by a 2 will run a total of 8000 iterations.
     """
 
     def __init__(self, operations: Union[SweepValue, List[SweepValue]] = None):
@@ -607,8 +599,9 @@ class Sweep(Instruction):
 
 
 class EndSweep(Instruction):
-    """
-    Basic scoping. Marks the end of the most recent sweep
+    """Basic scoping.
+
+    Marks the end of the most recent sweep
     """
 
     def __repr__(self):
@@ -616,9 +609,7 @@ class EndSweep(Instruction):
 
 
 class Jump(Instruction):
-    """
-    Classic jump instruction, should be linked to label with an optional condition.
-    """
+    """Classic jump instruction, should be linked to label with an optional condition."""
 
     def __init__(self, label: Union[str, Label], condition=None):
         self.condition = condition
@@ -703,9 +694,7 @@ def build_generated_name(existing_names=None, prefix=None):
 
 
 class Variable:
-    """
-    States that this value is actually a variable that should be fetched instead.
-    """
+    """States that this value is actually a variable that should be fetched instead."""
 
     def __init__(self, name, var_type=None, value=None):
         self.name = name
@@ -736,8 +725,9 @@ class Variable:
 
 
 class Label(Instruction):
-    """
-    Label to apply to a line of code. Used as anchors for other instructions like jumps.
+    """Label to apply to a line of code.
+
+    Used as anchors for other instructions like jumps.
     """
 
     def __init__(self, name):
@@ -781,10 +771,7 @@ def remove_floating_point(x):
 
 
 def calculate_duration(instruction, return_samples: bool = True):
-    """
-    Calculates the duration of the instruction for this particular piece of
-    hardware.
-    """
+    """Calculates the duration of the instruction for this particular piece of hardware."""
     if isinstance(instruction, Acquire):
         pulse_targets = [instruction.channel]
     else:
@@ -819,8 +806,10 @@ def calculate_duration(instruction, return_samples: bool = True):
 
 
 class InstructionBlock:
-    """An Instruction grouping type. Allows working with blocks of Instructions as a
-    unit."""
+    """An Instruction grouping type.
+
+    Allows working with blocks of Instructions as a unit.
+    """
 
     instructions: List[Instruction]
 

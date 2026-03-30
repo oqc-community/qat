@@ -47,11 +47,10 @@ def get_default_qiskit_hardware(
     strict_placement=True,
     connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
 ) -> "QiskitHardwareModel":
-    """
-    Creates a hardware model compatible with the Qiskit simulator.
+    """Creates a hardware model compatible with the Qiskit simulator.
 
-    If `strict_placement=True`, circuits can only be executed when circuit
-    intructions act on adjacent qubits in the coupling map.
+    If `strict_placement=True`, circuits can only be executed when circuit intructions act
+    on adjacent qubits in the coupling map.
     """
     model = QiskitHardwareModel(qubit_count, noise_model)
     model.strict_placement = strict_placement
@@ -187,10 +186,8 @@ class QiskitBuilder(InstructionBuilder):
         self.bit_ordering = {}
 
     def merge_builder(self, other_builder: InstructionBuilder):
-        """
-        overloaded merge_builder Ensure that circuits are copied too
-        As well as the rest of the base merging operations.
-        """
+        """Overloaded merge_builder Ensure that circuits are copied too As well as the rest
+        of the base merging operations."""
         self.circuit.compose(other_builder.circuit, inplace=True)
         self.bit_count = other_builder.bit_count
         self.bit_ordering = other_builder.bit_ordering
@@ -217,9 +214,8 @@ class QiskitHardwareModel(QuantumHardwareModel):
 
 
 def verify_placement(coupling_map, circuit):
-    """
-    Check that the circuit can be directly mapped according to the
-    wire map defined by the coupling map
+    """Check that the circuit can be directly mapped according to the wire map defined by
+    the coupling map.
 
     Raises if placement cannot happen without swaps
     """
@@ -271,8 +267,7 @@ class QiskitEngine(InstructionExecutionEngine):
         return job.result()
 
     def execute(self, builder: QiskitBuilder):
-        """
-        Execute a circuit using Qiskit's AerSimulator as a backend. Options for the
+        """Execute a circuit using Qiskit's AerSimulator as a backend. Options for the
         simulator can be provided using qatconfig.SIMULATION.QISKIT.
 
         For more information, see:
@@ -427,8 +422,7 @@ class QiskitRuntime(QuantumRuntime):
         repeats: int = None,
         error_mitigation: ErrorMitigationConfig = None,
     ):
-        """
-        Execute a circuit using Qiskit's AerSimulator as a backend. Options for the
+        """Execute a circuit using Qiskit's AerSimulator as a backend. Options for the
         simulator can be provided using qatconfig.SIMULATION.QISKIT.
 
         For more information, see:

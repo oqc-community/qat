@@ -20,9 +20,7 @@ class QubitRegister(NoExtraFieldsModel):
 
 
 class CregIndexValue(NoExtraFieldsModel):
-    """
-    Used to reference when we are looking at a particular index in a creg variable.
-    """
+    """Used to reference when we are looking at a particular index in a creg variable."""
 
     register_name: str
     index: int

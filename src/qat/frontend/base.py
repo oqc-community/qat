@@ -15,12 +15,11 @@ from qat.utils.hardware_model import check_type_legacy_or_pydantic
 
 
 class BaseFrontend(ABC):
-    """
-    Base class for frontend that scans a high-level language-specific, but target-agnostic, input
-    :class:`QatInput` and verifies its syntax and semantics according to a specific source language
-    (QASM, QIR, ...). The input is optimised so as to adhere to the underlying topology of the QPU
-    and is then compiled to a target-agnostic intermediate representation (IR) :class:`QatIR` that
-    can be further optimised in the middle end.
+    """Base class for frontend that scans a high-level language-specific, but target-
+    agnostic, input :class:`QatInput` and verifies its syntax and semantics according to a
+    specific source language (QASM, QIR, ...). The input is optimised so as to adhere to the
+    underlying topology of the QPU and is then compiled to a target-agnostic intermediate
+    representation (IR) :class:`QatIR` that can be further optimised in the middle end.
 
     Generally, frontends are picked to match the source language. For example, a QIR source
     program should be coupled with the :class:`QIRFrontend`. They implement compilation
@@ -43,8 +42,8 @@ class BaseFrontend(ABC):
         compiler_config: CompilerConfig | None = None,
         **kwargs,
     ) -> InstructionBuilder:
-        """
-        Compiles an input :class:`QatInput` down to :class:`QatIR` and emits it.
+        """Compiles an input :class:`QatInput` down to :class:`QatIR` and emits it.
+
         :param src: The high-level input.
         :param res_mgr: Collection of analysis results with caching and aggregation
                         capabilities, defaults to None.

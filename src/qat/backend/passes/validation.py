@@ -7,8 +7,11 @@ from qat.ir.measure import Acquire
 
 
 class NoAcquireWeightsValidation(ValidationPass):
-    """Some target machines do not support :class:`Acquire` instructions that contain weights.
-    This pass can be used to validate that this is the case."""
+    """Some target machines do not support :class:`Acquire` instructions that contain
+    weights.
+
+    This pass can be used to validate that this is the case.
+    """
 
     def run(self, ir: InstructionBuilder, *args, **kwargs):
         """

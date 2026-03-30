@@ -13,10 +13,10 @@ from qat.purr.qat import QATInput
 
 
 class CustomFrontend(BaseFrontend):
-    """
-    Frontend that uses a custom pipeline to compile the input to an IR.
-    While it is not equipped with a specific parser, it allows the user
-    to specify custom compilation requirements via a pipeline.
+    """Frontend that uses a custom pipeline to compile the input to an IR.
+
+    While it is not equipped with a specific parser, it allows the user to specify custom
+    compilation requirements via a pipeline.
     """
 
     # TODO: Allow the custom frontend to be equipped with an optional parser. Requires
@@ -48,9 +48,9 @@ class CustomFrontend(BaseFrontend):
         compiler_config: CompilerConfig | None = None,
         **kwargs,
     ):
-        """
-        Compiles an input :class:`QatInput` down to :class:`QatIR` with the custom
+        """Compiles an input :class:`QatInput` down to :class:`QatIR` with the custom
         pipeline and emits it.
+
         :param src: The high-level input.
         :param res_mgr: Collection of analysis results with caching and aggregation
                         capabilities, defaults to None.

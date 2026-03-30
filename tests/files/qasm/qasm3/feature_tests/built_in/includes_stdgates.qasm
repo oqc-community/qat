@@ -1,5 +1,5 @@
 // Contains calls to all gates in stdgates.inc.
-// Done on logical qubits; will require hardware model with at least 5 qubits and an 
+// Done on logical qubits; will require hardware model with at least 5 qubits and an
 // appropriate connectivity
 
 OPENQASM 3;
@@ -7,7 +7,7 @@ include "stdgates.inc";
 bit[2] c;
 qubit[2] q;
 
-// 1q gates 
+// 1q gates
 u3({{ angle1 }}, {{ angle2 }}, {{angle3}}) q[0];
 u2({{ angle1 }}, {{ angle2 }}) q[1];
 u1({{ angle1 }}) q[1];
@@ -28,7 +28,7 @@ rz({{ angle3 }}) q[1];
 sx q[0];
 id q[0];
 
-// 2q gates 
+// 2q gates
 CX q[0], q[1];
 cx q[0], q[1];
 cy q[0], q[1];
@@ -42,6 +42,6 @@ cry({{ angle2 }}) q[0], q[1];
 crz({{ angle3 }}) q[0], q[1];
 cu({{ angle1 }}, {{ angle2 }}, {{ angle3 }}) q[0], q[1];
 
-// 3q gates 
+// 3q gates
 ccx q[0], q[1], q[2];
 cswap q[0], q[1], q[2];

@@ -43,9 +43,9 @@ class CustomCalibration(RemoteCalibration):
 
 
 class BuiltinRemoteCalibration(RemoteCalibration):
-    """
-    Identifier for any built-in calibrations. Enables automatic running of calibrations
-    remotely for any class that inherits this.
+    """Identifier for any built-in calibrations.
+
+    Enables automatic running of calibrations remotely for any class that inherits this.
     """
 
     def __init_subclass__(cls, **kwargs):

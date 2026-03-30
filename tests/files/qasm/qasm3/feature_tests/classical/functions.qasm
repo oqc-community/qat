@@ -1,4 +1,4 @@
-// Tests function definitions and calls 
+// Tests function definitions and calls
 
 OPENQASM 3.0;
 
