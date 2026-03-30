@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.pipelines.purr.sweep.passes module &mdash; qat-compiler 3.0.0.post193.dev20260330090408 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+  <title>qat.pipelines.purr.sweep.passes module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -530,8 +530,8 @@
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.passes.FrequencyAssignSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyAssignSanitisation</span></span><a class="headerlink" href="#qat.pipelines.purr.sweep.passes.FrequencyAssignSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Sanitises device assignments that changes the frequency of a channel, by replacing it
-with a FrequencySet instruction.</p>
+<p>Sanitises device assignments that changes the frequency of a channel, by replacing
+it with a FrequencySet instruction.</p>
 <p>If this is done for targets that can support frequency assignment as an IR instruction,
 (i.e. has support for <code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySet</span></code>), then this pass can be used to avoid
 mutating the hardware model, which can be unsafe when used within pipelines.</p>

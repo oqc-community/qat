@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.compiler.instructions module &mdash; qat-compiler 2.7.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -374,8 +374,8 @@
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.Assign">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.Assign" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Assigns the variable ‘x’ the value ‘y’.</p>
-<p>This can be performed as a part of running on the QPU or by a post-processing pass.</p>
+<p>Assigns the variable ‘x’ the value ‘y’. This can be performed as a part of running
+on the QPU or by a post-processing pass.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -443,16 +443,14 @@ execution.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.EndRepeat">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EndRepeat</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.EndRepeat" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Basic scoping.</p>
-<p>Marks the end of the most recent repeat</p>
+<p>Basic scoping. Marks the end of the most recent repeat</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.EndSweep">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EndSweep</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.EndSweep" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Basic scoping.</p>
-<p>Marks the end of the most recent sweep</p>
+<p>Basic scoping. Marks the end of the most recent sweep</p>
 </dd></dl>
 
 <dl class="py class">
@@ -519,8 +517,8 @@ execution.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.InstructionBlock">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBlock</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.InstructionBlock" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>An Instruction grouping type.</p>
-<p>Allows working with blocks of Instructions as a unit.</p>
+<p>An Instruction grouping type. Allows working with blocks of Instructions as a
+unit.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.InstructionBlock.instructions">
 <span class="sig-name descname"><span class="pre">instructions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code><span class="pre">[</span><a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.purr.compiler.instructions.InstructionBlock.instructions" title="Link to this definition"></a></dt>
@@ -539,8 +537,7 @@ execution.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.Label">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.Label" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Label to apply to a line of code.</p>
-<p>Used as anchors for other instructions like jumps.</p>
+<p>Label to apply to a line of code. Used as anchors for other instructions like jumps.</p>
 <p>If you need a name, use generate_name and pass in existing values.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.Label.generate_name">
@@ -614,7 +611,7 @@ execution.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PhaseReset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseReset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reset_channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.PhaseReset" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
-<p>Reset the phase shift of all the channels.</p>
+<p>Reset the phase shift of all the channels</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PhaseReset.add_channels">
 <span class="sig-name descname"><span class="pre">add_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reset_channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.PhaseReset.add_channels" title="Link to this definition"></a></dt>
@@ -670,8 +667,8 @@ the phase relative to the current phase.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PostProcessing">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.PostProcessing" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.QuantumInstruction" title="qat.purr.compiler.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
-<p>States what post-processing should happen after data has been acquired.</p>
-<p>This can happen in the FPGA’s or a software post-process.</p>
+<p>States what post-processing should happen after data has been acquired. This can
+happen in the FPGA’s or a software post-process.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.PostProcessing.acquire">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">acquire</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.purr.compiler.instructions.Acquire" title="qat.purr.compiler.instructions.Acquire"><span class="pre">Acquire</span></a></em><a class="headerlink" href="#qat.purr.compiler.instructions.PostProcessing.acquire" title="Link to this definition"></a></dt>
@@ -695,9 +692,9 @@ the phase relative to the current phase.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstruction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantum_targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstruction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Any node that deals particularly with quantum operations.</p>
-<p>All quantum operations must have some sort of target on the quantum computer, such as a
-qubit, channel, or another form of component.</p>
+<p>Any node that deals particularly with quantum operations. All quantum operations
+must have some sort of target on the quantum computer, such as a qubit, channel, or
+another form of component.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.QuantumInstruction.duration">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">duration</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.QuantumInstruction.duration" title="Link to this definition"></a></dt>
@@ -737,8 +734,8 @@ qubit, channel, or another form of component.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.Repeat">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repetition_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">passive_reset_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.Repeat" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Global meta-instruction that applies to the entire list of instructions.</p>
-<p>Repeat value of the current operations, also known as shots.</p>
+<p>Global meta-instruction that applies to the entire list of instructions. Repeat
+value of the current operations, also known as shots.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -772,10 +769,10 @@ qubit, channel, or another form of component.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Sweep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.Sweep" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.instructions.Instruction" title="qat.purr.compiler.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
 <p>This is a global meta-instruction that performs a sweep over values, effectively
-performing a loop over the instructions replacing a variable with a specific value per
-time.</p>
-<p>Nested sweeps are run in the order they’re added and are performed after repeats. So a
-1000 repeat with a 4 sweep followed by a 2 will run a total of 8000 iterations.</p>
+performing a loop over the instructions replacing a variable with a specific value
+per time.</p>
+<p>Nested sweeps are run in the order they’re added and are performed after repeats. So
+a 1000 repeat with a 4 sweep followed by a 2 will run a total of 8000 iterations.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.Sweep.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#qat.purr.compiler.instructions.Sweep.length" title="Link to this definition"></a></dt>
@@ -850,7 +847,8 @@ execution on any of them.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.compiler.instructions.calculate_duration">
 <span class="sig-name descname"><span class="pre">calculate_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instruction</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.instructions.calculate_duration" title="Link to this definition"></a></dt>
-<dd><p>Calculates the duration of the instruction for this particular piece of hardware.</p>
+<dd><p>Calculates the duration of the instruction for this particular piece of
+hardware.</p>
 </dd></dl>
 
 <dl class="py function">

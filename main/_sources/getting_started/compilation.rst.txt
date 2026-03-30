@@ -1,6 +1,6 @@
 .. _compilation:
 
-Compilation
+Compilation 
 ------------------------
 
 As was shown previously, the compilation of source programs can be achieved in pipelines by
@@ -22,7 +22,7 @@ Frontend
 The frontend describes the front-facing part of the compiler.
 It's responsible for dealing with the semantics of the source language, and compiling it
 into QAT's intermediate representation (IR) which is independent of source language. A
-frontend is usually defined by two components:
+frontend is usually defined by two components: 
 
 #. A pipeline which can be used to validate and modify the provided source program (before
    compiling to QAT IR), see :mod:`qat.frontend.passes` for a list of passes available.
@@ -30,7 +30,7 @@ frontend is usually defined by two components:
    interprets the tree to produce QAT IR.
 
 The general rule of thumb is that there is a single frontend per type of source program.
-Currently, QAT supports source programs in the following formats through their appropriate
+Currently, QAT supports source programs in the following formats through their appropriate 
 frontends:
 
 * `QASM2 <https://arxiv.org/abs/1707.03429>`_:
@@ -40,13 +40,13 @@ frontends:
 * `QIR <https://www.qir-alliance.org/qir-book/>`_:
   :class:`QIRFrontend <qat.frontend.qir.QIRFrontend>`
 
-QASM2 example
+QASM2 example 
 ^^^^^^^^^^^^^^^^^^^^
 
-Each frontend can be provided with a compilation pipeline, with a suitable default already
-chosen for each. As an example, let's try to compile a QASM2 program
+Each frontend can be provided with a compilation pipeline, with a suitable default already 
+chosen for each. As an example, let's try to compile a QASM2 program 
 
-.. code-block:: python
+.. code-block:: python 
     :linenos:
 
     from qat.frontend.qasm import Qasm2Frontend
@@ -70,25 +70,25 @@ chosen for each. As an example, let's try to compile a QASM2 program
     frontend = Qasm2Frontend(model, pipeline=pipeline)
     ir = frontend.emit(qasm_str)
 
-The :code:`ir` emitted is an instruction builder that contains QAT IR, and can now be used
+The :code:`ir` emitted is an instruction builder that contains QAT IR, and can now be used 
 within the middleend of the compilation.
 
 Automatically chosen frontends
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Often enough, we are not explicitly told what is the type of source program. We need
-to infer the type and then decide on the correct frontend to use. We would also like to
+Often enough, we are not explicitly told what is the type of source program. We need 
+to infer the type and then decide on the correct frontend to use. We would also like to 
 avoid defining individual pipelines for each type of source program: it is sometimes
 expected that the middleend and backend will be the same regardless of the type of source
 program. For these reasons, it makes sense to have an automatic frontend that inspects the
-source program to determine and deploy the matching frontend.
+source program to determine and deploy the matching frontend. 
 
 This is achieved in QAT using the :class:`AutoFrontend <qat.frontend.auto.AutoFrontend>`.
 This frontend is provided with a list of frontends and attempts to match the source
 program with one of the given frontends. If a frontend is found to be compatible with the
 source program, it is used. Defining an automatic frontend might look something like:
 
-.. code-block:: python
+.. code-block:: python 
 
     frontend = AutoFrontend(
         model,
@@ -98,13 +98,13 @@ source program, it is used. Defining an automatic frontend might look something 
     )
 
 The natural question that follows is "how does a frontend know if it is compatible with
-the source program?" Each source-language specific frontend must be equipped with a
+the source program?" Each source-language specific frontend must be equipped with a 
 :meth:`check_and_return_source <qat.frontend.base.BaseFrontend.check_and_return_source>`
 method that inspects the contents of the source program, and returns it if it is found to be
 compatible.
 
-Let's consider a simple example to demonstrate how a custom frontend can be used within an
-:class:`AutoFrontend <qat.frontend.auto.AutoFrontend>`.
+Let's consider a simple example to demonstrate how a custom frontend can be used within an 
+:class:`AutoFrontend <qat.frontend.auto.AutoFrontend>`. 
 
 .. code-block:: python
     :linenos:
@@ -118,12 +118,12 @@ Let's consider a simple example to demonstrate how a custom frontend can be used
             if not isinstance(src, str):
                 return False
             if "this is a fancy new source language" in src:
-                return src
+                return src 
             return False
-
+        
         def emit(self, src, *args):
             return src
-
+        
 
     qasm_program = """
     OPENQASM 2.0;
@@ -158,18 +158,18 @@ QAT also has a few other frontends available:
   pipeline-oriented frontend to be defined.
 
 
-Middleend
+Middleend 
 **********************
 
 The middleend module handles compilation responsibilities at the level of QAT IR. It is
-passed a quantum program at the level of QAT IR, and applies a sequence of hardware-agnostic
+passed a quantum program at the level of QAT IR, and applies a sequence of hardware-agnostic 
 passes that
 
 #. Perform analysis on the IR,
 #. Validate the IR has appropriate specified properties,
 #. Transforms the IR (e.g. optimization and santisation of the IR).
 
-See :mod:`qat.middleend.passes` for a full list of available passes.
+See :mod:`qat.middleend.passes` for a full list of available passes. 
 
 Default Middleend
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -178,17 +178,17 @@ The standard middleend to use is the
 :class:`DefaultMiddleend <qat.middleend.default.DefaultMiddleend>`, which has a
 pre-defined pipeline.
 
-.. code-block:: python
+.. code-block:: python 
 
     from qat.middleend import DefaultMiddleend
     middleend = DefaultMiddleend(hardware_model)
     ir = middleend.emit(ir)
 
-Despite being hardware-agnostic, the middleend needs to be instantiated with the hardware
-model.
+Despite being hardware-agnostic, the middleend needs to be instantiated with the hardware 
+model. 
 Note that here hardware-agnostic means that it does not depend on the code-generation
 related details of the target. However, the calibration file is still required to produce
-the correction QAT IR instructions. Calling :code:`middleend.emit(ir)` will instruct the
+the correction QAT IR instructions. Calling :code:`middleend.emit(ir)` will instruct the 
 middleend to pass the IR through the compilation pipeline.
 
 Custom Middleend
@@ -199,7 +199,7 @@ We can specify a middleend with a custom compilation pipeline using the
 following middleend would optimise over phase shifts and remove any unnecessary
 post-processing instructions to reduce the overall instruction count.
 
-.. code-block:: python
+.. code-block:: python 
 
     from qat.middleend import CustomMiddleend
     from qat.passes.pass_base import PassManager
@@ -213,11 +213,11 @@ post-processing instructions to reduce the overall instruction count.
     middleend = CustomMiddleend(model, pipeline)
 
 
-Backend
+Backend 
 ***********************
 
 After we have compiled the source program to QAT IR, and performed any validation and
-transformation we wish to do at the level of QAT IR, the program will enter the backend.
+transformation we wish to do at the level of QAT IR, the program will enter the backend. 
 The objective of the backend is to compile the QAT IR into a language understandable by the
 target, a process referred to as "code generation" (codegen). Like the frontend, the backend
 has two components:
@@ -238,7 +238,7 @@ maintained for some of our simulators and demonstration purposes. Like the front
 middleend, the emitter can be used to generate native code by calling the :code:`emit`
 method,
 
-.. code-block:: python
+.. code-block:: python 
 
     from qat.backend.waveform import WaveformBackend
     backend = WaveformBackend(model)
@@ -287,5 +287,5 @@ compilation pipeline. Let's write one that compiles to "Waveform".
     ir = middleend.emit(ir, compiler_config=config)
     pkg = backend.emit(ir, compiler_config=config)
 
-The result will be a freshly prepared package ready for execution! Notice that this just
+The result will be a freshly prepared package ready for execution! Notice that this just 
 achieves what :code:`QAT().compile()` would, but not as neatly wrapped up.

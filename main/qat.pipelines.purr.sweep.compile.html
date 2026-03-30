@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.pipelines.purr.sweep.compile module &mdash; qat-compiler 3.0.0.post193.dev20260330090408 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+  <title>qat.pipelines.purr.sweep.compile module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -534,14 +534,14 @@
 devices assigns by making repeated calls to an underlying pipeline.</p>
 <p>The underlying pipeline must be updateable. This is done because applying device assigns
 can change properties of the hardware model, and the pipeline must be rebuilt to ensure
-it is not invalidated. Furthermore, even if device assigns aren’t used, sweeps are often
-done side-by-side with changes to the hardware model, so it is useful to ensure its
-rebuilt as a precaution.</p>
+it is not invalidated. Furthermore, even if device assigns aren’t used, sweeps are
+often done side-by-side with changes to the hardware model, so it is useful to ensure
+its rebuilt as a precaution.</p>
 <p>Eventually the risks associated with device assigns can be mitigated by mapping device
 assigns onto instructions in the IR, where possible. For example, a device assign that
 changes the frequency of a channel can be mapped onto a frequency set instruction.
-Similar behaviour could implemented for pulse channel scales too, with an e.g. “set
-scale” instruction, or appropriate mapping onto pulse amplitudes.</p>
+Similar behaviour could implemented for pulse channel scales too, with an e.g.
+“set scale” instruction, or appropriate mapping onto pulse amplitudes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -567,8 +567,8 @@ used.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A batched executable containing all instances of the sweeps, along with the
-metrics from the final compile call.</p>
+<dd class="field-even"><p>A batched executable containing all instances of the sweeps, along with
+the metrics from the final compile call.</p>
 </dd>
 </dl>
 </dd></dl>

@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.backends.qblox.codegen module &mdash; qat-compiler 2.7.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -372,7 +372,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.AllocationManager.reg_borrow">
 <span class="sig-name descname"><span class="pre">reg_borrow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.AllocationManager.reg_borrow" title="Link to this definition"></a></dt>
-<dd><p>Short-lived register allocation.</p>
+<dd><p>Short-lived register allocation</p>
 </dd></dl>
 
 <dl class="py method">
@@ -433,9 +433,8 @@
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.PreCodegenPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreCodegenPass</span></span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.PreCodegenPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></p>
-<p>Precedes code generation.</p>
-<p>The context-based emitter needs registers pre-allocated for every live variable in
-program. This pass performs a naive register allocation through a manager object.</p>
+<p>Precedes code generation. The context-based emitter needs registers pre-allocated for every
+live variable in program. This pass performs a naive register allocation through a manager object.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.PreCodegenPass.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.PreCodegenPass.run" title="Link to this definition"></a></dt>
@@ -537,24 +536,23 @@ program. This pass performs a naive register allocation through a manager object
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.is_empty">
 <span class="sig-name descname"><span class="pre">is_empty</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.is_empty" title="Link to this definition"></a></dt>
-<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation
-targets This is temporary and criteria will change with more features coming in.</p>
+<dd><p>Masks away yet-to-be-supported second-state, cancellation, and cross cancellation targets
+This is temporary and criteria will change with more features coming in</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.ledger">
 <span class="sig-name descname"><span class="pre">ledger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.ledger" title="Link to this definition"></a></dt>
 <dd><p>A helper method to keep track of the durations and phase as the codegen runs.</p>
-<p>Every little bit of time is accounted for and a timeline object (in static cases) is
-also kept up-to-date for debugging and visualisation purposes.</p>
+<p>Every little bit of time is accounted for and a timeline object (in static cases)
+is also kept up-to-date for debugging and visualisation purposes.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire">
 <span class="sig-name descname"><span class="pre">measure_acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measure</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.measure_acquire" title="Link to this definition"></a></dt>
-<dd><p>Regarding HW thresholding, <cite>acquire.rotation</cite> is in radians and
-<cite>acquire.threshold</cite> is uncorrected. (Exactly as they’ve been computed during measure
-block construction)</p>
+<dd><p>Regarding HW thresholding, <cite>acquire.rotation</cite> is in radians and <cite>acquire.threshold</cite> is uncorrected.
+(Exactly as they’ve been computed during measure block construction)</p>
 <dl class="simple">
 <dt>Here at configuration time, we “legalise” these parameters to what Qblox requires:</dt><dd><ul class="simple">
 <li><p><cite>rotation</cite> as degrees</p></li>
@@ -587,8 +585,8 @@ block construction)</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.codegen.QbloxContext.synchronize">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">synchronize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contexts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.codegen.QbloxContext.synchronize" title="Link to this definition"></a></dt>
-<dd><p>Favours static time padding whenever possible, or else uses SYNC.</p>
-<p>TODO - Default to SYNC when Qblox supports finer grained SYNC groups</p>
+<dd><p>Favours static time padding whenever possible, or else uses SYNC.
+TODO - Default to SYNC when Qblox supports finer grained SYNC groups</p>
 </dd></dl>
 
 <dl class="py method">

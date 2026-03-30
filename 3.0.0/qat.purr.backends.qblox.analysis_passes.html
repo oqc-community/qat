@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.backends.qblox.analysis_passes module &mdash; qat-compiler 3.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -360,9 +360,9 @@ required on read sites to make sure their usage is consistent and meaningful.</p
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.BindingPass.extract_iter_bound">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
 <dd><p>Given a sequence of numbers (typically having been generated from
-<code class="code docutils literal notranslate"><span class="pre">np.linspace()</span></code>), figure out if the numbers are linearly/evenly spaced, in
-which case returns an IterBound instance holding the start, step, end, and count of
-the numbers in the array, or else fail.</p>
+<code class="code docutils literal notranslate"><span class="pre">np.linspace()</span></code>), figure out if the numbers are linearly/evenly spaced,
+in which case returns an IterBound instance holding the start, step, end, and count
+of the numbers in the array, or else fail.</p>
 <p>In the future, we might be interested in relaxing this condition and return
 “interpolated” evenly spaced approximation of the input sequence.</p>
 </dd></dl>
@@ -471,8 +471,7 @@ the numbers in the array, or else fail.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps">
 <span class="sig-name descname"><span class="pre">amp_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">amp</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps" title="Link to this definition"></a></dt>
-<dd><p>The instruction <cite>set_awg_offs</cite> expects DAC ratio as a (potentially signed)
-integer operand.</p>
+<dd><p>The instruction <cite>set_awg_offs</cite> expects DAC ratio as a (potentially signed) integer operand.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
@@ -483,8 +482,7 @@ integer operand.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">freq_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq_hz</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps" title="Link to this definition"></a></dt>
-<dd><p>The instruction <cite>set_freq</cite> expects the frequency as a (potentially signed)
-integer operand.</p>
+<dd><p>The instruction <cite>set_freq</cite> expects the frequency as a (potentially signed) integer operand.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
@@ -495,8 +493,7 @@ integer operand.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">phase_as_steps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_rad</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps" title="Link to this definition"></a></dt>
-<dd><p>The instruction <cite>set_ph_delta</cite> expects the phase shift as a (potentially signed)
-integer operand.</p>
+<dd><p>The instruction <cite>set_ph_delta</cite> expects the phase shift as a (potentially signed) integer operand.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>

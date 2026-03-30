@@ -2,7 +2,7 @@ Pipelines
 ---------------------
 
 The primary way to access QAT's compilation and execution capabilities is through its
-pipelines API. Pipelines allow us to define the compilation and execution process in a
+pipelines API. Pipelines allow us to define the compilation and execution process in a 
 configurable and modular way.
 
 .. contents::
@@ -15,27 +15,27 @@ a :class:`QAT <qat.core.qat.QAT>` object.
 
 .. code-block:: python
 
-    from qat import QAT
+    from qat import QAT 
     core = QAT()
 
-We can now add a pipeline to it. Let's add a pipeline that uses the
+We can now add a pipeline to it. Let's add a pipeline that uses the 
 :class:`EchoEngine <qat.engines.waveform_v1.echo.EchoEngine>`:
 
-.. code-block:: python
+.. code-block:: python 
 
     from qat.pipelines.waveform import echo8
     core.pipelines.add(echo8, default=True)
 
 This will add the "echo8" pipeline to :code:`core`, which can be used to compile and execute
 programs using a simulator that simply returns all readouts as zeroes. The "8" in "echo8"
-specifies that the simulator has 8 qubits available. The pipeline already has its
-compilation modules chosen so that it is compatible with the echo engine: we'll cover this
+specifies that the simulator has 8 qubits available. The pipeline already has its 
+compilation modules chosen so that it is compatible with the echo engine: we'll cover this 
 in more detail in :ref:`compilation`. Now we can use this to execute a QASM program.
 
-.. code-block:: python
+.. code-block:: python 
     :linenos:
 
-    from qat import QAT
+    from qat import QAT 
     from qat.pipelines.waveform import echo8
     from compiler_config.config import CompilerConfig, QuantumResultsFormat
 
@@ -63,8 +63,8 @@ for readouts, the result returned here is :code:`results = {'c': {'00': 1000}}`.
 
 We could also achieve the same workflow by compiling and executing separately:
 
-.. code-block:: python
-
+.. code-block:: python 
+    
     pkg, metrics = core.compile(qasm_str, config, pipeline="echo8")
     results, metrics = core.execute(pkg, config, pipeline="echo8")
 
@@ -76,14 +76,14 @@ Updateable Pipelines
 *********************************************
 
 The pipeline from the previous example was a default pipeline instance that you can import
-from QAT. But more likely, you would want to configure your own pipeline using your own
+from QAT. But more likely, you would want to configure your own pipeline using your own 
 hardware model and target data for a given type of hardware.
-Updateable pipelines provide a prescribed way to create pipelines that offer utility to
+Updateable pipelines provide a prescribed way to create pipelines that offer utility to 
 rebuild pipelines using new hardware models or target data. Let's demonstrate with the
 Waveform example and the echo engine from the previous section, but by configuring our own.
 
-.. code-block:: python
-  :linenos:
+.. code-block:: python 
+  :linenos: 
 
   from qat.pipelines.waveform import EchoPipeline, PipelineConfig
   from qat.model.loaders.lucy import LucyModelLoader
@@ -94,14 +94,14 @@ Waveform example and the echo engine from the previous section, but by configuri
   pipeline.update(reload_model=True)
 
 There's a few things to notice here. First, the updateable pipeline actually takes
-ownership of the pipeline instance it creates, and in the way, can be used in-place of the
-pipeline instance. Secondly, we instantiated it using the model loader, allowing us to
-reload the model directly from the loader. However, updateable pipelines can be configured
+ownership of the pipeline instance it creates, and in the way, can be used in-place of the 
+pipeline instance. Secondly, we instantiated it using the model loader, allowing us to 
+reload the model directly from the loader. However, updateable pipelines can be configured 
 using a hardware model directly, and similarly, they can be updated by providing a new model
-directly. The target data can also be provided at instantiation, and updated to using
+directly. The target data can also be provided at instantiation, and updated to using 
 :code:`pipeline.update(target_data=target_data)`. Finally, each updateable pipeline is
 paired with a :class:`PipelineConfig <qat.pipelines.updateable.PipelineConfig>` object that
-stores configuration data for the pipeline, such as its name, and additional compiler
+stores configuration data for the pipeline, such as its name, and additional compiler 
 settings.
 
 
@@ -109,10 +109,10 @@ settings.
 
 
 
-Compile and Execute (updateable) pipelines
+Compile and Execute (updateable) pipelines 
 *********************************************
 
-The example seen previously uses a "full pipeline" that is capable of both compiling and
+The example seen previously uses a "full pipeline" that is capable of both compiling and 
 executing a program. However, we can also express pipelines that can only compile
 :class:`CompilePipeline <qat.pipelines.pipeline.CompilePipeline>` or only execute
 :class:`ExecutePipeline <qat.pipelines.pipeline.ExecutePipeline>`. The benefits of this are that
@@ -126,17 +126,17 @@ executing a program. However, we can also express pipelines that can only compil
 We can compile and execute against particular pipelines by using :code:`QAT.compile` and
 :code:`QAT.execute`, specifying the pipeline to use.
 
-.. code-block::
+.. code-block:: 
   :linenos:
 
   from qat.pipelines.waveform import WaveformCompilePipeline, EchoExecutePipeline, PipelineConfig
   from qat.model.loaders.lucy import LucyModelLoader
   from qat import QAT
 
-  # Define pipelines
+  # Define pipelines 
   model = LucyModelLoader(qubit_count=16).load()
   compile_pipeline = WaveformCompilePipeline(config=PipelineConfig(name="compile"), model=model)
-  execute_pipeline = EchoExecutePipeline(config=PipelineConfig(name="execute"), model=model)
+  execute_pipeline = EchoExecutePipeline(config=PipelineConfig(name="execute"), model=model)  
 
   # Register pipelines
   core = QAT()
@@ -157,7 +157,7 @@ We can compile and execute against particular pipelines by using :code:`QAT.comp
   results, execute_metrics = core.execute(executable, pipeline="execute")
 
 
-Default pipelines that are available in QAT
+Default pipelines that are available in QAT 
 *********************************************
 
 There are a number of pipelines in QAT that are available to use off-the-shelf.
@@ -165,11 +165,11 @@ There are a number of pipelines in QAT that are available to use off-the-shelf.
 * :mod:`qat.pipelines.waveform`: Pipelines that execute using the
   :class:`EchoEngine <qat.engines.waveform.echo.EchoEngine>`. The pipelines available
   by default are :attr:`echo8`, :attr:`echo16`, :attr:`echo32`. The updateable pipelines are
-  available through :class:`EchoPipeline <qat.pipelines.waveform.EchoPipeline>`,
+  available through :class:`EchoPipeline <qat.pipelines.waveform.EchoPipeline>`, 
   :class:`WaveformCompilePipeline <qat.pipelines.waveform.WaveformCompilePipeline>` and
   :class:`EchoExecutePipeline <qat.pipelines.waveform.EchoExecutePipeline>`.
 
-There are also pipelines that use legacy hardware and engines, but wrapped in the new
+There are also pipelines that use legacy hardware and engines, but wrapped in the new 
 pipeline API:
 
 * :mod:`qat.pipelines.legacy.echo`: Pipelines that execute using the legacy
@@ -181,7 +181,7 @@ pipeline API:
   :class:`RealtimeChipSimEngine <qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine>`.
   The only available pipeline is for two qubits, :attr:`legacy_rtcs2`.
 * :mod:`qat.pipelines.legacy.qiskit`: Pipelines that execute using the legacy
-  :class:`QiskitEngine <qat.purr.backends.qiskit_simulator.QiskitEngine>`. The available
+  :class:`QiskitEngine <qat.purr.backends.qiskit_simulator.QiskitEngine>`. The available 
   pipelines are :attr:`legacy_qiskit8`, :attr:`legacy_qiskit16` and :attr:`legacy_qiskit32`.
   For a custom amount of qubits, the method
   :meth:`get_pipeline <qat.pipelines.legacy.qiskit.get_pipeline>` can be used.
@@ -191,14 +191,14 @@ pipeline API:
 Defining custom pipelines
 *************************
 
-Pipelines in QAT are highly customisable to allow for diverse compilation behaviour for a
+Pipelines in QAT are highly customisable to allow for diverse compilation behaviour for a 
 range of targets, such as live hardware or custom simulators. Compilation is broken down
 into three parts: the **frontend**, the **middleend** and the **backend**. We will not go
 into the details of each module here, but they will be covered in :ref:`compilation`.
 Similarly, the execution part of the pipeline is defined by two objects: the **engine** and
 the **runtime**. The engine acts as an adapter to the target, and deals with communicating
 the instructions and results from the runtime to the target. The runtime handles the
-engine, and deals with software post-processing of the results. See :ref:`execution` for
+engine, and deals with software post-processing of the results. See :ref:`execution` for 
 more details.
 
 See :doc:`../notebooks/tutorials/custom_pipeline` for a working example of defining a custom

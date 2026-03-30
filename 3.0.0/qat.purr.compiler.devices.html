@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>qat.purr.compiler.devices module &mdash; qat-compiler 3.0.0 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -369,10 +369,10 @@ save location.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.Calibratable.save_calibration_to_file">
 <span class="sig-name descname"><span class="pre">save_calibration_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_cwd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.Calibratable.save_calibration_to_file" title="Link to this definition"></a></dt>
-<dd><p>Saves calibration to passed-in file path.</p>
-<p>use_cwd appends the working directory to any non-absolute path, otherwise it’ll
-search for common calibration config folders before defaulting to the one in source
-code.</p>
+<dd><p>Saves calibration to passed-in file path.
+use_cwd appends the working directory to any non-absolute path, otherwise it’ll
+search for common calibration config folders before defaulting to the one in
+source code.</p>
 </dd></dl>
 
 </dd></dl>
@@ -446,14 +446,14 @@ generating accurate circular references.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.CyclicRefUnpickler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CyclicRefUnpickler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">safe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v1_decode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">on_missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ignore'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.CyclicRefUnpickler" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Unpickler</span></code></p>
-<p>Makes sure cyclic references are picked up correctly.</p>
-<p>Objects need to be pickled with CyclicRefPickler otherwise the tags required for this
-more precise detection won’t exist.</p>
+<p>Makes sure cyclic references are picked up correctly. Objects need to be pickled
+with CyclicRefPickler otherwise the tags required for this more precise detection
+won’t exist.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.CyclicRefUnpickler.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.CyclicRefUnpickler.reset" title="Link to this definition"></a></dt>
-<dd><p>Replace _objs with our own dictionary upon every reset.</p>
-<p>This is called from the constructor.</p>
+<dd><p>Replace _objs with our own dictionary upon every reset. This is called from
+the constructor.</p>
 </dd></dl>
 
 </dd></dl>
@@ -465,10 +465,10 @@ more precise detection won’t exist.</p>
 <p>This is a patch-up object because originally the reference-counting mechanism for
 jsonpickle used incrementing ID’s and relied upon the graph to be deterministic.</p>
 <p>This isn’t the case in some situations, so we want to be able to match up object
-reference by their memory pointer instead. But we don’t really want a list a few billion
-elements long for many reasons.</p>
-<p>This simply exposes the methods and functionality jsonpickle relies upon in the list,
-while also allowing us to use very large ints as lookup targets.</p>
+reference by their memory pointer instead. But we don’t really want a list a few
+billion elements long for many reasons.</p>
+<p>This simply exposes the methods and functionality jsonpickle relies upon in the
+list, while also allowing us to use very large ints as lookup targets.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.FakeList.append">
 <span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.FakeList.append" title="Link to this definition"></a></dt>
@@ -586,12 +586,13 @@ while also allowing us to use very large ints as lookup targets.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.PulseChannelView">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseChannelView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auxiliary_devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.PulseChannelView" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.devices.PulseChannel" title="qat.purr.compiler.devices.PulseChannel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannel</span></code></a></p>
-<p>Each quantum device will have a unique view of a PulseChannel, which this class helps
-encapsulate. For example, a PulseChannel may be the driving channel for one qubit but to
-another qubit the same PulseChannel might be driving its second state. We need to be
-able to share pulse channel instances with different usages in this particular case.</p>
-<p>Functionally this acts as an opaque wrapper to PulseChannel, forwarding all calls to the
-wrapped object.</p>
+<p>Each quantum device will have a unique view of a PulseChannel, which this class
+helps encapsulate. For example, a PulseChannel may be the driving channel for one
+qubit but to another qubit the same PulseChannel might be driving its second state.
+We need to be able to share pulse channel instances with different usages in this
+particular case.</p>
+<p>Functionally this acts as an opaque wrapper to PulseChannel, forwarding all calls to
+the wrapped object.</p>
 <p>pulse_channel: The PulseChannel this device is viewing.
 channel_type: How this devices intends the PulseChannel to be used.
 auxiliary_devices: Any extra devices this PulseChannel could be effecting except</p>
@@ -845,8 +846,7 @@ Quality is the quality-level of the coupling.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.Resonator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Resonator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.Resonator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.purr.compiler.devices.QuantumDevice" title="qat.purr.compiler.devices.QuantumDevice"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumDevice</span></code></a></p>
-<p>Models a resonator on a chip.</p>
-<p>Can be connected to multiple qubits.</p>
+<p>Models a resonator on a chip. Can be connected to multiple qubits.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.Resonator.get_acquire_channel">
 <span class="sig-name descname"><span class="pre">get_acquire_channel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.Resonator.get_acquire_channel" title="Link to this definition"></a></dt>
@@ -878,8 +878,8 @@ Quality is the quality-level of the coupling.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.purr.compiler.devices.build_qubit">
 <span class="sig-name descname"><span class="pre">build_qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resonator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">physical_channel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drive_freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_state_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">measure_amp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_drive_if</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.devices.build_qubit" title="Link to this definition"></a></dt>
-<dd><p>Helper method tp build a qubit with assumed default values on the channels.</p>
-<p>Modelled after the live hardware.</p>
+<dd><p>Helper method tp build a qubit with assumed default values on the channels. Modelled
+after the live hardware.</p>
 </dd></dl>
 
 <dl class="py function">

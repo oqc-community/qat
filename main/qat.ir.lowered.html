@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.lowered module &mdash; qat-compiler 3.0.0.post193.dev20260330090408 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+  <title>qat.ir.lowered module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -530,9 +530,9 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Contains the IR that has been processed and reduced to a program per pulse channel.
 Also splits out any post-processing instructions to be used by the executor.</p>
-<p>Programs are typically sent to hardware as a package per physical / logical channel, and
-need to be partitioned out. They also need to be free of instructions that are not used
-at runtime. This class does this.</p>
+<p>Programs are typically sent to hardware as a package per physical / logical channel,
+and need to be partitioned out. They also need to be free of instructions that are not
+used at runtime. This class does this.</p>
 <p>This will eventually be replaced by some “partitoned module” approach, which might have
 a similar schema, or might just be many modules.</p>
 <dl class="py attribute">
