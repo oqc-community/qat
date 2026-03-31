@@ -11,7 +11,7 @@ from qat.executables import Executable
 from qat.frontend import BaseFrontend
 from qat.middleend.base import BaseMiddleend
 from qat.model.target_data import TargetData
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.pipelines.base import BasePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.runtime.base import BaseRuntime
@@ -168,7 +168,7 @@ class ExecutePipeline(BasePipeline):
             self.model is not None
             and self.model.calibration_id != executable.calibration_id
         ):
-            raise MismatchingHardwareModelException(
+            raise MismatchingHardwareModelError(
                 f"Hardware id '{executable.calibration_id}' in the executable "
                 f"does not match the hardware model id '{self.model.calibration_id}' used "
                 "for execution in this pipeline."

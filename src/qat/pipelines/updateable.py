@@ -10,7 +10,7 @@ from qat.engines.native import NativeEngine
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.base import BaseModelLoader
 from qat.model.target_data import TargetData
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.pipelines.base import AbstractPipeline
 from qat.pipelines.pipeline import BasePipeline
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -77,7 +77,7 @@ class UpdateablePipeline(AbstractPipeline):
         # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
         if requires_hardware_model(engine):
             if engine.model != model:
-                raise MismatchingHardwareModelException(
+                raise MismatchingHardwareModelError(
                     f"Engine model {engine.model} does not match the provided model "
                     f"{model}. If the UpdateablePipeline is only provided a loader, and "
                     "not a model, please consider also instantiating with a model."

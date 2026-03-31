@@ -9,7 +9,7 @@ from qat.frontend import AutoFrontend
 from qat.middleend import DefaultMiddleend
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.pipelines.updateable import PipelineConfig
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
@@ -136,7 +136,7 @@ class TestUpdateablePipeline:
         target_data = TargetData()
         config = MockPipelineConfig(name="test")
         engine = MockEngineWithModel(model=model)
-        with pytest.raises(MismatchingHardwareModelException):
+        with pytest.raises(MismatchingHardwareModelError):
             MockUpdateablePipeline(
                 config=config, loader=loader, target_data=target_data, engine=engine
             )

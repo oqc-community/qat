@@ -12,7 +12,7 @@ from qat.frontend.converters.purr import HardwareModelMapper, PurrConverter
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.purr import EchoModelLoader
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.purr.compiler.instructions import PulseShapeType
 
 
@@ -28,14 +28,14 @@ class TestHardwareModelMapper:
         converted_model = convert_purr_echo_hw_to_pydantic(
             EchoModelLoader(qubit_count=4).load()
         )
-        with pytest.raises(MismatchingHardwareModelException, match="number of qubits"):
+        with pytest.raises(MismatchingHardwareModelError, match="number of qubits"):
             HardwareModelMapper(self.model, converted_model).validate_physical_properties()
 
     def test_mismatching_qubit_indices_fails_validation(self):
         jagged_model = EchoModelLoader(qubit_count=3).load()
         jagged_model.qubits[-1].index = 6
         converted_model = convert_purr_echo_hw_to_pydantic(self.model)
-        with pytest.raises(MismatchingHardwareModelException, match="qubit indices"):
+        with pytest.raises(MismatchingHardwareModelError, match="qubit indices"):
             HardwareModelMapper(
                 jagged_model, converted_model
             ).validate_physical_properties()
@@ -43,7 +43,7 @@ class TestHardwareModelMapper:
     def test_mismatching_couplings_fails_validation(self):
         broken_model = EchoModelLoader(qubit_count=3).load()
         del broken_model.qubit_direction_couplings[-1]
-        with pytest.raises(MismatchingHardwareModelException, match="qubit couplings"):
+        with pytest.raises(MismatchingHardwareModelError, match="qubit couplings"):
             HardwareModelMapper(
                 broken_model, self.converted_model
             ).validate_physical_properties()
@@ -51,9 +51,7 @@ class TestHardwareModelMapper:
     def test_physical_channel_with_mismatching_acquires_allowed_fails_validation(self):
         broken_model = EchoModelLoader(qubit_count=3).load()
         broken_model.qubits[-1].measure_device.physical_channel.acquire_allowed = False
-        with pytest.raises(
-            MismatchingHardwareModelException, match="acquire allowed property"
-        ):
+        with pytest.raises(MismatchingHardwareModelError, match="acquire allowed property"):
             HardwareModelMapper(
                 broken_model, self.converted_model
             ).validate_physical_properties()
@@ -61,7 +59,7 @@ class TestHardwareModelMapper:
     def test_physical_channel_with_mismatching_frequencies_fails_validation(self):
         broken_model = EchoModelLoader(qubit_count=3).load()
         broken_model.qubits[-1].measure_device.physical_channel.baseband.frequency *= 1.05
-        with pytest.raises(MismatchingHardwareModelException, match="baseband frequency"):
+        with pytest.raises(MismatchingHardwareModelError, match="baseband frequency"):
             HardwareModelMapper(
                 broken_model, self.converted_model
             ).validate_physical_properties()

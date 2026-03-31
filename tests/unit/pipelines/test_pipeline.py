@@ -13,7 +13,7 @@ from qat.middleend import DefaultMiddleend, FallthroughMiddleend, PydDefaultMidd
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.pipelines.pipeline import CompilePipeline, ExecutePipeline, Pipeline
 from qat.runtime import SimpleRuntime
 
@@ -57,7 +57,7 @@ class TestCompilePipeline:
     def test_pipeline_with_inconsistent_model_raises_error(self):
         model1 = EchoModelLoader(qubit_count=4).load()
         model2 = EchoModelLoader(qubit_count=6).load()
-        with pytest.raises(MismatchingHardwareModelException):
+        with pytest.raises(MismatchingHardwareModelError):
             CompilePipeline(
                 name="TestCompilePipeline",
                 model=model1,
@@ -116,7 +116,7 @@ class TestCompilePipeline:
 
         # will raise
         new_model = LucyModelLoader(qubit_count=6).load()
-        with pytest.raises(MismatchingHardwareModelException):
+        with pytest.raises(MismatchingHardwareModelError):
             CompilePipeline(
                 name="TestCompilePipeline",
                 model=model,
@@ -147,7 +147,7 @@ class TestExecutePipeline:
     def test_pipeline_with_inconsistent_model_raises_error(self):
         model1 = EchoModelLoader(qubit_count=4).load()
         model2 = EchoModelLoader(qubit_count=6).load()
-        with pytest.raises(MismatchingHardwareModelException):
+        with pytest.raises(MismatchingHardwareModelError):
             ExecutePipeline(
                 name="TestExecutePipeline",
                 model=model1,
@@ -210,7 +210,7 @@ class TestExecutePipeline:
 
         # will raise
         new_model = LucyModelLoader(qubit_count=6).load()
-        with pytest.raises(MismatchingHardwareModelException):
+        with pytest.raises(MismatchingHardwareModelError):
             ExecutePipeline(
                 name="TestExecutePipeline",
                 model=model,
@@ -245,7 +245,7 @@ class TestPipeline:
     def test_pipeline_with_inconsistent_model_raises_error(self):
         model1 = EchoModelLoader(qubit_count=4).load()
         model2 = EchoModelLoader(qubit_count=6).load()
-        with pytest.raises(MismatchingHardwareModelException):
+        with pytest.raises(MismatchingHardwareModelError):
             Pipeline(
                 name="TestPipeline",
                 model=model1,

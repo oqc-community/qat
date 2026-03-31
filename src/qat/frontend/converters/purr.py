@@ -12,7 +12,7 @@ from qat.ir.builder_factory import BuilderFactory
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.model.device import PhysicalChannel, ResonatorPhysicalChannel
 from qat.model.hardware_model import PhysicalHardwareModel
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.purr.compiler.builders import InstructionBuilder as PurrInstructionBuilder
 from qat.purr.compiler.devices import (
     ChannelType as PurrChannelType,
@@ -82,7 +82,7 @@ class HardwareModelMapper:
             )
 
         if len(errors_reported) > 0:
-            raise MismatchingHardwareModelException(
+            raise MismatchingHardwareModelError(
                 "The provided PuRR instruction builder is not compatible with the target "
                 "hardware model, due to the following errors: \n"
                 + "\n".join(errors_reported)
@@ -116,14 +116,14 @@ class HardwareModelMapper:
     def _validate_qubit_mapping(self):
         legacy_qubits = self.legacy_model.qubits
         if len(legacy_qubits) != len(self.model.qubits):
-            raise MismatchingHardwareModelException(
+            raise MismatchingHardwareModelError(
                 f"Models have a different number of qubits, "
                 f"{len(legacy_qubits)} does not equal {len(self.model.qubits)}."
             )
 
         qubit_indices = {qubit.index for qubit in legacy_qubits}
         if qubit_indices != set(self.model.qubits.keys()):
-            raise MismatchingHardwareModelException(
+            raise MismatchingHardwareModelError(
                 f"Models have different qubit indices, {qubit_indices} does not equal "
                 f"{set(self.model.qubits.keys())}."
             )
@@ -139,7 +139,7 @@ class HardwareModelMapper:
         )
 
         if legacy_couplings != couplings:
-            raise MismatchingHardwareModelException(
+            raise MismatchingHardwareModelError(
                 f"Models have different qubit couplings, {legacy_couplings} does not equal "
                 f"{couplings}."
             )

@@ -6,7 +6,7 @@ from inspect import signature
 
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
-from qat.model.validators import MismatchingHardwareModelException
+from qat.model.validators import MismatchingHardwareModelError
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
@@ -86,6 +86,6 @@ class BasePipeline(AbstractPipeline, ABC):
         """
         for component in args:
             if hasattr(component, "model") and component.model not in (model, None):
-                raise MismatchingHardwareModelException(
+                raise MismatchingHardwareModelError(
                     f"{model} hardware does not match supplied hardware"
                 )
