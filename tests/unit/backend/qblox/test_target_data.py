@@ -120,6 +120,8 @@ class TestSpecifiedTargetDataFields:
         assert default_qcm_rf_description.number_of_sequencers == 6
         assert default_qcm_rf_description.min_qcm_rf_offset_mv == -84
         assert default_qcm_rf_description.max_qcm_rf_offset_mv == 73
+        assert default_qcm_rf_description.min_out_att_db == 0
+        assert default_qcm_rf_description.max_out_att_db == 60
 
     def test_qrm_description(self, default_qrm_description):
         assert default_qrm_description.number_of_sequencers == 6
@@ -136,12 +138,32 @@ class TestSpecifiedTargetDataFields:
         assert default_qrm_rf_description.max_binned_acquisitions == 3_000_000
         assert default_qrm_rf_description.min_qrm_rf_offset_v == -0.09
         assert default_qrm_rf_description.max_qrm_rf_offset_v == 0.09
+        assert default_qrm_rf_description.min_out_att_db == 0
+        assert default_qrm_rf_description.max_out_att_db == 60
+        assert default_qrm_rf_description.min_in_att_db == 0
+        assert default_qrm_rf_description.max_in_att_db == 30
 
     def test_qrc_description(self):
-        qrc_description = QrcDescription()
-        assert qrc_description.number_of_sequencers == 12
-        assert qrc_description.number_of_readout_sequencers == 8
-        assert qrc_description.number_of_control_sequencers == 4
-        assert qrc_description.min_sample_size_scope_acquisitions == 4
-        assert qrc_description.max_sample_size_scope_acquisitions == 16384
-        assert qrc_description.max_binned_acquisitions == 3_000_000
+        default_qrc_description = QrcDescription()
+        assert default_qrc_description.number_of_sequencers == 12
+        assert default_qrc_description.number_of_readout_sequencers == 8
+        assert default_qrc_description.number_of_control_sequencers == 4
+        assert default_qrc_description.min_sample_size_scope_acquisitions == 4
+        assert default_qrc_description.max_sample_size_scope_acquisitions == 16384
+        assert default_qrc_description.max_binned_acquisitions == 3_000_000
+        assert default_qrc_description.min_out_att_db == 0.0
+        assert default_qrc_description.max_out_att_db == 31.5
+        assert default_qrc_description.min_in_att_db == 0.0
+        assert default_qrc_description.max_in_att_db == 31.5
+        assert default_qrc_description.output_connections == {
+            0: list(range(8)),
+            1: list(range(8)),
+            2: [0, 4] + list(range(8, 12)),
+            3: [1, 5] + list(range(8, 12)),
+            4: [2, 6] + list(range(8, 12)),
+            5: [3, 7] + list(range(8, 12)),
+        }
+        assert default_qrc_description.input_connections == {
+            0: list(range(8)),
+            1: list(range(8)),
+        }

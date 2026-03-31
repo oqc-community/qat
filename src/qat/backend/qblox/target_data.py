@@ -3,7 +3,14 @@
 from importlib.metadata import version
 from warnings import warn
 
-from pydantic import NegativeFloat, NegativeInt, PositiveFloat, PositiveInt
+from pydantic import (
+    NegativeFloat,
+    NegativeInt,
+    NonNegativeFloat,
+    NonNegativeInt,
+    PositiveFloat,
+    PositiveInt,
+)
 from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.model.target_data import TargetData
@@ -151,8 +158,8 @@ class ControlModuleDescription(ModuleDescription):
 class QcmDescription(ControlModuleDescription):
     """Constants related to Qblox QCM Module.
 
-    :param min_qcm_offset_v: Minimum offset for QCM.
-    :param max_qcm_offset_v: Maximum offset for QCM.
+    :param min_qcm_offset_v: Minimum offset.
+    :param max_qcm_offset_v: Maximum offset.
     """
 
     min_qcm_offset_v: NegativeFloat = -2.5
@@ -162,19 +169,23 @@ class QcmDescription(ControlModuleDescription):
 class QcmRfDescription(ControlModuleDescription):
     """Constants related to Qblox QCM-RF Module.
 
-    :param min_qcm_rf_offset_mv: Minimum offset for QCM-RF.
-    :param max_qcm_rf_offset_mv: Maximum offset for QCM-RF.
+    :param min_qcm_rf_offset_mv: Minimum offset.
+    :param max_qcm_rf_offset_mv: Maximum offset.
+    :param min_out_att_db: Minimum attenuation.
+    :param max_out_att_db: Maximum attenuation.
     """
 
     min_qcm_rf_offset_mv: NegativeInt = -84
     max_qcm_rf_offset_mv: PositiveInt = 73
+    min_out_att_db: NonNegativeInt = 0
+    max_out_att_db: NonNegativeInt = 60
 
 
 class QrmDescription(ReadoutModuleDescription):
     """Constants related to Qblox QRM Module.
 
-    :param min_qrm_offset_v: Minimum offset for QRM.
-    :param max_qrm_offset_v: Maximum offset for QRM.
+    :param min_qrm_offset_v: Minimum offset.
+    :param max_qrm_offset_v: Maximum offset.
     """
 
     min_qrm_offset_v: NegativeFloat = -0.09
@@ -184,12 +195,20 @@ class QrmDescription(ReadoutModuleDescription):
 class QrmRfDescription(ReadoutModuleDescription):
     """Constants related to Qblox QRM-RF Module.
 
-    :param min_qrm_rf_offset_v: Minimum offset for QRM-RF.
-    :param max_qrm_rf_offset_v: Maximum offset for QRM-RF.
+    :param min_qrm_rf_offset_v: Minimum offset.
+    :param max_qrm_rf_offset_v: Maximum offset.
+    :param min_out_att_db: Minimum attenuation.
+    :param max_out_att_db: Maximum attenuation.
+    :param min_in_att_db: Minimum attenuation.
+    :param max_in_att_db: Maximum attenuation.
     """
 
     min_qrm_rf_offset_v: NegativeFloat = -0.09
     max_qrm_rf_offset_v: PositiveFloat = 0.09
+    min_out_att_db: NonNegativeInt = 0
+    max_out_att_db: NonNegativeInt = 60
+    min_in_att_db: NonNegativeInt = 0
+    max_in_att_db: NonNegativeInt = 30
 
 
 class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
@@ -198,16 +217,33 @@ class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
     :param number_of_sequencers: Number of sequencers in total.
     :param number_of_readout_sequencers: Number of readout sequencers.
     :param number_of_control_sequencers: Number of control sequencers.
-    :param max_binned_acquisitions: Each QRC module has a maximum of 3M memory bins. This
-        memory can be dynamically allocated by each of the 8 readout sequencers. For
-        example, all 8 readout sequencers can evenly allocate 375K bins simultaneously, or a
-        single sequencer can allocate the whole 3M bins, leaving nothing for other
-        sequencers.
+    :param min_out_att_db: Minimum output attenuation.
+    :param max_out_att_db: Maximum output attenuation.
+    :param min_in_att_db: Minimum input attenuation.
+    :param max_in_att_db: Maximum input attenuation.
+    :param output_connections: Sequencer output connection map.
+    :param input_connections: Sequencer input connection map.
     """
 
     number_of_sequencers: PositiveInt = 12  # 8 readout + 4 control
     number_of_readout_sequencers: PositiveInt = 8
     number_of_control_sequencers: PositiveInt = 4
+    min_out_att_db: NonNegativeFloat = 0.0
+    max_out_att_db: NonNegativeFloat = 31.5
+    min_in_att_db: NonNegativeFloat = 0.0
+    max_in_att_db: NonNegativeFloat = 31.5
+    output_connections: dict = {
+        0: list(range(8)),
+        1: list(range(8)),
+        2: [0, 4] + list(range(8, 12)),
+        3: [1, 5] + list(range(8, 12)),
+        4: [2, 6] + list(range(8, 12)),
+        5: [3, 7] + list(range(8, 12)),
+    }
+    input_connections: dict = {
+        0: list(range(8)),
+        1: list(range(8)),
+    }
 
 
 class QbloxTargetData(TargetData):
