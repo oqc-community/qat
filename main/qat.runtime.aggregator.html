@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime.aggregator module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.runtime.aggregator module &mdash; qat-compiler 3.0.0.post194.dev20260331092640 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -528,13 +528,14 @@
 <dt class="sig sig-object py" id="qat.runtime.aggregator.QBloxAggregator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QBloxAggregator</span></span><a class="headerlink" href="#qat.runtime.aggregator.QBloxAggregator" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Combines acquisition objects from multiple acquire instructions in multiple readout targets.
-Notice that <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby()</span></code> preserves (original) relative order, which makes it honour
-the (sequential) lexicographical order of the loop nest:</p>
-<p>playback[target][“acq_0”] contains (potentially) a list of acquisitions collected in the same
-order as the order in which the packages were sent to the FPGA.</p>
+<p>Combines acquisition objects from multiple acquire instructions in multiple readout
+targets. Notice that <code class="xref py py-meth docutils literal notranslate"><span class="pre">groupby()</span></code> preserves (original) relative order, which makes it
+honour the (sequential) lexicographical order of the loop nest:</p>
+<p>playback[target][“acq_0”] contains (potentially) a list of acquisitions collected in the
+same order as the order in which the packages were sent to the FPGA.</p>
 <p>Although acquisition names are enough for unicity in practice, the playback’s structure
-distinguishes different (multiple) acquisitions per readout target, thus making it more robust.</p>
+distinguishes different (multiple) acquisitions per readout target, thus making it more
+robust.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.runtime.aggregator.QBloxAggregator.append">
 <span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">playback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquires</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.aggregator.QBloxAggregator.append" title="Link to this definition"></a></dt>

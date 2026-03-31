@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.pipelines.purr.sweep package &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.pipelines.purr.sweep package &mdash; qat-compiler 3.0.0.post194.dev20260331092640 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -533,14 +533,14 @@
 devices assigns by making repeated calls to an underlying pipeline.</p>
 <p>The underlying pipeline must be updateable. This is done because applying device assigns
 can change properties of the hardware model, and the pipeline must be rebuilt to ensure
-it is not invalidated. Furthermore, even if device assigns aren’t used, sweeps are
-often done side-by-side with changes to the hardware model, so it is useful to ensure
-its rebuilt as a precaution.</p>
+it is not invalidated. Furthermore, even if device assigns aren’t used, sweeps are often
+done side-by-side with changes to the hardware model, so it is useful to ensure its
+rebuilt as a precaution.</p>
 <p>Eventually the risks associated with device assigns can be mitigated by mapping device
 assigns onto instructions in the IR, where possible. For example, a device assign that
 changes the frequency of a channel can be mapped onto a frequency set instruction.
-Similar behaviour could implemented for pulse channel scales too, with an e.g.
-“set scale” instruction, or appropriate mapping onto pulse amplitudes.</p>
+Similar behaviour could implemented for pulse channel scales too, with an e.g. “set
+scale” instruction, or appropriate mapping onto pulse amplitudes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -566,8 +566,8 @@ used.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A batched executable containing all instances of the sweeps, along with
-the metrics from the final compile call.</p>
+<dd class="field-even"><p>A batched executable containing all instances of the sweeps, along with the
+metrics from the final compile call.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -599,16 +599,17 @@ the metrics from the final compile call.</p>
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.ExecuteSweepPipeline">
 <span class="sig-name descname"><span class="pre">ExecuteSweepPipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_pipeline</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.pipelines.purr.sweep.ExecuteSweepPipeline" title="Link to this definition"></a></dt>
 <dd><p>Runtimes now support execution of batched programs in an executable, so the old
-ExecuteSweepPipeline is no longer necessary. This function is kept for backwards
-compatibility, and simply returns the base pipeline after checking its type.</p>
+ExecuteSweepPipeline is no longer necessary.</p>
+<p>This function is kept for backwards compatibility, and simply returns the base pipeline
+after checking its type.</p>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.pipelines.purr.sweep.FrequencyAssignSanitisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyAssignSanitisation</span></span><a class="headerlink" href="#qat.pipelines.purr.sweep.FrequencyAssignSanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
-<p>Sanitises device assignments that changes the frequency of a channel, by replacing
-it with a FrequencySet instruction.</p>
+<p>Sanitises device assignments that changes the frequency of a channel, by replacing it
+with a FrequencySet instruction.</p>
 <p>If this is done for targets that can support frequency assignment as an IR instruction,
 (i.e. has support for <code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencySet</span></code>), then this pass can be used to avoid
 mutating the hardware model, which can be unsafe when used within pipelines.</p>

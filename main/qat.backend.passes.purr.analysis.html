@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.passes.purr.analysis module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.backend.passes.purr.analysis module &mdash; qat-compiler 3.0.0.post194.dev20260331092640 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -541,9 +541,9 @@ required on read sites to make sure their usage is consistent and meaningful.</p
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extract_iter_bound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound" title="Link to this definition"></a></dt>
 <dd><p>Given a sequence of numbers (typically having been generated from
-<code class="code docutils literal notranslate"><span class="pre">np.linspace()</span></code>), figure out if the numbers are linearly/evenly spaced,
-in which case returns an IterBound instance holding the start, step, end, and count
-of the numbers in the array, or else fail.</p>
+<code class="code docutils literal notranslate"><span class="pre">np.linspace()</span></code>), figure out if the numbers are linearly/evenly spaced, in
+which case returns an IterBound instance holding the start, step, end, and count of
+the numbers in the array, or else fail.</p>
 <p>In the future, we might be interested in relaxing this condition and return
 “interpolated” evenly spaced approximation of the input sequence.</p>
 </dd></dl>
@@ -623,7 +623,8 @@ of the numbers in the array, or else fail.</p>
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.IntermediateFrequencyAnalysis">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntermediateFrequencyAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.passes.purr.analysis.IntermediateFrequencyAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
-<p>Adapted from <a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies" title="qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies()</span></code></a>.</p>
+<p>Adapted from
+<a class="reference internal" href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies" title="qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies"><code class="xref py py-meth docutils literal notranslate"><span class="pre">qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies()</span></code></a>.</p>
 <p>Retrieves intermediate frequencies for all physical channels if they exist,
 and validates that pulse channels that share the same physical channel cannot
 have differing fixed frequencies. This pass should always follow a <a class="reference internal" href="#qat.backend.passes.purr.analysis.TriagePass" title="qat.backend.passes.purr.analysis.TriagePass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TriagePass</span></code></a>,
@@ -698,8 +699,9 @@ as information of pulse channels are needed.</p>
 <dt class="sig sig-object py" id="qat.backend.passes.purr.analysis.LifetimePass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LifetimePass</span></span><a class="headerlink" href="#qat.backend.passes.purr.analysis.LifetimePass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass" title="qat.core.pass_base.AnalysisPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">AnalysisPass</span></code></a></p>
-<p>The end goal of this pass is to facilitate sequencer allocation on the control hardware. Much like classical
-register allocation techniques, this pass is intended to perform “channel liveness” analysis.</p>
+<p>The end goal of this pass is to facilitate sequencer allocation on the control
+hardware. Much like classical register allocation techniques, this pass is intended to
+perform “channel liveness” analysis.</p>
 <p>A logical channel is alive at some point P1 in the builder (analogically to a classical program) if it is
 targeted by some quantum operation at some point P2 &gt; P1 in the future relative to P1.</p>
 <p>Example:</p>

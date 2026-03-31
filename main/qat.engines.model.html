@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.engines.model module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.engines.model module &mdash; qat-compiler 3.0.0.post194.dev20260331092640 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -531,9 +531,9 @@
 <p>Specifies a hardware model requirement for a <code class="xref py py-class docutils literal notranslate"><span class="pre">NativeEngine</span></code>. To be used as a
 mixin for engines that require a hardware model to be set.</p>
 <p>Engines might require a hardware model to be set to execute. This might be because the
-hardware model contains information about the control hardware of the target device
-(for the case of legacy hardware models), or because the engine is a simulator that
-makes use of the calibration data.</p>
+hardware model contains information about the control hardware of the target device (for
+the case of legacy hardware models), or because the engine is a simulator that makes use
+of the calibration data.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.engines.model.RequiresHardwareModelMixin.model">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><span class="pre">PhysicalHardwareModel</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel" title="qat.purr.compiler.hardware_models.QuantumHardwareModel"><span class="pre">QuantumHardwareModel</span></a></em><a class="headerlink" href="#qat.engines.model.RequiresHardwareModelMixin.model" title="Link to this definition"></a></dt>
@@ -544,8 +544,9 @@ makes use of the calibration data.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.engines.model.requires_hardware_model">
 <span class="sig-name descname"><span class="pre">requires_hardware_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.engines.model.requires_hardware_model" title="Link to this definition"></a></dt>
-<dd><p>Checks if an engine requires a hardware model. This is used to allow backwards
-compatibility with purr engines, but should be removed in the future.</p>
+<dd><p>Checks if an engine requires a hardware model.</p>
+<p>This is used to allow backwards compatibility with purr engines, but should be removed
+in the future.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span></p>

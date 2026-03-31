@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.instructions module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.ir.instructions module &mdash; qat-compiler 3.0.0.post194.dev20260331092640 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -843,7 +843,8 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.instructions.Label">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Label" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Label to apply to a line of code. Used as anchors for other instructions like jumps.</p>
+<p>Label to apply to a line of code.</p>
+<p>Used as anchors for other instructions like jumps.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -969,8 +970,8 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.instructions.PhaseShift">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.PhaseShift" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
-<p>A PhaseShift instruction is used to change the phase of waveforms sent down
-the pulse channel.</p>
+<p>A PhaseShift instruction is used to change the phase of waveforms sent down the pulse
+channel.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -1008,9 +1009,9 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.instructions.QuantumInstruction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QuantumInstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.QuantumInstruction" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Any node that deals particularly with quantum operations. All quantum operations
-must have some sort of target on the quantum computer, such as a qubit, channel, or
-another form of component.</p>
+<p>Any node that deals particularly with quantum operations.</p>
+<p>All quantum operations must have some sort of target on the quantum computer, such as a
+qubit, channel, or another form of component.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -1090,8 +1091,8 @@ context: The context.</p>
 <dt class="sig sig-object py" id="qat.ir.instructions.Repeat">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instructions.Repeat" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Global meta-instruction that applies to the entire list of instructions. Repeat
-value of the current operations, also known as shots.</p>
+<p>Global meta-instruction that applies to the entire list of instructions.</p>
+<p>Repeat value of the current operations, also known as shots.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>

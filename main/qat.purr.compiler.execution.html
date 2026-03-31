@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.purr.compiler.execution module &mdash; qat-compiler 3.0.0.post192.dev20260330090413 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=4f649999" />
+  <title>qat.purr.compiler.execution module &mdash; qat-compiler 3.0.0.post194.dev20260331092640 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
       <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
@@ -16,7 +16,7 @@
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -529,8 +529,8 @@
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.DeviceInjector">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceInjector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.DeviceInjector" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Injects a value into a device for the entirety of a sweeps duration. Analogous to
-setting a device value before execution.</p>
+<p>Injects a value into a device for the entirety of a sweeps duration.</p>
+<p>Analogous to setting a device value before execution.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.DeviceInjector.inject">
 <span class="sig-name descname"><span class="pre">inject</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.DeviceInjector.inject" title="Link to this definition"></a></dt>
@@ -547,10 +547,10 @@ setting a device value before execution.</p>
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.DeviceInjectors">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeviceInjectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.DeviceInjectors" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Special sort of injector that is a sort of double-injection. It takes an object that
-needs to be modified during a sweep, replaces certain fields with Variable (and
-others) and lets normal injection do it’s work, then at the end of the sweep resets
-the field with the original value.</p>
+<p>Special sort of injector that is a sort of double-injection.</p>
+<p>It takes an object that needs to be modified during a sweep, replaces certain fields
+with Variable (and others) and lets normal injection do it’s work, then at the end of
+the sweep resets the field with the original value.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.DeviceInjectors.inject">
 <span class="sig-name descname"><span class="pre">inject</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.DeviceInjectors.inject" title="Link to this definition"></a></dt>
@@ -568,8 +568,8 @@ the field with the original value.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InjectionMetadata</span></span><a class="headerlink" href="#qat.purr.compiler.execution.InjectionMetadata" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class which is injected into an instruction to hold data about its state before
-injection started, as well as objects that facilitate dynamic injection of values
-into fields.</p>
+injection started, as well as objects that facilitate dynamic injection of values into
+fields.</p>
 <p>It’ll replace fields in the object that hold <code class="docutils literal notranslate"><span class="pre">Variable('X')</span></code> with the value of <code class="docutils literal notranslate"><span class="pre">X</span></code>. When revert is called it replaces
 the field with <code class="docutils literal notranslate"><span class="pre">Variable('X')</span></code> again, essentially reseting it for next execution.</p>
 <dl class="py attribute">
@@ -693,8 +693,8 @@ if it was <code class="docutils literal notranslate"><span class="pre">[1,</span
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.QuantumExecutionEngine.create_duration_timeline">
 <span class="sig-name descname"><span class="pre">create_duration_timeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.QuantumExecutionEngine.create_duration_timeline" title="Link to this definition"></a></dt>
 <dd><p>Builds a dictionary mapping channels to a list of instructions and at what
-precise sample time they should be associated with. It’s important that the
-times are absolute here, not relative.</p>
+precise sample time they should be associated with. It’s important that the times
+are absolute here, not relative.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Example<span class="colon">:</span></dt>
 <dd class="field-odd"><p></p></dd>
@@ -744,7 +744,7 @@ times are absolute here, not relative.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.QuantumExecutionEngine.process_phasereset">
 <span class="sig-name descname"><span class="pre">process_phasereset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.QuantumExecutionEngine.process_phasereset" title="Link to this definition"></a></dt>
-<dd><p>Child hardware types might need to know the phase and instruction</p>
+<dd><p>Child hardware types might need to know the phase and instruction.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -804,15 +804,15 @@ nested sweeps.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.SweepIterator.add_sweep">
 <span class="sig-name descname"><span class="pre">add_sweep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nested</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.SweepIterator.add_sweep" title="Link to this definition"></a></dt>
-<dd><p>Adds a sweep onto this iterator. If it already has a sweep, adds it as a nested
-one.</p>
+<dd><p>Adds a sweep onto this iterator.</p>
+<p>If it already has a sweep, adds it as a nested one.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.SweepIterator.do_sweep">
 <span class="sig-name descname"><span class="pre">do_sweep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instructions</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.SweepIterator.do_sweep" title="Link to this definition"></a></dt>
-<dd><p>Start/continue sweeping. Injects values into the instructions appropriate for
-this sweep.</p>
+<dd><p>Start/continue sweeping.</p>
+<p>Injects values into the instructions appropriate for this sweep.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -824,16 +824,16 @@ this sweep.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.SweepIterator.from_sweeps">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_sweeps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sweeps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.SweepIterator.from_sweeps" title="Link to this definition"></a></dt>
-<dd><p>Convenient helper that builds a SweepIterator from a collection of sweeps.
-This bypasses QatFile and is more suitable for the TriagePass.</p>
+<dd><p>Convenient helper that builds a SweepIterator from a collection of sweeps.</p>
+<p>This bypasses QatFile and is more suitable for the TriagePass.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.SweepIterator.get_current_sweep_iteration">
 <span class="sig-name descname"><span class="pre">get_current_sweep_iteration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.purr.compiler.execution.SweepIterator.get_current_sweep_iteration" title="Link to this definition"></a></dt>
-<dd><p>Returns the current iteration of the entire loop nest seen as a polyhedra.
-The returned structure is a list representing a lattice point p where p[i]
-indicates the current iteration of the sweep at level i</p>
+<dd><p>Returns the current iteration of the entire loop nest seen as a polyhedra.</p>
+<p>The returned structure is a list representing a lattice point p where p[i] indicates
+the current iteration of the sweep at level i</p>
 </dd></dl>
 
 <dl class="py method">
@@ -857,7 +857,7 @@ indicates the current iteration of the sweep at level i</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.purr.compiler.execution.SweepIterator.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#qat.purr.compiler.execution.SweepIterator.length" title="Link to this definition"></a></dt>
-<dd><p>Returns actual length of the entire sweep, so</p>
+<dd><p>Returns actual length of the entire sweep, so.</p>
 <p><code class="docutils literal notranslate"><span class="pre">sweep_length</span> <span class="pre">*</span> <span class="pre">nested_length</span> <span class="pre">*</span> <span class="pre">nested_length</span> <span class="pre">...</span></code></p>
 </dd></dl>
 

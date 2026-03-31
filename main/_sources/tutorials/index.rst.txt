@@ -7,5 +7,3 @@ Tutorials
 
     !index
     *
-    
-    
