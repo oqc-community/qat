@@ -51,11 +51,6 @@ class TestAutoFrontend:
     # of the parser, get_builder(model) is called. Something to resolve later.
     frontend = AutoFrontend(EchoModelLoader(32).load())
 
-    @pytest.mark.parametrize("invalid_type", ["invalid", True, 3.14])
-    def invalid_type(self, invalid_type):
-        with pytest.raises(TypeError):
-            AutoFrontend(invalid_type)
-
     @pytest.mark.parametrize("qasm2_path", qasm2_tests)
     def test_assign_frontend_qasm2(self, qasm2_path):
         # TODO: Update frontends to work with `Path`s, COMPILER-404
@@ -159,7 +154,7 @@ class TestAutoFrontend:
         ],
     )
     def test_emit_raises_error_with_bad_file(self, program):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="No suitable frontend could be found"):
             self.frontend.emit(program)
 
     @pytest.mark.parametrize("program", ["basic", "bell_psi_plus"])

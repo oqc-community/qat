@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+import re
 from pathlib import Path
 
 import pytest
@@ -104,7 +105,7 @@ class TestQIRFrontend:
     )
     def test_invalid_paths(self, legacy_model, file_path):
         frontend = QIRFrontend(legacy_model)
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError, match=re.escape(repr(file_path))):
             frontend.check_and_return_source(file_path)
 
     def test_check_valid_path(self, legacy_model):

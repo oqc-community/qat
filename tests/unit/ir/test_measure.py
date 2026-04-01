@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+import re
 from typing import Union, get_args
 
 import numpy as np
@@ -58,13 +59,27 @@ class TestAcquire:
             targets=acquire_channel.uuid,
             waveform=GaussianWaveform(width=time),
         )
-        with pytest.raises(ValidationError):
-            Acquire(
-                targets=acquire_channel.uuid,
-                duration=1e-6,
-                filter=filter,
-                output_variable="test",
-            )
+        if time == 0:
+            with pytest.raises(
+                ValidationError, match="Filter duration cannot be equal to zero"
+            ):
+                Acquire(
+                    targets=acquire_channel.uuid,
+                    duration=1e-6,
+                    filter=filter,
+                    output_variable="test",
+                )
+        else:
+            with pytest.raises(
+                ValidationError,
+                match=rf"Filter duration '{time}' must be equal to Acquire duration '1e-06'",
+            ):
+                Acquire(
+                    targets=acquire_channel.uuid,
+                    duration=1e-6,
+                    filter=filter,
+                    output_variable="test",
+                )
 
     @pytest.mark.parametrize("qubit_idx", list(model.qubits.keys()))
     def test_output_variable(self, qubit_idx):
@@ -80,16 +95,18 @@ class TestAcquire:
         assert acq.output_variable == "new_output_var"
 
     def test_invalid_output_variable(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid string"):
             Acquire(targets="mock", output_variable=123)
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid string"):
             Acquire(targets="mock", output_variable=1.23)
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid string"):
             Acquire(targets="mock", output_variable=["output_var"])
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(
+            ValidationError, match="String should have at least 1 character"
+        ):
             Acquire(targets="mock", output_variable="")
 
 
@@ -108,11 +125,13 @@ class TestPostProcessing:
         inst2 = PostProcessing(process_type=pp_type.value)
 
         assert inst1.process_type == inst2.process_type
-
-        with pytest.raises(ValidationError):
+        values = [f"'{e.value}'" for e in PostProcessType.__members__.values()]
+        options = ", ".join(values[:-1]) + f" or {values[-1]}"
+        match_pattern = re.escape(f"Input should be {options}")
+        with pytest.raises(ValidationError, match=match_pattern):
             inst1.process_type = "invalid"
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=match_pattern):
             inst2.process_type = "invalid"
 
     @pytest.mark.parametrize(
@@ -188,7 +207,7 @@ class TestMeasureBlock:
         mb = MeasureBlock(qubit_targets=target)
         assert list(mb.qubit_targets)[0] == target
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid integer"):
             MeasureBlock(qubit_targets=qubits_uuid)
 
     def test_init_multiple_targets(self):
@@ -197,7 +216,7 @@ class TestMeasureBlock:
         mb = MeasureBlock(qubit_targets=targets)
         assert mb.qubit_targets == targets
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid integer"):
             MeasureBlock(qubit_targets=qubits_uuid)
 
     def test_add_instruction(self):
@@ -251,27 +270,26 @@ class TestMeasureBlock:
         )
         assert mb.number_of_instructions == 3
 
-    def add_invalid_instruction(self):
+    def test_add_invalid_instruction(self):
         qubit_id = list(model.qubits.keys())[0]
         qubit = model.qubits[qubit_id]
         measure_channel = qubit.measure_pulse_channel
 
         mb = MeasureBlock(qubit_targets=qubit_id)
 
-        with pytest.raises(TypeError):
-            mb.add(
-                Pulse(
-                    waveform=measure_channel.pulse.waveform_type(
-                        **measure_channel.pulse.model_dump()
-                    ),
-                    duration=1e-03,
-                    targets=measure_channel.uuid,
-                    type="drive",
-                )
+        mb.add(
+            Pulse(
+                waveform=measure_channel.pulse.waveform_type(
+                    **measure_channel.pulse.model_dump()
+                ),
+                duration=1e-03,
+                targets=measure_channel.uuid,
+                type="drive",
             )
+        )
 
-        with pytest.raises(TypeError):
-            mb.add(PhaseShift())
+        with pytest.raises(TypeError, match="Cannot add value PhaseShift"):
+            mb.add(PhaseShift(target=qubit.uuid, phase=2.5))
 
     def test_custom_measure_block(self):
         class AdditionalQuantumInstructionBlock(QuantumInstructionBlock):

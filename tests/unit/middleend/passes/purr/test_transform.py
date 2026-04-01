@@ -756,7 +756,7 @@ class TestReturnSanitisation:
         builder = hw.create_builder()
         res_mgr = ResultManager()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Could not find any return instructions"):
             ReturnSanitisationValidation().run(builder, res_mgr)
 
         ReturnSanitisation().run(builder, res_mgr)
@@ -797,7 +797,7 @@ class TestReturnSanitisation:
 
         res_mgr = ResultManager()
         # Two returns in a single IR should raise an error.
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Found multiple return instructions"):
             ReturnSanitisationValidation().run(builder, res_mgr)
 
         # Compress the two returns to a single return and validate.
@@ -2175,7 +2175,7 @@ class TestRepeatSanitisation:
         builder = QuantumInstructionBuilder(model).X(model.get_qubit(0))
         for count in repeat_counts:
             builder.repeat(count)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Inconsistent repeat_count information found"):
             _ = RepeatSanitisation(model, target_data).run(
                 builder, compiler_config=compiler_config
             )

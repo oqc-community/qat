@@ -167,7 +167,7 @@ class TestDynamicFrequencyValidation:
                     frequency=self.get_baseband_frequency_of_pulse_channel(channel.uuid),
                 )
             )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
@@ -212,7 +212,7 @@ class TestDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -227,7 +227,7 @@ class TestDynamicFrequencyValidation:
         )
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -241,7 +241,7 @@ class TestDynamicFrequencyValidation:
         delta_freq = target_freq - channel.frequency
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -254,7 +254,7 @@ class TestDynamicFrequencyValidation:
         )
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -269,7 +269,7 @@ class TestDynamicFrequencyValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.frequency_shift(channel, delta_freq)
         builder.frequency_shift(channel, -delta_freq)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -283,7 +283,7 @@ class TestDynamicFrequencyValidation:
         builder = PydQuantumInstructionBuilder(hardware_model=self.hw)
         builder.add(FrequencySet(target=channel.uuid, frequency=target_freq))
         builder.add(FrequencySet(target=channel.uuid, frequency=0.5 * target_freq))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [+1, -1])
@@ -326,7 +326,7 @@ class TestDynamicFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4 * delta_freq)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     @pytest.mark.parametrize("sign", [+1, -1])
@@ -348,7 +348,7 @@ class TestDynamicFrequencyValidation:
         builder.phase_shift(channels[1], -2.54)
         builder.frequency_shift(channels[1], sign * 4 * delta_freq)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, self.target_data).run(builder)
 
     def test_small_change_to_if_is_valid(self):
@@ -384,7 +384,7 @@ class TestDynamicFrequencyValidation:
             frequency=channel.frequency, physical_channel=physical_channel
         )
         builder.frequency_shift(channel, delta_freq)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             PydDynamicFrequencyValidation(self.hw, target_data).run(builder)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
@@ -433,7 +433,9 @@ class TestNoMidCircuitMeasurementValidation:
         builder.X(target=self.hw.qubit_with_index(0))
 
         p = PydNoMidCircuitMeasurementValidation(self.hw)
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match="Mid-circuit measurements currently unable to be used"
+        ):
             p.run(builder)
 
 
@@ -663,7 +665,8 @@ class TestFrequencySetupValidation:
     def test_raises_error_for_invalid_baseband_frequency(
         self, violation_type, channel_type
     ):
-        qubit = self.model.qubits[0]
+        model = deepcopy(self.model)
+        qubit = model.qubits[0]
 
         # Sets up a channel to have a bad baseband freq but not a bad IF freq.
         if channel_type == "qubit":
@@ -700,14 +703,14 @@ class TestFrequencySetupValidation:
                 qubit.resonator.physical_channel.baseband.frequency + if_freq
             )
 
-        builder = PydQuantumInstructionBuilder(hardware_model=self.model)
+        builder = PydQuantumInstructionBuilder(hardware_model=model)
         builder.pulse(target=channel.uuid, waveform=SquareWaveform(width=80e-9))
         res_mgr = ResultManager()
         res = ActivePulseChannelResults()
         res.add_target(channel, "doesn't matter")
         res_mgr.add(res)
-        with pytest.raises(ValueError):
-            freq_setup = PydFrequencySetupValidation(self.model, self.target_data)
+        with pytest.raises(ValueError, match="out of the valid range"):
+            freq_setup = PydFrequencySetupValidation(model, self.target_data)
             freq_setup.run(builder, res_mgr)
 
     @pytest.mark.parametrize("violation_type", ["lower", "higher"])
@@ -749,7 +752,7 @@ class TestFrequencySetupValidation:
         res = ActivePulseChannelResults()
         res.add_target(pulse_channel, "doesn't matter")
         res_mgr.add(res)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="outside of the valid range"):
             PydFrequencySetupValidation(self.model, target_data).run(builder, res_mgr)
 
 
@@ -779,7 +782,10 @@ class TestPydHardwareConfigValidity:
         res_mgr = ResultManager()
 
         validation_pass = PydHardwareConfigValidity(hw_model, max_shots=max_shots)
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError,
+            match=f"Number of shots in compiler config {invalid_shots} exceeds max",
+        ):
             validation_pass.run(ir, res_mgr, compiler_config=comp_config)
 
         comp_config = CompilerConfig(repeats=invalid_shots - 1)
@@ -797,7 +803,7 @@ class TestPydHardwareConfigValidity:
         res_mgr = ResultManager()
 
         # Error mitigation not enabled in hw model.
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Error mitigation not calibrated"):
             PydHardwareConfigValidity(hw_model).run(
                 ir, res_mgr, compiler_config=comp_config
             )
@@ -813,7 +819,9 @@ class TestPydHardwareConfigValidity:
         )
 
         # Error mitigation only works with binary count as results format.
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match="BinaryCount format required for readout error mitigation"
+        ):
             PydHardwareConfigValidity(hw_model).run(
                 ir, res_mgr, compiler_config=comp_config
             )

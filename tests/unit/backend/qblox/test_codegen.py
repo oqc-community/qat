@@ -93,7 +93,7 @@ class TestQbloxBackend1:
             drive_channel, PulseShapeType.SOFT_SQUARE, amp=0.1, width=1e-5, rise=1e-8
         )
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="No more waveform memory left"):
             do_emit(qblox_model, QbloxBackend1, builder)
 
     def test_play_gaussian(self, qblox_model):
@@ -233,7 +233,7 @@ class TestQbloxBackend1:
             ),  # 8.192e-6
             (
                 np.full(1, CONTROL_SEQUENCER_DATA.max_sample_size_waveforms * 1e-9),
-                pytest.raises(ValueError),
+                pytest.raises(ValueError, match="No more waveform memory left"),
             ),  # 16.384e-6
         ],
     )
@@ -411,7 +411,9 @@ class TestQbloxBackend1:
         builder = multi_readout(
             qblox_model, qubit_indices, do_X=True, num_acquires=num_acquires
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match="Mid-circuit measurements currently unable to be used"
+        ):
             do_emit(qblox_model, QbloxBackend1, builder)
 
         old_value = qatconfig.INSTRUCTION_VALIDATION.NO_MID_CIRCUIT_MEASUREMENT
@@ -462,8 +464,16 @@ class TestQbloxBackend1:
             min(pulse_width, delay_width), CONTROL_SEQUENCER_DATA.grid_time
         )
         if 0 < pulse_width < effective_width + CONTROL_SEQUENCER_DATA.grid_time:
-            with pytest.raises(ValueError):
-                do_emit(qblox_model, QbloxBackend1, builder)
+            if pulse_width < delay_width + CONTROL_SEQUENCER_DATA.grid_time:
+                with pytest.raises(
+                    ValueError, match=r"Expected pulse width >= delay width \+ 4 ns"
+                ):
+                    do_emit(qblox_model, QbloxBackend1, builder)
+            else:
+                with pytest.raises(
+                    ValueError, match=r"Remaining width after delay must be at least 4 ns"
+                ):
+                    do_emit(qblox_model, QbloxBackend1, builder)
 
         else:
             executable = do_emit(qblox_model, QbloxBackend1, builder)
@@ -775,7 +785,9 @@ class TestQbloxBackend2:
             for pkg in program.packages.values():
                 if pkg.pulse_channel_id in default_pulse_channel_ids:
                     assert pkg.timeline is None
-                    with pytest.raises(TypeError):
+                    with pytest.raises(
+                        TypeError, match="object of type 'NoneType' has no len()"
+                    ):
                         plot_program(program)
                 else:
                     assert pkg.timeline is not None

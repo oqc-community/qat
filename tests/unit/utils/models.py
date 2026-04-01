@@ -38,7 +38,7 @@ def raises_thread_exception(exception_type: type):
     finally:
         assert threading.excepthook is _custom_hook
         threading.excepthook = old_hook
-        with pytest.raises(exception_type):
+        with pytest.raises(exception_type, match="Interrupt triggered"):
             for ex in _raised_exceptions:
                 raise ex
 

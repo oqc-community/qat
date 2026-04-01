@@ -30,7 +30,7 @@ class NCOFrequencyVariability(ValidationPass):
 
         for channel in model.pulse_channels.values():
             if channel.fixed_if:
-                raise ValueError("Cannot allow constance of the NCO frequency")
+                raise ValueError("Cannot allow constancy of the NCO frequency")
         return ir
 
 

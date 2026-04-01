@@ -48,13 +48,13 @@ class TestEngineDescription:
         assert desc.type is ZeroEngine
 
     def test_invalid_type_raises(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"is not a valid Engine"):
             EngineDescription(
                 name="invalid", type="qat.backend.fallthrough.FallthroughBackend"
             )
 
     def test_extra_fields_raises_validation_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             EngineDescription(
                 name="invalid", type="qat.engines.ZeroEngine", extra_field="value"
             )
@@ -108,7 +108,7 @@ class TestPipelineInstanceDescription:
         assert desc.name == "echo8a"
 
     def test_invalid_pipeline_class_raises(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"not a valid Pipeline instance"):
             PipelineInstanceDescription(
                 name="invalid",
                 pipeline="qat.backend.fallthrough.FallthroughBackend",
@@ -116,7 +116,7 @@ class TestPipelineInstanceDescription:
             )
 
     def test_extra_fields_raises_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             PipelineInstanceDescription(
                 name="invalid",
                 pipeline="qat.pipelines.echo.echo8",
@@ -197,7 +197,7 @@ class TestPipelineFactoryDescription:
         assert callable(desc.pipeline)
 
     def test_invalid_pipeline_class_raises(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"does not return a BasePipeline"):
             PipelineFactoryDescription(
                 name="invalid",
                 pipeline="qat.backend.fallthrough.FallthroughBackend",
@@ -205,7 +205,7 @@ class TestPipelineFactoryDescription:
             )
 
     def test_extra_fields_raises_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             PipelineFactoryDescription(
                 name="invalid",
                 pipeline="tests.unit.utils.pipelines.get_mock_pipeline",
@@ -288,7 +288,7 @@ class TestUpdateablePipelineDescription:
         assert desc.name == "echo8a"
 
     def test_invalid_pipeline_class_raises(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"is not a valid UpdateablePipeline"):
             UpdateablePipelineDescription(
                 name="invalid",
                 pipeline="qat.backend.fallthrough.FallthroughBackend",
@@ -296,7 +296,7 @@ class TestUpdateablePipelineDescription:
             )
 
     def test_extra_fields_raises_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             UpdateablePipelineDescription(
                 name="invalid",
                 pipeline="qat.pipelines.echo.EchoPipeline",
@@ -435,7 +435,7 @@ class TestPipelineClassDescription:
         assert P.runtime.connection_mode == ConnectionMode.ALWAYS_ON_EXECUTE
 
     def test_extra_field_raises_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             PipelineClassDescription(
                 name="somepipeline",
                 hardware_loader=None,
@@ -522,7 +522,7 @@ class TestCompilePipelineDescription:
         assert isinstance(pipeline.frontend, FallthroughFrontend)
 
     def test_extra_field_raises_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             CompilePipelineDescription(
                 name="mock_compile",
                 hardware_loader="echo8",
@@ -584,7 +584,7 @@ class TestExecutePipelineDescription:
         assert isinstance(pipeline.runtime, SimpleRuntime)
 
     def test_extra_field_raises_error(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Extra inputs are not permitted"):
             ExecutePipelineDescription(
                 name="mock_execute",
                 hardware_loader="echo8",

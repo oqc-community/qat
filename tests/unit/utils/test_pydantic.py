@@ -83,10 +83,10 @@ class TestValidatedContainer:
         s.add(valid_value)
 
         invalid_value = random.Random(seed).uniform(-1e-06, -1e10)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be >=0"):
             s.add(invalid_value)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be >=0"):
             ValidatedSet[CalibratablePositiveFloat]({-1.3})
 
     def test_validated_qubitid_set(self, seed):
@@ -96,14 +96,14 @@ class TestValidatedContainer:
         s.add(valid_value)
 
         invalid_value = -1  # Qubit indices are assumed to start at 0.
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be an int and >=0"):
             s.add(invalid_value)
 
         invalid_type = random.Random(seed).uniform(1e-03, 9e-03)
-        with pytest.raises(TypeError):  # Type is float and should be int.
+        with pytest.raises(TypeError, match=r"Cannot add value .* of type .*"):
             s.add(invalid_type)
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"Cannot add value .* of type .*"):
             s.add("a")
 
     def test_validated_calibratable_dict(self, seed):
@@ -114,24 +114,24 @@ class TestValidatedContainer:
         d.update({2: valid_value})
 
         invalid_value = random.Random(seed).uniform(1.1, 10)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be in the interval \[0, 1\]"):
             d[1] = invalid_value
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be in the interval \[0, 1\]"):
             d.update({2: invalid_value})
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match="Cannot add value a of type"):
             d[2] = "a"
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match="Cannot add value a of type"):
             d.update({2: "a"})
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Input should be a valid integer"):
             ValidatedDict[QubitId, CalibratableUnitInterval](
                 {"a": 0.5}
             )  # Key is not a QubitId
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be in the interval \[0, 1\]"):
             ValidatedDict[QubitId, CalibratableUnitInterval](
                 {0: invalid_value}
             )  # Value is not within [0, 1]
@@ -144,17 +144,17 @@ class TestFrozenContainer:
         s = FrozenSet[QubitId](set(elements))
 
         element = random.Random(seed).sample(list(range(1, 100)), 1)[0]
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match="has no attribute 'add'"):
             s.add(element)
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match="has no attribute 'pop'"):
             s.pop()
 
         for element in s:
-            with pytest.raises(AttributeError):
+            with pytest.raises(AttributeError, match="has no attribute 'discard'"):
                 s.discard(element)
 
-            with pytest.raises(AttributeError):
+            with pytest.raises(AttributeError, match="has no attribute 'remove'"):
                 s.remove(element)
 
     def test_frozen_dict(self, seed):
@@ -165,10 +165,10 @@ class TestFrozenContainer:
         d = FrozenDict[QubitId, CalibratablePositiveFloat](elements)
 
         element = random.Random(seed)
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match="object does not support item assignment"):
             d[101] = element
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match="has no attribute 'update'"):
             d.update({101: element})
 
 
@@ -191,7 +191,7 @@ class TestNDArray:
         assert np.allclose(d["a"], d_deserialised["a"])
         assert np.allclose(d["b"], d_deserialised["b"])
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid integer"):
             PydDictBase[int, NDArray_annot].model_validate(blob)
 
     def test_list_multi_dimensional_array(self, array_type):
@@ -208,7 +208,7 @@ class TestNDArray:
         assert np.allclose(base_list[0], deserialised_list[0])
         assert np.allclose(base_list[1], deserialised_list[1])
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid string"):
             PydListBase[str].model_validate(blob)
 
 
@@ -305,7 +305,7 @@ class TestPydArray:
         assert arr != arr2
 
     def test_wrong_type(self):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Invalid dtype"):
             IntNDArray(["a", "b", "c"])
 
         # Downconversion is fine.

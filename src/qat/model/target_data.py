@@ -163,10 +163,10 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
         if name in ["QUBIT_DATA", "RESONATOR_DATA"]:
             try:
                 return super().__getattribute__(name)
-            except AttributeError:
+            except AttributeError as e:
                 raise AttributeError(
                     f"Tried to get '{name}' from {self.__class__.__name__}, which does not exist. Please use a child class of `AbstractTargetData` that has '{name}'."
-                )
+                ) from e
         return super().__getattribute__(name)
 
     @classmethod

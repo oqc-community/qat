@@ -114,7 +114,7 @@ class TestAnalysisPasses:
     )
     def test_extract_iter_bound(self, value, bound):
         if bound is None:
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError, match="Not a regularly partitioned space"):
                 BindingPass.extract_iter_bound(value)
         else:
             assert BindingPass.extract_iter_bound(value) == bound
@@ -139,7 +139,7 @@ class TestAnalysisPasses:
 
         res_mgr = ResultManager()
         TriagePass().run(builder, res_mgr)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Unbalanced scopes"):
             BindingPass().run(builder, res_mgr, enable_hw_averaging=enable_hw_averaging)
 
         ScopeSanitisation().run(builder, res_mgr)
@@ -154,7 +154,7 @@ class TestAnalysisPasses:
 
         res_mgr = ResultManager()
         TriagePass().run(builder, res_mgr)
-        with pytest.raises(KeyError):
+        with pytest.raises(KeyError, match=f"{hash(sweeps[0])}"):
             BindingPass().run(builder, res_mgr, enable_hw_averaging=enable_hw_averaging)
 
         res_mgr = ResultManager()
@@ -497,7 +497,7 @@ class TestIntermediateFrequencyAnalysis:
 
         # fix IF for both channels: should fail
         pulse_channel_1.fixed_if = True
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Cannot fix the frequency"):
             IntermediateFrequencyAnalysis(model).run(ir, res_mgr)
 
     def test_same_frequencies_with_fixed_if_passes(self, function_seed):

@@ -100,7 +100,7 @@ class TestPipelineFactory:
             config={"invalid_param": True},
         )
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"unexpected keyword argument 'invalid_param'"):
             PipelineFactory(config, loader=EchoModelLoader())
 
     def test_build_pipeline_with_custom_engine(self):

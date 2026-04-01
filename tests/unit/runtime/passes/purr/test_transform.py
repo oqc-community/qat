@@ -31,7 +31,7 @@ class TestQiskitErrorMitigation:
         """
         results = {"b": {"11": 500, "00": 500}, "c": {"1": 1000}}
         config = CompilerConfig(error_mitigation=True)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Cannot have multiple registers"):
             QiskitErrorMitigation().run(results, compiler_config=config, package=None)
 
 

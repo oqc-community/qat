@@ -24,7 +24,9 @@ class TestNoAcquireWeightsValidation:
             ),
             duration=1e-6,
         )
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match="Acquire filters are not implemented"
+        ):
             NoAcquireWeightsValidation().run(builder, res_mgr)
 
     def test_acquire_without_filter_returns_instructions(self):

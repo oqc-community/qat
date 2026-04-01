@@ -459,7 +459,7 @@ class TestTwoQubitGates:
         target1 = hw_model.qubit_with_index(0)
         target2 = hw_model.qubit_with_index(1)
 
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(NotImplementedError, match="Generic ZX gate not implemented"):
             builder.ZX(target1, target2, theta=invalid_theta)
 
     def test_invalid_hw_topology(self):
@@ -471,7 +471,7 @@ class TestTwoQubitGates:
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         for invalid_target_idx in invalid_qubit_indices:
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError, match="Tried to perform cross resonance"):
                 invalid_target2 = hw_model.qubit_with_index(invalid_target_idx)
                 builder.ZX(target1, invalid_target2, theta=np.pi / 4)
 

@@ -88,7 +88,7 @@ def test_scope_peeling_pass(qubit_indices):
     ScopePeeling().run(builder, res_mgr, met_mgr, scopes=[])
     assert len(builder.instructions) == len_before
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Could not find scope"):
         ScopePeeling().run(builder, res_mgr, met_mgr, scopes=invalid_scopes)
 
     ScopePeeling().run(builder, res_mgr, met_mgr, scopes=valid_scopes)
@@ -99,14 +99,16 @@ def test_scope_peeling_pass(qubit_indices):
     res_mgr.cleanup()
 
     # TriageResult has been destroyed and is not expected to be found
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Could not find any results"):
         res_mgr.lookup_by_type(TriageResult)
 
     # BindingResult has been destroyed and is not expected to be found
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Could not find any results"):
         res_mgr.lookup_by_type(BindingResult)
 
     TriagePass().run(builder, res_mgr, met_mgr)
     # Variable t's usage becomes illegal because the sweep got remove
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError, match="Variable variable t referenced but no prior declaration found"
+    ):
         BindingPass().run(builder, res_mgr, met_mgr)

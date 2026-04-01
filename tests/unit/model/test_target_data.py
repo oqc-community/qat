@@ -14,12 +14,20 @@ class TestTargetData:
         assert isinstance(target_data, TargetData)
 
     @pytest.mark.parametrize(
-        "path",
+        "path,error_message",
         [
-            "tests/files/hardware/invalid_type_target_data.yaml",
-            "tests/files/hardware/unknown_field_target_data.yaml",
+            pytest.param(
+                "tests/files/hardware/invalid_type_target_data.yaml",
+                r"Input should be",
+                id="invalid_type",
+            ),
+            pytest.param(
+                "tests/files/hardware/unknown_field_target_data.yaml",
+                r"Extra inputs are not permitted",
+                id="unknown_field",
+            ),
         ],
     )
-    def test_invalid_field_throws_error(self, path):
-        with pytest.raises(ValidationError):
+    def test_invalid_field_throws_error(self, path, error_message):
+        with pytest.raises(ValidationError, match=error_message):
             TargetData.from_yaml(path)

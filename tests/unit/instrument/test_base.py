@@ -83,7 +83,7 @@ class TestInstrument:
         executable = do_emit(qblox_model, backend_type, builder)
         for program in executable.programs:
             # Fail if no resource had been allocated leading up to playback
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError, match="No allocations found"):
                 qblox_instrument.playback()
 
             qblox_instrument.setup(program)

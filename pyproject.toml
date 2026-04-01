@@ -170,13 +170,18 @@ extend-exclude = ["benchmarks/**"]
 [tool.ruff.lint]
 # Enable specific rule sets (see https://docs.astral.sh/ruff/rules/)
 extend-select = [
-  "E", # pycodestyle errors
-  "F", # pyflakes
-  "W", # pycodestyle warnings
-  "I", # isort
-  "N", # pep8-naming
+  "B",   # flake8-bugbear
+  "BLE", # blind-except
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "PT",  # pytest-style
+  "RSE", # flake8-raise
+  "S",   # bandit
+  "TRY", # tryceratops
+  "W",   # pycodestyle warnings
   #  "PL",   # pylint
-  #  "B",    # flake8-bugbear
   #  "C4",   # flake8-comprehensions
   #  "SIM",  # flake8-simplify
   #  "TID",  # flake8-tidy-imports
@@ -187,22 +192,81 @@ extend-select = [
 
 # Ignore specific rules (add or remove as needed)
 ignore = [
-  "N801",    # Class name should use CapWords convention
-  "N802",    # Function name should be lowercase
-  "N803",    # Argument name should be lowercase
-  "N805",    # TODO: First argument of a method should be named 'self' There are real errors revealed by this
-  "N806",    # Variable in function should be lowercase
-  "N812",    # Lowercase variable in function should be lowercase
-  "N815",    # Variable in function should be lowercase
+  # B codes TODO: COMPILER-1071
+  "B006", # Do not use mutable data structures for argument defaults
+  "B007", # Loop control variable not used within loop body
+  "B008", # Do not perform function call in argument default
+  "B010", # Do not call setattr with constant attribute value
+  "B011", # Do not assert False
+  "B015", # Pointless comparison
+  "B018", # Useless attribute access
+  "B020", # Loop control variable overrides iterable it iterates
+  "B023", # Function definition does not bind loop variable
+  "B024", # Abstract base class without abstract methods or properties
+  "B026", # *arg unpacking after a kwarg
+  "B027", # Empty method in an abstract base class without abstract decorator
+  "B028", # No explicit stacklevel in warning
+  "B905", # `zip()` without an explicit `strict=` parameter
+  # E codes TODO: COMPILER-1069
+  "E501", # Line too long (handled by ruff format as best we can with line-length=92)
+  # N codes
+  "N801", # Class name should use CapWords convention
+  "N802", # Function name should be lowercase
+  "N803", # Argument name should be lowercase
+  "N805", # TODO: First argument of a method should be named 'self' There are real errors revealed by this
+  "N806", # Variable in function should be lowercase
+  "N812", # Lowercase variable in function should be lowercase
+  "N815", # Variable in function should be lowercase
+  # PLR codes
   "PLR2004", # Magic value used in comparison
   "PLR0912", # Too many branches in function
   "PLR0913", # Too many arguments in function definition
-  "E501",    # Line too long (handled by ruff format as best we can with line-length=92)
+  # PT codes TODO: COMPILER-1078
+  "PT001", # Redundant parenthesis
+  "PT003", # `scope='function'` is implied
+  "PT006", # Wrong type passed to first argument of parametrize
+  "PT007", # Wrong type in parametrize
+  "PT012", # pytest.raises block should contain a single simple statement
+  "PT014", # Duplicate test case in parametrize
+  "PT015", # assert False (B011?)
+  "PT018", # Assertion should be broken down into multiple parts
+  "PT022", # No teardown in fixture, use return instead of yield
+  "PT028", # Test function parameter has default argument
+  "PT030", # pytest.warns without match
+  "PT031", # pytest.warns block should contain a single simple statement
+  # S codes TODO: COMPILER-1079
+  "S101", # Assert??
+  "S301", # Pickle is unsafe
+  "S307", # Use of possibly unsafe eval
+  "S311", # Pseudo random in cryptographic call
+  "S324", # Probable use of insecure hash function
+  "S701", # Jinja2 autoescape
+  # TRY codes TODO: COMPILER-1080
+  "TRY003", # Avoid specifying long messages outside exception class
+  "TRY004", # Prefer TypeError exception for invalid type
+  "TRY201", # raise without specifying exception name
+  "TRY300", # Consider else block
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# Ignore exception issues in legacy code and tests
+"src/qat/purr/**" = ["B904", "BLE001", "RSE102", "S110", "S112", "TRY002"]
+"tests/unit/purr/**" = [
+  "BLE001",
+  "B017",
+  "B904",
+  "PT010",
+  "PT011",
+  "PT017",
+  "S110",
+  "S112",
+]
 # Ignore imports not at top of notebook files
 "notebooks/**" = ["E402"]
+# Ignore issues in scripts and tools
+# TODO: COMPILER-1079
+"scripts/**" = ["S314", "S605", "S607"]
+"tools/partial_package_builder.py" = ["S607"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["qat"]

@@ -31,7 +31,7 @@ class TestValidationPasses:
         channel = next(iter(model.pulse_channels.values()))
         channel.fixed_if = True
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Cannot allow constancy of the NCO frequency"):
             NCOFrequencyVariability().run(builder, res_mgr, model)
 
         channel.fixed_if = False
@@ -48,7 +48,9 @@ class TestNoAcquireWeightsValidation:
         builder.acquire(
             channel, delay=0.0, filter=Pulse(channel, PulseShapeType.SQUARE, 1e-6)
         )
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match="Acquire filters are not implemented"
+        ):
             NoAcquireWeightsValidation().run(builder, res_mgr)
 
 
@@ -66,7 +68,9 @@ class TestNoMultipleAcquiresValidation:
 
         # Add another acquire and test it breaks it
         builder.acquire(channel, delay=0.0)
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match="Multiple acquisitions on a single channel"
+        ):
             NoMultipleAcquiresValidation().run(builder, res_mgr)
 
     def test_multiple_acquires_that_share_physical_channel_raises_error(self):
@@ -80,7 +84,9 @@ class TestNoMultipleAcquiresValidation:
         builder = model.create_builder()
         builder.acquire(acquire_channel, delay=0.0)
         builder.acquire(measure_channel, delay=0.0)
-        with pytest.raises(NotImplementedError):
+        with pytest.raises(
+            NotImplementedError, match="Multiple acquisitions on a single channel"
+        ):
             NoMultipleAcquiresValidation().run(builder, res_mgr)
 
 
@@ -103,8 +109,9 @@ class TestNoAcquiresWithDifferentWeightsValidation:
 
         ir = PartitionedIR(acquire_map={acquire_channel: acquires})
 
-        with pytest.raises(ValueError) if invalid else nullcontext():
+        with (
+            pytest.raises(ValueError, match=r"with different weights")
+            if invalid
+            else nullcontext()
+        ):
             NoAcquiresWithDifferentWeightsValidation().run(ir)
-
-
-# Test passes for the Pydantic hardware model.

@@ -132,7 +132,7 @@ class TestLoadQasmFile:
 
     def test_wrong_extension_raises_error(self):
         src = "test.qir"
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="String expected to end in `.qasm`"):
             load_qasm_file(src)
 
 
@@ -197,7 +197,7 @@ class TestQasm2Frontend:
         ],
     )
     def test_emit_raises_error_with_invalid_programs(self, qasm_path):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Source program is not a QASM2 program"):
             self.qasm2_frontend().emit(qasm_path)
 
     def test_results_manager_collects_results(self):
@@ -299,14 +299,14 @@ class TestQasm3Frontend:
         ],
     )
     def test_emit_raises_error_with_invalid_programs(self, qasm_path):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Source program is not a QASM3 program"):
             self.qasm3_frontend().emit(qasm_path)
 
     def test_emit_has_one_repeat(self):
         """Tests that the frontend correctly adds a Repeat instruction.
 
         Since we need not currently support control flow from qasm, this will always be the
-        case. By the time we do support it, we will have departed form repeats and this test
+        case. By the time we do support it, we will have departed from repeats and this test
         will be obsolete.
         """
         model = LucyModelLoader().load()

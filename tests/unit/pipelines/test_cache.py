@@ -30,7 +30,7 @@ with pytest.warns(DeprecationWarning):
             ],
         )
         def test_cannot_instantiate_pipeline_cache(self, pipeline):
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError, match=r"full Pipeline to use the "):
                 CompilePipelineCache(pipeline)
 
         @pytest.mark.parametrize(
@@ -67,7 +67,7 @@ with pytest.warns(DeprecationWarning):
             ],
         )
         def test_cannot_instantiate_pipeline_cache(self, pipeline):
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError, match=r"full Pipeline to use the "):
                 ExecutePipelineCache(pipeline)
 
         @pytest.mark.parametrize(

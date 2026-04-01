@@ -106,7 +106,7 @@ class TestPhysicalChannelAmplitudeValidation:
         builder = self.model.create_builder()
         builder.repeat(2000)
         builder.add(CustomPulse(qubit.get_drive_channel(), samples))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     def test_exceeding_custom_pulse_sum(self):
@@ -120,7 +120,7 @@ class TestPhysicalChannelAmplitudeValidation:
         builder.add(
             CustomPulse(qubit.get_cross_resonance_channel(self.model.get_qubit(1)), samples)
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     def test_valid_square_pulse(self):
@@ -161,7 +161,7 @@ class TestPhysicalChannelAmplitudeValidation:
                 phase=phase,
             )
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     def test_exceeding_square_pulse_sum(self):
@@ -186,7 +186,7 @@ class TestPhysicalChannelAmplitudeValidation:
                 ),
             ]
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     def test_exceeding_mixed_pulse_sum(self):
@@ -211,7 +211,7 @@ class TestPhysicalChannelAmplitudeValidation:
                 ),
             ]
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     def test_same_channel_not_summed(self):
@@ -296,7 +296,7 @@ class TestPhysicalChannelAmplitudeValidation:
                 samples=samples,
             )
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     def test_reset_by_sync_fails(self):
@@ -336,7 +336,7 @@ class TestPhysicalChannelAmplitudeValidation:
                 ignore_channel_scale=True,
             )
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
     @pytest.mark.parametrize("attributes1", pulse_attributes)
@@ -371,7 +371,7 @@ class TestPhysicalChannelAmplitudeValidation:
             chan2, width=400e-9, amp=0.65, ignore_channel_scale=True, **attributes2
         )
         EvaluatePulses().run(builder)
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Overflow error detect"):
             PhysicalChannelAmplitudeValidation().run(builder)
 
 
@@ -560,7 +560,7 @@ class TestFrequencySetupValidation:
         builder.pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE)
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="is out of the valid range"):
             FrequencySetupValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("violation_type", ["lower", "higher"])
@@ -600,7 +600,7 @@ class TestFrequencySetupValidation:
         builder.pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE)
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="is out of the valid range"):
             FrequencySetupValidation(model, target_data).run(builder, res_mgr)
 
     def test_with_custom_pulse_channel(self):
@@ -617,7 +617,7 @@ class TestFrequencySetupValidation:
         builder.add(Pulse(channel, width=80e-9, shape=PulseShapeType.SQUARE))
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="is out of the valid range"):
             FrequencySetupValidation(model, self.target_data).run(builder, res_mgr)
 
 
@@ -681,7 +681,7 @@ class TestDynamicFrequencyValidation:
         builder.frequency_shift(channel, -delta_freq)
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             DynamicFrequencyValidation(model, target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("scale", [-0.95, -0.5, 0.0, 0.5, 0.95])
@@ -718,7 +718,7 @@ class TestDynamicFrequencyValidation:
         builder.frequency_shift(channel, delta_freq)
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             DynamicFrequencyValidation(model, target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -735,7 +735,7 @@ class TestDynamicFrequencyValidation:
         builder.frequency_shift(channel, delta_freq)
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [-1, +1])
@@ -753,7 +753,7 @@ class TestDynamicFrequencyValidation:
         builder.frequency_shift(channel, -delta_freq)
         res_mgr = ResultManager()
         res_mgr.add(ActiveChannelResults(target_map={channel: "doesn't matter"}))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
@@ -810,7 +810,7 @@ class TestDynamicFrequencyValidation:
                 target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
             )
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     @pytest.mark.parametrize("sign", [+1, -1])
@@ -839,7 +839,7 @@ class TestDynamicFrequencyValidation:
                 target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
             )
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="exceed the allowed limits"):
             DynamicFrequencyValidation(model, self.target_data).run(builder, res_mgr)
 
     def test_small_change_to_if_is_valid(self):
@@ -895,7 +895,9 @@ class TestFixedIntermediateFrequencyValidation:
                 target_map={channels[0]: "doesn't matter", channels[1]: "matters even less"}
             )
         )
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match="has a fixed IF and cannot be frequency shifted"
+        ):
             FixedIntermediateFrequencyValidation(model).run(builder, res_mgr)
 
     def test_fixed_if_does_not_affect_other_channel(self):

@@ -378,7 +378,9 @@ class TestRepeatSanitisation:
         )
         for count in repeat_counts:
             builder.repeat(count)
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match=r"Repeat instruction .* not matching CompilerConfig value"
+        ):
             _ = RepeatSanitisation(target_data).run(
                 builder, compiler_config=compiler_config
             )
@@ -1201,7 +1203,7 @@ class TestReturnSanitisation:
         builder = QuantumInstructionBuilder(hardware_model=self.hw)
         res_mgr = ResultManager()
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Could not find any return instructions."):
             ReturnSanitisationValidation().run(builder, res_mgr)
 
         ReturnSanitisation().run(builder, res_mgr)
@@ -1240,7 +1242,7 @@ class TestReturnSanitisation:
 
         res_mgr = ResultManager()
         # Two returns in a single IR should raise an error.
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Found multiple return instructions."):
             ReturnSanitisationValidation().run(builder, res_mgr)
 
         # Compress the two returns to a single return and validate.
@@ -1336,7 +1338,9 @@ class TestPydBatchedShots:
             # when num_measurements=6 > max_acquisitions=5,
             # even a single shot would exceed the max acquisitions limit,
             # so an error should be raise,
-            with pytest.raises(ValueError):
+            with pytest.raises(
+                ValueError, match="acquires per shot exceeds the maximum acquires"
+            ):
                 BatchedShots(target_data).run(builder)
 
     def test_multiple_measurements_on_single_qubit_in_measure_block(self, model):

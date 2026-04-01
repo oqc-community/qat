@@ -311,8 +311,8 @@ class BindingPass(AnalysisPass):
                 elif isinstance(inst, (EndSweep, EndRepeat)):
                     try:
                         delimiter = stack.pop()
-                    except IndexError:
-                        raise ValueError(f"Unbalanced scope. Found orphan {inst}")
+                    except IndexError as e:
+                        raise ValueError(f"Unbalanced scope. Found orphan {inst}") from e
 
                     delimiter_type = Sweep if isinstance(inst, EndSweep) else Repeat
                     if not isinstance(delimiter, delimiter_type):

@@ -223,11 +223,8 @@ class TestMixerConfig(TestQbloxConfigMixin):
         assert module.in0_offset() == module_config.offset.in0
         assert module.in1_offset() == module_config.offset.in1
 
-    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets)
-    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios)
-    @pytest.mark.parametrize("i_offset", test_values.qrm_rf_i_offsets)
-    @pytest.mark.parametrize("q_offset", test_values.qrm_rf_q_offsets)
-    def test_qrm_rf_mixer_config(
+    @pytest.fixture(scope="class")
+    def qrm_rf_setup(
         self, qblox_instrument, module_seed, phase_offset, gain_ratio, i_offset, q_offset
     ):
         module_config = ModuleConfig()
@@ -239,16 +236,29 @@ class TestMixerConfig(TestQbloxConfigMixin):
         self.setup_qrm_rf_mixer_config(module_config, i_offset, q_offset)
         self.setup_sequencer_mixer_config(sequencer_config, phase_offset, gain_ratio)
         QrmRfConfigHelper(module_config, sequencer_config).configure(module, sequencer)
+        return module_config, module, sequencer_config, sequencer
+
+    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets, scope="class")
+    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios, scope="class")
+    @pytest.mark.parametrize("i_offset", test_values.qrm_rf_i_offsets, scope="class")
+    @pytest.mark.parametrize("q_offset", test_values.qrm_rf_q_offsets, scope="class")
+    def test_qrm_rf_mixer_config_out(self, qrm_rf_setup):
+        module_config, module, sequencer_config, sequencer = qrm_rf_setup
 
         assert module.out0_offset_path0() == module_config.offset.out0_path0
         assert module.out0_offset_path1() == module_config.offset.out0_path1
 
-        # TODO - potential bug with the dummy structures
-        with pytest.raises(AssertionError):
-            assert module.in0_offset_path0() == module_config.offset.in0_path0
+    @pytest.mark.parametrize("phase_offset", test_values.phase_offsets, scope="class")
+    @pytest.mark.parametrize("gain_ratio", test_values.gain_ratios, scope="class")
+    @pytest.mark.parametrize("i_offset", test_values.qrm_rf_i_offsets, scope="class")
+    @pytest.mark.parametrize("q_offset", test_values.qrm_rf_q_offsets, scope="class")
+    @pytest.mark.xfail(reason="COMPILER-1082", raises=AssertionError)
+    def test_qrm_rf_mixer_config_in(self, qrm_rf_setup):
+        module_config, module, sequencer_config, sequencer = qrm_rf_setup
 
-        with pytest.raises(AssertionError):
-            assert module.in0_offset_path1() == module_config.offset.in0_path1
+        # TODO - potential bug with the dummy structures: COMPILER-1082
+        assert module.in0_offset_path0() == module_config.offset.in0_path0
+        assert module.in0_offset_path1() == module_config.offset.in0_path1
 
 
 @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)
@@ -305,10 +315,8 @@ class TestAcqConfig(TestQbloxConfigMixin):
 class TestAttenuationConfig(TestQbloxConfigMixin):
     test_values = AttenuationTestValues()
 
-    @pytest.mark.parametrize("attenuation_values", test_values.qrc_attenuations)
-    def test_qrc_attenuation_config(
-        self, qblox_instrument, module_seed, attenuation_values
-    ):
+    @pytest.fixture(scope="class")
+    def qrc_attenuation_setup(self, qblox_instrument, module_seed, attenuation_values):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
         module, sequencer = qblox_resource(
@@ -318,6 +326,14 @@ class TestAttenuationConfig(TestQbloxConfigMixin):
         self.setup_qrc_attenuation_config(module_config, attenuation_values)
         QrcConfigHelper(module_config, sequencer_config).configure(module, sequencer)
 
+        return module_config, module, sequencer_config, sequencer
+
+    @pytest.mark.parametrize(
+        "attenuation_values", test_values.qrc_attenuations, scope="class"
+    )
+    def test_qrc_attenuation_config_out(self, qrc_attenuation_setup):
+        module_config, module, sequencer_config, sequencer = qrc_attenuation_setup
+
         assert module.out0_att() == module_config.attenuation.out0
         assert module.out1_att() == module_config.attenuation.out1
         assert module.out2_att() == module_config.attenuation.out2
@@ -325,10 +341,16 @@ class TestAttenuationConfig(TestQbloxConfigMixin):
         assert module.out4_att() == module_config.attenuation.out4
         assert module.out5_att() == module_config.attenuation.out5
 
-        with pytest.raises(AssertionError):
-            # TODO - QBlox bug: Dummy cluster fails to update input attenuation values: COMPILER-1052
-            assert module.in0_att() == module_config.attenuation.in0
-            assert module.in1_att() == module_config.attenuation.in1
+    @pytest.mark.parametrize(
+        "attenuation_values", test_values.qrc_attenuations, scope="class"
+    )
+    @pytest.mark.xfail(reason="COMPILER-1052", raises=AssertionError)
+    def test_qrc_attenuation_config_in(self, qrc_attenuation_setup):
+        module_config, module, sequencer_config, sequencer = qrc_attenuation_setup
+
+        # TODO - QBlox bug: Dummy cluster fails to update input attenuation values: COMPILER-1052
+        assert module.in0_att() == module_config.attenuation.in0
+        assert module.in1_att() == module_config.attenuation.in1
 
 
 @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)

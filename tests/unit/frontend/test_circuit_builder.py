@@ -17,15 +17,15 @@ class TestCircuitBuilder:
         circuit = CircuitBuilder(4)
 
         # Test cases that should fail
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Input should be greater than or equal to 0"):
             circuit.add(X(qubit=-1))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"indices outside the valid range"):
             circuit.add(X(qubit=4))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Input should be greater than or equal to 0"):
             circuit.add(CNOT(qubit1=-1, qubit2=1))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"indices outside the valid range"):
             circuit.add(CNOT(qubit1=0, qubit2=4))
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"duplicate indices"):
             circuit.add(CNOT(qubit1=1, qubit2=1))
 
         # Test cases that should not fail

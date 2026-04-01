@@ -90,7 +90,7 @@ class TestUpdateablePipeline:
         target_data = TargetData()
         engine = EchoEngine()
         config = MockPipelineConfig(name="test")
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Model or loader must be provided."):
             MockUpdateablePipeline(config=config, target_data=target_data, engine=engine)
 
     def test_initialization_with_model_and_loader_takes_precedence(self):
@@ -272,7 +272,7 @@ class TestUpdateablePipeline:
         )
 
         new_model = EchoModelLoader(qubit_count=5).load()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"cannot be used together."):
             pipeline.update(model=new_model, reload_model=True)
 
     def test_copy(self):
@@ -476,14 +476,19 @@ class TestUpdateablePipeline:
         assert hasattr(pipeline, "runtime")
 
     @pytest.mark.parametrize(
-        "model, loader, reload_model",
+        "model, loader, reload_model, error_message",
         [
-            (EchoModelLoader().load(), EchoModelLoader(), True),
-            (EchoModelLoader().load(), None, True),
-            (None, None, True),
+            (
+                EchoModelLoader().load(),
+                EchoModelLoader(),
+                True,
+                r"cannot be used together.",
+            ),
+            (EchoModelLoader().load(), None, True, r"cannot be used together."),
+            (None, None, True, r"cannot reload model."),
         ],
     )
-    def test_resolve_model_raises_error(self, model, loader, reload_model):
+    def test_resolve_model_raises_error(self, model, loader, reload_model, error_message):
         model_loader = MockModelLoader()
         target_data = TargetData()
         config = MockPipelineConfig(name="test")
@@ -491,7 +496,7 @@ class TestUpdateablePipeline:
             config=config, model=model_loader.load(), target_data=target_data
         )
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=error_message):
             pipeline._resolve_model(model, loader, reload_model)
 
     @pytest.mark.parametrize("has_loader", [True, False])

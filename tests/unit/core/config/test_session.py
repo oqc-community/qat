@@ -142,7 +142,7 @@ class TestQatSessionConfigForPipelines:
             )
         ]
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Hardware Loader .* not defined"):
             QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware)
 
     def test_invalid_hardware_on_engine_raises(self):
@@ -164,7 +164,7 @@ class TestQatSessionConfigForPipelines:
             )
         ]
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Hardware Loader .* not defined"):
             QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware, ENGINES=engines)
 
     def test_mismatching_hardware_on_engine_and_pipeline_raises(self):
@@ -199,7 +199,7 @@ class TestQatSessionConfigForPipelines:
             )
         ]
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"has a different hardware_loader"):
             QatSessionConfig(PIPELINES=pipelines, HARDWARE=hardware, ENGINES=engines)
 
     def test_yaml_custom_config(self, qatconfig_testfiles):
@@ -386,7 +386,9 @@ class TestQatSessionConfigForPipelines:
 
     def test_yaml_custom_config_missing_from_env(self, monkeypatch, qatconfig_testfiles):
         monkeypatch.delenv("SOME_ENV_VAR", raising=False)
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            ValueError, match=r"Environment Variable SOME_ENV_VAR not found"
+        ):
             QatSessionConfig.from_yaml(qatconfig_testfiles / "envvar.yaml")
 
     def test_yaml_custom_config_invalid_type(self, qatconfig_testfiles):
@@ -407,7 +409,7 @@ class TestQatSessionConfigForPipelines:
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "invalid" / "arg.yaml")
         desc = qatconfig.ENGINES[0]
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Unexpected keyword argument"):
             desc.construct()
 
     def test_multiple_defaults_on_full_and_separate_pipelines_raises(

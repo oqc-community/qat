@@ -221,7 +221,7 @@ class TestReturn:
 
     @pytest.mark.parametrize("vars", [0.4, ["test", 0.4]])
     def test_wrong_input(self, vars):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid string"):
             Return(variables=vars)
 
 
@@ -235,7 +235,15 @@ class TestResults:
 
     @pytest.mark.parametrize("res_processing", ["mean"])
     def test_wrong_results_processing_raises_validation_error(self, res_processing):
-        with pytest.raises(ValidationError):
+        valid_results_processing = [
+            str(option.value) for option in InlineResultsProcessing.__members__.values()
+        ]
+        options_str = (
+            ", ".join(valid_results_processing[0:-1])
+            + " or "
+            + valid_results_processing[-1]
+        )
+        with pytest.raises(ValidationError, match=f"Input should be {options_str}"):
             ResultsProcessing(variable="test", results_processing=res_processing)
 
 
@@ -265,7 +273,7 @@ class TestQuantumInstruction:
 
     def test_multiple_targets_throws_error(self):
         targets = pulse_channels
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Value should have at most 1 item"):
             QuantumInstruction(targets=targets)
 
     def test_list_to_set_removes_redundancy(self, caplog):
@@ -276,8 +284,12 @@ class TestQuantumInstruction:
         "targets", [2, np.array([1.0, 2.0]), [2, np.array([1.0, 2.0])]]
     )
     def test_wrong_targets_yield_validation_error(self, targets):
-        with pytest.raises((ValidationError, TypeError)):
-            QuantumInstruction(targets=targets)
+        if isinstance(targets, list):
+            with pytest.raises(TypeError, match="unhashable type: 'numpy.ndarray'"):
+                QuantumInstruction(targets=targets)
+        else:
+            with pytest.raises(ValidationError, match="Input should be a valid string"):
+                QuantumInstruction(targets=targets)
 
 
 class TestQuantumInstructionBlock:
@@ -343,7 +355,7 @@ class TestPhaseShift:
         product(pulse_channels, [1j, "pi"]),
     )
     def test_invalid_phase_raises_validation_error(self, pulse_channel, val):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid number"):
             PhaseShift(targets=pulse_channel, phase=val)
 
 
@@ -362,7 +374,7 @@ class TestFrequencyShift:
         product(pulse_channels, [1j, "pi"]),
     )
     def test_validation_phase(self, pulse_channel, val):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Input should be a valid number"):
             FrequencyShift(targets=pulse_channel, frequency=val)
 
 
@@ -381,8 +393,14 @@ class TestDelay:
 
     @pytest.mark.parametrize("delay", [-1, -1e-8, "pi"])
     def test_validation(self, delay):
-        with pytest.raises(ValidationError):
-            Delay(targets=hw_model.qubit_with_index(0).uuid, duration=delay)
+        if isinstance(delay, str):
+            with pytest.raises(ValidationError, match="Input should be a valid number"):
+                Delay(targets=hw_model.qubit_with_index(0).uuid, duration=delay)
+        else:
+            with pytest.raises(
+                ValidationError, match="Input should be greater than or equal to 0"
+            ):
+                Delay(targets=hw_model.qubit_with_index(0).uuid, duration=delay)
 
 
 class TestSynchronize:
@@ -394,7 +412,7 @@ class TestSynchronize:
 
     @pytest.mark.parametrize("invalid_targets", [set(), {"t1"}])
     def test_invalid_no_targets(self, invalid_targets):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match="Value should have at least 2 items"):
             Synchronize(targets=invalid_targets)
 
 

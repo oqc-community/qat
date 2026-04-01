@@ -17,6 +17,9 @@ from qat.utils.pydantic import NoExtraFieldsModel, ValidatedDict, ValidatedList
 log = get_default_logger()
 
 
+class QasmParseError(Exception): ...
+
+
 class QasmContext(NoExtraFieldsModel):
     """Container object for all data relating to the scope/pass of QASM currently under
     analysis."""
@@ -50,7 +53,7 @@ class AbstractParser(abc.ABC):
         try:
             self._fetch_or_parse(qasm)
             return ParseResults(success=True)
-        except Exception as ex:
+        except QasmParseError as ex:
             return ParseResults(success=False, errors=str(ex))
 
     def parser_language(self) -> Languages:

@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from jinja2 import Environment, FileSystemLoader, meta
 
-from qat.frontend.parsers.qasm import Qasm3Parser
+from qat.frontend.parsers.qasm import Qasm3Parser, QasmParseError
 from qat.ir.instruction_basetypes import PostProcessType
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
@@ -144,27 +144,29 @@ class TestQasm3Parser:
     def test_no_header(self, n_qubits, hardware_model):
         qasm = get_qasm3("no_header.qasm")
         parser = Qasm3Parser()
-        with pytest.raises(ValueError):
+        with pytest.raises(
+            QasmParseError, match="Ambiguous QASM version, need OPENQASM header."
+        ):
             parser.parse(QuantumInstructionBuilder(hardware_model=hardware_model), qasm)
 
     def test_invalid_syntax(self, n_qubits, hardware_model):
         qasm = get_qasm3("invalid_syntax.qasm")
         parser = Qasm3Parser()
-        with pytest.raises(ValueError):
+        with pytest.raises(QasmParseError, match="Invalid QASM 3 syntax:"):
             parser.parse(QuantumInstructionBuilder(hardware_model=hardware_model), qasm)
 
     def test_compiler_crashout(self, n_qubits):
         hw = generate_hw_model(n_qubits)
         qasm = get_qasm3("nonsense/qasm_file.qasm")
         parser = Qasm3Parser()
-        with pytest.raises(ValueError):
+        with pytest.raises(QasmParseError, match="Too many arithmetic operations"):
             parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
 
     def test_max_count_operator_within_waveform_elements(self, n_qubits):
         hw = generate_hw_model(n_qubits)
         qasm = get_qasm3("lark_parsing_test.qasm")
         parser = Qasm3Parser(max_count_operator_within_waveform_elements=0)
-        with pytest.raises(ValueError):
+        with pytest.raises(QasmParseError, match="Too many arithmetic operations"):
             parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
 
     # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
@@ -1088,7 +1090,7 @@ class TestQASM3Features:
         assert len(phases) == 1
         assert np.isclose(phases[0].phase, value)
 
-    @pytest.mark.xfail(raises=ValueError, reason="Control flow is not supported yet.")
+    @pytest.mark.xfail(raises=QasmParseError, reason="Control flow is not supported yet.")
     @pytest.mark.parametrize(
         "file",
         [
@@ -1105,7 +1107,9 @@ class TestQASM3Features:
         file = Path("classical", file)
         self.return_builder_and_devices(model, feature_testpath, file)
 
-    @pytest.mark.xfail(raises=ValueError, reason="Gate modifiers are not supported yet.")
+    @pytest.mark.xfail(
+        raises=QasmParseError, reason="Gate modifiers are not supported yet."
+    )
     @pytest.mark.parametrize(
         "file",
         [
@@ -1121,7 +1125,7 @@ class TestQASM3Features:
         self.return_builder_and_devices(model, feature_testpath, file)
 
     @pytest.mark.xfail(
-        raises=ValueError, reason="Constant declarations are not supported yet."
+        raises=QasmParseError, reason="Constant declarations are not supported yet."
     )
     def test_constant(self, model, feature_testpath):
         """More precise testing of constant declarations to come when they are supported."""
@@ -1132,7 +1136,7 @@ class TestQASM3Features:
         )
 
     @pytest.mark.xfail(
-        raises=ValueError, reason="Function definitions are not supported yet."
+        raises=QasmParseError, reason="Function definitions are not supported yet."
     )
     def test_def(self, model, feature_testpath):
         """More precise testing of function definitions to come when they are supported."""
@@ -1142,7 +1146,7 @@ class TestQASM3Features:
             Path("keywords", "def.qasm"),
         )
 
-    @pytest.mark.xfail(raises=ValueError, reason="Durationof is not supported yet.")
+    @pytest.mark.xfail(raises=QasmParseError, reason="Durationof is not supported yet.")
     def test_durationof(self, model, feature_testpath):
         """More precise testing of durationof to come when supported."""
         index = next(iter(model.qubits))
@@ -1155,7 +1159,9 @@ class TestQASM3Features:
             physical_index=index,
         )
 
-    @pytest.mark.xfail(raises=ValueError, reason="This types is not fully supported yet.")
+    @pytest.mark.xfail(
+        raises=(QasmParseError, ValueError), reason="This types is not fully supported yet."
+    )
     @pytest.mark.parametrize(
         "file",
         [

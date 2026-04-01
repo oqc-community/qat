@@ -62,7 +62,7 @@ def test_pass_manager():
     # Add an invalid instruction
     assert not isinstance(InvalidInstruction(), Instruction)
     builder.add(InvalidInstruction())
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match=r"is not an valid instruction"):
         pipline.run(builder, res_mgr, met_mgr)
 
     builder = resonator_spect(model)

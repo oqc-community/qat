@@ -60,7 +60,7 @@ class HardwareLoaders:
     ) -> QuantumHardwareModel | PhysicalHardwareModel:
         """Reloads a hardware model from its loader, updating the model in the cache."""
         if loader_name not in self._loaders:
-            raise Exception(f"Hardware Model Loader {loader_name} not found")
+            raise KeyError(f"Hardware Model Loader {loader_name} not found")
         return self.load(loader_name, allow_cache=False)
 
     def reload_all_models(self):
@@ -114,7 +114,7 @@ class EngineSet:
     def reload_model(self, name: str):
         """Reloads the model for an engine with the given identifier."""
         if name not in self._engines:
-            raise ValueError(f"Engine {name} not found")
+            raise KeyError(f"Engine {name} not found")
 
         engine = self._engines[name]
         # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
@@ -206,11 +206,11 @@ class PipelineSet:
         if isinstance(pipeline, AbstractPipeline):
             name = pipeline.name
             if name not in self._pipelines:
-                raise Exception("Add pipeline using add before setting default")
+                raise KeyError("Add pipeline using add before setting default")
         else:
             name = pipeline
             if name not in self._pipelines:
-                raise Exception(f"Cannot set default pipeline to unknown pipeline {name}")
+                raise KeyError(f"Cannot set default pipeline to unknown pipeline {name}")
 
         self._default_pipeline = name
 
@@ -237,7 +237,7 @@ class PipelineSet:
         name = pipeline.name if isinstance(pipeline, AbstractPipeline) else pipeline
 
         if name not in self._pipelines:
-            raise ValueError(f"Pipeline {name} not found")
+            raise KeyError(f"Pipeline {name} not found")
 
         if isinstance(pipeline, AbstractPipeline):
             if pipeline is not self._pipelines[name]:
@@ -259,10 +259,10 @@ class PipelineSet:
         if isinstance(pipeline, str):
             if pipeline == "default":
                 if self._default_pipeline is None:
-                    raise Exception("No Default Pipeline Set")
+                    raise KeyError("No Default Pipeline Set")
                 pipeline = self._default_pipeline
             elif pipeline not in self._pipelines:
-                raise Exception(f"Pipeline {pipeline} not found")
+                raise KeyError(f"Pipeline {pipeline} not found")
 
             pipeline = self._pipelines[pipeline]
 
@@ -276,7 +276,7 @@ class PipelineSet:
 
         pipeline = self._pipelines[pipeline]
         if not (isinstance(pipeline, UpdateablePipeline) and pipeline.has_loader):
-            raise Exception(
+            raise TypeError(
                 f"The pipeline {pipeline} is not an Updateable pipelines equipped with a "
                 "loader."
             )

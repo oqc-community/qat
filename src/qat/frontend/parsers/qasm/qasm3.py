@@ -13,13 +13,13 @@ from typing import Any
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing, Languages
-from lark import Lark, Token, Tree, UnexpectedCharacters
+from lark import Lark, Token, Tree, UnexpectedInput
 from lark.visitors import Interpreter
 from openqasm3 import ast
-from openqasm3.parser import parse as oq3_parse
+from openqasm3.parser import QASM3ParsingError, parse as oq3_parse
 from openqasm3.visitor import QASMVisitor
 
-from qat.frontend.parsers.qasm.base import AbstractParser, ParseResults, QasmContext
+from qat.frontend.parsers.qasm.base import AbstractParser, QasmContext, QasmParseError
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType
 from qat.ir.instruction_builder import QuantumInstructionBuilder
@@ -151,7 +151,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
     def _fetch_or_parse(self, qasm_str: str) -> ast.Program:
         if 'defcalgrammar "openpulse"' in qasm_str:
-            raise ValueError("QASM3ParserBase can not parse OpenPulse programs.")
+            raise QasmParseError("QASM3ParserBase can not parse OpenPulse programs.")
 
         # If we have seen this file before.
         qasm_id = hash(qasm_str)
@@ -160,9 +160,8 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
         try:
             program = oq3_parse(qasm_str)
-        except Exception as e:
-            invalid_string = str(e)
-            raise ValueError(f"Invalid QASM 3 syntax: '{invalid_string}'.")
+        except QASM3ParsingError as ex:
+            raise QasmParseError(ex) from ex
 
         self._cached_parses[qasm_id] = program
         return program
@@ -531,24 +530,17 @@ class Qasm3Parser(Interpreter, AbstractParser):
                             count_operators
                             > self._max_count_operator_within_waveform_elements
                         ):
-                            raise ValueError(
+                            raise QasmParseError(
                                 f"Too many arithmetic operations within waveform element."
                                 f"={count_operators}>{self._max_count_operator_within_waveform_elements}"
                             )
             program = self.lark_parser.parse(qasm_str)
-        except UnexpectedCharacters as e:
+        except UnexpectedInput as e:
             invalid_string = e._context.strip(" ^\t\n\r")
-            raise ValueError(f"Invalid QASM 3 syntax: '{invalid_string}'.")
+            raise QasmParseError(f"Invalid QASM 3 syntax: '{invalid_string}'.") from e
 
         self._cached_parses[qasm_id] = program
         return program
-
-    def can_parse(self, qasm_str: str) -> ParseResults:
-        try:
-            self._fetch_or_parse(qasm_str)
-            return ParseResults(success=True)
-        except Exception as ex:
-            return ParseResults(success=True, errors=str(ex))
 
     def include(self, tree):
         filename = self.transform_to_value(tree.children[0])
@@ -1751,10 +1743,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         self.visit(parsed)
         if not self._has_qasm_version:
-            raise ValueError("Ambiguous QASM version, need OPENQASM header.")
+            raise QasmParseError("Ambiguous QASM version, need OPENQASM header.")
 
         if self._has_open_pulse and not self._has_calibration_version:
-            raise ValueError("Uses pulse definitions without defcalgrammar header.")
+            raise QasmParseError("Uses pulse definitions without defcalgrammar header.")
 
         # If we're purely QASM act like the previous version in regards to results.
         register_keys = self._general_context.registers.classic.keys()

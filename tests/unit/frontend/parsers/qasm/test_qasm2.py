@@ -7,6 +7,7 @@ import pytest
 from compiler_config.config import Qasm2Optimizations
 
 from qat.frontend.parsers.qasm import Qasm2Parser, RestrictedQasm2Parser
+from qat.frontend.parsers.qasm.base import QasmParseError
 from qat.integrations.tket import run_pyd_tket_optimizations
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import InstructionBlock, Return
@@ -35,7 +36,7 @@ class TestQasm2Parser:
         return generate_hw_model(n_qubits, seed=seed)
 
     def test_invalid_gates(self, n_qubits, seed, hardware_model):
-        with pytest.raises(ValueError):
+        with pytest.raises(QasmParseError, match="currently unable to be used."):
             RestrictedQasm2Parser({"cx"}).parse(
                 QuantumInstructionBuilder(hardware_model=hardware_model),
                 get_qasm2("example.qasm"),
@@ -89,14 +90,14 @@ class TestQasm2Parser:
         assert count_number_of_pulses(builder, "Measure") == 5
 
     def test_restrict_if(self, n_qubits, seed, hardware_model):
-        with pytest.raises(ValueError, match="If's are currently unable to be used."):
+        with pytest.raises(QasmParseError, match="If's are currently unable to be used."):
             RestrictedQasm2Parser(disable_if=True).parse(
                 QuantumInstructionBuilder(hardware_model=hardware_model),
                 get_qasm2("example_if.qasm"),
             )
 
     def test_invalid_arbitrary_gate(self, n_qubits, seed, hardware_model):
-        with pytest.raises(ValueError):
+        with pytest.raises(QasmParseError, match="not coupled."):
             Qasm2Parser().parse(
                 QuantumInstructionBuilder(hardware_model=hardware_model),
                 get_qasm2("invalid_custom_gate.qasm"),

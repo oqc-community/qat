@@ -98,7 +98,9 @@ class TestCompilePipeline:
 
     def test_execute_is_not_supported(self, mock_pipeline):
         assert not hasattr(mock_pipeline, "execute")
-        with pytest.raises(AttributeError):
+        with pytest.raises(
+            AttributeError, match="'CompilePipeline' object has no attribute 'execute'"
+        ):
             mock_pipeline.execute(Executable())
 
     def test_validate_model(self):
@@ -175,7 +177,9 @@ class TestExecutePipeline:
 
     def test_compile_is_not_supported(self, mock_pipeline):
         assert not hasattr(mock_pipeline, "compile")
-        with pytest.raises(AttributeError):
+        with pytest.raises(
+            AttributeError, match="'ExecutePipeline' object has no attribute 'compile'"
+        ):
             mock_pipeline.compile("test")
 
     def test_execute(self, mock_pipeline):

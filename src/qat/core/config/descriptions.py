@@ -129,7 +129,7 @@ class ClassDescription(NoExtraFieldsModel, Generic[T]):
         try:
             return partial(self.type, **self.config)
         except TypeError as t:
-            raise ValueError(f"Validation error {str(t)}")
+            raise ValueError(f"Validation error {str(t)}") from t
 
 
 ToPartialValidator = AfterValidator(lambda v: v.partial())

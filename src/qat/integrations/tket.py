@@ -12,6 +12,7 @@ from pytket.passes import SequencePass
 from pytket.placement import Placement
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import QASMUnsupportedError
+from qiskit.qasm2.exceptions import QASM2ParseError
 from sympy import pi as sympy_pi, sympify
 
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
@@ -168,7 +169,7 @@ class TketOptimisationHelper:
             log.info(f"Number of gates before tket optimization: {circ.n_gates}")
             return circ
 
-        except Exception as e:  # Parsing is too fragile, can cause almost any exception.
+        except (QASM2ParseError, ValueError) as e:
             log.warning(
                 f"Tket failed during QASM parsing with error: {_full_stopalize(e)}. "
                 "Skipping this optimization pass."

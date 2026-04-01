@@ -378,7 +378,7 @@ class TestPipelineManager:
 
     def test_remove_execute_from_compile_raises_error(self):
         manager = self.setup_manager()
-        with pytest.raises(ValueError):
+        with pytest.raises(KeyError, match="Pipeline execute not found"):
             manager.remove("execute", compile=True)
 
     def test_set_default_compile_pipeline(self):

@@ -570,13 +570,14 @@ class QbloxContext(ABC):
         remaining_width = pulse_width - effective_width
         if remaining_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
             raise ValueError(
-                f"""
-                Remaining width after delay must be at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns.
-                Got pulse width = {pulse_width} ns, delay width = {delay_width} ns. This leaves {remaining_width} ns,
-                which isn't enough to trigger acquisition afterwards. Adjust the pulse width or delay width values so
-                that the following holds:
-                pulse_width - max(min(pulse_width, delay_width), self.target_data.CONTROL_SEQUENCER_DATA.grid_time) >= self.target_data.CONTROL_SEQUENCER_DATA.grid_time
-                """
+                "Remaining width after delay must be at least "
+                f"{self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns. Got pulse width "
+                f"= {pulse_width} ns, delay width = {delay_width} ns. This leaves "
+                f"{remaining_width} ns, which isn't enough to trigger acquisition "
+                "afterwards. Adjust the pulse width or delay width values so that the "
+                "following holds: pulse_width - max(min(pulse_width, delay_width), "
+                "self.target_data.CONTROL_SEQUENCER_DATA.grid_time) >= "
+                "self.target_data.CONTROL_SEQUENCER_DATA.grid_time"
             )
         yield remaining_width
         if pulse_shape == PulseShapeType.SQUARE:
@@ -756,10 +757,9 @@ class QbloxContext(ABC):
 
         if pulse_width < delay_width + self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
             raise ValueError(
-                f"""
-                Expected pulse width >= delay width + {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns.
-                Got pulse width = {pulse_width} ns and delay width = {delay_width} ns.
-                """
+                "Expected pulse width >= delay width + "
+                f"{self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns. Got pulse width "
+                f"= {pulse_width} ns and delay width = {delay_width} ns."
             )
 
         name = f"{hash(acquire)}"

@@ -513,7 +513,7 @@ class FrequencySetupValidation(ValidationPass):
                 freq_range = self._get_if_freq_range(physical_channel_data["is_resonator"])
                 violations.append(
                     f"The IF of {name} {pc_name} pulse channel has a value {if_freq}, "
-                    f"which is outside of the the valid range {freq_range}."
+                    f"which is outside of the valid range {freq_range}."
                 )
 
         return violations

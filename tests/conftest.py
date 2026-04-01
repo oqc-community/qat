@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+import sys
+
 import pytest
 
 pytest_plugins = ("tests.plugins.seeding", "tests.plugins.qblox")
@@ -18,6 +20,11 @@ def tmp_cwd(monkeypatch, tmp_path):
     used in qblox tests.
     """
     monkeypatch.chdir(tmp_path)
+
+
+@pytest.fixture(scope="session")
+def py_version():
+    return sys.version_info[:2]
 
 
 tests_dir = None

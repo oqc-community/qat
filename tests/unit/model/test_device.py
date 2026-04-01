@@ -34,15 +34,15 @@ from qat.utils.hardware_model import generate_hw_model
 class TestCalibratable:
     @pytest.mark.parametrize("invalid_width", ["invalid_width", -0.001, -5])
     def test_invalid_width(self, invalid_width):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Input should be"):
             CalibratablePulse(width=invalid_width)
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Input should be"):
             CalibratableAcquire(width=invalid_width)
 
     @pytest.mark.parametrize("invalid_delay", ["invalid_delay", -0.001, -5])
     def test_invalid_delay(self, invalid_delay):
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Input should be"):
             CalibratableAcquire(width=invalid_delay)
 
 
@@ -75,10 +75,10 @@ class TestDevicesValidation:
         bb.if_frequency = random.Random(seed + 1).uniform(1e05, 1e07)
         assert bb.is_calibrated
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"must be >=0"):
             bb.frequency = random.Random(seed).uniform(-1e05, -1e07)
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"must be >=0"):
             bb.if_frequency = random.Random(seed).uniform(-1e05, -1e07)
 
     def test_physical_channel(self, seed):
@@ -95,7 +95,7 @@ class TestDevicesValidation:
         assert physical_channel.is_calibrated
         assert physical_channel.I_bias != physical_channel.Q_bias
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Field is frozen"):
             physical_channel.baseband = 1.0
 
     def test_pulse_channel(self, seed):
@@ -105,7 +105,7 @@ class TestDevicesValidation:
         pulse_channel.frequency = random.Random(seed).uniform(1e08, 1e10)
         assert pulse_channel.is_calibrated
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"must be >=0"):
             pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
     @pytest.mark.parametrize(
@@ -127,11 +127,11 @@ class TestDevicesValidation:
         custom_pulse_ch = CustomPulseChannel()
         assert custom_pulse_ch.pulse_type == "custom"
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"must contain `PulseChannel` at the end"):
             # `PulseChannel` should be in the class name
             class InvalidChannel(PulseChannel): ...
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"must contain `PulseChannel` at the end"):
             # `PulseChannel` should be at the end in the class name
             class InvalidPulseChannelSuffix(PulseChannel): ...
 
@@ -155,7 +155,7 @@ class TestDevicesValidation:
 
         for pulse_channel_name in ResonatorPulseChannels.model_fields:
             pulse_channel = getattr(resonator.pulse_channels, pulse_channel_name)
-            with pytest.raises(ValidationError):
+            with pytest.raises(ValidationError, match=r"must be >=0"):
                 pulse_channel.frequency = random.Random(seed).uniform(-1e08, -1e10)
 
     def test_qubit(self, seed):
@@ -186,11 +186,15 @@ class TestDevicesValidation:
 
         for i, pulse_channel_name in enumerate(["drive", "second_state", "freq_shift"]):
             pulse_channel = getattr(qubit.pulse_channels, pulse_channel_name)
-            with pytest.raises(ValidationError):
+            with pytest.raises(ValidationError, match=r"must be >=0"):
                 pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
-    def test_qubit_pulse_channel_access(self, seed):
+    def test_qubit_pulse_channel_access(self, seed, py_version):
         hw = generate_hw_model(8, seed=seed)
+        if py_version >= (3, 11):
+            match_str = "object has no setter"
+        else:
+            match_str = "can't set attribute"
 
         for qubit in hw.qubits.values():
             assert isinstance(qubit.drive_pulse_channel, DrivePulseChannel)
@@ -206,7 +210,7 @@ class TestDevicesValidation:
                 assert isinstance(crc_pulse_channel, CrossResonanceCancellationPulseChannel)
 
             # No setter for the pulse channel attribute.
-            with pytest.raises(AttributeError):
+            with pytest.raises(AttributeError, match=match_str):
                 qubit.drive_pulse_channel = DrivePulseChannel()
 
     def test_qubit_pair(self, seed):
@@ -234,7 +238,7 @@ class TestDevicesValidation:
                 pulse_channel = getattr(qubit.pulse_channels, pulse_channel_name)
                 pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 
-                with pytest.raises(ValidationError):
+                with pytest.raises(ValidationError, match=r"must be >=0"):
                     pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             for i, pulse_channel_name in enumerate(
@@ -243,19 +247,19 @@ class TestDevicesValidation:
                 pulse_channel = getattr(qubit.resonator.pulse_channels, pulse_channel_name)
                 pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 
-                with pytest.raises(ValidationError):
+                with pytest.raises(ValidationError, match=r"must be >=0"):
                     pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             for i, cr_channel in enumerate(qubit.cross_resonance_pulse_channels.values()):
                 cr_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
-                with pytest.raises(ValidationError):
+                with pytest.raises(ValidationError, match=r"must be >=0"):
                     cr_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             for i, crc_channel in enumerate(
                 qubit.cross_resonance_cancellation_pulse_channels.values()
             ):
                 crc_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
-                with pytest.raises(ValidationError):
+                with pytest.raises(ValidationError, match=r"must be >=0"):
                     crc_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             assert qubit.is_calibrated
@@ -271,7 +275,7 @@ class TestDevicesValidation:
         )
         physical_channel = wrong_phys_ch_type(baseband=bb, name_index=0)
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Input should be"):
             device_type(physical_channel=physical_channel)
 
 
@@ -306,12 +310,12 @@ class TestFrozenQubit:
         )
 
         # Cannot add items to a frozen pulse channel dict.
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"does not support item assignment"):
             qubit.cross_resonance_pulse_channels[1] = CrossResonancePulseChannel(
                 auxiliary_qubit=2
             )
 
-        with pytest.raises(TypeError):
+        with pytest.raises(TypeError, match=r"does not support item assignment"):
             qubit.cross_resonance_cancellation_pulse_channels[1] = (
                 CrossResonanceCancellationPulseChannel(auxiliary_qubit=2)
             )
@@ -421,9 +425,9 @@ class TestQubitMapperDiscriminator:
         assert q2.post_process_method is None
 
     def test_qubit_mapper_invalid_discriminator(self):
-        """Test error handling for invalid post_process_method discriminator in Qubit.
+        """Test that an invalid post_process_method discriminator fails Qubit validation.
 
-        :raises Exception: If unknown method is accepted.
+        :raises ValidationError: If an unknown method discriminator is accepted.
         """
         invalid_post_process_method = {
             "method": "INVALID_METHOD",
@@ -444,7 +448,7 @@ class TestQubitMapperDiscriminator:
             "post_process_method": invalid_post_process_method,
             "direct_x_pi": False,
         }
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError, match=r"INVALID_METHOD"):
             Qubit.model_validate(d)
 
     def test_qubit_mapper_both_provided(self):

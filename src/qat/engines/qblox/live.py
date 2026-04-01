@@ -116,7 +116,7 @@ class QbloxLeafInstrument(LeafInstrument):
                 self._driver = None
                 self._modules.clear()
                 self.is_connected = False
-            except BaseException as e:
+            except (RuntimeError, OSError) as e:
                 log.warning(
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )
@@ -127,10 +127,10 @@ class QbloxLeafInstrument(LeafInstrument):
             self._reset_modules()
             for pkg in program.packages.values():
                 self.configure(pkg)
-        except BaseException as e:
+        except (RuntimeError, OSError):
             self._id2seq.clear()
             self._reset_modules()
-            raise e
+            raise
 
     def playback(self):
         if not any(self._id2seq):

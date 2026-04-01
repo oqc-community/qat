@@ -541,18 +541,27 @@ def _validate_value(
     elif isinstance(value, (list, np.ndarray)):
         value = np.asarray(value, dtype=implied_type)
     else:
-        raise ValueError(
+        raise TypeError(
             f"Expected value to be {str | list | np.ndarray}, got {type(value)}"
         )
 
-    if np.can_cast(value.dtype, required_type):
+    # First, attempt a strictly safe NumPy cast.
+    if np.can_cast(value.dtype, required_type, casting="safe"):
         return value.astype(required_type)
 
+    # If a safe cast is not allowed, attempt a value-preserving cast:
+    # cast to the required dtype, then back to the original and ensure
+    # that the round-trip does not change any values.
     try:
-        if np.all((cast_value := value.astype(required_type)) == value):
-            return cast_value
-    except Exception as e:
-        raise ValueError(f"""Cannot cast {value.dtype} to {required_type}\n{str(e)}""")
+        cast_value = value.astype(required_type)
+        round_tripped = cast_value.astype(value.dtype)
+    except (TypeError, ValueError, OverflowError) as e:
+        raise ValueError(f"Cannot cast {value.dtype} to {required_type}") from e
+
+    if np.array_equal(round_tripped, value):
+        return cast_value
+
+    raise ValueError(f"Cannot cast {value.dtype} to {required_type}")
 
 
 def _serializer(obj, ty: type):

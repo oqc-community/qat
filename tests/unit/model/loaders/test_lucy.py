@@ -162,20 +162,20 @@ class TestLucyModelLoader:
             (i, (i + 1) % qubit_count): i / qubit_count for i in range(qubit_count)
         }
         qualities[(0, 2)] = 0.5  # Invalid coupling
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"does not match the ring connectivity"):
             LucyModelLoader(
                 qubit_count=qubit_count,
                 coupling_qualities=qualities,
                 coupling_direction=LucyCouplingDirection.LEFT,
             ).load()
 
-    def test_missing_coupling_raises_validaiton_error(self):
+    def test_missing_coupling_raises_validation_error(self):
         qubit_count = 8
         qualities = {
             (i, (i + 1) % qubit_count): i / qubit_count for i in range(qubit_count)
         }
         del qualities[(0, 1)]
-        with pytest.raises(IndexError):
+        with pytest.raises(IndexError, match=r"coupling \(.*\) is not present"):
             LucyModelLoader(
                 qubit_count=qubit_count,
                 coupling_qualities=qualities,

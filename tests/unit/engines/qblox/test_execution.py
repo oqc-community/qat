@@ -303,7 +303,7 @@ class TestExecutionSuite:
                 drive_channel, PulseShapeType.SOFT_SQUARE, amp=0.1, width=1e-5, rise=1e-8
             )
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="No more waveform memory left"):
             executable = do_emit(qblox_model, backend_type, builder)
             results = do_execute(qblox_model, qblox_instrument, executable)
             assert results is not None

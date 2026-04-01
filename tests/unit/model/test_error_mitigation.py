@@ -23,7 +23,7 @@ class TestReadoutMitigation:
         qubit_indices_str = ["Q" + str(i) for i in range(1, n_qubits + 1)]
         linear = generate_random_linear(qubit_indices_str)
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Input should be a valid integer"):
             ReadoutMitigation(linear=linear, m3_available=m3_available)
 
     def test_invalid_matrix_elements(self, n_qubits, m3_available):
@@ -33,18 +33,18 @@ class TestReadoutMitigation:
         # Matrix elements must be in [0, 1].
         linear[0][0][0] = 1.1
         linear[0][1][0] = 0.9
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"elements must be in the interval \[0, 1\]"):
             ReadoutMitigation(linear=linear, m3_available=m3_available)
 
         linear[0][0][0] = -0.1
         linear[0][1][0] = 1.1
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"elements must be in the interval \[0, 1\]"):
             ReadoutMitigation(linear=linear, m3_available=m3_available)
 
         # Sum of columns must be equal to 1.
         linear[0][0][0] = 0.5
         linear[0][1][0] = 0.6
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"all probabilities .* sum to 1"):
             ReadoutMitigation(linear=linear, m3_available=m3_available)
 
     def test_serialisation(self, n_qubits, m3_available):
@@ -72,11 +72,16 @@ class TestReadoutMitigation:
 
 
 class TestErrorMitigation:
-    def test_default_constructor(self):
+    def test_default_constructor(self, py_version):
         error_mit = ErrorMitigation()
         assert error_mit.is_enabled is False
 
-        with pytest.raises(AttributeError):
+        if py_version >= (3, 11):
+            match_str = "object has no setter"
+        else:
+            match_str = "can't set attribute 'is_enabled'"
+
+        with pytest.raises(AttributeError, match=match_str):
             error_mit.is_enabled = True
 
     @pytest.mark.parametrize("n_qubits", [1, 2, 4, 8, 31, 64])

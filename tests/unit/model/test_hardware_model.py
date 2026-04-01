@@ -42,7 +42,9 @@ class TestPhysicalHardwareModel:
         model_data["qubits"][0]["resonator"]["physical_channel"]["name_index"] = model_data[
             "qubits"
         ][0]["physical_channel"]["name_index"]
-        with pytest.raises(ValidationError):
+        with pytest.raises(
+            ValidationError, match=r"Physical channel indices must be unique"
+        ):
             PhysicalHardwareModel(**model_data)
 
     def test_qubit_for_physical_channel_id_returns_qubits(self):
@@ -339,7 +341,7 @@ class Test_HW_Connectivity:
         wrong_connectivity = deepcopy(physical_connectivity)
         wrong_connectivity[0].add(n_qubits)
         wrong_connectivity[n_qubits] = {0}
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"contains edges that are not present"):
             PhysicalHardwareModelBuilder(
                 physical_connectivity=physical_connectivity,
                 logical_connectivity=wrong_connectivity,
@@ -357,7 +359,7 @@ class Test_HW_Connectivity:
             {(q1, q2): random.Random(seed).uniform(-1.0, -0.001)}
         )
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"must be in the interval \[0, 1\]"):
             PhysicalHardwareModelBuilder(
                 physical_connectivity=physical_connectivity,
                 logical_connectivity=logical_connectivity,
@@ -381,16 +383,16 @@ class Test_HW_Connectivity:
         q1_altered = random.Random(seed + 1).sample(list(range(0, n_qubits)), 1)[0]
         q2_altered = random.Random(seed + 2).sample(list(range(0, n_qubits)), 1)[0]
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=r"object has no attribute 'add'"):
             hw.physical_connectivity[q].add((q1_altered, q2_altered))
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=r"object has no attribute 'add'"):
             hw.logical_connectivity[q].add((q1_altered, q2_altered))
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=r"object has no attribute 'discard'"):
             hw.physical_connectivity[q].discard(q1_altered)
 
-        with pytest.raises(AttributeError):
+        with pytest.raises(AttributeError, match=r"object has no attribute 'discard'"):
             hw.logical_connectivity[q].discard(q2_altered)
 
     def test_invalid_connectivity_type(self, n_qubits, seed):
@@ -409,7 +411,7 @@ class Test_HW_Connectivity:
             physical_connectivity[q] = (invalid_value, invalid_value)
             logical_connectivity[q] = (invalid_value, invalid_value)
 
-            with pytest.raises(ValueError):
+            with pytest.raises(ValueError, match=r"auxiliary_qubit"):
                 PhysicalHardwareModelBuilder(
                     physical_connectivity=physical_connectivity,
                     logical_connectivity=logical_connectivity,
@@ -428,7 +430,7 @@ class Test_HW_Connectivity:
         ].items():
             pulse_channel["auxiliary_qubit"] = aux_qubit_id + 12321
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"Mismatch in mapping for qubit id"):
             PhysicalHardwareModel(**blob)
 
     def test_mismatch_qubits_vs_connectivity(self, n_qubits, seed):
@@ -442,13 +444,17 @@ class Test_HW_Connectivity:
         changed_connectivity = set(deepcopy(blob["physical_connectivity"][q]))
         changed_connectivity.update({100: {1, 2, 3}})
         blob["physical_connectivity"][q] = changed_connectivity
-        with pytest.raises(ValidationError):
+        with pytest.raises(
+            ValidationError, match=r"do not match physical connectivity edges"
+        ):
             PhysicalHardwareModel(**blob)
 
         changed_connectivity = set(deepcopy(blob["physical_connectivity"][q]))
         changed_connectivity.pop()
         blob["logical_connectivity"][q] = changed_connectivity
-        with pytest.raises(ValidationError):
+        with pytest.raises(
+            ValidationError, match=r"do not match physical connectivity edges"
+        ):
             PhysicalHardwareModel(**blob)
 
     def test_default_logical_topology(self, n_qubits, seed):

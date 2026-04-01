@@ -18,8 +18,9 @@ from qiskit.circuit.library import CXGate, UGate
 from qiskit.converters import circuit_to_dag
 from qiskit.dagcircuit import DAGCircuit, DAGInNode, DAGNode, DAGOpNode, DAGOutNode
 from qiskit.qasm2 import CustomInstruction
+from qiskit.qasm2.exceptions import QASM2ParseError
 
-from qat.frontend.parsers.qasm.base import AbstractParser, QasmContext
+from qat.frontend.parsers.qasm.base import AbstractParser, QasmContext, QasmParseError
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.purr.utils.logger import get_default_logger
 
@@ -55,7 +56,10 @@ class Qasm2Parser(AbstractParser):
         if (cached_value := self._cached_parses.get(qasm_id, None)) is not None:
             return cached_value
 
-        circ = qasm2.loads(qasm, custom_instructions=self._get_intrinsics(qasm))
+        try:
+            circ = qasm2.loads(qasm, custom_instructions=self._get_intrinsics(qasm))
+        except QASM2ParseError as ex:
+            raise QasmParseError(ex) from ex
         program = circuit_to_dag(circ)
         from importlib.metadata import version
 
@@ -78,7 +82,10 @@ class Qasm2Parser(AbstractParser):
         program = self._fetch_or_parse(qasm)
         if (qasm_id := hash(qasm)) in self._cached_parses:
             del self._cached_parses[qasm_id]
-        return self.process_program(builder, program)
+        try:
+            return self.process_program(builder, program)
+        except ValueError as ex:
+            raise QasmParseError(ex) from ex
 
     def validate(self, circ: DAGCircuit):
         pass
