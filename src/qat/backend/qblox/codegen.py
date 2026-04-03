@@ -31,7 +31,7 @@ from qat.backend.qblox.passes.analysis import (
     QbloxLegalisationPass,
     TriageResult,
 )
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
@@ -80,7 +80,7 @@ class QbloxContext(ABC):
         self.writes: dict[str, list[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr or AllocationManager()
-        self.target_data = target_data or QbloxTargetData()
+        self.target_data = target_data or TARGET_DATA
 
         self.sequence_builder = SequenceBuilder()
         self.sequencer_config = SequencerConfig()
@@ -986,8 +986,8 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
                     packages[target.full_id()] = package
             return QbloxProgram(
                 packages=packages,
-                driver_version=QbloxTargetData().driver_version,
-                fw_version=QbloxTargetData().fw_version,
+                driver_version=TARGET_DATA.driver_version,
+                fw_version=TARGET_DATA.fw_version,
             )
         finally:
             self.allocations.clear()

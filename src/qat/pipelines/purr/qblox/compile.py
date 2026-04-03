@@ -10,7 +10,7 @@ from qat.backend.passes.purr.analysis import (
 from qat.backend.passes.purr.transform import DesugaringPass
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.passes.analysis import PreCodegenPass, QbloxLegalisationPass
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
@@ -99,7 +99,7 @@ class QbloxCompilePipeline1(UpdateablePipeline):
                 "be ignored. "
             )
 
-        target_data = target_data if target_data is not None else QbloxTargetData()
+        target_data = target_data if target_data is not None else TARGET_DATA
         return CompilePipeline(
             model=model,
             target_data=target_data,
@@ -138,7 +138,7 @@ class QbloxCompilePipeline2(UpdateablePipeline):
                 "be ignored. "
             )
 
-        target_data = target_data if target_data is not None else QbloxTargetData()
+        target_data = target_data if target_data is not None else TARGET_DATA
         return CompilePipeline(
             model=model,
             target_data=target_data,

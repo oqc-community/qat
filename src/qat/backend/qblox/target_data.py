@@ -164,6 +164,12 @@ class QcmDescription(ControlModuleDescription):
 
     min_qcm_offset_v: NegativeFloat = -2.5
     max_qcm_offset_v: PositiveFloat = 2.5
+    output_connections: dict = {
+        0: list(range(6)),
+        1: list(range(6)),
+        2: list(range(6)),
+        3: list(range(6)),
+    }
 
 
 class QcmRfDescription(ControlModuleDescription):
@@ -179,6 +185,10 @@ class QcmRfDescription(ControlModuleDescription):
     max_qcm_rf_offset_mv: PositiveInt = 73
     min_out_att_db: NonNegativeInt = 0
     max_out_att_db: NonNegativeInt = 60
+    output_connections: dict = {
+        0: list(range(6)),
+        1: list(range(6)),
+    }
 
 
 class QrmDescription(ReadoutModuleDescription):
@@ -190,6 +200,11 @@ class QrmDescription(ReadoutModuleDescription):
 
     min_qrm_offset_v: NegativeFloat = -0.09
     max_qrm_offset_v: PositiveFloat = 0.09
+    output_connections: dict = {0: list(range(6)), 1: list(range(6))}
+    input_connections: dict = {
+        0: list(range(6)),
+        1: list(range(6)),
+    }
 
 
 class QrmRfDescription(ReadoutModuleDescription):
@@ -209,6 +224,10 @@ class QrmRfDescription(ReadoutModuleDescription):
     max_out_att_db: NonNegativeInt = 60
     min_in_att_db: NonNegativeInt = 0
     max_in_att_db: NonNegativeInt = 30
+    output_connections: dict = {0: list(range(6))}
+    input_connections: dict = {
+        0: list(range(6)),
+    }
 
 
 class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
@@ -270,3 +289,14 @@ class QbloxTargetData(TargetData):
     QRM_DATA: QrmDescription = QrmDescription()
     QRM_RF_DATA: QrmRfDescription = QrmRfDescription()
     QRC_DATA: QrcDescription = QrcDescription()
+
+
+TARGET_DATA = QbloxTargetData()
+QCM_DATA = TARGET_DATA.QCM_DATA
+QCM_RF_DATA = TARGET_DATA.QCM_RF_DATA
+QRM_DATA = TARGET_DATA.QRM_DATA
+QRM_RF_DATA = TARGET_DATA.QRM_RF_DATA
+QRC_DATA = TARGET_DATA.QRC_DATA
+Q1ASM_DATA = TARGET_DATA.Q1ASM_DATA
+CONTROL_SEQUENCER_DATA = TARGET_DATA.CONTROL_SEQUENCER_DATA
+READOUT_SEQUENCER_DATA = TARGET_DATA.READOUT_SEQUENCER_DATA

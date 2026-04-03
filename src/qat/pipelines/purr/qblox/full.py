@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.engines.qblox.execution import QbloxEngine
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
@@ -34,7 +34,7 @@ class QbloxPipeline1(UpdateablePipeline):
         target_data: QbloxTargetData | None,
         engine: QbloxEngine = None,
     ) -> Pipeline:
-        target_data = target_data if target_data is not None else QbloxTargetData()
+        target_data = target_data if target_data is not None else TARGET_DATA
         results_pipeline = get_results_pipeline(model)
         return Pipeline(
             model=model,
@@ -68,7 +68,7 @@ class QbloxPipeline2(UpdateablePipeline):
         target_data: QbloxTargetData | None,
         engine: QbloxEngine = None,
     ) -> Pipeline:
-        target_data = target_data if target_data is not None else QbloxTargetData()
+        target_data = target_data if target_data is not None else TARGET_DATA
         results_pipeline = get_results_pipeline(model)
         return Pipeline(
             model=model,

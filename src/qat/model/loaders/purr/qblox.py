@@ -15,7 +15,7 @@ from qat.backend.qblox.config.specification import (
     QbloxConfig,
     SequencerConfig,
 )
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import QCM_RF_DATA, QRC_DATA, QRM_RF_DATA
 from qat.model.loaders.purr.base import BaseLegacyModelLoader
 from qat.purr.backends.echo import Connectivity
 from qat.purr.backends.qblox.device import (
@@ -25,8 +25,6 @@ from qat.purr.backends.qblox.device import (
 )
 from qat.purr.backends.qblox.dummy import DummyQbloxControlHardware
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
-
-_TARGET_DATA = QbloxTargetData()
 
 # TODO: 32Q support: COMPILER-728
 DEFAULT_QUBIT_COUNT = 16
@@ -57,7 +55,7 @@ _CONTROL_CONFIG_MAP = {
             i: SequencerConfig(
                 connection=ConnectionConfig(bulk_value=["out0", "out1"]),
             )
-            for i in range(_TARGET_DATA.QCM_RF_DATA.number_of_sequencers)
+            for i in range(QCM_RF_DATA.number_of_sequencers)
         },
     ),
     ClusterType.CLUSTER_QRC: QbloxConfig(
@@ -113,7 +111,7 @@ _READOUT_CONFIG_MAP = {
             i: SequencerConfig(
                 connection=ConnectionConfig(bulk_value=["out0", "in0"]),
             )
-            for i in range(_TARGET_DATA.QRM_RF_DATA.number_of_sequencers)
+            for i in range(QRM_RF_DATA.number_of_sequencers)
         },
     ),
     ClusterType.CLUSTER_QRC: QbloxConfig(
@@ -123,7 +121,7 @@ _READOUT_CONFIG_MAP = {
                 # only use in/out0 as you cannot connect both inputs to a single seq
                 connection=ConnectionConfig(bulk_value=["out0", "in0"]),
             )
-            for i in range(_TARGET_DATA.QRC_DATA.number_of_readout_sequencers)
+            for i in range(QRC_DATA.number_of_readout_sequencers)
         },
     ),
 }

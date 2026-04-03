@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from qat.backend.qblox.codegen import QbloxBackend2
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.core.pass_base import PassManager
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
@@ -67,7 +67,7 @@ class LegacyQbloxCompilePipeline(UpdateablePipeline):
                 "The compilation pipeline does not require an engine. It will be ignored."
             )
 
-        target_data = target_data or QbloxTargetData()
+        target_data = target_data if target_data is not None else TARGET_DATA
         return CompilePipeline(
             name=config.name,
             model=model,

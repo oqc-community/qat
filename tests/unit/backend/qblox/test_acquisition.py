@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from qat.backend.qblox.target_data import QRM_DATA
 from qat.purr.backends.qblox.acquisition import (
     Acquisition,
     BinnedAcqData,
@@ -13,8 +14,6 @@ from qat.purr.backends.qblox.acquisition import (
     PathData,
     ScopeAcqData,
 )
-
-from tests.unit.backend.qblox.utils import QRM_DATA
 
 
 class TestAcquisition:

@@ -115,6 +115,12 @@ class TestSpecifiedTargetDataFields:
         assert default_qcm_description.number_of_sequencers == 6
         assert default_qcm_description.min_qcm_offset_v == -2.5
         assert default_qcm_description.max_qcm_offset_v == 2.5
+        assert default_qcm_description.output_connections == {
+            0: list(range(6)),
+            1: list(range(6)),
+            2: list(range(6)),
+            3: list(range(6)),
+        }
 
     def test_qcm_rf_description(self, default_qcm_rf_description):
         assert default_qcm_rf_description.number_of_sequencers == 6
@@ -122,6 +128,10 @@ class TestSpecifiedTargetDataFields:
         assert default_qcm_rf_description.max_qcm_rf_offset_mv == 73
         assert default_qcm_rf_description.min_out_att_db == 0
         assert default_qcm_rf_description.max_out_att_db == 60
+        assert default_qcm_rf_description.output_connections == {
+            0: list(range(6)),
+            1: list(range(6)),
+        }
 
     def test_qrm_description(self, default_qrm_description):
         assert default_qrm_description.number_of_sequencers == 6
@@ -130,6 +140,14 @@ class TestSpecifiedTargetDataFields:
         assert default_qrm_description.max_binned_acquisitions == 3_000_000
         assert default_qrm_description.min_qrm_offset_v == -0.09
         assert default_qrm_description.max_qrm_offset_v == 0.09
+        assert default_qrm_description.output_connections == {
+            0: list(range(6)),
+            1: list(range(6)),
+        }
+        assert default_qrm_description.input_connections == {
+            0: list(range(6)),
+            1: list(range(6)),
+        }
 
     def test_qrm_rf_description(self, default_qrm_rf_description):
         assert default_qrm_rf_description.number_of_sequencers == 6
@@ -142,6 +160,10 @@ class TestSpecifiedTargetDataFields:
         assert default_qrm_rf_description.max_out_att_db == 60
         assert default_qrm_rf_description.min_in_att_db == 0
         assert default_qrm_rf_description.max_in_att_db == 30
+        assert default_qrm_rf_description.output_connections == {0: list(range(6))}
+        assert default_qrm_rf_description.input_connections == {
+            0: list(range(6)),
+        }
 
     def test_qrc_description(self):
         default_qrc_description = QrcDescription()

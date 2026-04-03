@@ -12,7 +12,7 @@ from more_itertools import partition
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA, Q1ASM_DATA, TARGET_DATA
 from qat.backend.qblox.visualisation import plot_program
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
@@ -38,12 +38,7 @@ from qat.purr.compiler.instructions import (
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.unit.backend.qblox.utils import (
-    CONTROL_SEQUENCER_DATA,
-    Q1ASM_DATA,
-    QBLOX_TARGET_DATA,
-    do_emit,
-)
+from tests.unit.backend.qblox.utils import do_emit
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     discrimination,
@@ -64,10 +59,10 @@ log = get_default_logger()
 @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
 def test_sequencer_allocation(qblox_model, backend_type):
     if backend_type == QbloxBackend1:
-        middleend_pipeline = middleend_pipeline1(qblox_model, QbloxTargetData())
+        middleend_pipeline = middleend_pipeline1(qblox_model, TARGET_DATA)
         backend_pipeline = backend_pipeline1()
     elif backend_type == QbloxBackend2:
-        middleend_pipeline = middleend_pipeline2(qblox_model, QbloxTargetData())
+        middleend_pipeline = middleend_pipeline2(qblox_model, TARGET_DATA)
         backend_pipeline = backend_pipeline2()
     else:
         raise ValueError(f"Expected QbloxBackend1 or QbloxBackend2, got {backend_type}")
@@ -555,8 +550,8 @@ class TestQbloxBackend1:
         executable = do_emit(qblox_model, QbloxBackend1, builder)
 
         for program in executable.programs:
-            assert program.driver_version == QBLOX_TARGET_DATA.driver_version
-            assert program.fw_version == QBLOX_TARGET_DATA.fw_version
+            assert program.driver_version == TARGET_DATA.driver_version
+            assert program.fw_version == TARGET_DATA.fw_version
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)

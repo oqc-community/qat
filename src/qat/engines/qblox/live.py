@@ -18,7 +18,7 @@ from qat.backend.qblox.config.helpers import (
     QrmRfConfigHelper,
 )
 from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA
 from qat.instrument.base import CompositeInstrument, LeafInstrument
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
@@ -37,7 +37,7 @@ class QbloxLeafInstrument(LeafInstrument):
         super().__init__(id=id, name=name, address=address)
         self.ref_source = ref_source or "internal"
 
-        self._target_data = QbloxTargetData()
+        self._target_data = TARGET_DATA
         self._driver: Cluster = None
         self._modules: dict[Module, bool] = {}
         self._id2seq: dict[str, Sequencer] = {}

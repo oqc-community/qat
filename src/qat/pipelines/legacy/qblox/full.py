@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from qat.backend.qblox.codegen import QbloxBackend2
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
 from qat.pipelines.legacy.base import results_pipeline
@@ -39,7 +39,7 @@ class LegacyQbloxPipeline(UpdateablePipeline):
                 "The legacy QbloxEngine is used directly."
             )
 
-        target_data = target_data or QbloxTargetData()
+        target_data = target_data if target_data is not None else TARGET_DATA
         return Pipeline(
             name=config.name,
             model=model,

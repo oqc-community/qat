@@ -10,7 +10,7 @@ from qblox_instruments import (
 )
 
 from qat.backend.qblox.execution import QbloxPackage, QbloxProgram
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
@@ -20,7 +20,7 @@ log = get_default_logger()
 
 class DummyQbloxInstrument(QbloxLeafInstrument):
     shot_pattern = regex.compile("jlt( +)R([0-9]+),([0-9]+),@(.*)\n")
-    target_data = QbloxTargetData()
+    target_data = TARGET_DATA
     qrm_data = target_data.QRM_DATA
 
     def __init__(self, id, name, dummy_config):

@@ -9,7 +9,7 @@ from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 from qat import QAT
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.target_data import QbloxTargetData, TargetData
+from qat.backend.qblox.target_data import TARGET_DATA, TargetData
 from qat.engines.qblox.execution import QbloxEngine
 from qat.executables import Executable
 from qat.frontend import AutoFrontend
@@ -27,7 +27,6 @@ from qat.pipelines.purr.qblox import (
 from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
 from qat.runtime import SimpleRuntime
 
-from tests.unit.backend.qblox.utils import QBLOX_TARGET_DATA
 from tests.unit.utils.qasm_qir import get_pipeline_tests
 
 pytestmark = pytest.mark.qblox
@@ -47,7 +46,7 @@ class TestQbloxPipeline:
         assert isinstance(pipeline.backend, QbloxBackend2)
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.target_data, TargetData)
-        assert pipeline.target_data == QbloxTargetData()
+        assert pipeline.target_data == TARGET_DATA
         assert pipeline.engine is None
 
         assert pipeline.backend.pipeline is not None
@@ -196,7 +195,7 @@ class TestQbloxPipelineWithCircuits:
     # TODO: 32Q support: COMPILER-728
     model = QbloxModelLoader(qubit_count=16).load()
     pipeline = QbloxPipeline2(
-        config=PipelineConfig(name="stable"), model=model, target_data=QBLOX_TARGET_DATA
+        config=PipelineConfig(name="stable"), model=model, target_data=TARGET_DATA
     )
 
     @pytest.fixture(scope="class")

@@ -17,6 +17,20 @@ log = get_default_logger()
 
 
 class QbloxConfigHelper(ABC):
+    """Base helper class for config time. This class is abstract, it specified a contract
+    for applying configuration on a qblox resource (i.e. module and sequencer) necessary
+    to run an experiment. Module and Sequencer structurally represent analogue and digital
+    parts of the RF chain. Any concrete implementations must be able to:
+    - Apply analogue configuration via the module API
+    - Apply digital configuration via the sequencer API
+    - Perform mixer calibration when applicable
+
+    From flat pools of configuration (see :mod:`specification`), it's the helper class
+    that holds contextual semantics of what each piece of configuration mean, whether
+    is applies to a given Qblox resource, and how it should be applied via the respective
+    Module/Sequencer APIs.
+    """
+
     def __init__(
         self,
         module_config: ModuleConfig = None,
@@ -51,9 +65,11 @@ class QbloxConfigHelper(ABC):
         if self.sequencer_config.nco.phase_offs:
             sequencer.nco_phase_offs(self.sequencer_config.nco.phase_offs)
 
-    def configure_awg(self, sequencer: Sequencer):
+    def configure_awg_mod(self, sequencer: Sequencer):
         if self.sequencer_config.awg.mod_en:
             sequencer.mod_en_awg(self.sequencer_config.awg.mod_en)
+
+    def configure_awg(self, sequencer: Sequencer):
         if self.sequencer_config.awg.gain_path0:
             sequencer.gain_awg_path0(self.sequencer_config.awg.gain_path0)
         if self.sequencer_config.awg.gain_path1:
@@ -158,10 +174,14 @@ class QbloxConfigHelper(ABC):
 
 
 class QcmConfigHelper(QbloxConfigHelper):
+    """Configuration helper for QCM modules."""
+
     pass
 
 
 class QcmRfConfigHelper(QcmConfigHelper):
+    """Configuration helper for QCM-RF modules."""
+
     def configure_module(self, module: Module):
         self.configure_lo(module)
         self.configure_attenuation(module)
@@ -170,6 +190,7 @@ class QcmRfConfigHelper(QcmConfigHelper):
     def configure_sequencer(self, sequencer: Sequencer):
         self.configure_connection(sequencer)
         self.configure_nco(sequencer)
+        self.configure_awg_mod(sequencer)
         self.configure_awg(sequencer)
         self.configure_mixer(sequencer)
 
@@ -212,6 +233,8 @@ class QcmRfConfigHelper(QcmConfigHelper):
 
 
 class QrmConfigHelper(QbloxConfigHelper):
+    """Configuration helper for QRM modules."""
+
     def configure_scope_acq(self, module: Module):
         scope_acq = self.module_config.scope_acq
         if scope_acq.sequencer_select is not None:
@@ -238,6 +261,8 @@ class QrmConfigHelper(QbloxConfigHelper):
 
 
 class QrmRfConfigHelper(QrmConfigHelper):
+    """Configuration helper for QRM-RF modules."""
+
     def configure_module(self, module: Module):
         self.configure_lo(module)
         self.configure_attenuation(module)
@@ -247,8 +272,10 @@ class QrmRfConfigHelper(QrmConfigHelper):
     def configure_sequencer(self, sequencer: Sequencer):
         self.configure_connection(sequencer)
         self.configure_nco(sequencer)
+        self.configure_awg_mod(sequencer)
         self.configure_awg(sequencer)
         self.configure_mixer(sequencer)
+        self.configure_acq_demod(sequencer)
         self.configure_acq(sequencer)
 
     def configure_lo(self, module: Module):
@@ -273,10 +300,11 @@ class QrmRfConfigHelper(QrmConfigHelper):
         if self.module_config.offset.in0_path1:
             module.in0_offset_path1(self.module_config.offset.in0_path1)
 
-    def configure_acq(self, sequencer: Sequencer):
-        # Square weight integration
+    def configure_acq_demod(self, sequencer: Sequencer):
         if self.sequencer_config.demod_en_acq:
             sequencer.demod_en_acq(self.sequencer_config.demod_en_acq)
+
+    def configure_acq(self, sequencer: Sequencer):
         if self.sequencer_config.square_weight_acq.integration_length:
             sequencer.integration_length_acq(
                 self.sequencer_config.square_weight_acq.integration_length
@@ -314,6 +342,8 @@ class QrmRfConfigHelper(QrmConfigHelper):
 
 
 class QrcConfigHelper(QrmRfConfigHelper):
+    """Configuration helper for QRC Modules."""
+
     def configure_module(self, module: Module):
         self.configure_lo(module)
         self.configure_attenuation(module)

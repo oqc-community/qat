@@ -8,7 +8,7 @@ from qblox_instruments import ClusterType
 
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.engines.qblox.execution import QbloxEngine
@@ -103,16 +103,6 @@ _ALLOCATIONS = [
 
 assert len(_ADDRESSES) == len(_DUMMY_CONFIGS) == len(_COUNTS) == len(_ALLOCATIONS)
 
-QBLOX_TARGET_DATA = QbloxTargetData()
-QCM_DATA = QBLOX_TARGET_DATA.QCM_DATA
-QCM_RF_DATA = QBLOX_TARGET_DATA.QCM_RF_DATA
-QRM_DATA = QBLOX_TARGET_DATA.QRM_DATA
-QRM_RF_DATA = QBLOX_TARGET_DATA.QRM_RF_DATA
-QRC_DATA = QBLOX_TARGET_DATA.QRC_DATA
-Q1ASM_DATA = QBLOX_TARGET_DATA.Q1ASM_DATA
-CONTROL_SEQUENCER_DATA = QBLOX_TARGET_DATA.CONTROL_SEQUENCER_DATA
-READOUT_SEQUENCER_DATA = QBLOX_TARGET_DATA.READOUT_SEQUENCER_DATA
-
 
 def create_parameters(selections, indices=None):
     params = []
@@ -148,10 +138,10 @@ def create_parameters(selections, indices=None):
 
 def do_emit(model: QbloxLiveHardwareModel, backend_type: type, builder, ignore_empty=True):
     if backend_type == QbloxBackend1:
-        middleend_pipeline = middleend_pipeline1(model, QbloxTargetData())
+        middleend_pipeline = middleend_pipeline1(model, TARGET_DATA)
         backend_pipeline = backend_pipeline1()
     elif backend_type == QbloxBackend2:
-        middleend_pipeline = middleend_pipeline2(model, QbloxTargetData())
+        middleend_pipeline = middleend_pipeline2(model, TARGET_DATA)
         backend_pipeline = backend_pipeline2()
     else:
         raise ValueError(f"Expected QbloxBackend1 or QbloxBackend2, got {backend_type}")

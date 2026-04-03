@@ -11,7 +11,12 @@ from itertools import chain
 import numpy as np
 
 from qat.backend.passes.purr.analysis import BindingResult, IterBound, TriageResult
-from qat.backend.qblox.target_data import QbloxTargetData
+from qat.backend.qblox.target_data import (
+    CONTROL_SEQUENCER_DATA,
+    Q1ASM_DATA,
+    TARGET_DATA,
+    QbloxTargetData,
+)
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
 from qat.purr.compiler.builders import InstructionBuilder
@@ -31,14 +36,14 @@ log = get_default_logger()
 
 class QbloxLegalisationPass(AnalysisPass):
     def __init__(self, target_data: QbloxTargetData | None = None):
-        self.target_data = target_data or QbloxTargetData()
+        self.target_data = target_data if target_data is not None else TARGET_DATA
 
     @staticmethod
     def phase_as_steps(phase_rad: float) -> int:
         """The instruction `set_ph_delta` expects the phase shift as a (potentially signed)
         integer operand."""
 
-        sequencer_data = QbloxTargetData().CONTROL_SEQUENCER_DATA
+        sequencer_data = CONTROL_SEQUENCER_DATA
         phase_deg = np.rad2deg(phase_rad)
         phase_deg %= 360
         steps = int(round(phase_deg * sequencer_data.nco_phase_steps_per_deg))
@@ -49,7 +54,7 @@ class QbloxLegalisationPass(AnalysisPass):
         """The instruction `set_freq` expects the frequency as a (potentially signed)
         integer operand."""
 
-        sequencer_data = QbloxTargetData().CONTROL_SEQUENCER_DATA
+        sequencer_data = CONTROL_SEQUENCER_DATA
         steps = int(round(freq_hz * sequencer_data.nco_freq_steps_per_hz))
 
         if (
@@ -70,7 +75,7 @@ class QbloxLegalisationPass(AnalysisPass):
         """The instruction `set_awg_offs` expects DAC ratio as a (potentially signed)
         integer operand."""
 
-        q1asm_data = QbloxTargetData().Q1ASM_DATA
+        q1asm_data = Q1ASM_DATA
         amp_steps = int(amp.real * q1asm_data.max_offset)
         if amp_steps < q1asm_data.min_offset or amp_steps > q1asm_data.max_offset:
             raise ValueError(
@@ -248,8 +253,7 @@ class QbloxLegalisationPass(AnalysisPass):
 class AllocationManager:
     _reg_pool: list[str] = field(
         default_factory=lambda: sorted(
-            f"R{index}"
-            for index in range(QbloxTargetData().CONTROL_SEQUENCER_DATA.number_of_registers)
+            f"R{index}" for index in range(CONTROL_SEQUENCER_DATA.number_of_registers)
         )
     )
     _lbl_counters: dict[str, int] = field(default_factory=dict)

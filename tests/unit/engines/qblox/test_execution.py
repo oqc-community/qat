@@ -6,12 +6,13 @@ import pytest
 
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
+from qat.backend.qblox.target_data import QRM_DATA
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
 from qat.purr.utils.logger import get_default_logger
 
-from tests.unit.backend.qblox.utils import QRM_DATA, create_parameters, do_emit, do_execute
+from tests.unit.backend.qblox.utils import create_parameters, do_emit, do_execute
 from tests.unit.utils.builder_nuggets import (
     delay_iteration,
     hidden_mode,
