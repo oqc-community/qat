@@ -90,7 +90,7 @@ jobs:
         id: pip-audit
         if: ${{ !cancelled() }}
         run: |
-          poetry run pip-audit --ignore-vuln CVE-2026-4539
+          poetry run pip-audit
 
       - name: Pip licensing check
         id: pip-licenses
@@ -155,6 +155,8 @@ jobs:
     # See: https://github.com/actions/runner/pull/2477
     outputs:
       result: ${{ steps.pytest.outputs.result }}
+    env:
+      COVERAGE_FILE: reports/.coverage.stable.${{ matrix.python }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -164,7 +166,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           codebase: stable
-          pytest-args: "-n auto"
+          pytest-args: "-n auto --cov"
 
   experimental-unit-tests:
     name: Experimental Unit Tests
@@ -180,7 +182,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           codebase: experimental
-          pytest-args: "-n auto --experimental-only"
+          pytest-args: "-n auto --experimental-only --cov --cov-fail-under=20 --cov-report=markdown:$GITHUB_STEP_SUMMARY"
 
   notebook-validation-tests:
     name: Notebook Validation Tests
@@ -260,3 +262,43 @@ jobs:
         with:
           path: reports/output.md
           name: qat-pytest-markdown
+
+  coverage-report:
+    name: Generate coverage report
+    runs-on: ubuntu-22.04
+    if: ${{ !cancelled() }}
+    needs:
+      - unit-tests
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.repository }}
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: qat_*
+          path: reports/
+          merge-multiple: true
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry==${{ env.POETRY_VERSION }}
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v6
+        id: setup-python
+        with:
+          python-version: "3.10"
+          cache: "poetry"
+
+      - name: Install dependancies
+        run: |
+          poetry sync --with dev
+
+      - name: Combine coverage reports
+        run: |
+          poetry run coverage combine reports/
+
+      - name: Generate coverage report
+        run: |
+          poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY

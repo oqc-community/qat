@@ -323,3 +323,15 @@ markers = ["ab_test", "experimental", "legacy", "qblox"]
 
 [tool.jupytext]
 notebook_metadata_filter = "-kernelspec"
+
+[tool.coverage.run]
+branch = true
+source = ["qat"]
+
+[tool.coverage.report]
+fail_under = 60
+format = "text"
+show_missing = true
+skip_covered = true
+skip_empty = true
+precision = 2

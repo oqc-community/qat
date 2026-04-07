@@ -42,8 +42,9 @@ runs:
       run: poetry run pytest --benchmark-skip -v ${{ inputs.pytest-args }} --junitxml=./reports/${{ runner.os }}_${{ steps.setup-python.outputs.python-version }}_${{ inputs.codebase }}_unit_report.xml
 
     - name: Upload report
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:
         name: qat_${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}_${{ inputs.codebase }}_unit_report
         path: reports/**
+        include-hidden-files: true
