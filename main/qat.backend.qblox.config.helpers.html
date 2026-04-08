@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.qblox.config.helpers module &mdash; qat-compiler 3.0.0.post200.dev20260407150411 documentation</title>
+  <title>qat.backend.qblox.config.helpers module &mdash; qat-compiler 3.0.0.post201.dev20260408075552 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -531,9 +531,9 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxConfigHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.config.helpers.QbloxConfigHelper" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
 <p>Base helper class for config time. This class is abstract, it specified a contract
-for applying configuration on a qblox resource (i.e. module and sequencer) necessary
-to run an experiment. Module and Sequencer structurally represent analogue and digital
-parts of the RF chain. Any concrete implementations must be able to:
+for applying configuration on a qblox resource (i.e. module and sequencer) necessary to
+run an experiment. Module and Sequencer structurally represent analogue and digital.</p>
+<p>parts of the RF chain. Any concrete implementations must be able to:
 - Apply analogue configuration via the module API
 - Apply digital configuration via the sequencer API
 - Perform mixer calibration when applicable</p>
