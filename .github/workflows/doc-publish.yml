@@ -40,7 +40,11 @@ jobs:
     - name: Generate code coverage report
       continue-on-error: true
       run: |
-        poetry run pytest --cov --cov-report html:docs/build/coverage -n auto
+        poetry run pytest --cov --cov-report html:docs/build/coverage -n auto --dist loadgroup
+
+    - name: Remove .gitignore from coverage report
+      run: |
+        rm -f docs/build/coverage/.gitignore
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@v4

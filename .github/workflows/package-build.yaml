@@ -302,3 +302,13 @@ jobs:
       - name: Generate coverage report
         run: |
           poetry run coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate HTML coverage report
+        run: |
+          poetry run coverage html -d html-cov
+
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          path: html-cov
+          name: qat-coverage-report
