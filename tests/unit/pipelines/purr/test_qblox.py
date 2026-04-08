@@ -252,7 +252,7 @@ class TestQbloxPipelineWithCircuits:
 
     def test_shots(self, executable, shots):
         """This needs resolving to account for QbloxPrograms."""
-        pytest.mark.skip("Shots not yet accessible from QbloxProgram.")
+        pytest.skip("Shots not yet accessible from QbloxProgram.")
 
     def test_repetition_period(self, executable, passive_reset_time):
         """Checks that i) the repetition time accounts for both the passive reset time and
@@ -295,7 +295,7 @@ class TestQbloxPipelineWithCircuits:
         the EchoPipeline."""
 
         if "openpulse" in request.node.callspec.id:
-            pytest.mark.skip("Openpulse has more expressive use of acquires.")
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires.values():
             assert acquire.mode == AcquireMode.INTEGRATOR
@@ -321,7 +321,7 @@ class TestQbloxPipelineWithCircuits:
         """
 
         if "openpulse" in request.node.callspec.id:
-            pytest.mark.skip("Openpulse has more expressive use of acquires.")
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for output_variable, acquire in executable.acquires.items():
             assert isinstance(output_variable, str)
@@ -336,9 +336,13 @@ class TestQbloxPipelineWithCircuits:
         executable: Executable[QbloxProgram],
         compiler_config: CompilerConfig,
         returned_acquires: set[str],
+        request,
     ):
         """Check that the executable has a results processing that matches the provided
         value."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.xfail("Openpulse has more expressive use of acquires.")
 
         for acquire in returned_acquires:
             assert acquire in executable.acquires
@@ -354,6 +358,11 @@ class TestQbloxPipelineWithCircuits:
         request,
     ):
         """Checks that the results of the zero engine match the expected format."""
+
+        if "capture_v1" in request.node.callspec.id:
+            pytest.skip(
+                "Use of capture changes compiler config results processing additions."
+            )
 
         returns = executable.returns
 

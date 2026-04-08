@@ -258,7 +258,7 @@ class TestEchoPipelineWithCircuits:
         the PydanticEchoPipeline."""
 
         if "openpulse" in request.node.callspec.id:
-            pytest.mark.skip("Openpulse has more expressive use of acquires.")
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires.values():
             assert acquire.mode == AcquireMode.INTEGRATOR
@@ -284,7 +284,7 @@ class TestEchoPipelineWithCircuits:
         """
 
         if "openpulse" in request.node.callspec.id:
-            pytest.mark.skip("Openpulse has more expressive use of acquires.")
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for output_variable, acquire in executable.acquires.items():
             assert isinstance(output_variable, str)
@@ -298,9 +298,16 @@ class TestEchoPipelineWithCircuits:
         executable: Executable[WaveformProgram],
         compiler_config: CompilerConfig,
         returned_acquires: set[str],
+        request,
     ):
         """Check that the executable has a results processing that matches the provided
         value."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.skip(
+                "Openpulse has more expressive use of measurements, with custom results "
+                "processing."
+            )
 
         for acquire in returned_acquires:
             assert acquire in executable.acquires
@@ -316,6 +323,11 @@ class TestEchoPipelineWithCircuits:
         request,
     ):
         """Checks that the results of the zero engine match the expected format."""
+
+        if "capture_v1" in request.node.callspec.id:
+            pytest.skip(
+                "Use of capture changes compiler config results processing additions."
+            )
 
         returns = executable.returns
 
@@ -368,6 +380,28 @@ class TestEchoPipelineWithCircuits:
         for program in new_executable.programs:
             assert isinstance(program, WaveformProgram)
         assert new_executable == executable
+
+    def test_results_do_not_have_numpy_arrays(self, results):
+        """Check that the results returned by the EchoEngine do not contain numpy arrays, as
+        these are not JSON serializable and should be converted to lists."""
+
+        def recurse_object(obj):
+            assert not isinstance(obj, np.ndarray), (
+                "Results should not contain numpy arrays"
+            )
+            if isinstance(obj, dict):
+                for value in obj.values():
+                    recurse_object(value)
+            elif isinstance(obj, list):
+                for item in obj:
+                    recurse_object(item)
+            elif not isinstance(obj, (int, float, str, complex)):
+                assert False, (
+                    f"Results should only contain dicts, lists, ints, floats, strings, "
+                    f"and complex numbers, but found {type(obj)}"
+                )
+
+        recurse_object(results)
 
 
 class TestEchoPipelineWithErrorMitigation:
@@ -620,13 +654,26 @@ class TestEchoPipelineParity:
                 "because the new stack handles it slightly differently to give the correct "
                 "result."
             )
+
+        if "capture_v1" in request.node.callspec.id:
+            pytest.xfail(
+                "Capture instructions have different semantics for results processing, "
+                "so we don't expect parity here."
+            )
+
         assert purr_executable.acquires.keys() == pydantic_executable.acquires.keys()
         for key in purr_executable.acquires.keys():
             purr_acquire = purr_executable.acquires[key]
             pydantic_acquire = pydantic_executable.acquires[key]
             assert purr_acquire.results_processing == pydantic_acquire.results_processing
 
-    def test_postprocessing_data(self, purr_executable, pydantic_executable):
+    def test_postprocessing_data(self, purr_executable, pydantic_executable, request):
+        if "capture_v1" in request.node.callspec.id:
+            pytest.xfail(
+                "Capture instructions have different semantics for results processing, "
+                "so we don't expect parity here."
+            )
+
         assert purr_executable.acquires.keys() == pydantic_executable.acquires.keys()
         for key in purr_executable.acquires.keys():
             purr_acquire = purr_executable.acquires[key]

@@ -18,8 +18,9 @@ log = get_default_logger()
 
 class QbloxConfigHelper(ABC):
     """Base helper class for config time. This class is abstract, it specified a contract
-    for applying configuration on a qblox resource (i.e. module and sequencer) necessary
-    to run an experiment. Module and Sequencer structurally represent analogue and digital
+    for applying configuration on a qblox resource (i.e. module and sequencer) necessary to
+    run an experiment. Module and Sequencer structurally represent analogue and digital.
+
     parts of the RF chain. Any concrete implementations must be able to:
     - Apply analogue configuration via the module API
     - Apply digital configuration via the sequencer API

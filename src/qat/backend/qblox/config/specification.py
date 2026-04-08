@@ -12,30 +12,28 @@ log = get_default_logger()
 class ConnectionConfig:
     """Configuration for the sequencer's connection to the analogue input/output paths.
 
-    :param bulk_value: A list of strings in the format <direction><channel>
-                        or <direction><I-channel>_<Q-channel>:
-                       <direction> must be 'in' to make a connection between an input
-                            and the acquisition path, 'out' to make a connection from
-                            the waveform generator to an output, or 'io' to do both.
-                       <channel> must be integer channel indices. If only one channel
-                            is specified,the sequencer operates in real mode; if two
-                            channels are specified, it operates in complex mode.
-    :param out0: Component config of a sequencer's connection to output 0, if any.
-                 Possible values are 'I', 'Q', 'IQ', or 'off'
-    :param out1: Component config of a sequencer's connection to output 1, if any.
-                 Possible values are 'I', 'Q', 'IQ', or 'off'
-    :param out2: Component config of a sequencer's connection to output 2, if any.
-                 Possible values are 'I', 'Q', 'IQ', or 'off'
-    :param out3: Component config of a sequencer's connection to output 3, if any.
-                 Possible values are 'I', 'Q', 'IQ', or 'off'
-    :param out4: Component config of a sequencer's connection to output 4, if any.
-                 Possible values are 'I', 'Q', 'IQ', or 'off'
-    :param out5: Component config of a sequencer's connection to output 5, if any.
-                 Possible values are 'I', 'Q', 'IQ', or 'off'
+    :param bulk_value: A list of strings in the format <direction><channel> or
+        <direction><I-channel>_<Q-channel>: <direction> must be 'in' to make a connection
+        between an input and the acquisition path, 'out' to make a connection from the
+        waveform generator to an output, or 'io' to do both. <channel> must be integer
+        channel indices. If only one channel is specified,the sequencer operates in real
+        mode; if two channels are specified, it operates in complex mode.
+    :param out0: Component config of a sequencer's connection to output 0, if any. Possible
+        values are 'I', 'Q', 'IQ', or 'off'
+    :param out1: Component config of a sequencer's connection to output 1, if any. Possible
+        values are 'I', 'Q', 'IQ', or 'off'
+    :param out2: Component config of a sequencer's connection to output 2, if any. Possible
+        values are 'I', 'Q', 'IQ', or 'off'
+    :param out3: Component config of a sequencer's connection to output 3, if any. Possible
+        values are 'I', 'Q', 'IQ', or 'off'
+    :param out4: Component config of a sequencer's connection to output 4, if any. Possible
+        values are 'I', 'Q', 'IQ', or 'off'
+    :param out5: Component config of a sequencer's connection to output 5, if any. Possible
+        values are 'I', 'Q', 'IQ', or 'off'
     :param acq_I: Input config for the 'I' input of the acquisition path of this sequencer
-                  is connected to, if any. Possible values are 'in0', 'in1', or 'off'
+        is connected to, if any. Possible values are 'in0', 'in1', or 'off'
     :param acq_Q: Input config for the 'Q' input of the acquisition path of this sequencer
-                  is connected to, if any. Possible values are 'in0', 'in1', or 'off'
+        is connected to, if any. Possible values are 'in0', 'in1', or 'off'
     """
 
     bulk_value: list[str] = field(default_factory=list)
@@ -55,10 +53,11 @@ class NcoConfig:
     """Configuration components related to the sequencer's NCO.
 
     :param freq: NCO frequency in Hz.
-    :param phase_offs: Phase offset of the NCO in degrees with a resolution of 3.6e-7 degrees.
-    :param prop_delay_comp: Delay that compensates the NCO phase to the input path with respect
-                            to the instrument’s combined output and input propagation delay.
-                            This delays the frequency update as well.
+    :param phase_offs: Phase offset of the NCO in degrees with a resolution of 3.6e-7
+        degrees.
+    :param prop_delay_comp: Delay that compensates the NCO phase to the input path with
+        respect to the instrument’s combined output and input propagation delay. This delays
+        the frequency update as well.
     :param prop_delay_comp_en: Flag to enable/disable compensation of propagation delay.
     """
 
@@ -121,8 +120,7 @@ class SquareWeightAcq:
     """Configuration components for non-weighed acquisition.
 
     :param integration_length: Integration length in number of samples for non-weighed
-                               acquisitions on paths 0 and 1. Must be a multiple of 4.
-                               Default value is 1024.
+        acquisitions on paths 0 and 1. Must be a multiple of 4. Default value is 1024.
     """
 
     integration_length: int | None = None
@@ -169,12 +167,12 @@ class TtlAcqConfig:
     """Configuration components for Transistor-Transistor-Logic acquisition.
 
     :param auto_bin_incr_en: Flag to enable/disable whether the bin index is automatically
-                             incremented when acquiring multiple triggers. Disabling
-                             the TTL trigger acquisition path resets the bin index.
-    :param threshold: Threshold value with which to compare the input ADC values of
-                      the selected input path.
+        incremented when acquiring multiple triggers. Disabling the TTL trigger acquisition
+        path resets the bin index.
+    :param threshold: Threshold value with which to compare the input ADC values of the
+        selected input path.
     :param input_select: The input used to compare against the threshold value in the TTL
-                         trigger acquisition path.
+        trigger acquisition path.
     """
 
     auto_bin_incr_en: bool | None = None
@@ -230,9 +228,9 @@ class SequencerConfig:
 
 @dataclass
 class OffsetConfig:
-    """Configuration components to apply on the input/output the signal. They are
-    DC voltage levels can be used to shift the baseline the waveforms or to calibrate
-    out hardware imperfections such as mixer leakage.
+    """Configuration components to apply on the input/output the signal. They are DC voltage
+    levels can be used to shift the baseline the waveforms or to calibrate out hardware
+    imperfections such as mixer leakage.
 
     :param out0: Offset (in V) for output 0 (I) in QCM/QRM.
     :param out1: Offset (in V) for output 1 (Q) in QCM/QRM.
@@ -267,10 +265,9 @@ class OffsetConfig:
 
 @dataclass
 class FirConfig:
-    """Configuration of the Finite Impulse Response filter. Possible values
-    for the outputs/markers are 'bypassed' where the filter is disabled,
-    or 'delay_comp' where the filter is bypassed and the output is delayed
-    as if it were applied.
+    """Configuration of the Finite Impulse Response filter. Possible values for the
+    outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
+    filter is bypassed and the output is delayed as if it were applied.
 
     :param out0: Configuration for the FIR filter for output 0.
     :param out1: Configuration for the FIR filter for output 1.
@@ -293,10 +290,9 @@ class FirConfig:
 
 @dataclass
 class ExpOvershoot0Config:
-    """Configuration of exponential overshoot filter 0. Possible values
-    for the outputs/markers are 'bypassed' where the filter is disabled,
-    or 'delay_comp' where the filter is bypassed and the output is delayed
-    as if it were applied.
+    """Configuration of exponential overshoot filter 0. Possible values for the
+    outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
+    filter is bypassed and the output is delayed as if it were applied.
 
     :param out0: Configuration of exponential overshoot filter 0 for output 0.
     :param out1: Configuration of exponential overshoot filter 0 for output 1.
@@ -319,10 +315,9 @@ class ExpOvershoot0Config:
 
 @dataclass
 class ExpOvershoot1Config:
-    """Configuration of exponential overshoot filter 1. Possible values
-    for the outputs/markers are 'bypassed' where the filter is disabled,
-    or 'delay_comp' where the filter is bypassed and the output is delayed
-    as if it were applied.
+    """Configuration of exponential overshoot filter 1. Possible values for the
+    outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
+    filter is bypassed and the output is delayed as if it were applied.
 
     :param out0: Configuration of exponential overshoot filter 1 for output 0.
     :param out1: Configuration of exponential overshoot filter 1 for output 1.
@@ -345,10 +340,9 @@ class ExpOvershoot1Config:
 
 @dataclass
 class ExpOvershoot2Config:
-    """Configuration of exponential overshoot filter 2. Possible values
-    for the outputs/markers are 'bypassed' where the filter is disabled,
-    or 'delay_comp' where the filter is bypassed and the output is delayed
-    as if it were applied.
+    """Configuration of exponential overshoot filter 2. Possible values for the
+    outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
+    filter is bypassed and the output is delayed as if it were applied.
 
     :param out0: Configuration of exponential overshoot filter 2 for output 0.
     :param out1: Configuration of exponential overshoot filter 2 for output 1.
@@ -371,10 +365,9 @@ class ExpOvershoot2Config:
 
 @dataclass
 class ExpOvershoot3Config:
-    """Configuration of exponential overshoot filter 3. Possible values
-    for the outputs/markers are 'bypassed' where the filter is disabled,
-    or 'delay_comp' where the filter is bypassed and the output is delayed
-    as if it were applied.
+    """Configuration of exponential overshoot filter 3. Possible values for the
+    outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
+    filter is bypassed and the output is delayed as if it were applied.
 
     :param out0: Configuration of exponential overshoot filter 3 for output 0.
     :param out1: Configuration of exponential overshoot filter 3 for output 1.
@@ -400,25 +393,19 @@ class LoConfig:
     """Configuration for the local oscillator in QCM-RF, QRM-RF, and QRC.
 
     :param out0_en: Flag to enable/diable the LO on output 0. Relevant in QCM-RF.
-    :param out0_freq: Frequency (in Hz) for the LO attached to output 0.
-                      Relevant in QCM-RF.
+    :param out0_freq: Frequency (in Hz) for the LO attached to output 0. Relevant in QCM-RF.
     :param out1_en: Flag to enable/diable the LO on output 1.Relevant in QCM-RF.
-    :param out1_freq: Frequency (in Hz) for the LO attached to output 1.
-                      Relevant in QCM-RF.
-    :param out2_freq: Frequency (in Hz) for the LO attached to output 2.
-                      Relevant in QRC.
-    :param out3_freq: Frequency (in Hz) for the LO attached to output 3.
-                      Relevant in QRC.
-    :param out4_freq: Frequency (in Hz) for the LO attached to output 4.
-                      Relevant in QRC.
-    :param out5_freq: Frequency (in Hz) for the LO attached to output 5.
-                      Relevant in QRC.
+    :param out1_freq: Frequency (in Hz) for the LO attached to output 1. Relevant in QCM-RF.
+    :param out2_freq: Frequency (in Hz) for the LO attached to output 2. Relevant in QRC.
+    :param out3_freq: Frequency (in Hz) for the LO attached to output 3. Relevant in QRC.
+    :param out4_freq: Frequency (in Hz) for the LO attached to output 4. Relevant in QRC.
+    :param out5_freq: Frequency (in Hz) for the LO attached to output 5. Relevant in QRC.
     :param out0_in0_en: Flag to enable/diable the LO common to output 0 and input 0.
-                        Relevant in QRM-RF.
+        Relevant in QRM-RF.
     :param out0_in0_freq: Frequency (in Hz) for the LO common to output 0 and input 0.
-                          Relevant in QCM-RF/QRC.
+        Relevant in QCM-RF/QRC.
     :param out1_in1_freq: Frequency (in Hz) for the LO common to output 1 and input 1.
-                          Relevant in QRC.
+        Relevant in QRC.
     """
 
     out0_en: bool | None = None
@@ -476,34 +463,32 @@ class GainConfig:
 
 @dataclass
 class ScopeAcqConfig:
-    """Scope acquisition configuration relevant in QRM/QRM-RF/QRC. Possible values
-    For the trigger mode are 'sequencer' to trigger by sequencer, 'level' to trigger
-    by input level.
+    """Scope acquisition configuration relevant in QRM/QRM-RF/QRC. Possible values For the
+    trigger mode are 'sequencer' to trigger by sequencer, 'level' to trigger by input level.
 
     :param sequencer_select: Sequencer that specifies which sequencer triggers the scope
-                             acquisition when using sequencer trigger mode.
-                             It is a sequencer id, or a list of sequencer ids for each
-                             scope IQ pair.
+        acquisition when using sequencer trigger mode. It is a sequencer id, or a list of
+        sequencer ids for each scope IQ pair.
     :param trigger_mode_path0: Trigger mode for input path 0.
     :param trigger_mode_path1: Trigger mode for input path 1.
     :param trigger_mode_path2: Trigger mode for input path 2.
     :param trigger_mode_path3: Trigger mode for input path 3.
-    :param trigger_level_path0: Trigger level when using input level trigger mode
-                                for input path 0.
-    :param trigger_level_path1: Trigger level when using input level trigger mode
-                                for input path 1.
-    :param trigger_level_path2: Trigger level when using input level trigger mode
-                                for input path 2.
-    :param trigger_level_path3: Trigger level when using input level trigger mode
-                                for input path 3.
-    :param avg_mode_en_path0: Flag to enable/disable scope acquisition averaging
-                              mode for input path 0.
-    :param avg_mode_en_path1: Flag to enable/disable scope acquisition averaging
-                              mode for input path 1.
-    :param avg_mode_en_path2: Flag to enable/disable scope acquisition averaging
-                              mode for input path 2.
-    :param avg_mode_en_path3: Flag to enable/disable scope acquisition averaging
-                              mode for input path 3.
+    :param trigger_level_path0: Trigger level when using input level trigger mode for input
+        path 0.
+    :param trigger_level_path1: Trigger level when using input level trigger mode for input
+        path 1.
+    :param trigger_level_path2: Trigger level when using input level trigger mode for input
+        path 2.
+    :param trigger_level_path3: Trigger level when using input level trigger mode for input
+        path 3.
+    :param avg_mode_en_path0: Flag to enable/disable scope acquisition averaging mode for
+        input path 0.
+    :param avg_mode_en_path1: Flag to enable/disable scope acquisition averaging mode for
+        input path 1.
+    :param avg_mode_en_path2: Flag to enable/disable scope acquisition averaging mode for
+        input path 2.
+    :param avg_mode_en_path3: Flag to enable/disable scope acquisition averaging mode for
+        input path 3.
     """
 
     sequencer_select: int | None = None
@@ -558,12 +543,12 @@ class ModuleConfig:
 
 @dataclass
 class QbloxConfig:
-    """Object grouping configuration of the analogue side and the digital side
-    of the RF chain. For a given output/input analogue path, :param:`module`
-    describes the necessary QCodes configuration to set it up completely and
-    :param:`sequencers` is a collection of sequencer indices that are allowed
-    down/up the said output/input channel. Such mechanism allows us to restrict
-    where the code generator is allowed to pick the next available sequencer.
+    """Object grouping configuration of the analogue side and the digital side of the RF
+    chain. For a given output/input analogue path, :param:`module` describes the necessary
+    QCodes configuration to set it up completely and :param:`sequencers` is a collection of
+    sequencer indices that are allowed down/up the said output/input channel. Such mechanism
+    allows us to restrict where the code generator is allowed to pick the next available
+    sequencer.
 
     :param slot_idx: The slot index on the Qblox chassis (a.k.a. Cluster) where
                      the module is installed.

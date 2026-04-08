@@ -1563,7 +1563,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
             self._capture_iq_value(
                 args[0], args[1], variable.name, args[2] if len(args) > 2 else None
             )
-
+            # We only ever want a raw results processing here. The IQ value is not
+            # meaningful without post-processing, so we cannot meaningfully make it binary.
+            self.builder.results_processing(
+                variable=variable.name, res_format=InlineResultsProcessing.Raw
+            )
             self._attempt_declaration(variable)
             return variable
 

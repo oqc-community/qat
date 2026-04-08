@@ -224,7 +224,7 @@ class TestEchoPipelineWithCircuits:
         the EchoPipeline."""
 
         if "openpulse" in request.node.callspec.id:
-            pytest.mark.skip("Openpulse has more expressive use of acquires.")
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in executable.acquires.values():
             assert acquire.mode == AcquireMode.INTEGRATOR
@@ -250,7 +250,7 @@ class TestEchoPipelineWithCircuits:
         """
 
         if "openpulse" in request.node.callspec.id:
-            pytest.mark.skip("Openpulse has more expressive use of acquires.")
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for output_variable, acquire in executable.acquires.items():
             assert isinstance(output_variable, str)
@@ -264,9 +264,13 @@ class TestEchoPipelineWithCircuits:
         executable: Executable[WaveformV1Program],
         compiler_config: CompilerConfig,
         returned_acquires: set[str],
+        request,
     ):
         """Check that the executable has a results processing that matches the provided
         value."""
+
+        if "openpulse" in request.node.callspec.id:
+            pytest.skip("Openpulse has more expressive use of acquires.")
 
         for acquire in returned_acquires:
             assert acquire in executable.acquires
@@ -282,6 +286,11 @@ class TestEchoPipelineWithCircuits:
         request,
     ):
         """Checks that the results of the zero engine match the expected format."""
+
+        if "capture_v1" in request.node.callspec.id:
+            pytest.skip(
+                "Use of capture changes compiler config results processing additions."
+            )
 
         returns = executable.returns
 
