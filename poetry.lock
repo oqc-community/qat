@@ -3736,14 +3736,14 @@ files = [
 
 [[package]]
 name = "numpydantic"
-version = "1.8.0"
+version = "1.8.1"
 description = "Type and shape validation and serialization for arbitrary array types in pydantic models"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "numpydantic-1.8.0-py3-none-any.whl", hash = "sha256:7c9586f50bbdf331b9a6b3a15b86cd1afa42096af20df1bf1f3620031dc393f3"},
-    {file = "numpydantic-1.8.0.tar.gz", hash = "sha256:874f009d141fe70de2e096527683a722a25a32ef561a55a210d3e486e9c99327"},
+    {file = "numpydantic-1.8.1-py3-none-any.whl", hash = "sha256:f3170b44cdcb168d3799eccbbbe8993f146e90211db9d9903f62b56006e8baca"},
+    {file = "numpydantic-1.8.1.tar.gz", hash = "sha256:e5192efee5784df5cb70f99937e3538fdcbe58ed445c53935f39e5ab2b3f8ea6"},
 ]
 
 [package.dependencies]
