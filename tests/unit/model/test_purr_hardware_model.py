@@ -50,6 +50,7 @@ def validate_pulse_channel(pyd_pulse_channel, legacy_pulse_channel):
         == legacy_pulse_channel.physical_channel.phase_offset
     )
     assert pyd_pulse_channel.scale == legacy_pulse_channel.scale
+    assert pyd_pulse_channel.uuid == legacy_pulse_channel.full_id()
 
 
 def validate_pulse_shapes(pyd_pulse, legacy_pulse):
@@ -59,6 +60,18 @@ def validate_pulse_shapes(pyd_pulse, legacy_pulse):
     assert pyd_pulse.drag == legacy_pulse.get("drag", 0.0)
     assert pyd_pulse.rise == legacy_pulse.get("rise", 1.0 / 3.0)
     assert pyd_pulse.phase == legacy_pulse.get("phase", 0.0)
+
+
+def validate_baseband(pyd_baseband, legacy_baseband):
+    assert pyd_baseband.frequency == legacy_baseband.frequency
+    assert pyd_baseband.if_frequency == legacy_baseband.if_frequency
+    assert pyd_baseband.uuid == legacy_baseband.full_id()
+
+
+def validate_physical_channel(pyd_phys_ch, legacy_phys_ch):
+    assert pyd_phys_ch.block_size == legacy_phys_ch.block_size
+    assert pyd_phys_ch.uuid == legacy_phys_ch.full_id()
+    assert f"CH{pyd_phys_ch.name_index}" == legacy_phys_ch.id
 
 
 class TestEchoHardwareModelConversion:
@@ -354,27 +367,13 @@ class TestEchoHardwareModelConversion:
         pyd_hw, leg_hw = get_echo_hw_pair(num_qubits, seed=seed)
 
         for qubit_index, qubit in pyd_hw.qubits.items():
-            # Compare qubit physical basebands.
-            assert (
-                qubit.physical_channel.baseband.frequency
-                == leg_hw.get_qubit(qubit_index).physical_channel.baseband_frequency
+            leg_qubit = leg_hw.get_qubit(qubit_index)
+            validate_baseband(
+                qubit.physical_channel.baseband, leg_qubit.physical_channel.baseband
             )
-            assert (
-                qubit.physical_channel.baseband.if_frequency
-                == leg_hw.get_qubit(qubit_index).physical_channel.baseband_if_frequency
-            )
-            # Compare resonator physical basebands.
-            assert (
-                qubit.resonator.physical_channel.baseband.frequency
-                == leg_hw.get_qubit(
-                    qubit_index
-                ).measure_device.physical_channel.baseband_frequency
-            )
-            assert (
-                qubit.resonator.physical_channel.baseband.if_frequency
-                == leg_hw.get_qubit(
-                    qubit_index
-                ).measure_device.physical_channel.baseband_if_frequency
+            validate_baseband(
+                qubit.resonator.physical_channel.baseband,
+                leg_qubit.measure_device.physical_channel.baseband,
             )
 
     @pytest.mark.parametrize("num_qubits", _NUM_QUBITS)
@@ -395,8 +394,17 @@ class TestEchoHardwareModelConversion:
             for pyd_phys_ch, leg_phys_ch in zip(
                 pyd_physical_channels, leg_physical_channels
             ):
-                assert pyd_phys_ch.block_size == leg_phys_ch.block_size
-                assert f"CH{pyd_phys_ch.name_index}" == leg_phys_ch.id
+                validate_physical_channel(pyd_phys_ch, leg_phys_ch)
+
+    @pytest.mark.parametrize("num_qubits", _NUM_QUBITS)
+    @pytest.mark.parametrize("seed", _SEEDS)
+    def test_qubit_and_resonator_ids(self, num_qubits, seed):
+        pyd_hw, leg_hw = get_echo_hw_pair(num_qubits, seed=seed)
+
+        for qubit_index, qubit in pyd_hw.qubits.items():
+            leg_qubit = leg_hw.get_qubit(qubit_index)
+            assert qubit.uuid == leg_qubit.full_id()
+            assert qubit.resonator.uuid == leg_qubit.measure_device.full_id()
 
     def test_physical_couplings_with_missing_cr_channels_logs_warning(self, caplog):
         # Setup a hardware model with a missing CR channel

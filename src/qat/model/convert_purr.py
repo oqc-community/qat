@@ -47,6 +47,10 @@ log = get_default_logger()
 
 
 def get_number_from_string(s: str) -> int | None:
+    """Returns the first number found in a string, or None if no number is found.
+
+    Used to extract the index from IDs.
+    """
     number_match = number_mask.search(s)
     if number_match is not None:
         return int(number_match.group())
@@ -56,6 +60,14 @@ def get_number_from_string(s: str) -> int | None:
 def convert_purr_echo_hw_to_pydantic(
     legacy_hw: QuantumHardwareModel, seed_uuid: bool = True
 ) -> PhysicalHardwareModel:
+    """Converts a PuRR QuantumHardwareModel into a PhysicalHardwareModel.
+
+    :param legacy_hw: The PuRR QuantumHardwareModel to convert.
+    :param seed_uuid: Whether to seed the UUID generation for pulse channels that don't
+        exist in the PuRR model. Defaults to ``True`` so conversions generate
+        deterministic UUIDs across runs; set to ``False`` to use unseeded UUID
+        generation instead.
+    """
     if seed_uuid:
         seed_context = temporary_uuid_seed(legacy_hw.calibration_id)
     else:
@@ -100,7 +112,6 @@ def convert_purr_echo_hw_to_pydantic(
             calibration_id=calibration_id,
             error_mitigation=error_mitigation,
         )
-
     return hw
 
 
@@ -331,11 +342,14 @@ def _build_resonator(
 
     phys_bb_r = resonator.physical_channel.baseband
     new_phys_bb_r = PhysicalBaseband(
-        frequency=phys_bb_r.frequency, if_frequency=phys_bb_r.if_frequency
+        uuid=phys_bb_r.full_id(),
+        frequency=phys_bb_r.frequency,
+        if_frequency=phys_bb_r.if_frequency,
     )
 
     phys_channel_r = resonator.physical_channel
     new_phys_ch_r = ResonatorPhysicalChannel(
+        uuid=phys_channel_r.full_id(),
         baseband=new_phys_bb_r,
         block_size=phys_channel_r.block_size,
         swap_readout_iq=getattr(phys_channel_r, "swap_readout_IQ", False),
@@ -344,6 +358,7 @@ def _build_resonator(
 
     measure_pulse_channel = resonator.get_pulse_channel(ChannelType.measure)
     new_measure_pulse_channel = MeasurePulseChannel(
+        uuid=measure_pulse_channel.full_id(),
         frequency=measure_pulse_channel.frequency,
         imbalance=measure_pulse_channel.imbalance,
         scale=_process_real_or_complex(measure_pulse_channel.scale),
@@ -353,6 +368,7 @@ def _build_resonator(
 
     acquire_pulse_channel = resonator.get_pulse_channel(ChannelType.acquire)
     new_acquire_pulse_channel = AcquirePulseChannel(
+        uuid=acquire_pulse_channel.full_id(),
         frequency=acquire_pulse_channel.frequency,
         imbalance=acquire_pulse_channel.imbalance,
         scale=_process_real_or_complex(acquire_pulse_channel.scale),
@@ -365,6 +381,7 @@ def _build_resonator(
     )
 
     return Resonator(
+        uuid=resonator.full_id(),
         physical_channel=new_phys_ch_r,
         pulse_channels=new_res_pulse_channels,
     )
@@ -381,12 +398,15 @@ def _build_qubit(
     # Physical baseband
     phys_bb_q = qubit.physical_channel.baseband
     new_phys_bb_q = PhysicalBaseband(
-        frequency=phys_bb_q.frequency, if_frequency=phys_bb_q.if_frequency
+        uuid=phys_bb_q.full_id(),
+        frequency=phys_bb_q.frequency,
+        if_frequency=phys_bb_q.if_frequency,
     )
 
     # Physical channel
     phys_channel_q = qubit.physical_channel
     new_phys_ch_q = QubitPhysicalChannel(
+        uuid=phys_channel_q.full_id(),
         baseband=new_phys_bb_q,
         block_size=phys_channel_q.block_size,
         name_index=get_number_from_string(phys_channel_q.id),
@@ -399,6 +419,7 @@ def _build_qubit(
         pulse_hw_x_pi = _build_pulse(pulse_hw_x_pi)
 
     new_drive_pulse_channel = DrivePulseChannel(
+        uuid=drive_pulse_channel.full_id(),
         frequency=drive_pulse_channel.frequency,
         imbalance=drive_pulse_channel.imbalance,
         scale=_process_real_or_complex(drive_pulse_channel.scale),
@@ -410,6 +431,7 @@ def _build_qubit(
     freqshift_pulse_channel = _get_pulse_channel(qubit, ChannelType.freq_shift)
     if freqshift_pulse_channel is not None:
         new_freqshift_pulse_channel = FreqShiftPulseChannel(
+            uuid=freqshift_pulse_channel.full_id(),
             frequency=freqshift_pulse_channel.frequency,
             imbalance=freqshift_pulse_channel.imbalance,
             scale=_process_real_or_complex(freqshift_pulse_channel.scale),
@@ -424,6 +446,7 @@ def _build_qubit(
     secondstate_pulse_channel = _get_pulse_channel(qubit, ChannelType.second_state)
     if secondstate_pulse_channel is not None:
         new_secondstate_pulse_channel = SecondStatePulseChannel(
+            uuid=secondstate_pulse_channel.full_id(),
             frequency=secondstate_pulse_channel.frequency,
             imbalance=secondstate_pulse_channel.imbalance,
             scale=_process_real_or_complex(secondstate_pulse_channel.scale),
@@ -443,6 +466,7 @@ def _build_qubit(
             zx_pi_4 = _build_pulse(zx_pi_4)
 
         new_cr_pulse_channel = CrossResonancePulseChannel(
+            uuid=pulse_channel.full_id(),
             auxiliary_qubit=cr_qubit.index,
             frequency=pulse_channel.frequency,
             imbalance=pulse_channel.imbalance,
@@ -457,6 +481,7 @@ def _build_qubit(
             ChannelType.cross_resonance_cancellation, crc_qubit
         )
         new_crc_pulse_channel = CrossResonanceCancellationPulseChannel(
+            uuid=pulse_channel.full_id(),
             auxiliary_qubit=crc_qubit.index,
             frequency=pulse_channel.frequency,
             imbalance=pulse_channel.imbalance,
@@ -477,6 +502,7 @@ def _build_qubit(
     )
 
     return Qubit(
+        uuid=qubit.full_id(),
         physical_channel=new_phys_ch_q,
         pulse_channels=new_qubit_pulse_channels,
         resonator=resonator,
