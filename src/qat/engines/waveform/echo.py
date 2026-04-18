@@ -35,8 +35,14 @@ class EchoEngine(NativeEngine[WaveformProgram]):
         for channel_data in program.channel_data.values():
             buffer = np.asarray(channel_data.buffer)
             for acquire in channel_data.acquires:
+                if len(buffer) == 0 and acquire.length > 0:
+                    buffer_slice = np.zeros(acquire.length, dtype=np.complex128)
+                else:
+                    buffer_slice = buffer[
+                        acquire.position : acquire.position + acquire.length
+                    ]
                 results[acquire.output_variable] = process_readout(
-                    buffer[acquire.position : acquire.position + acquire.length],
+                    buffer_slice,
                     program.shots,
                     acquire.mode,
                 )

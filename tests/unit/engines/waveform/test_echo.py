@@ -128,3 +128,23 @@ class TestEchoEngine:
             elif mode == AcquireMode.INTEGRATOR:
                 assert np.shape(result) == (program.shots,)
                 assert np.allclose(result, np.mean(expected))
+
+    def test_with_empty_buffer_and_nonzero_length_acquire(self):
+        acquire = PositionalAcquireData(
+            mode=AcquireMode.SCOPE, position=0, length=10, output_variable="test"
+        )
+        channel_data = WaveformChannelData(
+            buffer=np.array([]), baseband_frequency=5.0e9, acquires=[acquire]
+        )
+        program = WaveformProgram(
+            channel_data={"ch1": channel_data}, repetition_time=1e-3, shots=1000
+        )
+
+        engine = EchoEngine()
+        results = engine.execute(program)
+        assert len(results) == 1
+        assert "test" in results
+        result = results["test"]
+        expected = np.zeros(10)
+        assert np.shape(result) == (10,)
+        assert np.allclose(result, expected)

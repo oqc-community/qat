@@ -20,10 +20,11 @@ from qat.purr.backends.realtime_chip_simulator import (
     get_default_RTCS_hardware,
     qutip_available,
 )
-from qat.purr.compiler.builders import InstructionBuilder
+from qat.purr.compiler.builders import InstructionBuilder, QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
+    Assign,
     CrossResonancePulse,
     CustomPulse,
     Delay,
@@ -37,6 +38,7 @@ from qat.purr.compiler.instructions import (
     Reset,
     Return,
     Synchronize,
+    Variable,
 )
 from qat.purr.compiler.optimisers import DefaultOptimizers
 from qat.purr.compiler.runtime import get_builder
@@ -744,6 +746,59 @@ class TestQASM3:
             gate_method = getattr(Gates, name)
             actual_gate = gate_method(*args)
             assert_same_up_to_phase(builder.matrix, actual_gate)
+
+    def test_capture_v1_in_cal(self):
+        """Tests that the capture_v1 function can be used in a cal block.
+
+        Serves as a regression test.
+        """
+        hardware_model = get_echo_hardware(8)
+        qasm = get_qasm3("openpulse_tests/capture_v1_in_cal.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(hardware_model.create_builder(), qasm)
+        assert isinstance(builder, QuantumInstructionBuilder)
+
+        acquire_instructions = [
+            inst for inst in builder.instructions if isinstance(inst, Acquire)
+        ]
+        assert len(acquire_instructions) == 2
+
+        output_variables = set(acquire.output_variable for acquire in acquire_instructions)
+
+        assigns = [inst for inst in builder.instructions if isinstance(inst, Assign)]
+        num_assigns = len(assigns)
+        assert num_assigns == 1
+
+        num_variables_in_assign = len(assigns[0].value)
+        assert num_variables_in_assign == 2
+
+        # The output variables are stored within variables in the assign
+        # The post-processing is robust to both strings and variables here...
+        assign_variables = set(var.name for var in assigns[0].value)
+        assert output_variables == assign_variables
+
+    def test_basic_with_assign(self):
+        """Tests that a basic circuit that uses measures within assigns can be parsed
+        correctly, checking for acquires and matching assigning of variables."""
+
+        hardware_model = get_echo_hardware(8)
+        qasm = get_qasm3("basic_with_assign.qasm")
+        parser = Qasm3Parser()
+        builder = parser.parse(hardware_model.create_builder(), qasm)
+        assert isinstance(builder, QuantumInstructionBuilder)
+        acquires = [inst for inst in builder.instructions if isinstance(inst, Acquire)]
+        output_variables = set(acquire.output_variable for acquire in acquires)
+
+        assigns = [inst for inst in builder.instructions if isinstance(inst, Assign)]
+        num_assigns = len(assigns)
+        assert num_assigns == 1
+
+        num_variables_in_assign = len(assigns[0].value)
+        assert num_variables_in_assign == 2
+
+        assert all(isinstance(val, Variable) for val in assigns[0].value)
+        assign_variables = set(val.name for val in assigns[0].value)
+        assert assign_variables == output_variables
 
 
 class TestQASM3Features:

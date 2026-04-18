@@ -287,11 +287,13 @@ class TestEchoPipelineWithCircuits:
     ):
         """Checks that the results of the zero engine match the expected format."""
 
-        if "capture_v1" in request.node.callspec.id:
+        if (
+            "capture_v1.qasm" in request.node.callspec.id
+            or "acquire.qasm" in request.node.callspec.id
+        ):
             pytest.skip(
                 "Use of capture changes compiler config results processing additions."
             )
-
         returns = executable.returns
 
         if len(returns) == 0:

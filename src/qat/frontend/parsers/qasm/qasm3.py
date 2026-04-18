@@ -1716,7 +1716,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
             raise ValueError(f"Assignment operator {op} is unsupported.")
 
         if isinstance(register, CregIndexValue):
-            register = register.register_name
+            # The CregIndexValue acts as a variable assignment within a classical bit
+            # register. So if this is the register, we want to update its value to be the
+            # rhs of the assignment.
+            register.value = value
+            return
 
         existing = self._current_context.variables.get(register, None)
         if existing is not None:

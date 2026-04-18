@@ -345,7 +345,7 @@ openpulse_expected_results = {
     "waveform_tests/waveform_test_phase_shift.qasm": (0, 0),
     "waveform_tests/waveform_test_scale.qasm": (0, 0),
     "waveform_tests/waveform_test_sum.qasm": (0, 0),
-    "openpulse_tests/acquire.qasm": (1, 2),
+    "openpulse_tests/acquire.qasm": (3, 2),
     "openpulse_tests/constant_wf.qasm": (1, 1),
     "openpulse_tests/capture_v1.qasm": (1, 1),
     "openpulse_tests/detune_gate.qasm": (1, 1),

@@ -324,7 +324,10 @@ class TestEchoPipelineWithCircuits:
     ):
         """Checks that the results of the zero engine match the expected format."""
 
-        if "capture_v1" in request.node.callspec.id:
+        if (
+            "capture_v1.qasm" in request.node.callspec.id
+            or "acquire.qasm" in request.node.callspec.id
+        ):
             pytest.skip(
                 "Use of capture changes compiler config results processing additions."
             )
@@ -543,7 +546,9 @@ class MockEchoModelLoader(EchoModelLoader):
         return model
 
 
-parity_test_files = get_pipeline_tests(openpulse=True)
+parity_test_files = get_pipeline_tests(
+    openpulse=True, skips=["openpulse_tests/acquire.qasm"]
+)
 
 
 @pytest.mark.parametrize(

@@ -31,11 +31,12 @@ cal {
     shift_phase(q1_drive, 4.366186381749424);
     shift_phase(q1_drive, 5.916747563126659);
     delay[300dt] q1_drive;
-    barrier q1_q2_cross_resonance, q1_drive;
+    barrier q1_q2_cross_resonance, q1_drive, r1_acquire;
+    barrier q1_q2_cross_resonance, r2_acquire;
     shift_phase(q1_q2_cross_resonance, 2.183093190874712);
     bit[2] ro;
-    ro[0] = measure $0;
-    ro[1] = measure $1;
+    ro[0] = capture_v1(r1_acquire, 800e-9);
+    ro[1] = capture_v1(r2_acquire, 400e-9);
 }
 bit[1] c;
 x $0;
