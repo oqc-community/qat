@@ -74,7 +74,8 @@ jobs:
         run: |
           find notebooks/ipynb -name '*.ipynb' | xargs -I {file_path} poetry run nbstripout --verify --extra-keys="metadata.kernelspec" {file_path}
           find docs/source/notebooks -name '*.ipynb' | xargs -I {file_path} poetry run nbstripout --verify --extra-keys="metadata.kernelspec" {file_path}
-          poetry run jupytext --sync --pipe "ruff check --fix {}" --pipe "ruff format {}" 'notebooks/scripts/**/*.py' && git diff --exit-code
+          poetry run jupytext --sync --pipe "ruff check --fix {}" --pipe "ruff format {}" 'notebooks/scripts/**/*.py' 'notebooks/**/*.ipynb' \
+            && git add notebooks/ && git diff --staged --exit-code
 
       - name: Ruff lint check
         if: ${{ !cancelled() }}
