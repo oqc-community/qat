@@ -2,7 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import inspect
-from typing import Callable
+from collections.abc import Callable
 
 from qat.instrument.base import InstrumentBuilder, InstrumentConcept
 
@@ -81,7 +81,7 @@ def is_engine(value: type):
 
     if not (
         inspect.isclass(value)
-        and issubclass(value, (NativeEngine, InstructionExecutionEngine))
+        and issubclass(value, NativeEngine | InstructionExecutionEngine)
     ):
         raise ValueError(
             f"{value} is not a valid Engine (either NativeEngine or legacy "

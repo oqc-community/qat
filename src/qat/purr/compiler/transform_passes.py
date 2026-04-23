@@ -3,7 +3,6 @@
 
 from collections import defaultdict
 from numbers import Number
-from typing import Dict, List
 
 from compiler_config.config import MetricsType
 
@@ -41,8 +40,8 @@ class PhaseOptimisation(TransformPass):
         *args,
         **kwargs,
     ):
-        accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
-        optimized_instructions: List[Instruction] = []
+        accum_phaseshifts: dict[PulseChannel, PhaseShift] = {}
+        optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
@@ -53,9 +52,9 @@ class PhaseOptimisation(TransformPass):
                     accum_phaseshifts[instruction.channel] = PhaseShift(
                         instruction.channel, instruction.phase
                     )
-            elif isinstance(instruction, (Pulse, CustomPulse)):
+            elif isinstance(instruction, Pulse | CustomPulse):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
-                if not isinstance(quantum_targets, List):
+                if not isinstance(quantum_targets, list):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
                     if quantum_target in accum_phaseshifts:

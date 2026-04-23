@@ -6,7 +6,6 @@ import os
 from collections import defaultdict
 from dataclasses import asdict
 from datetime import datetime
-from typing import Dict, List
 
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
@@ -121,7 +120,7 @@ class QbloxControlHardware(ControlHardware):
         dev_id: str,
         name: str,
         address: str = None,
-        dummy_cfg: Dict = None,
+        dummy_cfg: dict = None,
     ):
         super().__init__(id_=dev_id)
         self.name = name
@@ -132,8 +131,8 @@ class QbloxControlHardware(ControlHardware):
         self.plot_packages = False
         self.plot_acquisitions = False
 
-        self._modules: Dict[Module, bool] = {}
-        self._id2seq: Dict[str, Sequencer] = {}
+        self._modules: dict[Module, bool] = {}
+        self._id2seq: dict[str, Sequencer] = {}
 
     def _reset_modules(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
@@ -204,7 +203,7 @@ class QbloxControlHardware(ControlHardware):
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )
 
-    def set_data(self, packages: List[QbloxPackage]):
+    def set_data(self, packages: list[QbloxPackage]):
         if self.plot_packages:
             plot_packages(packages)
 
@@ -229,7 +228,7 @@ class QbloxControlHardware(ControlHardware):
         if not any(self._id2seq):
             raise ValueError("No allocations found. Install packages and configure first")
 
-        results: Dict[str, List[Acquisition]] = defaultdict(list)
+        results: dict[str, list[Acquisition]] = defaultdict(list)
         try:
             for pulse_channel_id, sequencer in self._id2seq.items():
                 sequencer.sync_en(True)
@@ -291,8 +290,8 @@ class QbloxControlHardware(ControlHardware):
             self._id2seq.clear()
             self._reset_modules()
 
-    def __getstate__(self) -> Dict:
-        results = super(QbloxControlHardware, self).__getstate__()
+    def __getstate__(self) -> dict:
+        results = super().__getstate__()
         results["_driver"] = None
         results["_modules"] = {}
         results["_id2seq"] = {}

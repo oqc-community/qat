@@ -199,9 +199,7 @@ class TestQbloxBackend1:
         executable = do_emit(qblox_model, QbloxBackend1, builder)
         remaining_width = int(qubit.pulse_measure["width"] * 1e9) - int(delay * 1e9)
 
-        pattern = r"set_awg_offs {0},0\nupd_param {1}\nacquire 0,R\d{{1,2}},{2}\nset_awg_offs 0,0\nupd_param 4".format(
-            i_offs_steps, int(delay * 1e9), remaining_width
-        )
+        pattern = rf"set_awg_offs {i_offs_steps},0\nupd_param {int(delay * 1e9)}\nacquire 0,R\d{{1,2}},{remaining_width}\nset_awg_offs 0,0\nupd_param 4"
         for program in executable.programs:
             assert len(program.packages) == 1
             pkg = next(iter(program.packages.values()))
@@ -267,12 +265,10 @@ class TestQbloxBackend1:
                 assert acquire_pkg.sequence.acquisitions
 
                 measure_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, MeasurePulse)
-                        and acquire_channel in inst.quantum_targets
-                    )
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
                 )
 
                 if measure_pulse.shape == PulseShapeType.SQUARE:
@@ -306,11 +302,9 @@ class TestQbloxBackend1:
                     )
                 )
                 drive_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
-                    )
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
                 )
                 if drive_pulse.shape == PulseShapeType.SQUARE:
                     assert not drive_pkg.sequence.waveforms
@@ -334,12 +328,10 @@ class TestQbloxBackend1:
                 )
                 assert acquire_pkg.sequence.acquisitions
                 measure_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, MeasurePulse)
-                        and acquire_channel in inst.quantum_targets
-                    )
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
                 )
 
                 if measure_pulse.shape == PulseShapeType.SQUARE:
@@ -366,7 +358,7 @@ class TestQbloxBackend1:
             else:
                 assert len(program.packages) == len(qubit_indices)
 
-            acquire_pkg = next((pkg for pkg in program.packages.values()))
+            acquire_pkg = next(pkg for pkg in program.packages.values())
             assert "weighed_acquire" not in acquire_pkg.sequence.program
 
         builder = measure_acquire(qblox_model, qubit_indices, enable_weights=enable_weights)
@@ -595,12 +587,10 @@ class TestQbloxBackend2:
                     )
                 )
                 measure_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, MeasurePulse)
-                        and acquire_channel in inst.quantum_targets
-                    )
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
                 )
 
                 assert acquire_pkg.sequence.acquisitions
@@ -657,11 +647,9 @@ class TestQbloxBackend2:
                     )
                 )
                 drive_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
-                    )
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, Pulse) and drive_channel in inst.quantum_targets
                 )
 
                 assert not drive_pkg.sequence.acquisitions
@@ -688,12 +676,10 @@ class TestQbloxBackend2:
                     )
                 )
                 measure_pulse = next(
-                    (
-                        inst
-                        for inst in builder.instructions
-                        if isinstance(inst, MeasurePulse)
-                        and acquire_channel in inst.quantum_targets
-                    )
+                    inst
+                    for inst in builder.instructions
+                    if isinstance(inst, MeasurePulse)
+                    and acquire_channel in inst.quantum_targets
                 )
 
                 assert acquire_pkg.sequence.acquisitions

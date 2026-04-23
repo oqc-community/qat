@@ -1,9 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import abc
+from collections.abc import Iterable
 from decimal import ROUND_DOWN, Decimal
 from numbers import Number
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
@@ -59,7 +60,7 @@ log = get_default_logger()
 
 class InstructionExecutionEngine(abc.ABC):
     def __init__(self, model: QuantumHardwareModel = None, startup_engine: bool = True):
-        self.model: Optional[QuantumHardwareModel] = None
+        self.model: QuantumHardwareModel | None = None
         if model is not None:
             self.load_model(model, startup_engine)
 
@@ -79,15 +80,15 @@ class InstructionExecutionEngine(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def execute(self, instructions: List[Instruction]) -> Dict[str, Any]:
+    def execute(self, instructions: list[Instruction]) -> dict[str, Any]:
         pass
 
     @abc.abstractmethod
-    def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
+    def optimize(self, instructions: list[Instruction]) -> list[Instruction]:
         pass
 
     @abc.abstractmethod
-    def validate(self, instructions: List[Instruction]):
+    def validate(self, instructions: list[Instruction]):
         pass
 
     def shutdown(self):
@@ -119,7 +120,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
-            if isinstance(value, List):
+            if isinstance(value, list):
                 return [recurse_arrays(results_map, val) for val in value]
             elif isinstance(value, Variable):
                 if value.name not in results_map:
@@ -190,11 +191,11 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         return results
 
-    def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
+    def optimize(self, instructions: list[Instruction]) -> list[Instruction]:
         """Runs optimization passes specific to this hardware."""
         self._model_exists()
-        accum_phaseshifts: Dict[PulseChannel, PhaseShift] = {}
-        optimized_instructions: List[Instruction] = []
+        accum_phaseshifts: dict[PulseChannel, PhaseShift] = {}
+        optimized_instructions: list[Instruction] = []
         for instruction in instructions:
             if isinstance(instruction, PhaseShift) and isinstance(
                 instruction.phase, Number
@@ -205,9 +206,9 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     accum_phaseshifts[instruction.channel] = PhaseShift(
                         instruction.channel, instruction.phase
                     )
-            elif isinstance(instruction, (Pulse, CustomPulse)):
+            elif isinstance(instruction, Pulse | CustomPulse):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
-                if not isinstance(quantum_targets, List):
+                if not isinstance(quantum_targets, list):
                     quantum_targets = [quantum_targets]
                 for quantum_target in quantum_targets:
                     if quantum_target in accum_phaseshifts:
@@ -221,7 +222,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 optimized_instructions.append(instruction)
         return optimized_instructions
 
-    def validate(self, instructions: List[Instruction]):
+    def validate(self, instructions: list[Instruction]):
         """Validates this graph for execution on the current hardware."""
         validation_settings = get_config().INSTRUCTION_VALIDATION
         self._model_exists()
@@ -245,7 +246,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     f"{inst.channel.physical_channel}"
                 )
             if validation_settings.PULSE_DURATION_LIMITS and isinstance(
-                inst, (Pulse, CustomPulse)
+                inst, Pulse | CustomPulse
             ):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
@@ -359,7 +360,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             return results
 
     @staticmethod
-    def _accumulate_results(results: Dict, batch_results: Dict):
+    def _accumulate_results(results: dict, batch_results: dict):
         if not any(batch_results):
             return results
 
@@ -384,7 +385,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     results[key] = np.concatenate(
                         (existing, appending), axis=existing.ndim - 1
                     )
-                elif isinstance(existing, List):
+                elif isinstance(existing, list):
 
                     def combine_lists(exi, new):
                         if len(new) > 0 and not isinstance(new[0], list):
@@ -406,10 +407,10 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     @abc.abstractmethod
     def _execute_on_hardware(
         self, sweep_iterator, package: "QatFile", interrupt: Interrupt = NullInterrupt()
-    ) -> Union[Dict[str, List[float]], Dict[str, np.ndarray]]:
+    ) -> dict[str, list[float]] | dict[str, np.ndarray]:
         pass
 
-    def create_duration_timeline(self, instructions: List[QuantumInstruction]):
+    def create_duration_timeline(self, instructions: list[QuantumInstruction]):
         """Builds a dictionary mapping channels to a list of instructions and at what
         precise sample time they should be associated with. It's important that the times
         are absolute here, not relative.
@@ -425,8 +426,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                 ...
             ]}
         """
-        results: Dict[PulseChannel, List[PositionData]] = {}
-        total_durations: Dict[PulseChannel, int] = dict()
+        results: dict[PulseChannel, list[PositionData]] = {}
+        total_durations: dict[PulseChannel, int] = dict()
 
         for instruction in instructions:
             # TODO: Acquire is a special quantum target for post processing.
@@ -445,7 +446,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
                     default=0.0,
                 )
                 for qtarget in qtargets:
-                    device_instructions: List[PositionData] = results.setdefault(
+                    device_instructions: list[PositionData] = results.setdefault(
                         qtarget, []
                     )
                     delay_time = longest_length - total_durations[qtarget]
@@ -464,7 +465,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             else:
                 duration = calculate_duration(instruction)
                 for qtarget in qtargets:
-                    device_instructions: List[PositionData] = results.setdefault(
+                    device_instructions: list[PositionData] = results.setdefault(
                         qtarget, []
                     )
                     start = device_instructions[-1].end if any(device_instructions) else 0
@@ -485,7 +486,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             key: timeline
             for key, timeline in dict(results).items()
             if not all(
-                isinstance(pos_data.instruction, (Delay, PhaseReset, PhaseShift))
+                isinstance(pos_data.instruction, Delay | PhaseReset | PhaseShift)
                 for pos_data in timeline
             )
         }
@@ -521,7 +522,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     def build_pulse_channel_buffers(
         self,
-        position_map: Dict[PulseChannel, List[PositionData]],
+        position_map: dict[PulseChannel, list[PositionData]],
         do_upconvert: bool = True,
     ):
         buffers = {}
@@ -551,7 +552,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
     def process_pulse(
         self,
         position: PositionData,
-        buffer: List[float],
+        buffer: list[float],
         pulse_channel: PulseChannel,
         phase: float,
         frequency: float,
@@ -569,7 +570,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         scale = pulse_channel.scale
         if (
-            isinstance(position.instruction, (Pulse, CustomPulse))
+            isinstance(position.instruction, Pulse | CustomPulse)
             and position.instruction.ignore_channel_scale
         ):
             scale = 1
@@ -623,8 +624,8 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
     def do_upconvert(
         self,
-        buffer: List[float],
-        time: List[float],
+        buffer: list[float],
+        time: list[float],
         pulse_channel: PulseChannel,
         frequency: float,
     ):
@@ -645,7 +646,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
         return buffer
 
     def build_physical_channel_buffers(
-        self, pulse_channel_buffers: Dict[PulseChannel, np.ndarray]
+        self, pulse_channel_buffers: dict[PulseChannel, np.ndarray]
     ):
         # Add all pulse channel buffers belonging to the same physical channel together
         buffers = {}
@@ -667,7 +668,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
 
         return buffers
 
-    def build_acquire_list(self, position_map: Dict[PulseChannel, List[PositionData]]):
+    def build_acquire_list(self, position_map: dict[PulseChannel, list[PositionData]]):
         buffers = {}
         for pulse_channel, positions in position_map.items():
             buffer = buffers.setdefault(pulse_channel.full_id(), [])
@@ -759,11 +760,11 @@ def _binary_average(results_list):
 def _numpy_array_to_list(array):
     """Transform numpy arrays to a normal list."""
     if isinstance(array, np.ndarray):
-        numpy_list: List = array.tolist()
+        numpy_list: list = array.tolist()
         if len(numpy_list) == 1:
             return numpy_list[0]
         return numpy_list
-    elif isinstance(array, List):
+    elif isinstance(array, list):
         list_list = [_numpy_array_to_list(val) for val in array]
         if len(list_list) == 1:
             return list_list[0]
@@ -784,7 +785,7 @@ class DeviceInjector:
         self.revert_value = None
 
     def inject(self):
-        if isinstance(self.updater.target, Dict):
+        if isinstance(self.updater.target, dict):
             self.revert_value = self.updater.target[self.updater.attribute]
             self.updater.target[self.updater.attribute] = self.updater.value
         else:
@@ -792,7 +793,7 @@ class DeviceInjector:
             setattr(self.updater.target, self.updater.attribute, self.updater.value)
 
     def revert(self):
-        if isinstance(self.updater.target, Dict):
+        if isinstance(self.updater.target, dict):
             self.updater.target[self.updater.attribute] = self.revert_value
         else:
             setattr(self.updater.target, self.updater.attribute, self.revert_value)
@@ -859,7 +860,7 @@ class IteratorInjector(ValueReplacement):
         self.iteration = iteration
 
     def replace(self, field_value, replacements, index):
-        if isinstance(self.iteration, (List, Tuple)):
+        if isinstance(self.iteration, list | tuple):
             type_to_check = type(self.iteration)
             expanded = []
             for val in self.iteration:
@@ -872,7 +873,7 @@ class IteratorInjector(ValueReplacement):
                 else:
                     expanded.append(val)
             return type_to_check(expanded)
-        elif isinstance(self.iteration, Dict):
+        elif isinstance(self.iteration, dict):
             return {
                 key: (
                     replacements[value.name][index]
@@ -900,9 +901,9 @@ class InjectionMetadata:
     field: str = "_$injection_metadata"
 
     def __init__(self):
-        self.variables: Dict[str, ValueReplacement] = dict()
+        self.variables: dict[str, ValueReplacement] = dict()
 
-    def inject(self, node, replacements: Dict, index):
+    def inject(self, node, replacements: dict, index):
         for field, replacer in self.variables.items():
             setattr(
                 node, field, replacer.replace(getattr(node, field), replacements, index)
@@ -961,7 +962,7 @@ class SweepIterator:
     def __init__(self, sweep=None, nested_sweep=None):
         self.sweep: Sweep = sweep
         self.current_iteration = -1
-        self.nested_sweep: "SweepIterator" = nested_sweep
+        self.nested_sweep: SweepIterator = nested_sweep
 
         # An injector is an object that does more complicated value injection with a
         # revert at the end.
@@ -1008,7 +1009,7 @@ class SweepIterator:
         return sweep_iterator
 
     @staticmethod
-    def from_sweeps(sweeps: List[Sweep]):
+    def from_sweeps(sweeps: list[Sweep]):
         """Convenient helper that builds a SweepIterator from a collection of sweeps.
 
         This bypasses QatFile and is more suitable for the TriagePass.
@@ -1067,10 +1068,10 @@ class SweepIterator:
                 if isinstance(value, Variable):
                     injection_meta.variables[field] = VariableInjector(value)
                 elif (
-                    isinstance(value, (Tuple, List))
+                    isinstance(value, tuple | list)
                     and any([isinstance(val, Variable) for val in value])
                 ) or (
-                    isinstance(value, Dict)
+                    isinstance(value, dict)
                     and any([isinstance(val, Variable) for val in value.values()])
                 ):
                     injection_meta.variables[field] = IteratorInjector(value)
@@ -1089,7 +1090,7 @@ class SweepIterator:
             if isinstance(value, InjectionMetadata):
                 continue
 
-            if isinstance(value, (Tuple, List, Dict)):
+            if isinstance(value, tuple | list | dict):
                 for val in value:
                     self._inject_sweep_values(
                         val, replacers, index, revert, recursion_guard
@@ -1160,7 +1161,7 @@ class SweepIterator:
             self.sweep.length - 1 if self.sweep is not None else 0
         ) and (self.nested_sweep is None or self.nested_sweep.is_finished())
 
-    def get_results_shape(self, shape: Tuple = None):
+    def get_results_shape(self, shape: tuple = None):
         """Return a default array that mirrors the structure for this set of sweeps."""
         if self.nested_sweep is not None:
             return (self.sweep.length, *self.nested_sweep.get_results_shape(shape))

@@ -68,7 +68,7 @@ class Component(NoExtraFieldsModel):
         for field_name in self.__class__.model_fields:
             field_value = getattr(self, field_name)
             if (
-                isinstance(field_value, (Component, PulseChannelSet))
+                isinstance(field_value, Component | PulseChannelSet)
                 and not field_value.is_calibrated
             ):
                 return False

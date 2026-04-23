@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from random import random
-from typing import Dict, Iterable, List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -65,11 +65,11 @@ class OperatorInfo:
 
 @dataclass
 class Section:
-    indices: List[int]
-    qubits: List[str]
+    indices: list[int]
+    qubits: list[str]
     control_type: ControlType
-    simulation_time: List[float] = None
-    drive_hamiltonian: List["Qobj"] = field(default_factory=list)
+    simulation_time: list[float] = None
+    drive_hamiltonian: list["Qobj"] = field(default_factory=list)
 
     def __repr__(self):
         return f"Section({self.indices}, {self.qubits}, {str(self.control_type)})"
@@ -77,17 +77,17 @@ class Section:
 
 class MeasurementStatistics:
     def __init__(self, state, level=0, probability=1, qubits_measured=None, result=None):
-        self.state: "Qobj" = state
+        self.state: Qobj = state
         self.level: int = level
         self.probability: float = probability
         self.result: str = result
-        self.qubits_measured: List[int] = qubits_measured
-        self.measurement_statistics: List[MeasurementStatistics] = []
-        self.branch_number: Union[int, None] = None
+        self.qubits_measured: list[int] = qubits_measured
+        self.measurement_statistics: list[MeasurementStatistics] = []
+        self.branch_number: int | None = None
         self.dynamics_results = None
-        self.hamiltonian: Union[List["Qobj", float], None] = None
-        self.c_ops: Union[List["Qobj"], None] = None
-        self.sim_t: Union[List[float], None] = None
+        self.hamiltonian: list[Qobj | float] | None = None
+        self.c_ops: list[Qobj] | None = None
+        self.sim_t: list[float] | None = None
 
     def build_tree(
         self,
@@ -244,7 +244,7 @@ class MeasurementStatistics:
         return branch_nodes
 
     def extract_branch_trajectory(
-        self, operators: List["Qobj"], branch: int, step: int = 1, plot_end=False
+        self, operators: list["Qobj"], branch: int, step: int = 1, plot_end=False
     ):
         section_dynamics = [[] for i in range(len(operators))]
         sim_t = [[] for i in range(len(operators))]
@@ -648,7 +648,7 @@ def get_default_RTCS_hardware(
 
 
 class RealtimeSimHardwareModel(QuantumHardwareModel):
-    couplings: List[RTCSCoupling] = []
+    couplings: list[RTCSCoupling] = []
 
     def create_engine(self):
         return RealtimeChipSimEngine(self)
@@ -671,16 +671,16 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
         self.auto_plot = auto_plot
         self.sim_qubit_dt = sim_qubit_dt
-        self.measurement_statistics: Optional[MeasurementStatistics] = None
-        self.sim_t: Optional[List[int]] = None
-        self.channel_pulse_data: Optional[dict] = None
+        self.measurement_statistics: MeasurementStatistics | None = None
+        self.sim_t: list[int] | None = None
+        self.channel_pulse_data: dict | None = None
 
     def process_reset(self, position: PositionData):
         """When the superclass process_reset is implemented, it should remain empty for the
         simulator."""
         pass
 
-    def build_simulator_resets(self, position_map: Dict[str, List[PositionData]]):
+    def build_simulator_resets(self, position_map: dict[str, list[PositionData]]):
         """Qubit resets are handled in a unqiue way for the simulator so require their own
         function."""
         resets = {}
@@ -692,7 +692,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
         return resets
 
-    def optimize(self, instructions: List[Instruction]):
+    def optimize(self, instructions: list[Instruction]):
         with log_duration("Instructions optimized in {} seconds."):
             instructions = super().optimize(instructions)
             if not any(inst for inst in instructions if isinstance(inst, Repeat)):
@@ -711,7 +711,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
         sweep_iterator: SweepIterator,
         package: QatFile,
         interrupt: Interrupt = NullInterrupt(),
-    ) -> Dict[str, np.ndarray]:
+    ) -> dict[str, np.ndarray]:
         """Derivation of the mathematics behind this simulation can be found in the docs
         folder, "Realtime chip simulator mathematical derivation.pdf". Emulate the effects
         of the firmware and quantum hardware for a given input. Before instructions are
@@ -884,7 +884,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             # sections and the second the channels measured at the end of each section.
             for key in list(buffer_segments.keys()):
                 buffer_segments[target_devices[key].index] = buffer_segments.pop(key)
-            simulation_sections: Dict[Section] = get_resonator_response_splicing_indices(
+            simulation_sections: dict[Section] = get_resonator_response_splicing_indices(
                 buffer_segments
             )
 
@@ -1092,7 +1092,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
         return results
 
-    def plot_pulses(self, channels: List[str] = None):
+    def plot_pulses(self, channels: list[str] = None):
         """Plot pulses used to drive the system. Pulses are shown before being transformed
         by the baseband frequnecy.
 
@@ -1121,8 +1121,8 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
 
     def plot_dynamics(
         self,
-        operator_info: List[Union[OperatorInfo, int]] = None,
-        branches: List[int] = None,
+        operator_info: list[OperatorInfo | int] = None,
+        branches: list[int] = None,
         step: int = 1,
     ):
         """Plot the dynamics of operator expectation values for a simulation run on this
@@ -1328,7 +1328,7 @@ def get_resonator_response_splicing_indices(buffer_segments):
     split in order to perform mid-circuit measurements."""
     previous_start_indice = 0
     section_num = -1
-    simulation_sections: Dict[Section] = {}
+    simulation_sections: dict[Section] = {}
     ordered_segments = []
     for qubit, segments in buffer_segments.items():  # Order segments from first to last
         for segment in segments:

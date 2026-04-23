@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import abc
-from typing import Dict
 
 import numpy as np
 from compiler_config.config import ErrorMitigationConfig
@@ -16,7 +15,7 @@ class ApplyReadoutMitigation:
 
     @abc.abstractmethod
     def apply_error_mitigation(
-        self, results: dict, mapping: Dict, model: QuantumHardwareModel
+        self, results: dict, mapping: dict, model: QuantumHardwareModel
     ):
         pass
 
@@ -33,7 +32,7 @@ class ApplyPostProcReadoutMitigation(ApplyReadoutMitigation):
     name = "post_processing_readout_base_class"
 
     def apply_error_mitigation(
-        self, results: dict, mapping: Dict, model: QuantumHardwareModel
+        self, results: dict, mapping: dict, model: QuantumHardwareModel
     ):
         raise NotImplementedError()
 
@@ -42,7 +41,7 @@ class ApplyHybridReadoutMitigation(ApplyReadoutMitigation):
     name = "hybrid_readout_base_class"
 
     def apply_error_mitigation(
-        self, results: dict, mapping: Dict, model: QuantumHardwareModel
+        self, results: dict, mapping: dict, model: QuantumHardwareModel
     ):
         raise NotImplementedError()
 
@@ -61,7 +60,7 @@ class ApplyLinearReadoutMitigation(ApplyPostProcReadoutMitigation):
     """
 
     def apply_error_mitigation(
-        self, results: dict, mapping: Dict, model: QuantumHardwareModel
+        self, results: dict, mapping: dict, model: QuantumHardwareModel
     ):
         results = self.process_results(results)
         qubit_count = len(mapping)

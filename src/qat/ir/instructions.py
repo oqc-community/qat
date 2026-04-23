@@ -131,7 +131,7 @@ class InstructionBlock(Instruction, Iterable):
     def _rehydrate_instructions(cls, instructions):
         if isinstance(instructions, Instruction):
             return instructions
-        if not isinstance(instructions, (list, ValidatedList)):
+        if not isinstance(instructions, list | ValidatedList):
             raise TypeError(
                 f"Expected `instructions` to be a list of `Instruction` instances or dictionaries, got {type(instructions)}."
             )

@@ -251,7 +251,7 @@ class Qasm2Parser(AbstractParser):
     ):
         """Process each individual QASM node, builds context or forwards processing to
         relevant ``process_x`` method associated with each node type."""
-        if isinstance(node, (DAGInNode, DAGOutNode)):
+        if isinstance(node, DAGInNode | DAGOutNode):
             for register, _ in self._current_dag.find_bit(node.wire).registers:
                 if isinstance(register, QuantumRegister):
                     self.process_qreg(register, context, builder)

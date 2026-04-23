@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
-from typing import List
 
 from qat.purr.compiler.builders import InstructionBuilder
 from qat.purr.core.metrics_base import MetricsManager
@@ -157,7 +156,7 @@ class PassManager(PassInfoMixin):
     """
 
     def __init__(self):
-        self.passes: List[PassModel] = []
+        self.passes: list[PassModel] = []
 
     def run(
         self,

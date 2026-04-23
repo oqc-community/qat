@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC
-from typing import Dict
 
 from pydantic import BaseModel, Field, IPvAnyAddress
 
@@ -61,7 +60,7 @@ class LeafInstrument(InstrumentConcept):
 
 class CompositeInstrument(InstrumentConcept):
     def __init__(self):
-        self.components: Dict[str, LeafInstrument] = {}
+        self.components: dict[str, LeafInstrument] = {}
 
     def connect(self):
         for comp in self.components.values():

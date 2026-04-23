@@ -9,7 +9,7 @@ from datetime import date, datetime
 from enum import Enum
 from logging.config import dictConfig
 from pathlib import Path
-from typing import IO, List, Union
+from typing import IO
 
 from compiler_config.serialiser import json_dump, json_load
 from numpy import savetxt
@@ -103,7 +103,7 @@ class BasicLogger(logging.Logger):
             },
         )
 
-    def code(self, source: List[str]):
+    def code(self, source: list[str]):
         """Outputs a section of executable code (used for Jupyter files). This logging
         function is PuRR specific.
 
@@ -263,7 +263,7 @@ class FileLoggerHandler(logging.FileHandler):
         pass
 
     def __repr__(self):
-        return "File logger handler (path: %s)" % self.baseFilename
+        return f"File logger handler (path: {self.baseFilename})"
 
 
 class JsonHandler(FileLoggerHandler):
@@ -316,7 +316,7 @@ class JsonLoggerHandler(JsonHandler):
         self.flush()
 
     def __repr__(self):
-        return "JSON console logger handler (path: %s)" % self.baseFilename
+        return f"JSON console logger handler (path: {self.baseFilename})"
 
 
 class CompositeLogger(BasicLogger):
@@ -330,7 +330,7 @@ class CompositeLogger(BasicLogger):
 
     def __init__(
         self,
-        loggers_or_names: List[Union[str, logging.Logger]] = None,
+        loggers_or_names: list[str | logging.Logger] = None,
         _log_folder=None,
     ):
         """Creates the list of loggers on which the logging functions will iterate.
@@ -354,7 +354,7 @@ class CompositeLogger(BasicLogger):
             min([val.level for val in self.loggers if (float(val.level / 10)).is_integer()])
         )
 
-    def add_loggers(self, loggers_or_names: List[Union[str, logging.Logger]] = ()):
+    def add_loggers(self, loggers_or_names: list[str | logging.Logger] = ()):
         if loggers_or_names is not None:
             for val in loggers_or_names:
                 if isinstance(val, str):
@@ -410,7 +410,7 @@ class CompositeLogger(BasicLogger):
             if isinstance(logger, BasicLogger):
                 logger.output(data, **kwargs)
 
-    def code(self, source: List[str]):
+    def code(self, source: list[str]):
         for logger in self.loggers:
             if isinstance(logger, BasicLogger):
                 logger.code(source)
@@ -438,7 +438,7 @@ class CompositeLogger(BasicLogger):
         return name
 
     def close(self):
-        super(CompositeLogger, self).close()
+        super().close()
         for logger in self.loggers:
             if isinstance(logger, BasicLogger):
                 logger.close()
@@ -718,7 +718,7 @@ def get_logger_config(config_file=None, log_folder: LogFolder = None):
         )
         potential_file = os.path.join(os.path.dirname(__file__), "logger_settings.json")
 
-    with open(potential_file, "r") as f:
+    with open(potential_file) as f:
         logger_config = json_load(f)
         return import_logger_configuration(logger_config, log_folder)
 
@@ -746,9 +746,7 @@ def load_object_from_log_folder(file_path: str):
     extension = Path(file_path).suffix
     if not extension == ".json":
         raise ValueError("Only JSON file paths are accepted!")
-    with open(
-        os.path.join(get_default_logger().log_folder.folder_path, file_path), "r"
-    ) as f:
+    with open(os.path.join(get_default_logger().log_folder.folder_path, file_path)) as f:
         obj = json_load(f)
     get_default_logger().debug(f"Object loaded: {str(obj)}")
     return obj

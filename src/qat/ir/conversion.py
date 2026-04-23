@@ -248,7 +248,7 @@ class ConvertToPydanticIR(TransformPass):
         *args,
         **kwargs,
     ):
-        if all(isinstance(v, (Number, str)) for v in value):
+        if all(isinstance(v, Number | str) for v in value):
             return value
         else:
             temp_list = []
@@ -273,7 +273,7 @@ class ConvertToPydanticIR(TransformPass):
         new_dict = {}
         for key, val in value.items():
             new_key = self._convert_element(key, *args, **kwargs)
-            if isinstance(val, (int, float, str)):
+            if isinstance(val, int | float | str):
                 new_dict[new_key] = val
             else:
                 new_dict[new_key] = self._convert_element(val, *args, **kwargs)

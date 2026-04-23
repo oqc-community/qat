@@ -127,17 +127,17 @@ class QbloxContext(ABC):
 
     @property
     def duration(self):
-        if all((isinstance(d, Number) for d in self._durations)):
+        if all(isinstance(d, Number) for d in self._durations):
             return sum(self._durations)
 
-        ValueError("Cannot determine duration statically in dynamic settings")
+        raise ValueError("Cannot determine duration statically in dynamic settings")
 
     @property
     def phase(self):
-        if all((isinstance(p, Number) for p in self._phases)):
+        if all(isinstance(p, Number) for p in self._phases):
             return sum(self._phases)
 
-        ValueError("Cannot determine phase statically in dynamic settings")
+        raise ValueError("Cannot determine phase statically in dynamic settings")
 
     def create_package(
         self, target: PulseChannel, seq_idx: int, slot_idx: int
@@ -316,7 +316,7 @@ class QbloxContext(ABC):
 
         if isinstance(duration, int):
             pulse = np.zeros(duration, dtype=complex) if pulse is None else pulse
-            if all((isinstance(p, Number) for p in self._phases)):
+            if all(isinstance(p, Number) for p in self._phases):
                 total_phase = sum(self._phases)
                 pulse = pulse * np.exp(1.0j * total_phase)
             assert pulse.size == duration
@@ -445,7 +445,7 @@ class QbloxContext(ABC):
         )
         pulse = evaluate_shape(waveform, t)
         scale = target.scale
-        if isinstance(waveform, (Pulse, CustomPulse)) and waveform.ignore_channel_scale:
+        if isinstance(waveform, Pulse | CustomPulse) and waveform.ignore_channel_scale:
             scale = 1
 
         pulse *= scale
@@ -800,7 +800,7 @@ class QbloxContext(ABC):
         """
 
         is_static = all(
-            all((isinstance(d, Number) for d in contexts[target].durations))
+            all(isinstance(d, Number) for d in contexts[target].durations)
             for target in inst.quantum_targets
         )
 
@@ -808,7 +808,7 @@ class QbloxContext(ABC):
             cxt = contexts[target]
             if is_static:
                 duration_offset = (
-                    max((contexts[target].duration for target in inst.quantum_targets))
+                    max(contexts[target].duration for target in inst.quantum_targets)
                     - cxt.duration
                 )
                 cxt.wait_imm(duration_offset)

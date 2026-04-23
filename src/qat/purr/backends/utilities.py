@@ -3,7 +3,6 @@
 import sys
 from dataclasses import dataclass
 from functools import wraps
-from typing import Dict, List, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -484,7 +483,7 @@ def get_axis_map(mode: AcquireMode, result: np.ndarray):
 
 
 def software_post_process_down_convert(
-    args, axes: List[ProcessAxis], raw: np.ndarray, source_axes: Dict[ProcessAxis, int]
+    args, axes: list[ProcessAxis], raw: np.ndarray, source_axes: dict[ProcessAxis, int]
 ):
     freq, dt = args
 
@@ -502,7 +501,7 @@ def software_post_process_down_convert(
 
 
 def software_post_process_mean(
-    target_axes: List[ProcessAxis], raw: np.ndarray, axes: Dict[ProcessAxis, int]
+    target_axes: list[ProcessAxis], raw: np.ndarray, axes: dict[ProcessAxis, int]
 ):
     axis_indices = tuple(axes[axis] for axis in axes if axis in target_axes)
     final_axes = remove_axes(raw.ndim, axis_indices, axes)
@@ -511,13 +510,13 @@ def software_post_process_mean(
 
 
 def software_post_process_linear_map_complex_to_real(
-    args, raw: List[np.ndarray], axes: Dict[ProcessAxis, int]
+    args, raw: list[np.ndarray], axes: dict[ProcessAxis, int]
 ):
     return np.real(args[0] * raw + args[1]), axes
 
 
 def software_post_process_discriminate(
-    args, raw: Union[np.ndarray, List[np.ndarray]], axes: Dict[ProcessAxis, int]
+    args, raw: np.ndarray | list[np.ndarray], axes: dict[ProcessAxis, int]
 ):
     z_vals = raw[0] if isinstance(raw, list) else raw
     discr = args[0]

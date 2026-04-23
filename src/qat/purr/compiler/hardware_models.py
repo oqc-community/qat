@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import numpy as np
 
@@ -69,7 +69,7 @@ class HardwareModel:
         return self.__class__.__name__
 
 
-def get_cl2qu_index_mapping(instructions: List[Instruction], model: QuantumHardwareModel):
+def get_cl2qu_index_mapping(instructions: list[Instruction], model: QuantumHardwareModel):
     """Returns a Dict[str, str] mapping creg to qreg indices.
 
     Classical register indices are extracted following the pattern
@@ -120,18 +120,18 @@ class ReadoutMitigation(Calibratable):
 
     def __init__(
         self,
-        linear: [Dict[str, Dict[str, float]]] = None,
+        linear: list[dict[str, dict[str, float]]] | None = None,
         matrix: np.array = None,
         m3: bool = False,
     ):
         super().__init__()
         self.m3_available = m3
-        self.linear: [Dict[str, Dict[str, float]]] = linear
+        self.linear: list[dict[str, dict[str, float]]] | None = linear
         self.matrix: np.array = matrix
 
 
 class ErrorMitigation(Calibratable):
-    def __init__(self, readout_mitigation: Optional[ReadoutMitigation] = None):
+    def __init__(self, readout_mitigation: ReadoutMitigation | None = None):
         super().__init__()
         self.readout_mitigation = readout_mitigation
 
@@ -160,7 +160,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         acquire_mode=None,
         repeat_count=1000,
         repetition_period=100e-6,
-        error_mitigation: Optional[ErrorMitigation] = None,
+        error_mitigation: ErrorMitigation | None = None,
         calibration_id: str = "",
     ):
         # Our hardware has a default shot limit of 10,000 right now.
@@ -168,12 +168,12 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self.default_repeat_count = repeat_count
         self.default_repetition_period = repetition_period
 
-        self.quantum_devices: Dict[str, QuantumDevice] = {}
-        self.pulse_channels: Dict[str, PulseChannel] = {}
-        self.physical_channels: Dict[str, PhysicalChannel] = {}
-        self.basebands: Dict[str, PhysicalBaseband] = {}
-        self.qubit_direction_couplings: List[QubitCoupling] = []
-        self.error_mitigation: Optional[ErrorMitigation] = error_mitigation
+        self.quantum_devices: dict[str, QuantumDevice] = {}
+        self.pulse_channels: dict[str, PulseChannel] = {}
+        self.physical_channels: dict[str, PhysicalChannel] = {}
+        self.basebands: dict[str, PhysicalBaseband] = {}
+        self.qubit_direction_couplings: list[QubitCoupling] = []
+        self.error_mitigation: ErrorMitigation | None = error_mitigation
         self.calibration_id = calibration_id
 
         # Construct last due to us overriding calibratables fields with properties.
@@ -201,14 +201,14 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         return EchoEngine(self)
 
-    def create_builder(self) -> "QuantumInstructionBuilder":
+    def create_builder(self) -> QuantumInstructionBuilder:
         from qat.purr.compiler.builders import QuantumInstructionBuilder
 
         return QuantumInstructionBuilder(self)
 
     def resolve_qb_pulse_channel(
-        self, chanbit: Union[Qubit, PulseChannel]
-    ) -> Tuple[Qubit, PulseChannel]:
+        self, chanbit: Qubit | PulseChannel
+    ) -> tuple[Qubit, PulseChannel]:
         if isinstance(chanbit, Qubit):
             return chanbit, chanbit.get_default_pulse_channel()
         else:
@@ -229,12 +229,12 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def resonators(self):
         return [qd for qd in self.quantum_devices.values() if isinstance(qd, Resonator)]
 
-    def has_qubit(self, id_: Union[int, str]):
+    def has_qubit(self, id_: int | str):
         if isinstance(id_, int):
             id_ = f"Q{id_}"
         return id_ in self.quantum_devices
 
-    def get_qubit(self, id_: Union[int, str, Qubit]) -> Qubit:
+    def get_qubit(self, id_: int | str | Qubit) -> Qubit:
         """Returns a qubit based on id/index.
 
         If the passed-in object is already a Qubit object just returns that.
@@ -293,7 +293,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         self,
         ch_type: ChannelType,
         host_device_id: str,
-        aux_device_ids: List[str] = None,
+        aux_device_ids: list[str] = None,
     ):
         if aux_device_ids is None:
             aux_device_ids = []
@@ -302,7 +302,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         )
 
     def get_pulse_channels_from_physical_channel(
-        self, physical_channel: Union[str, PhysicalChannel]
+        self, physical_channel: str | PhysicalChannel
     ):
         # WARNING: this will not get pulse channels created during execution, only ones
         # predefined on the hardware.
@@ -315,7 +315,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         return pulse_channels
 
-    def get_devices_from_pulse_channel(self, pulse_channel: Union[str, PulseChannel]):
+    def get_devices_from_pulse_channel(self, pulse_channel: str | PulseChannel):
         if isinstance(pulse_channel, str):
             pulse_channel = self.get_pulse_channel_from_id(pulse_channel)
         devices = [
@@ -328,9 +328,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def get_pulse_channel_from_id(self, id_: str):
         return self.pulse_channels.get(id_)
 
-    def get_devices_from_physical_channel(
-        self, physical_channel: Union[str, PhysicalChannel]
-    ):
+    def get_devices_from_physical_channel(self, physical_channel: str | PhysicalChannel):
         if isinstance(physical_channel, str):
             physical_channel = self.get_physical_channel(physical_channel)
         devices = [
@@ -392,7 +390,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
         else:
             self.add_quantum_device(device)
 
-    def _resolve_qb_pulse_channel(self, chanbit: Union[Qubit, PulseChannel]):
+    def _resolve_qb_pulse_channel(self, chanbit: Qubit | PulseChannel):
         if isinstance(chanbit, Qubit):
             return chanbit, chanbit.get_default_pulse_channel()
         else:
@@ -456,7 +454,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
     def get_hw_x_pi_2(
         self, qubit, pulse_channel: PulseChannel = None, amp_scale: float = None
-    ) -> List[Any]:
+    ) -> list[Any]:
         if amp_scale is None or np.isclose(amp_scale, 1.0):
             pulse_args = qubit.pulse_hw_x_pi_2
         else:
@@ -475,7 +473,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
             )
         ]
 
-    def get_hw_z(self, qubit, phase, pulse_channel: PulseChannel = None) -> List[Any]:
+    def get_hw_z(self, qubit, phase, pulse_channel: PulseChannel = None) -> list[Any]:
         if phase == 0:
             return []
 
@@ -498,7 +496,7 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
 
         return instr_collection
 
-    def get_hw_zx_pi_4(self, qubit: Qubit, target_qubit: Qubit) -> List[Any]:
+    def get_hw_zx_pi_4(self, qubit: Qubit, target_qubit: Qubit) -> list[Any]:
         control_channel = qubit.get_cross_resonance_channel(target_qubit)
         target_channel = target_qubit.get_cross_resonance_cancellation_channel(qubit)
         pulse = qubit.pulse_hw_zx_pi_4.get(target_qubit.id, None)

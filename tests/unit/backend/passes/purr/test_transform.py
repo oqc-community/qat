@@ -63,12 +63,10 @@ def test_scope_peeling_pass(qubit_indices):
 
     pipeline.run(builder, res_mgr, met_mgr)
 
-    sweep = next((inst for inst in builder.instructions if isinstance(inst, Sweep)))
-    end_sweep = next((inst for inst in builder.instructions if isinstance(inst, EndSweep)))
-    repeat = next((inst for inst in builder.instructions if isinstance(inst, Repeat)))
-    end_repeat = next(
-        (inst for inst in builder.instructions if isinstance(inst, EndRepeat))
-    )
+    sweep = next(inst for inst in builder.instructions if isinstance(inst, Sweep))
+    end_sweep = next(inst for inst in builder.instructions if isinstance(inst, EndSweep))
+    repeat = next(inst for inst in builder.instructions if isinstance(inst, Repeat))
+    end_repeat = next(inst for inst in builder.instructions if isinstance(inst, EndRepeat))
     valid_scopes = [(sweep, end_sweep), (repeat, end_repeat)]
     invalid_scopes = [(sweep, end_repeat), (repeat, end_sweep), (end_repeat, sweep)]
 

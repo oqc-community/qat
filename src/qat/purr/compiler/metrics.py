@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
-from typing import List, Optional
 
 from compiler_config.config import MetricsType
 
@@ -36,18 +35,18 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
     hold the value associated with that particular flag.
     """
 
-    optimized_circuit: Optional[str]
-    optimized_instruction_count: Optional[int]
-    physical_qubit_indices: Optional[list[int]]
+    optimized_circuit: str | None
+    optimized_instruction_count: int | None
+    physical_qubit_indices: list[int] | None
 
     def __init__(self, enabled_metrics=None):
-        self.enabled_metrics: Optional[MetricsType] = (
+        self.enabled_metrics: MetricsType | None = (
             enabled_metrics or MetricsType.Experimental
         )
         for key in [val.snake_case_name() for val in self._target_metrics()]:
             setattr(self, key, None)
 
-    def _target_metrics(self) -> List[MetricsType]:
+    def _target_metrics(self) -> list[MetricsType]:
         """Get a list of the enum types that we should function on."""
         return [
             val
@@ -102,7 +101,7 @@ class CompilationMetrics(metaclass=_FlagFieldValidation):
 class MetricsMixin:
     def __init__(self):
         super().__init__()
-        self.compilation_metrics: Optional[CompilationMetrics] = None
+        self.compilation_metrics: CompilationMetrics | None = None
 
     def are_metrics_enabled(self, metric_type: MetricsType = None):
         """Do we have a metrics collection, and if so does it have any active metrics."""

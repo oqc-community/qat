@@ -105,7 +105,7 @@ class QIRFrontend(BaseFrontend):
         :returns: If the program is determined to not be valid, False is returned.
             Otherwise, the program is returned (and loaded if required).
         """
-        if not isinstance(src, (str, bytes)):
+        if not isinstance(src, str | bytes):
             return False
 
         if isinstance(src, str):

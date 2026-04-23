@@ -3,7 +3,6 @@
 import abc
 import os
 import tempfile
-from typing import Tuple
 
 import regex
 from compiler_config.config import (
@@ -82,7 +81,7 @@ class LanguageFrontend(abc.ABC):
     @abc.abstractmethod
     def parse(
         self, program_str: str, hardware, compiler_config: CompilerConfig
-    ) -> Tuple[InstructionBuilder, CompilationMetrics]: ...
+    ) -> tuple[InstructionBuilder, CompilationMetrics]: ...
 
     @abc.abstractmethod
     def execute(

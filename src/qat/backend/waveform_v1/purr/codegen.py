@@ -340,7 +340,7 @@ class WaveformContext:
 
         scale = self.pulse_channel.scale
         if (
-            isinstance(instruction, (Pulse, CustomPulse))
+            isinstance(instruction, Pulse | CustomPulse)
             and instruction.ignore_channel_scale
         ):
             scale = 1

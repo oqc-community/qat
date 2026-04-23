@@ -957,7 +957,7 @@ class TestQASM3Features:
         parser = Qasm3Parser()
         builder = parser.parse(get_builder(model), qasm)
         for inst in builder.instructions:
-            assert not isinstance(inst, (Pulse, CustomPulse))
+            assert not isinstance(inst, Pulse | CustomPulse)
 
     def test_measure(self, model, feature_testpath):
         qubit = model.qubits[0]
@@ -1150,7 +1150,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 2
         assert pulses[0].quantum_targets[0].full_id() == qubit.get_drive_channel().full_id()
@@ -1231,7 +1231,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert pulses[0].quantum_targets[0].full_id() == qubit.get_drive_channel().full_id()
@@ -1253,7 +1253,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.allclose(pulses[0].samples, samples)
@@ -1272,7 +1272,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1294,7 +1294,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1318,7 +1318,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1341,7 +1341,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1363,7 +1363,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1386,7 +1386,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1410,7 +1410,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.allclose(pulses[0].samples, [2.5e-4 * 0.5])
@@ -1431,7 +1431,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1453,7 +1453,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.isclose(pulses[0].duration, 80e-9)
@@ -1477,7 +1477,7 @@ class TestQASM3Features:
 
         assert qubit in devices
         pulses = [
-            inst for inst in builder.instructions if isinstance(inst, (Pulse, CustomPulse))
+            inst for inst in builder.instructions if isinstance(inst, Pulse | CustomPulse)
         ]
         assert len(pulses) == 1
         assert np.allclose(pulses[0].samples, [2.5e-4 + 5e-4])

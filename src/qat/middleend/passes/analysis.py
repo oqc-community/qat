@@ -81,7 +81,7 @@ class ActivePulseChannelAnalysis(AnalysisPass):
 
         targets: set[str] = set()
         for inst in ir.instructions:
-            if isinstance(inst, (Acquire, Pulse)):
+            if isinstance(inst, Acquire | Pulse):
                 targets.add(inst.target)
 
         result = ActivePulseChannelResults()

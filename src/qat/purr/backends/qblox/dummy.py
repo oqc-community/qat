@@ -96,7 +96,7 @@ class DummyQbloxControlHardware(QbloxControlHardware):
         for pulse_channel_id, sequencer in self._id2seq.items():
             if ChannelType.macq.name in pulse_channel_id:
                 package = next(
-                    (pkg for pkg in packages if pkg.pulse_channel_id == pulse_channel_id)
+                    pkg for pkg in packages if pkg.pulse_channel_id == pulse_channel_id
                 )
                 self._setup_dummy_scope_acq_data(sequencer, package.sequence)
                 self._setup_dummy_binned_acq_data(sequencer, package.sequence)

@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import uuid
 from abc import ABC
-from typing import Set, TypeVar
+from typing import TypeVar
 
 
 class ResultConcept(ABC):
@@ -77,7 +77,7 @@ class ResultManager:
     """
 
     def __init__(self):
-        self._results: Set[ResultModel] = set()
+        self._results: set[ResultModel] = set()
 
     @property
     def results(self):

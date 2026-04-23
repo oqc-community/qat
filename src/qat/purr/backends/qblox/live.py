@@ -4,7 +4,6 @@ from abc import abstractmethod
 from collections import defaultdict
 from functools import reduce
 from itertools import groupby
-from typing import Dict, List
 
 from compiler_config.config import InlineResultsProcessing
 from more_itertools import partition
@@ -89,7 +88,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     def optimize(self, instructions):
         pass
 
-    def validate(self, instructions: List[Instruction]):
+    def validate(self, instructions: list[Instruction]):
         pass
 
     def _process_results(self, results, triage_result: TriageResult):
@@ -134,7 +133,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
 
         def recurse_arrays(results_map, value):
             """Recurse through assignment lists and fetch values in sequence."""
-            if isinstance(value, List):
+            if isinstance(value, list):
                 return [recurse_arrays(results_map, val) for val in value]
             elif isinstance(value, Variable):
                 if value.name not in results_map:
@@ -158,7 +157,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         return {key: assigned_results[key] for key in ret_inst.variables}
 
     @staticmethod
-    def combine_playbacks(playbacks: Dict[str, List[Acquisition]]):
+    def combine_playbacks(playbacks: dict[str, list[Acquisition]]):
         """Combines acquisition objects from multiple acquire instructions in multiple
         readout targets. Notice that :meth:`groupby` preserves (original) relative order,
         which makes it honour the (sequential) lexicographical order of the loop nest:
@@ -171,7 +170,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         making it more robust.
         """
 
-        playback: Dict[str, Dict[str, Acquisition]] = {}
+        playback: dict[str, dict[str, Acquisition]] = {}
         for pulse_channel_id, acquisitions in playbacks.items():
             acquisitions.sort(key=lambda acquisition: acquisition.name)
             groups_by_name = groupby(acquisitions, lambda acquisition: acquisition.name)
@@ -187,7 +186,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         return playback
 
     def process_playback(
-        self, playback: Dict[str, Dict[str, Acquisition]], res_mgr: ResultManager
+        self, playback: dict[str, dict[str, Acquisition]], res_mgr: ResultManager
     ):
         """Now that the combined playback is ready, we can compute and process results as
         required by customers.
@@ -213,7 +212,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
                 integ_data = acquisition.acquisition.bins.integration
                 thrld_data = acquisition.acquisition.bins.threshold
 
-                acquire = next((inst for inst in acquires if inst.output_variable == name))
+                acquire = next(inst for inst in acquires if inst.output_variable == name)
                 if acquire.mode in [AcquireMode.SCOPE, AcquireMode.RAW]:
                     repeat_counts.clear()
                     response = scope_data.path0.data + 1j * scope_data.path1.data
@@ -252,7 +251,7 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
     @abstractmethod
     def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager): ...
 
-    def execute_packages(self, packages) -> Dict[str, Dict[str, Acquisition]]: ...
+    def execute_packages(self, packages) -> dict[str, dict[str, Acquisition]]: ...
 
     def _common_execute(self, builder, interrupt: Interrupt = NullInterrupt()):
         self._model_exists()
@@ -292,7 +291,7 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
         return QbloxEmitter().emit_packages(ir, res_mgr, met_mgr)
 
     def execute_packages(self, iter2packages):
-        playbacks: Dict[str, List[Acquisition]] = defaultdict(list)
+        playbacks: dict[str, list[Acquisition]] = defaultdict(list)
         for packages in iter2packages.values():
             self.model.control_hardware.set_data(packages)
             playback = self.model.control_hardware.start_playback(None, None)
@@ -350,9 +349,9 @@ class QbloxLiveEngine2(AbstractQbloxLiveEngine):
         finally:
             injectors.revert()
 
-    def execute_packages(self, packages: List[QbloxPackage]):
+    def execute_packages(self, packages: list[QbloxPackage]):
         self.model.control_hardware.set_data(packages)
-        playbacks: Dict[str, List[Acquisition]] = (
+        playbacks: dict[str, list[Acquisition]] = (
             self.model.control_hardware.start_playback(None, None)
         )
 

@@ -2,10 +2,10 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 from abc import ABC
 from numbers import Number
+from typing import Annotated
 
 import numpy as np
 from pydantic import AfterValidator
-from typing_extensions import Annotated
 
 from qat.ir.instructions import Instruction
 

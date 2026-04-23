@@ -52,11 +52,11 @@ class TestPostProcessingTransform:
         )
         assert len(result) == 1
         assert "test" in result
-        assert np.shape((result["test"])) == (1000,)
+        assert np.shape(result["test"]) == (1000,)
         assert np.allclose(result["test"], -1.0)
 
     def test_integrator_to_bits(self):
-        mock_readout = {"test": np.ones((1000))}
+        mock_readout = {"test": np.ones(1000)}
         pp_instructions = [
             PostProcessing(
                 output_variable="test",
@@ -84,7 +84,7 @@ class TestPostProcessingTransform:
         )
         assert len(result) == 1
         assert "test" in result
-        assert np.shape((result["test"])) == (1000,)
+        assert np.shape(result["test"]) == (1000,)
         assert np.allclose(result["test"], -1.0)
 
 

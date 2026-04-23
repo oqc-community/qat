@@ -1,4 +1,4 @@
-from typing import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 from matplotlib import pyplot as plt, ticker
@@ -12,7 +12,7 @@ from qat.purr.compiler.runtime import QuantumRuntime, get_builder
 from qat.purr.integrations.qasm import Qasm3Parser
 
 np.set_printoptions(
-    edgeitems=3000000, linewidth=100000000, formatter=dict(float=lambda x: "%.3g" % x)
+    edgeitems=3000000, linewidth=100000000, formatter=dict(float=lambda x: f"{x:.3g}")
 )
 
 

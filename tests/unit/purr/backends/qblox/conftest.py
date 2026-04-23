@@ -3,7 +3,6 @@
 
 import os
 from dataclasses import dataclass
-from typing import Dict, List
 
 import numpy as np
 import pytest
@@ -71,7 +70,7 @@ def random_resource(type: ClusterType, name: str, address: str = None):
 class ClusterSetup:
     name: str = None
     address: str = None
-    dummy_cfg: Dict = None
+    dummy_cfg: dict = None
 
     def choose_qcmrf_qrmrf_slots(self):
         cluster = None
@@ -211,9 +210,9 @@ def cluster_setup(request, function_seed):
 def model(request, function_seed):
     with temporary_uuid_seed(function_seed):
         name = f"{request.node.originalname}_{uuid4()}".replace("-", "_")
-        if isinstance(request.param, Dict):
+        if isinstance(request.param, dict):
             address = request.param.get("address", None)
-        elif isinstance(request.param, List) and len(request.param) > 0:
+        elif isinstance(request.param, list) and len(request.param) > 0:
             address = request.param[0]
         else:
             address = request.param

@@ -8,7 +8,6 @@ from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
 from numbers import Number
-from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -65,28 +64,28 @@ log = get_default_logger()
 
 @dataclass
 class QbloxPackage:
-    pulse_channel_id: Optional[str] = None
-    physical_channel_id: Optional[str] = None
-    instrument_id: Optional[str] = None
-    seq_idx: Optional[int] = None
+    pulse_channel_id: str | None = None
+    physical_channel_id: str | None = None
+    instrument_id: str | None = None
+    seq_idx: int | None = None
     seq_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
-    slot_idx: Optional[int] = None
+    slot_idx: int | None = None
     mod_config: ModuleConfig = field(default_factory=lambda: ModuleConfig())
-    sequence: Optional[Sequence] = None
-    timeline: Optional[np.ndarray] = None
+    sequence: Sequence | None = None
+    timeline: np.ndarray | None = None
 
 
 @dataclass
 class AllocationManager:
-    _reg_pool: List[str] = field(
+    _reg_pool: list[str] = field(
         default_factory=lambda: sorted(
             f"R{index}" for index in range(Constants.NUMBER_OF_REGISTERS)
         )
     )
-    _lbl_counters: Dict[str, int] = field(default_factory=dict)
+    _lbl_counters: dict[str, int] = field(default_factory=dict)
 
-    registers: Dict[str, str] = field(default_factory=dict)
-    labels: Dict[str, str] = field(default_factory=dict)
+    registers: dict[str, str] = field(default_factory=dict)
+    labels: dict[str, str] = field(default_factory=dict)
 
     def reg_alloc(self, name: str) -> str:
         if name in self.registers:
@@ -128,9 +127,9 @@ class AllocationManager:
 
 class BaseEmitter:
     def __init__(self):
-        self.allocations: Dict[int, Dict[str, int]] = defaultdict(dict)
+        self.allocations: dict[int, dict[str, int]] = defaultdict(dict)
 
-    def allocate(self, target: PulseChannel) -> Tuple[int, int]:
+    def allocate(self, target: PulseChannel) -> tuple[int, int]:
         slot_idx = target.physical_channel.slot_idx
         target2seq = self.allocations[slot_idx]
         if (seq_idx := target2seq.get(target.full_id(), None)) is None:
@@ -152,12 +151,12 @@ class QbloxContext(ABC):
     def __init__(
         self,
         rw_result: ReadWriteResult,
-        iter_bounds: Dict[str, IterBound],
+        iter_bounds: dict[str, IterBound],
         alloc_mgr: AllocationManager = None,
     ):
-        self.inits: Dict[str, List[Instruction]] = rw_result.inits
-        self.reads: Dict[str, List[Instruction]] = rw_result.reads
-        self.writes: Dict[str, List[Instruction]] = rw_result.writes
+        self.inits: dict[str, list[Instruction]] = rw_result.inits
+        self.reads: dict[str, list[Instruction]] = rw_result.reads
+        self.writes: dict[str, list[Instruction]] = rw_result.writes
         self.iter_bounds = iter_bounds
         self.alloc_mgr = alloc_mgr or AllocationManager()
 
@@ -170,9 +169,9 @@ class QbloxContext(ABC):
         self._acq_index: int = 0
         self._wgt_index: int = 0
 
-        self._durations: List[Union[float, str]] = []
+        self._durations: list[float | str] = []
         self._frequency: float = 0.0  # Tracks frequency shifts on the target
-        self._phases: List[Union[float, str]] = []
+        self._phases: list[float | str] = []
         self._timeline: np.ndarray = np.empty(0, dtype=complex)
 
     def __enter__(self):
@@ -204,14 +203,14 @@ class QbloxContext(ABC):
 
     @property
     def duration(self):
-        if all((isinstance(d, Number) for d in self._durations)):
+        if all(isinstance(d, Number) for d in self._durations):
             return sum(self._durations)
 
         ValueError("Cannot determine duration statically in dynamic settings")
 
     @property
     def phase(self):
-        if all((isinstance(p, Number) for p in self._phases)):
+        if all(isinstance(p, Number) for p in self._phases):
             return sum(self._phases)
 
         ValueError("Cannot determine phase statically in dynamic settings")
@@ -352,7 +351,7 @@ class QbloxContext(ABC):
             self.sequence_builder.wait(iter_reg)
             self.sequence_builder.label(batch_exit)
 
-    def ledger(self, duration: Union[int, str], pulse: np.ndarray = None):
+    def ledger(self, duration: int | str, pulse: np.ndarray = None):
         """A helper method to keep track of the durations and phase as the codegen runs.
 
         Every little bit of time is accounted for and a timeline object (in static cases) is
@@ -361,7 +360,7 @@ class QbloxContext(ABC):
 
         if isinstance(duration, int):
             pulse = np.zeros(duration, dtype=complex) if pulse is None else pulse
-            if all((isinstance(p, Number) for p in self._phases)):
+            if all(isinstance(p, Number) for p in self._phases):
                 total_phase = sum(self._phases)
                 pulse = pulse * np.exp(1.0j * total_phase)
             assert pulse.size == duration
@@ -478,7 +477,7 @@ class QbloxContext(ABC):
         )
         pulse = evaluate_shape(waveform, t)
         scale = target.scale
-        if isinstance(waveform, (Pulse, CustomPulse)) and waveform.ignore_channel_scale:
+        if isinstance(waveform, Pulse | CustomPulse) and waveform.ignore_channel_scale:
             scale = 1
 
         pulse *= scale
@@ -545,7 +544,7 @@ class QbloxContext(ABC):
         q_index = self._register_signal(waveform, target, data.imag, "Q")
         return i_index, q_index
 
-    def _register_acquisition(self, acq_name: str, num_bins: Union[int, str]):
+    def _register_acquisition(self, acq_name: str, num_bins: int | str):
         acq_index = self._acq_index
         self.sequence_builder.add_acquisition(acq_name, acq_index, num_bins)
         self._acq_index = acq_index + 1
@@ -814,14 +813,14 @@ class QbloxContext(ABC):
         self.ledger(pulse_width, pulse)
 
     @staticmethod
-    def synchronize(inst: Synchronize, contexts: Dict):
+    def synchronize(inst: Synchronize, contexts: dict):
         """Favours static time padding whenever possible, or else uses SYNC.
 
         TODO - Default to SYNC when Qblox supports finer grained SYNC groups
         """
 
         is_static = all(
-            all((isinstance(d, Number) for d in contexts[target].durations))
+            all(isinstance(d, Number) for d in contexts[target].durations)
             for target in inst.quantum_targets
         )
 
@@ -829,7 +828,7 @@ class QbloxContext(ABC):
             cxt = contexts[target]
             if is_static:
                 duration_offset = (
-                    max((contexts[target].duration for target in inst.quantum_targets))
+                    max(contexts[target].duration for target in inst.quantum_targets)
                     - cxt.duration
                 )
                 cxt.wait_imm(duration_offset)
@@ -870,7 +869,7 @@ class QbloxContext(ABC):
             raise ValueError(f"Expected a Variable or a Number but got {du_inst.value}")
 
     @staticmethod
-    def enter_repeat(inst: Repeat, contexts: Dict):
+    def enter_repeat(inst: Repeat, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
             var_names = set([n for (n, insts) in context.inits.items() if inst in insts])
@@ -892,7 +891,7 @@ class QbloxContext(ABC):
             context.reset_phase()
 
     @staticmethod
-    def exit_repeat(inst: Repeat, contexts: Dict):
+    def exit_repeat(inst: Repeat, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
             context.wait_imm(int(inst.repetition_period * 1e9))
@@ -918,7 +917,7 @@ class QbloxContext(ABC):
             context.sequence_builder.jlt(register, bound.end + bound.step, label)
 
     @staticmethod
-    def enter_sweep(inst: Sweep, contexts: Dict):
+    def enter_sweep(inst: Sweep, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
             var_names = set([n for (n, insts) in context.inits.items() if inst in insts])
@@ -935,7 +934,7 @@ class QbloxContext(ABC):
             context.sequence_builder.label(label)
 
     @staticmethod
-    def exit_sweep(inst: Sweep, contexts: Dict):
+    def exit_sweep(inst: Sweep, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
             var_names = set(
@@ -961,7 +960,7 @@ class QbloxContext(ABC):
 
 @dataclass
 class PreCodegenResult(ResultInfoMixin):
-    alloc_mgrs: Dict[PulseChannel, AllocationManager] = field(
+    alloc_mgrs: dict[PulseChannel, AllocationManager] = field(
         default_factory=lambda: defaultdict(lambda: AllocationManager())
     )
 
@@ -1003,7 +1002,7 @@ class QbloxEmitter(BaseEmitter, InvokerMixin):
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         ignore_empty=True,
-    ) -> Dict[int, List[QbloxPackage]]:
+    ) -> dict[int, list[QbloxPackage]]:
         triage_result = res_mgr.lookup_by_type(TriageResult)
         device_updates = triage_result.device_updates
         quantum_instructions = triage_result.quantum_instructions
@@ -1021,7 +1020,7 @@ class QbloxEmitter(BaseEmitter, InvokerMixin):
         # TODO - Pass infrastructural improvements [COMPILER-849]
         # res_mgr.mark_as_dirty(triage_result, binding_result)
 
-        iter2packages: Dict[int, List[QbloxPackage]] = OrderedDict()
+        iter2packages: dict[int, list[QbloxPackage]] = OrderedDict()
         try:
             dinjectors.inject()
             while not switerator.is_finished():
@@ -1051,12 +1050,12 @@ class QbloxEmitter(BaseEmitter, InvokerMixin):
         binding_result: BindingResult,
         precodegen_result: PreCodegenResult,
         ignore_empty=True,
-    ) -> List[QbloxPackage]:
-        rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
-        iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = (
+    ) -> list[QbloxPackage]:
+        rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
+        iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
             binding_result.iter_bound_results
         )
-        alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
+        alloc_mgrs: dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
 
         with ExitStack() as stack:
             contexts = {
@@ -1128,7 +1127,7 @@ class NewQbloxEmitter(BaseEmitter, InvokerMixin):
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         ignore_empty=True,
-    ) -> List[QbloxPackage]:
+    ) -> list[QbloxPackage]:
         self.run_pass_pipeline(ir, res_mgr, met_mgr)
 
         triage_result = res_mgr.lookup_by_type(TriageResult)
@@ -1136,11 +1135,11 @@ class NewQbloxEmitter(BaseEmitter, InvokerMixin):
         precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
         cfg_result = res_mgr.lookup_by_type(CFGResult)
 
-        rw_results: Dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
-        iter_bound_results: Dict[PulseChannel, Dict[str, IterBound]] = (
+        rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
+        iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
             binding_result.iter_bound_results
         )
-        alloc_mgrs: Dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
+        alloc_mgrs: dict[PulseChannel, AllocationManager] = precodegen_result.alloc_mgrs
 
         with ExitStack() as stack:
             contexts = {
@@ -1165,7 +1164,7 @@ class NewQbloxEmitter(BaseEmitter, InvokerMixin):
 
 
 class QbloxCFGWalker(DfsTraversal):
-    def __init__(self, contexts: Dict[PulseChannel, QbloxContext]):
+    def __init__(self, contexts: dict[PulseChannel, QbloxContext]):
         super().__init__()
         self.contexts = contexts
 

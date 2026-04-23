@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
-from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -148,7 +147,7 @@ class LiveHardwareModel(QuantumHardwareModel):
         acquire_mode=None,
         repeat_count=1000,
         repetition_period=100e-6,
-        error_mitigation: Optional[ErrorMitigation] = None,
+        error_mitigation: ErrorMitigation | None = None,
         calibration_id: str = "",
     ):
         super().__init__(
@@ -160,8 +159,8 @@ class LiveHardwareModel(QuantumHardwareModel):
             calibration_id=calibration_id,
         )
         self.control_hardware: ControlHardware = control_hardware
-        self.instruments: Dict[str, Instrument] = {}
-        self.qubit_direction_couplings: List[QubitCoupling] = []
+        self.instruments: dict[str, Instrument] = {}
+        self.qubit_direction_couplings: list[QubitCoupling] = []
 
     def create_engine(self, startup_engine: bool = True):
         return LiveDeviceEngine(self, startup_engine)
@@ -258,7 +257,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         )
 
     def build_baseband_frequencies(
-        self, pulse_channel_buffers: Dict[PulseChannel, np.ndarray]
+        self, pulse_channel_buffers: dict[PulseChannel, np.ndarray]
     ):
         """Find fixed intermediate frequencies for physical channels if they exist."""
         baseband_freqs = {}
@@ -298,7 +297,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         sweep_iterator: SweepIterator,
         package: QatFile,
         interrupt: Interrupt = NullInterrupt(),
-    ) -> Dict[str, np.ndarray]:
+    ) -> dict[str, np.ndarray]:
         if self.model.control_hardware is None:
             raise ValueError("Please add a control hardware first!")
 
@@ -412,11 +411,11 @@ class LiveDeviceEngine(QuantumExecutionEngine):
 
             return instructions
 
-    def validate(self, instructions: List[Instruction]):
+    def validate(self, instructions: list[Instruction]):
         with log_duration("Instructions validated in {} seconds."):
             super().validate(instructions)
 
-            consumed_qubits: List[str] = []
+            consumed_qubits: list[str] = []
             chanbits_map = {}
             for inst in instructions:
                 if isinstance(inst, PostProcessing):
@@ -466,7 +465,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
                                 in consumed_qubits
                             )
                             for chanbit in inst.quantum_targets
-                            if isinstance(chanbit, (Qubit, PulseChannel))
+                            if isinstance(chanbit, Qubit | PulseChannel)
                         ]
 
                         if any(acquired_qubits):

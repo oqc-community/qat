@@ -308,7 +308,7 @@ class BindingPass(AnalysisPass):
                     rw_result.inits[iter_name].append(inst)
                     rw_result.reads[iter_name].append(inst)
                     rw_result.writes[iter_name].append(inst)
-                elif isinstance(inst, (EndSweep, EndRepeat)):
+                elif isinstance(inst, EndSweep | EndRepeat):
                     try:
                         delimiter = stack.pop()
                     except IndexError as e:
@@ -319,11 +319,9 @@ class BindingPass(AnalysisPass):
                         raise ValueError(f"Unbalanced scope. Found orphan {inst}")
 
                     scope = next(
-                        (
-                            (s, e)
-                            for (s, e) in scoping_result.scope2symbols.keys()
-                            if s == delimiter
-                        )
+                        (s, e)
+                        for (s, e) in scoping_result.scope2symbols.keys()
+                        if s == delimiter
                     )
                     symbols = scoping_result.scope2symbols[scope]
                     del scoping_result.scope2symbols[scope]
@@ -604,7 +602,7 @@ class CFGPass(AnalysisPass):
         headers = sorted([n.head() for n in cfg.nodes]) or [
             i
             for i, inst in enumerate(builder.instructions)
-            if isinstance(inst, (Sweep, Repeat, EndSweep, EndRepeat))
+            if isinstance(inst, Sweep | Repeat | EndSweep | EndRepeat)
         ]
         if headers[0] != 0:
             headers.insert(0, 0)
@@ -624,7 +622,7 @@ class CFGPass(AnalysisPass):
                 next_flow.add((h, h + 1))
                 dest = cfg.get_or_create_node(h + 1)
                 cfg.get_or_create_edge(src, dest)
-            elif isinstance(inst_at_h, (EndSweep, EndRepeat)):
+            elif isinstance(inst_at_h, EndSweep | EndRepeat):
                 if h < len(builder.instructions) - 1:
                     next_headers.add(h + 1)
                     next_flow.add((h, h + 1))
@@ -632,11 +630,9 @@ class CFGPass(AnalysisPass):
                     cfg.get_or_create_edge(src, dest)
                 delimiter_type = Sweep if isinstance(inst_at_h, EndSweep) else Repeat
                 p = next(
-                    (
-                        p
-                        for p in headers[i::-1]
-                        if isinstance(builder.instructions[p], delimiter_type)
-                    )
+                    p
+                    for p in headers[i::-1]
+                    if isinstance(builder.instructions[p], delimiter_type)
                 )
                 next_headers.add(p)
                 next_flow.add((h, p))
@@ -647,7 +643,7 @@ class CFGPass(AnalysisPass):
                     (
                         s
                         for s, inst in enumerate(builder.instructions[h + 1 :])
-                        if isinstance(inst, (Sweep, Repeat, EndSweep, EndRepeat))
+                        if isinstance(inst, Sweep | Repeat | EndSweep | EndRepeat)
                     ),
                     None,
                 )

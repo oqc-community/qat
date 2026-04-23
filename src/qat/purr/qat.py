@@ -3,7 +3,6 @@
 import os.path
 import typing
 from pathlib import Path
-from typing import Union
 
 import regex
 from compiler_config.config import CompilerConfig
@@ -20,11 +19,11 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 # Credible input are str (contents or file path) or pre-build instruction builder
-QATInput = Union[str, bytes, InstructionBuilder]
+QATInput = str | bytes | InstructionBuilder
 
 
 def _return_or_build(qat_input: QATInput, build_func: typing.Callable, **kwargs):
-    if isinstance(qat_input, (str, bytes)):
+    if isinstance(qat_input, str | bytes):
         return build_func(qat_input, **kwargs)
 
     if isinstance(qat_input, InstructionBuilder):
@@ -51,7 +50,7 @@ path_regex = regex.compile(r"^.+\.(qasm|ll|bc)$")
 
 
 def fetch_frontend(
-    path_or_str: Union[str, bytes],
+    path_or_str: str | bytes,
     use_experimental: bool = False,
 ) -> LanguageFrontend:
     frontend_mod = core_frontends

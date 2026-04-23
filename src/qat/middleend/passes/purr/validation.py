@@ -194,7 +194,7 @@ class InstructionValidation(ValidationPass):
                     f"Cannot perform an acquire on the physical channel with id "
                     f"{inst.channel.physical_channel}"
                 )
-            if isinstance(inst, (Pulse, CustomPulse)):
+            if isinstance(inst, Pulse | CustomPulse):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > self.pulse_duration_max:
                     if self.pulse_duration_limits:
@@ -315,7 +315,7 @@ class ReadoutValidation(ValidationPass):
                             in consumed_qubits
                         )
                         for chanbit in inst.quantum_targets
-                        if isinstance(chanbit, (Qubit, PulseChannel))
+                        if isinstance(chanbit, Qubit | PulseChannel)
                     ]
 
                     if any(acquired_qubits):

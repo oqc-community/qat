@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
-from typing import Callable
+from collections.abc import Callable
 
 from qat.core.config.descriptions import (
     CompilePipelineDescription,

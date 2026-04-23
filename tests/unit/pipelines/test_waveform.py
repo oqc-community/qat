@@ -398,7 +398,7 @@ class TestEchoPipelineWithCircuits:
             elif isinstance(obj, list):
                 for item in obj:
                     recurse_object(item)
-            elif not isinstance(obj, (int, float, str, complex)):
+            elif not isinstance(obj, int | float | str | complex):
                 assert False, (
                     f"Results should only contain dicts, lists, ints, floats, strings, "
                     f"and complex numbers, but found {type(obj)}"

@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from copy import deepcopy
 from math import ceil
-from typing import TYPE_CHECKING, Any, Dict, List, Set, Union
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing
@@ -39,12 +39,10 @@ class QuantumInstruction(Instruction):
     qubit, channel, or another form of component.
     """
 
-    def __init__(
-        self, quantum_targets: Union[QuantumComponent, List[QuantumComponent]] = None
-    ):
+    def __init__(self, quantum_targets: QuantumComponent | list[QuantumComponent] = None):
         if quantum_targets is None:
             quantum_targets = []
-        elif not isinstance(quantum_targets, List):
+        elif not isinstance(quantum_targets, list):
             quantum_targets = [quantum_targets]
 
         invalid_targets = [
@@ -55,7 +53,7 @@ class QuantumInstruction(Instruction):
             raise ValueError(f"Invalid targets for component: {invalid_targets_str}")
 
         # Quick way to make sure the targets are unique.
-        self.quantum_targets: List[QuantumComponent] = []
+        self.quantum_targets: list[QuantumComponent] = []
         for tar in quantum_targets:
             if tar not in self.quantum_targets:
                 self.quantum_targets.append(tar)
@@ -67,13 +65,13 @@ class QuantumInstruction(Instruction):
 
 def _add_channels(
     instruction: QuantumInstruction,
-    channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
+    channels: Qubit | PulseChannel | list[Qubit | PulseChannel],
 ):
     """Returns the union of `channels` and `instruction`'s quantum targets."""
     if channels is None:
         return instruction.quantum_targets
 
-    if not isinstance(channels, List):
+    if not isinstance(channels, list):
         channels = [channels]
 
     unique_targets = set(instruction.quantum_targets)
@@ -152,12 +150,12 @@ class PhaseSet(QuantumInstruction):
 
 
 class PhaseShift(QuantumInstruction):
-    def __init__(self, channel: "PulseChannel", phase: float):
+    def __init__(self, channel: PulseChannel, phase: float):
         super().__init__(channel)
         self.phase: float = phase
 
     @property
-    def channel(self) -> "PulseChannel":
+    def channel(self) -> PulseChannel:
         return self.quantum_targets[0]
 
     def __repr__(self):
@@ -165,12 +163,12 @@ class PhaseShift(QuantumInstruction):
 
 
 class FrequencySet(QuantumInstruction):
-    def __init__(self, channel: "PulseChannel", frequency: float):
+    def __init__(self, channel: PulseChannel, frequency: float):
         super().__init__(channel)
         self.frequency: float = frequency
 
     @property
-    def channel(self) -> "PulseChannel":
+    def channel(self) -> PulseChannel:
         return self.quantum_targets[0]
 
     def __repr__(self):
@@ -178,12 +176,12 @@ class FrequencySet(QuantumInstruction):
 
 
 class FrequencyShift(QuantumInstruction):
-    def __init__(self, channel: "PulseChannel", frequency: float):
+    def __init__(self, channel: PulseChannel, frequency: float):
         super().__init__(channel)
         self.frequency: float = frequency
 
     @property
-    def channel(self) -> "PulseChannel":
+    def channel(self) -> PulseChannel:
         return self.quantum_targets[0]
 
     def __repr__(self):
@@ -214,17 +212,17 @@ class Synchronize(QuantumInstruction):
     """Tells the QPU to wait for all the related channels to be free before continuing
     execution on any of them."""
 
-    quantum_targets: List[PulseChannel]
+    quantum_targets: list[PulseChannel]
 
     def __init__(
         self,
-        sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
+        sync_channels: Qubit | PulseChannel | list[Qubit | PulseChannel],
     ):
         super().__init__()
         self.add_channels(sync_channels)
 
     def add_channels(
-        self, sync_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]]
+        self, sync_channels: Qubit | PulseChannel | list[Qubit | PulseChannel]
     ):
         self.quantum_targets = _add_channels(self, sync_channels)
 
@@ -259,7 +257,7 @@ class Assign(Instruction):
 
 class Waveform(QuantumInstruction):
     @property
-    def channel(self) -> "PulseChannel":
+    def channel(self) -> PulseChannel:
         return self.quantum_targets[0]
 
 
@@ -268,7 +266,7 @@ class CustomPulse(Waveform):
 
     def __init__(
         self,
-        quantum_target: "PulseChannel",
+        quantum_target: PulseChannel,
         samples: list | np.ndarray,
         ignore_channel_scale: bool = False,
     ):
@@ -291,7 +289,7 @@ class Pulse(Waveform):
 
     def __init__(
         self,
-        quantum_target: "PulseChannel",
+        quantum_target: PulseChannel,
         shape: PulseShapeType,
         width: float,
         amp: float = 1.0,
@@ -361,13 +359,13 @@ class Acquire(QuantumComponent, QuantumInstruction):
 
     def __init__(
         self,
-        channel: "PulseChannel",
+        channel: PulseChannel,
         time: float = None,
         mode: AcquireMode = None,
         output_variable=None,
-        existing_names: Set[str] = None,
+        existing_names: set[str] = None,
         delay=None,
-        filter: Union[Pulse, CustomPulse] = None,
+        filter: Pulse | CustomPulse = None,
         rotation: float = None,
         threshold: float = None,
     ):
@@ -385,7 +383,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         self.mode: AcquireMode = mode or AcquireMode.RAW
         self.delay = delay
         self.output_variable = output_variable or self.generate_name(existing_names)
-        self.filter: Union[Pulse, CustomPulse] = self._check_filter(filter)
+        self.filter: Pulse | CustomPulse = self._check_filter(filter)
         self.rotation = rotation or 0.0
         self.threshold = threshold or 0.0
 
@@ -419,7 +417,7 @@ class Acquire(QuantumComponent, QuantumInstruction):
         return self.time
 
     @property
-    def channel(self) -> "PulseChannel":
+    def channel(self) -> PulseChannel:
         return next(iter(self.quantum_targets), None)
 
     def __repr__(self):
@@ -436,15 +434,15 @@ class PostProcessing(QuantumInstruction):
 
     def __init__(self, acquire: Acquire, process, axes=None, args=None):
         super().__init__(acquire)
-        if axes is not None and not isinstance(axes, List):
+        if axes is not None and not isinstance(axes, list):
             axes = [axes]
 
         self.process: PostProcessType = process
 
         # TODO: Should find out why ags can't reference model objects in builder serialization.
         #   But deep copying them, as the values shouldn't vary, should be fine.
-        self.args: List = deepcopy(args) or []
-        self.axes: List[ProcessAxis] = axes or []
+        self.args: list = deepcopy(args) or []
+        self.axes: list[ProcessAxis] = axes or []
         self.output_variable = acquire.output_variable
         self.result_needed = False
 
@@ -464,12 +462,12 @@ class PostProcessing(QuantumInstruction):
 class Reset(QuantumInstruction):
     """Resets this qubit to its starting state."""
 
-    def __init__(self, qubit: Union[List[Qubit], Qubit]):
-        if not isinstance(qubit, List):
+    def __init__(self, qubit: list[Qubit] | Qubit):
+        if not isinstance(qubit, list):
             qubit = [qubit]
 
         invalid_reset_targets = [
-            str(val) for val in qubit if not isinstance(val, (Qubit, PulseChannel))
+            str(val) for val in qubit if not isinstance(val, Qubit | PulseChannel)
         ]
         if any(invalid_reset_targets):
             raise ValueError(
@@ -488,18 +486,18 @@ class Reset(QuantumInstruction):
 class PhaseReset(QuantumInstruction):
     """Reset the phase shift of all the channels."""
 
-    quantum_targets: List[PulseChannel]
+    quantum_targets: list[PulseChannel]
 
     def __init__(
         self,
-        reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
+        reset_channels: Qubit | PulseChannel | list[Qubit | PulseChannel],
     ):
         super().__init__()
         self.add_channels(reset_channels)
 
     def add_channels(
         self,
-        reset_channels: Union[Qubit, PulseChannel, List[Union[Qubit, PulseChannel]]],
+        reset_channels: Qubit | PulseChannel | list[Qubit | PulseChannel],
     ):
         self.quantum_targets = _add_channels(self, reset_channels)
 
@@ -521,11 +519,11 @@ class PhaseReset(QuantumInstruction):
 class Return(Instruction):
     """A statement defining what to return from a quantum execution."""
 
-    def __init__(self, variables: List[str] = None):
+    def __init__(self, variables: list[str] = None):
         if variables is None:
             variables = []
 
-        if not isinstance(variables, List):
+        if not isinstance(variables, list):
             variables = [variables]
 
         self.variables = variables
@@ -573,15 +571,15 @@ class Sweep(Instruction):
     1000 repeat with a 4 sweep followed by a 2 will run a total of 8000 iterations.
     """
 
-    def __init__(self, operations: Union[SweepValue, List[SweepValue]] = None):
+    def __init__(self, operations: SweepValue | list[SweepValue] = None):
         super().__init__()
 
         if operations is None:
             operations = []
-        elif not isinstance(operations, List):
+        elif not isinstance(operations, list):
             operations = [operations]
 
-        self.variables: Dict[str, List[Any]] = {op.name: op.value for op in operations}
+        self.variables: dict[str, list[Any]] = {op.name: op.value for op in operations}
 
         # Get the length of the variables, which we will then assume is the sweep
         # length.
@@ -611,7 +609,7 @@ class EndSweep(Instruction):
 class Jump(Instruction):
     """Classic jump instruction, should be linked to label with an optional condition."""
 
-    def __init__(self, label: Union[str, Label], condition=None):
+    def __init__(self, label: str | Label, condition=None):
         self.condition = condition
         if isinstance(label, Label):
             self.target = label.name
@@ -811,12 +809,12 @@ class InstructionBlock:
     Allows working with blocks of Instructions as a unit.
     """
 
-    instructions: List[Instruction]
+    instructions: list[Instruction]
 
     def _validate_types(self, items, valid_types, label="targets"):
         if items is None:
             items = []
-        elif not isinstance(items, List):
+        elif not isinstance(items, list):
             items = [items]
 
         invalid_items = [item for item in items if not isinstance(item, valid_types)]
@@ -833,8 +831,8 @@ class InstructionBlock:
 class QuantumInstructionBlock(InstructionBlock):
     """Allows working with blocks of QuantumInstructions as a unit."""
 
-    quantum_targets: List[QuantumComponent]
-    instructions: List[QuantumInstruction]
+    quantum_targets: list[QuantumComponent]
+    instructions: list[QuantumInstruction]
     duration: float
 
 
@@ -843,10 +841,10 @@ class MeasureBlock(QuantumInstructionBlock):
 
     def __init__(
         self,
-        targets: Union[Qubit, List[Qubit]],
+        targets: Qubit | list[Qubit],
         mode: AcquireMode,
-        output_variables: Union[str, List[str]] = None,
-        existing_names: Set[str] = None,
+        output_variables: str | list[str] = None,
+        existing_names: set[str] = None,
     ):
         self._target_dict = {}
         self._existing_names = existing_names
@@ -855,13 +853,13 @@ class MeasureBlock(QuantumInstructionBlock):
 
     def add_measurements(
         self,
-        targets: Union[Qubit, List[Qubit]],
+        targets: Qubit | list[Qubit],
         mode: AcquireMode,
-        output_variables: Union[str, List[str]] = None,
-        existing_names: Set[str] = None,
+        output_variables: str | list[str] = None,
+        existing_names: set[str] = None,
     ):
         targets = self._validate_types(targets, (Qubit))
-        if len((duplicates := [t for t in targets if t in self.quantum_targets])) > 0:
+        if len(duplicates := [t for t in targets if t in self.quantum_targets]) > 0:
             raise ValueError(
                 "Target can only be measured once in a 'MeasureBlock'. "
                 f"Duplicates: {duplicates}"
@@ -894,7 +892,7 @@ class MeasureBlock(QuantumInstructionBlock):
     def quantum_targets(self):
         return [v["target"] for v in self._target_dict.values()]
 
-    def get_acquires(self, targets: Union[Qubit, List[Qubit]]):
+    def get_acquires(self, targets: Qubit | list[Qubit]):
         if not isinstance(targets, list):
             targets = [targets]
         return [self._target_dict[qt.full_id()]["acquire"] for qt in targets]
@@ -910,7 +908,7 @@ class MeasureBlock(QuantumInstructionBlock):
         return f"Measure {', '.join(target_strings)}"
 
     @property
-    def instructions(self) -> List[QuantumInstruction]:
+    def instructions(self) -> list[QuantumInstruction]:
         targets = self.quantum_targets
         instructions = [Synchronize(targets)]
         for _, values in self._target_dict.items():

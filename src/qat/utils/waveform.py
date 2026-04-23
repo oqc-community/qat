@@ -3,7 +3,6 @@
 
 import abc
 import sys
-from typing import Type
 
 import numpy as np
 from scipy.special import erf
@@ -18,7 +17,7 @@ MAX_COSH_ARG = np.arccosh(0.99 * sys.float_info.max)
 class ComplexFunction(AllowExtraFieldsModel, abc.ABC):
     """Function object used to represent Complex 1D functions."""
 
-    _dtype: Type = np.complex128
+    _dtype: type = np.complex128
     dt: float = 0.5e-9
 
     @abc.abstractmethod

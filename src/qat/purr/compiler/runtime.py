@@ -2,7 +2,7 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from collections.abc import Iterable
 from numbers import Number
-from typing import List, Optional, TypeVar, Union
+from typing import TypeVar
 
 import numpy
 from compiler_config.config import (
@@ -98,7 +98,7 @@ class QuantumRuntime(MetricsMixin):
         return self.engine.model if self.engine is not None else None
 
     def _transform_results(
-        self, results, format_flags: ResultsFormatting, repeats: Optional[int] = None
+        self, results, format_flags: ResultsFormatting, repeats: int | None = None
     ):
         """Transform the raw results into the format that we've been asked to provide.
 
@@ -175,13 +175,13 @@ class QuantumRuntime(MetricsMixin):
         return results  # TODO: new results object
 
     def run_calibration(
-        self, calibrations: Union[CalibrationWithArgs, List[CalibrationWithArgs]]
+        self, calibrations: CalibrationWithArgs | list[CalibrationWithArgs]
     ):
         """Make 'calibration' distinct from 'quantum executable' for usabilities sake."""
         self.run_quantum_executable(calibrations)
 
     def run_quantum_executable(
-        self, executables: Union[QuantumExecutableBlock, List[QuantumExecutableBlock]]
+        self, executables: QuantumExecutableBlock | list[QuantumExecutableBlock]
     ):
         if executables is None:
             return
@@ -326,9 +326,7 @@ def _binary_count(results_list, repeats):
             return str(res)
 
     def get_tuple(res, index):
-        return [
-            val[index] if isinstance(val, (List, numpy.ndarray)) else val for val in res
-        ]
+        return [val[index] if isinstance(val, list | numpy.ndarray) else val for val in res]
 
     binary_results = _binary(results_list)
 
@@ -348,13 +346,13 @@ def _binary_count(results_list, repeats):
     return result_count
 
 
-def get_model(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
+def get_model(hardware: QuantumExecutionEngine | QuantumHardwareModel):
     if isinstance(hardware, QuantumExecutionEngine):
         return hardware.model
     return hardware
 
 
-def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
+def get_runtime(hardware: QuantumExecutionEngine | QuantumHardwareModel):
     # We shouldn't really have an orphaned execution engine, but no harm in it.
     if isinstance(hardware, QuantumExecutionEngine):
         return hardware.model.create_runtime(hardware)
@@ -367,7 +365,7 @@ def get_runtime(hardware: Union[QuantumExecutionEngine, QuantumHardwareModel]):
 
 
 def get_builder(
-    model: Union[QuantumHardwareModel, InstructionExecutionEngine],
+    model: QuantumHardwareModel | InstructionExecutionEngine,
 ) -> QuantumInstructionBuilder:
     if isinstance(model, InstructionExecutionEngine):
         model = model.model
@@ -375,11 +373,11 @@ def get_builder(
 
 
 def execute_instructions(
-    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
-    instructions: Union[List[Instruction], QuantumInstructionBuilder],
+    hardware: QuantumExecutionEngine | QuantumHardwareModel,
+    instructions: list[Instruction] | QuantumInstructionBuilder,
     config: CompilerConfig = None,
-    executable_blocks: List[QuantumExecutableBlock] = None,
-    repeats: Optional[int] = None,
+    executable_blocks: list[QuantumExecutableBlock] = None,
+    repeats: int | None = None,
     metrics: MetricsType = None,
     *args,
     **kwargs,
@@ -405,10 +403,10 @@ def execute_instructions(
 
 
 def _execute_instructions_with_interrupt(
-    hardware: Union[QuantumExecutionEngine, QuantumHardwareModel],
-    instructions: Union[List[Instruction], QuantumInstructionBuilder],
+    hardware: QuantumExecutionEngine | QuantumHardwareModel,
+    instructions: list[Instruction] | QuantumInstructionBuilder,
     config: CompilerConfig = None,
-    executable_blocks: List[QuantumExecutableBlock] = None,
+    executable_blocks: list[QuantumExecutableBlock] = None,
     interrupt: Interrupt = NullInterrupt(),
     *args,
     **kwargs,

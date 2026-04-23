@@ -1,13 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
-from typing import Dict, Union
 
 from compiler_config.config import CalibrationArguments
 
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.compiler.runtime import QuantumRuntime, RemoteCalibration, get_runtime
 
-RuntimeOrModel = Union[QuantumHardwareModel, QuantumRuntime]
+RuntimeOrModel = QuantumHardwareModel | QuantumRuntime
 
 
 def find_calibration(args: "CalibrationArguments"):
@@ -33,7 +32,7 @@ def run_calibration(runtime: RuntimeOrModel, args: "CalibrationArguments"):
     calibration.run(runtime.model, runtime, args)
 
 
-_standard_calibrations: Dict[str, "BuiltinRemoteCalibration"] = dict()
+_standard_calibrations: dict[str, "BuiltinRemoteCalibration"] = dict()
 
 
 class CustomCalibration(RemoteCalibration):

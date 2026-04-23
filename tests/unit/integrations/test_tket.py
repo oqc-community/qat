@@ -270,7 +270,7 @@ class TestTketToQatIRConverter:
                 assert type(inst) is type(qat_inst)
                 assert inst.process_type == qat_inst.process_type
                 assert inst.axes == qat_inst.axes
-            elif isinstance(inst, (PhaseShift, PhaseSet)):
+            elif isinstance(inst, PhaseShift | PhaseSet):
                 assert type(inst) is type(qat_inst)
                 assert inst.target == qat_inst.target
                 assert isclose(inst.phase, qat_inst.phase)

@@ -2,7 +2,6 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import itertools
-from typing import List, Tuple
 
 import numpy as np
 from more_itertools import partition
@@ -34,7 +33,7 @@ class ScopeSanitisation(TransformPass):
         """
 
         tail, head = partition(
-            lambda inst: isinstance(inst, (Sweep, Repeat)), ir.instructions
+            lambda inst: isinstance(inst, Sweep | Repeat), ir.instructions
         )
         tail, head = list(tail), list(head)
 
@@ -118,12 +117,12 @@ class ScopePeeling(TransformPass):
         *args,
         **kwargs,
     ):
-        scopes: List[Tuple[Instruction, Instruction]] = kwargs.get("scopes", [])
+        scopes: list[tuple[Instruction, Instruction]] = kwargs.get("scopes", [])
 
         if scopes is None or len(scopes) == 0:
             return PreservedResults.all()
 
-        if any(not isinstance(scope, Tuple) or len(scope) != 2 for scope in scopes):
+        if any(not isinstance(scope, tuple) or len(scope) != 2 for scope in scopes):
             raise ValueError(
                 f"Invalid scopes argument. Expected a list of tuples of length 2, got {scopes}"
             )

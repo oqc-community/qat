@@ -2,7 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import time
 import uuid
-from typing import List
 
 from compiler_config.config import CompilerConfig
 from qiskit import QuantumCircuit, qasm2, transpile
@@ -66,7 +65,7 @@ class QatBackend(BasicSimulator):
         self.comp_config = comp_config
 
     def run(self, run_input, **run_options):
-        if not isinstance(run_input, List):
+        if not isinstance(run_input, list):
             run_input = [run_input]
 
         if not all(isinstance(val, QuantumCircuit) for val in run_input):

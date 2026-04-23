@@ -2,7 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from copy import deepcopy
 from numbers import Number
-from typing import List, Union
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing, TketOptimizations
@@ -70,15 +69,15 @@ class TketBuilder:
         self.circuit.add_c_register(name, size)
 
     def barrier(self, qubits):
-        qubits = [qubits] if not isinstance(qubits, List) else qubits
+        qubits = [qubits] if not isinstance(qubits, list) else qubits
         self.circuit.add_barrier(qubits)
 
     def ECR(self, qubit1, qubit2, *args):
         self.circuit.ECR(qubit1, qubit2)
 
     def measure(self, qubits, bits, conditions=None):
-        qubits = [qubits] if not isinstance(qubits, List) else qubits
-        bits = [bits] if not isinstance(bits, List) else bits
+        qubits = [qubits] if not isinstance(qubits, list) else qubits
+        bits = [bits] if not isinstance(bits, list) else bits
         conditions = conditions or {}
         for qubit, bit in zip(qubits, bits):
             self.circuit.Measure(qubit, bit, **conditions)
@@ -96,15 +95,15 @@ class TketBuilder:
 
         conditions = conditions or {}
         params = params or []
-        qubits = [qubits] if not isinstance(qubits, List) else qubits
-        params = [params] if not isinstance(params, List) else params
+        qubits = [qubits] if not isinstance(qubits, list) else qubits
+        params = [params] if not isinstance(params, list) else params
         self.circuit.add_gate(target_gate, params, qubits, **conditions)
 
     def custom_gate(self, gate_def: CustomGateDef, qubits, params=None, conditions=None):
         conditions = conditions or {}
         params = params or []
-        qubits = [qubits] if not isinstance(qubits, List) else qubits
-        params = [params] if not isinstance(params, List) else params
+        qubits = [qubits] if not isinstance(qubits, list) else qubits
+        params = [params] if not isinstance(params, list) else params
         self.circuit.add_custom_gate(gate_def, params, qubits, **conditions)
 
 
@@ -139,7 +138,7 @@ class TketQasmParser(Qasm2Parser):
             try:
                 return sympify(num) / pi
             except Exception:
-                raise ValueError("Cannot parse angle: {}".format(num))
+                raise ValueError(f"Cannot parse angle: {num}")
 
         res = self._expand_to_match_registers(
             self._get_qubits(node, context),
@@ -219,7 +218,7 @@ class TketQasmParser(Qasm2Parser):
     def process_barrier(self, node, context, builder: TketBuilder, **kwargs):
         barrier_qubits = []
         for qubits, _ in self._get_staggered_qubit_params(node, context):
-            if isinstance(qubits, List):
+            if isinstance(qubits, list):
                 barrier_qubits.extend(qubits)
             else:
                 barrier_qubits.append(qubits)
@@ -234,7 +233,7 @@ class TketQasmParser(Qasm2Parser):
 class TketQIRParser(QIRParser):
     """QIR parser than turns circuits into Tket structures."""
 
-    def __init__(self, hardware: Union[QuantumHardwareModel, InstructionExecutionEngine]):
+    def __init__(self, hardware: QuantumHardwareModel | InstructionExecutionEngine):
         if isinstance(hardware, InstructionExecutionEngine):
             hardware = hardware.model
 
@@ -456,7 +455,7 @@ class TketToQatIRConverter:
         return builder
 
 
-def fetch_default_passes(architecture, opts, pass_list: List = None, add_delay=True):
+def fetch_default_passes(architecture, opts, pass_list: list = None, add_delay=True):
     pass_list = pass_list or []
     if TketOptimizations.DefaultMappingPass in opts:
         pass_list.append(DefaultMappingPass(architecture, add_delay))

@@ -4,7 +4,7 @@ import math
 import warnings
 from collections import defaultdict
 from enum import Enum, auto
-from typing import List, Set, Union
+from typing import Union
 
 import jsonpickle
 import numpy as np
@@ -66,7 +66,7 @@ class InstructionBuilder:
     def __init__(
         self,
         hardware_model,
-        instructions: List[Union["InstructionBuilder", Instruction]] = None,
+        instructions: list[Union["InstructionBuilder", Instruction]] = None,
     ):
         super().__init__()
         self._instructions = []
@@ -131,7 +131,7 @@ class InstructionBuilder:
         return builder
 
     def _fix_clashing_label_names(
-        self, invalid_label_names: Set[str], existing_names: Set[str]
+        self, invalid_label_names: set[str], existing_names: set[str]
     ):
         """Fixes up auto-generated label names if there are clashes.
 
@@ -178,7 +178,7 @@ class InstructionBuilder:
         components: Union[
             "InstructionBuilder",
             Instruction,
-            List[Union["InstructionBuilder", Instruction]],
+            list[Union["InstructionBuilder", Instruction]],
         ],
     ):
         """Adds an instruction to this builder.
@@ -193,7 +193,7 @@ class InstructionBuilder:
         components: Union[
             "InstructionBuilder",
             Instruction,
-            List[Union["InstructionBuilder", Instruction]],
+            list[Union["InstructionBuilder", Instruction]],
         ],
         index: int,
     ):
@@ -205,7 +205,7 @@ class InstructionBuilder:
         if components is None:
             return self
 
-        if not isinstance(components, List):
+        if not isinstance(components, list):
             components = [components]
 
         for component in components:
@@ -276,16 +276,16 @@ class InstructionBuilder:
     def id(self, target):
         self.add(Id(target))
 
-    def X(self, target: Union[Qubit, PulseChannel], radii=None):
+    def X(self, target: Qubit | PulseChannel, radii=None):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def Y(self, target: Union[Qubit, PulseChannel], radii=None):
+    def Y(self, target: Qubit | PulseChannel, radii=None):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def Z(self, target: Union[Qubit, PulseChannel], radii=None):
+    def Z(self, target: Qubit | PulseChannel, radii=None):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def U(self, target: Union[Qubit, PulseChannel], theta, phi, lamb):
+    def U(self, target: Qubit | PulseChannel, theta, phi, lamb):
         return self.Z(target, lamb).Y(target, theta).Z(target, phi)
 
     def swap(self, target: Qubit, destination: Qubit):
@@ -309,10 +309,10 @@ class InstructionBuilder:
     def acquire(self, *args, **kwargs):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def delay(self, target: Union[Qubit, PulseChannel], time: float):
+    def delay(self, target: Qubit | PulseChannel, time: float):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def synchronize(self, targets: Union[Qubit, List[Qubit]]):
+    def synchronize(self, targets: Qubit | list[Qubit]):
         raise NotImplementedError("Not available on this hardware model.")
 
     def phase_shift(self, target: PulseChannel, phase):
@@ -336,37 +336,35 @@ class InstructionBuilder:
     def Tdg(self, target):
         return self.Z(target, -(np.pi / 4))
 
-    def controlled(
-        self, controllers: Union[Qubit, List[Qubit]], builder: "InstructionBuilder"
-    ):
+    def controlled(self, controllers: Qubit | list[Qubit], builder: "InstructionBuilder"):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def cX(self, controllers: Union[Qubit, List[Qubit]], target: Qubit, radii=None):
+    def cX(self, controllers: Qubit | list[Qubit], target: Qubit, radii=None):
         builder = self.get_child_builder()
         return self.controlled(controllers, builder.X(target, radii))
 
-    def cY(self, controllers: Union[Qubit, List[Qubit]], target: Qubit, radii=None):
+    def cY(self, controllers: Qubit | list[Qubit], target: Qubit, radii=None):
         builder = self.get_child_builder()
         return self.controlled(controllers, builder.Y(target, radii))
 
-    def cZ(self, controllers: Union[Qubit, List[Qubit]], target: Qubit, radii=None):
+    def cZ(self, controllers: Qubit | list[Qubit], target: Qubit, radii=None):
         builder = self.get_child_builder()
         return self.controlled(controllers, builder.Z(target, radii))
 
-    def cnot(self, control: Union[Qubit, List[Qubit]], target_qubit: Qubit):
+    def cnot(self, control: Qubit | list[Qubit], target_qubit: Qubit):
         return self.cX(control, target_qubit, np.pi)
 
-    def ccnot(self, controllers: List[Qubit], target_qubit: Qubit):
+    def ccnot(self, controllers: list[Qubit], target_qubit: Qubit):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def cswap(self, controllers: Union[Qubit, List[Qubit]], target, destination):
+    def cswap(self, controllers: Qubit | list[Qubit], target, destination):
         builder = self.get_child_builder()
         return self.controlled(controllers, builder.swap(target, destination))
 
     def ECR(self, control: Qubit, target: Qubit):
         raise NotImplementedError("Not available on this hardware model.")
 
-    def jump(self, label: Union[str, Label], condition=None):
+    def jump(self, label: str | Label, condition=None):
         return self.add(Jump(label, condition))
 
     def repeat(self, repeat_value: int, repetition_period=None, passive_reset_time=None):
@@ -514,7 +512,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def measure_single_shot_binned(
         self,
         target: Qubit,
-        axis: Union[str, List[str]] = None,
+        axis: str | list[str] = None,
         output_variable: str = None,
     ):
         _, acquire = self.measure(
@@ -637,25 +635,25 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return FluidBuilderWrapper(self, acquire_instruction)
 
-    def X(self, target: Union[Qubit, PulseChannel], radii=None):
+    def X(self, target: Qubit | PulseChannel, radii=None):
         qubit, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(
             self.model.get_gate_X(qubit, math.pi if radii is None else radii, channel)
         )
 
-    def Y(self, target: Union[Qubit, PulseChannel], radii=None):
+    def Y(self, target: Qubit | PulseChannel, radii=None):
         qubit, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(
             self.model.get_gate_Y(qubit, math.pi if radii is None else radii, channel)
         )
 
-    def Z(self, target: Union[Qubit, PulseChannel], radii=None):
+    def Z(self, target: Qubit | PulseChannel, radii=None):
         qubit, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(
             self.model.get_gate_Z(qubit, math.pi if radii is None else radii, channel)
         )
 
-    def U(self, target: Union[Qubit, PulseChannel], theta, phi, lamb):
+    def U(self, target: Qubit | PulseChannel, theta, phi, lamb):
         qubit, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(self.model.get_gate_U(qubit, theta, phi, lamb, channel))
 
@@ -724,12 +722,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
             delay = qubits[0].measure_acquire["delay"]
         return self.add(Acquire(channel, *args, delay=delay, **kwargs))
 
-    def delay(self, target: Union[Qubit, PulseChannel], time: float):
+    def delay(self, target: Qubit | PulseChannel, time: float):
         _, channel = self.model._resolve_qb_pulse_channel(target)
         return self.add(Delay(channel, time))
 
-    def synchronize(self, targets: Union[Qubit, List[Qubit]]):
-        if not isinstance(targets, List):
+    def synchronize(self, targets: Qubit | list[Qubit]):
+        if not isinstance(targets, list):
             targets = [targets]
 
         channels = []
@@ -756,7 +754,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return self.add(FrequencyShift(channel, frequency))
 
     def cnot(self, control: Qubit, target: Qubit):
-        if isinstance(control, List):
+        if isinstance(control, list):
             if len(control) > 1:
                 raise ValueError("CNOT requires one control qubit.")
             else:

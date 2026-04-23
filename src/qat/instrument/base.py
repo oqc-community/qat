@@ -80,7 +80,7 @@ class CompositeInstrument(Generic[LInstr], InstrumentConcept):
 
     @property
     def is_connected(self) -> bool:
-        return all((component.is_connected for component in self._components.values()))
+        return all(component.is_connected for component in self._components.values())
 
     def connect(self):
         for comp in self._components.values():

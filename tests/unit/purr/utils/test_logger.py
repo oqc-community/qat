@@ -81,7 +81,7 @@ class TestFileLogger:
         ):
             msg = "Hello world!"
             file_logger.info(msg)
-            with open(file_handler.baseFilename, "r") as f:
+            with open(file_handler.baseFilename) as f:
                 text = f.read()
                 regex_match = re.match(info_msg_pattern, text)
                 assert regex_match
@@ -115,7 +115,7 @@ class TestFileLogger:
 
             file_logger.info(msg)
 
-            with open(file_handler.baseFilename, "r") as f:
+            with open(file_handler.baseFilename) as f:
                 text = f.read().split("\n")
                 assert text[0] == self.FakeFileLoggerHandler.initial_text
                 regex_match = re.match(info_msg_pattern, text[1] + "\n")
@@ -151,7 +151,7 @@ class TestJsonLogger:
             json_logger.info(msg)
             json_logger.info(msg)
             assert os.path.exists(json_handler.baseFilename)
-            f = open(json_handler.baseFilename, "r")
+            f = open(json_handler.baseFilename)
             try:
                 json_load(f)
             except json.JSONDecodeError:
@@ -169,7 +169,7 @@ class TestJsonLogger:
         ):
             msg = "Test message"
             json_logger.info(msg)
-            with open(json_handler.baseFilename, "r") as f:
+            with open(json_handler.baseFilename) as f:
                 res = json_load(f)
                 assert res["entries"][0]["level"] == "INFO"
                 assert res["entries"][0]["message"] == msg

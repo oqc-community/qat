@@ -4,7 +4,6 @@ from functools import reduce
 from operator import mul
 from queue import Queue
 from threading import Event, Thread
-from typing import List
 from unittest.mock import create_autospec
 
 import numpy as np
@@ -91,7 +90,7 @@ def test_interrupt_triggered_on_batch(get_hardware):
     hardware = get_hardware(2)
     frontend = experimental_frontends.QASMFrontend()
     instructions, _ = frontend.parse(path, hardware, config)
-    assert isinstance(instructions, (InstructionBuilder, List))
+    assert isinstance(instructions, InstructionBuilder | list)
     queue = Queue(maxsize=1)
     event = Event()
     interrupt = BasicInterrupt(event, queue)
@@ -142,7 +141,7 @@ def test_interrupt_triggered_on_batch_n(
     path = _get_qasm_path("ghz_2.qasm")
     frontend = experimental_frontends.QASMFrontend()
     instructions, _ = frontend.parse(path, hardware, config)
-    assert isinstance(instructions, (InstructionBuilder, List))
+    assert isinstance(instructions, InstructionBuilder | list)
     mock_event = create_autospec(Event)
 
     # Trigger cancellation on the nth batch
@@ -180,7 +179,7 @@ def test_interrupt_not_triggered_on_n_batches(get_hardware):
     path = _get_qasm_path("ghz_2.qasm")
     frontend = experimental_frontends.QASMFrontend()
     instructions, _ = frontend.parse(path, hardware, config)
-    assert isinstance(instructions, (InstructionBuilder, List))
+    assert isinstance(instructions, InstructionBuilder | list)
     interrupt = BasicInterrupt()
 
     t = Thread(
@@ -236,7 +235,7 @@ def test_interrupt_triggered_on_sweep_m_1d(
     hardware.repeat_limit = repeat_limit
     hardware.default_repeat_count = repeat_count
     instructions, sweep_size = _builder_1d_sweep_example(hardware)
-    assert isinstance(instructions, (InstructionBuilder, List))
+    assert isinstance(instructions, InstructionBuilder | list)
     switerator_length = reduce(mul, sweep_size, 1)
 
     coordinates = 1
@@ -322,7 +321,7 @@ def test_interrupt_triggered_on_sweep_m_2d(
     hardware.repeat_limit = repeat_limit
     hardware.default_repeat_count = repeat_count
     instructions, sweep_size = _builder_2d_sweep_example(hardware)
-    assert isinstance(instructions, (InstructionBuilder, List))
+    assert isinstance(instructions, InstructionBuilder | list)
     switerator_length = reduce(mul, sweep_size, 1)
 
     coordinates = 1
@@ -704,7 +703,7 @@ class TestExecutionFrontend:
         contents = get_qasm2("basic.qasm")
         frontend = fetch_frontend(contents, use_experimental=use_experimental)
         built, _ = frontend.parse(contents, hardware=hardware)
-        assert isinstance(built, (InstructionBuilder, List))
+        assert isinstance(built, InstructionBuilder | list)
         results = frontend.execute(instructions=built, hardware=hardware)
         assert results is not None
 

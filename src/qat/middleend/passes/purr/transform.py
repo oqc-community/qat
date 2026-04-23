@@ -126,7 +126,7 @@ class LegacyPhaseOptimisation(TransformPass):
                     accum_phaseshifts[instruction.channel] = PhaseShift(
                         instruction.channel, instruction.phase
                     )
-            elif isinstance(instruction, (Pulse, CustomPulse)):
+            elif isinstance(instruction, Pulse | CustomPulse):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, list):
                     quantum_targets = [quantum_targets]
@@ -234,7 +234,7 @@ class PhaseOptimisation(TransformPass):
         accum_phaseshifts: dict[str, PhaseShift | PhaseSet] = dict()
         optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
-            if isinstance(instruction, (PhaseShift, PhaseSet)) and isinstance(
+            if isinstance(instruction, PhaseShift | PhaseSet) and isinstance(
                 instruction.phase, Number
             ):
                 key = instruction.channel.partial_id()
@@ -248,7 +248,7 @@ class PhaseOptimisation(TransformPass):
                         channel, accum_phaseshifts.get(key, None), instruction
                     )
             elif isinstance(
-                instruction, (CustomPulse, Pulse, Acquire, PhaseSet, PhaseShift)
+                instruction, CustomPulse | Pulse | Acquire | PhaseSet | PhaseShift
             ):
                 quantum_targets = getattr(instruction, "quantum_targets", [])
                 if not isinstance(quantum_targets, list):
@@ -262,13 +262,13 @@ class PhaseOptimisation(TransformPass):
                         ):
                             optimized_instructions.append(new_instruction)
                 optimized_instructions.append(instruction)
-            elif isinstance(instruction, (Delay, Synchronize)):
+            elif isinstance(instruction, Delay | Synchronize):
                 for channel in instruction.quantum_targets:
                     key = channel.partial_id()
                     if isinstance(accum_phaseshifts.get(key, None), PhaseSet):
                         optimized_instructions.append(accum_phaseshifts.pop(key))
                 optimized_instructions.append(instruction)
-            elif isinstance(instruction, (Jump, Label)):
+            elif isinstance(instruction, Jump | Label):
                 accum_phaseshifts = dict()
                 optimized_instructions.append(instruction)
             else:
@@ -430,7 +430,7 @@ class InstructionGranularitySanitisation(TransformPass):
         """
 
         self.sanitise_quantum_instructions(
-            [inst for inst in ir.instructions if isinstance(inst, (Pulse, Acquire, Delay))]
+            [inst for inst in ir.instructions if isinstance(inst, Pulse | Acquire | Delay)]
         )
         self.sanitise_custom_pulses(
             [inst for inst in ir.instructions if isinstance(inst, CustomPulse)]
@@ -611,7 +611,7 @@ class InactivePulseChannelSanitisation(TransformPass):
         ]
         instructions: list[Instruction] = []
         for inst in ir.instructions:
-            if isinstance(inst, (PostProcessing, Pulse, CustomPulse, Acquire)):
+            if isinstance(inst, PostProcessing | Pulse | CustomPulse | Acquire):
                 # instructions which define an active channel
                 instructions.append(inst)
             elif isinstance(inst, Synchronize):
@@ -814,7 +814,7 @@ class EndOfTaskResetSanitisation(TransformPass):
         }
 
         for inst in reversed(ir.instructions):
-            if not isinstance(inst, (Pulse, CustomPulse, Acquire, Reset)):
+            if not isinstance(inst, Pulse | CustomPulse | Acquire | Reset):
                 continue
 
             elif isinstance(inst, Reset):
@@ -939,7 +939,7 @@ class ResetsToDelays(TransformPass):
     def _get_total_duration(ir: InstructionBuilder) -> float:
         durations: dict[str, float] = defaultdict(float)
         for inst in ir.instructions:
-            if isinstance(inst, (Pulse, Acquire, Delay, CustomPulse)):
+            if isinstance(inst, Pulse | Acquire | Delay | CustomPulse):
                 # only increment the durations for meaningful instructions
                 pulse_chan_id = inst.quantum_targets[0].partial_id()
                 durations[pulse_chan_id] += inst.duration
@@ -996,7 +996,7 @@ class EvaluatePulses(TransformPass):
 
         instructions = []
         for inst in ir.instructions:
-            if isinstance(inst, (Pulse, CustomPulse)):
+            if isinstance(inst, Pulse | CustomPulse):
                 inst = self.evaluate_waveform(inst, self.ignored_shapes, pulses)
             elif isinstance(inst, Acquire) and inst.filter:
                 inst.filter = self.evaluate_waveform(
@@ -1288,7 +1288,7 @@ class LowerSyncsToDelays(TransformPass):
         new_instructions: list[Instruction] = []
 
         for inst in ir.instructions:
-            if isinstance(inst, (Pulse, Acquire, Delay, CustomPulse)):
+            if isinstance(inst, Pulse | Acquire | Delay | CustomPulse):
                 # only increment the durations for meaningful instructions
                 pulse_chan_id = inst.quantum_targets[0].partial_id()
                 durations[pulse_chan_id] += inst.duration
@@ -1471,7 +1471,7 @@ class ScopeSanitisation(TransformPass):
         """:param ir: The list of instructions stored in an :class:`InstructionBuilder`."""
 
         tail, head = partition(
-            lambda inst: isinstance(inst, (Sweep, Repeat)), ir.instructions
+            lambda inst: isinstance(inst, Sweep | Repeat), ir.instructions
         )
         tail, head = list(tail), list(head)
 

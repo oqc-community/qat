@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from enum import Enum, auto
-from typing import Dict, List, Optional, Set, TypeVar, Union
+from typing import TypeVar
 
 import jsonpickle
 import jsonpickle.ext.numpy as jsonpickle_numpy
@@ -142,7 +142,7 @@ class Calibratable:
     def _is_serializable(self, val):
         """Checks whether this field value/name should be serialized as a calibration
         value."""
-        if isinstance(val, (List, tuple)):
+        if isinstance(val, list | tuple):
             return all([self._is_serializable(val_) for val_ in val])
 
         if isinstance(val, dict):
@@ -156,7 +156,7 @@ class Calibratable:
         # This checks the field name in JSON is valid, which it'll always be for us.
         return is_picklable("", val)
 
-    def __getstate__(self) -> Dict:
+    def __getstate__(self) -> dict:
         """Returns a dictionary that will be used to pickle the object. By default
         everything that is considered valid by jsonpickle will be added.
 
@@ -202,7 +202,7 @@ class Calibratable:
         if os.path.isfile(cwd_path):
             file_path = cwd_path
 
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             return Calibratable.load_calibration(f.read())
 
 
@@ -221,7 +221,7 @@ class CyclicRefPickler(Pickler):
         is_new = super()._log_ref(obj)
         # We don't want complex' or enums to be referenced. Just create a new one on
         # each instance.
-        if isinstance(obj, (complex, Enum, np.number)):
+        if isinstance(obj, complex | Enum | np.number):
             return True
 
         if is_new:
@@ -297,7 +297,7 @@ class PhysicalChannel(QuantumComponent, Calibratable):
         id_: str,
         sample_time: float,
         baseband: PhysicalBaseband,
-        block_size: Optional[int] = None,
+        block_size: int | None = None,
         phase_offset: float = 0.0,
         imbalance: float = 1.0,
         acquire_allowed: bool = False,
@@ -382,7 +382,7 @@ class PhysicalBaseband(QuantumComponent, Calibratable):
     def __init__(self, id_: str, frequency: float, if_frequency: float = 250e6):
         super().__init__(id_)
         self.frequency: float = frequency
-        self.if_frequency: Optional[float] = if_frequency
+        self.if_frequency: float | None = if_frequency
 
 
 class PulseChannel(QuantumComponent, Calibratable):
@@ -523,7 +523,7 @@ class PulseChannelView(PulseChannel):
         self,
         pulse_channel: PulseChannel,
         channel_type: ChannelType,
-        auxiliary_devices: List[QuantumDevice] = None,
+        auxiliary_devices: list[QuantumDevice] = None,
     ):
         """
         pulse_channel: The PulseChannel this device is viewing.
@@ -538,7 +538,7 @@ class PulseChannelView(PulseChannel):
             auxiliary_devices = []
         self.pulse_channel: PulseChannel = pulse_channel
         self.channel_type: ChannelType = channel_type
-        self.auxiliary_devices: List[QuantumDevice] = auxiliary_devices
+        self.auxiliary_devices: list[QuantumDevice] = auxiliary_devices
         if not any(self._pulse_channel_attributes):
             self._pulse_channel_attributes = {
                 val
@@ -551,7 +551,7 @@ class PulseChannelView(PulseChannel):
                     "Pulse channel has attributes that will shadow wrapping class."
                 )
 
-    _pulse_channel_attributes: Set[str] = set()
+    _pulse_channel_attributes: set[str] = set()
 
     def __getattr__(self, item):
         if item in self._pulse_channel_attributes:
@@ -594,7 +594,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
     ):
         super().__init__(id_)
         self.measure_device: QuantumDevice = measure_device
-        self.pulse_channels: Dict[str, Union[PulseChannel, PulseChannelView]] = {}
+        self.pulse_channels: dict[str, PulseChannel | PulseChannelView] = {}
         self.default_pulse_channel_type = ChannelType.measure
         self.physical_channel: PhysicalChannel = physical_channel
 
@@ -607,10 +607,10 @@ class QuantumDevice(QuantumComponent, Calibratable):
         amp=0.0,
         active: bool = True,
         fixed_if: bool = False,
-        auxiliary_devices: List[QuantumDevice] = None,
+        auxiliary_devices: list[QuantumDevice] = None,
         id_: str = None,
-        imbalance: Optional[float] = None,
-        phase_offset: Optional[float] = None,
+        imbalance: float | None = None,
+        phase_offset: float | None = None,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
@@ -643,7 +643,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
         return pulse_channel
 
     def _create_pulse_channel_id(
-        self, channel_type: ChannelType, auxiliary_devices: List[QuantumDevice]
+        self, channel_type: ChannelType, auxiliary_devices: list[QuantumDevice]
     ):
         if (
             channel_type in self.multi_device_pulse_channel_types
@@ -660,7 +660,7 @@ class QuantumDevice(QuantumComponent, Calibratable):
         self,
         pulse_channel: PulseChannel,
         channel_type: ChannelType,
-        auxiliary_devices: List[QuantumDevice] = None,
+        auxiliary_devices: list[QuantumDevice] = None,
     ):
         if auxiliary_devices is None:
             auxiliary_devices = []
@@ -686,13 +686,13 @@ class QuantumDevice(QuantumComponent, Calibratable):
     def get_pulse_channel(
         self,
         channel_type: ChannelType = None,
-        auxiliary_devices: List[QuantumDevice] = None,
+        auxiliary_devices: list[QuantumDevice] = None,
     ) -> PTType:
         if channel_type is None:
             channel_type = self.default_pulse_channel_type
         if auxiliary_devices is None:
             auxiliary_devices = []
-        if not isinstance(auxiliary_devices, List):
+        if not isinstance(auxiliary_devices, list):
             auxiliary_devices = [auxiliary_devices]
 
         id_ = self._create_pulse_channel_id(channel_type, auxiliary_devices)
@@ -736,13 +736,13 @@ class Qubit(QuantumDevice):
         index: int,
         resonator: Resonator,
         physical_channel: PhysicalChannel,
-        coupled_qubits: List[Qubit] = None,
+        coupled_qubits: list[Qubit] = None,
         drive_amp: float = 1.0,
         id_=None,
     ):
         super().__init__(id_ or f"Q{index}", physical_channel, resonator)
         self.index = index
-        self.coupled_qubits: List[Qubit] = []
+        self.coupled_qubits: list[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
         self.discriminator = [0.0]
         self.pulse_hw_zx_pi_4 = dict()
@@ -818,11 +818,11 @@ class Qubit(QuantumDevice):
     def get_freq_shift_channel(self) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.freq_shift)
 
-    def get_cross_resonance_channel(self, linked_qubits: List[Qubit]) -> PulseChannel:
+    def get_cross_resonance_channel(self, linked_qubits: list[Qubit]) -> PulseChannel:
         return self.get_pulse_channel(ChannelType.cross_resonance, linked_qubits)
 
     def get_cross_resonance_cancellation_channel(
-        self, linked_qubits: List[Qubit]
+        self, linked_qubits: list[Qubit]
     ) -> PulseChannel:
         return self.get_pulse_channel(
             ChannelType.cross_resonance_cancellation, linked_qubits

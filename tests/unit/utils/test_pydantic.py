@@ -275,7 +275,7 @@ class TestPydArray:
     @pytest.mark.parametrize("pyd_array", ["pyd_array_1.json", "pyd_array_2.json"])
     def test_serialisation_json(self, testpath, pyd_array):
         file_path = Path(testpath, "files", "payload", pyd_array)
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             arr = IntNDArray.model_validate_json(f.read())
 
         assert arr.shape == (1000,)

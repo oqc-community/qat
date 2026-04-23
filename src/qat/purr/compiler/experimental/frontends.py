@@ -30,7 +30,7 @@ class InterruptableExecutingMixin:
         ]
 
         exe_method = _execute_instructions_with_interrupt
-        if isinstance(hardware, (QiskitHardwareModel, QiskitEngine)):
+        if isinstance(hardware, QiskitHardwareModel | QiskitEngine):
             exe_method = execute_instructions
 
         return exe_method(hardware, instructions, compiler_config, calibrations, interrupt)

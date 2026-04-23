@@ -196,8 +196,8 @@ class SquashCNOTs(TransformPass):
             pair_set = set(pair)
             intersections = [
                 len(set(gate.qubits) & pair_set) == 0
-                or (isinstance(gate, (Z, Rz, Phase)) and gate.qubit == pair[0])
-                or (isinstance(gate, (X, Rx, X_pi_2)) and gate.qubit == pair[1])
+                or (isinstance(gate, Z | Rz | Phase) and gate.qubit == pair[0])
+                or (isinstance(gate, X | Rx | X_pi_2) and gate.qubit == pair[1])
                 for gate in ir.instructions[positions[0] : positions[-1]]
             ]
             i = 0

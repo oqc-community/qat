@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-from typing import Optional
 
 from compiler_config.config import MetricsType
 from pydantic import BaseModel, Field, ValidationError, model_validator
@@ -15,13 +14,13 @@ snake_cased_flags = [
 class MetricsManager(BaseModel):
     """Pydantic version based on qat.purr.compiler.metrics.py elements."""
 
-    enabled_metrics: Optional[MetricsType] = Field(
+    enabled_metrics: MetricsType | None = Field(
         default=MetricsType.Experimental, repr=False, exclude=True
     )
 
-    optimized_circuit: Optional[str] = Field(default=None)
-    optimized_instruction_count: Optional[int] = Field(default=None)
-    physical_qubit_indices: Optional[list[int]] = Field(default=None)
+    optimized_circuit: str | None = Field(default=None)
+    optimized_instruction_count: int | None = Field(default=None)
+    physical_qubit_indices: list[int] | None = Field(default=None)
 
     @model_validator(mode="before")
     def validate_all_fields_exist(cls, value):
@@ -34,7 +33,7 @@ class MetricsManager(BaseModel):
         return value
 
     def __init__(
-        self, enabled_metrics: Optional[MetricsType] = MetricsType.Experimental, **kwargs
+        self, enabled_metrics: MetricsType | None = MetricsType.Experimental, **kwargs
     ):
         super().__init__(enabled_metrics=enabled_metrics, **kwargs)
 

@@ -2,7 +2,8 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import abc
 import itertools as it
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from compiler_config.config import InlineResultsProcessing, Languages
 from pydantic import Field
@@ -178,7 +179,7 @@ class AbstractParser(abc.ABC):
     def _is_register_target(self, values: list[Any]):
         """Does it look like the passed-in qubit or parameter list contains a register."""
         return isinstance(values, Iterable) and any(
-            isinstance(val, (QubitRegister, BitRegister)) for val in values
+            isinstance(val, QubitRegister | BitRegister) for val in values
         )
 
     def _curate_register_input(self, input: list | Qubit) -> list:

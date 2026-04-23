@@ -686,7 +686,7 @@ class TestBaseQuantum:
         for ch, positions in position_map.items():
             assert not all(
                 [
-                    isinstance(p.instruction, (Delay, PhaseShift, PhaseReset))
+                    isinstance(p.instruction, Delay | PhaseShift | PhaseReset)
                     for p in positions
                 ]
             )

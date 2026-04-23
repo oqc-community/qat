@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import re
-from typing import List, Optional, Tuple, Union
 from warnings import warn
 
 import numpy as np
@@ -45,7 +44,7 @@ def get_default_qiskit_hardware(
     qubit_count=20,
     noise_model=None,
     strict_placement=True,
-    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+    connectivity: Connectivity | list[tuple[int, int]] | None = None,
 ) -> "QiskitHardwareModel":
     """Creates a hardware model compatible with the Qiskit simulator.
 
@@ -86,7 +85,7 @@ class QiskitBuilder(InstructionBuilder):
         self.bit_count = self.bit_count + 1
         return self
 
-    def R(self, axis: Axis, target: Union[Qubit, PulseChannel], radii=None):
+    def R(self, axis: Axis, target: Qubit | PulseChannel, radii=None):
         qb, _ = self.model.resolve_qb_pulse_channel(target)
         if radii is None:
             radii = np.pi
@@ -100,17 +99,17 @@ class QiskitBuilder(InstructionBuilder):
 
         return self
 
-    def Z(self, target: Union[Qubit, PulseChannel], radii=np.pi):
+    def Z(self, target: Qubit | PulseChannel, radii=np.pi):
         qb, _ = self.model.resolve_qb_pulse_channel(target)
         self.circuit.rz(radii, qb.index)
         return self
 
-    def X(self, target: Union[Qubit, PulseChannel], radii=np.pi):
+    def X(self, target: Qubit | PulseChannel, radii=np.pi):
         qb, _ = self.model.resolve_qb_pulse_channel(target)
         self.circuit.rx(radii, qb.index)
         return self
 
-    def Y(self, target: Union[Qubit, PulseChannel], radii=np.pi):
+    def Y(self, target: Qubit | PulseChannel, radii=np.pi):
         qb, _ = self.model.resolve_qb_pulse_channel(target)
         self.circuit.ry(radii, qb.index)
         return self
@@ -119,7 +118,7 @@ class QiskitBuilder(InstructionBuilder):
         self.circuit.swap(target.index, destination.index)
         return self
 
-    def delay(self, target: Union[Qubit, PulseChannel], time: float):
+    def delay(self, target: Qubit | PulseChannel, time: float):
         qb, _ = self.model.resolve_qb_pulse_channel(target)
         self.circuit.delay(time, qb.index)
         return self
@@ -127,7 +126,7 @@ class QiskitBuilder(InstructionBuilder):
     def cR(
         self,
         axis: Axis,
-        controllers: Union[Qubit, List[Qubit]],
+        controllers: Qubit | list[Qubit],
         target: Qubit,
         theta: float,
     ):
@@ -163,7 +162,7 @@ class QiskitBuilder(InstructionBuilder):
         self.circuit.h(qubit.index)
         return self
 
-    def reset(self, qubits: Union[Qubit, List[Qubit]]):
+    def reset(self, qubits: Qubit | list[Qubit]):
         if not isinstance(qubits, list):
             qubits = [qubits]
 
@@ -369,11 +368,11 @@ class QiskitEngine(InstructionExecutionEngine):
             else task_results
         )
 
-    def optimize(self, instructions: List[Instruction]) -> List[Instruction]:
+    def optimize(self, instructions: list[Instruction]) -> list[Instruction]:
         log.info("No optimize implemented for QiskitEngine")
         return instructions
 
-    def validate(self, instructions: List[Instruction]):
+    def validate(self, instructions: list[Instruction]):
         pass
 
 

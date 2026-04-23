@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import re
-from typing import Union, get_args
 
 import numpy as np
 import pytest
@@ -299,9 +298,7 @@ class TestMeasureBlock:
             def target(self):
                 return next(iter(self.targets))
 
-        VALID_CUSTOM_INSTR = Union[
-            tuple(list(get_args(VALID_MEASURE_INSTR)) + [AdditionalQuantumInstructionBlock])
-        ]
+        VALID_CUSTOM_INSTR = VALID_MEASURE_INSTR | AdditionalQuantumInstructionBlock
 
         class CustomMeasureBlock(MeasureBlock):
             instructions: ValidatedList[VALID_CUSTOM_INSTR] = Field(

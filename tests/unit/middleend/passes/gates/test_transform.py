@@ -35,7 +35,7 @@ class TestDecompose2QToCNOTs:
         assert len(ir.instructions) >= 1
         for gate in ir.instructions:
             if isinstance(gate, Gate2Q):
-                assert isinstance(gate, (CNOT, ECR, ZX_pi_4))
+                assert isinstance(gate, CNOT | ECR | ZX_pi_4)
 
 
 class TestDecomposeToNativeGates:
@@ -47,7 +47,7 @@ class TestDecomposeToNativeGates:
         ir = DecomposeToNativeGates().run(ir)
         assert len(ir.instructions) >= 1 or gate == Id
         for gate in ir.instructions:
-            assert isinstance(gate, (Z_phase, X_pi_2))
+            assert isinstance(gate, Z_phase | X_pi_2)
 
     @pytest.mark.parametrize(["gate", "params"], two_q_gate_tests())
     def test_2qs_decompose_to_only_native(self, gate, params):
@@ -58,7 +58,7 @@ class TestDecomposeToNativeGates:
         ir = DecomposeToNativeGates().run(ir)
         assert len(ir.instructions) >= 1
         for gate in ir.instructions:
-            assert isinstance(gate, (Z_phase, X_pi_2, ZX_pi_4))
+            assert isinstance(gate, Z_phase | X_pi_2 | ZX_pi_4)
 
 
 involutory_gates = [X, Y, Z, Hadamard]

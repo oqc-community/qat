@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from typing import Dict, List
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -13,7 +12,7 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-def plot_packages(packages: List[QbloxPackage]):
+def plot_packages(packages: list[QbloxPackage]):
     if not packages:
         return
 
@@ -52,7 +51,7 @@ def plot_packages(packages: List[QbloxPackage]):
     plt.show()
 
 
-def plot_playback(playback: Dict[str, List[Acquisition]]):
+def plot_playback(playback: dict[str, list[Acquisition]]):
     if not playback:
         return
 

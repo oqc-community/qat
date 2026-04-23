@@ -382,7 +382,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                         gate_context,
                     )
             for qb_name, value in zip(gate_def.qubits, target_qubits):
-                if isinstance(qb_name, (QubitRegister, Qubit)):
+                if isinstance(qb_name, QubitRegister | Qubit):
                     continue
                 self._attempt_declaration(
                     Variable(name=qb_name.name, var_type=type(value), value=value),
@@ -479,7 +479,6 @@ def _create_lark_parser():
             "grammars",
             "partial_qasm3.lark",
         ),
-        "r",
         encoding="utf-8",
     ) as lark_grammar_file:
         lark_grammar_str = lark_grammar_file.read()
@@ -653,7 +652,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 for val in child_tree
             ]
 
-        if not isinstance(child_tree, (Tree, Token)):
+        if not isinstance(child_tree, Tree | Token):
             return child_tree
 
         # TODO: For now it's fine, but want to change all visitor methods to return
@@ -905,7 +904,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 raise ValueError(
                     f"Rise '{str(rise)}' used in {intrinsic_name} is not a float."
                 )
-            if std_dev is not _empty and not isinstance(std_dev, (float, int)):
+            if std_dev is not _empty and not isinstance(std_dev, float | int):
                 raise ValueError(
                     f"Standard deviation '{str(std_dev)}' used in {intrinsic_name} "
                     "is not a float."
@@ -928,7 +927,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             """As results length is dynamic, centralise validation and messages."""
             lengths = set(lengths)
             args = self.transform_to_value(arg_tree)
-            is_iterable = isinstance(args, (tuple, list))
+            is_iterable = isinstance(args, tuple | list)
             arg_length = len(args) if is_iterable else 1
             if (is_iterable and arg_length not in lengths) or (
                 not is_iterable and 1 not in lengths
@@ -1161,7 +1160,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 for val in value:
                     _strip_qubits(val)
             else:
-                if isinstance(value, (Qubit, QubitRegister)):
+                if isinstance(value, Qubit | QubitRegister):
                     qubits.append(value)
                 else:
                     others.append(value)
@@ -1239,7 +1238,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
             for qb_name, value in zip(qubit_mappings, qubits):
                 # If we resolved to a qubit already, we're a physical qubit.
-                if isinstance(qb_name, (QubitRegister, Qubit)):
+                if isinstance(qb_name, QubitRegister | Qubit):
                     continue
 
                 self._attempt_declaration(
@@ -1379,7 +1378,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if is_expr_list:
             gate_name = self.generate_expr_list_defcal_name(gate_name, classic_args)
 
-        if all(isinstance(val, (Qubit, QubitRegister)) for val in target_qubits):
+        if all(isinstance(val, Qubit | QubitRegister) for val in target_qubits):
             gate_name = self._create_qb_specific_gate_suffix(gate_name, target_qubits)
         self._current_context.calibration_methods[gate_name] = (
             classic_args,
@@ -1401,7 +1400,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         target_qubits = (
             target_qubits if isinstance(target_qubits, list) else [target_qubits]
         )
-        if all(isinstance(val, (Qubit, QubitRegister)) for val in target_qubits):
+        if all(isinstance(val, Qubit | QubitRegister) for val in target_qubits):
             gate_name = self._create_qb_specific_gate_suffix(gate_name, target_qubits)
 
         # Not technically a calibration method, but the way to call is the same.
@@ -1478,7 +1477,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if not isinstance(pulse_channel, IRPulseChannel):
             raise ValueError(f"{str(pulse_channel)} is not a valid pulse channel.")
 
-        if value is not None and not isinstance(value, (int, float)):
+        if value is not None and not isinstance(value, int | float):
             raise ValueError(f"{str(value)} is not a valid {val_type}.")
 
         return pulse_channel, value

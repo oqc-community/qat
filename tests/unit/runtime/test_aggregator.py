@@ -216,7 +216,7 @@ class TestResultsAggregator:
         aggregator = ResultsAggregator()
 
         with pytest.raises(ValueError, match="Expected readout length"):
-            playback = {"acquire_1": np.ones((50))}
+            playback = {"acquire_1": np.ones(50)}
             aggregator.append(playback, acquires)
         with pytest.raises(ValueError, match="Expected readout length"):
             playback = {"acquire_1": np.ones((500, 50))}

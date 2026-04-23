@@ -64,7 +64,7 @@ class StateVector(StateTensor):
         on.
         """
 
-        qubits = (qubits,) if not isinstance(qubits, (tuple, list)) else qubits
+        qubits = (qubits,) if not isinstance(qubits, tuple | list) else qubits
         matrix = np.reshape(matrix, (2,) * (2 * len(qubits)))
         matrix_contraction_dims = tuple(len(qubits) + i for i in range(len(qubits)))
         tensor = np.tensordot(self.tensor, matrix, (qubits, matrix_contraction_dims))
@@ -102,7 +102,7 @@ class StateOperator(StateTensor):
         on.
         """
 
-        qubits = (qubits,) if not isinstance(qubits, (tuple, list)) else qubits
+        qubits = (qubits,) if not isinstance(qubits, tuple | list) else qubits
         matrix = np.reshape(matrix, (2,) * (2 * len(qubits)))
         matrix_contraction_dims = tuple(len(qubits) + i for i in range(len(qubits)))
         tensor = np.tensordot(matrix, self.tensor, (matrix_contraction_dims, qubits))

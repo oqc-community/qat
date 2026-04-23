@@ -59,7 +59,7 @@ class TestLegacyAndNetworkxSubgraphsMatch:
             assert nx.is_connected(G)
 
 
-with open("tests/files/hardware/toshiko_lattice_connections.json", "r") as f:
+with open("tests/files/hardware/toshiko_lattice_connections.json") as f:
     toshiko_edges = []
 
     connections = json.load(f)

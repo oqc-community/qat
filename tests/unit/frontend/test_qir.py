@@ -222,7 +222,7 @@ class TestQIRFrontend:
 
         qubits = set()
         for instruction in builder.instructions:
-            if isinstance(instruction, (PydPulse, Acquire, MeasureBlock)):
+            if isinstance(instruction, PydPulse | Acquire | MeasureBlock):
                 for target in instruction.targets:
                     device = model.device_for_pulse_channel_id(target)
                     if not isinstance(device, Qubit):

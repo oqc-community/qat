@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from abc import abstractmethod
-from typing import Dict, Union
 
 from qat.purr.compiler.devices import Calibratable, PhysicalBaseband, PhysicalChannel
 from qat.purr.utils.logger import get_default_logger
@@ -58,8 +57,8 @@ class Instrument(Calibratable):
             self.disconnect()
         self._driver = obj
 
-    def __getstate__(self) -> Dict:
-        results = super(Instrument, self).__getstate__()
+    def __getstate__(self) -> dict:
+        results = super().__getstate__()
         results["_driver"] = None
         return results
 
@@ -83,7 +82,7 @@ class ControlHardwareChannel(PhysicalChannel):
     ):
         super().__init__(id_, *args, **kwargs)
         self.hardware_id = hardware_id
-        self.dcbiaschannel_pair: Dict[str, DCBiasChannel] = dcbiaschannel_pair
+        self.dcbiaschannel_pair: dict[str, DCBiasChannel] = dcbiaschannel_pair
         self.switch_ch = switch_ch
 
 
@@ -97,7 +96,7 @@ class ControlHardware(Instrument):
 
     def __init__(self, id_=None):
         super().__init__(address=None, id_=id_)
-        self.channels: Dict[str, ControlHardwareChannel] = {}
+        self.channels: dict[str, ControlHardwareChannel] = {}
 
     def add_physical_channel(self, *physical_channel: ControlHardwareChannel):
         for physical_channel in physical_channel:
@@ -160,7 +159,7 @@ class DCBiasChannel(Calibratable):
     def __init__(
         self,
         channel_idx=None,
-        bias_value: Union[float, int] = 0,
+        bias_value: float | int = 0,
         instrument: Instrument = None,
     ):
         super().__init__()

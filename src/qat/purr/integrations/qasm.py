@@ -5,11 +5,12 @@ import importlib
 import importlib.util
 import math
 import re
+from collections.abc import Iterable
 from copy import deepcopy
 from numbers import Number
 from os.path import join
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any
 
 from compiler_config.config import InlineResultsProcessing, Languages
 from lark import Lark, Token, Tree, UnexpectedCharacters
@@ -110,7 +111,7 @@ def qasm_from_file(file_path):
 
 class QubitRegister:
     def __init__(self, qubits=None):
-        self.qubits: List[Qubit] = qubits or []
+        self.qubits: list[Qubit] = qubits or []
 
     def __repr__(self):
         return "QubitRegister: " + str(self.qubits)
@@ -118,7 +119,7 @@ class QubitRegister:
 
 class BitRegister:
     def __init__(self, bits=None):
-        self.bits: List[CregIndexValue] = bits or []
+        self.bits: list[CregIndexValue] = bits or []
 
     def __repr__(self):
         return "Register: " + str(self.bits)
@@ -126,8 +127,8 @@ class BitRegister:
 
 class Registers:
     def __init__(self):
-        self.quantum: Dict[str, QubitRegister] = dict()
-        self.classic: Dict[str, BitRegister] = dict()
+        self.quantum: dict[str, QubitRegister] = dict()
+        self.classic: dict[str, BitRegister] = dict()
 
 
 class QasmContext:
@@ -136,8 +137,8 @@ class QasmContext:
 
     def __init__(self, registers=None, gates=None, variables=None):
         self.registers: Registers = registers or Registers()
-        self.variables: Dict[str, Variable] = variables or dict()
-        self.gates: Dict[str, Any] = gates or dict()
+        self.variables: dict[str, Variable] = variables or dict()
+        self.gates: dict[str, Any] = gates or dict()
 
 
 class CregIndexValue:
@@ -159,7 +160,7 @@ class CregIndexValue:
 class AbstractParser:
     def __init__(self):
         self.results_format = InlineResultsProcessing.Program
-        self._cached_parses: Dict[int, Any] = dict()
+        self._cached_parses: dict[int, Any] = dict()
 
     def can_parse(self, qasm: str) -> ParseResults:
         try:
@@ -209,7 +210,7 @@ class AbstractParser:
         theta,
         phi,
         _lambda,
-        qubit_or_register: List[Union[Qubit, QubitRegister]],
+        qubit_or_register: list[Qubit | QubitRegister],
         builder,
     ):
         """Unitary in QASM terms is just ``U(...)``."""
@@ -263,10 +264,10 @@ class AbstractParser:
 
         return index_range
 
-    def _is_register_target(self, values: List[Any]):
+    def _is_register_target(self, values: list[Any]):
         """Does it look like the passed-in qubit or parameter list contains a register."""
         return isinstance(values, Iterable) and any(
-            isinstance(val, (QubitRegister, BitRegister)) for val in values
+            isinstance(val, QubitRegister | BitRegister) for val in values
         )
 
     def _expand_to_match_registers(self, *args, tuple_return=True, flatten_results=False):
@@ -288,18 +289,18 @@ class AbstractParser:
 
             [[q1, q4, c1], [q2, q5, c1], [q3, q6, c1]]
         """
-        args = [val if isinstance(val, List) else [val] for val in args]
+        args = [val if isinstance(val, list) else [val] for val in args]
 
         def _flatten_registers(value):
             res = []
-            if not isinstance(value, List):
+            if not isinstance(value, list):
                 value = [value]
 
             # If we have multiple registers it means they should be zipped together as
             # one.
             # So p, r = [ [ p[0], p[1] ], [ r[0], r[1] ] ] = [ [ p0, r0 ], [ p1, r1 ] ]
             registers = [
-                val for val in value if isinstance(val, (QubitRegister, BitRegister))
+                val for val in value if isinstance(val, QubitRegister | BitRegister)
             ]
             if len(registers) >= 2:
                 value.extend(
@@ -334,7 +335,7 @@ class AbstractParser:
             results = [
                 tuple(
                     [
-                        val[0] if isinstance(val, List) and len(val) == 1 else val
+                        val[0] if isinstance(val, list) and len(val) == 1 else val
                         for val in tup
                     ]
                 )
@@ -354,7 +355,7 @@ class Qasm2Parser(AbstractParser):
         super().__init__()
         self.order_result_vars = order_result_vars
         self.raw_results = raw_results
-        self._cached_parses: Dict[int, DAGCircuit] = dict()
+        self._cached_parses: dict[int, DAGCircuit] = dict()
 
     def __repr__(self):
         return self.__class__.__name__
@@ -362,7 +363,7 @@ class Qasm2Parser(AbstractParser):
     def parser_language(self) -> Languages:
         return Languages.Qasm2
 
-    def _get_intrinsics(self, qasm="") -> List[CustomInstruction]:
+    def _get_intrinsics(self, qasm="") -> list[CustomInstruction]:
         instrinsics = list(qasm2.LEGACY_CUSTOM_INSTRUCTIONS)
         if "gate ecr" not in qasm:
             instrinsics.append(
@@ -531,7 +532,7 @@ class Qasm2Parser(AbstractParser):
     ):
         """Process each individual QASM node, builds context or forwards processing to
         relevant ``process_x`` method associated with each node type."""
-        if isinstance(node, (DAGInNode, DAGOutNode)):
+        if isinstance(node, DAGInNode | DAGOutNode):
             for register, _ in self._current_dag.find_bit(node.wire).registers:
                 if isinstance(register, QuantumRegister):
                     self.process_qreg(register, context, builder)
@@ -569,7 +570,7 @@ class Qasm2Parser(AbstractParser):
             return node.op.params
         if isinstance(node.op, Measure):
             bits = self._get_clbits(node, context)
-            if not isinstance(bits, List):
+            if not isinstance(bits, list):
                 bits = [bits]
 
             return bits
@@ -599,7 +600,7 @@ class Qasm2Parser(AbstractParser):
                 qubits.append(register.qubits[ind])
         return qubits
 
-    def _get_clbits(self, source: Union[DAGOpNode, tuple], context: QasmContext) -> list:
+    def _get_clbits(self, source: DAGOpNode | tuple, context: QasmContext) -> list:
         if isinstance(source, DAGOpNode):
             return self._get_clbits(source.cargs, context)
         else:
@@ -657,7 +658,6 @@ def _create_lark_parser():
             "grammars",
             "partial_qasm3.lark",
         ),
-        "r",
         encoding="utf-8",
     ) as lark_grammar_file:
         lark_grammar_str = lark_grammar_file.read()
@@ -667,7 +667,7 @@ def _create_lark_parser():
 class OpenPulseContext(QasmContext):
     def __init__(self, registers=None, gates=None, variables=None, cali_methods=None):
         super().__init__(registers, gates, variables)
-        self.calibration_methods: Dict[str, Any] = cali_methods or dict()
+        self.calibration_methods: dict[str, Any] = cali_methods or dict()
 
 
 def get_frame_mappings(model: QuantumHardwareModel):
@@ -714,7 +714,7 @@ class UntargetedPulse:
     """Pulse that currently has no device to send it down."""
 
     def __init__(self, pulse_class: type, *args, **kwargs):
-        self._ref_instance: Union[CustomPulse, Pulse] = pulse_class(
+        self._ref_instance: CustomPulse | Pulse = pulse_class(
             None, *args, ignore_channel_scale=True, **kwargs
         )
         self._built = False
@@ -770,7 +770,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         return self.process_program(program, context)
 
     def process_program(
-        self, prog: ast.Program, context: Optional[QasmContext]
+        self, prog: ast.Program, context: QasmContext | None
     ) -> InstructionBuilder:
         context = context or QasmContext()
         self._walk_program(prog, context)
@@ -851,7 +851,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                 raise NotImplementedError(f"Cannot get qubits from {type(input_)}")
 
     def _create_qb_specific_gate_suffix(
-        self, name: str, target_qubits: List[Qubit | QubitRegister]
+        self, name: str, target_qubits: list[Qubit | QubitRegister]
     ) -> str:
         return f"{name}[{','.join([str(qb) for qb in target_qubits])}]"
 
@@ -1008,7 +1008,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                         Variable(self.visit(arg, context), type(value), value), gate_context
                     )
             for qb_name, value in zip(gate_def.qubits, target_qubits):
-                if isinstance(qb_name, (QubitRegister, Qubit)):
+                if isinstance(qb_name, QubitRegister | Qubit):
                     continue
                 self._attempt_declaration(
                     Variable(qb_name.name, type(value), value), gate_context
@@ -1056,7 +1056,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         theta,
         phi,
         _lambda,
-        qubit_or_register: List[Union[Qubit, QubitRegister]],
+        qubit_or_register: list[Qubit | QubitRegister],
         builder: InstructionBuilder,
     ):
         self._add_unitary(theta, phi, _lambda, qubit_or_register, builder)
@@ -1081,14 +1081,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
     def __init__(self):
         super().__init__()
-        self.builder: Optional[InstructionBuilder] = None
-        self._general_context: Optional[OpenPulseContext] = None
-        self._calibration_context: Optional[OpenPulseContext] = None
-        self._current_context: Optional[OpenPulseContext] = None
+        self.builder: InstructionBuilder | None = None
+        self._general_context: OpenPulseContext | None = None
+        self._calibration_context: OpenPulseContext | None = None
+        self._current_context: OpenPulseContext | None = None
         self._q3_patcher: Qasm3ParserBase = Qasm3ParserBase()
-        self._port_mappings: Dict[str, PhysicalChannel] = dict()
-        self._frame_mappings: Dict[str, PulseChannel] = dict()
-        self._cached_parses: Dict[int, Any] = dict()
+        self._port_mappings: dict[str, PhysicalChannel] = dict()
+        self._frame_mappings: dict[str, PulseChannel] = dict()
+        self._cached_parses: dict[int, Any] = dict()
 
         self._has_qasm_version = False
         self._has_calibration_version = False
@@ -1229,13 +1229,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._current_context.variables[var.name] = var
 
     def transform_to_value(self, child_tree, walk_variable=True, return_variable=False):
-        if isinstance(child_tree, List):
+        if isinstance(child_tree, list):
             return [
                 self.transform_to_value(val, walk_variable, return_variable)
                 for val in child_tree
             ]
 
-        if not isinstance(child_tree, (Tree, Token)):
+        if not isinstance(child_tree, Tree | Token):
             return child_tree
 
         # TODO: For now it's fine, but want to change all visitor methods to return
@@ -1373,7 +1373,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             if bits is not None:
                 return bits
 
-            def _walk_variables(var_id, guard: Set[str] = None):
+            def _walk_variables(var_id, guard: set[str] = None):
                 if guard is None:
                     guard = set()
                 variable = self._current_context.variables.get(var_id, None)
@@ -1481,7 +1481,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 raise ValueError(
                     f"Rise '{str(rise)}' used in {intrinsic_name} is not a float."
                 )
-            if std_dev is not _empty and not isinstance(std_dev, (float, int)):
+            if std_dev is not _empty and not isinstance(std_dev, float | int):
                 raise ValueError(
                     f"Standard deviation '{str(std_dev)}' used in {intrinsic_name} "
                     "is not a float."
@@ -1504,7 +1504,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             """As results length is dynamic, centralize validation and messages."""
             lengths = set(lengths)
             args = self.transform_to_value(arg_tree)
-            is_iterable = isinstance(args, (tuple, list))
+            is_iterable = isinstance(args, tuple | list)
             arg_length = len(args) if is_iterable else 1
             if (is_iterable and arg_length not in lengths) or (
                 not is_iterable and 1 not in lengths
@@ -1678,10 +1678,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
             bits = args[0]
             qubits = args[2]
 
-        if not isinstance(bits, List):
+        if not isinstance(bits, list):
             bits = [bits]
 
-        if not isinstance(qubits, List):
+        if not isinstance(qubits, list):
             qubits = [qubits]
 
         # If the measure for this particular qubit has been overriden the functionality
@@ -1689,7 +1689,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if self._has_defcal_override("measure", qubits):
             results = self._call_gate("measure", qubits)
             if results is not None:
-                results = results if isinstance(results, List) else [results]
+                results = results if isinstance(results, list) else [results]
                 if len(bits) != len(results):
                     raise ValueError("Can't flatten overriden measure into assignment.")
 
@@ -1702,13 +1702,13 @@ class Qasm3Parser(Interpreter, AbstractParser):
     def _has_defcal_override(
         self,
         name: str,
-        qubits: List[Qubit],
-        argument_values: Optional[List[Any]] = None,
+        qubits: list[Qubit],
+        argument_values: list[Any] | None = None,
     ):
         """Returns whether this gate has been overriden, either in a generic or qubit-
         specific manner."""
         argument_values = argument_values or []
-        qubits = qubits if isinstance(qubits, List) else [qubits]
+        qubits = qubits if isinstance(qubits, list) else [qubits]
         qubit_specific_name = self._create_qb_specific_gate_suffix(name, qubits)
 
         is_calibration = name in self._current_context.calibration_methods
@@ -1729,11 +1729,11 @@ class Qasm3Parser(Interpreter, AbstractParser):
         qubits, others = [], []
 
         def _strip_qubits(value):
-            if isinstance(value, List):
+            if isinstance(value, list):
                 for val in value:
                     _strip_qubits(val)
             else:
-                if isinstance(value, (Qubit, QubitRegister)):
+                if isinstance(value, Qubit | QubitRegister):
                     qubits.append(value)
                 else:
                     others.append(value)
@@ -1792,10 +1792,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 # No type given if an expression list
                 arg_mappings = [name for type_, name in arg_mappings]
 
-            if not isinstance(arg_mappings, List):
+            if not isinstance(arg_mappings, list):
                 arg_mappings = [arg_mappings]
 
-            if not isinstance(qubit_mappings, List):
+            if not isinstance(qubit_mappings, list):
                 qubit_mappings = [qubit_mappings]
 
             if len(arg_mappings) != len(others):
@@ -1809,7 +1809,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
             for qb_name, value in zip(qubit_mappings, qubits):
                 # If we resolved to a qubit already, we're a physical qubit.
-                if isinstance(qb_name, (QubitRegister, Qubit)):
+                if isinstance(qb_name, QubitRegister | Qubit):
                     continue
 
                 self._attempt_declaration(Variable(qb_name, type(value), value))
@@ -1950,7 +1950,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if is_expr_list:
             gate_name = self.generate_expr_list_defcal_name(gate_name, classic_args)
 
-        if all(isinstance(val, (Qubit, QubitRegister)) for val in target_qubits):
+        if all(isinstance(val, Qubit | QubitRegister) for val in target_qubits):
             gate_name = self._create_qb_specific_gate_suffix(gate_name, target_qubits)
         self._current_context.calibration_methods[gate_name] = (
             classic_args,
@@ -1971,7 +1971,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
 
         if not isinstance(target_qubits, list):
             target_qubits = [target_qubits]
-        if all(isinstance(val, (Qubit, QubitRegister)) for val in target_qubits):
+        if all(isinstance(val, Qubit | QubitRegister) for val in target_qubits):
             gate_name = self._create_qb_specific_gate_suffix(gate_name, target_qubits)
 
         # Not technically a calibration method, but the way to call is the same.
@@ -2047,7 +2047,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         if not isinstance(channel, PulseChannel):
             raise ValueError(f"{str(channel)} is not a valid pulse channel.")
 
-        if value is not None and not isinstance(value, (int, float)):
+        if value is not None and not isinstance(value, int | float):
             raise ValueError(f"{str(value)} is not a valid {val_type}.")
 
         return channel, value

@@ -40,7 +40,7 @@ def json_load(
 
 class CustomQatJsonDecoder(legacy_serialiser.CustomJsonDecoder):
     def __init__(self, *args, model=None, **kwargs):
-        self.model: "QuantumHardwareModel" = model
+        self.model: QuantumHardwareModel = model
         super().__init__(*args, **kwargs)
         self.object_hook = self.default
 

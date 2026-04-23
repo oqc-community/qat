@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+from collections.abc import Iterable
 from numbers import Number
-from typing import Iterable
 
 import numpy as np
 
@@ -89,7 +89,7 @@ def binary_count(results_list, repeats):
             return str(res)
 
     def get_tuple(res, index):
-        return [val[index] if isinstance(val, (list, np.ndarray)) else val for val in res]
+        return [val[index] if isinstance(val, list | np.ndarray) else val for val in res]
 
     binary_results = binary(results_list)
 

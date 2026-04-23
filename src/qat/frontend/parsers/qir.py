@@ -34,7 +34,7 @@ try:
             """Converts QIR arguments to appropriate types for the instruction builder."""
 
             for i, arg in enumerate(args):
-                if isinstance(arg, (IntConstant, FloatConstant)):
+                if isinstance(arg, IntConstant | FloatConstant):
                     args[i] = arg.value
                 elif (qid := qubit_id(arg)) is not None:
                     # Checks to see if this is a qubit
@@ -73,7 +73,7 @@ try:
                     else:
                         raise ValueError(f"Argument {i} is not a valid result.")
                 elif expected_type == ArgumentType.Number:
-                    if isinstance(arg, (IntConstant, FloatConstant)):
+                    if isinstance(arg, IntConstant | FloatConstant):
                         args[i] = arg.value
                     else:
                         raise ValueError(f"Argument {i} is not a valid number.")

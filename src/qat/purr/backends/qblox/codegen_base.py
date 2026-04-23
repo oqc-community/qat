@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
-from typing import List
 
 from qat.purr.backends.qblox.graph import BasicBlock, ControlFlowGraph
 
@@ -10,7 +9,7 @@ class DfsTraversal(ABC):
     """Base Depth-first Search algorithm on the control flow graph."""
 
     def __init__(self):
-        self._entered: List[BasicBlock] = []
+        self._entered: list[BasicBlock] = []
 
     def clear(self):
         self._entered.clear()

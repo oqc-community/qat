@@ -2,7 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import random
 from enum import Enum, auto
-from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
@@ -26,7 +25,7 @@ from qat.utils.uuid import SeedType, temporary_uuid_seed
 def apply_setup_to_hardware(
     hw,
     qubit_count: int = 4,
-    connectivity: Optional[List[Tuple[int, int]]] = None,
+    connectivity: list[tuple[int, int]] | None = None,
     add_direction_couplings: bool = False,
     seed: SeedType | None = None,
 ):
@@ -147,7 +146,7 @@ class Connectivity(Enum):
 
 def get_default_echo_hardware(
     qubit_count=4,
-    connectivity: Optional[Union[Connectivity, List[Tuple[int, int]]]] = None,
+    connectivity: Connectivity | list[tuple[int, int]] | None = None,
     add_direction_couplings: bool = False,
     seed: SeedType | None = 42,
 ) -> "QuantumHardwareModel":
@@ -194,7 +193,7 @@ class EchoEngine(QuantumExecutionEngine):
         sweep_iterator: SweepIterator,
         package: QatFile,
         interrupt: Interrupt = NullInterrupt(),
-    ) -> Dict[str, np.ndarray]:
+    ) -> dict[str, np.ndarray]:
         results = {}
         while not sweep_iterator.is_finished():
             sweep_iterator.do_sweep(package.instructions)

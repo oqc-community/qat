@@ -2,7 +2,7 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Any, List, Set
+from typing import Any
 
 from qat.purr.compiler.instructions import (
     Acquire,
@@ -20,8 +20,8 @@ class TimelineSegment:
     def __init__(
         self,
         instruction: QuantumInstruction,
-        dependencies: Set[str] = None,
-        reliant: List[Any] = None,
+        dependencies: set[str] = None,
+        reliant: list[Any] = None,
     ):
         self.instruction = instruction
         self.scheduling_dependencies = dependencies or {
@@ -46,7 +46,7 @@ class QatFile:
     """In-memory representation of our instruction file."""
 
     def __init__(self):
-        self.timeline: List[TimelineSegment] = []
+        self.timeline: list[TimelineSegment] = []
         self.meta_instructions = []
 
     def add(self, *args, **kwargs):

@@ -2,7 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from compiler_config.config import CompilerConfig
 
@@ -85,7 +84,7 @@ def verify_instructions(builder: InstructionBuilder, qpu_type: QPUVersion):
     engine.verify_instructions(builder.instructions)
 
 
-def get_verification_model(qpu_type: QPUVersion) -> Optional[VerificationModel]:
+def get_verification_model(qpu_type: QPUVersion) -> VerificationModel | None:
     """Get verification model for a particular QPU make and model. Each make has its own
     class, which has a field that is each individual version available for verification.
 
@@ -130,13 +129,13 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
         return results
 
     @abstractmethod
-    def verify_instructions(self, instructions: List[Instruction], metadata): ...
+    def verify_instructions(self, instructions: list[Instruction], metadata): ...
 
 
 class LucyVerificationEngine(VerificationEngine):
     max_circuit_duration = 90000e-9
 
-    def verify_instructions(self, instructions: List[QuantumInstruction], metadata):
+    def verify_instructions(self, instructions: list[QuantumInstruction], metadata):
         timeline = self.create_duration_timeline(instructions)
 
         pc2samples = {pc: positions[-1].end for pc, positions in timeline.items()}

@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from dataclasses import dataclass
-from typing import Dict
 
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import Pulse
@@ -15,7 +14,7 @@ class WaveformDef:
 
 
 class AbstractWaveform(Pulse):
-    actual_waveforms: Dict[str, "AbstractWaveform"] = dict()
+    actual_waveforms: dict[str, "AbstractWaveform"] = dict()
     waveform_definition: WaveformDef = None
 
     def __init_subclass__(cls: "AbstractWaveform"):

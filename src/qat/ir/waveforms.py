@@ -2,8 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
-from typing import Type, Union
-
 import numpy as np
 from pydantic import Field, model_validator
 
@@ -59,7 +57,7 @@ class Waveform(AbstractWaveform):
     std_dev: float = 0.0
     square_width: float = 0.0
 
-    shape_function_type: Type[ComplexFunction] | None = None
+    shape_function_type: type[ComplexFunction] | None = None
 
     @property
     def duration(self):
@@ -145,63 +143,63 @@ class SampledWaveform(AbstractWaveform):
 
 
 class SquareWaveform(Waveform):
-    shape_function_type: Type[SquareFunction] = SquareFunction
+    shape_function_type: type[SquareFunction] = SquareFunction
 
 
 class SoftSquareWaveform(Waveform):
-    shape_function_type: Type[SoftSquareFunction] = SoftSquareFunction
+    shape_function_type: type[SoftSquareFunction] = SoftSquareFunction
 
 
 class SofterSquareWaveform(Waveform):
-    shape_function_type: Type[SofterSquareFunction] = SofterSquareFunction
+    shape_function_type: type[SofterSquareFunction] = SofterSquareFunction
 
 
 class ExtraSoftSquareWaveform(Waveform):
-    shape_function_type: Type[ExtraSoftSquareFunction] = ExtraSoftSquareFunction
+    shape_function_type: type[ExtraSoftSquareFunction] = ExtraSoftSquareFunction
 
 
 class GaussianWaveform(Waveform):
-    shape_function_type: Type[GaussianFunction] = GaussianFunction
+    shape_function_type: type[GaussianFunction] = GaussianFunction
 
 
 class SofterGaussianWaveform(Waveform):
-    shape_function_type: Type[SofterGaussianFunction] = SofterGaussianFunction
+    shape_function_type: type[SofterGaussianFunction] = SofterGaussianFunction
 
 
 class BlackmanWaveform(Waveform):
-    shape_function_type: Type[BlackmanFunction] = BlackmanFunction
+    shape_function_type: type[BlackmanFunction] = BlackmanFunction
 
 
 class SetupHoldWaveform(Waveform):
-    shape_function_type: Type[SetupHoldFunction] = SetupHoldFunction
+    shape_function_type: type[SetupHoldFunction] = SetupHoldFunction
 
 
 class RoundedSquareWaveform(Waveform):
-    shape_function_type: Type[RoundedSquareFunction] = RoundedSquareFunction
+    shape_function_type: type[RoundedSquareFunction] = RoundedSquareFunction
 
 
 class GaussianSquareWaveform(Waveform):
-    shape_function_type: Type[GaussianSquareFunction] = GaussianSquareFunction
+    shape_function_type: type[GaussianSquareFunction] = GaussianSquareFunction
 
 
 class DragGaussianWaveform(Waveform):
-    shape_function_type: Type[DragGaussianFunction] = DragGaussianFunction
+    shape_function_type: type[DragGaussianFunction] = DragGaussianFunction
 
 
 class GaussianZeroEdgeWaveform(Waveform):
-    shape_function_type: Type[GaussianZeroEdgeFunction] = GaussianZeroEdgeFunction
+    shape_function_type: type[GaussianZeroEdgeFunction] = GaussianZeroEdgeFunction
 
 
 class CosWaveform(Waveform):
-    shape_function_type: Type[Cos] = Cos
+    shape_function_type: type[Cos] = Cos
 
 
 class SinWaveform(Waveform):
-    shape_function_type: Type[Sin] = Sin
+    shape_function_type: type[Sin] = Sin
 
 
 class SechWaveform(Waveform):
-    shape_function_type: Type[SechFunction] = SechFunction
+    shape_function_type: type[SechFunction] = SechFunction
 
 
 waveform_classes = tuple(find_all_subclasses(Waveform) + [SampledWaveform])
@@ -215,7 +213,7 @@ class Pulse(QuantumInstruction):
     """
 
     ignore_channel_scale: bool = False
-    waveform: Union[waveform_classes]
+    waveform: Waveform | SampledWaveform
 
     @model_validator(mode="before")
     def validate_duration(cls, data):

@@ -399,7 +399,7 @@ class InstructionGranularitySanitisation(TransformPass):
         quantum_instructions = []
         custom_pulses = []
         for inst in ir.instructions:
-            if isinstance(inst, (Acquire, Delay)) or (
+            if isinstance(inst, Acquire | Delay) or (
                 isinstance(inst, Pulse) and not isinstance(inst.waveform, SampledWaveform)
             ):
                 quantum_instructions.append(inst)
@@ -1004,7 +1004,7 @@ class EndOfTaskResetSanitisation(TransformPass):
         }
 
         for inst in reversed(ir.instructions):
-            if not isinstance(inst, (Pulse, Acquire, Reset)):
+            if not isinstance(inst, Pulse | Acquire | Reset):
                 continue
 
             elif isinstance(inst, Reset):

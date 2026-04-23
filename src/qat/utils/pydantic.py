@@ -8,7 +8,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from functools import cached_property
 from pydoc import locate
-from typing import Annotated, Any, Type, TypeVar, Union, get_args, get_origin
+from typing import Annotated, Any, TypeVar, Union, get_args, get_origin
 
 import numpy as np
 from frozendict import frozendict
@@ -273,9 +273,9 @@ class ValidatedList(PydListBase, PydValidatedBase):
 
 
 def _validate_set(value: float | int | str | Iterable | None):
-    if isinstance(value, (float, int, str)):
+    if isinstance(value, float | int | str):
         value = {value}
-    elif isinstance(value, (list, ValidatedList, tuple)):
+    elif isinstance(value, list | ValidatedList | tuple):
         value = set(value)
     return value
 
@@ -291,7 +291,7 @@ class PydSetBase(RootModel[set[V]]):
             return self.root.__eq__(other.root)
         elif isinstance(other, set):
             return self.root.__eq__(other)
-        elif isinstance(other, (list, tuple)):
+        elif isinstance(other, list | tuple):
             return self.root.__eq__(set(other))
         return False
 
@@ -517,7 +517,7 @@ WaveformType = Annotated[
 ]
 
 
-def find_all_subclasses(cls: Type) -> list[Type]:
+def find_all_subclasses(cls: type) -> list[type]:
     """Recursively finds nested subclasses of a class."""
     subclasses = cls.__subclasses__()
     for subclass in subclasses:
@@ -538,7 +538,7 @@ def _validate_value(
 
     if isinstance(value, str):
         value = np.frombuffer(bytearray.fromhex(value), dtype=implied_type)
-    elif isinstance(value, (list, np.ndarray)):
+    elif isinstance(value, list | np.ndarray):
         value = np.asarray(value, dtype=implied_type)
     else:
         raise TypeError(
@@ -597,7 +597,7 @@ def _validator(payload, ty: type):
             payload, implied_type=payload.dtype, required_type=np.dtype(ty)
         )
         payload = {"dtype": payload.dtype, "shape": payload.shape, "value": payload}
-    elif isinstance(payload, (str, list)):
+    elif isinstance(payload, str | list):
         payload = _validate_value(
             payload, implied_type=np.dtype(ty), required_type=np.dtype(ty)
         )
@@ -712,7 +712,7 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
             # Use PydArray instead of type(self)
             # for isinstance to allow subclasses that don't
             # override __array_ufunc__ to handle `PydArray` objects.
-            if not isinstance(x, (np.ndarray, numbers.Number, PydArray)):
+            if not isinstance(x, np.ndarray | numbers.Number | PydArray):
                 return NotImplemented
         # Defer to the implementation of the ufunc
         # on unwrapped values.
@@ -776,7 +776,7 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
             yield self._wrap(x)
 
     def __repr__(self):
-        return "%s(%r, dtype=%r)" % (type(self).__name__, self.value, self.dtype)
+        return f"{type(self).__name__}({self.value!r}, dtype={self.dtype!r})"
 
 
 IntNDArray = annotate_pyd_array(int)

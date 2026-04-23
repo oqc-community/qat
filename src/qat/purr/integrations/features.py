@@ -2,7 +2,6 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 from qat.purr.compiler.devices import Qubit, Resonator
 from qat.purr.compiler.waveforms import AbstractWaveform
@@ -76,7 +75,7 @@ class OpenPulseFeatures(FeatureMetadata):
         self.ports = dict()
         self.frames = dict()
         self.waveforms = dict()
-        self.constraints: Optional[Constraints] = None
+        self.constraints: Constraints | None = None
 
     def for_hardware(self, hardware):
         def _find_qubit(qubit) -> Qubit:

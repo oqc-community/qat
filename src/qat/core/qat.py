@@ -18,7 +18,7 @@ from qat.purr.qatconfig import QatConfig
 
 class QAT:
     def __init__(self, qatconfig: QatSessionConfig | QatConfig | str | Path | None = None):
-        if isinstance(qatconfig, (str, Path)):
+        if isinstance(qatconfig, str | Path):
             qatconfig = QatSessionConfig.from_yaml(qatconfig)
 
         if type(qatconfig) is QatConfig:

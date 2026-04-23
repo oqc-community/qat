@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from importlib.metadata import version
-from typing import List, Union
 
 from compiler_config.config import InlineResultsProcessing
 
@@ -39,7 +38,7 @@ except ImportError:
 class QIRParser:
     def __init__(
         self,
-        hardware: Union[QuantumHardwareModel, InstructionExecutionEngine],
+        hardware: QuantumHardwareModel | InstructionExecutionEngine,
         builder=None,
         results_format=None,
     ):
@@ -126,7 +125,7 @@ class QIRParser:
                             f"expected {expected_args}."
                         )
 
-                args: List[Constant] = inst.args
+                args: list[Constant] = inst.args
                 intrinsic_name = inst.callee.name
                 if intrinsic_name in (
                     "__quantum__qis__ccx__body",
@@ -154,15 +153,15 @@ class QIRParser:
                     self.reset(qubit_id(args[0]))
                 elif intrinsic_name == "__quantum__qis__rx__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    radii: IntConstant | FloatConstant = args[0]
                     self.rx(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__ry__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    radii: IntConstant | FloatConstant = args[0]
                     self.ry(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__rz__body":
                     throw_on_invalid_args(len(args), 2)
-                    radii: Union[IntConstant, FloatConstant] = args[0]
+                    radii: IntConstant | FloatConstant = args[0]
                     self.rz(radii.value, qubit_id(args[1]))
                 elif intrinsic_name == "__quantum__qis__s__body":
                     throw_on_invalid_args(len(args), 1)

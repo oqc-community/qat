@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 from numbers import Number
-from typing import List
 
 import numpy as np
 
@@ -53,7 +52,7 @@ class InstructionValidation(ValidationPass):
                     f"Cannot perform an acquire on the physical channel with id "
                     f"{inst.channel.physical_channel}"
                 )
-            if isinstance(inst, (Pulse, CustomPulse)):
+            if isinstance(inst, Pulse | CustomPulse):
                 duration = inst.duration
                 if isinstance(duration, Number) and duration > MaxPulseLength:
                     if (
@@ -102,7 +101,7 @@ class ReadoutValidation(ValidationPass):
         if not isinstance(self.model, LiveHardwareModel):
             return
 
-        consumed_qubits: List[str] = []
+        consumed_qubits: list[str] = []
         chanbits_map = {}
         for inst in ir.instructions:
             if isinstance(inst, PostProcessing):
@@ -152,7 +151,7 @@ class ReadoutValidation(ValidationPass):
                             in consumed_qubits
                         )
                         for chanbit in inst.quantum_targets
-                        if isinstance(chanbit, (Qubit, PulseChannel))
+                        if isinstance(chanbit, Qubit | PulseChannel)
                     ]
 
                     if any(acquired_qubits):

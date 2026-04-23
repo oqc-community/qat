@@ -20,7 +20,7 @@ class FrequencyAssignSanitisation(TransformPass):
         for instruction in ir._instructions:
             if (
                 isinstance(instruction, DeviceUpdate)
-                and isinstance(instruction.target, (PulseChannel, PulseChannelView))
+                and isinstance(instruction.target, PulseChannel | PulseChannelView)
                 and instruction.attribute == "frequency"
             ):
                 instructions.append(
