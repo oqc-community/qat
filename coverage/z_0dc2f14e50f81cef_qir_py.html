@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_7b56761c4a6c842e_analysis_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-22 10:28 +0000
+            created at 2026-04-23 09:13 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -118,7 +118,7 @@
     <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">            <span class="str">"""Converts QIR arguments to appropriate types for the instruction builder."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">            <span class="key">for</span> <span class="nam">i</span><span class="op">,</span> <span class="nam">arg</span> <span class="key">in</span> <span class="nam">enumerate</span><span class="op">(</span><span class="nam">args</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">                <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">arg</span><span class="op">,</span> <span class="op">(</span><span class="nam">IntConstant</span><span class="op">,</span> <span class="nam">FloatConstant</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">                <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">arg</span><span class="op">,</span> <span class="nam">IntConstant</span> <span class="op">|</span> <span class="nam">FloatConstant</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">                    <span class="nam">args</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span> <span class="op">=</span> <span class="nam">arg</span><span class="op">.</span><span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">                <span class="key">elif</span> <span class="op">(</span><span class="nam">qid</span> <span class="op">:=</span> <span class="nam">qubit_id</span><span class="op">(</span><span class="nam">arg</span><span class="op">)</span><span class="op">)</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">                    <span class="com"># Checks to see if this is a qubit</span>&nbsp;</span><span class="r"></span></p>
@@ -157,7 +157,7 @@
     <p class="pln"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">                    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">                        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f"Argument {i} is not a valid result."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">                <span class="key">elif</span> <span class="nam">expected_type</span> <span class="op">==</span> <span class="nam">ArgumentType</span><span class="op">.</span><span class="nam">Number</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">                    <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">arg</span><span class="op">,</span> <span class="op">(</span><span class="nam">IntConstant</span><span class="op">,</span> <span class="nam">FloatConstant</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">76&#x202F;&#x219B;&#x202F;79</span><span class="annotate long">line 76 didn't jump to line 79 because the condition on line 76 was always true</span></span></p>
+    <p class="par run show_par"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">                    <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">arg</span><span class="op">,</span> <span class="nam">IntConstant</span> <span class="op">|</span> <span class="nam">FloatConstant</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">76&#x202F;&#x219B;&#x202F;79</span><span class="annotate long">line 76 didn't jump to line 79 because the condition on line 76 was always true</span></span></p>
     <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">                        <span class="nam">args</span><span class="op">[</span><span class="nam">i</span><span class="op">]</span> <span class="op">=</span> <span class="nam">arg</span><span class="op">.</span><span class="nam">value</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">                    <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">                        <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">f"Argument {i} is not a valid number."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -381,7 +381,7 @@
             <a class="nav" href="z_7b56761c4a6c842e_analysis_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-22 10:28 +0000
+            created at 2026-04-23 09:13 +0000
         </p>
     </div>
 </footer>

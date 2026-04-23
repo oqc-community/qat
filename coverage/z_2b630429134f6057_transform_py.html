@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_2b630429134f6057_validation_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-22 10:28 +0000
+            created at 2026-04-23 09:13 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -483,7 +483,7 @@
     <p class="run"><span class="n"><a id="t399" href="#t399">399</a></span><span class="t">        <span class="nam">quantum_instructions</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t400" href="#t400">400</a></span><span class="t">        <span class="nam">custom_pulses</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t401" href="#t401">401</a></span><span class="t">        <span class="key">for</span> <span class="nam">inst</span> <span class="key">in</span> <span class="nam">ir</span><span class="op">.</span><span class="nam">instructions</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t402" href="#t402">402</a></span><span class="t">            <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="op">(</span><span class="nam">Acquire</span><span class="op">,</span> <span class="nam">Delay</span><span class="op">)</span><span class="op">)</span> <span class="key">or</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t402" href="#t402">402</a></span><span class="t">            <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="nam">Acquire</span> <span class="op">|</span> <span class="nam">Delay</span><span class="op">)</span> <span class="key">or</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t403" href="#t403">403</a></span><span class="t">                <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="nam">Pulse</span><span class="op">)</span> <span class="key">and</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">.</span><span class="nam">waveform</span><span class="op">,</span> <span class="nam">SampledWaveform</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t404" href="#t404">404</a></span><span class="t">            <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t405" href="#t405">405</a></span><span class="t">                <span class="nam">quantum_instructions</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">inst</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -1088,7 +1088,7 @@
     <p class="pln"><span class="n"><a id="t1004" href="#t1004">1004</a></span><span class="t">        <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1005" href="#t1005">1005</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1006" href="#t1006">1006</a></span><span class="t">        <span class="key">for</span> <span class="nam">inst</span> <span class="key">in</span> <span class="nam">reversed</span><span class="op">(</span><span class="nam">ir</span><span class="op">.</span><span class="nam">instructions</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t1007" href="#t1007">1007</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="op">(</span><span class="nam">Pulse</span><span class="op">,</span> <span class="nam">Acquire</span><span class="op">,</span> <span class="nam">Reset</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t1007" href="#t1007">1007</a></span><span class="t">            <span class="key">if</span> <span class="key">not</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="nam">Pulse</span> <span class="op">|</span> <span class="nam">Acquire</span> <span class="op">|</span> <span class="nam">Reset</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1008" href="#t1008">1008</a></span><span class="t">                <span class="key">continue</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1009" href="#t1009">1009</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t1010" href="#t1010">1010</a></span><span class="t">            <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="nam">Reset</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -1555,7 +1555,7 @@
             <a class="nav" href="z_2b630429134f6057_validation_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-22 10:28 +0000
+            created at 2026-04-23 09:13 +0000
         </p>
     </div>
 </footer>

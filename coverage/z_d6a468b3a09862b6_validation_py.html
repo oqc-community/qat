@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_2b630429134f6057_transform_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-22 10:28 +0000
+            created at 2026-04-23 09:13 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -278,7 +278,7 @@
     <p class="pln"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t">                    <span class="str">f"Cannot perform an acquire on the physical channel with id "</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t195" href="#t195">195</a></span><span class="t">                    <span class="str">f"{inst.channel.physical_channel}"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t196" href="#t196">196</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t197" href="#t197">197</a></span><span class="t">            <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="op">(</span><span class="nam">Pulse</span><span class="op">,</span> <span class="nam">CustomPulse</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t197" href="#t197">197</a></span><span class="t">            <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">inst</span><span class="op">,</span> <span class="nam">Pulse</span> <span class="op">|</span> <span class="nam">CustomPulse</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t198" href="#t198">198</a></span><span class="t">                <span class="nam">duration</span> <span class="op">=</span> <span class="nam">inst</span><span class="op">.</span><span class="nam">duration</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t199" href="#t199">199</a></span><span class="t">                <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">duration</span><span class="op">,</span> <span class="nam">Number</span><span class="op">)</span> <span class="key">and</span> <span class="nam">duration</span> <span class="op">></span> <span class="nam">self</span><span class="op">.</span><span class="nam">pulse_duration_max</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t200" href="#t200">200</a></span><span class="t">                    <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">pulse_duration_limits</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -399,7 +399,7 @@
     <p class="pln"><span class="n"><a id="t315" href="#t315">315</a></span><span class="t">                            <span class="key">in</span> <span class="nam">consumed_qubits</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t316" href="#t316">316</a></span><span class="t">                        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t317" href="#t317">317</a></span><span class="t">                        <span class="key">for</span> <span class="nam">chanbit</span> <span class="key">in</span> <span class="nam">inst</span><span class="op">.</span><span class="nam">quantum_targets</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t318" href="#t318">318</a></span><span class="t">                        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">chanbit</span><span class="op">,</span> <span class="op">(</span><span class="nam">Qubit</span><span class="op">,</span> <span class="nam">PulseChannel</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t318" href="#t318">318</a></span><span class="t">                        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">chanbit</span><span class="op">,</span> <span class="nam">Qubit</span> <span class="op">|</span> <span class="nam">PulseChannel</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t319" href="#t319">319</a></span><span class="t">                    <span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t320" href="#t320">320</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t321" href="#t321">321</a></span><span class="t">                    <span class="key">if</span> <span class="nam">any</span><span class="op">(</span><span class="nam">acquired_qubits</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -782,7 +782,7 @@
             <a class="nav" href="z_2b630429134f6057_transform_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-22 10:28 +0000
+            created at 2026-04-23 09:13 +0000
         </p>
     </div>
 </footer>
