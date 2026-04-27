@@ -1,0 +1,23 @@
+qat.experimental.dialect.pulse package
+======================================
+
+.. automodule:: qat.experimental.dialect.pulse
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.experimental.dialect.pulse.ir
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.experimental.dialect.pulse.units

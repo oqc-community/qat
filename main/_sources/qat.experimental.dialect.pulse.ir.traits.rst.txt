@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.ir.traits module
+===============================================
+
+.. automodule:: qat.experimental.dialect.pulse.ir.traits
+   :members:
+   :undoc-members:
+   :show-inheritance:

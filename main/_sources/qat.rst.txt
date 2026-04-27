@@ -15,6 +15,7 @@ Subpackages
    qat.backend
    qat.core
    qat.engines
+   qat.experimental
    qat.frontend
    qat.instrument
    qat.integrations
