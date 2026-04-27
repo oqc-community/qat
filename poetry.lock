@@ -5151,18 +5151,18 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyqir"
-version = "0.12.3"
-description = "PyQIR parses, generates and evaluates the Quantum Intermediate Representation."
+version = "0.12.4"
+description = ""
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyqir-0.12.3-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:d2e5298b14350b7edb1145ebedeeab61f260df880542c0b5d557991b2f49334f"},
-    {file = "pyqir-0.12.3-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:eb2c41c124dd05dabfafa934dd0a6228783fdd1b32b93effecd4128bb931f2e1"},
-    {file = "pyqir-0.12.3-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:9ceeb69a009c906a22569f048967c8e59c269f2ed5856116d1ce474a27b38c28"},
-    {file = "pyqir-0.12.3-cp39-abi3-manylinux_2_38_aarch64.whl", hash = "sha256:37e5fd01d5e2261f522c9274c309a3e67210d0560c44209397a87818c1b7588c"},
-    {file = "pyqir-0.12.3-cp39-abi3-win_amd64.whl", hash = "sha256:d0516b7f5f44987647398f8f589424a720878928d3178b2a852783e9cf2ff204"},
-    {file = "pyqir-0.12.3-cp39-abi3-win_arm64.whl", hash = "sha256:cf25cdb2e750cb1a9ebe205c7ad27fe1a188cb2c01e15072389ec5b88df0e37b"},
+    {file = "pyqir-0.12.4-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:76178436de55cc6f95e2527fc65af25c0c273e4df57699c6a23d2df99d475044"},
+    {file = "pyqir-0.12.4-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:a3d6041515cf4bbf2564c8e6dd9901bda576bffa477415216a6d53f4558c19a2"},
+    {file = "pyqir-0.12.4-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:64c8f6688f1bbe99acd55138187cd77c16691c52fe11dedf0eae2324469d9c88"},
+    {file = "pyqir-0.12.4-cp39-abi3-manylinux_2_38_aarch64.whl", hash = "sha256:1fae5338e02eb087bf4fdab0cbb6e878ccdafe042b0d07986f6a496583f830e5"},
+    {file = "pyqir-0.12.4-cp39-abi3-win_amd64.whl", hash = "sha256:2f4f68ab2e0c8c9abfe2e1bbcc5cace3f070a6a9a664fe5bd196c08acbfe22cf"},
+    {file = "pyqir-0.12.4-cp39-abi3-win_arm64.whl", hash = "sha256:74e1c5ca4407425982e9c78384ee1b2292bc4d51bf43c90e9097316048d4430d"},
 ]
 
 [package.extras]
