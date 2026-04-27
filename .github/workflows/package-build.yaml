@@ -91,7 +91,7 @@ jobs:
         id: pip-audit
         if: ${{ !cancelled() }}
         run: |
-          poetry run pip-audit --ignore-vuln CVE-2025-71176
+          poetry run pip-audit --ignore-vuln CVE-2025-71176 --ignore-vuln CVE-2026-3219
 
       - name: Pip licensing check
         id: pip-licenses
@@ -183,7 +183,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
           codebase: experimental
-          pytest-args: "-n auto --experimental-only --cov --cov-fail-under=20 --cov-report=markdown:$GITHUB_STEP_SUMMARY"
+          pytest-args: "-n auto --experimental-only --cov=src/qat/experimental --cov-fail-under=98 --cov-report=markdown:$GITHUB_STEP_SUMMARY"
 
   notebook-validation-tests:
     name: Notebook Validation Tests

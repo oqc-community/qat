@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import sys
+from io import StringIO
 
 import pytest
 
@@ -25,6 +26,12 @@ def tmp_cwd(monkeypatch, tmp_path):
 @pytest.fixture(scope="session")
 def py_version():
     return sys.version_info[:2]
+
+
+@pytest.fixture(scope="function")
+def io_stream():
+    """Provides a fresh StringIO object for each test."""
+    return StringIO()
 
 
 tests_dir = None
@@ -110,6 +117,8 @@ def pytest_collection_modifyitems(config, items):
             config.rootpath / "tests" / "unit" / "purr"
         ):
             item.add_marker(pytest.mark.legacy)
+        if "experimental" in item.path.parts:
+            item.add_marker(pytest.mark.experimental)
 
 
 def pytest_sessionfinish(session, exitstatus):

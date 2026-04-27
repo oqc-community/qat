@@ -1963,6 +1963,18 @@ files = [
 ]
 
 [[package]]
+name = "immutabledict"
+version = "4.2.2"
+description = "Immutable wrapper around dictionaries (a fork of frozendict)"
+optional = false
+python-versions = "<4.0,>=3.8"
+groups = ["main"]
+files = [
+    {file = "immutabledict-4.2.2-py3-none-any.whl", hash = "sha256:97c31d098a2c850e93a958badeef765e4736ed7942ec73e439facd764a3a7217"},
+    {file = "immutabledict-4.2.2.tar.gz", hash = "sha256:cb6ed3090df593148f94cb407d218ca526fd2639694afdb553dc4f50ce6feeca"},
+]
+
+[[package]]
 name = "importlib-metadata"
 version = "8.7.1"
 description = "Read metadata from Python packages"
@@ -3796,6 +3808,21 @@ files = [
 [package.dependencies]
 importlib-metadata = ">=6.0,<8.8.0"
 typing-extensions = ">=4.5.0"
+
+[[package]]
+name = "ordered-set"
+version = "4.1.0"
+description = "An OrderedSet is a custom MutableSet that remembers its order, so that every"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "ordered-set-4.1.0.tar.gz", hash = "sha256:694a8e44c87657c59292ede72891eb91d34131f6531463aab3009191c77364a8"},
+    {file = "ordered_set-4.1.0-py3-none-any.whl", hash = "sha256:046e1132c71fcf3330438a539928932caf51ddbc582496833e23de611de14562"},
+]
+
+[package.extras]
+dev = ["black", "mypy", "pytest"]
 
 [[package]]
 name = "orjson"
@@ -7951,6 +7978,28 @@ types = ["pandas-stubs", "scipy-stubs", "types-PyYAML", "types-Pygments", "types
 viz = ["cartopy (>=0.23)", "matplotlib (>=3.8)", "nc-time-axis", "seaborn"]
 
 [[package]]
+name = "xdsl"
+version = "0.59.0"
+description = "xDSL"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "xdsl-0.59.0-py3-none-any.whl", hash = "sha256:dc1d355e4456a06c18e06fa49ff83afc12fd507a61da828eba46c496baff21be"},
+    {file = "xdsl-0.59.0.tar.gz", hash = "sha256:1bd01e2fd4aad05205d49974896b3b8d4215ae77f1fe8349783866be6d1ae3e0"},
+]
+
+[package.dependencies]
+immutabledict = "<4.2.3"
+ordered-set = "4.1.0"
+typing-extensions = ">=4.7,<5"
+
+[package.extras]
+dev = ["coverage (<8.0.0)", "filecheck (==1.0.3)", "ipykernel", "lit (<19.0.0)", "marimo (>=0.17,<0.18)", "nbconvert (>=7.7.2,<8.0.0)", "nbval (<0.12)", "prek (>=0.3.1,<0.4.0)", "pyright (==1.1.407)", "pytest (<8.5)", "pytest-asyncio (==1.2.0)", "pytest-cov", "ruff (==0.14.7)", "sympy (==1.14.0)", "textual-dev (==1.8.0)", "toml (<0.11)"]
+gui = ["pyclip (==0.7)", "textual (>=6,<7)"]
+llvm = ["llvmlite (>=0.46.0,<0.47.0)"]
+
+[[package]]
 name = "zipp"
 version = "3.23.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -7974,4 +8023,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "1568ee8c433b45a99977e82d8f92db54356937365dbdaf16eb0b6e2956282540"
+content-hash = "f52bdb7ef0b6f493ac8be78dd5fbd8b640c21a0b2fb3f671f7c72eb9ad68ebc6"
