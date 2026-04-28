@@ -559,6 +559,8 @@ class PurrConverter:
             model_mapper.get_pulse_channel_id(target)
             for target in instruction.quantum_targets
         )
+        if len(targets) < 2:
+            return []
         return [Instructions.Synchronize(targets=targets)]
 
     @_parse_instruction.register(PurrInstructions.Pulse)

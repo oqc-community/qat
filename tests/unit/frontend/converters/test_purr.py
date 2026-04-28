@@ -459,3 +459,22 @@ class TestPurrConverter:
         builder.instructions[-1].quantum_targets = ["test"]
         with pytest.raises(ValueError, match="Expected target to be a PulseChannel"):
             parser.convert(builder)
+
+    def test_empty_sync_program(self):
+        parser = PurrConverter(self.converted_model)
+
+        drive_channel = self.hw_model.qubits[0].get_drive_channel()
+
+        builder = self.hw_model.create_builder()
+        builder.pulse(drive_channel, shape=PulseShapeType.SQUARE, width=80e-9, amp=0.5)
+        builder.synchronize([])
+        builder.pulse(drive_channel, shape=PulseShapeType.SQUARE, width=120e-9, amp=0.5)
+        builder.synchronize([drive_channel])
+        new_builder = parser.convert(builder)
+
+        syncs = [
+            instr
+            for instr in new_builder.instructions
+            if isinstance(instr, Instructions.Synchronize)
+        ]
+        assert len(syncs) == 0
