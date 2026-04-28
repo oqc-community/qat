@@ -24,6 +24,7 @@ Submodules
    qat.runtime.base
    qat.runtime.connection
    qat.runtime.exceptions
+   qat.runtime.expressions
    qat.runtime.legacy
    qat.runtime.post_processing
    qat.runtime.results_pipeline

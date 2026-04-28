@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime package &mdash; qat-compiler 3.0.0.post218.dev20260428120445 documentation</title>
+  <title>qat.runtime package &mdash; qat-compiler 3.0.0.post219.dev20260428125622 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -474,6 +474,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.expressions.html">qat.runtime.expressions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
@@ -613,6 +614,73 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.runtime.exceptions.html#qat.runtime.exceptions.ExecutionError"><code class="docutils literal notranslate"><span class="pre">ExecutionError</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.runtime.expressions.html">qat.runtime.expressions module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression"><code class="docutils literal notranslate"><span class="pre">BinaryExpression</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.evaluate"><code class="docutils literal notranslate"><span class="pre">BinaryExpression.evaluate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.left"><code class="docutils literal notranslate"><span class="pre">BinaryExpression.left</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.model_config"><code class="docutils literal notranslate"><span class="pre">BinaryExpression.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.operator"><code class="docutils literal notranslate"><span class="pre">BinaryExpression.operator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.right"><code class="docutils literal notranslate"><span class="pre">BinaryExpression.right</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.simplify"><code class="docutils literal notranslate"><span class="pre">BinaryExpression.simplify()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp"><code class="docutils literal notranslate"><span class="pre">BinaryOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.ADD"><code class="docutils literal notranslate"><span class="pre">BinaryOp.ADD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.DIV"><code class="docutils literal notranslate"><span class="pre">BinaryOp.DIV</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.MOD"><code class="docutils literal notranslate"><span class="pre">BinaryOp.MOD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.MUL"><code class="docutils literal notranslate"><span class="pre">BinaryOp.MUL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.POW"><code class="docutils literal notranslate"><span class="pre">BinaryOp.POW</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.SUB"><code class="docutils literal notranslate"><span class="pre">BinaryOp.SUB</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Literal"><code class="docutils literal notranslate"><span class="pre">Literal</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Literal.evaluate"><code class="docutils literal notranslate"><span class="pre">Literal.evaluate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Literal.model_config"><code class="docutils literal notranslate"><span class="pre">Literal.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Literal.simplify"><code class="docutils literal notranslate"><span class="pre">Literal.simplify()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Literal.value"><code class="docutils literal notranslate"><span class="pre">Literal.value</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression"><code class="docutils literal notranslate"><span class="pre">UnaryExpression</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.evaluate"><code class="docutils literal notranslate"><span class="pre">UnaryExpression.evaluate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.model_config"><code class="docutils literal notranslate"><span class="pre">UnaryExpression.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.operand"><code class="docutils literal notranslate"><span class="pre">UnaryExpression.operand</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.operator"><code class="docutils literal notranslate"><span class="pre">UnaryExpression.operator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.simplify"><code class="docutils literal notranslate"><span class="pre">UnaryExpression.simplify()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp"><code class="docutils literal notranslate"><span class="pre">UnaryOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp.ABS"><code class="docutils literal notranslate"><span class="pre">UnaryOp.ABS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp.COS"><code class="docutils literal notranslate"><span class="pre">UnaryOp.COS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp.NEG"><code class="docutils literal notranslate"><span class="pre">UnaryOp.NEG</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp.SIN"><code class="docutils literal notranslate"><span class="pre">UnaryOp.SIN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp.SQRT"><code class="docutils literal notranslate"><span class="pre">UnaryOp.SQRT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable"><code class="docutils literal notranslate"><span class="pre">Variable</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.evaluate"><code class="docutils literal notranslate"><span class="pre">Variable.evaluate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.model_config"><code class="docutils literal notranslate"><span class="pre">Variable.model_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.name"><code class="docutils literal notranslate"><span class="pre">Variable.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.name_must_be_nonempty"><code class="docutils literal notranslate"><span class="pre">Variable.name_must_be_nonempty()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.simplify"><code class="docutils literal notranslate"><span class="pre">Variable.simplify()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.var_type"><code class="docutils literal notranslate"><span class="pre">Variable.var_type</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType"><code class="docutils literal notranslate"><span class="pre">VariableType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.AMPLITUDE"><code class="docutils literal notranslate"><span class="pre">VariableType.AMPLITUDE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.BOOL"><code class="docutils literal notranslate"><span class="pre">VariableType.BOOL</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.COMPLEX"><code class="docutils literal notranslate"><span class="pre">VariableType.COMPLEX</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.FLOAT"><code class="docutils literal notranslate"><span class="pre">VariableType.FLOAT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.FREQUENCY"><code class="docutils literal notranslate"><span class="pre">VariableType.FREQUENCY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.INT"><code class="docutils literal notranslate"><span class="pre">VariableType.INT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.PHASE"><code class="docutils literal notranslate"><span class="pre">VariableType.PHASE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.TIME"><code class="docutils literal notranslate"><span class="pre">VariableType.TIME</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.cos"><code class="docutils literal notranslate"><span class="pre">cos()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.sin"><code class="docutils literal notranslate"><span class="pre">sin()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.runtime.expressions.html#qat.runtime.expressions.sqrt"><code class="docutils literal notranslate"><span class="pre">sqrt()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a><ul>
