@@ -1972,7 +1972,7 @@ class TestRepeatTranslation:
 
     @staticmethod
     def _check_loop_close(ir: InstructionBuilder, indices: list[int], repeats: list[int]):
-        for index, repeat in zip(indices, repeats):
+        for index, repeat in zip(indices, repeats, strict=True):
             # Increment LoopCount Variable with 1
             assert isinstance(assign := ir.instructions[index], Assign)
             name_base = assign.name.removesuffix("_count")

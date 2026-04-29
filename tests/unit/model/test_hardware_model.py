@@ -360,7 +360,7 @@ class Test_HW_Connectivity:
         )
 
         with pytest.raises(ValueError, match=r"must be in the interval \[0, 1\]"):
-            PhysicalHardwareModelBuilder(
+            _ = PhysicalHardwareModelBuilder(
                 physical_connectivity=physical_connectivity,
                 logical_connectivity=logical_connectivity,
                 logical_connectivity_quality=logical_connectivity_quality,
@@ -412,7 +412,7 @@ class Test_HW_Connectivity:
             logical_connectivity[q] = (invalid_value, invalid_value)
 
             with pytest.raises(ValueError, match=r"auxiliary_qubit"):
-                PhysicalHardwareModelBuilder(
+                _ = PhysicalHardwareModelBuilder(
                     physical_connectivity=physical_connectivity,
                     logical_connectivity=logical_connectivity,
                     logical_connectivity_quality=logical_connectivity_quality,
@@ -461,7 +461,7 @@ class Test_HW_Connectivity:
         physical_connectivity = random_connectivity(n_qubits, seed=seed)
         hw = PhysicalHardwareModelBuilder(physical_connectivity=physical_connectivity).model
 
-        hw.logical_connectivity == physical_connectivity
+        assert hw.logical_connectivity == physical_connectivity
         for quality in hw.logical_connectivity_quality.values():
             assert quality == 1.0
 

@@ -55,7 +55,7 @@ class TestFlattenIRPass:
 
         ir.flatten()
         assert ir.number_of_instructions == len(ref_ir)
-        for instr, ref_instr in zip(ir, ref_ir):
+        for instr, ref_instr in zip(ir, ref_ir, strict=True):
             assert instr == ref_instr
 
     def test_instruction_block_flattened(self, model):
@@ -113,7 +113,7 @@ class TestFlattenIRPass:
 
         ir.flatten()
         assert len(ir.instructions) == ref_nr_instructions
-        for instr, ref_instr in zip(ir.instructions, ref_ir):
+        for instr, ref_instr in zip(ir.instructions, ref_ir, strict=True):
             assert instr == ref_instr
 
 
@@ -200,10 +200,12 @@ class TestConvertToPydanticIRPass:
                         i += 1
                     self._check_conversion(legacy_val, converted_val)
             else:
-                for legacy_val, converted_val in zip(legacy_value, converted_value):
+                for legacy_val, converted_val in zip(
+                    legacy_value, converted_value, strict=True
+                ):
                     self._check_conversion(legacy_val, converted_val)
         else:
-            assert False, "Unsupported type for comparison"
+            raise AssertionError("Unsupported type for comparison")
 
     @_check_conversion.register(dict)
     def _(self, legacy_value, converted_value):
@@ -557,7 +559,9 @@ class TestConvertToPydanticIRPass:
         instruction."""
         assert isinstance(converted_insts, list)
         assert len(converted_insts) == len(legacy_inst.quantum_targets)
-        for converted_inst, target in zip(converted_insts, legacy_inst.quantum_targets):
+        for converted_inst, target in zip(
+            converted_insts, legacy_inst.quantum_targets, strict=True
+        ):
             assert converted_inst.__class__.__name__ == "Reset"
             assert converted_inst.__class__.__module__.startswith("qat.ir")
             assert isinstance(converted_inst.targets, FrozenSet)

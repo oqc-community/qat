@@ -694,12 +694,12 @@ class TestQASM3:
             expectations = [json_loads(i, model=hw) for i in json_load(f)]
         assert len(builder.instructions) > 0
         assert isinstance(builder.instructions[-1], Return)
-        for instruction, expected in zip(builder.instructions, expectations):
+        for instruction, expected in zip(builder.instructions, expectations, strict=True):
             assert expected == instruction
 
     def test_default_gates_together(self):
         """Check that all default gates can be parsed together."""
-        Ns, strings = zip(*get_default_qasm3_gate_qasms())
+        Ns, strings = zip(*get_default_qasm3_gate_qasms(), strict=True)
         N = max(Ns)
         gate_strings = "\n".join(strings)
         qasm = qasm3_base.format(N=N, gate_strings=gate_strings)
@@ -1700,7 +1700,7 @@ class TestParsing:
 
     def test_default_gates_together(self):
         """Check that all default gates can be parsed together."""
-        Ns, strings = zip(*get_default_qasm2_gate_qasms())
+        Ns, strings = zip(*get_default_qasm2_gate_qasms(), strict=True)
         N = max(Ns)
         # TODO: Remove filtering when all gates are supported.
         strings = filter(lambda s: not s.startswith(self._unsupported_gates), strings)

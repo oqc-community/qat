@@ -79,7 +79,7 @@ class TketBuilder:
         qubits = [qubits] if not isinstance(qubits, list) else qubits
         bits = [bits] if not isinstance(bits, list) else bits
         conditions = conditions or {}
-        for qubit, bit in zip(qubits, bits):
+        for qubit, bit in zip(qubits, bits, strict=True):
             self.circuit.Measure(qubit, bit, **conditions)
 
     def is_basic_gate(self, name):

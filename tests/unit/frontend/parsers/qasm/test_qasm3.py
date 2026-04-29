@@ -289,7 +289,7 @@ class TestQasm3Parser:
 
     def test_default_gates_together(self):
         """Check that all default gates can be parsed together."""
-        Ns, strings = zip(*get_default_qasm3_gate_qasms())
+        Ns, strings = zip(*get_default_qasm3_gate_qasms(), strict=True)
         N = max(Ns)
         gate_strings = "\n".join(strings)
         qasm = qasm3_base.format(N=N, gate_strings=gate_strings)

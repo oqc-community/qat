@@ -1210,7 +1210,7 @@ class RealtimeChipSimEngine(QuantumExecutionEngine):
             # Sort by qubit id
             trajectory_dict = {}
             for name, trajectory, time in zip(
-                operator_names, branch_trajectories, branch_time
+                operator_names, branch_trajectories, branch_time, strict=False
             ):
                 item = trajectory_dict.setdefault(name[0], [])
                 item.append((name[1], trajectory, time))
@@ -1461,7 +1461,7 @@ def get_simple_resonator_response(
             - a3 * np.cos(6.0 * np.pi * n)
         )
 
-    for s, qz in zip(segments, qzsegments):
+    for s, qz in zip(segments, qzsegments, strict=True):
         p0 = 0.5 * (qz + 1)
         p1 = 1 - p0
 

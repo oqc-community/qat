@@ -445,7 +445,7 @@ class TestConstrainedPauliGates:
         )
         assert builder1.number_of_instructions == builder2.number_of_instructions
 
-        for instr1, instr2 in zip(builder1._ir, builder2._ir):
+        for instr1, instr2 in zip(builder1._ir, builder2._ir, strict=True):
             assert instr1 == instr2
 
 

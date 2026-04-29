@@ -399,7 +399,7 @@ class TestEchoPipelineWithCircuits:
                 for item in obj:
                     recurse_object(item)
             elif not isinstance(obj, int | float | str | complex):
-                assert False, (
+                raise AssertionError(
                     f"Results should only contain dicts, lists, ints, floats, strings, "
                     f"and complex numbers, but found {type(obj)}"
                 )
@@ -643,7 +643,7 @@ class TestEchoPipelineParity:
 
     def test_program_metadata(self, purr_executable, pydantic_executable):
         for purr_program, pydantic_program in zip(
-            purr_executable.programs, pydantic_executable.programs
+            purr_executable.programs, pydantic_executable.programs, strict=False
         ):
             assert np.isclose(
                 purr_program.repetition_time, pydantic_program.repetition_time
@@ -688,20 +688,22 @@ class TestEchoPipelineParity:
         # the ordering of packages, and different times when measures are done mean we
         # no longer have complete parity here.
         assert len(purr_executable.assigns) == len(pydantic_executable.assigns)
-        for purr, pydantic in zip(purr_executable.assigns, pydantic_executable.assigns):
+        for purr, pydantic in zip(
+            purr_executable.assigns, pydantic_executable.assigns, strict=True
+        ):
             if purr.name.startswith("generated_name_"):
                 assert pydantic.name.startswith("generated_name_")
             else:
                 assert purr.name == pydantic.name
             if isinstance(purr.value, list):
-                for sv, ev in zip(purr.value, pydantic.value):
+                for sv, ev in zip(purr.value, pydantic.value, strict=True):
                     assert sv == (ev.name if isinstance(ev, PydVariable) else ev)
             else:
                 assert purr.value == pydantic.value.name
 
     def test_subpackages(self, purr_executable, pydantic_executable, physical_channel_map):
         for purr_program, pydantic_program in zip(
-            purr_executable.programs, pydantic_executable.programs
+            purr_executable.programs, pydantic_executable.programs, strict=False
         ):
             for key, purr_data in purr_program.channel_data.items():
                 new_key = physical_channel_map[key]
@@ -720,7 +722,9 @@ class TestEchoPipelineParity:
                 # different: check what we can, but otherwise, skip
                 assert len(purr_data.acquires) == len(pydantic_data.acquires)
                 if len(purr_data.acquires) > 0:
-                    for acq1, acq2 in zip(purr_data.acquires, pydantic_data.acquires):
+                    for acq1, acq2 in zip(
+                        purr_data.acquires, pydantic_data.acquires, strict=True
+                    ):
                         assert acq1.length == acq2.length
                         assert np.allclose(
                             purr_data.buffer[acq1.position : acq1.position + acq1.length],
@@ -789,7 +793,7 @@ class TestMidCircuitMeasurements:
         assert isinstance(results, dict)
 
         assert len(results) == len(executable.returns)
-        for output_variable, result in results.items():
+        for result in results.values():
             assert isinstance(result, dict)
             assert all(isinstance(key, str) for key in result)
             assert sum(result.values()) == self.SHOTS

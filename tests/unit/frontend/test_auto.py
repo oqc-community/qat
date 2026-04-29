@@ -172,7 +172,10 @@ class TestAutoFrontend:
         assert len(builder_qasm2.instructions) == len(builder_qir.instructions)
 
         for inst_qasm2, inst_qasm3, inst_qir in zip(
-            builder_qasm2.instructions, builder_qasm3.instructions, builder_qir.instructions
+            builder_qasm2.instructions,
+            builder_qasm3.instructions,
+            builder_qir.instructions,
+            strict=False,
         ):
             assert type(inst_qasm2) is type(inst_qasm3)
             assert type(inst_qasm2) is type(inst_qir)

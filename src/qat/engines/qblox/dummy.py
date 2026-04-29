@@ -38,7 +38,7 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
             for _ in range(num_paths)
         ]
         dummy_scope_acquisition_data = DummyScopeAcquisitionData(
-            data=zip(*paths),
+            data=zip(*paths, strict=True),
             out_of_range=(False,) * num_paths,
             avg_cnt=(avg_count,) * num_paths,
         )

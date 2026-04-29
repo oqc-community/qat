@@ -363,7 +363,8 @@ class PurrConverter:
             warn(
                 "Converting of Repeat instructions with repetition periods or passive reset "
                 "times is not supported, and the values will be ignored. Please set the "
-                "passive reset time using the compiler config, instead."
+                "passive reset time using the compiler config, instead.",
+                stacklevel=2,
             )
         return [Instructions.Repeat(repeat_count=instruction.repeat_count)]
 

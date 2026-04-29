@@ -102,7 +102,7 @@ class Qasm2Parser(AbstractParser):
         self.validate(circ)
         self._current_dag = circ
 
-        for i, node in enumerate(circ.nodes()):
+        for node in circ.nodes():
             self.walk_node(node, context, builder)
 
     def process_program(

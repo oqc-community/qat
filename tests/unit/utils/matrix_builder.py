@@ -352,7 +352,9 @@ class MatrixInstructionBuilder(QuantumInstructionBuilder):
     multiplication.
     """
 
-    def __init__(self, hardware_model, instructions=[]):
+    def __init__(self, hardware_model, instructions=None):
+        if instructions is None:
+            instructions = []
         self.matrix = np.eye(2 ** len(hardware_model.qubits))
         super().__init__(hardware_model, instructions)
 
@@ -381,7 +383,7 @@ def assert_same_up_to_phase(gate1, gate2):
     """
     gate = np.conj(np.transpose(gate1)) @ gate2
     if np.isclose(gate[0, 0], 0.0 + 0.0j):
-        assert False
+        raise AssertionError
     assert np.isclose(gate / gate[0, 0], np.eye(np.shape(gate1)[0])).all()
 
 

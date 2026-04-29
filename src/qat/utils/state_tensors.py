@@ -1,14 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-from abc import ABC
-
 import numpy as np
 
 from qat.ir.gates.base import GateBase
 
 
-class StateTensor(ABC):
+class StateTensor:
     """A tensorial description of quantum-related objects, such as quantum states and
     unitary operators.
 

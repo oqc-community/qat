@@ -25,7 +25,9 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
 
 class HardwareLoaders:
-    def __init__(self, hardware_loaders: dict[str, BaseModelLoader] = {}):
+    def __init__(self, hardware_loaders: dict[str, BaseModelLoader] | None = None):
+        if hardware_loaders is None:
+            hardware_loaders = {}
         self._loaders = dict(**hardware_loaders)
         self._loaded_models = {}
 
@@ -97,9 +99,13 @@ class EngineSet:
 
     def __init__(
         self,
-        engines: dict[str, NativeEngine] = {},
-        loaders: dict[str, BaseModelLoader] = {},
+        engines: dict[str, NativeEngine] | None = None,
+        loaders: dict[str, BaseModelLoader] | None = None,
     ):
+        if loaders is None:
+            loaders = {}
+        if engines is None:
+            engines = {}
         self._engines: dict[str, NativeEngine] = dict(**engines)
         self._loaders: dict[str, BaseModelLoader] = dict(**loaders)
 
@@ -154,7 +160,9 @@ class EngineSet:
 
 
 class PipelineSet:
-    def __init__(self, pipelines: list[AbstractPipeline] = []):
+    def __init__(self, pipelines: list[AbstractPipeline] | None = None):
+        if pipelines is None:
+            pipelines = []
         self._pipelines = {}
         self._default_pipeline = None
 

@@ -368,6 +368,7 @@ class TestPurrConverter:
         for old_channel, new_channel in zip(
             [drive_channel, drive_channel_two, acquire_channel],
             [new_drive_channel, new_drive_channel_two, new_acquire_channel],
+            strict=False,
         ):
             assert old_channel.scale == new_channel.scale
             assert old_channel.phase_offset == new_channel.phase_iq_offset

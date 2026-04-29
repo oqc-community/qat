@@ -516,7 +516,7 @@ class TestQbloxEmitter(InvokerMixin):
             assert len(packages) == len(qubits)
             qub_pkg_zip = [
                 x
-                for x in zip(qubits, packages)
+                for x in zip(qubits, packages, strict=True)
                 if x[0].get_measure_channel().full_id() == x[1].pulse_channel_id
             ]
 

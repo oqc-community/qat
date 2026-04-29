@@ -368,7 +368,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         gate_context = QasmContext(registers=Registers(), gates=context.gates)
 
         if (gate_def := context.gates.get(gate_name, None)) is not None:
-            for arg, value in zip(gate_def.arguments, arguments):
+            for arg, value in zip(gate_def.arguments, arguments, strict=False):
                 if (known_var := context.variables.get(arg.name, None)) is not None:
                     self._attempt_declaration(
                         Variable(name=known_var.name, var_type=type(value), value=value),
@@ -381,7 +381,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                         ),
                         gate_context,
                     )
-            for qb_name, value in zip(gate_def.qubits, target_qubits):
+            for qb_name, value in zip(gate_def.qubits, target_qubits, strict=True):
                 if isinstance(qb_name, QubitRegister | Qubit):
                     continue
                 self._attempt_declaration(
@@ -1116,7 +1116,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     raise ValueError("Can't flatten overriden measure into assignment.")
 
                 bit: CregIndexValue
-                for bit, result in zip(bits, results):
+                for bit, result in zip(bits, results, strict=True):
                     bit.value = result
         else:
             self._q3_patcher.add_measure(qubits, bits, self.builder)
@@ -1226,12 +1226,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     f"Has {len(others)}."
                 )
 
-            for arg_name, value in zip(arg_mappings, others):
+            for arg_name, value in zip(arg_mappings, others, strict=True):
                 self._attempt_declaration(
                     Variable(name=str(arg_name), var_type=type(value), value=value)
                 )
 
-            for qb_name, value in zip(qubit_mappings, qubits):
+            for qb_name, value in zip(qubit_mappings, qubits, strict=True):
                 # If we resolved to a qubit already, we're a physical qubit.
                 if isinstance(qb_name, QubitRegister | Qubit):
                     continue

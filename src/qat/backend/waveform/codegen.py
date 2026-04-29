@@ -39,10 +39,10 @@ class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
     def __init__(
         self,
         model: PhysicalHardwareModel,
-        target_data: TargetData = TargetData(),
+        target_data: TargetData | None = None,
     ):
         self.model = model
-        self.target_data = target_data
+        self.target_data = target_data if target_data is not None else TargetData()
 
     def emit(
         self,

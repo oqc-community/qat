@@ -105,7 +105,9 @@ class TestActivePulseChannelAnalysis:
     @pytest.mark.parametrize("gate", ["cnot", "ECR"])
     def test_2Q_gate(self, active_qubits, gate):
         builder = QuantumInstructionBuilder(self.model)
-        for c_qubit_idx, t_qubit_idx in zip(active_qubits[::2], active_qubits[1::2]):
+        for c_qubit_idx, t_qubit_idx in zip(
+            active_qubits[::2], active_qubits[1::2], strict=True
+        ):
             getattr(builder, gate)(
                 self.model.qubit_with_index(c_qubit_idx),
                 self.model.qubit_with_index(t_qubit_idx),

@@ -56,7 +56,7 @@ def plot_playback(playback: dict[str, list[Acquisition]]):
     if not playback:
         return
 
-    for i, (pulse_channel_id, acquisitions) in enumerate(playback.items()):
+    for pulse_channel_id, acquisitions in playback.items():
         for acquisition in acquisitions:
             fig, axes = plt.subplots(
                 nrows=3,

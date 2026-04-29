@@ -292,7 +292,7 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         if len(s_qubits) != len(o_qubits):
             return False
 
-        return all(s == o for s, o in zip(s_qubits, o_qubits))
+        return all(s == o for s, o in zip(s_qubits, o_qubits, strict=True))
 
     @property
     def is_calibrated(self) -> bool:

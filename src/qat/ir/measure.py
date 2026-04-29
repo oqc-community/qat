@@ -92,9 +92,11 @@ class PostProcessing(Instruction):
         return []
 
     @field_validator("args", mode="before")
-    def _validate_args(cls, args=[]):
+    def _validate_args(cls, args=None):
         """Ensures that the args are not numpy arrays or numpy numbers."""
 
+        if args is None:
+            args = []
         args = [args] if not isinstance(args, list | np.ndarray) else args
         return np.asarray(args).tolist()
 

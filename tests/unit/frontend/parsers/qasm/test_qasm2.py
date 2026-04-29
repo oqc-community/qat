@@ -136,7 +136,7 @@ class TestQasm2Parser:
 
     def test_default_gates_together(self, n_qubits, seed, hardware_model):
         """Check that all default gates can be parsed together."""
-        Ns, strings = zip(*get_default_qasm2_gate_qasms())
+        Ns, strings = zip(*get_default_qasm2_gate_qasms(), strict=True)
         N = max(Ns)
         # TODO: Remove filtering when all gates are supported.
         strings = filter(lambda s: not s.startswith(self._unsupported_gates), strings)

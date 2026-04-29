@@ -56,7 +56,7 @@ class TestAnalysisPasses:
         precodegen_result = res_mgr.lookup_by_type(PreCodegenResult)
 
         assert precodegen_result.alloc_mgrs.keys() == target_map.keys()
-        for target, alloc_mgr in precodegen_result.alloc_mgrs.items():
+        for alloc_mgr in precodegen_result.alloc_mgrs.values():
             assert len(alloc_mgr.registers) >= 2
             assert len(alloc_mgr.labels) >= 2
 
@@ -81,7 +81,7 @@ class TestAnalysisPasses:
 
         legal_binding_result = res_mgr.lookup_by_type(BindingResult)
 
-        for target, instructions in triage_result.target_map.items():
+        for target, _instructions in triage_result.target_map.items():
             scoping_result = binding_result.scoping_results[target]
             rw_result = binding_result.rw_results[target]
 

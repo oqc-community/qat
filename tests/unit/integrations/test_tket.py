@@ -321,7 +321,6 @@ class TestTketToQatIRConverter:
         # Build directly in QAT
         direct_builder = QuantumInstructionBuilder(self.model)
         getattr(direct_builder, qat_method)(*qat_args)
-        direct_builder
 
         self.compare_builders(builder, direct_builder)
 

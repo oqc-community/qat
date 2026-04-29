@@ -209,7 +209,7 @@ class TestRepeatTranslation:
     def _check_loop_close(
         ir: QuantumInstructionBuilder, indices: list[int], repeats: list[int]
     ):
-        for index, repeat in zip(indices, repeats):
+        for index, repeat in zip(indices, repeats, strict=True):
             # Increment LoopCount Variable with 1
             assert isinstance(assign := ir.instructions[index], Assign)
             name_base = assign.name.removesuffix("_count")
@@ -621,7 +621,7 @@ class TestMeasurePhaseResetSanitisation:
         number_of_measured_qubits = 2
         ref_measure_pulse_channels = set()
 
-        for i in range(number_of_measured_qubits):
+        for _ in range(number_of_measured_qubits):
             qubit = self.hw.qubit_with_index(0)
             builder.X(target=qubit)
             builder.measure(qubit)
@@ -1987,7 +1987,8 @@ class TestPhaseResetSanitisation:
         InitialPhaseResetSanitisation().run(builder, res_mgr=res_mgr)
 
         assert builder.number_of_instructions == n_instr_before + len(res.targets)
-        for key, instr in zip(res.targets, builder.instructions):
+        inserted_resets = builder.instructions[: len(res.targets)]
+        for key, instr in zip(res.targets, inserted_resets, strict=True):
             assert isinstance(instr, PhaseReset)
             assert instr.target == key
 
@@ -2012,7 +2013,8 @@ class TestPhaseResetSanitisation:
 
         assert builder.number_of_instructions == n_instr_before + len(res.targets)
         assert isinstance(builder.instructions[0], Repeat)
-        for key, instr in zip(res.targets, builder.instructions[1:]):
+        inserted_resets = builder.instructions[1 : 1 + len(res.targets)]
+        for key, instr in zip(res.targets, inserted_resets, strict=True):
             assert isinstance(instr, PhaseReset)
             assert instr.target == key
 

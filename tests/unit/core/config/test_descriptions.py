@@ -652,7 +652,7 @@ class TestClassConfig:
             type="tests.unit.utils.some_classes.SomeClass", config=config
         )
 
-        desc.type is SomeClass
+        assert desc.type is SomeClass
         cls_partial = desc.partial()
         ob = cls_partial()
 
@@ -667,7 +667,7 @@ class TestClassConfig:
 
         FrontendDescription = ClassDescription[ImportFrontend]
         frontend_desc = FrontendDescription(type="qat.frontend.AutoFrontend")
-        frontend_desc.type is qat.frontend.AutoFrontend
+        assert frontend_desc.type is qat.frontend.AutoFrontend
         frontend_partial = frontend_desc.partial()
 
         frontend = frontend_partial(model=model)

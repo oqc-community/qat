@@ -66,7 +66,7 @@ class DeviceAssignSet:
                 self._set_attribute(assign, assign.value)
             yield
         finally:
-            for assign, original in zip(self.assigns, original_values):
+            for assign, original in zip(self.assigns, original_values, strict=True):
                 self._set_attribute(assign, original)
 
     def _get_attribute(self, assign: DeviceUpdate):

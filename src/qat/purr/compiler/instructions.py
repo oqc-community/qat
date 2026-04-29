@@ -871,9 +871,9 @@ class MeasureBlock(QuantumInstructionBlock):
         elif num_out_vars != len(targets):
             raise ValueError(
                 f"Unsupported number of `output_variables`: {num_out_vars}, "
-                f"must be `None` or match numer of targets: {len(targets)}."
+                f"must be `None` or match number of targets: {len(targets)}."
             )
-        for target, output_variable in zip(targets, output_variables):
+        for target, output_variable in zip(targets, output_variables, strict=True):
             meas, acq = self._generate_measure_acquire(
                 target, mode, output_variable, existing_names
             )

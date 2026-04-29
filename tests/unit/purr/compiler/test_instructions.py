@@ -511,7 +511,9 @@ class TestInstructionSerialisation:
         seri = builder.serialize()
         deseri = InstructionBuilder.deserialize(seri)
 
-        for original, serialised in zip(builder.instructions, deseri.instructions):
+        for original, serialised in zip(
+            builder.instructions, deseri.instructions, strict=True
+        ):
             assert str(original) == str(serialised)
 
     def test_most_instructions(self):
@@ -548,7 +550,9 @@ class TestInstructionSerialisation:
         )
         seri = builder.serialize()
         deseri = InstructionBuilder.deserialize(seri)
-        for original, serialised in zip(builder.instructions, deseri.instructions):
+        for original, serialised in zip(
+            builder.instructions, deseri.instructions, strict=True
+        ):
             assert str(original) == str(serialised)
 
     def test_json_instructions(self, monkeypatch):

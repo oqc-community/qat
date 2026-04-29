@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from abc import ABC
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
 from numbers import Number
@@ -67,7 +66,7 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class QbloxContext(ABC):
+class QbloxContext:
     def __init__(
         self,
         rw_result: ReadWriteResult,

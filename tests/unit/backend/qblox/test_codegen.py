@@ -252,7 +252,7 @@ class TestQbloxBackend1:
         for program in executable.programs:
             assert len(program.packages) == len(qubit_indices)
 
-            for i, index in enumerate(qubit_indices):
+            for index in qubit_indices:
                 qubit = qblox_model.get_qubit(index)
                 acquire_channel = qubit.get_acquire_channel()
                 acquire_pkg = next(
@@ -289,7 +289,7 @@ class TestQbloxBackend1:
         for program in executable.programs:
             assert len(program.packages) == 2 * len(qubit_indices)
 
-            for i, index in enumerate(qubit_indices):
+            for index in qubit_indices:
                 qubit = qblox_model.get_qubit(index)
 
                 # Drive
@@ -490,7 +490,9 @@ class TestQbloxBackend1:
             assert len(program.packages) == len(qubits)
             qub_pkg_zip = [
                 (qub, pkg)
-                for (qub, (pulse_channel_id, pkg)) in zip(qubits, program.packages.items())
+                for (qub, (pulse_channel_id, pkg)) in zip(
+                    qubits, program.packages.items(), strict=True
+                )
                 if qub.get_measure_channel()
                 == qblox_model.get_pulse_channel_from_id(pulse_channel_id)
             ]

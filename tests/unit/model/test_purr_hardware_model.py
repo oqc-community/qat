@@ -392,7 +392,7 @@ class TestEchoHardwareModelConversion:
             ]
 
             for pyd_phys_ch, leg_phys_ch in zip(
-                pyd_physical_channels, leg_physical_channels
+                pyd_physical_channels, leg_physical_channels, strict=False
             ):
                 validate_physical_channel(pyd_phys_ch, leg_phys_ch)
 

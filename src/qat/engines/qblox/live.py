@@ -138,13 +138,13 @@ class QbloxLeafInstrument(LeafInstrument):
 
         results: dict[str, list[Acquisition]] = defaultdict(list)
         try:
-            for pulse_channel_id, sequencer in self._id2seq.items():
+            for sequencer in self._id2seq.values():
                 sequencer.sync_en(True)
 
-            for pulse_channel_id, sequencer in self._id2seq.items():
+            for sequencer in self._id2seq.values():
                 sequencer.arm_sequencer()
 
-            for pulse_channel_id, sequencer in self._id2seq.items():
+            for sequencer in self._id2seq.values():
                 sequencer.start_sequencer()
 
             for pulse_channel_id, sequencer in self._id2seq.items():

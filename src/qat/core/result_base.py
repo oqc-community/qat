@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import uuid
-from abc import ABC
 from typing import TypeVar
 
 from qat.purr.utils.logger import get_default_logger
@@ -9,7 +8,7 @@ from qat.purr.utils.logger import get_default_logger
 log = get_default_logger()
 
 
-class ResultConcept(ABC):
+class ResultConcept:
     """Base class describing the abstraction of an analysis result.
 
     See :class:`ResultManager`.
@@ -42,7 +41,7 @@ class ResultModel(ResultConcept):
         return hash(self._uuid)
 
 
-class ResultInfoMixin(ABC):
+class ResultInfoMixin:
     """Base mixin specifying result identification mechanism. A result has an :attr:`id`,
     :attr:`name`, and :attr:`value`.
 

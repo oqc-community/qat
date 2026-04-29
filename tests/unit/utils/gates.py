@@ -63,8 +63,10 @@ def one_q_gate_tests():
                 params[field] = [0]
             else:
                 params[field] = test_angles
-        keys, values = zip(*params.items())
-        tests.extend([(gate, dict(zip(keys, v))) for v in itertools.product(*values)])
+        keys, values = zip(*params.items(), strict=True)
+        tests.extend(
+            [(gate, dict(zip(keys, v, strict=True))) for v in itertools.product(*values)]
+        )
     return tests
 
 
@@ -82,8 +84,10 @@ def two_q_gate_tests():
             params["qubits"] = [(0, 1), (1, 0)]
             if field != "qubit1" and field != "qubit2":
                 params[field] = test_angles
-        keys, values = zip(*params.items())
-        tests.extend([(gate, dict(zip(keys, v))) for v in itertools.product(*values)])
+        keys, values = zip(*params.items(), strict=True)
+        tests.extend(
+            [(gate, dict(zip(keys, v, strict=True))) for v in itertools.product(*values)]
+        )
     return tests
 
 

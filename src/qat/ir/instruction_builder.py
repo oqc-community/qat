@@ -51,10 +51,12 @@ class InstructionBuilder(ABC):
     def __init__(
         self,
         hardware_model: PhysicalHardwareModel,
-        instructions: list[Instruction] = [],
+        instructions: list[Instruction] | None = None,
         _qubit_index_by_uuid: dict[str, int] | None = None,
         _qubits_ordered_by_index: list[Qubit] | None = None,
     ):
+        if instructions is None:
+            instructions = []
         self.hw = hardware_model
         self._qubit_index_by_uuid = (
             _qubit_index_by_uuid

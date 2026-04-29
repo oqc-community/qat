@@ -106,7 +106,7 @@ def pytest_configure(config):
             mark_list.append(marker)
         elif val == -1:
             mark_list.append(f"not {marker}")
-    setattr(config.option, "markexpr", " and ".join(mark_list))
+    config.option.markexpr = " and ".join(mark_list)
 
 
 def pytest_collection_modifyitems(config, items):

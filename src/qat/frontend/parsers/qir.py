@@ -61,7 +61,9 @@ try:
             """Converts QIR arguments to appropriate types for the instruction builder,
             given expected argument types."""
 
-            for i, (arg, expected_type) in enumerate(zip(args, expected_types)):
+            for i, (arg, expected_type) in enumerate(
+                zip(args, expected_types, strict=True)
+            ):
                 if expected_type == ArgumentType.Qubit:
                     if (qid := ptr_id(arg)) is not None:
                         args[i] = builder.get_logical_qubit(qid)

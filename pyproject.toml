@@ -193,21 +193,6 @@ extend-select = [
 
 # Ignore specific rules (add or remove as needed)
 ignore = [
-  # B codes TODO: COMPILER-1071
-  "B006", # Do not use mutable data structures for argument defaults
-  "B007", # Loop control variable not used within loop body
-  "B008", # Do not perform function call in argument default
-  "B010", # Do not call setattr with constant attribute value
-  "B011", # Do not assert False
-  "B015", # Pointless comparison
-  "B018", # Useless attribute access
-  "B020", # Loop control variable overrides iterable it iterates
-  "B023", # Function definition does not bind loop variable
-  "B024", # Abstract base class without abstract methods or properties
-  "B026", # *arg unpacking after a kwarg
-  "B027", # Empty method in an abstract base class without abstract decorator
-  "B028", # No explicit stacklevel in warning
-  "B905", # `zip()` without an explicit `strict=` parameter
   # E codes TODO: COMPILER-1069
   "E501", # Line too long (handled by ruff format as best we can with line-length=92)
   # N codes
@@ -252,12 +237,19 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Ignore exception issues in legacy code and tests
 "src/qat/**/purr/**" = [
+  "B007",
+  "B008",
+  "B015",
+  "B020",
+  "B023",
+  "B024",
+  "B026",
+  "B027",
   "B904",
   "BLE001",
   "RSE102",
   "S110",
   "S112",
-  "TRY002",
   "SIM101",
   "SIM102",
   "SIM103",
@@ -268,8 +260,32 @@ ignore = [
   "SIM118",
   "SIM201",
   "SIM910",
+  "TRY002",
+]
+"src/qat/purr/**" = [
+  "B006",
+  "B007",
+  "B008",
+  "B904",
+  "BLE001",
+  "RSE102",
+  "S110",
+  "S112",
+  "TRY002",
+]
+"tests/unit/**/purr/**" = [
+  "B007",
+  "B008",
+  "B015",
+  "B020",
+  "B023",
+  "B024",
+  "B026",
+  "B027",
 ]
 "tests/unit/purr/**" = [
+  "B006",
+  "B007",
   "BLE001",
   "B017",
   "B904",
@@ -284,8 +300,7 @@ ignore = [
   "SIM201",
   "SIM300",
 ]
-# Ignore imports not at top of notebook files
-"notebooks/**" = ["E402"]
+"notebooks/**" = ["E402", "B018"]
 # Ignore issues in scripts and tools
 # TODO: COMPILER-1079
 "scripts/**" = ["S314", "S605", "S607"]

@@ -235,7 +235,7 @@ class QbloxLegalisationPass(AnalysisPass):
                     legal_bound = self._legalise_bound(name, bound_result[name], inst)
                     qblox_bounds[name].add(legal_bound)
 
-            for name, bound in bound_result.items():
+            for name, _bound in bound_result.items():
                 if name in qblox_bounds:
                     bound_set = qblox_bounds[name]
                     if len(bound_set) > 1:

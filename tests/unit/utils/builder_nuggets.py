@@ -577,7 +577,7 @@ def hidden_mode(model, qubit_indices=None, mode_indices=None, num_points=None):
 
     builder.sweep([SweepValue("f", dephasing_freqs)])
     builder.sweep([SweepValue("t", time), SweepValue("p", phase)])
-    for index, mode_index in zip(qubit_indices, mode_indices):
+    for index, _mode_index in zip(qubit_indices, mode_indices, strict=True):
         qubit = model.get_qubit(index)
         mode_channel = model.get_qubit(mode_indices[index]).get_measure_channel()
         builder.device_assign(mode_channel, "frequency", Variable("f"))

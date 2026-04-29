@@ -233,7 +233,8 @@ def _build_logical_topology(
         warn(
             "The following logical couplings are present in the PuRR hardware model, but "
             "will be ignored in the new hardware model due to missing pulse channels or "
-            f"zx_pi_4 definitions: {invalid_couplings}."
+            f"zx_pi_4 definitions: {invalid_couplings}.",
+            stacklevel=2,
         )
 
     return logical_connectivity

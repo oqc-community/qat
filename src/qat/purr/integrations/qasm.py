@@ -330,7 +330,9 @@ class AbstractParser:
             for val in args
         ]
         max_length = max([len(val) for val in args])
-        results = list(zip(*[val * max_length if len(val) == 1 else val for val in args]))
+        results = list(
+            zip(*[val * max_length if len(val) == 1 else val for val in args], strict=True)
+        )
         if flatten_results:
             results = [
                 tuple(
@@ -998,7 +1000,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         )
 
         if (gate_def := context.gates.get(gate_name, None)) is not None:
-            for arg, value in zip(gate_def.arguments, arguments):
+            for arg, value in zip(gate_def.arguments, arguments, strict=False):
                 if (known_var := context.variables.get(arg.name, None)) is not None:
                     self._attempt_declaration(
                         Variable(known_var.name, type(value), value), gate_context
@@ -1007,7 +1009,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                     self._attempt_declaration(
                         Variable(self.visit(arg, context), type(value), value), gate_context
                     )
-            for qb_name, value in zip(gate_def.qubits, target_qubits):
+            for qb_name, value in zip(gate_def.qubits, target_qubits, strict=True):
                 if isinstance(qb_name, QubitRegister | Qubit):
                     continue
                 self._attempt_declaration(
@@ -1694,7 +1696,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     raise ValueError("Can't flatten overriden measure into assignment.")
 
                 bit: CregIndexValue
-                for bit, result in zip(bits, results):
+                for bit, result in zip(bits, results, strict=True):
                     bit.value = result
         else:
             self._q3_patcher.add_measure(qubits, bits, self.builder)
@@ -1804,10 +1806,10 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     f"Has {len(others)}."
                 )
 
-            for arg_name, value in zip(arg_mappings, others):
+            for arg_name, value in zip(arg_mappings, others, strict=True):
                 self._attempt_declaration(Variable(arg_name, type(value), value))
 
-            for qb_name, value in zip(qubit_mappings, qubits):
+            for qb_name, value in zip(qubit_mappings, qubits, strict=True):
                 # If we resolved to a qubit already, we're a physical qubit.
                 if isinstance(qb_name, QubitRegister | Qubit):
                     continue

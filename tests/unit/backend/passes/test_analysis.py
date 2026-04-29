@@ -263,7 +263,7 @@ class TestTimelineAnalysisParity:
         assert pyd_res.total_duration == leg_res.total_duration
         assert len(pyd_res.target_map.values()) == len(leg_res.target_map.values())
         for pyd_timeline, res_timeline in zip(
-            pyd_res.target_map.values(), leg_res.target_map.values()
+            pyd_res.target_map.values(), leg_res.target_map.values(), strict=False
         ):
             assert np.isclose(pyd_timeline.samples, res_timeline.samples).all()
             assert np.isclose(

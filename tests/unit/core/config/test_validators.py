@@ -36,8 +36,6 @@ from tests.unit.utils.pipelines import (
     get_mock_pipeline,
 )
 
-[BaseFrontend, BaseMiddleend, BaseBackend, BaseRuntime, InstrumentBuilder]
-
 
 @pytest.mark.parametrize(
     "object, validator",

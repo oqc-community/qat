@@ -422,7 +422,7 @@ class TestNoMidCircuitMeasurementValidation:
         p.run(builder)
 
         assert builder_before.number_of_instructions == builder.number_of_instructions
-        for instr_before, instr_after in zip(builder_before, builder):
+        for instr_before, instr_after in zip(builder_before, builder, strict=True):
             assert instr_before == instr_after
 
     def test_throw_error_mid_circuit_meas(self):
@@ -906,7 +906,7 @@ class TestRepeatSanitisationValidation:
         p.run(builder)
 
         assert builder_before.number_of_instructions == builder.number_of_instructions
-        for instr_before, instr_after in zip(builder_before, builder):
+        for instr_before, instr_after in zip(builder_before, builder, strict=True):
             assert instr_before == instr_after
 
     def test_repeat_sanitisation_validation_logs_warning_when_repeat_is_not_present(

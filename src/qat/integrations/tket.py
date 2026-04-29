@@ -118,7 +118,7 @@ class TketOptimisationHelper:
                 subgraphs_nodes, subgraphs_edges = get_connected_subgraphs(
                     filtered_couplings
                 )
-                for nodes, edges in zip(subgraphs_nodes, subgraphs_edges):
+                for nodes, edges in zip(subgraphs_nodes, subgraphs_edges, strict=True):
                     if self.circ.n_qubits <= len(nodes):
                         if not (optimisations_failed := self._optimise_circuit(edges)):
                             break

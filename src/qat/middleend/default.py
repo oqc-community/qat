@@ -48,13 +48,15 @@ class DefaultMiddleend(CustomMiddleend):
     def __init__(
         self,
         model: HardwareModel,
-        target_data: TargetData = TargetData(),
+        target_data: TargetData | None = None,
     ):
         """
         :param model: The hardware model that holds calibrated information on the qubits on
             the QPU.
         :param clock_cycle: The period for a single sequencer clock cycle.
         """
+        if target_data is None:
+            target_data = TargetData()
         pipeline = self.build_pass_pipeline(model, target_data)
         self.target_data = target_data
         super().__init__(model=model, pipeline=pipeline)
@@ -62,7 +64,7 @@ class DefaultMiddleend(CustomMiddleend):
     @staticmethod
     def build_pass_pipeline(
         model: HardwareModel,
-        target_data: TargetData = TargetData(),
+        target_data: TargetData | None = None,
     ) -> PassManager:
         """Builds the default middle end pass pipeline.
 
@@ -70,6 +72,8 @@ class DefaultMiddleend(CustomMiddleend):
             the QPU.
         :return: A :class:`PassManager` containing a sequence of passes.
         """
+        if target_data is None:
+            target_data = TargetData()
         return (
             PassManager()
             | PopulateWaveformSampleTime(model, target_data)

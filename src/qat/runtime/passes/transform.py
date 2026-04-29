@@ -84,7 +84,7 @@ class QBloxAcquisitionPostProcessing(TransformPass):
         """
 
         results = {}
-        for pulse_channel_id, acquisitions in playback.items():
+        for acquisitions in playback.values():
             # TODO - Support multiple acquires target (unicity by name only is not wise)
             acquires = package.acquires
             for name, acquisition in acquisitions.items():

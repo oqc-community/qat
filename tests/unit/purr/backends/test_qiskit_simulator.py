@@ -121,22 +121,33 @@ class TestQiskitSimulator:
 
         # QuantumError objects
         errors_reset = [
-            thermal_relaxation_error(t1, t2, time_reset) for t1, t2 in zip(T1s, T2s)
+            thermal_relaxation_error(t1, t2, time_reset)
+            for t1, t2 in zip(T1s, T2s, strict=True)
         ]
         errors_measure = [
-            thermal_relaxation_error(t1, t2, time_measure) for t1, t2 in zip(T1s, T2s)
+            thermal_relaxation_error(t1, t2, time_measure)
+            for t1, t2 in zip(T1s, T2s, strict=True)
         ]
-        errors_u1 = [thermal_relaxation_error(t1, t2, time_u1) for t1, t2 in zip(T1s, T2s)]
-        errors_u2 = [thermal_relaxation_error(t1, t2, time_u2) for t1, t2 in zip(T1s, T2s)]
-        errors_u3 = [thermal_relaxation_error(t1, t2, time_u3) for t1, t2 in zip(T1s, T2s)]
+        errors_u1 = [
+            thermal_relaxation_error(t1, t2, time_u1)
+            for t1, t2 in zip(T1s, T2s, strict=True)
+        ]
+        errors_u2 = [
+            thermal_relaxation_error(t1, t2, time_u2)
+            for t1, t2 in zip(T1s, T2s, strict=True)
+        ]
+        errors_u3 = [
+            thermal_relaxation_error(t1, t2, time_u3)
+            for t1, t2 in zip(T1s, T2s, strict=True)
+        ]
         errors_cx = [
             [
                 thermal_relaxation_error(t1a, t2a, time_cx).expand(
                     thermal_relaxation_error(t1b, t2b, time_cx)
                 )
-                for t1a, t2a in zip(T1s, T2s)
+                for t1a, t2a in zip(T1s, T2s, strict=True)
             ]
-            for t1b, t2b in zip(T1s, T2s)
+            for t1b, t2b in zip(T1s, T2s, strict=True)
         ]
 
         # Add errors to noise model

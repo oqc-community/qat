@@ -114,7 +114,7 @@ class TestInstructionBlock:
         ]
         comp_instr.add(*instructions)
 
-        for instr, ref_instr in zip(comp_instr, instructions):
+        for instr, ref_instr in zip(comp_instr, instructions, strict=True):
             assert instr == ref_instr
 
     def test_iterator(self):
@@ -130,7 +130,7 @@ class TestInstructionBlock:
         ]
         comp_instr.add(*instructions)
 
-        ref_instr = [
+        ref_instructions = [
             Instruction(),
             PhaseShift(target=None),
             Delay(target=None),
@@ -139,11 +139,13 @@ class TestInstructionBlock:
             Instruction(),
         ]
 
-        for instr, ref_instr in zip(comp_instr, ref_instr):
-            assert instr == ref_instr
+        for instr, expected_instr in zip(comp_instr, ref_instructions, strict=True):
+            assert instr == expected_instr
 
-        for instr, ref_instr in zip(reversed(comp_instr), reversed(ref_instr)):
-            assert instr == ref_instr
+        for instr, expected_instr in zip(
+            reversed(comp_instr), reversed(ref_instructions), strict=True
+        ):
+            assert instr == expected_instr
 
     def test_rehydrating_gives_validated_list(self):
         comp_instr = InstructionBlock()
@@ -162,7 +164,7 @@ class TestInstructionBlock:
         assert isinstance(rehydrated.instructions, ValidatedList[Instruction])
         assert rehydrated.number_of_instructions == len(instructions)
 
-        for instr, ref_instr in zip(rehydrated, instructions):
+        for instr, ref_instr in zip(rehydrated, instructions, strict=True):
             assert instr == ref_instr
 
 
@@ -463,8 +465,8 @@ class TestInstructionSerialisationDeserialisation:
         assert new_block.number_of_instructions == ref_nr_instr
 
         ref_instructions = [inst1, inst1, inst2, inst1, inst2]
-        for instr, ref_instr in zip(new_block, ref_instructions):
-            instr == ref_instr
+        for instr, ref_instr in zip(new_block, ref_instructions, strict=True):
+            assert instr == ref_instr
 
     def test_reserialisation_deserialisation(self):
         inst1 = PhaseShift(targets={"t1"}, phase=0.5, duration=1e-06)

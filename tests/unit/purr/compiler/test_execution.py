@@ -1053,7 +1053,7 @@ class TestQatOptimization:
             )
 
         # We check that every measurement fires at the same time.
-        for key, start_end in zip(keys, expected):
+        for key, start_end in zip(keys, expected, strict=True):
             assert get_start_end(key, MeasurePulse, ChannelType.measure) == start_end
             assert get_start_end(key, Acquire, ChannelType.acquire) == start_end
 

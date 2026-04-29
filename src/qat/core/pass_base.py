@@ -40,7 +40,7 @@ class PassModel(PassConcept):
         return self._pass.run(ir, res_mgr, met_mgr, *args, **kwargs)
 
 
-class PassInfoMixin(ABC):
+class PassInfoMixin:
     """Base mixin specifying pass identification mechanism. A pass has an :attr:`id` and
     :attr:`name`.
 
