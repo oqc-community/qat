@@ -44,7 +44,7 @@ class LogicalHardwareModel(NoExtraFieldsModel):
         assert version.major == VERSION.major, (
             f"Direct instantiation requires major version compatibility (expected {VERSION.major}.Y.Z, found {version})"
         )
-        assert VERSION >= version, (
+        assert version <= VERSION, (
             f"Latest supported hardware model version {VERSION}, found {version}"
         )
         return VERSION
@@ -59,10 +59,7 @@ class LogicalHardwareModel(NoExtraFieldsModel):
         if self.version != other.version:
             return False
 
-        if self.logical_connectivity != other.logical_connectivity:
-            return False
-
-        return True
+        return self.logical_connectivity == other.logical_connectivity
 
     def __ne__(self, other: LogicalHardwareModel) -> bool:
         return not self.__eq__(other)
@@ -295,18 +292,11 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         if len(s_qubits) != len(o_qubits):
             return False
 
-        for s, o in zip(s_qubits, o_qubits):
-            if s != o:
-                return False
-
-        return True
+        return all(s == o for s, o in zip(s_qubits, o_qubits))
 
     @property
     def is_calibrated(self) -> bool:
-        for qubit in self.qubits.values():
-            if not qubit.is_calibrated:
-                return False
-        return True
+        return all(qubit.is_calibrated for qubit in self.qubits.values())
 
     @property
     def number_of_qubits(self) -> int:

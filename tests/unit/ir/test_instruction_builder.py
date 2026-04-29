@@ -127,10 +127,7 @@ class TestInstructionBuilder:
     def test_create_pulse_channel(self, string: bool):
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         qubit = hw_model.qubit_with_index(0)
-        if string:
-            physical_channel = qubit.physical_channel.uuid
-        else:
-            physical_channel = qubit.physical_channel
+        physical_channel = qubit.physical_channel.uuid if string else qubit.physical_channel
 
         pulse_channel = builder.create_pulse_channel(
             frequency=5.0e9,
@@ -730,11 +727,10 @@ class TestMeasure:
                 "measure_single_shot_binned",
             ]:
                 pp_length -= 1
-        elif axis == ProcessAxis.TIME:
-            if measure_method in [
-                "measure_mean_z",
-            ]:
-                pp_length -= 1
+        elif axis == ProcessAxis.TIME and measure_method in [
+            "measure_mean_z",
+        ]:
+            pp_length -= 1
 
         assert measure_blocks_per_qubit == [1] * len(qubit_indices)
         assert pps_per_qubit == [pp_length] * len(qubit_indices)

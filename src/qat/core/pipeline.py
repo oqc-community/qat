@@ -239,11 +239,10 @@ class PipelineSet:
         if name not in self._pipelines:
             raise KeyError(f"Pipeline {name} not found")
 
-        if isinstance(pipeline, AbstractPipeline):
-            if pipeline is not self._pipelines[name]:
-                raise ValueError(
-                    f"Pipeline {name} is not the same as stored pipeline with the same name"
-                )
+        if isinstance(pipeline, AbstractPipeline) and pipeline is not self._pipelines[name]:
+            raise ValueError(
+                f"Pipeline {name} is not the same as stored pipeline with the same name"
+            )
 
         if self._default_pipeline == name:
             self._default_pipeline = None

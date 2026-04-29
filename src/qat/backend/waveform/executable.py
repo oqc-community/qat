@@ -42,9 +42,7 @@ class WaveformChannelData(BaseModel):
             return False
         if self.baseband_frequency != other.baseband_frequency:
             return False
-        if not np.all(self.buffer == other.buffer):
-            return False
-        return True
+        return np.all(self.buffer == other.buffer)
 
 
 class WaveformProgram(AbstractProgram):

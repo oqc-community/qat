@@ -65,7 +65,7 @@ class TestQasm2Parser:
 
     def test_example(self, n_qubits, seed, hardware_model):
         builder = parse_qasm2_and_apply_optimisations("example.qasm", hardware_model)
-        assert 351 == builder.number_of_instructions
+        assert builder.number_of_instructions == 351
 
     def test_parallel(self, n_qubits, seed, hardware_model):
         builder = parse_qasm2_and_apply_optimisations("parallel_test.qasm", hardware_model)

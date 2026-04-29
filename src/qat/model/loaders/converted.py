@@ -68,10 +68,7 @@ class JaggedEchoModelLoader(BasePhysicalModelLoader):
 
         random = Random(random_seed)
         if connectivity is None:
-            if qubit_indices is None:
-                n = qubit_count + 5
-            else:
-                n = max(qubit_indices) + 1
+            n = qubit_count + 5 if qubit_indices is None else max(qubit_indices) + 1
             connectivity = random_connectivity(n, seed=random)
         else:
             connectivity_dict = defaultdict(set)

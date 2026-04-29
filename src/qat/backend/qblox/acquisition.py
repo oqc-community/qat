@@ -23,9 +23,7 @@ class PathData(BaseModel):
             return False
         if self.oor != other.oor:
             return False
-        if self.data.size != other.data.size or np.any(self.data != other.data):
-            return False
-        return True
+        return not (self.data.size != other.data.size or np.any(self.data != other.data))
 
 
 class IntegData(BaseModel):
@@ -39,9 +37,9 @@ class IntegData(BaseModel):
             return False
         if self.path0.size != other.path0.size or np.any(self.path0 != other.path0):
             return False
-        if self.path1.size != other.path1.size or np.any(self.path1 != other.path1):
-            return False
-        return True
+        return not (
+            self.path1.size != other.path1.size or np.any(self.path1 != other.path1)
+        )
 
 
 class ScopeAcqData(BaseModel):
@@ -74,11 +72,10 @@ class BinnedAcqData(BaseModel):
             return False
         if self.integration != other.integration:
             return False
-        if self.threshold.size != other.threshold.size or np.any(
-            self.threshold != other.threshold
-        ):
-            return False
-        return True
+        return not (
+            self.threshold.size != other.threshold.size
+            or np.any(self.threshold != other.threshold)
+        )
 
 
 class BinnedAndScopeAcqData(BaseModel):

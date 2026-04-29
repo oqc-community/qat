@@ -62,11 +62,7 @@ class ErrorMitigation(NoExtraFieldsModel):
 
     @property
     def is_enabled(self):
-        return (
-            True
-            if self.readout_mitigation and len(self.readout_mitigation.linear)
-            else False
-        )
+        return bool(self.readout_mitigation and len(self.readout_mitigation.linear))
 
     @property
     def qubits(self):

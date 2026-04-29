@@ -243,8 +243,8 @@ def apply_setup_to_echo_hardware(
         connectivity = dict.fromkeys(connectivity, None)
     for connection, quality in connectivity.items():
         left_index, right_index = connection
-        qubit_left = qubits_by_index.get(left_index, None)
-        qubit_right = qubits_by_index.get(right_index, None)
+        qubit_left = qubits_by_index.get(left_index)
+        qubit_right = qubits_by_index.get(right_index)
 
         if not all([qubit_left, qubit_right]):
             continue

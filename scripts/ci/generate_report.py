@@ -26,10 +26,7 @@ def get_details(testsuite, os, python, codebase):
 
 
 def has_passed(testcase):
-    for tag in NON_PASSED:
-        if testcase.find(tag) is not None:
-            return False
-    return True
+    return all(testcase.find(tag) is None for tag in NON_PASSED)
 
 
 def split_path(path):
@@ -64,7 +61,7 @@ def get_reports(report_path):
     all_details = {"failure": [], "skipped": [], "error": [], "warning": []}
     levels = ["unit", "integration"]
     summaries = {lvl: [] for lvl in levels}
-    for suite in summaries.keys():
+    for suite in summaries:
         for path in sorted(Path(report_path).glob(f"*_*_*_{suite}_report.xml")):
             print(path)
             summary, details = parse_junit(path)

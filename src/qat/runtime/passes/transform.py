@@ -241,7 +241,7 @@ class ResultTransform(TransformPass):
             If we only have one result after this, just return that list directly
             instead, as it's probably just a single experiment.
             """
-            if all([self._is_generated_name(k) for k in simplify_target.keys()]):
+            if all(self._is_generated_name(k) for k in simplify_target):
                 if len(simplify_target) == 1:
                     return list(simplify_target.values())[0]
                 else:

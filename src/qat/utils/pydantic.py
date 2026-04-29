@@ -89,11 +89,7 @@ class RehydratableModel(BaseModel):
     @classmethod
     def _rehydrate_object(cls, data):
         type_str = data.get("object_type", None)
-        if type_str is None:
-            cls_type = cls
-        else:
-            # Locate the class using the type string.
-            cls_type = locate(type_str)
+        cls_type = cls if type_str is None else locate(type_str)
         if cls_type is None:
             raise ValueError(
                 f"Could not locate class for type string '{type_str}'. Ensure it is a valid class path."
@@ -134,9 +130,8 @@ CalibratablePositiveFloat = Annotated[
 
 
 def validate_calibratable_unit_interval(value: CalibratableUnitInterval):
-    if not np.isnan(value):
-        if value < 0.0 or value > 1.0:
-            raise ValueError(f"Given value {value} must be in the interval [0, 1].")
+    if not np.isnan(value) and (value < 0.0 or value > 1.0):
+        raise ValueError(f"Given value {value} must be in the interval [0, 1].")
     return value
 
 
@@ -603,7 +598,7 @@ def _validator(payload, ty: type):
         )
         payload = {"dtype": payload.dtype, "shape": payload.shape, "value": payload}
     elif isinstance(payload, dict):
-        dtype = payload.get("dtype", None)
+        dtype = payload.get("dtype")
         dtype = np.dtype(dtype) if dtype is not None else None
         shape = payload.get("shape", (0,))
         shape = tuple(shape)

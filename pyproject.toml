@@ -185,7 +185,7 @@ extend-select = [
   "UP",  # pyupgrade
   #  "PL",   # pylint
   #  "C4",   # flake8-comprehensions
-  #  "SIM",  # flake8-simplify
+  "SIM", # flake8-simplify
   #  "TID",  # flake8-tidy-imports
   #  "A",    # flake8-builtins
   #  "RUF",  # Ruff-specific rules
@@ -251,7 +251,24 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # Ignore exception issues in legacy code and tests
-"src/qat/purr/**" = ["B904", "BLE001", "RSE102", "S110", "S112", "TRY002"]
+"src/qat/**/purr/**" = [
+  "B904",
+  "BLE001",
+  "RSE102",
+  "S110",
+  "S112",
+  "TRY002",
+  "SIM101",
+  "SIM102",
+  "SIM103",
+  "SIM105",
+  "SIM108",
+  "SIM114",
+  "SIM116",
+  "SIM118",
+  "SIM201",
+  "SIM910",
+]
 "tests/unit/purr/**" = [
   "BLE001",
   "B017",
@@ -261,6 +278,11 @@ ignore = [
   "PT017",
   "S110",
   "S112",
+  "SIM105",
+  "SIM115",
+  "SIM118",
+  "SIM201",
+  "SIM300",
 ]
 # Ignore imports not at top of notebook files
 "notebooks/**" = ["E402"]

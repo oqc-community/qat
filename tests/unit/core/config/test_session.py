@@ -567,15 +567,15 @@ class TestSpecifiedTargetDataFields:
         target_data = target_data_dict["top_level_info"]
         assert target_data.max_acquisitions == 2540
         assert target_data.default_shots == 425
-        assert target_data.QUBIT_DATA == default_qubit_data
-        assert target_data.RESONATOR_DATA == default_resonator_data
+        assert default_qubit_data == target_data.QUBIT_DATA
+        assert default_resonator_data == target_data.RESONATOR_DATA
 
     def test_passive_reset_time(self, target_data_dict, default_resonator_data):
         """Test that the passive_reset_time field in QUBIT_DATA is set correctly and that
         RESONATOR_DATA matches the default."""
         target_data = target_data_dict["passive_reset_time"]
         assert target_data.QUBIT_DATA.passive_reset_time == 1e-2
-        assert target_data.RESONATOR_DATA == default_resonator_data
+        assert default_resonator_data == target_data.RESONATOR_DATA
 
     def test_different_memory_size(self, target_data_dict):
         """Test that accessing TargetData.instruction_memory_size warns, and returns the
@@ -597,7 +597,7 @@ class TestSpecifiedTargetDataFields:
         target_data = target_data_dict["resonator_if"]
         assert target_data.RESONATOR_DATA.pulse_channel_if_freq_min == 400
         assert target_data.RESONATOR_DATA.pulse_channel_if_freq_max == 100_000_000_000
-        assert target_data.QUBIT_DATA == default_qubit_data
+        assert default_qubit_data == target_data.QUBIT_DATA
 
     def test_combined(self, target_data_dict):
         """Test that a target data object with combined field adjustments has all expected

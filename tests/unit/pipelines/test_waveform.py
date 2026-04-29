@@ -667,7 +667,7 @@ class TestEchoPipelineParity:
             )
 
         assert purr_executable.acquires.keys() == pydantic_executable.acquires.keys()
-        for key in purr_executable.acquires.keys():
+        for key in purr_executable.acquires:
             purr_acquire = purr_executable.acquires[key]
             pydantic_acquire = pydantic_executable.acquires[key]
             assert purr_acquire.results_processing == pydantic_acquire.results_processing
@@ -680,7 +680,7 @@ class TestEchoPipelineParity:
             )
 
         assert purr_executable.acquires.keys() == pydantic_executable.acquires.keys()
-        for key in purr_executable.acquires.keys():
+        for key in purr_executable.acquires:
             purr_acquire = purr_executable.acquires[key]
             pydantic_acquire = pydantic_executable.acquires[key]
             assert purr_acquire.post_processing == pydantic_acquire.post_processing

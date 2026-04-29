@@ -96,10 +96,7 @@ class TestStateOperator:
             U = StateOperator(4).apply_gate(X(qubit=qubit))
             tensor = 1.0
             for i in range(4):
-                if i == qubit:
-                    op = X(qubit=i).matrix
-                else:
-                    op = np.eye(2)
+                op = X(qubit=i).matrix if i == qubit else np.eye(2)
                 tensor = np.kron(tensor, op)
             assert np.all(np.isclose(U.tensor, np.reshape(tensor, (2,) * 8)))
 
@@ -142,9 +139,6 @@ class TestStateOperator:
 
                 tensor2 = 1.0
                 for i in range(4):
-                    if i == qubit1:
-                        op = [[1, 0], [0, 0]]
-                    else:
-                        op = np.eye(2)
+                    op = [[1, 0], [0, 0]] if i == qubit1 else np.eye(2)
                     tensor2 = np.kron(tensor2, op)
                 assert np.all(np.isclose(U.tensor, np.reshape(tensor1 + tensor2, (2,) * 8)))

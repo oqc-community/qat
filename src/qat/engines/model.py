@@ -50,6 +50,4 @@ def requires_hardware_model(engine) -> bool:
 
     if isinstance(engine, RequiresHardwareModelMixin):
         return True
-    if isinstance(engine, QuantumExecutionEngine) and engine.model is not None:
-        return True
-    return False
+    return isinstance(engine, QuantumExecutionEngine) and engine.model is not None

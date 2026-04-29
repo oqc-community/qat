@@ -48,9 +48,13 @@ class Component(NoExtraFieldsModel):
         for field_name in self.__class__.model_fields:
             field_s = getattr(self, field_name)
             field_o = getattr(other, field_name)
-            if isinstance(field_s, float) and isinstance(field_o, float):
-                if np.isnan(field_s) and np.isnan(field_o):
-                    continue
+            if (
+                isinstance(field_s, float)
+                and isinstance(field_o, float)
+                and np.isnan(field_s)
+                and np.isnan(field_o)
+            ):
+                continue
 
             if field_s != field_o:
                 return False
@@ -68,11 +72,13 @@ class Component(NoExtraFieldsModel):
         for field_name in self.__class__.model_fields:
             field_value = getattr(self, field_name)
             if (
-                isinstance(field_value, Component | PulseChannelSet)
-                and not field_value.is_calibrated
+                (
+                    isinstance(field_value, Component | PulseChannelSet)
+                    and not field_value.is_calibrated
+                )
+                or isinstance(field_value, float)
+                and np.isnan(field_value)
             ):
-                return False
-            elif isinstance(field_value, float) and np.isnan(field_value):
                 return False
         return True
 

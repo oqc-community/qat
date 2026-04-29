@@ -146,7 +146,7 @@ class LucyModelLoader(BasePhysicalModelLoader):
         """Orders the coupling qualities according to the connectivity of the model."""
 
         ordered_qualities: dict[tuple[int, int], float] = {}
-        for qubit1, qubit2 in qualities.keys():
+        for qubit1, qubit2 in qualities:
             if qubit1 in connectivity and qubit2 in connectivity[qubit1]:
                 ordered_qualities[(qubit1, qubit2)] = qualities[(qubit1, qubit2)]
             elif qubit2 in connectivity and qubit1 in connectivity[qubit2]:

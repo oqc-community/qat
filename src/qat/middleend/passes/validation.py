@@ -83,14 +83,15 @@ class InstructionValidation(ValidationPass):
     @_validate_instruction.register(Pulse)
     def _(self, instruction: Pulse):
         duration = instruction.duration
-        if duration > self.pulse_duration_max or duration < self.pulse_duration_min:
-            if self.pulse_duration_limits:
-                # Do not throw error if we specifically disabled the limit checks.
-                raise ValueError(
-                    f"Waveform width must be between {self.pulse_duration_min} s "
-                    f"and {self.pulse_duration_max} s. "
-                    f"Given has a width: {instruction.duration} s"
-                )
+        if (
+            duration > self.pulse_duration_max or duration < self.pulse_duration_min
+        ) and self.pulse_duration_limits:
+            # Do not throw error if we specifically disabled the limit checks.
+            raise ValueError(
+                f"Waveform width must be between {self.pulse_duration_min} s "
+                f"and {self.pulse_duration_max} s. "
+                f"Given has a width: {instruction.duration} s"
+            )
 
     @_validate_instruction.register(Acquire)
     def _(self, instruction: Acquire):
@@ -282,7 +283,7 @@ class NoMidCircuitMeasurementValidation(ValidationPass):
 
             # Check if we have a measure in the middle of the circuit somewhere.
             elif isinstance(instr, Pulse):
-                acq_pc = drive_acq_pc_map.get(instr.target, None)
+                acq_pc = drive_acq_pc_map.get(instr.target)
 
                 if acq_pc and acq_pc in consumed_acquire_pc:
                     raise ValueError(
@@ -304,7 +305,7 @@ class ReadoutValidation(ValidationPass):
             if isinstance(inst, Acquire):
                 acquire_modes[inst.output_variable] = inst.mode
             if isinstance(inst, PostProcessing):
-                acquire_mode = acquire_modes.get(inst.output_variable, None)
+                acquire_mode = acquire_modes.get(inst.output_variable)
                 self._post_processing_options_handling(inst, acquire_mode)
         return ir
 

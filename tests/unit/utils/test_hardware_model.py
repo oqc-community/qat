@@ -9,10 +9,8 @@ from qat.utils.hardware_model import ensure_connected_connectivity, random_error
 def _graph_from_connectivity(connectivity: dict) -> nx.Graph:
     G = nx.Graph()
     G.add_nodes_from(connectivity.keys())
-    for q1_index in connectivity.keys():
-        for q2_index in filter(
-            lambda x: x in connectivity.keys(), connectivity.get(q1_index, [])
-        ):
+    for q1_index in connectivity:
+        for q2_index in filter(lambda x: x in connectivity, connectivity.get(q1_index, [])):
             G.add_edge(q1_index, q2_index)
     return G
 
@@ -59,7 +57,7 @@ def test_random_error_mitigation_without_seed():
     assert isinstance(error_mitigation, ErrorMitigation)
     assert isinstance(error_mitigation.readout_mitigation, ReadoutMitigation)
     assert {
-        int(key) for key in error_mitigation.readout_mitigation.linear.keys()
+        int(key) for key in error_mitigation.readout_mitigation.linear
     } == physical_indices
 
 

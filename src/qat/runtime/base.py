@@ -61,9 +61,8 @@ class BaseRuntime(abc.ABC):
         if not isinstance(self.engine, ConnectionMixin):
             return None
 
-        if flag in self.connection_mode:
-            if not self.engine.is_connected:
-                self.engine.connect()
+        if flag in self.connection_mode and not self.engine.is_connected:
+            self.engine.connect()
         return self.engine.is_connected
 
     def disconnect_engine(self, flag: ConnectionMode) -> bool | None:
@@ -71,9 +70,8 @@ class BaseRuntime(abc.ABC):
         if not isinstance(self.engine, ConnectionMixin):
             return None
 
-        if flag in self.connection_mode:
-            if self.engine.is_connected:
-                self.engine.disconnect()
+        if flag in self.connection_mode and self.engine.is_connected:
+            self.engine.disconnect()
         return self.engine.is_connected
 
     @contextmanager

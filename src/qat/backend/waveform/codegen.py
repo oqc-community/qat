@@ -325,7 +325,7 @@ class WaveformContext:
             amplitude = np.array(waveform.samples, dtype=np.csingle)
 
             pulse = scale_factor * amp * np.exp(1.0j * self._phase) * amplitude
-            if not drag == 0.0:
+            if drag != 0.0:
                 amplitude_differential = NumericFunction().derivative(t, amplitude)
                 if len(amplitude_differential) < len(pulse):
                     amplitude_differential = np.pad(
@@ -367,10 +367,10 @@ class WaveformContext:
         imbalance = self.pulse_channel.imbalance
         freq = self._frequency - self.physical_channel.baseband.frequency
         buffer *= np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * time)
-        if not tslip == 0.0:
+        if tslip != 0.0:
             buffer_slip = buffer * np.exp(UPCONVERT_SIGN * 2.0j * np.pi * freq * tslip)
             buffer.imag = buffer_slip.imag
-        if not imbalance == 1.0:
+        if imbalance != 1.0:
             buffer.real /= imbalance**0.5
             buffer.imag *= imbalance**0.5
 

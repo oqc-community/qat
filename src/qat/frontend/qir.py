@@ -30,9 +30,7 @@ def is_qir_path(src: str) -> bool:
 def is_qir_str(src: str) -> bool:
     """Determines if the string contains QIR semantics."""
 
-    if isinstance(src, str) and string_regex in src:
-        return True
-    return False
+    return isinstance(src, str) and string_regex in src
 
 
 def load_qir_file(path: str) -> str | bytes:
@@ -108,9 +106,8 @@ class QIRFrontend(BaseFrontend):
         if not isinstance(src, str | bytes):
             return False
 
-        if isinstance(src, str):
-            if src.endswith(".ll") or src.endswith(".bc"):
-                src = load_qir_file(src)
+        if isinstance(src, str) and (src.endswith(".ll") or src.endswith(".bc")):
+            src = load_qir_file(src)
 
         if isinstance(src, bytes):
             if src.startswith(b"BC"):

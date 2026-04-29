@@ -205,7 +205,7 @@ class PostProcessingSanitisation(TransformPass):
                 discarded_pp[index] = instruction
 
         for index, pp in reversed(discarded_pp.items()):
-            acquire_mode = acquire_mode_output_var_map.get(pp.output_variable, None)
+            acquire_mode = acquire_mode_output_var_map.get(pp.output_variable)
             if not self._valid_pp(acquire_mode, pp):
                 del instructions[index]
 
@@ -233,31 +233,29 @@ class PostProcessingSanitisation(TransformPass):
             )
             return False
 
-        if acquire_mode == AcquireMode.INTEGRATOR:
-            if (
-                pp.process_type == PostProcessType.MEAN
-                and ProcessAxis.TIME in pp.axes
-                and len(pp.axes) <= 1
-            ):
-                log.warning(
-                    f"Post-processing instruction {pp} is invalid because it has a TIME "
-                    "axis but the associated acquire instruction has an INTEGRATOR mode. "
-                    "It will be ignored."
-                )
-                return False
+        if acquire_mode == AcquireMode.INTEGRATOR and (
+            pp.process_type == PostProcessType.MEAN
+            and ProcessAxis.TIME in pp.axes
+            and len(pp.axes) <= 1
+        ):
+            log.warning(
+                f"Post-processing instruction {pp} is invalid because it has a TIME "
+                "axis but the associated acquire instruction has an INTEGRATOR mode. "
+                "It will be ignored."
+            )
+            return False
 
-        if acquire_mode == AcquireMode.SCOPE:
-            if (
-                pp.process_type == PostProcessType.MEAN
-                and ProcessAxis.SEQUENCE in pp.axes
-                and len(pp.axes) <= 1
-            ):
-                log.warning(
-                    f"Post-processing instruction {pp} is invalid because it has a "
-                    "SEQUENCE axis but the associated acquire instruction has an "
-                    "SCOPE mode. It will be ignored."
-                )
-                return False
+        if acquire_mode == AcquireMode.SCOPE and (
+            pp.process_type == PostProcessType.MEAN
+            and ProcessAxis.SEQUENCE in pp.axes
+            and len(pp.axes) <= 1
+        ):
+            log.warning(
+                f"Post-processing instruction {pp} is invalid because it has a "
+                "SEQUENCE axis but the associated acquire instruction has an "
+                "SCOPE mode. It will be ignored."
+            )
+            return False
         return True
 
 

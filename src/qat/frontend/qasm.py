@@ -34,9 +34,7 @@ def is_qasm_path(src: str) -> bool:
     :param src: The path to the source program.
     """
 
-    if path_regex.match(src) is not None:
-        return True
-    return False
+    return path_regex.match(src) is not None
 
 
 def is_qasm_str(src: str) -> bool:
@@ -45,9 +43,7 @@ def is_qasm_str(src: str) -> bool:
     :param src: The source program as a string.
     """
 
-    if string_regex.search(src) is not None:
-        return True
-    return False
+    return string_regex.search(src) is not None
 
 
 def get_qasm_version(src: str) -> int:
@@ -138,9 +134,8 @@ class BaseQasmFrontend(BaseFrontend, ABC):
         if not isinstance(src, str):
             return False
 
-        if is_qasm_path(src):
-            if Path(src).is_file():
-                src = load_qasm_file(src)
+        if is_qasm_path(src) and Path(src).is_file():
+            src = load_qasm_file(src)
 
         if not is_qasm_str(src):
             return False

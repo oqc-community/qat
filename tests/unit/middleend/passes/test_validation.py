@@ -601,7 +601,7 @@ class TestFrequencySetupValidation:
             baseband_validation = freq_setup._validate_baseband_frequency(
                 freqs[key], is_resonator[key]
             )
-            assert baseband_validation == (True if i in (2, 5) else False)
+            assert baseband_validation == (i in (2, 5))
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_validate_pulse_channel_ifs(self, sign):

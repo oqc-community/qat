@@ -116,10 +116,13 @@ class QatSessionConfig(QatConfig):
         execute_pipelines = values.EXECUTE
         full_pipelines = values.PIPELINES
 
-        if not (compile_pipelines or execute_pipelines):
-            if full_pipelines and len(full_pipelines) == 1:
-                full_pipelines[0].default = True
-                return values
+        if (
+            not (compile_pipelines or execute_pipelines)
+            and full_pipelines
+            and len(full_pipelines) == 1
+        ):
+            full_pipelines[0].default = True
+            return values
 
         num_full_defaults = (
             sum(desc.default for desc in full_pipelines)

@@ -443,7 +443,7 @@ class TestFrequencySetupValidation:
         assert len(baseband_validations) == 6
         for i in range(6):
             assert f"test{i + 1}" in baseband_validations
-            assert baseband_validations[f"test{i + 1}"] == (True if i in (2, 5) else False)
+            assert baseband_validations[f"test{i + 1}"] == (i in (2, 5))
 
     @pytest.mark.parametrize("sign", [-1, +1])
     def test_validate_pulse_channel_ifs(self, sign):

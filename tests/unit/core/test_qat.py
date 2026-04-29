@@ -353,17 +353,19 @@ class TestQATHardwareModelReloading:
         hardware = qat._available_hardware
         assert isinstance(hardware, HardwareLoaders)
         assert len(hardware._loaded_models) == 2
-        assert ("loader1", "loader2") == tuple(hardware._loaded_models.keys())
+        assert tuple(hardware._loaded_models.keys()) == ("loader1", "loader2")
         assert len(hardware["loader1"].qubits) == 2
         assert len(hardware["loader2"].qubits) == 6
 
     def test_engines_are_instantiated_correctly(self, qat):
         engines = qat._engines
         assert len(engines._engines) == 3
-        assert ("InitableEngine", "model_engine1", "model_engine2") == tuple(
-            engines._engines.keys()
+        assert tuple(engines._engines.keys()) == (
+            "InitableEngine",
+            "model_engine1",
+            "model_engine2",
         )
-        assert ("model_engine1", "model_engine2") == tuple(engines._loaders.keys())
+        assert tuple(engines._loaders.keys()) == ("model_engine1", "model_engine2")
         assert isinstance(engines.get("InitableEngine"), InitableEngine)
         assert isinstance(engines.get("model_engine1"), MockEngineWithModel)
         assert isinstance(engines.get("model_engine2"), MockEngineWithModel)

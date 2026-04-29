@@ -682,12 +682,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     return +value
             elif data == "unary_expression":
                 op, value = self.transform_to_value(node.children)
-                if op == "-":
-                    return -value
-                elif op == "~":
-                    return ~value
-                elif op == "!":
-                    return not value
+                unary_ops = {"-": lambda v: -v, "~": lambda v: ~v, "!": lambda v: not v}
+                if op in unary_ops:
+                    return unary_ops[op](value)
             elif data == "index_identifier":
                 registers = self.transform_to_value(node.children[0])
                 if isinstance(registers, BitRegister):
@@ -794,14 +791,12 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 if guard is None:
                     guard = set()
                 variable = self._current_context.variables.get(var_id, None)
-                if variable is not None:
-                    if walk_variable:
-                        if isinstance(variable.value, Variable):
-                            if var_id not in guard:
-                                guard.add(var_id)
-                                return _walk_variables(variable.name, guard)
+                if variable is not None and walk_variable:
+                    if isinstance(variable.value, Variable) and var_id not in guard:
+                        guard.add(var_id)
+                        return _walk_variables(variable.name, guard)
 
-                        return variable if return_variable else variable.value
+                    return variable if return_variable else variable.value
                 return var_id
 
             return _walk_variables(id_value)

@@ -75,13 +75,12 @@ class UpdateablePipeline(AbstractPipeline):
             model = loader.load()
 
         # TODO: Change to just check against RequiresHardwareModelMixin (COMPILER-662)
-        if requires_hardware_model(engine):
-            if engine.model != model:
-                raise MismatchingHardwareModelError(
-                    f"Engine model {engine.model} does not match the provided model "
-                    f"{model}. If the UpdateablePipeline is only provided a loader, and "
-                    "not a model, please consider also instantiating with a model."
-                )
+        if requires_hardware_model(engine) and engine.model != model:
+            raise MismatchingHardwareModelError(
+                f"Engine model {engine.model} does not match the provided model "
+                f"{model}. If the UpdateablePipeline is only provided a loader, and "
+                "not a model, please consider also instantiating with a model."
+            )
 
         self._loader = loader
         self._engine = engine
