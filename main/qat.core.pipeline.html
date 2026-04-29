@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.core.pipeline module &mdash; qat-compiler 3.0.0.post220.dev20260429074308 documentation</title>
+  <title>qat.core.pipeline module &mdash; qat-compiler 3.0.0.post221.dev20260429081746 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -538,7 +538,7 @@
 <span id="qat-core-pipeline-module"></span><h1>qat.core.pipeline module<a class="headerlink" href="#module-qat.core.pipeline" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.EngineSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EngineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.EngineSet" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EngineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.EngineSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Stores a set of engines, allowing identification by name.</p>
 <p>Also stores corresponding loaders which can be used to update the models within engines
@@ -581,7 +581,7 @@ for engines that have a <code class="xref py py-class docutils literal notransla
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareLoaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HardwareLoaders</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_loaders</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.HardwareLoaders" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.HardwareLoaders.clear_cache">
@@ -758,7 +758,7 @@ default, it will be both.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineSet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineSet" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PipelineSet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipelines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.pipeline.PipelineSet" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.pipeline.PipelineSet.add">

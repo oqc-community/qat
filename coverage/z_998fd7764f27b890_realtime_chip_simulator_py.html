@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_998fd7764f27b890_utilities_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-29 08:03 +0000
+            created at 2026-04-29 08:38 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -1294,7 +1294,7 @@
     <p class="pln"><span class="n"><a id="t1210" href="#t1210">1210</a></span><span class="t">            <span class="com"># Sort by qubit id</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1211" href="#t1211">1211</a></span><span class="t">            <span class="nam">trajectory_dict</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1212" href="#t1212">1212</a></span><span class="t">            <span class="key">for</span> <span class="nam">name</span><span class="op">,</span> <span class="nam">trajectory</span><span class="op">,</span> <span class="nam">time</span> <span class="key">in</span> <span class="nam">zip</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t1213" href="#t1213">1213</a></span><span class="t">                <span class="nam">operator_names</span><span class="op">,</span> <span class="nam">branch_trajectories</span><span class="op">,</span> <span class="nam">branch_time</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t1213" href="#t1213">1213</a></span><span class="t">                <span class="nam">operator_names</span><span class="op">,</span> <span class="nam">branch_trajectories</span><span class="op">,</span> <span class="nam">branch_time</span><span class="op">,</span> <span class="nam">strict</span><span class="op">=</span><span class="key">False</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1214" href="#t1214">1214</a></span><span class="t">            <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1215" href="#t1215">1215</a></span><span class="t">                <span class="nam">item</span> <span class="op">=</span> <span class="nam">trajectory_dict</span><span class="op">.</span><span class="nam">setdefault</span><span class="op">(</span><span class="nam">name</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">,</span> <span class="op">[</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1216" href="#t1216">1216</a></span><span class="t">                <span class="nam">item</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="op">(</span><span class="nam">name</span><span class="op">[</span><span class="num">1</span><span class="op">]</span><span class="op">,</span> <span class="nam">trajectory</span><span class="op">,</span> <span class="nam">time</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -1545,7 +1545,7 @@
     <p class="pln"><span class="n"><a id="t1461" href="#t1461">1461</a></span><span class="t">            <span class="op">-</span> <span class="nam">a3</span> <span class="op">*</span> <span class="nam">np</span><span class="op">.</span><span class="nam">cos</span><span class="op">(</span><span class="num">6.0</span> <span class="op">*</span> <span class="nam">np</span><span class="op">.</span><span class="nam">pi</span> <span class="op">*</span> <span class="nam">n</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1462" href="#t1462">1462</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1463" href="#t1463">1463</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t1464" href="#t1464">1464</a></span><span class="t">    <span class="key">for</span> <span class="nam">s</span><span class="op">,</span> <span class="nam">qz</span> <span class="key">in</span> <span class="nam">zip</span><span class="op">(</span><span class="nam">segments</span><span class="op">,</span> <span class="nam">qzsegments</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t1464" href="#t1464">1464</a></span><span class="t">    <span class="key">for</span> <span class="nam">s</span><span class="op">,</span> <span class="nam">qz</span> <span class="key">in</span> <span class="nam">zip</span><span class="op">(</span><span class="nam">segments</span><span class="op">,</span> <span class="nam">qzsegments</span><span class="op">,</span> <span class="nam">strict</span><span class="op">=</span><span class="key">True</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1465" href="#t1465">1465</a></span><span class="t">        <span class="nam">p0</span> <span class="op">=</span> <span class="num">0.5</span> <span class="op">*</span> <span class="op">(</span><span class="nam">qz</span> <span class="op">+</span> <span class="num">1</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t1466" href="#t1466">1466</a></span><span class="t">        <span class="nam">p1</span> <span class="op">=</span> <span class="num">1</span> <span class="op">-</span> <span class="nam">p0</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t1467" href="#t1467">1467</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -1607,7 +1607,7 @@
             <a class="nav" href="z_998fd7764f27b890_utilities_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-29 08:03 +0000
+            created at 2026-04-29 08:38 +0000
         </p>
     </div>
 </footer>

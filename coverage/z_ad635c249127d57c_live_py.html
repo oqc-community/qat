@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_26339b9f59ffda72_echo_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-29 08:03 +0000
+            created at 2026-04-29 08:38 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -222,13 +222,13 @@
     <p class="pln"><span class="n"><a id="t138" href="#t138">138</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t139" href="#t139">139</a></span><span class="t">        <span class="nam">results</span><span class="op">:</span> <span class="nam">dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">list</span><span class="op">[</span><span class="nam">Acquisition</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="nam">defaultdict</span><span class="op">(</span><span class="nam">list</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">        <span class="key">try</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">            <span class="key">for</span> <span class="nam">pulse_channel_id</span><span class="op">,</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">            <span class="key">for</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">                <span class="nam">sequencer</span><span class="op">.</span><span class="nam">sync_en</span><span class="op">(</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">            <span class="key">for</span> <span class="nam">pulse_channel_id</span><span class="op">,</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">            <span class="key">for</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">                <span class="nam">sequencer</span><span class="op">.</span><span class="nam">arm_sequencer</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">            <span class="key">for</span> <span class="nam">pulse_channel_id</span><span class="op">,</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">            <span class="key">for</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t148" href="#t148">148</a></span><span class="t">                <span class="nam">sequencer</span><span class="op">.</span><span class="nam">start_sequencer</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t149" href="#t149">149</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t150" href="#t150">150</a></span><span class="t">            <span class="key">for</span> <span class="nam">pulse_channel_id</span><span class="op">,</span> <span class="nam">sequencer</span> <span class="key">in</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_id2seq</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -308,7 +308,7 @@
             <a class="nav" href="z_26339b9f59ffda72_echo_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-04-29 08:03 +0000
+            created at 2026-04-29 08:38 +0000
         </p>
     </div>
 </footer>
