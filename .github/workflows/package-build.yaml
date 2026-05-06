@@ -34,7 +34,7 @@ jobs:
 
   formatting-tests:
     name: Consistency and formatting
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ inputs.formatting-tests }}
     defaults:
       run:
@@ -130,7 +130,7 @@ jobs:
 
   legacy-unit-tests:
     name: Legacy Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
@@ -146,7 +146,7 @@ jobs:
 
   unit-tests:
     name: Stable Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -171,7 +171,7 @@ jobs:
 
   experimental-unit-tests:
     name: Experimental Unit Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
@@ -187,7 +187,7 @@ jobs:
 
   notebook-validation-tests:
     name: Notebook Validation Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
@@ -203,7 +203,7 @@ jobs:
 
   generate-report:
     name: Generate report
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
     needs:
       - unit-tests
@@ -266,7 +266,7 @@ jobs:
 
   coverage-report:
     name: Generate coverage report
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     if: ${{ !cancelled() }}
     needs:
       - unit-tests

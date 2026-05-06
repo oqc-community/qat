@@ -19,6 +19,10 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Install Pipx
+      shell: bash
+      run: |
+        sudo apt update && sudo apt install pipx -y
 
     - name: Install Poetry
       shell: bash
@@ -32,7 +36,7 @@ runs:
         python-version: ${{ inputs.python-version }}
         cache: 'poetry'
 
-    - name: Install dependancies
+    - name: Install dependencies
       shell: bash
       run: poetry sync --with dev
 
