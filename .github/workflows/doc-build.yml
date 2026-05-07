@@ -1,14 +1,47 @@
 name: Build documentation
 on:
-  pull_request:
-    branches:
-      - main
-  push:
-    branches:
-      - main
-    tags:
-      - '*.*.*'
+  workflow_call:
+
+env:
+  POETRY_VERSION: "2.3.4"
 
 jobs:
-  deploy:
-    uses: ./.github/workflows/doc-publish.yml
+  sphinx-build:
+    name: Build documentation
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Install Poetry Action
+      run: |
+        pipx install poetry==${{ env.POETRY_VERSION }}
+
+    - name: Setup Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.10"
+        cache: poetry
+
+    - run: poetry sync --with docs,dev
+
+    - name: Build docs
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        rm -rf .gitignore
+        poetry run sphinx-apidoc -f -M -e -o docs/source/ src
+        git add .
+        git commit -m "temporarily commiting api docs"
+        poetry run sphinx-multiversion docs/source/ docs/build/
+
+    - name: Upload documentation
+      id: artifact
+      uses: actions/upload-artifact@v7
+      if: ${{ github.event_name != 'pull_request' }}
+      with:
+        name: sphinx-docs
+        path: docs/build/**

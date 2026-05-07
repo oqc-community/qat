@@ -17,3 +17,7 @@ jobs:
       repository: ${{ github.repository }}
       formatting-tests: true
     secrets: inherit
+
+  docs:
+    name: Documentation
+    uses: ./.github/workflows/doc-build.yml

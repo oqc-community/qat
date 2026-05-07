@@ -1,54 +1,76 @@
 name: Publish documentation
 on:
   workflow_call:
+  push:
+    branches:
+      - main
 
 env:
-  POETRY_VERSION: "2.1.4"
+  POETRY_VERSION: "2.3.4"
 
 jobs:
-  deploy:
+  coverage-report:
+    name: Generate code coverage report
     runs-on: ubuntu-24.04
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v6
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
-    - name: Install Poetry Action
-      run: |
-        pipx install poetry==${{ env.POETRY_VERSION }}
+      - name: Install Poetry Action
+        run: |
+          pipx install poetry==${{ env.POETRY_VERSION }}
 
-    - name: Setup Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: "3.10"
-        cache: poetry
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: poetry
 
-    - run: poetry sync --with docs,dev
+      - run: poetry sync --with docs,dev
 
-    - name: Build docs
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        rm -rf .gitignore
-        poetry run sphinx-apidoc -f -M -e -o docs/source/ src
-        git add .
-        git commit -m "temporarily commiting api docs"
-        poetry run sphinx-multiversion docs/source/ docs/build/
+      - name: Generate code coverage report
+        continue-on-error: true
+        run: |
+          poetry run pytest --cov --cov-report html:coverage -n auto
 
-    - name: Generate code coverage report
-      continue-on-error: true
-      run: |
-        poetry run pytest --cov --cov-report html:docs/build/coverage -n auto --dist loadgroup
+      - name: Remove .gitignore from coverage report
+        run: |
+          rm -f coverage/.gitignore
 
-    - name: Remove .gitignore from coverage report
-      run: |
-        rm -f docs/build/coverage/.gitignore
+      - name: Upload code coverage report
+        id: artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-coverage-report
+          path: coverage/**
 
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4
-      if: ${{ github.event_name != 'pull_request' }}
-      with:
-        folder: docs/build
-        clean: false
+  sphinx-build:
+    uses: ./.github/workflows/doc-build.yml
+
+  publish-docs:
+    name: Publish documentation
+    runs-on: ubuntu-24.04
+    needs:
+      - coverage-report
+      - sphinx-build
+    steps:
+      - name: Download coverage report
+        uses: actions/download-artifact@v8
+        with:
+          name: code-coverage-report
+          path: docs/build/coverage
+
+      - name: Download documentation
+        uses: actions/download-artifact@v8
+        with:
+          name: sphinx-docs
+          path: docs/build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs/build
+          clean: false
