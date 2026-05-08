@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 
-from dataclasses import dataclass, field
-
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
@@ -12,15 +10,14 @@ from qat.executables import AbstractProgram
 from qat.utils.pydantic import ComplexNDArray
 
 
-@dataclass
-class QbloxPackage:
+class QbloxPackage(BaseModel):
     pulse_channel_id: str | None = None
     physical_channel_id: str | None = None
     instrument_id: str | None = None
     seq_idx: int | None = None
-    seq_config: SequencerConfig = field(default_factory=lambda: SequencerConfig())
+    seq_config: SequencerConfig = Field(default_factory=lambda: SequencerConfig())
     slot_idx: int | None = None
-    mod_config: ModuleConfig = field(default_factory=lambda: ModuleConfig())
+    mod_config: ModuleConfig = Field(default_factory=lambda: ModuleConfig())
     sequence: Sequence | None = None
     timeline: ComplexNDArray | None = None
 
@@ -28,7 +25,6 @@ class QbloxPackage:
 class QbloxProgram(AbstractProgram):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    # COMPILER 828: change to pydantic objects (not dataclasses)
     packages: dict[str, QbloxPackage]
 
     # COMPILER-1004, COMPILER-1005

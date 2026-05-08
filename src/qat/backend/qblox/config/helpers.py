@@ -207,9 +207,17 @@ class QcmRfConfigHelper(QcmConfigHelper):
 
     def configure_attenuation(self, module: Module):
         if self.module_config.attenuation.out0:
-            module.out0_att(self.module_config.attenuation.out0)
+            if not self.module_config.attenuation.out0.is_integer():
+                raise ValueError("Must be an integer")
+            if int(self.module_config.attenuation.out0) % 2 == 1:
+                raise ValueError("Must be multiples of 2")
+            module.out0_att(int(self.module_config.attenuation.out0))
         if self.module_config.attenuation.out1:
-            module.out1_att(self.module_config.attenuation.out1)
+            if not self.module_config.attenuation.out1.is_integer():
+                raise ValueError("Must be an integer")
+            if int(self.module_config.attenuation.out1) % 2 == 1:
+                raise ValueError("Must be multiples of 2")
+            module.out1_att(int(self.module_config.attenuation.out1))
 
     def configure_offset(self, module: Module):
         if self.module_config.offset.out0_path0:
@@ -287,9 +295,17 @@ class QrmRfConfigHelper(QrmConfigHelper):
 
     def configure_attenuation(self, module: Module):
         if self.module_config.attenuation.out0:
-            module.out0_att(self.module_config.attenuation.out0)
+            if not self.module_config.attenuation.out0.is_integer():
+                raise ValueError("Must be an integer")
+            if int(self.module_config.attenuation.out0) % 2 == 1:
+                raise ValueError("Must be multiples of 2")
+            module.out0_att(int(self.module_config.attenuation.out0))
         if self.module_config.attenuation.in0:
-            module.in0_att(self.module_config.attenuation.in0)
+            if not self.module_config.attenuation.in0.is_integer():
+                raise ValueError("Must be an integer")
+            if int(self.module_config.attenuation.in0) % 2 == 1:
+                raise ValueError("Must be multiples of 2")
+            module.in0_att(int(self.module_config.attenuation.in0))
 
     def configure_offset(self, module: Module):
         if self.module_config.offset.out0_path0:

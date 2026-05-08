@@ -1,15 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
-
-from dataclasses import dataclass, field
+from pydantic import BaseModel, Field
 
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
 
 
-@dataclass
-class ConnectionConfig:
+class ConnectionConfig(BaseModel):
     """Configuration for the sequencer's connection to the analogue input/output paths.
 
     :param bulk_value: A list of strings in the format <direction><channel> or
@@ -36,7 +34,7 @@ class ConnectionConfig:
         is connected to, if any. Possible values are 'in0', 'in1', or 'off'
     """
 
-    bulk_value: list[str] = field(default_factory=list)
+    bulk_value: list[str] = Field(default_factory=list)
     out0: str | None = None
     out1: str | None = None
     out2: str | None = None
@@ -48,8 +46,7 @@ class ConnectionConfig:
     acq_Q: str | None = None
 
 
-@dataclass
-class NcoConfig:
+class NcoConfig(BaseModel):
     """Configuration components related to the sequencer's NCO.
 
     :param freq: NCO frequency in Hz.
@@ -67,8 +64,7 @@ class NcoConfig:
     prop_delay_comp_en: bool | None = None
 
 
-@dataclass
-class AwgConfig:
+class AwgConfig(BaseModel):
     """Configuration components related to the sequencer's AWG.
 
     :param cont_mode_en_path0: Flag to enable/disable continuous waveform mode enable path 0 (I).
@@ -103,8 +99,7 @@ class AwgConfig:
     mod_en: bool | None = None
 
 
-@dataclass
-class MixerConfig:
+class MixerConfig(BaseModel):
     """Configuration related to the sequencer's mixer correction component.
 
     :param phase_offset: Mixer phase imbalance correction for AWG.
@@ -115,8 +110,7 @@ class MixerConfig:
     gain_ratio: float | None = None
 
 
-@dataclass
-class SquareWeightAcq:
+class SquareWeightAcq(BaseModel):
     """Configuration components for non-weighed acquisition.
 
     :param integration_length: Integration length in number of samples for non-weighed
@@ -126,8 +120,7 @@ class SquareWeightAcq:
     integration_length: int | None = None
 
 
-@dataclass
-class ThresholdedAcqConfig:
+class ThresholdedAcqConfig(BaseModel):
     """Configuration components for thresholded acquisition.
 
     :param rotation:  Phase rotation (in degrees) for the integration result.
@@ -162,8 +155,7 @@ class ThresholdedAcqConfig:
     trigger_invert: bool | None = None
 
 
-@dataclass
-class TtlAcqConfig:
+class TtlAcqConfig(BaseModel):
     """Configuration components for Transistor-Transistor-Logic acquisition.
 
     :param auto_bin_incr_en: Flag to enable/disable whether the bin index is automatically
@@ -180,8 +172,7 @@ class TtlAcqConfig:
     input_select: int | None = None
 
 
-@dataclass
-class SequencerConfig:
+class SequencerConfig(BaseModel):
     """Configuration specification for sequencer (the digital side of the RF chain).
 
     :param sync_en: Flag to enable/disable party-line synchronization. If enabled,
@@ -210,24 +201,23 @@ class SequencerConfig:
     marker_ovr_en: bool | None = None
     marker_ovr_value: int | None = None
 
-    trigger_count_thresholds: dict[int, float] = field(default_factory=dict)
-    trigger_threshold_inverts: dict[int, bool] = field(default_factory=dict)
+    trigger_count_thresholds: dict[int, float] = Field(default_factory=dict)
+    trigger_threshold_inverts: dict[int, bool] = Field(default_factory=dict)
 
-    connection: ConnectionConfig = field(default_factory=lambda: ConnectionConfig())
-    nco: NcoConfig = field(default_factory=lambda: NcoConfig())
-    awg: AwgConfig = field(default_factory=lambda: AwgConfig())
-    mixer: MixerConfig = field(default_factory=lambda: MixerConfig())
+    connection: ConnectionConfig = Field(default_factory=lambda: ConnectionConfig())
+    nco: NcoConfig = Field(default_factory=lambda: NcoConfig())
+    awg: AwgConfig = Field(default_factory=lambda: AwgConfig())
+    mixer: MixerConfig = Field(default_factory=lambda: MixerConfig())
 
     demod_en_acq: bool | None = None
-    square_weight_acq: SquareWeightAcq = field(default_factory=lambda: SquareWeightAcq())
-    thresholded_acq: ThresholdedAcqConfig = field(
+    square_weight_acq: SquareWeightAcq = Field(default_factory=lambda: SquareWeightAcq())
+    thresholded_acq: ThresholdedAcqConfig = Field(
         default_factory=lambda: ThresholdedAcqConfig()
     )
-    ttl_acq: TtlAcqConfig = field(default_factory=lambda: TtlAcqConfig())
+    ttl_acq: TtlAcqConfig = Field(default_factory=lambda: TtlAcqConfig())
 
 
-@dataclass
-class OffsetConfig:
+class OffsetConfig(BaseModel):
     """Configuration components to apply on the input/output the signal. They are DC voltage
     levels can be used to shift the baseline the waveforms or to calibrate out hardware
     imperfections such as mixer leakage.
@@ -263,8 +253,7 @@ class OffsetConfig:
     in0_path1: float | None = None
 
 
-@dataclass
-class FirConfig:
+class FirConfig(BaseModel):
     """Configuration of the Finite Impulse Response filter. Possible values for the
     outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
     filter is bypassed and the output is delayed as if it were applied.
@@ -288,8 +277,7 @@ class FirConfig:
     marker0: str | None = None
 
 
-@dataclass
-class ExpOvershoot0Config:
+class ExpOvershoot0Config(BaseModel):
     """Configuration of exponential overshoot filter 0. Possible values for the
     outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
     filter is bypassed and the output is delayed as if it were applied.
@@ -313,8 +301,7 @@ class ExpOvershoot0Config:
     marker0: str | None = None
 
 
-@dataclass
-class ExpOvershoot1Config:
+class ExpOvershoot1Config(BaseModel):
     """Configuration of exponential overshoot filter 1. Possible values for the
     outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
     filter is bypassed and the output is delayed as if it were applied.
@@ -338,8 +325,7 @@ class ExpOvershoot1Config:
     marker0: str | None = None
 
 
-@dataclass
-class ExpOvershoot2Config:
+class ExpOvershoot2Config(BaseModel):
     """Configuration of exponential overshoot filter 2. Possible values for the
     outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
     filter is bypassed and the output is delayed as if it were applied.
@@ -363,8 +349,7 @@ class ExpOvershoot2Config:
     marker0: str | None = None
 
 
-@dataclass
-class ExpOvershoot3Config:
+class ExpOvershoot3Config(BaseModel):
     """Configuration of exponential overshoot filter 3. Possible values for the
     outputs/markers are 'bypassed' where the filter is disabled, or 'delay_comp' where the
     filter is bypassed and the output is delayed as if it were applied.
@@ -388,8 +373,7 @@ class ExpOvershoot3Config:
     marker0: str | None = None
 
 
-@dataclass
-class LoConfig:
+class LoConfig(BaseModel):
     """Configuration for the local oscillator in QCM-RF, QRM-RF, and QRC.
 
     :param out0_en: Flag to enable/diable the LO on output 0. Relevant in QCM-RF.
@@ -424,8 +408,7 @@ class LoConfig:
     out1_in1_freq: float | None = None
 
 
-@dataclass
-class AttConfig:
+class AttConfig(BaseModel):
     """Configuration for output/input attenuation.
 
     :param out0: Attenuation (in dB) for output 0.
@@ -449,8 +432,7 @@ class AttConfig:
     in1: float | None = None
 
 
-@dataclass
-class GainConfig:
+class GainConfig(BaseModel):
     """Configuration for input gain relevant in the QRM.
 
     :param in0: Gain (in dB) for input 0.
@@ -461,8 +443,7 @@ class GainConfig:
     in1: int | None = None
 
 
-@dataclass
-class ScopeAcqConfig:
+class ScopeAcqConfig(BaseModel):
     """Scope acquisition configuration relevant in QRM/QRM-RF/QRC. Possible values For the
     trigger mode are 'sequencer' to trigger by sequencer, 'level' to trigger by input level.
 
@@ -509,8 +490,7 @@ class ScopeAcqConfig:
     avg_mode_en_path3: bool | None = None
 
 
-@dataclass
-class ModuleConfig:
+class ModuleConfig(BaseModel):
     """Configuration specification for module (the analogue side of the RF chain).
 
     :param marker_inverts: Dictionary mapping marker indices to a flag whether
@@ -527,22 +507,21 @@ class ModuleConfig:
     :param exp3: Exponential overshoot 3 configuration, see :class:`ExpOvershoot3Config`.
     """
 
-    marker_inverts: dict[int, bool] = field(default_factory=dict)
+    marker_inverts: dict[int, bool] = Field(default_factory=dict)
 
-    offset: OffsetConfig = field(default_factory=lambda: OffsetConfig())
-    lo: LoConfig = field(default_factory=lambda: LoConfig())
-    attenuation: AttConfig = field(default_factory=lambda: AttConfig())
-    gain: GainConfig = field(default_factory=lambda: GainConfig())
-    scope_acq: ScopeAcqConfig = field(default_factory=lambda: ScopeAcqConfig())
-    fir: FirConfig = field(default_factory=lambda: FirConfig())
-    exp0: ExpOvershoot0Config = field(default_factory=lambda: ExpOvershoot0Config())
-    exp1: ExpOvershoot1Config = field(default_factory=lambda: ExpOvershoot1Config())
-    exp2: ExpOvershoot2Config = field(default_factory=lambda: ExpOvershoot2Config())
-    exp3: ExpOvershoot3Config = field(default_factory=lambda: ExpOvershoot3Config())
+    offset: OffsetConfig = Field(default_factory=lambda: OffsetConfig())
+    lo: LoConfig = Field(default_factory=lambda: LoConfig())
+    attenuation: AttConfig = Field(default_factory=lambda: AttConfig())
+    gain: GainConfig = Field(default_factory=lambda: GainConfig())
+    scope_acq: ScopeAcqConfig = Field(default_factory=lambda: ScopeAcqConfig())
+    fir: FirConfig = Field(default_factory=lambda: FirConfig())
+    exp0: ExpOvershoot0Config = Field(default_factory=lambda: ExpOvershoot0Config())
+    exp1: ExpOvershoot1Config = Field(default_factory=lambda: ExpOvershoot1Config())
+    exp2: ExpOvershoot2Config = Field(default_factory=lambda: ExpOvershoot2Config())
+    exp3: ExpOvershoot3Config = Field(default_factory=lambda: ExpOvershoot3Config())
 
 
-@dataclass
-class QbloxConfig:
+class QbloxConfig(BaseModel):
     """Object grouping configuration of the analogue side and the digital side of the RF
     chain. For a given output/input analogue path, :param:`module` describes the necessary
     QCodes configuration to set it up completely and :param:`sequencers` is a collection of
@@ -558,5 +537,5 @@ class QbloxConfig:
     """
 
     slot_idx: int | None = None
-    module: ModuleConfig = field(default_factory=lambda: ModuleConfig())
-    sequencers: dict[int, SequencerConfig] = field(default_factory=dict)
+    module: ModuleConfig = Field(default_factory=lambda: ModuleConfig())
+    sequencers: dict[int, SequencerConfig] = Field(default_factory=dict)
