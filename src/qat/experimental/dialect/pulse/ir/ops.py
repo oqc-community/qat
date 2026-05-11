@@ -61,7 +61,7 @@ from .attributes import (
     TimeAttr,
 )
 from .interfaces import IsAnalyticalWaveformInterface
-from .traits import AdvancesTimeTrait
+from .traits import AdvancesTimeTrait, PulseTypesCanonicalizationPatternsTrait
 from .types import (
     PULSE_VAR_TYPE,
     AmplitudeType,
@@ -219,7 +219,7 @@ class AddOp(InternalBinaryOp[PULSE_VAR_TYPE], Generic[PULSE_VAR_TYPE]):
     """
 
     name = "pulse.add"
-    traits = traits_def(Pure(), Commutative())
+    traits = traits_def(Pure(), Commutative(), PulseTypesCanonicalizationPatternsTrait())
 
     @staticmethod
     def py_operation(lhs, rhs):
@@ -250,7 +250,7 @@ class SubOp(InternalBinaryOp[PULSE_VAR_TYPE], Generic[PULSE_VAR_TYPE]):
     """
 
     name = "pulse.sub"
-    traits = traits_def(Pure())
+    traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
 
     @staticmethod
     def py_operation(lhs, rhs):
@@ -284,7 +284,7 @@ class ModulateOp(InternalBinaryOp[WaveformType]):
     """
 
     name = "pulse.modulate"
-    traits = traits_def(Pure())
+    traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
 
     lhs = operand_def(WaveformType)
     rhs = operand_def(WaveformType)
@@ -336,7 +336,7 @@ class ScaleOp(BinaryOp, Generic[PULSE_VAR_TYPE]):
     """
 
     name = "pulse.scale"
-    traits = traits_def(Pure())
+    traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
 
     lhs = operand_def(AnyOf((IntegerType, AnyFloat, ComplexType)))
     rhs = operand_def(AnyOf(_PULSE_OP_TYPES))
@@ -401,7 +401,7 @@ class ModuloOp(InternalBinaryOp[PhaseType]):
     """
 
     name = "pulse.modulo"
-    traits = traits_def(Pure())
+    traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
 
     lhs = operand_def(PhaseType)
     rhs = operand_def(PhaseType)

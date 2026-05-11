@@ -63,7 +63,7 @@ from .ops import (
     SynchronizeOp,
     WaitOp,
 )
-from .traits import AdvancesTimeTrait
+from .traits import AdvancesTimeTrait, PulseTypesCanonicalizationPatternsTrait
 from .types import (
     AmplitudeType,
     FrameType,
@@ -112,6 +112,7 @@ _interfaces = [
 
 _traits = [
     AdvancesTimeTrait,
+    PulseTypesCanonicalizationPatternsTrait,
 ]
 
 _types = [

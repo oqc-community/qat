@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
-from xdsl.traits import OpTrait
+from xdsl.pattern_rewriter import RewritePattern
+from xdsl.traits import HasCanonicalizationPatternsTrait, OpTrait
 
 
 class AdvancesTimeTrait(OpTrait):
@@ -12,3 +13,14 @@ class AdvancesTimeTrait(OpTrait):
     """
 
     ...
+
+
+class PulseTypesCanonicalizationPatternsTrait(HasCanonicalizationPatternsTrait):
+    """Applied to arithmetic binary operations on types in the pulse dialect that resemble
+    floating point or complex numbers."""
+
+    @classmethod
+    def get_canonicalization_patterns(cls) -> tuple[RewritePattern, ...]:
+        from qat.experimental.dialect.pulse.transforms import FoldConstantConstantOp
+
+        return (FoldConstantConstantOp(),)
