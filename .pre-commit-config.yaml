@@ -54,7 +54,7 @@ repos:
           - mdformat-footnote    # Footnote support
   # Sync Jupyter notebooks and Python scripts, auto-format with Ruff
   - repo: https://github.com/mwouts/jupytext
-    rev: v1.19.1
+    rev: v1.19.2
     hooks:
       - id: jupytext  # Sync .ipynb and .py, run Ruff check/format on notebooks
         args: [--sync, --pre-commit-mode, --pipe, "ruff check --fix {}", --pipe, "ruff format {}"]
