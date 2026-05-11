@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post228.dev20260511133729 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post229.dev20260511202457 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -160,6 +160,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 </ul>
 </li>
@@ -1232,6 +1233,8 @@
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ModuleConfig.params.attenuation">(qat.backend.qblox.config.specification.ModuleConfig parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.attr_constructor">attr_constructor (qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter parameter)</a>
+</li>
       <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.VariableAccessor.attribute">attribute (VariableAccessor attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.attributes">attributes (AcquireOp attribute)</a>
@@ -3774,6 +3777,8 @@
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ModuleConfig.params.exp3">(qat.backend.qblox.config.specification.ModuleConfig parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.exponent_map">exponent_map (qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter parameter)</a>
+</li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ExpOvershoot0Config">ExpOvershoot0Config (class in qat.backend.qblox.config.specification)</a>
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ExpOvershoot1Config">ExpOvershoot1Config (class in qat.backend.qblox.config.specification)</a>
@@ -3931,7 +3936,21 @@
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.FluidBuilderWrapper">FluidBuilderWrapper (class in qat.purr.compiler.builders)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.ConstantOp.fold">fold() (ConstantOp method)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ConstantOp.fold">[1]</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter.fold">(PulseConstantFoldAdapter method)</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.fold">(ScalarConstantFoldAdapter method)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.WaveformConstantFoldAdapter.fold">(WaveformConstantFoldAdapter method)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.html#qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp">FoldConstantConstantOp (class in qat.experimental.dialect.pulse.transforms)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp">(class in qat.experimental.dialect.pulse.transforms.constants)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.folder_name">folder_name (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.OpenPulseFeatures.for_hardware">for_hardware() (OpenPulseFeatures method)</a>
@@ -4002,14 +4021,14 @@
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SynchronizeOp.frames">(SynchronizeOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SynchronizeOp.frames">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.FrameType">FrameType (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.FrameType">(class in qat.experimental.dialect.pulse.ir.types)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.NcoConfig.freq">freq (NcoConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.freq">[1]</a>
 
       <ul>
@@ -4372,6 +4391,8 @@
         <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_calibration">(QuantumHardwareModel method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseTypesCanonicalizationPatternsTrait.get_canonicalization_patterns">get_canonicalization_patterns() (PulseTypesCanonicalizationPatternsTrait class method)</a>, <a href="qat.experimental.dialect.pulse.ir.traits.html#qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait.get_canonicalization_patterns">[1]</a>
+</li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.get_child_builder">get_child_builder() (InstructionBuilder method)</a>
 
       <ul>
@@ -6268,6 +6289,8 @@
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.marker_ovr_value">(SequencerConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.marker_ovr_value">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp.match_and_rewrite">match_and_rewrite() (FoldConstantConstantOp method)</a>, <a href="qat.experimental.dialect.pulse.transforms.html#qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp.match_and_rewrite">[1]</a>
+</li>
       <li><a href="qat.core.config.session.html#qat.core.config.session.QatSessionConfig.matching_engines">matching_engines() (QatSessionConfig class method)</a>
 </li>
       <li><a href="qat.core.config.session.html#qat.core.config.session.QatSessionConfig.matching_hardware_loaders">matching_hardware_loaders() (QatSessionConfig class method)</a>
@@ -7823,6 +7846,10 @@
         <li><a href="qat.experimental.dialect.pulse.ir.traits.html#module-qat.experimental.dialect.pulse.ir.traits">qat.experimental.dialect.pulse.ir.traits</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.types.html#module-qat.experimental.dialect.pulse.ir.types">qat.experimental.dialect.pulse.ir.types</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.html#module-qat.experimental.dialect.pulse.transforms">qat.experimental.dialect.pulse.transforms</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#module-qat.experimental.dialect.pulse.transforms.constants">qat.experimental.dialect.pulse.transforms.constants</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.units.html#module-qat.experimental.dialect.pulse.units">qat.experimental.dialect.pulse.units</a>
 </li>
@@ -10191,6 +10218,8 @@
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannelView">PulseChannelView (class in qat.purr.compiler.devices)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter">PulseConstantFoldAdapter (class in qat.experimental.dialect.pulse.transforms.constants)</a>
+</li>
       <li><a href="qat.middleend.decompositions.pulses.html#qat.middleend.decompositions.pulses.PulseDecompositionBase">PulseDecompositionBase (class in qat.middleend.decompositions.pulses)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseNumericTypedAttr">PulseNumericTypedAttr (class in qat.experimental.dialect.pulse.ir)</a>
@@ -10207,6 +10236,12 @@
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType">PulseShapeType (class in qat.purr.compiler.devices)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseTypesCanonicalizationPatternsTrait">PulseTypesCanonicalizationPatternsTrait (class in qat.experimental.dialect.pulse.ir)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.ir.traits.html#qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait">(class in qat.experimental.dialect.pulse.ir.traits)</a>
+</li>
+      </ul></li>
       <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.PurrConverter">PurrConverter (class in qat.frontend.converters.purr)</a>
 </li>
       <li><a href="qat.frontend.purr.html#qat.frontend.purr.PurrFrontend">PurrFrontend (class in qat.frontend.purr)</a>
@@ -10889,6 +10924,20 @@
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.ir.types.html#module-qat.experimental.dialect.pulse.ir.types">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.pulse.transforms
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.html#module-qat.experimental.dialect.pulse.transforms">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.pulse.transforms.constants
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#module-qat.experimental.dialect.pulse.transforms.constants">module</a>
 </li>
       </ul></li>
       <li>
@@ -11759,6 +11808,8 @@
         <li><a href="qat.pipelines.purr.qblox.compile.html#module-qat.pipelines.purr.qblox.compile">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.purr.qblox.execute
 
@@ -11766,8 +11817,6 @@
         <li><a href="qat.pipelines.purr.qblox.execute.html#module-qat.pipelines.purr.qblox.execute">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.purr.qblox.full
 
@@ -14259,6 +14308,8 @@
       </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.save_object_to_log_folder">save_object_to_log_folder() (in module qat.purr.utils.logger)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter">ScalarConstantFoldAdapter (class in qat.experimental.dialect.pulse.transforms.constants)</a>
+</li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Scale">Scale (class in qat.purr.integrations.features)</a>
 
       <ul>
@@ -16285,6 +16336,8 @@
         <li><a href="qat.pipelines.waveform.compile.html#qat.pipelines.waveform.compile.WaveformCompilePipeline">(class in qat.pipelines.waveform.compile)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.WaveformConstantFoldAdapter">WaveformConstantFoldAdapter (class in qat.experimental.dialect.pulse.transforms.constants)</a>
+</li>
       <li><a href="qat.backend.waveform.codegen.html#qat.backend.waveform.codegen.WaveformContext">WaveformContext (class in qat.backend.waveform.codegen)</a>
 
       <ul>
@@ -16307,14 +16360,14 @@
         <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Sequence.waveforms">(Sequence attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.waveforms">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.WaveformType">WaveformType (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType">(class in qat.experimental.dialect.pulse.ir.types)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.waveform_v1.purr.codegen.html#qat.backend.waveform_v1.purr.codegen.WaveformV1Backend">WaveformV1Backend (class in qat.backend.waveform_v1.purr.codegen)</a>
 </li>
       <li><a href="qat.pipelines.purr.waveform_v1.html#qat.pipelines.purr.waveform_v1.WaveformV1CompilePipeline">WaveformV1CompilePipeline (class in qat.pipelines.purr.waveform_v1)</a>

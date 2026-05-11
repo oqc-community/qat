@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse package &mdash; qat-compiler 3.0.0.post228.dev20260511133729 documentation</title>
+  <title>qat.experimental.dialect.pulse package &mdash; qat-compiler 3.0.0.post229.dev20260511202457 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -163,6 +163,7 @@
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul class="current">
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.experimental.dialect.pulse package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 </ul>
 </li>
@@ -817,6 +818,10 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.waveform"><code class="docutils literal notranslate"><span class="pre">PulseOp.waveform</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseTypesCanonicalizationPatternsTrait"><code class="docutils literal notranslate"><span class="pre">PulseTypesCanonicalizationPatternsTrait</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseTypesCanonicalizationPatternsTrait.get_canonicalization_patterns"><code class="docutils literal notranslate"><span class="pre">PulseTypesCanonicalizationPatternsTrait.get_canonicalization_patterns()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp.get_irdl_definition()</span></code></a></li>
@@ -1074,6 +1079,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.traits.html">qat.experimental.dialect.pulse.ir.traits module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.traits.html#qat.experimental.dialect.pulse.ir.traits.AdvancesTimeTrait"><code class="docutils literal notranslate"><span class="pre">AdvancesTimeTrait</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.traits.html#qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait"><code class="docutils literal notranslate"><span class="pre">PulseTypesCanonicalizationPatternsTrait</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html">qat.experimental.dialect.pulse.ir.types module</a><ul>
@@ -1083,6 +1089,23 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.PhaseType"><code class="docutils literal notranslate"><span class="pre">PhaseType</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.TimeType"><code class="docutils literal notranslate"><span class="pre">TimeType</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType"><code class="docutils literal notranslate"><span class="pre">WaveformType</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html#qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp"><code class="docutils literal notranslate"><span class="pre">FoldConstantConstantOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html#qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">FoldConstantConstantOp.match_and_rewrite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html">qat.experimental.dialect.pulse.transforms.constants module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp"><code class="docutils literal notranslate"><span class="pre">FoldConstantConstantOp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter"><code class="docutils literal notranslate"><span class="pre">PulseConstantFoldAdapter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter"><code class="docutils literal notranslate"><span class="pre">ScalarConstantFoldAdapter</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.WaveformConstantFoldAdapter"><code class="docutils literal notranslate"><span class="pre">WaveformConstantFoldAdapter</span></code></a></li>
 </ul>
 </li>
 </ul>

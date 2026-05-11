@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.traits module &mdash; qat-compiler 3.0.0.post228.dev20260511133729 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.traits module &mdash; qat-compiler 3.0.0.post229.dev20260511202457 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -163,6 +163,7 @@
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul class="current">
 <li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul class="current">
 <li class="toctree-l6 current"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 </ul>
 </li>
@@ -546,6 +547,24 @@
 <p>A trait that signifies an operation advances time on the frame(s) it acts on.</p>
 <p>The time does not need to be known at compile time, and in that sense, can be runtime
 dynamic.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseTypesCanonicalizationPatternsTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasCanonicalizationPatternsTrait</span></code></p>
+<p>Applied to arithmetic binary operations on types in the pulse dialect that resemble
+floating point or complex numbers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait.get_canonicalization_patterns">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_canonicalization_patterns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.PulseTypesCanonicalizationPatternsTrait.get_canonicalization_patterns" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
