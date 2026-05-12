@@ -5,12 +5,17 @@
 import math
 from math import isclose, pi
 
+import numpy as np
 import pytest
+from pydantic import BaseModel, ValidationError
 
+from qat.ir.waveforms import GaussianWaveform, SampledWaveform
 from qat.runtime.expressions import (
     BinaryExpression,
     BinaryOp,
     Literal,
+    ParameterisedWaveform,
+    RuntimeExpression,
     UnaryExpression,
     UnaryOp,
     Variable,
@@ -437,3 +442,190 @@ class TestComposedExpressions:
         # sin²θ + cos²θ == 1  for any θ
         for angle in [0.0, 0.5, 1.0, pi]:
             assert isclose(expr2.evaluate({"theta": angle}), 1.0, abs_tol=1e-9)
+
+
+class TestRuntimeExpression:
+    """Tests that Runtime expressions can be created with each of the different variable
+    types.
+
+    Evaluates that subtyping within a Pydantic basemodel implements the correct validation.
+    Tests serialization as that is a fundamental part of how this is used.
+    """
+
+    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    def test_runtime_expression_with_different_types(self, expected_type):
+        """Checks instantiation of RuntimeExpression with different variable types."""
+
+        expr = RuntimeExpression(
+            evaluated_type=expected_type,
+            expression=Variable(name="test", var_type=expected_type),
+        )
+        assert expr.evaluated_type == expected_type
+
+    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    def test_subtyped_runtime_expression(self, expected_type):
+        """Tests subtyping of RuntimeExpression within a Pydantic BaseModel, ensuring that
+        the correct type validation is enforced."""
+
+        class TestModel(BaseModel):
+            value: RuntimeExpression[expected_type]
+
+        test_value = RuntimeExpression(
+            evaluated_type=expected_type,
+            expression=Variable(name="test", var_type=expected_type),
+        )
+        model_instance = TestModel(value=test_value)
+        assert model_instance.value.evaluated_type == expected_type
+
+        with pytest.raises(ValidationError, match="Expected type"):
+            type_ = next(t for t in VariableType if t != expected_type)
+            TestModel(
+                value=RuntimeExpression(
+                    evaluated_type=type_,
+                    expression=Variable(name="test", var_type=type_),
+                )
+            )
+
+    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    def test_serialization_roundtrip(self, expected_type):
+        """Tests that a RuntimeExpression with a specific evaluated type can be serialized
+        to a dict and deserialized back, preserving the structure and types."""
+
+        expr = RuntimeExpression(
+            evaluated_type=expected_type,
+            expression=Variable(name="test", var_type=expected_type),
+        )
+        data = expr.model_dump()
+        loaded_expr = RuntimeExpression(**data)
+        assert loaded_expr == expr
+
+    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    def test_json_serialization_roundtrip(self, expected_type):
+        """Tests that a RuntimeExpression with a specific evaluated type can be serialized
+        to JSON and deserialized back, preserving the structure and types."""
+
+        expr = RuntimeExpression(
+            evaluated_type=expected_type,
+            expression=Variable(name="test", var_type=expected_type),
+        )
+        json_str = expr.model_dump_json()
+        loaded_expr = RuntimeExpression.model_validate_json(json_str)
+        assert loaded_expr == expr
+
+    def test_invalid_subtyping(self):
+        """Tests that subtyping of RuntimeExpression enforces that the subscripted type is a
+        VariableType, and that using an invalid type raises a TypeError."""
+
+        with pytest.raises(
+            TypeError, match="RuntimeExpression must be subscripted with a VariableType."
+        ):
+            RuntimeExpression["AMPLITUDE"]
+
+
+class TestParameterisedWaveform:
+    """Tests for ParameterisedWaveform, which includes RuntimeExpressions as parameters.
+
+    Tests validation on instantiation, evaluation of parameters, and serialization. This is
+    a key part of how parameterised waveforms are represented in the runtime, so ensuring
+    that this works correctly is crucial.
+    """
+
+    def test_serialization_roundtrip(self):
+        """Tests that a ParameterisedWaveform with RuntimeExpressions can be serialized to a
+        dict and deserialized back, preserving the structure and types."""
+
+        waveform = ParameterisedWaveform(
+            waveform_type=GaussianWaveform,
+            sample_time=5e-9,
+            amplitude=RuntimeExpression(
+                evaluated_type=VariableType.AMPLITUDE,
+                expression=Variable(name="amp", var_type=VariableType.AMPLITUDE),
+            ),
+            width=RuntimeExpression(
+                evaluated_type=VariableType.TIME,
+                expression=BinaryExpression(
+                    operator=BinaryOp.ADD,
+                    left=Variable(name="width", var_type=VariableType.TIME),
+                    right=Literal(value=80e-9),
+                ),
+            ),
+            parameters={"rise": 1 / 3},
+        )
+
+        dump = waveform.model_dump()
+        loaded_waveform = ParameterisedWaveform(**dump)
+        assert loaded_waveform == waveform
+
+    def test_json_serialization_roundtrip(self):
+        """Tests that a ParameterisedWaveform with RuntimeExpressions can be serialized to
+        JSON and deserialized back, preserving the structure and types."""
+
+        waveform = ParameterisedWaveform(
+            waveform_type=GaussianWaveform,
+            sample_time=5e-9,
+            amplitude=RuntimeExpression(
+                evaluated_type=VariableType.AMPLITUDE,
+                expression=Variable(name="amp", var_type=VariableType.AMPLITUDE),
+            ),
+            width=RuntimeExpression(
+                evaluated_type=VariableType.TIME,
+                expression=BinaryExpression(
+                    operator=BinaryOp.ADD,
+                    left=Variable(name="width", var_type=VariableType.TIME),
+                    right=Literal(value=80e-9),
+                ),
+            ),
+            parameters={"rise": 1 / 3},
+        )
+        json_str = waveform.model_dump_json()
+        loaded_waveform = ParameterisedWaveform.model_validate_json(json_str)
+        assert loaded_waveform == waveform
+
+    def test_invalid_waveform_type(self):
+        """Tests that instantiating a ParameterisedWaveform with an invalid waveform type
+        raises a ValidationError."""
+        with pytest.raises(ValidationError, match="Unknown waveform_type"):
+            data = {
+                "waveform_type": "triangle",
+                "sample_time": 5e-9,
+                "amplitude": 0.5,
+                "width": 100e-9,
+                "parameters": {},
+            }
+            ParameterisedWaveform(**data)
+
+    def test_evaluate_parameters(self):
+        """Tests that the parameters of a ParameterisedWaveform can be evaluated
+        correctly."""
+
+        sample_time = 5e-9
+        offset_time = 80e-9
+        waveform = ParameterisedWaveform(
+            waveform_type=GaussianWaveform,
+            sample_time=sample_time,
+            amplitude=RuntimeExpression(
+                evaluated_type=VariableType.AMPLITUDE,
+                expression=Variable(name="amp", var_type=VariableType.AMPLITUDE),
+            ),
+            width=RuntimeExpression(
+                evaluated_type=VariableType.TIME,
+                expression=BinaryExpression(
+                    operator=BinaryOp.ADD,
+                    left=Variable(name="width", var_type=VariableType.TIME),
+                    right=Literal(value=offset_time),
+                ),
+            ),
+            parameters={"rise": 1 / 3},
+        )
+
+        params = {"amp": 0.5, "width": 160e-9}
+        sampled_waveform = waveform.evaluate(params)
+        assert isinstance(sampled_waveform, SampledWaveform)
+        assert sampled_waveform.sample_time == sample_time
+        assert len(sampled_waveform.samples) == int(
+            (params["width"] + offset_time) / sample_time
+        )
+        # Doesn't catch the center so it's slightly lower
+        max_amp = np.max(sampled_waveform.samples)
+        assert max_amp <= params["amp"]
+        assert np.isclose(max_amp, params["amp"], rtol=1e-2)

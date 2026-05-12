@@ -1,14 +1,21 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
+"""Utility file for Pydantic related classes and functions.
+
+Contains base classes for Pydantic models with builtin constraints, as well as utility
+functions and classes for efficient (de)serialization of numpy arrays and validation of
+custom types.
+"""
+
 from __future__ import annotations
 
 import numbers
 import re
 from collections.abc import Iterable
 from copy import deepcopy
-from functools import cached_property
+from functools import cache, cached_property
 from pydoc import locate
-from typing import Annotated, Any, TypeVar, Union, get_args, get_origin
+from typing import Annotated, Any, TypeAlias, TypeVar, Union, get_args, get_origin
 
 import numpy as np
 from frozendict import frozendict
@@ -80,6 +87,9 @@ class AllowExtraFieldsModel(BaseModel):
 
 
 class RehydratableModel(BaseModel):
+    """A base model with utility to serialize and deserialize objects with type
+    information."""
+
     @computed_field
     @cached_property
     def object_type(self) -> str:
@@ -92,12 +102,14 @@ class RehydratableModel(BaseModel):
         cls_type = cls if type_str is None else locate(type_str)
         if cls_type is None:
             raise ValueError(
-                f"Could not locate class for type string '{type_str}'. Ensure it is a valid class path."
+                f"Could not locate class for type string '{type_str}'. Ensure it is a "
+                "valid class path."
             )
         # Create an instance of the located class with the provided data.
         if not issubclass(cls_type, cls):
             raise TypeError(
-                f"Located class '{cls_type.__name__}' is not a subclass of '{cls.__name__}'."
+                f"Located class '{cls_type.__name__}' is not a subclass of "
+                f"'{cls.__name__}'."
             )
         return cls_type(**data)
 
@@ -105,7 +117,13 @@ class RehydratableModel(BaseModel):
 # This base file is used to implement classes/methods common to all hardware.
 
 
-def validate_non_negative(value: int):
+def validate_non_negative(value: int) -> int:
+    """Validator function to check if a value is a non-negative integer.
+
+    :param value: The value to validate.
+    :return: The validated value if it is a non-negative integer.
+    :raises ValueError: If the value is not a non-negative integer.
+    """
     if not isinstance(value, int) or value < 0:
         raise ValueError(f"Given value {value} must be an int and >=0.")
     return value
@@ -117,7 +135,15 @@ NonNegativeInt = Annotated[
 ]
 
 
-def validate_calibratable_positive_float(value: CalibratablePositiveFloat):
+def validate_calibratable_positive_float(
+    value: CalibratablePositiveFloat,
+) -> CalibratablePositiveFloat:
+    """Validator function to check if a value is a non-negative float.
+
+    :param value: The value to validate.
+    :return: The validated value if it is a non-negative float.
+    :raises ValueError: If the value is not a non-negative float.
+    """
     if not np.isnan(value) and value < 0.0:
         raise ValueError(f"Given value {value} must be >=0.")
     return value
@@ -129,7 +155,15 @@ CalibratablePositiveFloat = Annotated[
 ]
 
 
-def validate_calibratable_unit_interval(value: CalibratableUnitInterval):
+def validate_calibratable_unit_interval(
+    value: CalibratableUnitInterval,
+) -> CalibratableUnitInterval:
+    """Validator function to check if a value is a float in the unit interval [0, 1].
+
+    :param value: The value to validate.
+    :return: The validated value if it is a float in the unit interval [0, 1].
+    :raises ValueError: If the value is not a float in the unit interval [0, 1].
+    """
     if not np.isnan(value) and (value < 0.0 or value > 1.0):
         raise ValueError(f"Given value {value} must be in the interval [0, 1].")
     return value
@@ -142,13 +176,28 @@ CalibratableUnitInterval = Annotated[
 ]
 
 
-def validate_calibratable_unit_interval_array(array: CalibratableUnitInterval2x2Array):
+def validate_calibratable_unit_interval_array(
+    array: CalibratableUnitInterval2x2Array,
+) -> CalibratableUnitInterval2x2Array:
+    """Validator function to check if a 2x2 array has all elements in the unit interval [0,
+    1].
+
+    :param array: The array to validate.
+    :return: The validated array if all elements are in the unit interval [0, 1].
+    :raises ValueError: If any element in the array is not in the unit interval [0, 1].
+    """
     if np.any(array > 1) or np.any(array < 0):
         raise ValueError("Given array elements must be in the interval [0, 1].")
     return array
 
 
-def validate_qubit_coupling(value: QubitCoupling):
+def validate_qubit_coupling(value: QubitCoupling) -> QubitCoupling:
+    """Validator function to check if a value is a valid qubit coupling.
+
+    :param value: The value to validate.
+    :return: The validated value if it is a valid qubit coupling.
+    :raises TypeError: If the value is not a valid qubit coupling.
+    """
     if isinstance(value, str):
         return tuple(map(int, re.findall(r"\d+", value)))
     elif isinstance(value, tuple):
@@ -214,6 +263,8 @@ class PydValidatedBase(RootModel):
 
 
 class PydListBase(RootModel[list[V]]):
+    """Base class for Pydantic list containers."""
+
     root: list[V] = Field(default_factory=list)
 
     def __iter__(self):
@@ -267,7 +318,14 @@ class ValidatedList(PydListBase, PydValidatedBase):
         del self.root[index]
 
 
-def _validate_set(value: float | int | str | Iterable | None):
+def _validate_set(value: float | int | str | Iterable | None) -> set:
+    """Validator function to check if a value is a valid set, and packs it into a set if it
+    is not already a set.
+
+    :param value: The value to validate.
+    :return: The validated set if the value is valid.
+    :raises TypeError: If the value is not a valid set.
+    """
     if isinstance(value, float | int | str):
         value = {value}
     elif isinstance(value, list | ValidatedList | tuple):
@@ -276,6 +334,8 @@ def _validate_set(value: float | int | str | Iterable | None):
 
 
 class PydSetBase(RootModel[set[V]]):
+    """Base class for Pydantic set containers."""
+
     root: set[V] = Field(default_factory=set)
 
     def __iter__(self):
@@ -363,6 +423,8 @@ class ValidatedSet(PydSetBase, PydValidatedBase):
 
 
 class PydDictBase(RootModel[dict[K, V]]):
+    """Base class for Pydantic dict containers."""
+
     root: dict[K, V] = Field(default_factory=dict)
 
     def get(self, key, default=None):
@@ -475,7 +537,8 @@ class ValidatedDict(PydDictBase, PydValidatedBase):
     def validate_key(self, key: K):
         if not isinstance(key, self._key_types):
             raise TypeError(
-                f"Cannot add key {key} of type '{type(key)}' to container of type {self._key_type}."
+                f"Cannot add key {key} of type '{type(key)}' to container of type "
+                f"{self._key_type}."
             )
         for validator in self._key_validators:
             key = validator(key)
@@ -615,9 +678,13 @@ def _validator(payload, ty: type):
     return value.reshape(shape)
 
 
-def annotate_pyd_array(ty: type):
+def annotate_pyd_array(ty: type) -> TypeAlias:
     """Creates an annotated type for numeric lists with Pydantic serializers and validators
-    for efficient serialization."""
+    for efficient serialization.
+
+    :param ty: The required type of the elements in the array (e.g. np.float64).
+    :return: An annotated type that can be used in Pydantic models.
+    """
     return Annotated[
         PydArray,  # TODO - Encode custom data type COMPILER-769
         PlainValidator(lambda x: _validator(x, ty)),
@@ -627,22 +694,24 @@ def annotate_pyd_array(ty: type):
 
 class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
     """
-    A data class wrapper to handle the information needed to completely describe a numpy array:
+    A data class wrapper to handle the information needed to completely describe a numpy
+    array:
         + Value is the numpy array itself
         + Shape is the shape of the numpy array
         + dtype is the data (implied) type of the numpy array
 
-    Through annotations, this allows creation of metadata classes on top of PydArray that describe
-    how to (de)serialise a (blob) PydArray object according to some (required) type. See _validator()
-    and _serializer().
+    Through annotations, this allows creation of metadata classes on top of PydArray that
+    describes how to (de)serialise a (blob) PydArray object according to some (required)
+    type. See _validator() and _serializer().
 
-    Enlisting the array data as (nested) list(s) is not optimal, and this class renders (de)serialisation
-    fast.
+    Enlisting the array data as (nested) list(s) is not optimal, and this class renders
+    (de)serialisation fast.
 
-    This class also mixes in NDArrayOperatorsMixin, which defines Python arithmetic operators in terms of
-    NumPy ufuncs. This does NOT guarantee full interoperability with NumPy but allows the option to extend
-    this support in the future. For now, the sole purpose of this class is ONLY to be a data class wrapper
-    and mediator for (de)serialisation purposes.
+    This class also mixes in NDArrayOperatorsMixin, which defines Python arithmetic
+    operators in terms of NumPy ufuncs. This does NOT guarantee full interoperability with
+    NumPy but allows the option to extend this support in the future. For now, the sole
+    purpose of this class is ONLY to be a data class wrapper and mediator for
+    (de)serialisation purposes.
     """
 
     value: NDArray[Shape["*, ..."], int | float | complex | bool]  # noqa: F722
@@ -652,7 +721,8 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
         if args:
             if len(args) != 1:
                 raise TypeError(
-                    f"{type(self).__name__} accepts at most 1 positional argument ('value'), got {len(args)}."
+                    f"{type(self).__name__} accepts at most 1 positional argument "
+                    f"('value'), got {len(args)}."
                 )
 
             if "value" in kwargs:
@@ -775,6 +845,7 @@ class PydArray(NoExtraFieldsModel, np.lib.mixins.NDArrayOperatorsMixin):
 
 
 IntNDArray = annotate_pyd_array(int)
+Int16NDArray = annotate_pyd_array(np.int16)
 FloatNDArray = annotate_pyd_array(float)
 ComplexNDArray = annotate_pyd_array(complex)
 
@@ -783,3 +854,24 @@ CalibratableUnitInterval2x2Array = Annotated[
     AfterValidator(validate_calibratable_unit_interval_array),
     PlainSerializer(lambda x: _serializer(x, float)),
 ]
+
+
+class uint:
+    """Helper class for defining annotated unsigned integer fields with a given bit width.
+
+    Used as :code:`uint[n]` to represent an unsigned integer field with n bits, which is
+    validated to be between 0 and 2^n - 1 inclusive. When used in a Pydantic model as type
+    hint, this will provide validation on the value.
+    """
+
+    def __init__(self, n: int):
+        raise TypeError(
+            "uint cannot be instantiated. Use uint[n] to define an annotated type."
+        )
+
+    @classmethod
+    @cache
+    def __class_getitem__(cls, n: int) -> TypeAlias:
+        if not isinstance(n, int) or n <= 0:
+            raise ValueError(f"Bit width n must be a positive integer, got {n}.")
+        return Annotated[int, Field(strict=True, ge=0, le=(2**n) - 1)]

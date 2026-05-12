@@ -6,15 +6,37 @@ Provides a Pydantic-serializable representation of typed variables and expressio
 (unary/binary) over those variables and literals. Intended for use in variational quantum
 circuits, software-iterated sweeps, and general runtime argument injection via virtual
 registers.
+
+This module adds support for different quantum variable types, such as Phase and Frequency,
+which are important for correctly interpreting their meaning in quantum programs, in
+addition to standard numeric types. It also supports a variety of unary and binary
+operators over variables (and literals), allowing for the construction of complex
+expressions that can be evaluated at runtime. The top-level node for these expressions used
+in compiled parameterised programs is :class:`RuntimeExpression`, which wraps an expression
+tree and includes the necessary context for evaluation. Similarly, the
+:class:`ParameterisedWaveform` class allows us to represent waveforms that are parameterised
+by these expressions, which can be used to represent parameterised analytical pulse shapes
+in compiled programs.
 """
 
 from __future__ import annotations
 
 import math
 from enum import Enum
-from typing import Any
+from functools import cache
+from typing import Annotated, Any, TypeAlias
 
-from pydantic import BaseModel, field_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    Field,
+    PositiveFloat,
+    field_serializer,
+    field_validator,
+)
+
+from qat.ir.waveforms import SampledWaveform, Waveform, sample_waveform
+from qat.utils.pydantic import NoExtraFieldsFrozenModel, find_all_subclasses
 
 
 class VariableType(str, Enum):
@@ -471,6 +493,145 @@ def sqrt(operand: ExpressionLike) -> UnaryExpression:
     return UnaryExpression(operator=UnaryOp.SQRT, operand=_wrap(operand))
 
 
+class RuntimeExpression(NoExtraFieldsFrozenModel):
+    """Represents an expression that can be evaluated at runtime.
+
+    It is expected to return a value of a given type when evaluated.
+
+    The :class:`RuntimeExpression` is generically typed to allow it be used for
+    expressions that return different types, e.g.
+    :code:`RuntimeExpression[VariableType.TIME]` returns this class with an annotation to
+    validate the evaluated type. This can be used in other Pydantic models to enforce
+    expressions of the correct type.
+
+    It allows us to represent an expression tree that is unknown at compile time, but can
+    be evaluated at runtime given a set of variable bindings. This is used to allow
+    parameterised runtime arguments in programs for backends that lack runtime argument
+    support. :class:`RuntimeExpression` will be used within the representation of compiled
+    programs to represent these unknown values.
+
+    For example, there might be a runtime expression to represent a variable number of shots
+    in a program, which would only contain a variable node. Similarly, if the frequency of
+    a program is being varied, we can compile a program with the frequency provided at
+    runtime, representing that as a :class:`RuntimeExpression` containing a variable node
+    for the frequency variable.
+
+    A more sophisticated example would be using runtime expressions within variational
+    quantum circuits, where parameters of gates become phases within phase shift
+    operations. After optimizations and compressions, those phase shifts would be
+    represented as expressions over those parameters (in the most simple case, sums of
+    parameters). This allows us to represent the parameterised program in a way that can be
+    compiled and optimized without knowing the parameter values, but still allows us to
+    evaluate the final program with specific parameter values at runtime.
+
+    :ivar evaluated_type: The type that this expression is expected to evaluate to. This is
+        used for bitcasting the result to the correct type when assembling the program.
+    :ivar expression: The expression or variable to be evaluated given the runtime
+        variables.
+    """
+
+    evaluated_type: VariableType
+    expression: Node
+
+    def evaluate(self, params: dict[str, Any] | None = None) -> Any:
+        """Evaluate the expression, resolving free variables from params.
+
+        Does not handle details of the evaluated_type, such as bitcasting and legalisation.
+        This is to be done by the consumer.
+
+        :param params: Dictionary of variable values to use for evaluation, optional.
+        :return: The result of evaluating the expression with the given params.
+        """
+        return self.expression.evaluate(params or {})
+
+    @classmethod
+    @cache
+    def __class_getitem__(cls, expression_type: VariableType) -> TypeAlias:
+        if not isinstance(expression_type, VariableType):
+            raise TypeError("RuntimeExpression must be subscripted with a VariableType.")
+
+        def _check(v: RuntimeExpression) -> RuntimeExpression:
+            if v.evaluated_type != expression_type:
+                raise ValueError(
+                    f"Expected type {expression_type}, got {v.evaluated_type}."
+                )
+            return v
+
+        return Annotated[cls, AfterValidator(_check)]
+
+
+_WAVEFORM_BY_NAME: dict[str, type[Waveform]] = {
+    cls.__name__: cls for cls in find_all_subclasses(Waveform)
+}
+
+
+class ParameterisedWaveform(NoExtraFieldsFrozenModel):
+    """Represents an analytical waveform that is parameterised by a set of parameters,
+    including runtime expressions.
+
+    :ivar waveform_type: The type of the waveform, which determines the functional form of
+        the waveform.
+    :ivar sample_time: The sample time of the waveform in seconds, which determines the time
+        resolution of the waveform.
+    :ivar amplitude: The amplitude of the waveform, which can be given as a complex number
+        or a runtime expression with evaluated type :class:`VariableType.AMPLITUDE`.
+    :ivar width: The width of the waveform, which can be given as a float or a runtime
+        expression that evaluates to a float.
+    :ivar parameters: A dictionary of additional parameters for the waveform, which can be
+        boolean, float, complex, or runtime expressions.
+    """
+
+    waveform_type: type[Waveform]
+    sample_time: PositiveFloat
+    amplitude: complex | RuntimeExpression[VariableType.AMPLITUDE]
+    width: PositiveFloat | RuntimeExpression[VariableType.TIME]
+    parameters: dict[str, bool | float | complex | RuntimeExpression] = Field(
+        default_factory=dict
+    )
+
+    def evaluate(self, params: dict[str, Any] | None = None) -> SampledWaveform:
+        """Evaluate the parameterised waveform, resolving any runtime expressions from
+        params.
+
+        Returns a sampled representation of the waveform.
+
+        :param params: Dictionary of variable values to use for evaluation, optional.
+        :return: A SampledWaveform instance representing the evaluated waveform.
+        """
+        evaluated_amplitude = (
+            self.amplitude.evaluate(params)
+            if isinstance(self.amplitude, RuntimeExpression)
+            else self.amplitude
+        )
+        evaluated_width = (
+            self.width.evaluate(params)
+            if isinstance(self.width, RuntimeExpression)
+            else self.width
+        )
+        evaluated_parameters = {
+            k: v.evaluate(params) if isinstance(v, RuntimeExpression) else v
+            for k, v in self.parameters.items()
+        }
+
+        analytical_waveform = self.waveform_type(
+            amp=evaluated_amplitude, width=evaluated_width, **evaluated_parameters
+        )
+        return sample_waveform(analytical_waveform, self.sample_time)
+
+    @field_serializer("waveform_type", when_used="json")
+    def _serialize_waveform_type(self, value: type[Waveform]) -> str:
+        return value.__name__
+
+    @field_validator("waveform_type", mode="before")
+    @classmethod
+    def _deserialize_waveform_type(cls, value):
+        if not isinstance(value, str):
+            return value
+        if not (waveform_cls := _WAVEFORM_BY_NAME.get(value)):
+            raise ValueError(f"Unknown waveform_type: {value}")
+        return waveform_cls
+
+
 __all__ = [
     # Types
     "VariableType",
@@ -481,6 +642,8 @@ __all__ = [
     "Literal",
     "UnaryExpression",
     "BinaryExpression",
+    "RuntimeExpression",
+    "ParameterisedWaveform",
     # Type alias
     "Node",
     "ExpressionLike",

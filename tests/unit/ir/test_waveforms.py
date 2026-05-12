@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import numpy as np
 import pytest
 
 from qat.ir.waveforms import (
     ExtraSoftSquareWaveform,
+    GaussianWaveform,
     Pulse,
     SampledWaveform,
     SofterSquareWaveform,
     SquareWaveform,
+    sample_waveform,
     waveform_classes,
 )
 
@@ -83,3 +85,23 @@ class TestSoftSquares:
         samples2 = waveform2.sample(times).samples
 
         assert not np.allclose(samples1, samples2)
+
+
+def test_sample_waveform():
+    """Test that sample_waveform produces a SampledWaveform with the expected samples."""
+    width = 800e-9
+    sample_time = 0.5e-9
+    waveform = GaussianWaveform(width=width, amp=0.254 + 0.454j, rise=1 / 3)
+    num_samples = int(np.ceil(width / sample_time))
+    sampled = sample_waveform(waveform, sample_time)
+    assert len(sampled.samples) == num_samples
+
+    # Check magnitude of amplitude
+    assert np.isclose(np.max(np.abs(sampled.samples)), np.abs(0.254 + 0.454j))
+
+    # Make sure sampled.samples is symmetric
+    assert np.allclose(sampled.samples, sampled.samples[::-1])
+
+    # Check it rises to the center by checking every element increases up to the midpoint
+    center_index = len(sampled.samples) // 2
+    assert np.all(np.diff(np.abs(sampled.samples[:center_index])) >= 0)

@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
+"""Implements IR transformation passes that happen in the middleend."""
+
 import itertools
 from collections import OrderedDict, defaultdict
 from copy import deepcopy
@@ -39,7 +41,13 @@ from qat.ir.instructions import (
     Variable,
 )
 from qat.ir.measure import Acquire, MeasureBlock
-from qat.ir.waveforms import Pulse, SampledWaveform, SquareWaveform, Waveform
+from qat.ir.waveforms import (
+    Pulse,
+    SampledWaveform,
+    SquareWaveform,
+    Waveform,
+    sample_waveform,
+)
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
@@ -1363,14 +1371,11 @@ class EvaluateWaveforms(TransformPass):
 
         samples = waveform_lookup[target].get(waveform, None)
         if samples is not None:
-            new_waveform = SampledWaveform(samples=samples)
+            new_waveform = SampledWaveform(
+                samples=samples, sample_time=self.sample_times[physical_channel]
+            )
         else:
-            # Evaluate the waveform at discrete times
-            sample_time = self.sample_times[physical_channel]
-            edge = waveform.duration / 2.0 - sample_time * 0.5
-            num_samples = int(np.ceil(waveform.duration / sample_time - 1e-10))
-            t = np.linspace(start=-edge, stop=edge, num=num_samples)
-            new_waveform = waveform.sample(t)
+            new_waveform = sample_waveform(waveform, self.sample_times[physical_channel])
             waveform_lookup[target][waveform] = new_waveform.samples
 
         if not np.isclose(scale, 1.0):

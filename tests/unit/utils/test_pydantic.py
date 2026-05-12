@@ -24,6 +24,7 @@ from qat.utils.pydantic import (
     QubitId,
     ValidatedDict,
     ValidatedSet,
+    uint,
 )
 
 
@@ -373,3 +374,24 @@ class TestPydArrayNumpyInteroperability:
 
         assert np.any(arr0 == random_value)
         assert np.any(arr1 == random_value)
+
+
+class TestUint:
+    """Tests functionality of the helper class for building validated unsigned integers of
+    bitwidth n."""
+
+    class MockContainer(BaseModel):
+        a: uint[3]
+
+    @pytest.mark.parametrize("val", [0, 7])
+    def test_valid_uint(self, val):
+        self.MockContainer(a=val)  # should not raise any errors
+
+    @pytest.mark.parametrize("val", [-1, 8])
+    def test_invalid_uint(self, val):
+        with pytest.raises(ValidationError, match="Input should be"):
+            self.MockContainer(a=val)
+
+    def test_instantiation(self):
+        with pytest.raises(TypeError, match="uint cannot be instantiated"):
+            uint(3)

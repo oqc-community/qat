@@ -1,9 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2026 Oxford Quantum Circuits Ltd
+"""Contains elementary IR units for waveforms, including waveform types and pulses."""
+
 from __future__ import annotations
 
 import numpy as np
-from pydantic import Field, model_validator
+from pydantic import Field, PositiveFloat, model_validator
 
 from qat.ir.instructions import QuantumInstruction
 from qat.utils.pydantic import (
@@ -264,3 +266,18 @@ class Pulse(QuantumInstruction):
     @property
     def pulse_channel(self):
         return self.target
+
+
+def sample_waveform(waveform: Waveform, sample_time: PositiveFloat) -> SampledWaveform:
+    """Utility function to sample a waveform at a given time per sample (sample rate).
+
+    :param waveform: The analytical waveform to sample.
+    :param sample_time: The time between samples, in seconds.
+    :return: A SampledWaveform containing the sampled values.
+    """
+
+    edge = (waveform.duration - sample_time) / 2.0
+    num_samples = int(np.ceil(waveform.duration / sample_time - 1e-10))
+    t = np.linspace(start=-edge, stop=edge, num=num_samples)
+    samples = waveform.sample(t)
+    return SampledWaveform(samples=samples.samples, sample_time=sample_time)
