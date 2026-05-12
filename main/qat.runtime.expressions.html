@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime.expressions module &mdash; qat-compiler 3.0.0.post229.dev20260511202457 documentation</title>
+  <title>qat.runtime.expressions module &mdash; qat-compiler 3.0.0.post230.dev20260512154021 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -542,6 +542,16 @@
 (unary/binary) over those variables and literals. Intended for use in variational quantum
 circuits, software-iterated sweeps, and general runtime argument injection via virtual
 registers.</p>
+<p>This module adds support for different quantum variable types, such as Phase and Frequency,
+which are important for correctly interpreting their meaning in quantum programs, in
+addition to standard numeric types. It also supports a variety of unary and binary
+operators over variables (and literals), allowing for the construction of complex
+expressions that can be evaluated at runtime. The top-level node for these expressions used
+in compiled parameterised programs is <a class="reference internal" href="#qat.runtime.expressions.RuntimeExpression" title="qat.runtime.expressions.RuntimeExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeExpression</span></code></a>, which wraps an expression
+tree and includes the necessary context for evaluation. Similarly, the
+<a class="reference internal" href="#qat.runtime.expressions.ParameterisedWaveform" title="qat.runtime.expressions.ParameterisedWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterisedWaveform</span></code></a> class allows us to represent waveforms that are parameterised
+by these expressions, which can be used to represent parameterised analytical pulse shapes
+in compiled programs.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.expressions.BinaryExpression">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinaryExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.BinaryExpression" title="Link to this definition"></a></dt>
@@ -705,6 +715,163 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.runtime.expressions.Literal.value">
 <span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">bool</span></em><a class="headerlink" href="#qat.runtime.expressions.Literal.value" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ParameterisedWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
+<p>Represents an analytical waveform that is parameterised by a set of parameters,
+including runtime expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>waveform_type</strong> – The type of the waveform, which determines the functional form of
+the waveform.</p></li>
+<li><p><strong>sample_time</strong> – The sample time of the waveform in seconds, which determines the time
+resolution of the waveform.</p></li>
+<li><p><strong>amplitude</strong> – The amplitude of the waveform, which can be given as a complex number
+or a runtime expression with evaluated type <a class="reference internal" href="#qat.runtime.expressions.VariableType.AMPLITUDE" title="qat.runtime.expressions.VariableType.AMPLITUDE"><code class="xref py py-class docutils literal notranslate"><span class="pre">VariableType.AMPLITUDE</span></code></a>.</p></li>
+<li><p><strong>width</strong> – The width of the waveform, which can be given as a float or a runtime
+expression that evaluates to a float.</p></li>
+<li><p><strong>parameters</strong> – A dictionary of additional parameters for the waveform, which can be
+boolean, float, complex, or runtime expressions.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.amplitude">
+<span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">complex</span> <span class="pre">|</span> <span class="pre">RuntimeExpression[VariableType.AMPLITUDE]</span></em><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.amplitude" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.evaluate" title="Link to this definition"></a></dt>
+<dd><p>Evaluate the parameterised waveform, resolving any runtime expressions from
+params.</p>
+<p>Returns a sampled representation of the waveform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values to use for evaluation, optional.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A SampledWaveform instance representing the evaluated waveform.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">RuntimeExpression]</span></em><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.sample_time">
+<span class="sig-name descname"><span class="pre">sample_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PositiveFloat</span></em><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.sample_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.waveform_type">
+<span class="sig-name descname"><span class="pre">waveform_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type[Waveform]</span></em><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.waveform_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.ParameterisedWaveform.width">
+<span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PositiveFloat</span> <span class="pre">|</span> <span class="pre">RuntimeExpression[VariableType.TIME]</span></em><a class="headerlink" href="#qat.runtime.expressions.ParameterisedWaveform.width" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.runtime.expressions.RuntimeExpression">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RuntimeExpression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel" title="qat.utils.pydantic.NoExtraFieldsFrozenModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsFrozenModel</span></code></a></p>
+<p>Represents an expression that can be evaluated at runtime.</p>
+<p>It is expected to return a value of a given type when evaluated.</p>
+<p>The <a class="reference internal" href="#qat.runtime.expressions.RuntimeExpression" title="qat.runtime.expressions.RuntimeExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeExpression</span></code></a> is generically typed to allow it be used for
+expressions that return different types, e.g.
+<code class="code docutils literal notranslate"><span class="pre">RuntimeExpression[VariableType.TIME]</span></code> returns this class with an annotation to
+validate the evaluated type. This can be used in other Pydantic models to enforce
+expressions of the correct type.</p>
+<p>It allows us to represent an expression tree that is unknown at compile time, but can
+be evaluated at runtime given a set of variable bindings. This is used to allow
+parameterised runtime arguments in programs for backends that lack runtime argument
+support. <a class="reference internal" href="#qat.runtime.expressions.RuntimeExpression" title="qat.runtime.expressions.RuntimeExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeExpression</span></code></a> will be used within the representation of compiled
+programs to represent these unknown values.</p>
+<p>For example, there might be a runtime expression to represent a variable number of shots
+in a program, which would only contain a variable node. Similarly, if the frequency of
+a program is being varied, we can compile a program with the frequency provided at
+runtime, representing that as a <a class="reference internal" href="#qat.runtime.expressions.RuntimeExpression" title="qat.runtime.expressions.RuntimeExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeExpression</span></code></a> containing a variable node
+for the frequency variable.</p>
+<p>A more sophisticated example would be using runtime expressions within variational
+quantum circuits, where parameters of gates become phases within phase shift
+operations. After optimizations and compressions, those phase shifts would be
+represented as expressions over those parameters (in the most simple case, sums of
+parameters). This allows us to represent the parameterised program in a way that can be
+compiled and optimized without knowing the parameter values, but still allows us to
+evaluate the final program with specific parameter values at runtime.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>evaluated_type</strong> – The type that this expression is expected to evaluate to. This is
+used for bitcasting the result to the correct type when assembling the program.</p></li>
+<li><p><strong>expression</strong> – The expression or variable to be evaluated given the runtime
+variables.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.runtime.expressions.RuntimeExpression.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression.evaluate" title="Link to this definition"></a></dt>
+<dd><p>Evaluate the expression, resolving free variables from params.</p>
+<p>Does not handle details of the evaluated_type, such as bitcasting and legalisation.
+This is to be done by the consumer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.expressions.RuntimeExpression.evaluate.params.params"></span><strong>params</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.expressions.RuntimeExpression.evaluate.params.params">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Dictionary of variable values to use for evaluation, optional.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The result of evaluating the expression with the given params.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.RuntimeExpression.evaluated_type">
+<span class="sig-name descname"><span class="pre">evaluated_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">VariableType</span></em><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression.evaluated_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.RuntimeExpression.expression">
+<span class="sig-name descname"><span class="pre">expression</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Node</span></em><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression.expression" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.expressions.RuntimeExpression.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'frozen':</span> <span class="pre">True,</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.runtime.expressions.RuntimeExpression.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
 
 </dd></dl>
 

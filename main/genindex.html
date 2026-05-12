@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post229.dev20260511202457 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post230.dev20260512154021 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -986,6 +986,8 @@
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.amplitude">(IsAnalyticalWaveformInterface property)</a>, <a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.amplitude">[1]</a>
 </li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.amplitude">(ParameterisedWaveform attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.BlackmanWaveformOp.params.amplitude">(qat.experimental.dialect.pulse.ir.BlackmanWaveformOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.CosWaveformOp.params.amplitude">(qat.experimental.dialect.pulse.ir.CosWaveformOp parameter)</a>
@@ -1166,6 +1168,8 @@
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.RemoteCalibration.arguments_type">arguments_type() (RemoteCalibration method)</a>
 </li>
       <li><a href="qat.frontend.parsers.qir.html#qat.frontend.parsers.qir.ArgumentType">ArgumentType (class in qat.frontend.parsers.qir)</a>
+</li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval_array.params.array">array (qat.utils.pydantic.validate_calibratable_unit_interval_array parameter)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.as_dict">as_dict() (CompilationMetrics method)</a>
 
@@ -3632,6 +3636,10 @@
       <ul>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.Literal.evaluate">(Literal method)</a>
 </li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.evaluate">(ParameterisedWaveform method)</a>
+</li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.RuntimeExpression.evaluate">(RuntimeExpression method)</a>
+</li>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.evaluate">(UnaryExpression method)</a>
 </li>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.evaluate">(Variable method)</a>
@@ -3647,6 +3655,8 @@
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluateWaveforms.evaluate_waveform">(EvaluateWaveforms method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.RuntimeExpression.evaluated_type">evaluated_type (RuntimeExpression attribute)</a>
+</li>
       <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.EvaluatePulses">EvaluatePulses (class in qat.middleend.passes.purr.transform)</a>
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.EvaluateWaveforms">EvaluateWaveforms (class in qat.middleend.passes.transform)</a>
@@ -3786,6 +3796,8 @@
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ExpOvershoot2Config">ExpOvershoot2Config (class in qat.backend.qblox.config.specification)</a>
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ExpOvershoot3Config">ExpOvershoot3Config (class in qat.backend.qblox.config.specification)</a>
+</li>
+      <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.RuntimeExpression.expression">expression (RuntimeExpression attribute)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.extend">extend() (ValidatedList method)</a>
 </li>
@@ -7398,6 +7410,8 @@
 </li>
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulsePort.model_config">(OpenPulsePort attribute)</a>
 </li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.model_config">(ParameterisedWaveform attribute)</a>
+</li>
         <li><a href="qat.frontend.parsers.qasm.base.html#qat.frontend.parsers.qasm.base.ParseResults.model_config">(ParseResults attribute)</a>
 </li>
         <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.model_config">(PathData attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.model_config">[1]</a>
@@ -7531,6 +7545,8 @@
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.model_config">(RoundedSquareFunction attribute)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.RoundedSquareWaveform.model_config">(RoundedSquareWaveform attribute)</a>
+</li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.RuntimeExpression.model_config">(RuntimeExpression attribute)</a>
 </li>
         <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Rx.model_config">(Rx attribute)</a>
 </li>
@@ -9254,10 +9270,18 @@
       </ul></li>
       <li><a href="qat.backend.qblox.execution.html#qat.backend.qblox.execution.QbloxProgram.packages">packages (QbloxProgram attribute)</a>
 </li>
+      <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform">ParameterisedWaveform (class in qat.runtime.expressions)</a>
+</li>
+      <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.parameters">parameters (ParameterisedWaveform attribute)</a>
+</li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.evaluate.params.params">params (qat.runtime.expressions.BinaryExpression.evaluate parameter)</a>
 
       <ul>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.simplify.params.params">(qat.runtime.expressions.BinaryExpression.simplify parameter)</a>
+</li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.evaluate.params.params">(qat.runtime.expressions.ParameterisedWaveform.evaluate parameter)</a>
+</li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.RuntimeExpression.evaluate.params.params">(qat.runtime.expressions.RuntimeExpression.evaluate parameter)</a>
 </li>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.evaluate.params.params">(qat.runtime.expressions.UnaryExpression.evaluate parameter)</a>
 </li>
@@ -9792,14 +9816,14 @@
         <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.TriageResult.pp_map">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.pp_map">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.PreCodegenPass">PreCodegenPass (class in qat.backend.qblox.passes.analysis)</a>
 
       <ul>
         <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass">(class in qat.purr.backends.qblox.codegen)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.PreCodegenResult">PreCodegenResult (class in qat.backend.qblox.passes.analysis)</a>
 
       <ul>
@@ -14184,6 +14208,8 @@
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.PipelineClassDescription.runtime">(PipelineClassDescription attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.RuntimeExpression">RuntimeExpression (class in qat.runtime.expressions)</a>
+</li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.BindingResult.rw_results">rw_results (BindingResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingResult.rw_results">[1]</a>
 </li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Rx">Rx (class in qat.ir.gates.gates_1q)</a>
@@ -14247,11 +14273,15 @@
       <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.sample_time">sample_time (DeviceDescription attribute)</a>
 
       <ul>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.sample_time">(ParameterisedWaveform attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.sample_time">(PulseChannel property)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.params.sample_time">(qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SampledWaveformAttr.params.sample_time">(qat.experimental.dialect.pulse.ir.SampledWaveformAttr parameter)</a>
+</li>
+        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.sample_waveform.params.sample_time">(qat.ir.waveforms.sample_waveform parameter)</a>
 </li>
         <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.sample_time">(qat.model.target_data.DeviceDescription parameter)</a>
 </li>
@@ -14260,6 +14290,8 @@
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.sample_time">(SampledWaveformAttr attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SampledWaveformAttr.sample_time">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.sample_waveform">sample_waveform() (in module qat.ir.waveforms)</a>
+</li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform">SampledWaveform (class in qat.ir.waveforms)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SampledWaveformAttr">SampledWaveformAttr (class in qat.experimental.dialect.pulse.ir)</a>
@@ -14658,6 +14690,8 @@
       </ul></li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.SIMULATION">SIMULATION (QatConfig attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.simulation_time">simulation_time (Section attribute)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.Sin">Sin (class in qat.purr.backends.utilities)</a>
@@ -14666,8 +14700,6 @@
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.Sin">(class in qat.utils.waveform)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.SIN">SIN (PulseShapeType attribute)</a>
 
       <ul>
@@ -15757,6 +15789,8 @@
       <ul>
         <li><a href="qat.core.result_base.html#qat.core.result_base.ResultManager.lookup_by_type.params.ty">(qat.core.result_base.ResultManager.lookup_by_type parameter)</a>
 </li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.annotate_pyd_array.params.ty">(qat.utils.pydantic.annotate_pyd_array parameter)</a>
+</li>
       </ul></li>
       <li><a href="qat.core.config.descriptions.html#id4">type (ClassDescription attribute)</a>, <a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ClassDescription.type">[1]</a>
 
@@ -15790,6 +15824,8 @@
         <li><a href="qat.integrations.tket.html#qat.integrations.tket.TketBuilder.U">(TketBuilder method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.uint">uint (class in qat.utils.pydantic)</a>
+</li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression">UnaryExpression (class in qat.runtime.expressions)</a>
 </li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp">UnaryOp (class in qat.runtime.expressions)</a>
@@ -16007,6 +16043,14 @@
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.TimeAttr.params.value">(qat.experimental.dialect.pulse.ir.TimeAttr parameter)</a>
 </li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_positive_float.params.value">(qat.utils.pydantic.validate_calibratable_positive_float parameter)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_calibratable_unit_interval.params.value">(qat.utils.pydantic.validate_calibratable_unit_interval parameter)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative.params.value">(qat.utils.pydantic.validate_non_negative parameter)</a>
+</li>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_qubit_coupling.params.value">(qat.utils.pydantic.validate_qubit_coupling parameter)</a>
+</li>
         <li><a href="qat.core.result_base.html#qat.core.result_base.ResultModel.value">(ResultModel property)</a>, <a href="qat.purr.core.result_base.html#qat.purr.core.result_base.ResultModel.value">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.value">(TimeAttr attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.TimeAttr.value">[1]</a>
@@ -16040,14 +16084,14 @@
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.Variable">(class in qat.runtime.expressions)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.register.html#qat.frontend.register.CregIndexValue.variable">variable (CregIndexValue property)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.CregIndexValue.variable">[1]</a>
 
       <ul>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.variable">(ResultsProcessing attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.VariableAccessor.variable_name">variable_name (VariableAccessor attribute)</a>
 </li>
       <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.VariableAccessor">VariableAccessor (class in qat.pipelines.purr.sweep.flattener)</a>
@@ -16257,6 +16301,8 @@
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.params.waveform">(qat.experimental.dialect.pulse.ir.PulseOp parameter)</a>
 </li>
+        <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.sample_waveform.params.waveform">(qat.ir.waveforms.sample_waveform parameter)</a>
+</li>
       </ul></li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.waveform">waveform() (QbloxContext method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.waveform">[1]</a>
 </li>
@@ -16308,6 +16354,8 @@
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.waveform_type">(GaussianZeroEdgeWaveformOp property)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.waveform_type">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.waveform_type">(IsAnalyticalWaveformInterface property)</a>, <a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.waveform_type">[1]</a>
+</li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.waveform_type">(ParameterisedWaveform attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.waveform_type">(RoundedSquareWaveformOp property)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp.waveform_type">[1]</a>
 </li>
@@ -16408,6 +16456,8 @@
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.width">(GaussianZeroEdgeWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.width">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.width">(IsAnalyticalWaveformInterface property)</a>, <a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.width">[1]</a>
+</li>
+        <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.ParameterisedWaveform.width">(ParameterisedWaveform attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.params.width">(qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr parameter)</a>
 </li>

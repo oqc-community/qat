@@ -335,6 +335,10 @@
 
   <section id="module-qat.utils.pydantic">
 <span id="qat-utils-pydantic-module"></span><h1>qat.utils.pydantic module<a class="headerlink" href="#module-qat.utils.pydantic" title="Link to this heading"></a></h1>
+<p>Utility file for Pydantic related classes and functions.</p>
+<p>Contains base classes for Pydantic models with builtin constraints, as well as utility
+functions and classes for efficient (de)serialization of numpy arrays and validation of
+custom types.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.utils.pydantic.AllowExtraFieldsModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AllowExtraFieldsModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.AllowExtraFieldsModel" title="Link to this definition"></a></dt>
@@ -453,23 +457,25 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydArray">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">NDArray</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydArray" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">NDArrayOperatorsMixin</span></code></p>
-<dl class="simple">
-<dt>A data class wrapper to handle the information needed to completely describe a numpy array:</dt><dd><ul class="simple">
+<p>A data class wrapper to handle the information needed to completely describe a numpy
+array:</p>
+<blockquote>
+<div><ul class="simple">
 <li><p>Value is the numpy array itself</p></li>
 <li><p>Shape is the shape of the numpy array</p></li>
 <li><p>dtype is the data (implied) type of the numpy array</p></li>
 </ul>
-</dd>
-</dl>
-<p>Through annotations, this allows creation of metadata classes on top of PydArray that describe
-how to (de)serialise a (blob) PydArray object according to some (required) type. See _validator()
-and _serializer().</p>
-<p>Enlisting the array data as (nested) list(s) is not optimal, and this class renders (de)serialisation
-fast.</p>
-<p>This class also mixes in NDArrayOperatorsMixin, which defines Python arithmetic operators in terms of
-NumPy ufuncs. This does NOT guarantee full interoperability with NumPy but allows the option to extend
-this support in the future. For now, the sole purpose of this class is ONLY to be a data class wrapper
-and mediator for (de)serialisation purposes.</p>
+</div></blockquote>
+<p>Through annotations, this allows creation of metadata classes on top of PydArray that
+describes how to (de)serialise a (blob) PydArray object according to some (required)
+type. See _validator() and _serializer().</p>
+<p>Enlisting the array data as (nested) list(s) is not optimal, and this class renders
+(de)serialisation fast.</p>
+<p>This class also mixes in NDArrayOperatorsMixin, which defines Python arithmetic
+operators in terms of NumPy ufuncs. This does NOT guarantee full interoperability with
+NumPy but allows the option to extend this support in the future. For now, the sole
+purpose of this class is ONLY to be a data class wrapper and mediator for
+(de)serialisation purposes.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -508,6 +514,7 @@ context: The context.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydDictBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydDictBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydDictBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RootModel[dict[~GeneralKey,</span> <span class="pre">~GeneralValue]]</span></code></p>
+<p>Base class for Pydantic dict containers.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -554,6 +561,7 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydListBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydListBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydListBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RootModel[list[~GeneralValue]]</span></code></p>
+<p>Base class for Pydantic list containers.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -575,6 +583,7 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.PydSetBase">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PydSetBase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PydanticUndefined</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.PydSetBase" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RootModel[set[~GeneralValue]]</span></code></p>
+<p>Base class for Pydantic set containers.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -624,6 +633,8 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.utils.pydantic.RehydratableModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RehydratableModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.RehydratableModel" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>A base model with utility to serialize and deserialize objects with type
+information.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -760,6 +771,17 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">annotate_pyd_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ty</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.annotate_pyd_array" title="Link to this definition"></a></dt>
 <dd><p>Creates an annotated type for numeric lists with Pydantic serializers and validators
 for efficient serialization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.utils.pydantic.annotate_pyd_array.params.ty"></span><strong>ty</strong><a class="paramlink headerlink reference internal" href="#qat.utils.pydantic.annotate_pyd_array.params.ty">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></span>) – The required type of the elements in the array (e.g. np.float64).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAlias</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An annotated type that can be used in Pydantic models.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -773,30 +795,116 @@ for efficient serialization.</p>
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.utils.pydantic.uint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.uint" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Helper class for defining annotated unsigned integer fields with a given bit width.</p>
+<p>Used as <code class="code docutils literal notranslate"><span class="pre">uint[n]</span></code> to represent an unsigned integer field with n bits, which is
+validated to be between 0 and 2^n - 1 inclusive. When used in a Pydantic model as type
+hint, this will provide validation on the value.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_calibratable_positive_float">
 <span class="sig-name descname"><span class="pre">validate_calibratable_positive_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_calibratable_positive_float" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validator function to check if a value is a non-negative float.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.utils.pydantic.validate_calibratable_positive_float.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.utils.pydantic.validate_calibratable_positive_float.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The value to validate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validated value if it is a non-negative float.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the value is not a non-negative float.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_calibratable_unit_interval">
 <span class="sig-name descname"><span class="pre">validate_calibratable_unit_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_calibratable_unit_interval" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validator function to check if a value is a float in the unit interval [0, 1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.utils.pydantic.validate_calibratable_unit_interval.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.utils.pydantic.validate_calibratable_unit_interval.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The value to validate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validated value if it is a float in the unit interval [0, 1].</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the value is not a float in the unit interval [0, 1].</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_calibratable_unit_interval_array">
 <span class="sig-name descname"><span class="pre">validate_calibratable_unit_interval_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_calibratable_unit_interval_array" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validator function to check if a 2x2 array has all elements in the unit interval [0,
+1].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.utils.pydantic.validate_calibratable_unit_interval_array.params.array"></span><strong>array</strong><a class="paramlink headerlink reference internal" href="#qat.utils.pydantic.validate_calibratable_unit_interval_array.params.array">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.utils.pydantic.PydArray" title="qat.utils.pydantic.PydArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydArray</span></code></a></span>) – The array to validate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.utils.pydantic.PydArray" title="qat.utils.pydantic.PydArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydArray</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validated array if all elements are in the unit interval [0, 1].</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any element in the array is not in the unit interval [0, 1].</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_non_negative">
 <span class="sig-name descname"><span class="pre">validate_non_negative</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_non_negative" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validator function to check if a value is a non-negative integer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.utils.pydantic.validate_non_negative.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.utils.pydantic.validate_non_negative.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The value to validate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validated value if it is a non-negative integer.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the value is not a non-negative integer.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_qubit_coupling">
 <span class="sig-name descname"><span class="pre">validate_qubit_coupling</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.utils.pydantic.validate_qubit_coupling" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Validator function to check if a value is a valid qubit coupling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.utils.pydantic.validate_qubit_coupling.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.utils.pydantic.validate_qubit_coupling.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – The value to validate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validated value if it is a valid qubit coupling.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – If the value is not a valid qubit coupling.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.utils.pydantic.validate_waveform_type">

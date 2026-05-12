@@ -343,6 +343,7 @@
 
   <section id="module-qat.ir.waveforms">
 <span id="qat-ir-waveforms-module"></span><h1>qat.ir.waveforms module<a class="headerlink" href="#module-qat.ir.waveforms" title="Link to this heading"></a></h1>
+<p>Contains elementary IR units for waveforms, including waveform types and pulses.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.waveforms.AbstractWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AbstractWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.AbstractWaveform" title="Link to this definition"></a></dt>
@@ -860,6 +861,26 @@ validated to form a valid model.</p>
 <span class="sig-name descname"><span class="pre">zero_at_edges</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.ir.waveforms.Waveform.zero_at_edges" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.ir.waveforms.sample_waveform">
+<span class="sig-name descname"><span class="pre">sample_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">waveform</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.sample_waveform" title="Link to this definition"></a></dt>
+<dd><p>Utility function to sample a waveform at a given time per sample (sample rate).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.sample_waveform.params.waveform"></span><strong>waveform</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.sample_waveform.params.waveform">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></span>) – The analytical waveform to sample.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.sample_waveform.params.sample_time"></span><strong>sample_time</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.sample_waveform.params.sample_time">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The time between samples, in seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A SampledWaveform containing the sampled values.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
