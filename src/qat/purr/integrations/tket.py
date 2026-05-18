@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 from copy import deepcopy
+from importlib.metadata import version
 from numbers import Number
+from warnings import warn
 
 import numpy as np
 from compiler_config.config import InlineResultsProcessing, TketOptimizations
@@ -24,7 +26,6 @@ from pytket.passes import (
     DecomposeBoxes,
     DefaultMappingPass,
     FullPeepholeOptimise,
-    GlobalisePhasedX,
     KAKDecomposition,
     PeepholeOptimise2Q,
     RemoveBarriers,
@@ -35,6 +36,14 @@ from pytket.passes import (
     SynthesiseTket,
     ThreeQubitSquash,
 )
+
+if version("pytket") < "2.0.0":
+    # TODO: Drop compatibility for next major version release, COMPILER-909
+    from pytket.passes import GlobalisePhasedX
+
+    glob_phase_x_available = True
+else:
+    glob_phase_x_available = False
 from pytket.placement import Placement
 from pytket.qasm import circuit_to_qasm_str
 from pytket.qasm.qasm import NOPARAM_COMMANDS, PARAM_COMMANDS, QASMUnsupportedError
@@ -521,8 +530,19 @@ def optimize_circuit(circ, architecture, opts):
         # if TketOptimizations.EulerAngleReduction in opts:
         #     passes.append(EulerAngleReduction())
 
-        if TketOptimizations.GlobalisePhasedX in opts:
-            passes.append(GlobalisePhasedX())
+        if (
+            hasattr(TketOptimizations, "GlobalisePhasedX")
+            and TketOptimizations.GlobalisePhasedX in opts
+        ):
+            if glob_phase_x_available:
+                passes.append(GlobalisePhasedX())
+            else:
+                msg = (
+                    "Requested Tket optimization `GlobalisePhasedX` is unavailable for "
+                    "installed pytket versions >=2.0.0. Skipping this optimization."
+                )
+                log.warning(msg)
+                warn(msg, RuntimeWarning, stacklevel=2)
 
         # if TketOptimizations.GuidedPauliSimp in opts:
         #     passes.append(GuidedPauliSimp())

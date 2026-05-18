@@ -2,10 +2,16 @@
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
 import random
 from math import pi
+from pathlib import Path
 
 import numpy as np
 import pytest
-from compiler_config.config import Qasm2Optimizations, Tket, TketOptimizations
+from compiler_config.config import (
+    CompilerConfig,
+    Qasm2Optimizations,
+    Tket,
+    TketOptimizations,
+)
 from pytket import Circuit
 from pytket.architecture import Architecture, RingArch
 
@@ -19,6 +25,7 @@ from qat.purr.integrations.tket import (
     TketQasmParser,
     TketToQatIRConverter,
     get_coupling_subgraphs,
+    glob_phase_x_available,
     optimize_circuit,
     run_1Q_tket_optimizations,
     run_multiQ_tket_optimizations,
@@ -161,8 +168,29 @@ class TestTketOptimization:
         circ, architecture = self._build_tket_objects(qasm_string)
         return optimize_circuit(circ, architecture, opt_config.tket_optimizations)
 
-    def test_globalise_phased_x(self):
-        assert self._run_qasm2(TketOptimizations.GlobalisePhasedX)
+    def test_globalise_phased_x(self, testpath):
+        # TODO: Drop compatibility for next major version release, COMPILER-909
+        if hasattr(TketOptimizations, "GlobalisePhasedX"):
+            if glob_phase_x_available:
+                assert self._run_qasm2(TketOptimizations.GlobalisePhasedX)
+            else:
+                with pytest.warns(
+                    RuntimeWarning,
+                    match="Requested Tket optimization `GlobalisePhasedX` is unavailable",
+                ):
+                    assert self._run_qasm2(TketOptimizations.GlobalisePhasedX)
+        else:
+            with pytest.raises(ValueError, match="invalid value 128"):
+                TketOptimizations(128)
+            with Path(
+                testpath,
+                "files",
+                "compiler_config",
+                "serialised_full_compiler_config_v02_with_globalise_phased_x.json",
+            ).open("r") as f:
+                conf_json = f.read()
+            with pytest.warns(UserWarning, match="Ignoring unknown legacy flag bits 128"):
+                CompilerConfig.create_from_json(conf_json)
 
     def test_clifford_simp(self):
         assert self._run_qasm2(TketOptimizations.CliffordSimp)
