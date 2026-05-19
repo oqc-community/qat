@@ -64,7 +64,7 @@ _PYTHON_TYPE: dict[VariableType, type] = {
     VariableType.BOOL: bool,
     VariableType.PHASE: float,
     VariableType.FREQUENCY: float,
-    VariableType.AMPLITUDE: float,
+    VariableType.AMPLITUDE: complex,
     VariableType.TIME: float,
 }
 

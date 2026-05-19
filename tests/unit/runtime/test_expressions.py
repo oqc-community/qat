@@ -123,9 +123,10 @@ class TestVariable:
         assert isinstance(bound, Literal)
 
     def test_evaluate(self):
-        v = Variable(name="beta", var_type=VariableType.PHASE)
-        bound = v.evaluate({"beta": 0.5})
-        assert isclose(bound, 0.5)
+        v = Variable(name="beta", var_type=VariableType.AMPLITUDE)
+        bound = v.evaluate({"beta": 0.5 + 0.5j})
+        assert isclose(bound.real, 0.5)
+        assert isclose(bound.imag, 0.5)
 
     def test_evaluate_without_binding_raises(self):
         v = Variable(name="gamma", var_type=VariableType.COMPLEX)
@@ -594,9 +595,12 @@ class TestParameterisedWaveform:
             }
             ParameterisedWaveform(**data)
 
-    def test_evaluate_parameters(self):
-        """Tests that the parameters of a ParameterisedWaveform can be evaluated
-        correctly."""
+    @pytest.mark.parametrize("amp", [0.5, 0.2 + 0.3j])
+    def test_evaluate_parameters(self, amp):
+        """Tests that the parameters of a ParameterisedWaveform can be evaluated correctly.
+
+        Parametrised by real and complex amplitudes.
+        """
 
         sample_time = 5e-9
         offset_time = 80e-9
@@ -618,7 +622,7 @@ class TestParameterisedWaveform:
             parameters={"rise": 1 / 3},
         )
 
-        params = {"amp": 0.5, "width": 160e-9}
+        params = {"amp": amp, "width": 160e-9}
         sampled_waveform = waveform.evaluate(params)
         assert isinstance(sampled_waveform, SampledWaveform)
         assert sampled_waveform.sample_time == sample_time
@@ -626,6 +630,6 @@ class TestParameterisedWaveform:
             (params["width"] + offset_time) / sample_time
         )
         # Doesn't catch the center so it's slightly lower
-        max_amp = np.max(sampled_waveform.samples)
-        assert max_amp <= params["amp"]
-        assert np.isclose(max_amp, params["amp"], rtol=1e-2)
+        max_amp = np.max(np.abs(sampled_waveform.samples))
+        assert max_amp <= abs(params["amp"])
+        assert np.isclose(max_amp, abs(params["amp"]), rtol=1e-2)
