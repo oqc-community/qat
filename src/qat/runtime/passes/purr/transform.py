@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import re
+from typing import Any
 
 import numpy as np
 from compiler_config.config import CompilerConfig
@@ -27,12 +28,12 @@ class QiskitErrorMitigation(TransformPass):
 
     def run(
         self,
-        acquisitions: dict[str, any],
+        acquisitions: dict[str, Any],
         *args,
         compiler_config: CompilerConfig,
         package: QiskitBuilder,
         **kwargs,
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :param compiler_config: The compiler config contains the error mitigation
@@ -87,7 +88,7 @@ class QiskitStripMetadata(TransformPass):
     """Detects if Qiskit is returning meta data associated with the simulation, and trims it
     away if so."""
 
-    def run(self, acquisitions: dict[str, any], *args, **kwargs):
+    def run(self, acquisitions: dict[str, Any], *args, **kwargs):
         """
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :return: The acquisition data with metadata stripped away (if found).
@@ -104,7 +105,7 @@ class QiskitSimplifyResults(TransformPass):
     This is the same as the `simplify_results` function in :class:`ResultsTransform`.
     """
 
-    def run(self, acquisitions: dict[str, any], *args, **kwargs):
+    def run(self, acquisitions: dict[str, Any], *args, **kwargs):
         """
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :return: The acquisition data simplified.

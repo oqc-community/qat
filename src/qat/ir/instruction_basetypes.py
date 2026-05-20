@@ -1,4 +1,19 @@
-from __future__ import annotations
+"""qat.ir.instruction_basetypes
+================================
+
+Module containing small enums used to describe acquisition and post-processing
+semantics in the QAT IR. These types are used by instructions such as
+``Acquire`` and ``PostProcessing`` to describe how readout data should be
+handled by the runtime.
+
+The public symbols are:
+
+- :class:`PostProcessType` -- the kind of post-processing to apply to readout
+  data.
+- :class:`ProcessAxis` -- the axis of the readout data to operate on.
+- :class:`AcquireMode` -- the hardware acquisition mode used by an acquire
+  instruction.
+"""
 
 from enum import Enum
 

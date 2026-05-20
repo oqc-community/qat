@@ -71,6 +71,28 @@ def numpy_array_to_list(array):
         return array
 
 
+def label_count(labels: np.ndarray) -> dict[str, int]:
+    """Count occurrences of each string state label across all shots in an acquisition.
+
+    This is the granular-pipeline equivalent of :func:`binary_count`. It works
+    directly on the string state labels produced by the
+    :class:`~qat.ir.measure.Discriminate` step, so multi-state classifiers
+    (qutrit, etc.) are counted correctly without any float conversion.
+
+    The input array is flattened before counting, so both 1-D per-shot arrays and
+    multi-dimensional acquisition arrays (e.g. shape ``(shots, averages)``) are
+    handled uniformly — all elements contribute to the same label histogram.
+
+    :param labels: String ndarray of state labels (any shape), e.g.
+        ``["0", "0", "1", "2"]``.
+    :returns: Dictionary mapping each state label to its occurrence count across
+        all shots, e.g. ``{"0": 2, "1": 1, "2": 1}``.
+    """
+    flat = np.asarray(labels).flatten()
+    values, counts = np.unique(flat, return_counts=True)
+    return {str(v): int(c) for v, c in zip(values, counts, strict=True)}
+
+
 def binary_count(results_list, repeats):
     """Extracted from `qat.purr.compiler.runtime`.
 

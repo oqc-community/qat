@@ -405,6 +405,9 @@ class Qubit(Component):
     :param mean_z_map_args: (deprecated) Arguments for linear mapping (mutually exclusive with ``post_process_method``).
     :param discriminator: Discriminator value for measurement.
     :param post_process_method: Post-processing method used to map complex IQ values to states.
+    :param preselect_required: When ``True``, a pre-selection measurement is intended
+        to be inserted before this qubit's first use in the circuit once pre-selection
+        is enabled via the compiler config and the corresponding pass is available.
     :param direct_x_pi: Whether direct X(pi) pulse is used.
 
     :raises ValueError: If neither or both of ``mean_z_map_args`` and ``post_process_method`` are provided.
@@ -420,7 +423,9 @@ class Qubit(Component):
     post_process_method: PostProcessMethod | None = Field(
         discriminator="method", default=None
     )
-
+    preselect_required: bool = Field(
+        False, description="Whether preselect is required for this qubit."
+    )
     direct_x_pi: bool = False
 
     @model_validator(mode="after")

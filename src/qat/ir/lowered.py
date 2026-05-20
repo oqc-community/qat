@@ -4,7 +4,14 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 
 from qat.ir.instructions import Assign, Instruction, ResultsProcessing, Return
-from qat.ir.measure import Acquire, PostProcessing
+from qat.ir.measure import (
+    Acquire,
+    Demap,
+    Discriminate,
+    Equalise,
+    PostProcessing,
+    PostSelect,
+)
 from qat.ir.pulse_channel import PulseChannel
 
 
@@ -32,9 +39,9 @@ class PartitionedIR:
     acquire_map: dict[PulseChannel | str, list[Acquire]] = field(
         default_factory=lambda: defaultdict(list)
     )
-    pp_map: dict[str, list[PostProcessing]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
+    pp_map: dict[
+        str, list[PostProcessing | Equalise | Discriminate | PostSelect | Demap]
+    ] = field(default_factory=lambda: defaultdict(list))
     rp_map: dict[str, ResultsProcessing] = field(default_factory=dict)
 
     def get_pulse_channel(self, id: str) -> PulseChannel | None:

@@ -1,8 +1,17 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+"""Runtime analysis passes for result indexing and post-selection.
+
+This module provides analysis passes that run prior to result transformation. They are
+responsible for deriving mappings between acquired output variables and physical qubit
+indices, and for recording post-selection metadata produced by post-processing.
+"""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
+
+import numpy as np
 
 from qat.core.pass_base import AnalysisPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
@@ -14,7 +23,53 @@ from qat.model.hardware_model import PhysicalHardwareModel
 
 @dataclass
 class IndexMappingResult(ResultInfoMixin):
+    """Result containing a mapping from output variable names to qubit indices.
+
+    :param mapping: Dictionary mapping variable name to physical qubit index.
+    """
+
     mapping: dict[str, int]
+
+
+@dataclass
+class PostSelectionResult(ResultInfoMixin):
+    """Records the outcome of post-selection applied during acquisition post-processing.
+
+    :param shots_requested: Total shots compiled and executed.
+    :param shots_retained: Number of shots that survived post-selection.
+    :param global_mask: Boolean array of shape ``(shots_requested,)`` where ``True``
+        marks a retained shot. ``None`` if no post-selection was applied.
+    """
+
+    shots_requested: int
+    shots_retained: int
+    global_mask: np.ndarray | None = field(default=None, repr=False)
+
+
+@dataclass
+class EqualiseResult(ResultInfoMixin):
+    """Stores the equalised (affine-transformed) complex IQ arrays produced by the
+    :class:`~qat.ir.measure.Equalise` stage of the granular post-processing pipeline.
+
+    :param outputs: Mapping from output variable name to the complex-valued IQ array after
+        equalisation. Arrays are indexed by shot (and optionally by time for SCOPE mode).
+        The global post-selection mask has already been applied when this result is stored.
+    """
+
+    outputs: dict[str, np.ndarray]
+
+
+@dataclass
+class DiscriminateResult(ResultInfoMixin):
+    """Stores the string state-label arrays produced by the
+    :class:`~qat.ir.measure.Discriminate` stage of the granular post-processing pipeline.
+
+    :param outputs: Mapping from output variable name to a string ndarray of state labels
+        (e.g. ``"0"``, ``"1"``, ``"2"``). The global post-selection mask has already been
+        applied when this result is stored.
+    """
+
+    outputs: dict[str, np.ndarray]
 
 
 class IndexMappingAnalysis(AnalysisPass):
@@ -43,7 +98,7 @@ class IndexMappingAnalysis(AnalysisPass):
 
     def run(
         self,
-        acquisitions: dict[str, any],
+        acquisitions: dict[str, Any],
         res_mgr: ResultManager,
         *args,
         package: InstructionBuilder | Executable,

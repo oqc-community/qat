@@ -7,7 +7,7 @@ from qat.ir.waveforms import Pulse
 from qat.purr.compiler.instructions import Instruction as LegInstruction
 
 
-def count_number_of_non_sync_non_phase_reset_non_delay_non_post_processing_instructions(
+def count_active_instructions(
     instructions: list[PydInstruction | LegInstruction],
 ):
     """Counts the number of non-sync, non-phase reset, non-delay, and non-post processing
@@ -24,11 +24,15 @@ def count_number_of_non_sync_non_phase_reset_non_delay_non_post_processing_instr
     """
     n_instr_no_sync = 0
     for instr in instructions:
-        if (
-            instr.__class__.__name__ != "Synchronize"
-            and instr.__class__.__name__ != "PhaseReset"
-            and instr.__class__.__name__ != "Delay"
-            and instr.__class__.__name__ != "PostProcessing"
+        if instr.__class__.__name__ not in (
+            "Synchronize",
+            "PhaseReset",
+            "Delay",
+            "PostProcessing",
+            "Equalise",
+            "Discriminate",
+            "PostSelect",
+            "Demap",
         ):
             n_instr_no_sync += 1
 

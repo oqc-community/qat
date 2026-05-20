@@ -109,12 +109,14 @@ class QIRParser:
     def __init__(
         self,
         results_format: InlineResultsProcessing | None = None,
+        post_selection: bool = False,
     ):
         self._results_format = (
             results_format
             if results_format is not None
             else InlineResultsProcessing.Program
         )
+        self._post_selection = post_selection
         self._result_variables = []
 
     def parse(self, builder: InstructionBuilder, qir_file: str):
@@ -192,7 +194,13 @@ class QIRParser:
                 args = _convert_args(
                     builder, args, [ArgumentType.Qubit, ArgumentType.Result]
                 )
-                builder.measure_single_shot_z(args[0], output_variable=args[1])
+                builder.measure_with_granular_post_processing(
+                    args[0], output_variable=args[1]
+                )
+                if self._post_selection:
+                    method = args[0].post_process_method
+                    disallowed = method.disallowed_states if method is not None else []
+                    builder.emit_post_select(args[1], disallowed)
                 builder.results_processing(args[1], self._results_format)
             case "__quantum__qis__reset__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)

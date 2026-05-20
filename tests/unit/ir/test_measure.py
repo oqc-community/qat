@@ -14,7 +14,13 @@ from qat.ir.instructions import (
     QuantumInstructionBlock,
     Synchronize,
 )
-from qat.ir.measure import VALID_MEASURE_INSTR, Acquire, MeasureBlock, PostProcessing
+from qat.ir.measure import (
+    VALID_MEASURE_INSTR,
+    Acquire,
+    Equalise,
+    MeasureBlock,
+    PostProcessing,
+)
 from qat.ir.waveforms import GaussianWaveform, Pulse
 from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.instructions import (
@@ -411,3 +417,73 @@ class TestMeasureBlock:
         assert isinstance(mb.instructions[3], Acquire)
         assert mb.instructions[3].delay == 0
         assert mb.duration == 23
+
+
+class TestEqualise:
+    """Tests for the Equalise instruction's __eq__() and __hash__() methods."""
+
+    def test_eq_with_equal_numpy_arrays_returns_true(self):
+        """Test that __eq__() returns True when all attributes are equal."""
+        eq1 = Equalise(output_variable="ch0")
+        eq2 = Equalise(output_variable="ch0")
+
+        assert eq1 == eq2
+
+    def test_eq_with_non_equalise_object_returns_false(self):
+        """Test that __eq__() returns False when comparing to non-Equalise objects."""
+        eq = Equalise(output_variable="ch0")
+
+        assert eq != "not an Equalise"
+        assert eq != 42
+        assert eq is not None
+        assert eq != {}
+        assert eq != Acquire(targets="ch0", output_variable="test")
+
+    def test_eq_different_output_variable_short_circuits(self):
+        """Test that different output variables short-circuit comparison (no ValueError).
+
+        With different output_variable values, the 'and' operator short-circuits and returns
+        False before evaluating numpy array comparisons.
+        """
+        eq1 = Equalise(output_variable="ch0")
+        eq2 = Equalise(output_variable="ch1")
+
+        assert eq1 != eq2
+
+    def test_hash_diffs(self):
+        """Tests all possible hash options."""
+        eq1 = Equalise(output_variable="ch0")
+        eq2 = Equalise(output_variable="ch1")
+
+        assert hash(eq1) != hash(eq2)
+
+        eq1 = Equalise(
+            output_variable="ch0",
+            transform=np.eye(2),
+        )
+        eq2 = Equalise(
+            output_variable="ch0",
+            transform=np.array([[2.0, 0.0], [0.0, 2.0]]),
+        )
+        assert hash(eq1) != hash(eq2)
+
+        eq1 = Equalise(
+            output_variable="ch0",
+            offset=np.zeros(2),
+        )
+        eq2 = Equalise(
+            output_variable="ch0",
+            offset=np.array([1.0, 1.0]),
+        )
+
+        assert hash(eq1) != hash(eq2)
+
+    def test_eq_handles_non_comparable_types(self):
+        """Test that __eq__() correctly returns False for incompatible types."""
+        eq = Equalise(output_variable="ch0")
+
+        # These should return False without raising exceptions
+        assert (eq == "string") is False
+        assert (eq == 42) is False
+        assert (eq is None) is False
+        assert (eq == []) is False

@@ -1,11 +1,28 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+"""Runtime post-processing utilities.
+
+This module provides helpers to map raw IQ readout arrays into processed
+forms expected by higher-level code.  It implements the supported legacy
+``PostProcessType`` operations (mean, linear map, discriminate), plus the
+granular post-processing pipeline functions (:func:`apply_equalise`,
+:func:`apply_discriminate_instruction`, :func:`apply_post_select`,
+:func:`apply_demap_instruction`) and small helpers for axis bookkeeping.
+
+For a full description of the granular pipeline and how each step fits together,
+see the :ref:`post_processing_pipeline` guide.
+
+The legacy ``LINEAR_MAP_COMPLEX_TO_REAL`` path is preserved unchanged for
+backward compatibility.
+"""
+
 from numbers import Number
 
 import numpy as np
 
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
-from qat.ir.measure import PostProcessing
+from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing, PostSelect
+from qat.model.post_processing import BG_LABEL, MaxLikelihoodMethod
 
 # TODO: move to QAT config?
 UPCONVERT_SIGN = 1.0
@@ -58,10 +75,10 @@ def apply_post_processing(
             return linear_map_complex_to_real(response, axes, *post_processing.args)
         case PostProcessType.DISCRIMINATE:
             return discriminate(response, axes, post_processing.args[0])
-
-    raise NotImplementedError(
-        f"Post processing type {post_processing.process_type} not implemented."
-    )
+        case _:
+            raise NotImplementedError(
+                f"Post processing type {post_processing.process_type} is not implemented."
+            )
 
 
 def mean(
@@ -117,6 +134,155 @@ def discriminate(response: np.ndarray, axes: dict[ProcessAxis, int], threshold: 
     :returns: The processed results as an array and the axis map.
     """
     return 2 * (response > threshold) - 1, axes
+
+
+def apply_equalise(
+    response: np.ndarray,
+    instr: Equalise,
+    axes: dict[ProcessAxis, int],
+) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
+    """Runtime implementation of :class:`qat.ir.measure.Equalise`.
+
+    Applies the affine ``[I', Q'] = A @ [I, Q] + b`` transform to the
+    complex readout array and returns the result as a complex array
+    ``I' + j Q'``.
+
+    :param response: Complex IQ readout array (arbitrary batch shape).
+    :param instr: The :class:`Equalise` instruction carrying ``transform`` and
+        ``offset``.
+    :param axes: Current axis map.
+    :returns: Complex-valued transformed data and unchanged axis map.
+    :raises ValueError: If ``instr.transform`` is not shape ``(2, 2)`` or
+        ``instr.offset`` is not shape ``(2,)``.
+    """
+    A = np.asarray(instr.transform, dtype=float)
+    b_iq = np.asarray(instr.offset, dtype=float)
+
+    if A.shape != (2, 2):
+        raise ValueError(
+            f"Equalise transform must be shape (2, 2) for single-channel operation; "
+            f"got {A.shape}."
+        )
+    if b_iq.shape != (2,):
+        raise ValueError(
+            f"Equalise offset must be shape (2,) for single-channel operation; "
+            f"got {b_iq.shape}."
+        )
+
+    # Represent each complex sample as a real [I, Q] vector, apply the affine
+    # transform, then repack into a complex scalar.
+    iq = np.stack([response.real, response.imag], axis=-1)  # (..., 2)
+    iq_out = iq @ A.T + b_iq  # (..., 2)
+    return iq_out[..., 0] + 1j * iq_out[..., 1], axes
+
+
+def apply_discriminate_instruction(
+    response: np.ndarray,
+    instr: Discriminate,
+    axes: dict[ProcessAxis, int],
+) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
+    """Runtime implementation of :class:`qat.ir.measure.Discriminate`.
+
+    Discriminate equalised values to string state labels using a
+    :class:`Discriminate` instruction.
+
+    For the threshold path (``instr.threshold is not None``) values above the
+    threshold map to ``"0"`` and values at or below map to ``"1"``.
+
+    For the ML path (``instr.method`` is set) normalised Gaussian likelihoods
+    are computed using a single global ``noise_est``; the state with the highest
+    likelihood wins and its ``label`` string is returned.  Likelihoods are
+    computed in log-domain with log-sum-exp stabilisation to avoid underflow.
+    When ``p_min > 0``, shots below the minimum confidence threshold are
+    labelled :data:`~qat.model.post_processing.BG_LABEL`.
+
+    :param response: Equalised (real or complex) readout array.
+    :param instr: The :class:`Discriminate` instruction.
+    :param axes: Current axis map.
+    :returns: String state-label array and unchanged axis map.
+    """
+    if instr.threshold is not None:
+        state_labels = np.where(np.real(response) > instr.threshold, "0", "1")
+        return state_labels, axes
+
+    # ML path — compute normalised likelihoods via log-sum-exp stabilisation.
+    method: MaxLikelihoodMethod = instr.method  # type: ignore[assignment]
+    if len(method.states) == 0:
+        raise ValueError("MaxLikelihoodMethod must define at least one state.")
+
+    locations = np.array([s.location for s in method.states], dtype=np.complex128)
+    orig_shape = response.shape
+    flat = response.flatten()  # shape (N,)
+
+    # log_p[n, k] = -|z_n - loc_k|^2 / (2 * noise_est)  where noise_est is the noise power (variance σ²)
+    sq_dist = np.abs(flat[:, np.newaxis] - locations[np.newaxis, :]) ** 2  # (N, K)
+    log_p = -sq_dist / (2.0 * method.noise_est)  # (N, K)
+
+    best_idx = np.argmax(log_p, axis=1)  # (N,)
+    state_label_arr = np.array([s.label for s in method.states])
+    classified = state_label_arr[best_idx]
+
+    # p_min check: compute normalised likelihoods and reject low-confidence shots.
+    if method.p_min > 0.0:
+        # Log-sum-exp stabilisation: subtract row-wise max before exp to prevent
+        # underflow when all log-likelihoods are very negative (extreme outliers).
+        log_p_stable = log_p - log_p.max(axis=1, keepdims=True)  # (N, K)
+        likelihoods = np.exp(log_p_stable)  # (N, K)
+        norm_likelihoods = likelihoods / likelihoods.sum(axis=1, keepdims=True)  # (N, K)
+        best_p = norm_likelihoods[np.arange(len(flat)), best_idx]  # (N,)
+        classified = np.where(best_p >= method.p_min, classified, BG_LABEL)
+
+    return classified.reshape(orig_shape), axes
+
+
+def apply_post_select(
+    state_ids: np.ndarray,
+    instr: PostSelect,
+    axes: dict[ProcessAxis, int],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Runtime implementation of :class:`qat.ir.measure.PostSelect`.
+
+    Build a per-shot validity mask from a :class:`PostSelect` instruction.
+
+    Shots whose state label appears in ``instr.disallowed_states`` are marked
+    ``False`` in the returned validity mask. When ``disallowed_states`` is empty
+    every shot is valid.
+
+    :param state_ids: String state-label array produced by a :class:`Discriminate` step.
+    :param instr: The :class:`PostSelect` instruction.
+    :param axes: Current axis map (not used; present for interface consistency).
+    :returns: A tuple of ``(state_ids, validity_mask)`` where ``validity_mask``
+        is a boolean ndarray with the same shape as ``state_ids``.
+    """
+    disallowed = np.asarray(instr.disallowed_states)
+    validity_mask = ~np.isin(state_ids, disallowed)
+    return state_ids, validity_mask
+
+
+def apply_demap_instruction(
+    state_ids: np.ndarray,
+    instr: Demap,
+    axes: dict[ProcessAxis, int],
+) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
+    """Runtime implementation of :class:`qat.ir.measure.Demap`.
+
+    Demap string state labels to integer output values using a :class:`Demap` instruction.
+
+    :param state_ids: String state-label array produced by a :class:`Discriminate` step.
+    :param instr: The :class:`Demap` instruction carrying the ``state_map`` dict.
+    :param axes: Current axis map.
+    :returns: Demapped int values and unchanged axis map.
+    """
+    state_ids = np.asarray(state_ids)
+    lookup = instr.state_map
+    if BG_LABEL not in lookup and np.any(state_ids == BG_LABEL):
+        raise RuntimeError(
+            f"Discriminate emitted the background label {BG_LABEL!r} (p_min rejection) "
+            "but no PostSelect instruction was emitted to handle it. "
+            "Ensure post_selection is enabled in CompilerConfig when p_min > 0."
+        )
+    mapped = np.vectorize(lambda k: lookup.get(k, -1))(state_ids).astype(int)
+    return mapped, axes
 
 
 def _remove_axes(original_dims, removed_axis_indices, axis_locations):

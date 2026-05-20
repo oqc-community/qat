@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+"""Instruction builder abstractions and a concrete quantum builder.
+
+This module defines the abstract :class:`InstructionBuilder` API and a
+concrete :class:`QuantumInstructionBuilder` which implements pulse-level gate
+construction and measurement helpers. The builders produce an IR
+``InstructionBlock`` suitable for later compilation and scheduling stages.
+"""
 
 from __future__ import annotations
 
@@ -29,11 +36,21 @@ from qat.ir.instructions import (
     Return,
     Synchronize,
 )
-from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, acq_mode_process_axis
+from qat.ir.measure import (
+    Acquire,
+    Demap,
+    Discriminate,
+    Equalise,
+    MeasureBlock,
+    PostProcessing,
+    PostSelect,
+    acq_mode_process_axis,
+)
 from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import Pulse, SampledWaveform
 from qat.model.device import Component, PhysicalChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
+from qat.model.post_processing import LinearMapToRealMethod, MaxLikelihoodMethod
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.pydantic import QubitId, ValidatedList
 
@@ -99,17 +116,17 @@ class InstructionBuilder(ABC):
     @abstractmethod
     def X(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
-    ): ...
+    ) -> InstructionBuilder: ...
 
     @abstractmethod
     def Y(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
-    ): ...
+    ) -> InstructionBuilder: ...
 
     @abstractmethod
     def Z(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
-    ): ...
+    ) -> InstructionBuilder: ...
 
     @abstractmethod
     def U(
@@ -119,85 +136,115 @@ class InstructionBuilder(ABC):
         phi: float,
         lamb: float,
         pulse_channel: PulseChannel = None,
-    ): ...
+    ) -> InstructionBuilder: ...
 
     @abstractmethod
-    def swap(self, target: Qubit, destination: Qubit): ...
+    def swap(self, target: Qubit, destination: Qubit) -> InstructionBuilder: ...
 
-    def had(self, target: Qubit):
+    def had(self, target: Qubit) -> InstructionBuilder:
         return self.Z(target).Y(target, theta=np.pi / 2.0)
 
-    def SX(self, target: Qubit):
+    def SX(self, target: Qubit) -> InstructionBuilder:
         return self.X(target, theta=np.pi / 2.0)
 
-    def SXdg(self, target: Qubit):
+    def SXdg(self, target: Qubit) -> InstructionBuilder:
         return self.X(target, theta=-(np.pi / 2.0))
 
-    def S(self, target: Qubit):
+    def S(self, target: Qubit) -> InstructionBuilder:
         return self.Z(target, theta=np.pi / 2.0)
 
-    def Sdg(self, target: Qubit):
+    def Sdg(self, target: Qubit) -> InstructionBuilder:
         return self.Z(target, theta=-(np.pi / 2))
 
-    def T(self, target: Qubit):
+    def T(self, target: Qubit) -> InstructionBuilder:
         return self.Z(target, theta=np.pi / 4.0)
 
-    def Tdg(self, target: Qubit):
+    def Tdg(self, target: Qubit) -> InstructionBuilder:
         return self.Z(target, -(np.pi / 4.0))
 
     @abstractmethod
-    def controlled(self, controllers: Qubit | list[Qubit], builder: InstructionBuilder): ...
+    def controlled(
+        self, controllers: Qubit | list[Qubit], builder: InstructionBuilder
+    ) -> InstructionBuilder: ...
 
-    def cX(self, controllers: Qubit | list[Qubit], target: Qubit, theta=np.pi):
+    def cX(
+        self, controllers: Qubit | list[Qubit], target: Qubit, theta: float = np.pi
+    ) -> InstructionBuilder:
         return self.controlled(controllers, self.X(target, theta=theta))
 
-    def cY(self, controllers: Qubit | list[Qubit], target: Qubit, theta=np.pi):
+    def cY(
+        self, controllers: Qubit | list[Qubit], target: Qubit, theta: float = np.pi
+    ) -> InstructionBuilder:
         return self.controlled(controllers, self.Y(target, theta=theta))
 
-    def cZ(self, controllers: Qubit | list[Qubit], target: Qubit, theta=np.pi):
+    def cZ(
+        self, controllers: Qubit | list[Qubit], target: Qubit, theta: float = np.pi
+    ) -> InstructionBuilder:
         return self.controlled(controllers, self.Z(target, theta=theta))
 
-    def cnot(self, control: Qubit | list[Qubit], target: Qubit):
+    def cnot(self, control: Qubit | list[Qubit], target: Qubit) -> InstructionBuilder:
         return self.cX(control, target, theta=np.pi)
 
     @abstractmethod
-    def ccnot(self, controllers: list[Qubit], target: Qubit): ...
+    def ccnot(self, controllers: list[Qubit], target: Qubit) -> InstructionBuilder: ...
 
-    def cswap(self, controllers: Qubit | list[Qubit], target: Qubit, destination: Qubit):
+    def cswap(
+        self, controllers: Qubit | list[Qubit], target: Qubit, destination: Qubit
+    ) -> InstructionBuilder:
         return self.controlled(controllers, self.swap(target, destination))
 
     @abstractmethod
-    def ECR(self, control: Qubit, target: Qubit): ...
+    def ECR(self, control: Qubit, target: Qubit) -> InstructionBuilder: ...
 
     @abstractmethod
-    def measure_single_shot_z(
+    def measure_with_granular_post_processing(
         self,
         target: Qubit,
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
-    ): ...
+    ):
+        """Measure a qubit and emit the full granular post-processing pipeline.
+
+        Compiler frontends should call this method when lowering a measurement
+        assignment into IR. The granular discrimination chain is emitted for
+        both qubits with ``post_process_method`` configured and legacy qubits.
+        For configured qubits, the chain (for example ``Equalise`` →
+        ``Discriminate`` → ``Demap``) is derived from the configured
+        post-processing method; for legacy qubits, the equivalent granular
+        chain is derived from legacy ``mean_z_map_args`` data.
+
+        See :meth:`QuantumInstructionBuilder.measure_with_granular_post_processing` for
+        full detail.
+        """
+        ...
 
     @abstractmethod
-    def reset(self, targets: Qubit | list[Qubit], **kwargs): ...
+    def reset(
+        self, targets: Qubit | list[Qubit], **kwargs
+    ) -> QuantumInstructionBuilder: ...
 
-    def repeat(self, repeat_count: int):
+    def repeat(self, repeat_count: int) -> InstructionBuilder:
         return self.add(Repeat(repeat_count=repeat_count))
 
-    def returns(self, variables: list[str] = None):
+    def returns(self, variables: list[str] = None) -> InstructionBuilder:
         """Add return statement."""
         variables = variables if variables is not None else []
         return self.add(Return(variables=variables))
 
-    def assign(self, name: str, value):
+    def assign(self, name: str, value) -> InstructionBuilder:
         return self.add(Assign(name=name, value=value))
 
-    def jump(self, label: str | Label, condition: BinaryOperator | None = None):
+    def jump(
+        self, label: str | Label, condition: BinaryOperator | None = None
+    ) -> InstructionBuilder:
         return self.add(Jump(label=label, condition=condition))
 
-    def results_processing(self, variable: str, res_format: InlineResultsProcessing):
+    def results_processing(
+        self, variable: str, res_format: InlineResultsProcessing
+    ) -> InstructionBuilder:
         return self.add(ResultsProcessing(variable=variable, results_processing=res_format))
 
-    def add(self, *instructions: Instruction, flatten: bool = False):
+    def add(self, *instructions: Instruction, flatten: bool = False) -> InstructionBuilder:
         """Add one or more instruction(s) into this builder.
 
         All methods should use this instead of accessing the instructions tree directly as
@@ -271,7 +318,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             pulse_channel_map = self._build_pulse_channel_mapping(self.hw)
         self._pulse_channels: dict[str, PulseChannel] = pulse_channel_map
 
-    def pretty_print(self):
+    def pretty_print(self) -> str:
         output_str = ""
         for instr in self:
             targets = getattr(instr, "targets", None)
@@ -438,7 +485,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         gate: list[Pulse],
         theta: float,
         pulse_channel: PulseChannel = None,
-    ):
+    ) -> QuantumInstructionBuilder:
         if np.isclose(theta, 0.0):
             return self.add(*gate)
 
@@ -450,7 +497,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     def _hw_X_pi_2(
         self, target: Qubit, pulse_channel: PulseChannel = None, amp_scale: float = 1.0
-    ):
+    ) -> list[Pulse]:
         """Op definition for a X(pi/2) gate.
 
         Optionally allows a pulse channel to be provided to apply the X(pi/2) pulse down.
@@ -464,7 +511,13 @@ class QuantumInstructionBuilder(InstructionBuilder):
         pulse_waveform.amp *= amp_scale
         return [Pulse(targets=pulse_channel.uuid, waveform=pulse_waveform)]
 
-    def _hw_X_pi(self, target: Qubit, pulse_channel: PulseChannel = None):
+    def _hw_X_pi(self, target: Qubit, pulse_channel: PulseChannel = None) -> list[Pulse]:
+        """Op definition for a X(pi) gate.
+
+        If the qubit has a direct X(pi) pulse, it is used. Otherwise, a X(pi/2) pulse is
+        used twice.
+        """
+
         pulse_channel = pulse_channel or self.get_pulse_channel(
             target.drive_pulse_channel.uuid
         )
@@ -477,7 +530,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     def _hw_Z(
         self, target: Qubit, theta: float = np.pi, pulse_channel: PulseChannel = None
-    ):
+    ) -> list[PhaseShift]:
         """Op definition for a Z(theta) gate.
 
         If a channel is provided, the phase shift is applied to that channel. If none is
@@ -511,7 +564,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         return instr_collection
 
-    def _hw_ZX_pi_4(self, target1: Qubit, target2: Qubit):
+    def _hw_ZX_pi_4(self, target1: Qubit, target2: Qubit) -> list[Synchronize | Pulse]:
         """Native op definition for a ZX(pi/4) gate."""
 
         target1_id = self._qubit_index_by_uuid[target1.uuid]
@@ -558,7 +611,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
     def _generate_measure_acquire(
         self, target: Qubit, mode: AcquireMode, output_variable: str = None
-    ):
+    ) -> list[Pulse | Acquire]:
         # Measure-related info.
         measure_channel = target.measure_pulse_channel
         measure_instruction = Pulse(
@@ -585,11 +638,30 @@ class QuantumInstructionBuilder(InstructionBuilder):
         else:
             filter = None
 
-        A, B = target.mean_z_map_args[0], target.mean_z_map_args[1]
-        mean_g = (1 - B) / A
-        mean_e = (-1 - B) / A
-        rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
-        threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+        if target.mean_z_map_args is not None:
+            # This is the legacy path
+            A, B = target.mean_z_map_args[0], target.mean_z_map_args[1]
+            mean_g = (1 - B) / A
+            mean_e = (-1 - B) / A
+            rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
+            threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+        elif isinstance(target.post_process_method, LinearMapToRealMethod):
+            # New-style path: derive rotation/threshold from the configured method's
+            # mean_z_map_args so QBlox HW thresholded acquisition is correctly set.
+            A, B = (
+                target.post_process_method.mean_z_map_args[0],
+                target.post_process_method.mean_z_map_args[1],
+            )
+            mean_g = (1 - B) / A
+            mean_e = (-1 - B) / A
+            rotation = np.mod(-np.angle(mean_e - mean_g), 2 * np.pi)
+            threshold = (np.exp(1j * rotation) * (mean_e + mean_g)).real / 2
+        else:
+            # MaxLikelihoodMethod or unknown: no linear-map calibration available.
+            # Default to zero so hardware backends that unconditionally configure
+            # these fields do not fail at runtime.
+            rotation = 0.0
+            threshold = 0.0
 
         acquire_instruction = Acquire(
             targets=acquire_channel.uuid,
@@ -672,13 +744,15 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target: Qubit | set[Qubit],
         output_variable: str,
     ):
-        """Takes the mean of the acquired data. If the acquire mode is INTEGRATOR, it
-        returns the builder without any changes.
+        """Emit ``PostProcessing(MEAN, TIME)`` unless the acquire mode is INTEGRATOR.
 
-        :param target: The qubit to be measured.
-        :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        For ``INTEGRATOR`` mode the hardware already integrates over time so no
+        software mean is needed; the builder is returned unchanged.
+
+        :param acquire_mode: The hardware acquisition mode in use.
+        :param target: The qubit being measured.
+        :param output_variable: The variable name to attach to the instruction.
+        :returns: The builder instance.
         """
         if acquire_mode == AcquireMode.INTEGRATOR:
             return self
@@ -693,14 +767,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
         target: Qubit | set[Qubit],
         output_variable: str,
     ):
-        """Applies the mean post-processing to the acquired data along the sequence axis. If
-        the acquire mode is SCOPE, the mean post-processing is not needed, so it returns the
-        builder without any changes.
+        """Emit ``PostProcessing(MEAN, SEQUENCE)`` unless the acquire mode is SCOPE.
 
-        :param target: The qubit to be measured.
-        :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        For ``SCOPE`` mode the raw time-series waveform is captured directly so
+        averaging over the shot sequence is not meaningful; the builder is returned
+        unchanged.
+
+        :param acquire_mode: The hardware acquisition mode in use.
+        :param target: The qubit being measured.
+        :param output_variable: The variable name to attach to the instruction.
+        :returns: The builder instance.
         """
         if acquire_mode == AcquireMode.SCOPE:
             return self
@@ -715,16 +791,32 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """Measure a single qubit along the z-axis. Execution results in an array of floats
-        centred around 0, where anything above 0 shows a bias towards a +Z measurement, and
-        below 0 shows a bias towards a -Z measurement. The array is an ndarray, where the
-        first dimension is for each of the qubits measured, the second dimension is for each
-        shot run.
+        """Measure a single qubit along the z-axis (customer-facing API).
+
+        Emits a :class:`~qat.ir.measure.MeasureBlock`, an optional
+        ``PostProcessing(MEAN, TIME)`` when ``axis`` is
+        :attr:`~qat.ir.instruction_basetypes.ProcessAxis.TIME` (SCOPE mode), and a
+        ``PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)`` to project the complex IQ value
+        onto a real z-projection.  Results are an ndarray of floats centred around 0:
+        values above 0 indicate a bias towards the +Z state, values below 0 indicate
+        a bias towards the −Z state.
+
+        .. note::
+            This method always emits a legacy ``PostProcessing`` instruction regardless
+            of whether ``post_process_method`` is configured on the qubit.  Compiler
+            frontends that need the granular discrimination pipeline (``Equalise`` →
+            ``Discriminate`` → ``PostSelect``) should call
+            :meth:`measure_with_granular_post_processing` instead (and
+            :meth:`emit_post_select` for post-selection insertion).
 
         :param target: The qubit to be measured.
-        :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        :param axis: The axis along which post-processing of readouts should occur.
+            :attr:`~ProcessAxis.SEQUENCE` (default) uses ``INTEGRATOR`` acquisition;
+            :attr:`~ProcessAxis.TIME` uses ``SCOPE`` acquisition and emits an
+            additional ``PostProcessing(MEAN, TIME)``.
+        :param output_variable: Name of the variable where the acquire result is saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
@@ -740,15 +832,19 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """Measure the signal of a single qubit. Execution results in an array of complex
-        numbers that show the war signal output form the hardware. The array is an ndarray,
-        where the first dimension is for each of the qubits measured, the second dimension
-        is for each shot run.
+        """Measure the raw IQ signal of a single qubit (customer-facing API).
+
+        Emits a :class:`~qat.ir.measure.MeasureBlock` and, when ``axis`` is
+        :attr:`~qat.ir.instruction_basetypes.ProcessAxis.TIME` (SCOPE mode), an
+        additional ``PostProcessing(MEAN, TIME)`` to average over the time axis.
+        No z-discrimination is applied; results are an ndarray of complex IQ values,
+        one per shot.
 
         :param target: The qubit to be measured.
-        :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        :param axis: The axis along which post-processing of readouts should occur.
+        :param output_variable: Name of the variable where the acquire result is saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
@@ -761,33 +857,46 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """Measure a single qubit along the z-axis. Execution results in an array of floats
-        centred around 0, where anything above 0 shows a bias towards a +Z measurement, and
-        below 0 shows a bias towards a -Z measurement. Each entry is for each qubit
-        measured, and is the mean of the results from `measure_single_shot_z`.
+        """Measure a single qubit along the z-axis and return the shot-averaged result.
+
+        Emits a :class:`~qat.ir.measure.MeasureBlock`, averages first over the time
+        axis (SCOPE mode only) then over the sequence axis (INTEGRATOR mode only), and
+        finally emits ``PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)`` to project the
+        averaged complex IQ value to a real z-expectation value.
+
+        .. note::
+            Like :meth:`measure_single_shot_z`, this method always emits a legacy
+            ``PostProcessing`` instruction.  Use
+            :meth:`measure_with_granular_post_processing` for the granular
+            discrimination pipeline.
 
         :param target: The qubit to be measured.
-        :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        :param axis: The axis along which post-processing of readouts should occur.
+        :param output_variable: Name of the variable where the acquire result is saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
         self.measure(target, acquire_mode, output_variable)
         self._take_time_mean(acquire_mode, target, output_variable)
         self._take_sequence_mean(acquire_mode, target, output_variable)
+
         return self.post_processing(
             target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
         )
 
     def measure_mean_signal(self, target: Qubit, output_variable: str = None):
-        """Measure the signal of a single qubit. Execution results in an array of complex
-        numbers that show the war signal output form the hardware. Each entry is for each
-        qubit measured, and is the mean of the results from `measure_single_signal_shot`.
+        """Measure the raw IQ signal of a single qubit and return the shot-averaged result.
+
+        Emits a :class:`~qat.ir.measure.MeasureBlock` using ``INTEGRATOR`` acquisition
+        and appends a ``PostProcessing(MEAN, SEQUENCE)`` to average the complex IQ
+        values across all shots.  Results are a single complex value per qubit.
 
         :param target: The qubit to be measured.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        :param output_variable: Name of the variable where the acquire result is saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[ProcessAxis.SEQUENCE]
@@ -796,11 +905,16 @@ class QuantumInstructionBuilder(InstructionBuilder):
         )
 
     def measure_scope_mode(self, target: Qubit, output_variable: str = None):
-        """Measure the scope mode.
+        """Measure the qubit in scope (waveform-capture) mode.
+
+        Emits a :class:`~qat.ir.measure.MeasureBlock` using ``SCOPE`` acquisition mode.
+        No post-processing is applied; the raw time-series IQ waveform is stored
+        directly in the output variable.
 
         :param target: The qubit to be measured.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        :param output_variable: Name of the variable where the acquire result is saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
         """
         acquire_mode = acq_mode_process_axis[ProcessAxis.TIME]
         return self.measure(target, acquire_mode, output_variable)
@@ -811,31 +925,41 @@ class QuantumInstructionBuilder(InstructionBuilder):
         axis: ProcessAxis = ProcessAxis.SEQUENCE,
         output_variable: str = None,
     ):
-        """Measure a single qubit along the z-axis. Execution results in an array of ±1s,
-        where 1 indicates a +Z measurement, and -1 indicates a -Z measurement. It takes the
-        results from `measure_single_shot_z` and applies a binning operation to round the
-        results to ±1. The array is an ndarray, where the first dimension is for each of the
-        qubits measured, the second dimension is for each shot run.
+        """Measure a single qubit along the z-axis and discriminate to ±1 (customer-facing
+        API).
+
+        Emits a :class:`~qat.ir.measure.MeasureBlock`, an optional
+        ``PostProcessing(MEAN, TIME)`` (SCOPE mode only),
+        ``PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)`` to project complex IQ to a
+        real z-value, and a ``PostProcessing(DISCRIMINATE)`` that rounds the
+        z-projection value to +1 (above threshold) or −1 (at or below threshold).
+
+        .. note::
+            This method uses the legacy ``DISCRIMINATE`` post-processing type and does
+            not emit the granular :class:`~qat.ir.measure.Discriminate` instruction
+            used by the post-selection pipeline.  It is not equivalent to
+            :meth:`measure_with_granular_post_processing` (which uses
+            ``Discriminate``/``PostSelect``/``Demap``) and should not be substituted
+            for it.
 
         :param target: The qubit to be measured.
-        :param axis: The type of axis which the post-processing of readouts should occur on.
-        :param output_variable: The variable where the output of the acquire should be
-            saved.
+        :param axis: The axis along which post-processing of readouts should occur.
+        :param output_variable: Name of the variable where the acquire result is saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
         """
         output_variable = output_variable or self._generate_output_variable(target)
         acquire_mode = acq_mode_process_axis[axis]
-        return (
-            self.measure(target, acq_mode_process_axis[axis], output_variable)
-            ._take_time_mean(acquire_mode, target, output_variable)
-            .post_processing(
-                target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
-            )
-            .post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
+        self.measure(target, acq_mode_process_axis[axis], output_variable)
+        self._take_time_mean(acquire_mode, target, output_variable)
+        self.post_processing(
+            target, output_variable, PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
         )
+        return self.post_processing(target, output_variable, PostProcessType.DISCRIMINATE)
 
     def reset(
         self, targets: PulseChannel | Qubit | Iterable[PulseChannel | Qubit], **kwargs
-    ):
+    ) -> QuantumInstructionBuilder:
         if isinstance(targets, list):
             targets = set(targets)
         elif isinstance(targets, PulseChannel | Qubit):
@@ -861,10 +985,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return self
 
     @staticmethod
-    def _generate_output_variable(target: Component):
+    def _generate_output_variable(target: Component) -> str:
         return "out_" + target.uuid + f"_{np.random.randint(np.iinfo(np.int32).max)}"
 
-    def _find_valid_measure_block(self, target_ids: QubitId | set[QubitId]):
+    def _find_valid_measure_block(
+        self, target_ids: QubitId | set[QubitId]
+    ) -> MeasureBlock | None:
         """Finds the previous :class:`MeasureBlock` where the given qubits are not measured
         yet.
 
@@ -878,6 +1004,257 @@ class QuantumInstructionBuilder(InstructionBuilder):
                 return instruction
         return None
 
+    @staticmethod
+    def _build_legacy_equalise_args(
+        mean_z_map_args: list,
+    ) -> tuple[np.ndarray, np.ndarray, float]:
+        """Compute ``Equalise`` parameters and discrimination threshold from
+        ``mean_z_map_args``.
+
+        Given ``mean_z_map_args = [A, B]`` where the legacy linear map is
+        ``z = Re(A * iq + B)``, the affine transform applied to the IQ vector
+        ``[I, Q]`` is:
+
+        .. code-block:: text
+
+            [I', Q'] = [[a, -b], [b, a]] @ [I, Q] + [c_I, c_Q]
+
+        where ``a + jb = A`` and ``c_I + jc_Q = B``.  This is identical to
+        the transform used by the :class:`~qat.model.post_processing.LinearMapToRealMethod`
+        branch of :meth:`emit_granular_post_processing`.
+
+        The discrimination threshold is ``0.0`` — the midpoint on the real
+        axis between the rotated state centroids — matching the convention of
+        :class:`~qat.ir.measure.Discriminate` (``> 0 → "0"``, ``≤ 0 → "1"``).
+
+        :param mean_z_map_args: Two-element list ``[A, B]`` as stored on the
+            legacy qubit.
+        :returns: ``(transform, offset, threshold)`` tuple.
+        """
+        A, B = complex(mean_z_map_args[0]), complex(mean_z_map_args[1])
+        a, b = A.real, A.imag
+        transform = np.array([[a, -b], [b, a]], dtype=float)
+        offset = np.array([B.real, B.imag], dtype=float)
+        return transform, offset, 0.0
+
+    def emit_granular_post_processing(
+        self, target: Qubit, output_variable: str
+    ) -> QuantumInstructionBuilder:
+        """Emit the granular post-processing instruction chain (without PostSelect).
+
+        Emits ``Equalise`` → ``Discriminate`` → ``Demap`` based on the qubit's
+        configuration. Does NOT emit ``PostSelect`` instructions; use
+        :meth:`emit_post_select` separately if needed.
+
+        Dispatches as follows:
+
+        * :class:`~qat.model.post_processing.LinearMapToRealMethod` →
+          :class:`~qat.ir.measure.Equalise` + :class:`~qat.ir.measure.Discriminate`
+          + :class:`~qat.ir.measure.Demap` (``{"0": 0, "1": 1}``).
+        * :class:`~qat.model.post_processing.MaxLikelihoodMethod` →
+          optional :class:`~qat.ir.measure.Equalise`
+          + :class:`~qat.ir.measure.Discriminate` (ML path)
+          + :class:`~qat.ir.measure.Demap` (derived from ``MLStateMap.label`` →
+          ``MLStateMap.output_value``).
+        * Legacy (``post_process_method is None``, ``mean_z_map_args`` set) →
+          :class:`~qat.ir.measure.Equalise` (rotation derived from
+          ``mean_z_map_args``) + :class:`~qat.ir.measure.Discriminate`
+          + :class:`~qat.ir.measure.Demap` (``{"0": 0, "1": 1}``).
+
+        **Demap value convention**
+
+        The ``Demap`` instruction for the ``LinearMapToRealMethod`` and legacy paths
+        emits ``{"0": 0, "1": 1}`` — the standard qubit convention (ground state → 0,
+        excited state → 1).  This aligns with the ML pipeline and the ``binary()``
+        output format, eliminating the need for sign-based conversion in the runtime.
+
+        **Results Format Semantics with Compiler Config**
+
+        The emitted ``Demap`` instruction decodes discriminated string state labels to
+        numeric output values. These values then flow through the runtime pipeline where
+        ``results_format`` flags determine final encoding:
+
+        - **``raw()``**: Complex IQ arrays from
+          :class:`~qat.runtime.passes.analysis.EqualiseResult` (post-mask applied).
+          For legacy acquires without an ``Equalise`` step, falls back to the mapped
+          arrays.
+
+        - **``binary()``**: Per-shot int output-value array from ``Demap`` (one value
+          per retained shot, e.g. ``[0, 1, 0, ...]``). With post-selection,
+          only retained shots are included.
+
+        - **``binary_count()``**: Dictionary of state string → count using
+          :func:`~qat.runtime.results_processing.label_count` on the string labels
+          from :class:`~qat.runtime.passes.analysis.DiscriminateResult`.
+          **Key difference**: when post-selection is active,
+          the repeat count passed to ``binary_count()`` is ``shots_retained`` (not
+          ``shots_requested``), so counts reflect only the passing shots.
+
+        **Example: 3-state ML with state "2" disallowed**
+
+        Setup::
+
+            states = [
+                MLStateMap(label="0", output_value=0, location=1+0j, disallowed=False),
+                MLStateMap(label="1", output_value=1, location=-1+0j, disallowed=False),
+                MLStateMap(label="2", output_value=2, location=0+1j, disallowed=True),
+            ]
+            # 10 shots: 4 → state 0, 3 → state 1, 3 → state 2 (filtered by post-select)
+
+        After ``Demap``::
+
+            [0, 0, 0, 0, 1, 1, 1, 2, 2, 2]
+
+        After ``PostSelect`` + global mask (7 retained)::
+
+            [0, 0, 0, 0, 1, 1, 1]
+
+        Format outcomes::
+
+            raw():        <complex IQ from EqualiseResult, 7 retained shots>
+            binary():     [0, 0, 0, 0, 1, 1, 1]
+            binary_count(): {"0": 4, "1": 3}  (from 7 retained, not 10 requested)
+
+        **Default Behavior**
+
+        When ``CompilerConfig.results_format`` is not set, it defaults to
+        ``ResultsFormatting.DynamicStructureReturn``, which simplifies output
+        (removes generated variable names, unwraps single-value results).
+
+        :param target: Qubit whose configuration drives the emitted instructions.
+        :param output_variable: The variable name to attach to the instructions.
+        :returns: The builder instance.
+        """
+        match target.post_process_method:
+            case LinearMapToRealMethod() as method:
+                m, c = (
+                    complex(method.mean_z_map_args[0]),
+                    complex(method.mean_z_map_args[1]),
+                )
+                a, b = m.real, m.imag
+                self.add(
+                    Equalise(
+                        output_variable=output_variable,
+                        transform=np.array([[a, -b], [b, a]], dtype=float),
+                        offset=np.array([c.real, c.imag], dtype=float),
+                    )
+                )
+                self.add(Discriminate(output_variable=output_variable, threshold=0.0))
+                # Demap convention: {"0": 0, "1": 1} uses the standard qubit convention
+                # (|0⟩ → 0, |1⟩ → 1) matching the ML pipeline and binary() output format.
+                self.add(Demap(output_variable=output_variable, state_map={"0": 0, "1": 1}))
+            case MaxLikelihoodMethod() as method:
+                if method.transform is not None and method.offset is not None:
+                    self.add(
+                        Equalise(
+                            output_variable=output_variable,
+                            transform=np.asarray(method.transform, dtype=float),
+                            offset=np.asarray(method.offset, dtype=float),
+                        )
+                    )
+                self.add(Discriminate(output_variable=output_variable, method=method))
+                self.add(
+                    Demap(
+                        output_variable=output_variable,
+                        state_map={s.label: s.output_value for s in method.states},
+                    )
+                )
+            case _:
+                # Legacy mean_z_map_args path: derive Equalise parameters from
+                # mean_z_map_args and emit the same granular chain so all measurement
+                # paths use one pipeline.
+                transform, offset, threshold = self._build_legacy_equalise_args(
+                    target.mean_z_map_args
+                )
+                self.add(
+                    Equalise(
+                        output_variable=output_variable,
+                        transform=transform,
+                        offset=offset,
+                    )
+                )
+                self.add(Discriminate(output_variable=output_variable, threshold=threshold))
+                self.add(Demap(output_variable=output_variable, state_map={"0": 0, "1": 1}))
+        return self
+
+    def emit_post_select(
+        self,
+        output_variable: str,
+        disallowed_states: list[str],
+    ) -> QuantumInstructionBuilder:
+        """Emit a PostSelect instruction with given disallowed states.
+
+        :param output_variable: The variable name to attach to the instruction.
+        :param disallowed_states: List of state labels to filter out (e.g., ["1"]).
+        :returns: The builder instance.
+        """
+        if not disallowed_states:
+            return self
+
+        post_select = PostSelect(
+            output_variable=output_variable,
+            disallowed_states=disallowed_states,
+        )
+
+        # Keep post-selection before state mapping so disallowed labels are matched
+        # against discriminated states rather than mapped numeric outputs.
+        for index in range(len(self._ir.instructions) - 1, -1, -1):
+            instruction = self._ir.instructions[index]
+            if (
+                isinstance(instruction, Demap)
+                and instruction.output_variable == output_variable
+            ):
+                instructions = list(self._ir.instructions)
+                instructions.insert(index, post_select)
+                self._ir.instructions = instructions
+                return self
+
+        self.add(post_select)
+        return self
+
+    def measure_with_granular_post_processing(
+        self,
+        target: Qubit,
+        axis: ProcessAxis = ProcessAxis.SEQUENCE,
+        output_variable: str = None,
+    ) -> QuantumInstructionBuilder:
+        """Measure a qubit and emit the full granular post-processing pipeline.
+
+        This method is intended for use by compiler frontends (QASM2, QASM3, QIR,
+        tket) where the result of a measurement assignment must be discriminated into
+        state labels. Customer-facing code that only needs raw z-projection floats
+        should call :meth:`measure_single_shot_z` instead.
+
+        For qubits with a ``post_process_method`` configured the emitted sequence is:
+
+        * :class:`~qat.ir.measure.MeasureBlock` (via :meth:`measure`)
+        * Optional ``PostProcessing(MEAN, TIME)`` via :meth:`_take_time_mean`
+          (only for SCOPE / TIME axis).
+        * The granular chain from :meth:`emit_granular_post_processing`:
+          :class:`~qat.ir.measure.Equalise` → :class:`~qat.ir.measure.Discriminate`
+          → :class:`~qat.ir.measure.Demap`.
+
+        Frontends that need post-selection should append
+        :meth:`emit_post_select` explicitly based on compiler configuration.
+
+        For legacy qubits (``post_process_method is None``, ``mean_z_map_args`` set),
+        :meth:`emit_granular_post_processing` derives the ``Equalise`` rotation from
+        ``mean_z_map_args`` and emits the same ``Equalise`` → ``Discriminate`` → ``Demap``
+        chain so that all measurement paths use one unified pipeline.
+
+        :param target: The qubit to be measured.
+        :param axis: The axis along which post-processing of readouts should occur.
+        :param output_variable: The variable where the acquire result will be saved.
+            A unique name is generated if not provided.
+        :returns: The builder instance.
+        """
+        output_variable = output_variable or self._generate_output_variable(target)
+        acquire_mode = acq_mode_process_axis[axis]
+        self.measure(target, acquire_mode, output_variable)
+        self._take_time_mean(acquire_mode, target, output_variable)
+        self.emit_granular_post_processing(target, output_variable)
+        return self
+
     def post_processing(
         self,
         target: Qubit,
@@ -885,14 +1262,37 @@ class QuantumInstructionBuilder(InstructionBuilder):
         process_type: PostProcessType,
         axes: ProcessAxis | list[ProcessAxis] | None = None,
         args=None,
-    ):
+    ) -> QuantumInstructionBuilder:
+        """Emit a legacy :class:`~qat.ir.measure.PostProcessing` instruction.
+
+        Populates ``args`` automatically when none are provided:
+
+        * ``LINEAR_MAP_COMPLEX_TO_REAL`` — reads from ``target.mean_z_map_args``
+          (legacy) or ``target.post_process_method.mean_z_map_args`` (new-style
+          :class:`~qat.model.post_processing.LinearMapToRealMethod`).
+        * ``DISCRIMINATE`` — reads from ``target.discriminator``.
+
+        :param target: The qubit whose calibration data is used to fill ``args``.
+        :param output_variable: The variable name to attach to the instruction.
+        :param process_type: The type of post-processing to apply.
+        :param axes: Axis or axes along which the post-processing operates.
+        :param args: Explicit arguments for the post-processing; auto-filled when
+            ``None`` for ``LINEAR_MAP_COMPLEX_TO_REAL`` and ``DISCRIMINATE`` types.
+        :returns: The builder instance.
+        """
         axes = axes if axes is not None else []
         args = args if args is not None else []
 
         # Default the mean z-map args if none supplied.
         if not any(args):
             if process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
-                args = target.mean_z_map_args
+                # Prefer mean_z_map_args on the qubit directly; fall back to
+                # LinearMapToRealMethod.mean_z_map_args when the new-style
+                # post_process_method is configured instead.
+                if target.mean_z_map_args is not None:
+                    args = target.mean_z_map_args
+                elif isinstance(target.post_process_method, LinearMapToRealMethod):
+                    args = target.post_process_method.mean_z_map_args
 
             elif process_type == PostProcessType.DISCRIMINATE:
                 args = [target.discriminator]
@@ -908,7 +1308,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
         )
 
-    def cnot(self, control: Qubit, target: Qubit):
+    def cnot(self, control: Qubit, target: Qubit) -> QuantumInstructionBuilder:
         return (
             self.ECR(control, target)
             .X(control)
@@ -916,7 +1316,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             .X(target, theta=-np.pi / 2)
         )
 
-    def ECR(self, control: Qubit, target: Qubit):
+    def ECR(self, control: Qubit, target: Qubit) -> QuantumInstructionBuilder:
         if not isinstance(control, Qubit) or not isinstance(target, Qubit):
             raise ValueError("The quantum targets of the ECR node must be qubits!")
 
@@ -933,10 +1333,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
             .ZX(control, target, theta=-np.pi / 4.0)
         )
 
-    def swap(self, target: Qubit, destination: Qubit):
+    def swap(self, target: Qubit, destination: Qubit) -> QuantumInstructionBuilder:
         raise NotImplementedError("Not available on this hardware model.")
 
-    def pulse(self, **kwargs):
+    def pulse(self, **kwargs) -> QuantumInstructionBuilder:
         return self.add(Pulse(**kwargs))
 
     def acquire(
@@ -945,7 +1345,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         delay: float = 1e-06,
         output_variable: str | None = None,
         **kwargs,
-    ):
+    ) -> QuantumInstructionBuilder:
         pulse_channel = target.acquire_pulse_channel
 
         if delay is None:
@@ -957,7 +1357,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             Acquire(target=pulse_channel.uuid, output_variable=output_variable, **kwargs)
         )
 
-    def delay(self, target: Qubit | PulseChannel, duration: float):
+    def delay(
+        self, target: Qubit | PulseChannel, duration: float
+    ) -> QuantumInstructionBuilder:
         delays = []
         if isinstance(target, Qubit):
             delays = [
@@ -968,7 +1370,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             delays = [Delay(targets=target.uuid, duration=duration)]
         return self.add(*delays)
 
-    def synchronize(self, targets: Qubit | list[Qubit | PulseChannel]):
+    def synchronize(
+        self, targets: Qubit | list[Qubit | PulseChannel]
+    ) -> QuantumInstructionBuilder:
         targets = targets if isinstance(targets, list) else [targets]
 
         pulse_channel_ids = set()
@@ -989,17 +1393,21 @@ class QuantumInstructionBuilder(InstructionBuilder):
             )
             return self
 
-    def controlled(self, controllers: Qubit | list[Qubit], builder: InstructionBuilder):
+    def controlled(
+        self, controllers: Qubit | list[Qubit], builder: InstructionBuilder
+    ) -> QuantumInstructionBuilder:
         raise NotImplementedError("Not available on this hardware model.")
 
-    def ccnot(self, controllers: list[Qubit], target: Qubit):
+    def ccnot(self, controllers: list[Qubit], target: Qubit) -> QuantumInstructionBuilder:
         raise NotImplementedError("Not available on this hardware model.")
 
     @InstructionBuilder._check_identity_operation
-    def phase_shift(self, target: PulseChannel, theta: float):
+    def phase_shift(self, target: PulseChannel, theta: float) -> QuantumInstructionBuilder:
         return self.add(PhaseShift(targets=target.uuid, phase=theta))
 
-    def frequency_shift(self, target: PulseChannel, frequency: float):
+    def frequency_shift(
+        self, target: PulseChannel, frequency: float
+    ) -> QuantumInstructionBuilder:
         if np.isclose(frequency, 0.0):
             return self
         return self.add(FrequencyShift(targets=target.uuid, frequency=frequency))
@@ -1087,7 +1495,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
                     )
         return pulse_channels
 
-    def _create_empty_builder(self):
+    def _create_empty_builder(self) -> QuantumInstructionBuilder:
         """Creates a new instance of the builder that is free of instructions; passes
         through the expensive mappings created at instantiation."""
 

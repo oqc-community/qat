@@ -10,7 +10,6 @@ from jinja2 import Environment, FileSystemLoader, meta
 from pydantic import ValidationError
 
 from qat.frontend.parsers.qasm import Qasm3Parser, QasmParseError
-from qat.ir.instruction_basetypes import PostProcessType
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
     Assign,
@@ -22,7 +21,7 @@ from qat.ir.instructions import (
     Return,
     Synchronize,
 )
-from qat.ir.measure import Acquire, MeasureBlock, PostProcessing
+from qat.ir.measure import Acquire, Discriminate, Equalise, MeasureBlock, PostProcessing
 from qat.ir.pulse_channel import PulseChannel as IRPulseChannel
 from qat.ir.waveforms import (
     DragGaussianWaveform,
@@ -776,9 +775,27 @@ class TestQASM3Features:
             assert len(pps) == 0
         elif version == "2":
             # returns discriminated bit
-            assert len(pps) == 1
-            assert pps[0].output_variable == acquire_name
-            assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+            if qubit.post_process_method is not None:
+                # Granular chain: Equalise → Discriminate (no PostProcessing)
+                eq_instrs = [i for i in builder.instructions if isinstance(i, Equalise)]
+                disc_instrs = [
+                    i for i in builder.instructions if isinstance(i, Discriminate)
+                ]
+                assert len(eq_instrs) == 1
+                assert eq_instrs[0].output_variable == acquire_name
+                assert len(disc_instrs) == 1
+                assert disc_instrs[0].output_variable == acquire_name
+            else:
+                # Legacy qubit (mean_z_map_args, no post_process_method): also uses
+                # granular chain derived from mean_z_map_args.
+                eq_instrs = [i for i in builder.instructions if isinstance(i, Equalise)]
+                disc_instrs = [
+                    i for i in builder.instructions if isinstance(i, Discriminate)
+                ]
+                assert len(eq_instrs) == 1
+                assert eq_instrs[0].output_variable == acquire_name
+                assert len(disc_instrs) == 1
+                assert disc_instrs[0].output_variable == acquire_name
         elif version == "3":
             # SCOPE mode
             assert len(pps) == 0

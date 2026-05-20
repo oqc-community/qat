@@ -155,6 +155,10 @@ class Parse(TransformPass):
         if parser is not None:
             if compiler_config.results_format.format is not None:
                 parser.results_format = compiler_config.results_format.format
+            if compiler_config.post_selection:
+                raise NotImplementedError(
+                    "post_selection is not supported by the legacy purr QASM parsers."
+                )
             builder = parser.parse(builder, program)
 
         return (
@@ -185,6 +189,12 @@ class Parse(TransformPass):
                 parser = QIRParser(self.hardware, builder=builder)
                 if compiler_config.results_format.format is not None:
                     parser.results_format = compiler_config.results_format.format
+                # NOTE: post_selection is not supported by the legacy purr QIR parser.
+                # Setting it here would have no effect.
+                if compiler_config.post_selection:
+                    raise NotImplementedError(
+                        "post_selection is not supported by the legacy purr QIR parser."
+                    )
                 quantum_builder = parser.parse(fp.name)
             finally:
                 os.remove(fp.name)

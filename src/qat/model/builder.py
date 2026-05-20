@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+"""Helpers for constructing lightweight physical hardware models for tests.
+
+This module exposes :class:`PhysicalHardwareModelBuilder`, a convenience class
+used in tests and examples to create small, uncalibrated physical hardware
+models with sensible defaults. It is not used by production code but is handy
+when unit tests need a model instance.
+"""
 
 from qat.model.device import (
     AcquirePulseChannel,
@@ -18,6 +25,7 @@ from qat.model.device import (
     SecondStatePulseChannel,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
+from qat.model.post_processing import LinearMapToRealMethod
 from qat.utils.pydantic import CalibratableUnitInterval, FrozenDict, FrozenSet, QubitId
 from qat.utils.uuid import SeedType, temporary_uuid_seed
 
@@ -93,6 +101,8 @@ class PhysicalHardwareModelBuilder:
                 physical_channel=physical_channel_q,
                 pulse_channels=pulse_channels_q,
                 resonator=resonator,
+                mean_z_map_args=None,
+                post_process_method=LinearMapToRealMethod(),
             )
 
             qubits[qubit_id] = qubit

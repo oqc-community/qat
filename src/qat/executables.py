@@ -4,12 +4,12 @@ from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
 from compiler_config.config import InlineResultsProcessing
-from pydantic import BaseModel, PositiveInt, field_validator
+from pydantic import BaseModel, Field, PositiveInt, field_validator
 from pydantic_core import from_json
 
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instructions import Assign
-from qat.ir.measure import PostProcessing
+from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing, PostSelect
 from qat.utils.pydantic import RehydratableModel
 
 
@@ -32,7 +32,9 @@ class AcquireData(BaseModel):
     mode: AcquireMode
     shape: tuple[int, ...]
     physical_channel: str
-    post_processing: list[PostProcessing] = []
+    post_processing: list[PostProcessing | Equalise | Discriminate | PostSelect | Demap] = (
+        Field(default_factory=list)
+    )
     results_processing: InlineResultsProcessing | None = None
 
 

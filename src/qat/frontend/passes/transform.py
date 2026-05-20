@@ -139,6 +139,7 @@ class PydParse(TransformPass):
         if parser is not None:
             if compiler_config.results_format.format is not None:
                 parser.results_format = compiler_config.results_format.format
+            parser.post_selection = compiler_config.post_selection
             builder = parser.parse(builder, program)
 
         return (
@@ -161,7 +162,10 @@ class PydParse(TransformPass):
                 fp.write(qir_string)
             fp.close()
             try:
-                parser = QIRParser(results_format=compiler_config.results_format.format)
+                parser = QIRParser(
+                    results_format=compiler_config.results_format.format,
+                    post_selection=compiler_config.post_selection,
+                )
                 builder = BuilderFactory.create_builder(self.hw_model)
                 builder = parser.parse(builder, fp.name)
             finally:

@@ -246,6 +246,12 @@ class Qasm2Frontend(BaseQasmFrontend):
             if config.results_format.format is not None
             else InlineResultsProcessing.Program
         )
+        if config.post_selection and isinstance(self.model, QuantumHardwareModel):
+            raise NotImplementedError(
+                "post_selection is not supported for legacy QuantumHardwareModel QASM2 "
+                "programs. Use a PydHardwareModel instead."
+            )
+        parser.post_selection = config.post_selection
         return parser
 
 
@@ -281,4 +287,10 @@ class Qasm3Frontend(BaseQasmFrontend):
             if config.results_format.format is not None
             else InlineResultsProcessing.Program
         )
+        if config.post_selection and isinstance(self.model, QuantumHardwareModel):
+            raise NotImplementedError(
+                "post_selection is not supported for legacy QuantumHardwareModel QASM3 "
+                "programs. Use a PydHardwareModel instead."
+            )
+        parser.post_selection = config.post_selection
         return parser

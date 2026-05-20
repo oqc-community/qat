@@ -1,5 +1,16 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
+"""OpenQASM3 parser integration and helpers.
+
+This module implements a QASM3 parser that maps OpenQASM AST nodes into the
+project's IR instruction builder. It provides two entry points:
+
+- :class:`Qasm3ParserBase` — a lightweight visitor used to translate standard
+  OpenQASM constructs.
+- :class:`Qasm3Parser` — a full interpreter that supports additional OpenPulse
+  constructs and connects to the hardware model to resolve frames and ports.
+"""
+
 import math
 import re
 from copy import deepcopy
@@ -21,7 +32,7 @@ from openqasm3.visitor import QASMVisitor
 
 from qat.frontend.parsers.qasm.base import AbstractParser, QasmContext, QasmParseError
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
-from qat.ir.instruction_basetypes import AcquireMode, PostProcessType
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import (
     FrequencyShift,
@@ -564,6 +575,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
     def initialize(self, builder: QuantumInstructionBuilder):
         self.builder = builder
         self._q3_patcher.builder = builder
+        self._q3_patcher.post_selection = self.post_selection
 
         # Both contexts share global state except for variables.
         self._general_context = self._q3_patcher.load_default_gates(OpenPulseContext())
@@ -1580,27 +1592,25 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 variable.name,
                 args[2] if len(args) > 2 else None,
             )  # TODO: Fill in output_variable
-            mean_z_map_args = None
-            if len(args) > 3:
-                mean_z_map_args = args[3]
-            else:
-                for q in self.builder.hw.qubits.values():
-                    if q.resonator.pulse_channels.pulse_channel_with_id(pulse_channel.uuid):
-                        mean_z_map_args = q.mean_z_map_args
-                        break
-            if mean_z_map_args is None:
-                keys = next(
-                    key
-                    for key, value in self._frame_mappings.items()
-                    if value == pulse_channel
+            device = self.builder.hw.qubit_for_physical_channel_id(
+                pulse_channel.physical_channel_id
+            )
+            if not isinstance(device, Qubit):
+                raise ValueError(
+                    f"Pulse channel with id {pulse_channel.uuid} is not associated "
+                    f"with any qubit."
                 )
-                raise ValueError(f"Could not find mean_z_map_args for frame {keys}.")
-            self.builder.post_processing(
-                target=q,
-                process_type=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
-                args=mean_z_map_args,
+            if len(args) > 3:
+                raise ValueError("mean_z_map_args override is no longer supported.")
+
+            self.builder.emit_granular_post_processing(
+                target=device,
                 output_variable=acquire.output_variable,
             )
+            if self.post_selection:
+                method = device.post_process_method
+                disallowed = method.disallowed_states if method is not None else []
+                self.builder.emit_post_select(acquire.output_variable, disallowed)
             self.builder.results_processing(
                 variable=variable.name, res_format=InlineResultsProcessing.Program
             )
@@ -1609,7 +1619,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
             return variable
 
         elif name == "capture_v3":
-            # A capture command that returns a raw waveform data
             #
             # The acquire scope mode will average the resonator response signal over all
             # the shots within a group.
@@ -1630,13 +1639,14 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 output_variable=variable.name,
                 filter=args[2] if len(args) > 2 else None,
             )
-            qubit = None
+            device = None
             for q in self.builder.hw.qubits.values():
                 if q.resonator.pulse_channels.pulse_channel_with_id(pulse_channel.uuid):
-                    qubit = q
-            if not isinstance(qubit, Qubit):
+                    device = q
+            if not isinstance(device, Qubit):
                 raise ValueError(
-                    f"Pulse channel with id {pulse_channel.uuid} is not associated with any quantum device."
+                    f"Pulse channel with id {pulse_channel.uuid} is not associated "
+                    f"with any qubit."
                 )
 
             self.builder.add(acquire)

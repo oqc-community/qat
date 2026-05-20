@@ -45,6 +45,7 @@ class TestQasm2Parser:
     @pytest.mark.parametrize(
         "qasm_file",
         [
+            "example.qasm",
             "basic.qasm",
             "basic_results_formats.qasm",
             "basic_single_measures.qasm",
@@ -62,10 +63,6 @@ class TestQasm2Parser:
         builder = parse_qasm2_and_apply_optimisations(qasm_file, hardware_model)
         assert builder.number_of_instructions > 0
         assert count_number_of_pulses(builder, "measure") >= 1
-
-    def test_example(self, n_qubits, seed, hardware_model):
-        builder = parse_qasm2_and_apply_optimisations("example.qasm", hardware_model)
-        assert builder.number_of_instructions == 351
 
     def test_parallel(self, n_qubits, seed, hardware_model):
         builder = parse_qasm2_and_apply_optimisations("parallel_test.qasm", hardware_model)

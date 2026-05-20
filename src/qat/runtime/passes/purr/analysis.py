@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
 import re
 from dataclasses import dataclass, field
+from typing import Any
 
 from compiler_config.config import CompilerConfig
 
@@ -50,7 +51,7 @@ class IndexMappingAnalysis(AnalysisPass):
 
     def run(
         self,
-        acquisitions: dict[str, any],
+        acquisitions: dict[str, Any],
         res_mgr: ResultManager,
         *args,
         package: InstructionBuilder | Executable,

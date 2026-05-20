@@ -400,16 +400,15 @@ class TestQubitMapperDiscriminator:
             fails.
         """
         states = [
-            MLStateMap(state="0", val=0, location=0.0),
-            MLStateMap(state="1", val=1, location=1.0),
+            MLStateMap(label="0", output_value=0.0, location=0.0),
+            MLStateMap(label="1", output_value=1.0, location=1.0),
         ]
-        post_process_method = MaxLikelihoodMethod(noise_est=0.1, states=states)
+        post_process_method = MaxLikelihoodMethod(states=states)
         q = self._dummy_qubit(mean_z_map_args=None, post_process_method=post_process_method)
         s = q.model_dump_json()
         assert '"method":"max_likelihood"' in s
         q2 = Qubit.model_validate_json(s)
         assert isinstance(q2.post_process_method, MaxLikelihoodMethod)
-        assert q2.post_process_method.noise_est == 0.1
         assert len(q2.post_process_method.states) == 2
 
     def test_qubit_mapper_none_json(self):

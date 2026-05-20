@@ -17,9 +17,9 @@ from qat.backend.waveform.executable import WaveformChannelData, WaveformProgram
 from qat.engines.waveform import EchoEngine
 from qat.executables import Executable
 from qat.frontend import AutoFrontend
-from qat.ir.instruction_basetypes import AcquireMode, PostProcessType
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instructions import Variable as PydVariable
-from qat.ir.measure import PostProcessing
+from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing
 from qat.middleend import PydDefaultMiddleend
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.lucy import LucyModelLoader
@@ -289,9 +289,13 @@ class TestEchoPipelineWithCircuits:
         for output_variable, acquire in executable.acquires.items():
             assert isinstance(output_variable, str)
             pps = acquire.post_processing
-            assert len(pps) == 1
-            assert isinstance(pps[0], PostProcessing)
-            assert pps[0].process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+            # All paths now emit the granular pipeline:
+            #   Equalise → Discriminate → Demap
+            # (legacy mean_z_map_args path included).
+            assert len(pps) >= 3
+            assert isinstance(pps[0], Equalise)
+            assert isinstance(pps[1], Discriminate)
+            assert isinstance(pps[2], Demap)
 
     def test_executable_has_correct_results_processing(
         self,
@@ -683,7 +687,60 @@ class TestEchoPipelineParity:
         for key in purr_executable.acquires:
             purr_acquire = purr_executable.acquires[key]
             pydantic_acquire = pydantic_executable.acquires[key]
-            assert purr_acquire.post_processing == pydantic_acquire.post_processing
+            purr_pps = purr_acquire.post_processing
+            pyd_pps = pydantic_acquire.post_processing
+
+            # Count how many PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL) each stack emits.
+            # In the purr stack this is always a PostProcessing instruction.
+            # In the pydantic stack it may be either:
+            #   (a) a granular Equalise→Discriminate pair (post_process_method path), or
+            #   (b) a PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL) (legacy path).
+            purr_linear_map_count = sum(
+                1
+                for pp in purr_pps
+                if isinstance(pp, PostProcessing)
+                and pp.process_type.name == "LINEAR_MAP_COMPLEX_TO_REAL"
+            )
+            pyd_granular_pairs = sum(
+                1
+                for i in range(len(pyd_pps) - 1)
+                if isinstance(pyd_pps[i], Equalise)
+                and isinstance(pyd_pps[i + 1], Discriminate)
+            )
+            pyd_linear_map_count = sum(
+                1
+                for pp in pyd_pps
+                if isinstance(pp, PostProcessing)
+                and pp.process_type.name == "LINEAR_MAP_COMPLEX_TO_REAL"
+            )
+            pyd_effective_linear_map = pyd_granular_pairs + pyd_linear_map_count
+            assert pyd_effective_linear_map == purr_linear_map_count, (
+                f"Linear-map post-processing count mismatch for '{key}': "
+                f"purr={purr_linear_map_count}, "
+                f"pydantic granular pairs={pyd_granular_pairs} + "
+                f"legacy PostProcessing={pyd_linear_map_count}"
+            )
+            # Non-linear-map PP instructions (e.g. MEAN) must still match 1:1.
+            purr_non_lm = [
+                pp
+                for pp in purr_pps
+                if not (
+                    isinstance(pp, PostProcessing)
+                    and pp.process_type.name == "LINEAR_MAP_COMPLEX_TO_REAL"
+                )
+            ]
+            pyd_non_granular = [
+                pp
+                for pp in pyd_pps
+                if not isinstance(pp, Equalise | Discriminate | Demap)
+                and not (
+                    isinstance(pp, PostProcessing)
+                    and pp.process_type.name == "LINEAR_MAP_COMPLEX_TO_REAL"
+                )
+            ]
+            assert len(purr_non_lm) == len(pyd_non_granular), (
+                f"Non-linear-map PP count mismatch for '{key}'"
+            )
 
         # the ordering of packages, and different times when measures are done mean we
         # no longer have complete parity here.

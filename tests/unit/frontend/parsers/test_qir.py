@@ -14,9 +14,7 @@ from qat.purr.compiler.hardware_models import QuantumHardwareModel
 from qat.purr.integrations.qir import QIRParser as LegQIRParser
 
 from tests.unit.purr.integrations.test_qir import _get_qir_path
-from tests.unit.utils.instruction import (
-    count_number_of_non_sync_non_phase_reset_non_delay_non_post_processing_instructions,
-)
+from tests.unit.utils.instruction import count_active_instructions
 from tests.unit.utils.qasm_qir import get_qir, qir_files, short_file_name
 
 n_qubits = 32
@@ -78,11 +76,6 @@ class TestQIRParser:
         pyd_builder = pyd_parser.parse(QuantumInstructionBuilder(pyd_hw_model), qir_string)
         leg_builder = leg_parser.parse(qir_string)
 
-        assert (
-            count_number_of_non_sync_non_phase_reset_non_delay_non_post_processing_instructions(
-                pyd_builder._ir
-            )
-            == count_number_of_non_sync_non_phase_reset_non_delay_non_post_processing_instructions(
-                leg_builder.instructions
-            )
+        assert count_active_instructions(pyd_builder._ir) == count_active_instructions(
+            leg_builder.instructions
         )

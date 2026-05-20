@@ -20,7 +20,14 @@ from qat.integrations.tket import (
 )
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import PhaseSet, PhaseShift, ResultsProcessing
-from qat.ir.measure import Acquire, PostProcessing
+from qat.ir.measure import (
+    Acquire,
+    Demap,
+    Discriminate,
+    Equalise,
+    PostProcessing,
+    PostSelect,
+)
 from qat.model.loaders.converted import JaggedEchoModelLoader, PydEchoModelLoader
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.hardware_model import generate_hw_model, random_error_mitigation
@@ -220,7 +227,7 @@ class TestTketBuilder:
     def test_measure(self):
         builder = TketBuilder(self.model)
         qubit = builder.qubits[1]
-        builder.measure_single_shot_z(qubit)
+        builder.measure_with_granular_post_processing(qubit)
         commands = builder.circuit.commands_of_type(OpType.Measure)
         assert len(commands) == 1
         assert commands[0].qubits == [qubit]
@@ -266,10 +273,15 @@ class TestTketToQatIRConverter:
                 assert inst.target == qat_inst.target
                 assert inst.mode == qat_inst.mode
                 assert inst.duration == qat_inst.duration
-            elif isinstance(inst, PostProcessing):
+            elif isinstance(
+                inst, PostProcessing | Equalise | Discriminate | PostSelect | Demap
+            ):
+                # Post-processing instructions may have differing output_variable values;
+                # just verify the instruction type and pipeline-structure matches.
                 assert type(inst) is type(qat_inst)
-                assert inst.process_type == qat_inst.process_type
-                assert inst.axes == qat_inst.axes
+                if isinstance(inst, PostProcessing):
+                    assert inst.process_type == qat_inst.process_type
+                    assert inst.axes == qat_inst.axes
             elif isinstance(inst, PhaseShift | PhaseSet):
                 assert type(inst) is type(qat_inst)
                 assert inst.target == qat_inst.target
@@ -296,7 +308,7 @@ class TestTketToQatIRConverter:
             ("U3", (0.254, 0.7, 1.2, 0), "U", (qubit1, 0.254 * pi, 0.7 * pi, 1.2 * pi)),
             ("CX", (0, 1), "cnot", (qubit1, qubit2)),
             ("ECR", (0, 1), "ECR", (qubit1, qubit2)),
-            ("Measure", (0, 0), "measure_single_shot_z", (qubit1,)),
+            ("Measure", (0, 0), "measure_with_granular_post_processing", (qubit1,)),
             ("Reset", (0,), "reset", (qubit1,)),
             # The following tests expressions that are symbolic (regression tests)
             ("Rx", (sympy_pi, 0), "X", (qubit1, pi**2)),
@@ -314,7 +326,7 @@ class TestTketToQatIRConverter:
         getattr(circ, tket_method)(*tket_args)
         tket_builder = TketBuilder(self.model)
         tket_builder.circuit = circ
-        if qat_method == "measure_single_shot_z":
+        if qat_method == "measure_with_granular_post_processing":
             tket_builder._output_variables[0] = "0"
         builder = converter.convert(builder, tket_builder)
 
@@ -335,8 +347,8 @@ class TestTketToQatIRConverter:
         qubit2 = tket_builder.qubits[1]
         tket_builder.had(qubit1)
         tket_builder.cnot(qubit1, qubit2)
-        tket_builder.measure_single_shot_z(qubit1, output_variable="0")
-        tket_builder.measure_single_shot_z(qubit2, output_variable="1")
+        tket_builder.measure_with_granular_post_processing(qubit1, output_variable="0")
+        tket_builder.measure_with_granular_post_processing(qubit2, output_variable="1")
         builder = converter.convert(builder, tket_builder)
 
         # Build directly in QAT
@@ -345,8 +357,8 @@ class TestTketToQatIRConverter:
         qubit2 = direct_builder.qubits[1]
         direct_builder.had(qubit1)
         direct_builder.cnot(qubit1, qubit2)
-        direct_builder.measure_single_shot_z(qubit1, output_variable="0")
-        direct_builder.measure_single_shot_z(qubit2, output_variable="1")
+        direct_builder.measure_with_granular_post_processing(qubit1, output_variable="0")
+        direct_builder.measure_with_granular_post_processing(qubit2, output_variable="1")
 
         self.compare_builders(builder, direct_builder)
 
@@ -358,7 +370,7 @@ class TestTketToQatIRConverter:
         tket_builder = TketBuilder(self.model)
         qubit1 = tket_builder.qubits[0]
         tket_builder.had(qubit1)
-        tket_builder.measure_single_shot_z(qubit1, output_variable="0")
+        tket_builder.measure_with_granular_post_processing(qubit1, output_variable="0")
         tket_builder.results_processing("0", InlineResultsProcessing.Program)
         builder = converter.convert(builder, tket_builder)
         assert isinstance(builder.instructions[-1], ResultsProcessing)

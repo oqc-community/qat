@@ -330,6 +330,13 @@ class TketBuilder(InstructionBuilder):
     def measure_single_shot_z(
         self, qubit: Qubit, output_variable: str | None = None, **kwargs
     ):
+        return self.measure_with_granular_post_processing(
+            qubit, output_variable=output_variable, **kwargs
+        )
+
+    def measure_with_granular_post_processing(
+        self, qubit: Qubit, output_variable: str | None = None, **kwargs
+    ):
         self._output_variables[self._bit_ctr] = output_variable or str(self._bit_ctr)
         cbit = Bit(self._output_variables[self._bit_ctr], self._bit_ctr)
         self.circuit.add_bit(cbit)
@@ -368,12 +375,16 @@ class TketToQatIRConverter:
         return float(sympy_pi * sympify(arg))
 
     def convert(
-        self, qat_builder: InstructionBuilder, tket_builder: TketBuilder
+        self,
+        qat_builder: InstructionBuilder,
+        tket_builder: TketBuilder,
+        post_selection: bool = False,
     ) -> InstructionBuilder:
-        """Converts a Tket circuit into Qat IR, adding any necesarry assigns and returns.
+        """Converts a Tket circuit into Qat IR, adding any necessary assigns and returns.
 
-        :param circuit: Program as a Tket circuit.
-        :param result_format: Specifies how measurement results are formatted.
+        :param qat_builder: The QAT instruction builder.
+        :param tket_builder: The Tket circuit builder.
+        :param post_selection: Whether to emit PostSelect instructions during measurement.
         """
 
         for command in tket_builder.circuit.to_dict()["commands"]:
@@ -457,10 +468,15 @@ class TketToQatIRConverter:
                 # Operations
                 case "Measure":
                     output_var = tket_builder._output_variables[int(str(args[1]))]
-                    qat_builder.measure_single_shot_z(
+                    qat_builder.measure_with_granular_post_processing(
                         qat_builder.get_logical_qubit(args[0]),
                         output_variable=output_var,
                     )
+                    if post_selection:
+                        qubit = qat_builder.get_logical_qubit(args[0])
+                        method = qubit.post_process_method
+                        disallowed = method.disallowed_states if method is not None else []
+                        qat_builder.emit_post_select(output_var, disallowed)
                 case "Barrier":
                     qat_builder.synchronize(
                         [qat_builder.get_logical_qubit(arg) for arg in args]

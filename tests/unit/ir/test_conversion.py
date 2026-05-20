@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
+"""Tests for conversion of legacy purr IR and instruction builders into the new pydantic-
+based IR.
+
+These tests exercise the ConvertToPydanticIR pass and validate that fields and structures
+are preserved during conversion.
+"""
+
 from copy import deepcopy
 from enum import Enum
 from functools import singledispatchmethod
@@ -300,6 +307,13 @@ class TestConvertToPydanticIRPass:
                 name = "duration"
             elif name == "id" and isinstance(legacy_value, instructions.Acquire):
                 # Skip id for Acquire instructions
+                continue
+            elif name in ("rotation", "threshold") and isinstance(
+                legacy_value, instructions.Acquire
+            ):
+                # rotation and threshold are deprecated fields on the pydantic Acquire model;
+                # the conversion pass intentionally leaves them unset (defaulting to 0.0)
+                # so we skip comparing them here.
                 continue
             assert hasattr(converted_value, name), (
                 f"Converted instruction does not have field '{name}'"

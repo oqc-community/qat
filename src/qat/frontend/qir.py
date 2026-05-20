@@ -90,10 +90,11 @@ class QIRFrontend(BaseFrontend):
         results_format = (
             config.results_format.format if config and config.results_format else None
         )
+        post_selection = config.post_selection if config else False
         if not self._pyd_model:
             return QIRParser(self.model, results_format=results_format)
         else:
-            return PydQIRParser(results_format)
+            return PydQIRParser(results_format, post_selection=post_selection)
 
     def check_and_return_source(self, src: str | bytes) -> bool | str | bytes:
         """Checks that the source program (or file path) can be interpreted as a QIR file by
@@ -171,7 +172,9 @@ class QIRFrontend(BaseFrontend):
                     self.model,
                     return_as_qasm_str=False,
                 )
-                builder = TketToQatIRConverter().convert(builder, tket_builder)
+                builder = TketToQatIRConverter().convert(
+                    builder, tket_builder, post_selection=compiler_config.post_selection
+                )
             else:
                 builder = parser.parse(builder, src)
         return builder

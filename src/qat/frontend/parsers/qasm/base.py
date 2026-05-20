@@ -48,6 +48,7 @@ class ParseResults(NoExtraFieldsModel):
 class AbstractParser(abc.ABC):
     def __init__(self):
         self.results_format = InlineResultsProcessing.Program
+        self.post_selection = False
         self._cached_parses: dict[int, Any] = dict()
 
     def can_parse(self, qasm: str) -> ParseResults:
@@ -112,7 +113,11 @@ class AbstractParser(abc.ABC):
             qubit_idx = builder._qubit_index_by_uuid[qubit.uuid]
 
             res_id = f"{creg}_{qubit_idx}"
-            builder.measure_single_shot_z(qubit, output_variable=res_id)
+            builder.measure_with_granular_post_processing(qubit, output_variable=res_id)
+            if self.post_selection:
+                method = qubit.post_process_method
+                disallowed = method.disallowed_states if method is not None else []
+                builder.emit_post_select(res_id, disallowed)
             creg.value = res_id
             builder.results_processing(res_id, self.results_format)
 

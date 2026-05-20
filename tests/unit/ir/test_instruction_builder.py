@@ -1,14 +1,30 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+"""Unit tests for the instruction builder and quantum instruction helpers.
+
+These tests exercise high-level builder convenience methods and ensure the generated
+instruction sequences match expectations for pulse, acquire and post-processing generation.
+"""
+
+import copy
 import random
 
 import numpy as np
 import pytest
 
-from qat.ir.instruction_basetypes import AcquireMode, ProcessAxis
+from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import Delay, PhaseShift, Synchronize
-from qat.ir.measure import Acquire, MeasureBlock, PostProcessing, acq_mode_process_axis
+from qat.ir.measure import (
+    Acquire,
+    Demap,
+    Discriminate,
+    Equalise,
+    MeasureBlock,
+    PostProcessing,
+    PostSelect,
+    acq_mode_process_axis,
+)
 from qat.ir.pulse_channel import PulseChannel
 from qat.ir.waveforms import GaussianWaveform, Pulse, SampledWaveform
 from qat.model.device import (
@@ -16,9 +32,11 @@ from qat.model.device import (
     CrossResonanceCancellationPulseChannel,
     CrossResonancePulseChannel,
     MeasurePulseChannel,
+    Qubit,
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.lucy import LucyModelLoader
+from qat.model.post_processing import LinearMapToRealMethod, MaxLikelihoodMethod, MLStateMap
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
 
@@ -676,19 +694,165 @@ class TestMeasure:
         builder.X(target=qubit)
         builder.measure_single_shot_z(target=qubit)
 
+    def test_state_map_legacy_post_processing(self):
+        """When a qubit has no post_process_method (legacy mean_z_map_args path),
+        measure_with_granular_post_processing should emit the granular Equalise →
+        Discriminate → Demap chain derived from mean_z_map_args, with Demap convention {"0":
+
+        0, "1": 1}.
+        """
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit: Qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        # Simulate a legacy qubit: mean_z_map_args set, no post_process_method.
+        qubit.__dict__["post_process_method"] = None
+        qubit.__dict__["mean_z_map_args"] = [1 + 0j, 0j]
+
+        builder.measure_with_granular_post_processing(target=qubit, output_variable="0")
+        eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
+        pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
+        disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
+        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
+
+        assert len(pp_instructions) == 0
+        assert len(eq_instructions) == 1
+        assert len(disc_instructions) == 1
+        assert len(map_instructions) == 1
+        assert map_instructions[0].state_map == {"0": 0, "1": 1}
+
+    def test_state_map_post_processing(self):
+        """When a qubit has LinearMapToRealMethod, measure_with_granular_post_processing
+        emits Equalise → Discriminate → Demap({"0": 0, "1": 1}) matching the legacy sign
+        convention."""
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit: Qubit = hw_model.qubit_with_index(0)
+        qubit = copy.deepcopy(qubit)  # Makes a temporary copy for this test.
+        qubit.__dict__["post_process_method"] = LinearMapToRealMethod()
+        qubit.__dict__["mean_z_map_args"] = None
+
+        builder.measure_with_granular_post_processing(target=qubit, output_variable="0")
+        eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
+        disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
+        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
+        assert len(eq_instructions) == 1
+        assert len(disc_instructions) == 1
+        assert disc_instructions[0].threshold == 0.0
+        assert len(map_instructions) == 1
+        assert map_instructions[0].state_map == {"0": 0, "1": 1}
+
+    def test_legacy_post_processing_inferred_from_target(self):
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit: Qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        qubit.__dict__["post_process_method"] = None
+        qubit.__dict__["mean_z_map_args"] = [1 + 0j, 0j]
+
+        builder.post_processing(
+            target=qubit,
+            output_variable="0",
+            process_type=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+        )
+        pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
+        assert len(pp_instructions) == 1
+        pp = pp_instructions[0]
+        assert pp.process_type == PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL
+        assert pp.args == [1 + 0j, 0j]
+
+    def test_measure_post_selected_linear_map(self):
+        """measure_with_granular_post_processing with LinearMapToRealMethod emits a
+        MeasureBlock then Equalise → Discriminate → Demap({"0": 0, "1": 1}).
+
+        No PostProcessing(LINEAR_MAP) is emitted.
+        """
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit: Qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        qubit.__dict__["post_process_method"] = LinearMapToRealMethod()
+        qubit.__dict__["mean_z_map_args"] = None
+
+        builder.measure_with_granular_post_processing(target=qubit, output_variable="0")
+
+        pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
+        eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
+        disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
+        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
+
+        assert len(pp_instructions) == 0
+        assert len(eq_instructions) == 1
+        assert len(disc_instructions) == 1
+        assert disc_instructions[0].threshold == 0.0
+        assert len(map_instructions) == 1
+        assert map_instructions[0].state_map == {"0": 0, "1": 1}
+
+    def test_measure_post_selected_legacy_qubit(self):
+        """measure_with_granular_post_processing for a legacy qubit (no post_process_method)
+        emits the granular Equalise → Discriminate → Demap chain derived from
+        mean_z_map_args, with Demap convention {"0": 0, "1": 1}."""
+
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        qubit: Qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        qubit.__dict__["post_process_method"] = None
+        qubit.__dict__["mean_z_map_args"] = [1 + 0j, 0j]
+
+        builder.measure_with_granular_post_processing(target=qubit, output_variable="0")
+
+        pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
+        eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
+        disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
+        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
+
+        assert len(pp_instructions) == 0
+        assert len(eq_instructions) == 1
+        assert len(disc_instructions) == 1
+        assert len(map_instructions) == 1
+        assert map_instructions[0].state_map == {"0": 0, "1": 1}
+
     @pytest.mark.parametrize("axis", list(ProcessAxis))
     @pytest.mark.parametrize(
-        ("measure_method", "pp_length"),
+        "measure_method",
         (
-            ["measure_single_shot_z", 2],
-            ["measure_single_shot_signal", 1],
-            ["measure_mean_z", 3],
-            ["measure_mean_signal", 1],
-            ["measure_scope_mode", 0],
-            ["measure_single_shot_binned", 3],
+            "measure_single_shot_z",
+            "measure_single_shot_signal",
+            "measure_mean_z",
+            "measure_mean_signal",
+            "measure_scope_mode",
+            "measure_single_shot_binned",
         ),
     )
-    def test_single_qubit_measurement_with_pp(self, axis, measure_method, pp_length):
+    def test_single_qubit_measurement_with_pp(self, axis, measure_method):
+        def _expected_pp_signatures(method: str, proc_axis: ProcessAxis):
+            mean_time = (PostProcessType.MEAN, (ProcessAxis.TIME,))
+            mean_sequence = (PostProcessType.MEAN, (ProcessAxis.SEQUENCE,))
+            linear_map = (PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, tuple())
+            discriminate = (PostProcessType.DISCRIMINATE, tuple())
+
+            if method == "measure_single_shot_z":
+                return (
+                    [linear_map]
+                    if proc_axis == ProcessAxis.SEQUENCE
+                    else [mean_time, linear_map]
+                )
+            if method == "measure_single_shot_signal":
+                return [] if proc_axis == ProcessAxis.SEQUENCE else [mean_time]
+            if method == "measure_mean_z":
+                return (
+                    [mean_sequence, linear_map]
+                    if proc_axis == ProcessAxis.SEQUENCE
+                    else [mean_time, linear_map]
+                )
+            if method == "measure_mean_signal":
+                return [mean_sequence]
+            if method == "measure_scope_mode":
+                return []
+            if method == "measure_single_shot_binned":
+                return (
+                    [linear_map, discriminate]
+                    if proc_axis == ProcessAxis.SEQUENCE
+                    else [mean_time, linear_map, discriminate]
+                )
+
+            raise AssertionError(f"Unhandled measure method '{method}'.")
+
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         qubit_indices = list(range(hw_model.number_of_qubits))
 
@@ -706,7 +870,7 @@ class TestMeasure:
                 ref_mode = acq_mode_process_axis[axis]
 
         measure_blocks_per_qubit = [0 for _ in qubit_indices]
-        pps_per_qubit = [0 for _ in qubit_indices]
+        pp_signatures_per_qubit = [[] for _ in qubit_indices]
         for instruction in builder._ir.instructions:
             if isinstance(instruction, MeasureBlock):
                 for q_idx in instruction.qubit_targets:
@@ -717,23 +881,13 @@ class TestMeasure:
                         assert acq.mode == ref_mode
 
             if isinstance(instruction, PostProcessing):
-                pps_per_qubit[int(instruction.output_variable)] += 1
-
-        if axis == ProcessAxis.SEQUENCE:
-            if measure_method in [
-                "measure_single_shot_z",
-                "measure_single_shot_signal",
-                "measure_mean_z",
-                "measure_single_shot_binned",
-            ]:
-                pp_length -= 1
-        elif axis == ProcessAxis.TIME and measure_method in [
-            "measure_mean_z",
-        ]:
-            pp_length -= 1
+                pp_signatures_per_qubit[int(instruction.output_variable)].append(
+                    (instruction.process_type, tuple(instruction.axes))
+                )
 
         assert measure_blocks_per_qubit == [1] * len(qubit_indices)
-        assert pps_per_qubit == [pp_length] * len(qubit_indices)
+        expected = _expected_pp_signatures(measure_method, axis)
+        assert pp_signatures_per_qubit == [expected] * len(qubit_indices)
 
     @pytest.mark.parametrize("mode", list(AcquireMode))
     def test_multi_qubit_measurement_no_qubit_sync(self, mode):
@@ -831,3 +985,83 @@ class TestMeasure:
             assert qubit.drive_pulse_channel.uuid in sync.targets
             assert qubit.acquire_pulse_channel.uuid in sync.targets
             assert qubit.measure_pulse_channel.uuid in sync.targets
+
+
+class TestPostSelectionConfig:
+    """Tests post-select emission behavior for the current builder API."""
+
+    @pytest.fixture
+    def ml_qubit_with_disallowed(self):
+        """Returns a qubit configured with MaxLikelihoodMethod where |1> is disallowed."""
+        qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        qubit.__dict__["mean_z_map_args"] = None
+        qubit.__dict__["post_process_method"] = MaxLikelihoodMethod(
+            states=[
+                MLStateMap(label="0", output_value=0.0, location=1 + 0j, disallowed=False),
+                MLStateMap(label="1", output_value=1.0, location=-1 + 0j, disallowed=True),
+            ],
+        )
+        return qubit
+
+    @pytest.fixture
+    def linear_map_qubit_with_disallowed(self):
+        """Returns a qubit with LinearMapToRealMethod that has a disallowed state."""
+        qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        qubit.__dict__["mean_z_map_args"] = None
+        method = LinearMapToRealMethod()
+        method.__dict__["disallowed_states"] = ["1"]
+        qubit.__dict__["post_process_method"] = method
+        return qubit
+
+    def test_ml_post_select_emitted_only_when_explicitly_added(
+        self, ml_qubit_with_disallowed
+    ):
+        """In current API, PostSelect is appended explicitly by caller orchestration."""
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder.emit_granular_post_processing(
+            target=ml_qubit_with_disallowed, output_variable="v"
+        )
+        assert [type(i) for i in builder.instructions] == [Discriminate, Demap]
+
+        disallowed = ml_qubit_with_disallowed.post_process_method.disallowed_states
+        builder.emit_post_select("v", disallowed)
+        assert [type(i) for i in builder.instructions] == [Discriminate, PostSelect, Demap]
+
+    def test_linear_map_post_select_emitted_only_when_explicitly_added(
+        self, linear_map_qubit_with_disallowed
+    ):
+        """Linear-map granular chain excludes PostSelect unless emitted explicitly."""
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder.emit_granular_post_processing(
+            target=linear_map_qubit_with_disallowed, output_variable="v"
+        )
+        assert [type(i) for i in builder.instructions] == [Equalise, Discriminate, Demap]
+
+        disallowed = linear_map_qubit_with_disallowed.post_process_method.disallowed_states
+        builder.emit_post_select("v", disallowed)
+        assert [type(i) for i in builder.instructions] == [
+            Equalise,
+            Discriminate,
+            PostSelect,
+            Demap,
+        ]
+
+    def test_measure_post_selected_does_not_emit_post_select(
+        self, ml_qubit_with_disallowed
+    ):
+        """measure_post_selected emits granular processing but not PostSelect by itself."""
+        builder = QuantumInstructionBuilder(hardware_model=hw_model)
+        builder.measure_with_granular_post_processing(
+            target=ml_qubit_with_disallowed, output_variable="v"
+        )
+        ps = [i for i in builder.instructions if isinstance(i, PostSelect)]
+        assert len(ps) == 0
+
+    def test_emit_post_select_with_empty_disallowed_is_noop(self):
+        """emit_post_select should be a no-op when disallowed state list is empty."""
+        b1 = QuantumInstructionBuilder(hardware_model=hw_model)
+        b2 = QuantumInstructionBuilder(hardware_model=hw_model)
+        b1 += b2
+        before = b1.number_of_instructions
+        b1.emit_post_select("v", [])
+        assert b1.number_of_instructions == before

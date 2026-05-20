@@ -22,7 +22,14 @@ from qat.ir.instructions import (
     Variable,
 )
 from qat.ir.lowered import PartitionedIR
-from qat.ir.measure import Acquire, PostProcessing
+from qat.ir.measure import (
+    Acquire,
+    Demap,
+    Discriminate,
+    Equalise,
+    PostProcessing,
+    PostSelect,
+)
 
 
 class PartitionByPulseChannel(LoweringPass):
@@ -99,6 +106,10 @@ class PartitionByPulseChannel(LoweringPass):
                     partitioned_ir.acquire_map[target].append(instr)
 
             elif isinstance(instr, PostProcessing):
+                partitioned_ir.pp_map[instr.output_variable].append(instr)
+
+            elif isinstance(instr, Equalise | Discriminate | PostSelect | Demap):
+                # Granular post-processing instructions are also keyed by output_variable.
                 partitioned_ir.pp_map[instr.output_variable].append(instr)
 
             elif isinstance(instr, ResultsProcessing):
