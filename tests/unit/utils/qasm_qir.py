@@ -233,6 +233,9 @@ skip_qasm3 = [
     "u_gate.qasm",
     "invalid_pulse_length.qasm",
     "overlong_waveform.qasm",
+    "complex_without_type_specifier.qasm",
+    "cal_block_assign_from_call.qasm",
+    "defcal_assign_undeclared.qasm",
 ]
 
 

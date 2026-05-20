@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from jinja2 import Environment, FileSystemLoader, meta
+from pydantic import ValidationError
 
 from qat.frontend.parsers.qasm import Qasm3Parser, QasmParseError
 from qat.ir.instruction_basetypes import PostProcessType
@@ -170,6 +171,28 @@ class TestQasm3Parser:
         parser = Qasm3Parser(max_count_operator_within_waveform_elements=0)
         with pytest.raises(QasmParseError, match="Too many arithmetic operations"):
             parser.parse(QuantumInstructionBuilder(hardware_model=hw), qasm)
+
+    @pytest.mark.xfail(
+        raises=(ValueError, ValidationError),
+        reason=("Raises wrong error types: COMPILER-1161"),
+    )
+    @pytest.mark.parametrize(
+        "qasm_file",
+        [
+            "complex_without_type_specifier.qasm",
+            "cal_block_assign_from_call.qasm",
+            "defcal_assign_undeclared.qasm",
+        ],
+    )
+    def test_classical_variable_usage(self, qasm_file, hardware_model):
+        """Unsupported classical variable usage should raise a QasmParseError."""
+        qasm = get_qasm3(qasm_file)
+        parser = Qasm3Parser()
+        with pytest.raises(QasmParseError, match="Invalid QASM 3 syntax:"):
+            parser.parse(
+                QuantumInstructionBuilder(hardware_model=hardware_model),
+                qasm,
+            )
 
     # ("cx", "cnot") is intentional: qir parses cX as cnot, but echo engine does
     # not support cX.

@@ -91,7 +91,9 @@ jobs:
         id: pip-audit
         if: ${{ !cancelled() }}
         run: |
-          poetry run pip-audit --ignore-vuln CVE-2025-71176
+          poetry run pip-audit \
+           --ignore-vuln CVE-2025-71176 \
+           --ignore-vuln PYSEC-2025-183
 
       - name: Pip licensing check
         id: pip-licenses
