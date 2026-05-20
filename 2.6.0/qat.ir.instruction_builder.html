@@ -335,6 +335,11 @@
 
   <section id="module-qat.ir.instruction_builder">
 <span id="qat-ir-instruction-builder-module"></span><h1>qat.ir.instruction_builder module<a class="headerlink" href="#module-qat.ir.instruction_builder" title="Link to this heading"></a></h1>
+<p>Instruction builder abstractions and a concrete quantum builder.</p>
+<p>This module defines the abstract <a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a> API and a
+concrete <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a> which implements pulse-level gate
+construction and measurement helpers. The builders produce an IR
+<code class="docutils literal notranslate"><span class="pre">InstructionBlock</span></code> suitable for later compilation and scheduling stages.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InstructionBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instructions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_qubit_index_by_uuid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_qubits_ordered_by_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder" title="Link to this definition"></a></dt>
@@ -346,57 +351,112 @@ implemented are left to child classes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.ECR">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ECR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.ECR" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.S">
 <span class="sig-name descname"><span class="pre">S</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.S" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.SX">
 <span class="sig-name descname"><span class="pre">SX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.SX" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.SXdg">
 <span class="sig-name descname"><span class="pre">SXdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.SXdg" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.Sdg">
 <span class="sig-name descname"><span class="pre">Sdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.Sdg" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.T">
 <span class="sig-name descname"><span class="pre">T</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.T" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.Tdg">
 <span class="sig-name descname"><span class="pre">Tdg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.Tdg" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.U">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">U</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.U" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.X">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">X</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.X" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.Y">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Y</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.Y" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.Z">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_channel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.Z" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.add">
@@ -404,37 +464,72 @@ implemented are left to child classes.</p>
 <dd><p>Add one or more instruction(s) into this builder.</p>
 <p>All methods should use this instead of accessing the instructions tree directly as
 it deals with composite instructions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.assign">
 <span class="sig-name descname"><span class="pre">assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.assign" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.cX">
 <span class="sig-name descname"><span class="pre">cX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.cX" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.cY">
 <span class="sig-name descname"><span class="pre">cY</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.cY" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.cZ">
 <span class="sig-name descname"><span class="pre">cZ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">theta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.141592653589793</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.cZ" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.ccnot">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ccnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.ccnot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.cnot">
 <span class="sig-name descname"><span class="pre">cnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.cnot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.constrain">
@@ -446,12 +541,22 @@ sphere.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.controlled">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">controlled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.controlled" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.cswap">
 <span class="sig-name descname"><span class="pre">cswap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.cswap" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.flatten">
@@ -497,7 +602,12 @@ InstructionBlocks.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.had">
 <span class="sig-name descname"><span class="pre">had</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.had" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.instructions">
@@ -507,12 +617,27 @@ InstructionBlocks.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.jump">
 <span class="sig-name descname"><span class="pre">jump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.jump" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.measure_single_shot_z">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measure_single_shot_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.measure_single_shot_z" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.measure_with_granular_post_processing">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">measure_with_granular_post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.measure_with_granular_post_processing" title="Link to this definition"></a></dt>
+<dd><p>Measure a qubit and emit the full granular post-processing pipeline.</p>
+<p>Compiler frontends should call this method when lowering a measurement
+assignment into IR. The granular discrimination chain is emitted for
+both qubits with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> configured and legacy qubits.
+For configured qubits, the chain (for example <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> →
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) is derived from the configured
+post-processing method; for legacy qubits, the equivalent granular
+chain is derived from legacy <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> data.</p>
+<p>See <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_with_granular_post_processing()</span></code></a> for
+full detail.</p>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.number_of_instructions">
@@ -528,28 +653,53 @@ InstructionBlocks.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.repeat">
 <span class="sig-name descname"><span class="pre">repeat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">repeat_count</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.repeat" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.reset">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.reset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.results_processing">
 <span class="sig-name descname"><span class="pre">results_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_format</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.results_processing" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.returns">
 <span class="sig-name descname"><span class="pre">returns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.returns" title="Link to this definition"></a></dt>
 <dd><p>Add return statement.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.InstructionBuilder.swap">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">swap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.InstructionBuilder.swap" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -568,7 +718,12 @@ and an API for pulse-level instructions.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.ECR">
 <span class="sig-name descname"><span class="pre">ECR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.ECR" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.U">
@@ -621,22 +776,42 @@ to the builder (see <a class="reference external" href="https://doi.org/10.48550
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.acquire">
 <span class="sig-name descname"><span class="pre">acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.acquire" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.ccnot">
 <span class="sig-name descname"><span class="pre">ccnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.ccnot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.cnot">
 <span class="sig-name descname"><span class="pre">cnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.cnot" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.controlled">
 <span class="sig-name descname"><span class="pre">controlled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.controlled" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.create_pulse_channel">
@@ -654,12 +829,132 @@ linked too, or use the physical channel of a provided pulse channel.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.delay">
 <span class="sig-name descname"><span class="pre">delay</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.delay" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing">
+<span class="sig-name descname"><span class="pre">emit_granular_post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="Link to this definition"></a></dt>
+<dd><p>Emit the granular post-processing instruction chain (without PostSelect).</p>
+<p>Emits <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code> based on the qubit’s
+configuration. Does NOT emit <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> instructions; use
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a> separately if needed.</p>
+<p>Dispatches as follows:</p>
+<ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code> →
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> + <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>
++ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a> (<code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code>).</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code> →
+optional <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a>
++ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> (ML path)
++ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a> (derived from <code class="docutils literal notranslate"><span class="pre">MLStateMap.label</span></code> →
+<code class="docutils literal notranslate"><span class="pre">MLStateMap.output_value</span></code>).</p></li>
+<li><p>Legacy (<code class="docutils literal notranslate"><span class="pre">post_process_method</span> <span class="pre">is</span> <span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> set) →
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> (rotation derived from
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>) + <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>
++ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a> (<code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code>).</p></li>
+</ul>
+<p><strong>Demap value convention</strong></p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Demap</span></code> instruction for the <code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code> and legacy paths
+emits <code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code> — the standard qubit convention (ground state → 0,
+excited state → 1).  This aligns with the ML pipeline and the <code class="docutils literal notranslate"><span class="pre">binary()</span></code>
+output format, eliminating the need for sign-based conversion in the runtime.</p>
+<p><strong>Results Format Semantics with Compiler Config</strong></p>
+<p>The emitted <code class="docutils literal notranslate"><span class="pre">Demap</span></code> instruction decodes discriminated string state labels to
+numeric output values. These values then flow through the runtime pipeline where
+<code class="docutils literal notranslate"><span class="pre">results_format</span></code> flags determine final encoding:</p>
+<ul class="simple">
+<li><p><strong>``raw()``</strong>: Complex IQ arrays from
+<a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.EqualiseResult" title="qat.runtime.passes.analysis.EqualiseResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseResult</span></code></a> (post-mask applied).
+For legacy acquires without an <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> step, falls back to the mapped
+arrays.</p></li>
+<li><p><strong>``binary()``</strong>: Per-shot int output-value array from <code class="docutils literal notranslate"><span class="pre">Demap</span></code> (one value
+per retained shot, e.g. <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">...]</span></code>). With post-selection,
+only retained shots are included.</p></li>
+<li><p><strong>``binary_count()``</strong>: Dictionary of state string → count using
+<a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.label_count" title="qat.runtime.results_processing.label_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">label_count()</span></code></a> on the string labels
+from <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.DiscriminateResult" title="qat.runtime.passes.analysis.DiscriminateResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateResult</span></code></a>.
+<strong>Key difference</strong>: when post-selection is active,
+the repeat count passed to <code class="docutils literal notranslate"><span class="pre">binary_count()</span></code> is <code class="docutils literal notranslate"><span class="pre">shots_retained</span></code> (not
+<code class="docutils literal notranslate"><span class="pre">shots_requested</span></code>), so counts reflect only the passing shots.</p></li>
+</ul>
+<p><strong>Example: 3-state ML with state “2” disallowed</strong></p>
+<p>Setup:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">states</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+    <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="c1"># 10 shots: 4 → state 0, 3 → state 1, 3 → state 2 (filtered by post-select)</span>
+</pre></div>
+</div>
+<p>After <code class="docutils literal notranslate"><span class="pre">Demap</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>After <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> + global mask (7 retained):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Format outcomes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="p">():</span>        <span class="o">&lt;</span><span class="nb">complex</span> <span class="n">IQ</span> <span class="kn">from</span><span class="w"> </span><span class="nn">EqualiseResult</span><span class="p">,</span> <span class="mi">7</span> <span class="n">retained</span> <span class="n">shots</span><span class="o">&gt;</span>
+<span class="n">binary</span><span class="p">():</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">binary_count</span><span class="p">():</span> <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>  <span class="p">(</span><span class="kn">from</span><span class="w"> </span><span class="mi">7</span> <span class="n">retained</span><span class="p">,</span> <span class="ow">not</span> <span class="mi">10</span> <span class="n">requested</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Default Behavior</strong></p>
+<p>When <code class="docutils literal notranslate"><span class="pre">CompilerConfig.results_format</span></code> is not set, it defaults to
+<code class="docutils literal notranslate"><span class="pre">ResultsFormatting.DynamicStructureReturn</span></code>, which simplifies output
+(removes generated variable names, unwraps single-value results).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – Qubit whose configuration drives the emitted instructions.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The variable name to attach to the instructions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The builder instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select">
+<span class="sig-name descname"><span class="pre">emit_post_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_states</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="Link to this definition"></a></dt>
+<dd><p>Emit a PostSelect instruction with given disallowed states.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The variable name to attach to the instruction.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – List of state labels to filter out (e.g., [“1”]).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The builder instance.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift">
 <span class="sig-name descname"><span class="pre">frequency_shift</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.get_pulse_channel">
@@ -696,16 +991,20 @@ qubits in <cite>targets</cite> or not. Sync between qubits is on by default.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal">
 <span class="sig-name descname"><span class="pre">measure_mean_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal" title="Link to this definition"></a></dt>
-<dd><p>Measure the signal of a single qubit. Execution results in an array of complex
-numbers that show the war signal output form the hardware. Each entry is for each
-qubit measured, and is the mean of the results from <cite>measure_single_signal_shot</cite>.</p>
+<dd><p>Measure the raw IQ signal of a single qubit and return the shot-averaged result.</p>
+<p>Emits a <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a> using <code class="docutils literal notranslate"><span class="pre">INTEGRATOR</span></code> acquisition
+and appends a <code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">SEQUENCE)</span></code> to average the complex IQ
+values across all shots.  Results are a single complex value per qubit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the output of the acquire should be
-saved.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_signal.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of the variable where the acquire result is saved.
+A unique name is generated if not provided.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The builder instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -713,18 +1012,29 @@ saved.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z">
 <span class="sig-name descname"><span class="pre">measure_mean_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z" title="Link to this definition"></a></dt>
-<dd><p>Measure a single qubit along the z-axis. Execution results in an array of floats
-centred around 0, where anything above 0 shows a bias towards a +Z measurement, and
-below 0 shows a bias towards a -Z measurement. Each entry is for each qubit
-measured, and is the mean of the results from <cite>measure_single_shot_z</cite>.</p>
+<dd><p>Measure a single qubit along the z-axis and return the shot-averaged result.</p>
+<p>Emits a <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a>, averages first over the time
+axis (SCOPE mode only) then over the sequence axis (INTEGRATOR mode only), and
+finally emits <code class="docutils literal notranslate"><span class="pre">PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)</span></code> to project the
+averaged complex IQ value to a real z-expectation value.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Like <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_single_shot_z()</span></code></a>, this method always emits a legacy
+<code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code> instruction.  Use
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a> for the granular
+discrimination pipeline.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The type of axis which the post-processing of readouts should occur on.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the output of the acquire should be
-saved.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The axis along which post-processing of readouts should occur.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_mean_z.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of the variable where the acquire result is saved.
+A unique name is generated if not provided.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The builder instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -732,14 +1042,20 @@ saved.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode">
 <span class="sig-name descname"><span class="pre">measure_scope_mode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode" title="Link to this definition"></a></dt>
-<dd><p>Measure the scope mode.</p>
+<dd><p>Measure the qubit in scope (waveform-capture) mode.</p>
+<p>Emits a <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a> using <code class="docutils literal notranslate"><span class="pre">SCOPE</span></code> acquisition mode.
+No post-processing is applied; the raw time-series IQ waveform is stored
+directly in the output variable.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the output of the acquire should be
-saved.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_scope_mode.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of the variable where the acquire result is saved.
+A unique name is generated if not provided.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The builder instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -747,19 +1063,33 @@ saved.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned">
 <span class="sig-name descname"><span class="pre">measure_single_shot_binned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned" title="Link to this definition"></a></dt>
-<dd><p>Measure a single qubit along the z-axis. Execution results in an array of ±1s,
-where 1 indicates a +Z measurement, and -1 indicates a -Z measurement. It takes the
-results from <cite>measure_single_shot_z</cite> and applies a binning operation to round the
-results to ±1. The array is an ndarray, where the first dimension is for each of the
-qubits measured, the second dimension is for each shot run.</p>
+<dd><p>Measure a single qubit along the z-axis and discriminate to ±1 (customer-facing
+API).</p>
+<p>Emits a <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a>, an optional
+<code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code> (SCOPE mode only),
+<code class="docutils literal notranslate"><span class="pre">PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)</span></code> to project complex IQ to a
+real z-value, and a <code class="docutils literal notranslate"><span class="pre">PostProcessing(DISCRIMINATE)</span></code> that rounds the
+z-projection value to +1 (above threshold) or −1 (at or below threshold).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method uses the legacy <code class="docutils literal notranslate"><span class="pre">DISCRIMINATE</span></code> post-processing type and does
+not emit the granular <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> instruction
+used by the post-selection pipeline.  It is not equivalent to
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a> (which uses
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>/<code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>/<code class="docutils literal notranslate"><span class="pre">Demap</span></code>) and should not be substituted
+for it.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The type of axis which the post-processing of readouts should occur on.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the output of the acquire should be
-saved.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The axis along which post-processing of readouts should occur.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_binned.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of the variable where the acquire result is saved.
+A unique name is generated if not provided.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The builder instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -767,18 +1097,23 @@ saved.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal">
 <span class="sig-name descname"><span class="pre">measure_single_shot_signal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal" title="Link to this definition"></a></dt>
-<dd><p>Measure the signal of a single qubit. Execution results in an array of complex
-numbers that show the war signal output form the hardware. The array is an ndarray,
-where the first dimension is for each of the qubits measured, the second dimension
-is for each shot run.</p>
+<dd><p>Measure the raw IQ signal of a single qubit (customer-facing API).</p>
+<p>Emits a <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a> and, when <code class="docutils literal notranslate"><span class="pre">axis</span></code> is
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TIME</span></code> (SCOPE mode), an
+additional <code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code> to average over the time axis.
+No z-discrimination is applied; results are an ndarray of complex IQ values,
+one per shot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The type of axis which the post-processing of readouts should occur on.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the output of the acquire should be
-saved.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The axis along which post-processing of readouts should occur.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_signal.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of the variable where the acquire result is saved.
+A unique name is generated if not provided.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The builder instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -786,19 +1121,78 @@ saved.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z">
 <span class="sig-name descname"><span class="pre">measure_single_shot_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z" title="Link to this definition"></a></dt>
-<dd><p>Measure a single qubit along the z-axis. Execution results in an array of floats
-centred around 0, where anything above 0 shows a bias towards a +Z measurement, and
-below 0 shows a bias towards a -Z measurement. The array is an ndarray, where the
-first dimension is for each of the qubits measured, the second dimension is for each
-shot run.</p>
+<dd><p>Measure a single qubit along the z-axis (customer-facing API).</p>
+<p>Emits a <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a>, an optional
+<code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code> when <code class="docutils literal notranslate"><span class="pre">axis</span></code> is
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TIME</span></code> (SCOPE mode), and a
+<code class="docutils literal notranslate"><span class="pre">PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)</span></code> to project the complex IQ value
+onto a real z-projection.  Results are an ndarray of floats centred around 0:
+values above 0 indicate a bias towards the +Z state, values below 0 indicate
+a bias towards the −Z state.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method always emits a legacy <code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code> instruction regardless
+of whether <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> is configured on the qubit.  Compiler
+frontends that need the granular discrimination pipeline (<code class="docutils literal notranslate"><span class="pre">Equalise</span></code> →
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>) should call
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a> instead (and
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a> for post-selection insertion).</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The type of axis which the post-processing of readouts should occur on.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the output of the acquire should be
-saved.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The axis along which post-processing of readouts should occur.
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">SEQUENCE</span></code> (default) uses <code class="docutils literal notranslate"><span class="pre">INTEGRATOR</span></code> acquisition;
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">TIME</span></code> uses <code class="docutils literal notranslate"><span class="pre">SCOPE</span></code> acquisition and emits an
+additional <code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code>.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Name of the variable where the acquire result is saved.
+A unique name is generated if not provided.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The builder instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing">
+<span class="sig-name descname"><span class="pre">measure_with_granular_post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">SEQUENCE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="Link to this definition"></a></dt>
+<dd><p>Measure a qubit and emit the full granular post-processing pipeline.</p>
+<p>This method is intended for use by compiler frontends (QASM2, QASM3, QIR,
+tket) where the result of a measurement assignment must be discriminated into
+state labels. Customer-facing code that only needs raw z-projection floats
+should call <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_single_shot_z()</span></code></a> instead.</p>
+<p>For qubits with a <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> configured the emitted sequence is:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.MeasureBlock" title="qat.ir.measure.MeasureBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeasureBlock</span></code></a> (via <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure()</span></code></a>)</p></li>
+<li><p>Optional <code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code> via <code class="xref py py-meth docutils literal notranslate"><span class="pre">_take_time_mean()</span></code>
+(only for SCOPE / TIME axis).</p></li>
+<li><p>The granular chain from <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a>:
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> → <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>
+→ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a>.</p></li>
+</ul>
+<p>Frontends that need post-selection should append
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a> explicitly based on compiler configuration.</p>
+<p>For legacy qubits (<code class="docutils literal notranslate"><span class="pre">post_process_method</span> <span class="pre">is</span> <span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> set),
+<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a> derives the <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> rotation from
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> and emits the same <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>
+chain so that all measurement paths use one unified pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit to be measured.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing.params.axis"></span><strong>axis</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing.params.axis">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></span>) – The axis along which post-processing of readouts should occur.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The variable where the acquire result will be saved.
+A unique name is generated if not provided.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The builder instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -811,32 +1205,83 @@ saved.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing">
 <span class="sig-name descname"><span class="pre">post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Emit a legacy <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a> instruction.</p>
+<p>Populates <code class="docutils literal notranslate"><span class="pre">args</span></code> automatically when none are provided:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LINEAR_MAP_COMPLEX_TO_REAL</span></code> — reads from <code class="docutils literal notranslate"><span class="pre">target.mean_z_map_args</span></code>
+(legacy) or <code class="docutils literal notranslate"><span class="pre">target.post_process_method.mean_z_map_args</span></code> (new-style
+<code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DISCRIMINATE</span></code> — reads from <code class="docutils literal notranslate"><span class="pre">target.discriminator</span></code>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.target"></span><strong>target</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.target">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – The qubit whose calibration data is used to fill <code class="docutils literal notranslate"><span class="pre">args</span></code>.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The variable name to attach to the instruction.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.process_type"></span><strong>process_type</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.process_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessType</span></code></span>) – The type of post-processing to apply.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.axes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Axis or axes along which the post-processing operates.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.args"></span><strong>args</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.args">¶</a> – Explicit arguments for the post-processing; auto-filled when
+<code class="docutils literal notranslate"><span class="pre">None</span></code> for <code class="docutils literal notranslate"><span class="pre">LINEAR_MAP_COMPLEX_TO_REAL</span></code> and <code class="docutils literal notranslate"><span class="pre">DISCRIMINATE</span></code> types.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The builder instance.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.pretty_print">
 <span class="sig-name descname"><span class="pre">pretty_print</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.pretty_print" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.pulse">
 <span class="sig-name descname"><span class="pre">pulse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.pulse" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.reset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.swap">
 <span class="sig-name descname"><span class="pre">swap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">destination</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.swap" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.synchronize">
 <span class="sig-name descname"><span class="pre">synchronize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.synchronize" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

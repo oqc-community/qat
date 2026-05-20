@@ -28,4 +28,5 @@ an adapter to Qiskit's AerSimulator and our realistic (but limited) real time ch
    qat_config
    compilation
    execution
+   post_processing_pipeline
    simulators

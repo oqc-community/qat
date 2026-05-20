@@ -19,6 +19,7 @@
       <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -335,10 +336,34 @@
 
   <section id="module-qat.ir.measure">
 <span id="qat-ir-measure-module"></span><h1>qat.ir.measure module<a class="headerlink" href="#module-qat.ir.measure" title="Link to this heading"></a></h1>
+<p>IR models for measurement and post-processing instructions.</p>
+<p>This module defines <a class="reference internal" href="#qat.ir.measure.Acquire" title="qat.ir.measure.Acquire"><code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code></a>, <a class="reference internal" href="#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a> and
+<code class="docutils literal notranslate"><span class="pre">MeasureBlock</span></code> representations used in the intermediate representation to
+describe measurement-related operations and software post-processing steps.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.measure.Acquire">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Acquire</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Acquire" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.QuantumInstruction" title="qat.ir.instructions.QuantumInstruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstruction</span></code></a></p>
+<p>Instruction representing an acquisition of a resonator/qubit signal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.duration"></span><strong>duration</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.duration">¶</a> – Acquisition duration in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.mode"></span><strong>mode</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.mode">¶</a> – Acquisition mode describing how the hardware returns data.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.delay"></span><strong>delay</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.delay">¶</a> – Optional delay inserted before the acquisition value is valid.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.filter"></span><strong>filter</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.filter">¶</a> – Optional pulse defining an integration/filter kernel applied on the
+readout channel by the hardware or software.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.output_variable">¶</a> – Name of the variable where the acquisition result will be
+stored.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.rotation"></span><strong>rotation</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.rotation">¶</a> – optional angle in radians applied to the acquired complex value,
+equivalent to a complex multiplier of <code class="docutils literal notranslate"><span class="pre">exp(-j</span> <span class="pre">*</span> <span class="pre">rotation)</span></code>.  Ignored if
+<cite>filter</cite> is provided.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.threshold"></span><strong>threshold</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.threshold">¶</a> – Optional threshold value for discriminating the acquired value
+into a binary state label. Ignored if <cite>filter</cite> is provided or if <cite>mode</cite> is not
+<cite>AcquireMode.INTEGRATOR</cite>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -382,7 +407,14 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.measure.Acquire.rotation">
 <span class="sig-name descname"><span class="pre">rotation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.ir.measure.Acquire.rotation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Read-only data descriptor used to emit a runtime deprecation warning before accessing a deprecated field.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>msg: The deprecation message to be emitted.
+wrapped_property: The property instance if the deprecated field is a computed field, or <cite>None</cite>.
+field_name: The name of the field being deprecated.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.measure.Acquire.target">
@@ -392,6 +424,167 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.measure.Acquire.threshold">
 <span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.ir.measure.Acquire.threshold" title="Link to this definition"></a></dt>
+<dd><p>Read-only data descriptor used to emit a runtime deprecation warning before accessing a deprecated field.</p>
+<dl class="simple">
+<dt>Attributes:</dt><dd><p>msg: The deprecation message to be emitted.
+wrapped_property: The property instance if the deprecated field is a computed field, or <cite>None</cite>.
+field_name: The name of the field being deprecated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.Demap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Demap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Demap" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>De-map string state labels to final integer output values.</p>
+<p>This is the final stage of the granular post-processing pipeline. Each
+shot is mapped from a string state label (produced by <a class="reference internal" href="#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>)
+to the configured integer output value written to the classical register.</p>
+<p>Runtime implementation: <a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction" title="qat.runtime.post_processing.apply_demap_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_demap_instruction()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Demap.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Demap.params.output_variable">¶</a> – Variable name whose state labels should be mapped.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Demap.params.state_map"></span><strong>state_map</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Demap.params.state_map">¶</a> – Mapping from string state label to integer output value, e.g.
+<code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code> for the standard binary convention.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Demap.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.Demap.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Demap.output_variable">
+<span class="sig-name descname"><span class="pre">output_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.ir.measure.Demap.output_variable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Demap.state_map">
+<span class="sig-name descname"><span class="pre">state_map</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">int]</span></em><a class="headerlink" href="#qat.ir.measure.Demap.state_map" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Discriminate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Discriminate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>Discriminate equalised values to string state labels.</p>
+<p>For the linear-map path a sign-based threshold comparison is used:
+values above <code class="docutils literal notranslate"><span class="pre">threshold</span></code> → label <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, values at or below → label
+<code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>. For the maximum-likelihood path the nearest centroid in the
+complex plane determines the state’s configured string label
+(<code class="docutils literal notranslate"><span class="pre">MLStateMap.label</span></code>).</p>
+<p>Exactly one of <code class="docutils literal notranslate"><span class="pre">threshold</span></code> or <code class="docutils literal notranslate"><span class="pre">method</span></code> must be provided.</p>
+<p>Runtime implementation:
+<a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_discriminate_instruction()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Discriminate.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Discriminate.params.output_variable">¶</a> – Variable name whose data should be discriminated.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Discriminate.params.threshold"></span><strong>threshold</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Discriminate.params.threshold">¶</a> – Scalar threshold for the linear-map discrimination path.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> when <code class="docutils literal notranslate"><span class="pre">method</span></code> is provided.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Discriminate.params.method"></span><strong>method</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Discriminate.params.method">¶</a> – Post-process method object for the ML path. <code class="docutils literal notranslate"><span class="pre">None</span></code> when
+<code class="docutils literal notranslate"><span class="pre">threshold</span></code> is provided.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">MaxLikelihoodMethod</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.ir.measure.Discriminate.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.Discriminate.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate.output_variable">
+<span class="sig-name descname"><span class="pre">output_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.ir.measure.Discriminate.output_variable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.ir.measure.Discriminate.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Equalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Equalise" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>Apply an affine transform in the IQ (complex) plane to readout data.</p>
+<p>This is the first stage of the granular post-processing pipeline.</p>
+<p>In superconducting qubit readout the downconverted IQ signal is distorted
+by three hardware imperfections: <strong>phase imbalance</strong> (LO quadrature paths
+not exactly 90° apart), <strong>gain imbalance</strong> (unequal I/Q amplifier chains),
+and <strong>DC offsets</strong> (mixer leakage and biases).  As a result, raw <code class="docutils literal notranslate"><span class="pre">(I,</span> <span class="pre">Q)</span></code>
+samples cluster on a distorted, offset ellipse rather than a compact point
+cloud, degrading any downstream discriminator.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> instruction corrects all three imperfections in a single
+real affine transform:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} I' \\ Q' \end{pmatrix}
+= A \begin{pmatrix} I \\ Q \end{pmatrix} + \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">A</span></code> is a <strong>real</strong> 2×2 matrix (<code class="docutils literal notranslate"><span class="pre">transform</span></code>) and <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code>
+is the real offset vector (<code class="docutils literal notranslate"><span class="pre">offset</span></code>).  The output is returned as a
+complex value <code class="docutils literal notranslate"><span class="pre">I'</span> <span class="pre">+</span> <span class="pre">j</span> <span class="pre">Q'</span></code>.</p>
+<p>Each <a class="reference internal" href="#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> instruction operates on a single readout channel.
+To equalise multiple channels, emit one instruction per channel with its
+own <code class="docutils literal notranslate"><span class="pre">output_variable</span></code>.</p>
+<p>The default <code class="docutils literal notranslate"><span class="pre">transform</span></code> (2×2 identity) and default <code class="docutils literal notranslate"><span class="pre">offset</span></code> (zero
+vector) are a no-op pass-through for already-calibrated hardware.</p>
+<p>Runtime implementation: <a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_equalise" title="qat.runtime.post_processing.apply_equalise"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_equalise()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Equalise.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Equalise.params.output_variable">¶</a> – Variable name whose data should be transformed.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Equalise.params.transform"></span><strong>transform</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Equalise.params.transform">¶</a> – Real <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">2)</span></code> matrix <code class="docutils literal notranslate"><span class="pre">A</span></code>.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Equalise.params.offset"></span><strong>offset</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Equalise.params.offset">¶</a> – Real offset vector <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(2,)</span></code>.
+Defaults to the zero vector.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.Equalise.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FloatNDArray</span></em><a class="headerlink" href="#qat.ir.measure.Equalise.offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise.output_variable">
+<span class="sig-name descname"><span class="pre">output_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.ir.measure.Equalise.output_variable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">FloatNDArray</span></em><a class="headerlink" href="#qat.ir.measure.Equalise.transform" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -491,6 +684,48 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.measure.PostProcessing.result_needed">
 <span class="sig-name descname"><span class="pre">result_needed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.ir.measure.PostProcessing.result_needed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.PostSelect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.PostSelect" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>Remove shots whose state label appears in <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code>.</p>
+<p>Emitting this instruction with an empty <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> list is a
+no-op (all shots are considered valid) but is safe to emit unconditionally
+so that the pipeline structure is uniform.</p>
+<p>Runtime implementation: <a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select" title="qat.runtime.post_processing.apply_post_select"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_post_select()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.PostSelect.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.output_variable">¶</a> – Variable name whose state labels should be
+screened.</p></li>
+<li><p><span class="target" id="qat.ir.measure.PostSelect.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.disallowed_states">¶</a> – String state labels that should be marked
+invalid. Shots mapped to these labels will have their validity mask
+entry set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.PostSelect.disallowed_states">
+<span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[str]</span></em><a class="headerlink" href="#qat.ir.measure.PostSelect.disallowed_states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.PostSelect.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.PostSelect.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.PostSelect.output_variable">
+<span class="sig-name descname"><span class="pre">output_variable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#qat.ir.measure.PostSelect.output_variable" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

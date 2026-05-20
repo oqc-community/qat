@@ -345,6 +345,15 @@
 
   <section id="module-qat.frontend.parsers.qasm.qasm3">
 <span id="qat-frontend-parsers-qasm-qasm3-module"></span><h1>qat.frontend.parsers.qasm.qasm3 module<a class="headerlink" href="#module-qat.frontend.parsers.qasm.qasm3" title="Link to this heading"></a></h1>
+<p>OpenQASM3 parser integration and helpers.</p>
+<p>This module implements a QASM3 parser that maps OpenQASM AST nodes into the
+project’s IR instruction builder. It provides two entry points:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase" title="qat.frontend.parsers.qasm.qasm3.Qasm3ParserBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm3ParserBase</span></code></a> — a lightweight visitor used to translate standard
+OpenQASM constructs.</p></li>
+<li><p><a class="reference internal" href="#qat.frontend.parsers.qasm.qasm3.Qasm3Parser" title="qat.frontend.parsers.qasm.qasm3.Qasm3Parser"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qasm3Parser</span></code></a> — a full interpreter that supports additional OpenPulse
+constructs and connects to the hardware model to resolve frames and ports.</p></li>
+</ul>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qasm.qasm3.OpenPulseContext">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OpenPulseContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qasm.qasm3.OpenPulseContext" title="Link to this definition"></a></dt>

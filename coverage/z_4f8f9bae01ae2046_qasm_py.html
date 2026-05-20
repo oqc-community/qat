@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/qat/frontend/qasm.py: 93.98%</title>
+    <title>Coverage for src/qat/frontend/qasm.py: 91.61%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_81f8c14c.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src/qat/frontend/qasm.py</b>:
-            <span class="pc_cov">93.98%</span>
+            <span class="pc_cov">91.61%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,11 +55,11 @@
             </div>
         </aside>
         <h2>
-            <span class="text">101 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">99<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">2<span class="text"> missing</span></button>
+            <span class="text">107 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">103<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">4<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
-            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">6<span class="text"> partial</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">8<span class="text"> partial</span></button>
         </h2>
         <p class="text">
             <a id="prevFileLink" class="nav" href="z_7b56761c4a6c842e_transform_py.html">&#xab; prev</a> &nbsp; &nbsp;
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_4f8f9bae01ae2046_qat_ir_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-05-20 13:12 +0000
+            created at 2026-05-20 14:28 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -330,42 +330,54 @@
     <p class="pln"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">            <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">results_format</span><span class="op">.</span><span class="nam">format</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t247" href="#t247">247</a></span><span class="t">            <span class="key">else</span> <span class="nam">InlineResultsProcessing</span><span class="op">.</span><span class="nam">Program</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t248" href="#t248">248</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t249" href="#t249">249</a></span><span class="t">        <span class="key">return</span> <span class="nam">parser</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t250" href="#t250">250</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t251" href="#t251">251</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t252" href="#t252">252</a></span><span class="t"><span class="key">class</span> <span class="nam">Qasm3Frontend</span><span class="op">(</span><span class="nam">BaseQasmFrontend</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t253" href="#t253">253</a></span><span class="t">    <span class="str">"""A frontend for QASM3 programs.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t254" href="#t254">254</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t255" href="#t255">255</a></span><span class="t"><span class="str">    Handles the parsing of QASM3 into QATs intermediate representation. Optionally, it can</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t256" href="#t256">256</a></span><span class="t"><span class="str">    also run pipelines before to optimize and validate QASM3 files.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t257" href="#t257">257</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t258" href="#t258">258</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t259" href="#t259">259</a></span><span class="t">    <span class="nam">version</span> <span class="op">=</span> <span class="num">3</span>&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t249" href="#t249">249</a></span><span class="t">        <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">post_selection</span> <span class="key">and</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">model</span><span class="op">,</span> <span class="nam">QuantumHardwareModel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">249&#x202F;&#x219B;&#x202F;250</span><span class="annotate long">line 249 didn't jump to line 250 because the condition on line 249 was never true</span></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t250" href="#t250">250</a></span><span class="t">            <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t251" href="#t251">251</a></span><span class="t">                <span class="str">"post_selection is not supported for legacy QuantumHardwareModel QASM2 "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t252" href="#t252">252</a></span><span class="t">                <span class="str">"programs. Use a PydHardwareModel instead."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t253" href="#t253">253</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t254" href="#t254">254</a></span><span class="t">        <span class="nam">parser</span><span class="op">.</span><span class="nam">post_selection</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">post_selection</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t255" href="#t255">255</a></span><span class="t">        <span class="key">return</span> <span class="nam">parser</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t256" href="#t256">256</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t257" href="#t257">257</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t258" href="#t258">258</a></span><span class="t"><span class="key">class</span> <span class="nam">Qasm3Frontend</span><span class="op">(</span><span class="nam">BaseQasmFrontend</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t259" href="#t259">259</a></span><span class="t">    <span class="str">"""A frontend for QASM3 programs.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t260" href="#t260">260</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t261" href="#t261">261</a></span><span class="t">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">model</span><span class="op">:</span> <span class="nam">QuantumHardwareModel</span><span class="op">,</span> <span class="nam">pipeline</span><span class="op">:</span> <span class="key">None</span> <span class="op">|</span> <span class="nam">PassManager</span> <span class="op">=</span> <span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t262" href="#t262">262</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t263" href="#t263">263</a></span><span class="t"><span class="str">        :param model: The hardware model can be required for the pipeline and is used in</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t264" href="#t264">264</a></span><span class="t"><span class="str">            parsing.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t265" href="#t265">265</a></span><span class="t"><span class="str">        :param pipeline: A pipeline for validation and optimising QASM, defaults to a</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t266" href="#t266">266</a></span><span class="t"><span class="str">            predefined pipeline that optimizes the QASM file.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t267" href="#t267">267</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t268" href="#t268">268</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t269" href="#t269">269</a></span><span class="t">        <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__init__</span><span class="op">(</span><span class="nam">model</span><span class="op">,</span> <span class="nam">pipeline</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t271" href="#t271">271</a></span><span class="t">    <span class="key">def</span> <span class="nam">create_parser</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">config</span><span class="op">:</span> <span class="nam">CompilerConfig</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Qasm3Parser</span> <span class="op">|</span> <span class="nam">PydQasm3Parser</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t">        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">model</span><span class="op">,</span> <span class="nam">QuantumHardwareModel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t">            <span class="nam">parser</span> <span class="op">=</span> <span class="nam">Qasm3Parser</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t274" href="#t274">274</a></span><span class="t">        <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">model</span><span class="op">,</span> <span class="nam">PydHardwareModel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">274&#x202F;&#x219B;&#x202F;277</span><span class="annotate long">line 274 didn't jump to line 277 because the condition on line 274 was always true</span></span></p>
-    <p class="run"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">            <span class="nam">parser</span> <span class="op">=</span> <span class="nam">PydQasm3Parser</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t276" href="#t276">276</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t277" href="#t277">277</a></span><span class="t">            <span class="key">raise</span> <span class="nam">TypeError</span><span class="op">(</span><span class="str">"Invalid hardware model type set."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t278" href="#t278">278</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t279" href="#t279">279</a></span><span class="t">        <span class="nam">parser</span><span class="op">.</span><span class="nam">results_format</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t280" href="#t280">280</a></span><span class="t">            <span class="nam">config</span><span class="op">.</span><span class="nam">results_format</span><span class="op">.</span><span class="nam">format</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t281" href="#t281">281</a></span><span class="t">            <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">results_format</span><span class="op">.</span><span class="nam">format</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t282" href="#t282">282</a></span><span class="t">            <span class="key">else</span> <span class="nam">InlineResultsProcessing</span><span class="op">.</span><span class="nam">Program</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t283" href="#t283">283</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t284" href="#t284">284</a></span><span class="t">        <span class="key">return</span> <span class="nam">parser</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t261" href="#t261">261</a></span><span class="t"><span class="str">    Handles the parsing of QASM3 into QATs intermediate representation. Optionally, it can</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t262" href="#t262">262</a></span><span class="t"><span class="str">    also run pipelines before to optimize and validate QASM3 files.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t263" href="#t263">263</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t264" href="#t264">264</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t265" href="#t265">265</a></span><span class="t">    <span class="nam">version</span> <span class="op">=</span> <span class="num">3</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t266" href="#t266">266</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t267" href="#t267">267</a></span><span class="t">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">model</span><span class="op">:</span> <span class="nam">QuantumHardwareModel</span><span class="op">,</span> <span class="nam">pipeline</span><span class="op">:</span> <span class="key">None</span> <span class="op">|</span> <span class="nam">PassManager</span> <span class="op">=</span> <span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t268" href="#t268">268</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t269" href="#t269">269</a></span><span class="t"><span class="str">        :param model: The hardware model can be required for the pipeline and is used in</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t"><span class="str">            parsing.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t271" href="#t271">271</a></span><span class="t"><span class="str">        :param pipeline: A pipeline for validation and optimising QASM, defaults to a</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t"><span class="str">            predefined pipeline that optimizes the QASM file.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t274" href="#t274">274</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">        <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__init__</span><span class="op">(</span><span class="nam">model</span><span class="op">,</span> <span class="nam">pipeline</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t276" href="#t276">276</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t277" href="#t277">277</a></span><span class="t">    <span class="key">def</span> <span class="nam">create_parser</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">config</span><span class="op">:</span> <span class="nam">CompilerConfig</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Qasm3Parser</span> <span class="op">|</span> <span class="nam">PydQasm3Parser</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t278" href="#t278">278</a></span><span class="t">        <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">model</span><span class="op">,</span> <span class="nam">QuantumHardwareModel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t279" href="#t279">279</a></span><span class="t">            <span class="nam">parser</span> <span class="op">=</span> <span class="nam">Qasm3Parser</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t280" href="#t280">280</a></span><span class="t">        <span class="key">elif</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">model</span><span class="op">,</span> <span class="nam">PydHardwareModel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">280&#x202F;&#x219B;&#x202F;283</span><span class="annotate long">line 280 didn't jump to line 283 because the condition on line 280 was always true</span></span></p>
+    <p class="run"><span class="n"><a id="t281" href="#t281">281</a></span><span class="t">            <span class="nam">parser</span> <span class="op">=</span> <span class="nam">PydQasm3Parser</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t282" href="#t282">282</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t283" href="#t283">283</a></span><span class="t">            <span class="key">raise</span> <span class="nam">TypeError</span><span class="op">(</span><span class="str">"Invalid hardware model type set."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t284" href="#t284">284</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t285" href="#t285">285</a></span><span class="t">        <span class="nam">parser</span><span class="op">.</span><span class="nam">results_format</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t286" href="#t286">286</a></span><span class="t">            <span class="nam">config</span><span class="op">.</span><span class="nam">results_format</span><span class="op">.</span><span class="nam">format</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t287" href="#t287">287</a></span><span class="t">            <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">results_format</span><span class="op">.</span><span class="nam">format</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t288" href="#t288">288</a></span><span class="t">            <span class="key">else</span> <span class="nam">InlineResultsProcessing</span><span class="op">.</span><span class="nam">Program</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t289" href="#t289">289</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="par run show_par"><span class="n"><a id="t290" href="#t290">290</a></span><span class="t">        <span class="key">if</span> <span class="nam">config</span><span class="op">.</span><span class="nam">post_selection</span> <span class="key">and</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">model</span><span class="op">,</span> <span class="nam">QuantumHardwareModel</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">290&#x202F;&#x219B;&#x202F;291</span><span class="annotate long">line 290 didn't jump to line 291 because the condition on line 290 was never true</span></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t291" href="#t291">291</a></span><span class="t">            <span class="key">raise</span> <span class="nam">NotImplementedError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t292" href="#t292">292</a></span><span class="t">                <span class="str">"post_selection is not supported for legacy QuantumHardwareModel QASM3 "</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t293" href="#t293">293</a></span><span class="t">                <span class="str">"programs. Use a PydHardwareModel instead."</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t294" href="#t294">294</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t295" href="#t295">295</a></span><span class="t">        <span class="nam">parser</span><span class="op">.</span><span class="nam">post_selection</span> <span class="op">=</span> <span class="nam">config</span><span class="op">.</span><span class="nam">post_selection</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t296" href="#t296">296</a></span><span class="t">        <span class="key">return</span> <span class="nam">parser</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -375,7 +387,7 @@
             <a class="nav" href="z_4f8f9bae01ae2046_qat_ir_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-05-20 13:12 +0000
+            created at 2026-05-20 14:28 +0000
         </p>
     </div>
 </footer>

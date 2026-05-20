@@ -874,6 +874,9 @@ post-process methods. <code class="docutils literal notranslate"><span class="pr
 <li><p><span class="target" id="qat.model.device.Qubit.params.mean_z_map_args"></span><strong>mean_z_map_args</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.mean_z_map_args">¶</a> – (deprecated) Arguments for linear mapping (mutually exclusive with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code>).</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.discriminator"></span><strong>discriminator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.discriminator">¶</a> – Discriminator value for measurement.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.post_process_method"></span><strong>post_process_method</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.post_process_method">¶</a> – Post-processing method used to map complex IQ values to states.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.preselect_required"></span><strong>preselect_required</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.preselect_required">¶</a> – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, a pre-selection measurement is intended
+to be inserted before this qubit’s first use in the circuit once pre-selection
+is enabled via the compiler config and the corresponding pass is available.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.direct_x_pi"></span><strong>direct_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.direct_x_pi">¶</a> – Whether direct X(pi) pulse is used.</p></li>
 </ul>
 </dd>
@@ -954,6 +957,11 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.post_process_method">
 <span class="sig-name descname"><span class="pre">post_process_method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PostProcessMethod</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#qat.model.device.Qubit.post_process_method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.Qubit.preselect_required">
+<span class="sig-name descname"><span class="pre">preselect_required</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.model.device.Qubit.preselect_required" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

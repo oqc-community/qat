@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post237.dev20260520130331 documentation</title>
+  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post238.dev20260520141917 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -57,6 +57,7 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -632,6 +633,21 @@ is identical to get_physical_qubit.</p>
 <span class="sig-name descname"><span class="pre">measure_single_shot_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketBuilder.measure_single_shot_z" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.integrations.tket.TketBuilder.measure_with_granular_post_processing">
+<span class="sig-name descname"><span class="pre">measure_with_granular_post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketBuilder.measure_with_granular_post_processing" title="Link to this definition"></a></dt>
+<dd><p>Measure a qubit and emit the full granular post-processing pipeline.</p>
+<p>Compiler frontends should call this method when lowering a measurement
+assignment into IR. The granular discrimination chain is emitted for
+both qubits with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> configured and legacy qubits.
+For configured qubits, the chain (for example <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> →
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) is derived from the configured
+post-processing method; for legacy qubits, the equivalent granular
+chain is derived from legacy <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> data.</p>
+<p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_with_granular_post_processing()</span></code> for
+full detail.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketBuilder.qubits">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">qubits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Qubit</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.integrations.tket.TketBuilder.qubits" title="Link to this definition"></a></dt>
@@ -691,13 +707,14 @@ registers, and might give undesired behaviour if used outside of this use case.<
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.integrations.tket.TketToQatIRConverter.convert">
-<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qat_builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tket_builder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketToQatIRConverter.convert" title="Link to this definition"></a></dt>
-<dd><p>Converts a Tket circuit into Qat IR, adding any necesarry assigns and returns.</p>
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qat_builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tket_builder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.integrations.tket.TketToQatIRConverter.convert" title="Link to this definition"></a></dt>
+<dd><p>Converts a Tket circuit into Qat IR, adding any necessary assigns and returns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.integrations.tket.TketToQatIRConverter.convert.params.circuit"></span><strong>circuit</strong><a class="paramlink headerlink reference internal" href="#qat.integrations.tket.TketToQatIRConverter.convert.params.circuit">¶</a> – Program as a Tket circuit.</p></li>
-<li><p><span class="target" id="qat.integrations.tket.TketToQatIRConverter.convert.params.result_format"></span><strong>result_format</strong><a class="paramlink headerlink reference internal" href="#qat.integrations.tket.TketToQatIRConverter.convert.params.result_format">¶</a> – Specifies how measurement results are formatted.</p></li>
+<li><p><span class="target" id="qat.integrations.tket.TketToQatIRConverter.convert.params.qat_builder"></span><strong>qat_builder</strong><a class="paramlink headerlink reference internal" href="#qat.integrations.tket.TketToQatIRConverter.convert.params.qat_builder">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a></span>) – The QAT instruction builder.</p></li>
+<li><p><span class="target" id="qat.integrations.tket.TketToQatIRConverter.convert.params.tket_builder"></span><strong>tket_builder</strong><a class="paramlink headerlink reference internal" href="#qat.integrations.tket.TketToQatIRConverter.convert.params.tket_builder">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.integrations.tket.TketBuilder" title="qat.integrations.tket.TketBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">TketBuilder</span></code></a></span>) – The Tket circuit builder.</p></li>
+<li><p><span class="target" id="qat.integrations.tket.TketToQatIRConverter.convert.params.post_selection"></span><strong>post_selection</strong><a class="paramlink headerlink reference internal" href="#qat.integrations.tket.TketToQatIRConverter.convert.params.post_selection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to emit PostSelect instructions during measurement.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

@@ -1,0 +1,1165 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Granular Post-Processing Pipeline &mdash; qat-compiler 3.0.0.post238.dev20260520141917 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx_paramlinks.css" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=c4370934"></script>
+      <script src="../_static/doctools.js?v=888ff710"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Using QAT with simulators" href="simulators.html" />
+    <link rel="prev" title="Execution" href="execution.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            qat-compiler
+              <img src="../_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Getting started with QAT</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input.html">Supported input to the compiler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat_config.html">QAT Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="compilation.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="execution.html">Execution</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Granular Post-Processing Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutorials/target_data.html">TargetData Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">src</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../qat.html">qat package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../qat.backend.html">qat.backend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.passes.html">qat.backend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.passes.purr.html">qat.backend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.passes.purr.analysis.html">qat.backend.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.passes.purr.lowering.html">qat.backend.passes.purr.lowering module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.passes.purr.transform.html">qat.backend.passes.purr.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.passes.purr.validation.html">qat.backend.passes.purr.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.qblox.html">qat.backend.qblox package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.passes.html">qat.backend.qblox.passes package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.qblox.passes.analysis.html">qat.backend.qblox.passes.analysis module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.acquisition.html">qat.backend.qblox.acquisition module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.ir.html">qat.backend.qblox.ir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.target_data.html">qat.backend.qblox.target_data module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.base.html">qat.backend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.codegen_base.html">qat.backend.codegen_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.fallthrough.html">qat.backend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.backend.graph.html">qat.backend.graph module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.core.html">qat.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.config.html">qat.core.config package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.core.config.configure.html">qat.core.config.configure module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.core.config.descriptions.html">qat.core.config.descriptions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.core.config.session.html">qat.core.config.session module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.core.config.validators.html">qat.core.config.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.pass_base.html">qat.core.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.pipeline.html">qat.core.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.qat.html">qat.core.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.core.result_base.html">qat.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.engines.html">qat.engines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.qblox.html">qat.engines.qblox package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.engines.waveform_v1.echo.html">qat.engines.waveform_v1.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.model.html">qat.engines.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.native.html">qat.engines.native module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.engines.zero.html">qat.engines.zero module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.experimental.html">qat.experimental package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.experimental.dialect.html">qat.experimental.dialect package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.converters.html">qat.frontend.converters package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.converters.purr.html">qat.frontend.converters.purr module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.frontend.parsers.qasm.base.html">qat.frontend.parsers.qasm.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.frontend.parsers.qasm.qasm2.html">qat.frontend.parsers.qasm.qasm2 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.frontend.parsers.qasm.qasm3.html">qat.frontend.parsers.qasm.qasm3 module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.passes.html">qat.frontend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.passes.purr.html">qat.frontend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.frontend.passes.purr.transform.html">qat.frontend.passes.purr.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.passes.analysis.html">qat.frontend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.auto.html">qat.frontend.auto module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.base.html">qat.frontend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.builder.html">qat.frontend.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.custom.html">qat.frontend.custom module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.qir.html">qat.frontend.qir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.frontend.register.html">qat.frontend.register module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.integrations.features.html">qat.integrations.features module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.integrations.tket.html">qat.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.gates.html">qat.ir.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.ir.gates.gates_1q.html">qat.ir.gates.gates_1q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.ir.gates.gates_2q.html">qat.ir.gates.gates_2q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.ir.gates.native.html">qat.ir.gates.native module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.conversion.html">qat.ir.conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.instruction_basetypes.html">qat.ir.instruction_basetypes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.instructions.html">qat.ir.instructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.lowered.html">qat.ir.lowered module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.utils.html">qat.ir.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.middleend.html">qat.middleend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.decompositions.html">qat.middleend.decompositions package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.decompositions.base.html">qat.middleend.decompositions.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.decompositions.gates.html">qat.middleend.decompositions.gates module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.decompositions.pulses.html">qat.middleend.decompositions.pulses module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.passes.html">qat.middleend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.passes.gates.html">qat.middleend.passes.gates package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.middleend.passes.gates.transform.html">qat.middleend.passes.gates.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.middleend.passes.gates.validation.html">qat.middleend.passes.gates.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.passes.purr.html">qat.middleend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.middleend.passes.purr.analysis.html">qat.middleend.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.middleend.passes.purr.transform.html">qat.middleend.passes.purr.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.middleend.passes.purr.validation.html">qat.middleend.passes.purr.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.passes.analysis.html">qat.middleend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.passes.transform.html">qat.middleend.passes.transform module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.model.html">qat.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.loaders.html">qat.model.loaders package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.qblox.html">qat.model.loaders.purr.qblox module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.qiskit.html">qat.model.loaders.purr.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.model.loaders.purr.rtcs.html">qat.model.loaders.purr.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.base.html">qat.model.loaders.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.qblox.html">qat.model.loaders.qblox module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.builder.html">qat.model.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.convert_purr.html">qat.model.convert_purr module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.post_processing.html">qat.model.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.target_data.html">qat.model.target_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.model.validators.html">qat.model.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.legacy.html">qat.pipelines.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.legacy.base.html">qat.pipelines.legacy.base package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.base.compile.html">qat.pipelines.legacy.base.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.base.execute.html">qat.pipelines.legacy.base.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.base.full.html">qat.pipelines.legacy.base.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.legacy.echo.html">qat.pipelines.legacy.echo package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.echo.compile.html">qat.pipelines.legacy.echo.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.echo.execute.html">qat.pipelines.legacy.echo.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.echo.full.html">qat.pipelines.legacy.echo.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.legacy.qblox.html">qat.pipelines.legacy.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.qblox.compile.html">qat.pipelines.legacy.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.qblox.full.html">qat.pipelines.legacy.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.legacy.qiskit.html">qat.pipelines.legacy.qiskit package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.qiskit.compile.html">qat.pipelines.legacy.qiskit.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.qiskit.execute.html">qat.pipelines.legacy.qiskit.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.qiskit.full.html">qat.pipelines.legacy.qiskit.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.rtcs.compile.html">qat.pipelines.legacy.rtcs.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.legacy.rtcs.full.html">qat.pipelines.legacy.rtcs.full module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.pipelines.purr.waveform_v1.full.html">qat.pipelines.purr.waveform_v1.full module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.base.html">qat.pipelines.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.cache.html">qat.pipelines.cache module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.acquisition.html">qat.purr.backends.qblox.acquisition module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.qat.html">qat.purr.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.runtime.html">qat.runtime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.passes.html">qat.runtime.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="../qat.runtime.passes.purr.html">qat.runtime.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="../qat.runtime.passes.purr.analysis.html">qat.runtime.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="../qat.runtime.passes.purr.transform.html">qat.runtime.passes.purr.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.runtime.passes.analysis.html">qat.runtime.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.base.html">qat.runtime.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.expressions.html">qat.runtime.expressions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.runtime.simple.html">qat.runtime.simple module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.utils.html">qat.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.piny.html">qat.utils.piny module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.qasm.html">qat.utils.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.uuid.html">qat.utils.uuid module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../qat.utils.waveform.html">qat.utils.waveform module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.executables.html">qat.executables module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../qat.extensions.html">qat.extensions module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">qat-compiler</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Getting started with QAT</a></li>
+      <li class="breadcrumb-item active">Granular Post-Processing Pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/getting_started/post_processing_pipeline.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="granular-post-processing-pipeline">
+<span id="post-selection"></span><span id="post-processing-pipeline"></span><h1>Granular Post-Processing Pipeline<a class="headerlink" href="#granular-post-processing-pipeline" title="Link to this heading"></a></h1>
+<p>This page explains how QAT’s granular readout pipeline fits together. For
+field-level API details, rely on the autodoc sections rendered from code
+(docstrings) below.</p>
+<p>Pipeline order:</p>
+<p><code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code></p>
+<p>Post-selection discards shots based on discriminated state labels.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Post-selection</strong> is implemented. <strong>Pre-selection</strong> is planned; see
+<a class="reference internal" href="#pre-selection-planned"><span class="std std-ref">Pre-selection (planned)</span></a>.</p>
+</div>
+<nav class="contents local" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#overview" id="id8">Overview</a></p></li>
+<li><p><a class="reference internal" href="#pipeline-steps" id="id9">Pipeline steps</a></p>
+<ul>
+<li><p><a class="reference internal" href="#step-1-equalise" id="id10">Step 1 — Equalise</a></p></li>
+<li><p><a class="reference internal" href="#step-2-discriminate" id="id11">Step 2 — Discriminate</a></p></li>
+<li><p><a class="reference internal" href="#step-3-postselect" id="id12">Step 3 — PostSelect</a></p></li>
+<li><p><a class="reference internal" href="#step-4-demap" id="id13">Step 4 — Demap</a></p></li>
+<li><p><a class="reference internal" href="#step-5-results-format" id="id14">Step 5 — Results format</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#ir-encoding" id="id15">IR encoding</a></p></li>
+<li><p><a class="reference internal" href="#runtime-execution" id="id16">Runtime execution</a></p></li>
+<li><p><a class="reference internal" href="#pre-selection-planned" id="id17">Pre-selection (planned)</a></p></li>
+<li><p><a class="reference internal" href="#see-also" id="id18">See also</a></p></li>
+</ul>
+</nav>
+<section id="overview">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Overview</a><a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The data flow spans three layers:</p>
+<ol class="arabic simple">
+<li><p><strong>Hardware model</strong> —
+Qubits carry a configured discrimination method
+(<code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code> or <code class="docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code>).</p></li>
+<li><p><strong>IR builder</strong> —
+Frontends emit granular readout instructions from that method.</p></li>
+<li><p><strong>Runtime pass</strong> —
+Runtime applies instructions, builds masks, filters invalid shots, and formats
+final outputs.</p></li>
+</ol>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Qubit.post_process_method
+  └─ LinearMapToRealMethod | MaxLikelihoodMethod
+           │
+           ▼
+measure_with_granular_post_processing()       ← frontend parsers call this
+  ├─ MeasureBlock
+  ├─ emit_granular_post_processing()
+  │    └─ Equalise → Discriminate → Demap
+  └─ emit_post_select()  (if disallowed states configured)
+       └─ PostSelect (inserted before Demap)
+           │
+           ▼
+AcquisitionPostprocessing pass (runtime)
+  ├─ apply_equalise()
+  ├─ apply_discriminate_instruction()
+  ├─ apply_post_select() → validity_mask
+  └─ apply_demap_instruction()
+  │
+  ├─ global_mask = AND of all per-output masks
+  ├─ filter all result arrays by global_mask
+  └─ store PostSelectionResult(shots_requested, shots_retained, mask)
+           │
+           ▼
+ResultTransform
+  └─ uses shots_retained as denominator for binary_count
+</pre></div>
+</div>
+</section>
+<section id="pipeline-steps">
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Pipeline steps</a><a class="headerlink" href="#pipeline-steps" title="Link to this heading"></a></h2>
+<section id="step-1-equalise">
+<h3><a class="toc-backref" href="#id10" role="doc-backlink">Step 1 — Equalise</a><a class="headerlink" href="#step-1-equalise" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Equalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Equalise" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>Apply an affine transform in the IQ (complex) plane to readout data.</p>
+<p>This is the first stage of the granular post-processing pipeline.</p>
+<p>In superconducting qubit readout the downconverted IQ signal is distorted
+by three hardware imperfections: <strong>phase imbalance</strong> (LO quadrature paths
+not exactly 90° apart), <strong>gain imbalance</strong> (unequal I/Q amplifier chains),
+and <strong>DC offsets</strong> (mixer leakage and biases).  As a result, raw <code class="docutils literal notranslate"><span class="pre">(I,</span> <span class="pre">Q)</span></code>
+samples cluster on a distorted, offset ellipse rather than a compact point
+cloud, degrading any downstream discriminator.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> instruction corrects all three imperfections in a single
+real affine transform:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} I' \\ Q' \end{pmatrix}
+= A \begin{pmatrix} I \\ Q \end{pmatrix} + \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">A</span></code> is a <strong>real</strong> 2×2 matrix (<code class="docutils literal notranslate"><span class="pre">transform</span></code>) and <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code>
+is the real offset vector (<code class="docutils literal notranslate"><span class="pre">offset</span></code>).  The output is returned as a
+complex value <code class="docutils literal notranslate"><span class="pre">I'</span> <span class="pre">+</span> <span class="pre">j</span> <span class="pre">Q'</span></code>.</p>
+<p>Each <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> instruction operates on a single readout channel.
+To equalise multiple channels, emit one instruction per channel with its
+own <code class="docutils literal notranslate"><span class="pre">output_variable</span></code>.</p>
+<p>The default <code class="docutils literal notranslate"><span class="pre">transform</span></code> (2×2 identity) and default <code class="docutils literal notranslate"><span class="pre">offset</span></code> (zero
+vector) are a no-op pass-through for already-calibrated hardware.</p>
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_equalise" title="qat.runtime.post_processing.apply_equalise"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_equalise()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Equalise.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Equalise.params.output_variable">¶</a> – Variable name whose data should be transformed.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Equalise.params.transform"></span><strong>transform</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Equalise.params.transform">¶</a> – Real <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">2)</span></code> matrix <code class="docutils literal notranslate"><span class="pre">A</span></code>.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Equalise.params.offset"></span><strong>offset</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Equalise.params.offset">¶</a> – Real offset vector <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code>, shape <code class="docutils literal notranslate"><span class="pre">(2,)</span></code>.
+Defaults to the zero vector.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Equalise.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.Equalise.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_equalise" title="qat.runtime.post_processing.apply_equalise"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_equalise()</span></code></a>.</p>
+</section>
+<section id="step-2-discriminate">
+<h3><a class="toc-backref" href="#id11" role="doc-backlink">Step 2 — Discriminate</a><a class="headerlink" href="#step-2-discriminate" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Discriminate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Discriminate" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>Discriminate equalised values to string state labels.</p>
+<p>For the linear-map path a sign-based threshold comparison is used:
+values above <code class="docutils literal notranslate"><span class="pre">threshold</span></code> → label <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, values at or below → label
+<code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>. For the maximum-likelihood path the nearest centroid in the
+complex plane determines the state’s configured string label
+(<code class="docutils literal notranslate"><span class="pre">MLStateMap.label</span></code>).</p>
+<p>Exactly one of <code class="docutils literal notranslate"><span class="pre">threshold</span></code> or <code class="docutils literal notranslate"><span class="pre">method</span></code> must be provided.</p>
+<p>Runtime implementation:
+<a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_discriminate_instruction()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Discriminate.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Discriminate.params.output_variable">¶</a> – Variable name whose data should be discriminated.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Discriminate.params.threshold"></span><strong>threshold</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Discriminate.params.threshold">¶</a> – Scalar threshold for the linear-map discrimination path.
+<code class="docutils literal notranslate"><span class="pre">None</span></code> when <code class="docutils literal notranslate"><span class="pre">method</span></code> is provided.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Discriminate.params.method"></span><strong>method</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Discriminate.params.method">¶</a> – Post-process method object for the ML path. <code class="docutils literal notranslate"><span class="pre">None</span></code> when
+<code class="docutils literal notranslate"><span class="pre">threshold</span></code> is provided.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Discriminate.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.Discriminate.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_discriminate_instruction()</span></code></a>.</p>
+<section id="configuring-classification-methods">
+<h4>Configuring classification methods<a class="headerlink" href="#configuring-classification-methods" title="Link to this heading"></a></h4>
+<p>Configuration lives on <a class="reference internal" href="../qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a> via
+<code class="docutils literal notranslate"><span class="pre">post_process_method</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> and legacy <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> are mutually
+exclusive.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearMapToRealMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a></p>
+<p>Threshold-based discriminator using a calibrated complex-to-real projection.</p>
+<p>Projects each complex IQ readout onto a real value via:</p>
+<div class="math notranslate nohighlight">
+\[v = \mathrm{Re}(a \cdot \mathrm{IQ} + b)\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> are the two entries of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>.  The
+result is sign-classified: positive → state <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, non-positive →
+state <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>.</p>
+<p>Set <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> to filter out shots by their classified state
+label (e.g. <code class="docutils literal notranslate"><span class="pre">[&quot;1&quot;]</span></code> to discard shots <strong>not</strong> in the ground state).</p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.disallowed_states">
+<span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.disallowed_states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args">
+<span class="sig-name descname"><span class="pre">mean_z_map_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">&lt;MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL:</span> <span class="pre">'linear_map_complex_to_real'&gt;</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MaxLikelihoodMethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a></p>
+<p>Maximum likelihood discriminator for qubit measurement results.</p>
+<p>Each shot is assigned to the state <code class="docutils literal notranslate"><span class="pre">k</span></code> with the highest normalised likelihood:</p>
+<div class="math notranslate nohighlight">
+\[\tilde{p}_k(z) = \frac{L_k(z)}{\sum_j L_j(z)},
+\quad L_k(z) = \exp\!\left(-\frac{|z - \mathrm{loc}_k|^2}{2\,\nu}\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the noise power (variance) <code class="docutils literal notranslate"><span class="pre">noise_est</span></code>.</p>
+<p>Likelihoods are computed in log-domain with log-sum-exp stabilisation to avoid
+underflow on extreme outliers.</p>
+<p><strong>Outlier rejection</strong> — set <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> to automatically reject shots whose
+winning normalised likelihood falls below the threshold. Those shots are labelled
+<a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.BG_LABEL" title="qat.model.post_processing.BG_LABEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_LABEL</span></code></a> and discarded by <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.
+Default <code class="docutils literal notranslate"><span class="pre">p_min=0.0</span></code> disables the check entirely (zero overhead).</p>
+<p><strong>Disallowed states</strong> — individual states can be marked <code class="docutils literal notranslate"><span class="pre">disallowed=True</span></code> on
+<a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MLStateMap" title="qat.model.post_processing.MLStateMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLStateMap</span></code></a> for erasure checks and pre-selection; these are independent of
+<code class="docutils literal notranslate"><span class="pre">p_min</span></code> and handled by separate <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> instructions.</p>
+<p>Runtime implementation:
+<a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_discriminate_instruction()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.states"></span><strong>states</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.states">¶</a> – Per-state IQ-plane centroids, labels and output values.</p></li>
+<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.noise_est"></span><strong>noise_est</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.noise_est">¶</a> – Global Gaussian noise power (variance, <span class="math notranslate nohighlight">\(\sigma^2\)</span>). Must be
+strictly positive. Default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.p_min"></span><strong>p_min</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.p_min">¶</a> – Minimum normalised likelihood for acceptance. Must be in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>.</p></li>
+<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.transform"></span><strong>transform</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.transform">¶</a> – Real <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">2)</span></code> IQ affine pre-transform matrix <code class="docutils literal notranslate"><span class="pre">A</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> step is emitted.</p></li>
+<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.offset"></span><strong>offset</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.offset">¶</a> – Real offset vector <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code> for the affine pre-transform.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), no <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> step is emitted.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.disallowed_states">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.disallowed_states" title="Link to this definition"></a></dt>
+<dd><p>State labels marked <code class="docutils literal notranslate"><span class="pre">disallowed=True</span></code>, plus <code class="docutils literal notranslate"><span class="pre">BG_LABEL</span></code> if <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of disallowed state label strings.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">&lt;MethodIndicator.MAX_LIKELIHOOD:</span> <span class="pre">'max_likelihood'&gt;</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.method" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.noise_est">
+<span class="sig-name descname"><span class="pre">noise_est</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.noise_est" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><a class="reference internal" href="../qat.utils.pydantic.html#qat.utils.pydantic.PydArray" title="qat.utils.pydantic.PydArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydArray</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.offset" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.p_min">
+<span class="sig-name descname"><span class="pre">p_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.p_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.states">
+<span class="sig-name descname"><span class="pre">states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MLStateMap" title="qat.model.post_processing.MLStateMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLStateMap</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Annotated</span></code><span class="pre">[</span><a class="reference internal" href="../qat.utils.pydantic.html#qat.utils.pydantic.PydArray" title="qat.utils.pydantic.PydArray"><code class="xref py py-class docutils literal notranslate"><span class="pre">PydArray</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.transform" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MLStateMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MLStateMap" title="Link to this definition"></a></dt>
+<dd><p>Demapping from a quantum state to its IQ-plane location and C-register output value.</p>
+<p>Each <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MLStateMap" title="qat.model.post_processing.MLStateMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLStateMap</span></code></a> entry represents one possible measurement outcome.  The
+<code class="docutils literal notranslate"><span class="pre">label</span></code> is string routing key that threads through the discrimination pipeline
+(<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>). The <code class="docutils literal notranslate"><span class="pre">output_value</span></code> is the final
+integer written to the classical register after <code class="docutils literal notranslate"><span class="pre">Demap</span></code> has been applied.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">disallowed</span></code> field marks a state as invalid for use-cases such as erasure
+checks and pre-selection.  Shots assigned to a <code class="docutils literal notranslate"><span class="pre">disallowed=True</span></code> state are
+subsequently removed by <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p>
+<p>Example — a standard qubit with states <a href="#id1"><span class="problematic" id="id2">|</span></a>0⟩ and <a href="#id3"><span class="problematic" id="id4">|</span></a>1⟩:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+<span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example — qutrit classifier that rejects the leakage state <a href="#id5"><span class="problematic" id="id6">|</span></a>2⟩:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+<span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+<span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.disallowed">
+<span class="sig-name descname"><span class="pre">disallowed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.disallowed" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.label" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.location">
+<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.location" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.output_value">
+<span class="sig-name descname"><span class="pre">output_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.output_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<p><strong>Example</strong> — attaching a method to a qubit:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.device</span><span class="w"> </span><span class="kn">import</span> <span class="n">Qubit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.post_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearMapToRealMethod</span>
+
+<span class="n">qubit</span> <span class="o">=</span> <span class="n">Qubit</span><span class="p">(</span>
+    <span class="o">...</span><span class="p">,</span>
+    <span class="n">mean_z_map_args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">post_process_method</span><span class="o">=</span><span class="n">LinearMapToRealMethod</span><span class="p">(</span><span class="n">disallowed_states</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">]),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-3-postselect">
+<h3><a class="toc-backref" href="#id12" role="doc-backlink">Step 3 — PostSelect</a><a class="headerlink" href="#step-3-postselect" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.PostSelect">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.PostSelect" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>Remove shots whose state label appears in <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code>.</p>
+<p>Emitting this instruction with an empty <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> list is a
+no-op (all shots are considered valid) but is safe to emit unconditionally
+so that the pipeline structure is uniform.</p>
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select" title="qat.runtime.post_processing.apply_post_select"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_post_select()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.PostSelect.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.output_variable">¶</a> – Variable name whose state labels should be
+screened.</p></li>
+<li><p><span class="target" id="qat.ir.measure.PostSelect.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.disallowed_states">¶</a> – String state labels that should be marked
+invalid. Shots mapped to these labels will have their validity mask
+entry set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.PostSelect.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.PostSelect.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PostSelect does not remove shots inline. Runtime combines per-output masks
+into one global mask and applies filtering after per-output processing.</p>
+</div>
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select" title="qat.runtime.post_processing.apply_post_select"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_post_select()</span></code></a>.</p>
+</section>
+<section id="step-4-demap">
+<h3><a class="toc-backref" href="#id13" role="doc-backlink">Step 4 — Demap</a><a class="headerlink" href="#step-4-demap" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.measure.Demap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Demap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.Demap" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
+<p>De-map string state labels to final integer output values.</p>
+<p>This is the final stage of the granular post-processing pipeline. Each
+shot is mapped from a string state label (produced by <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>)
+to the configured integer output value written to the classical register.</p>
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction" title="qat.runtime.post_processing.apply_demap_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_demap_instruction()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.measure.Demap.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Demap.params.output_variable">¶</a> – Variable name whose state labels should be mapped.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Demap.params.state_map"></span><strong>state_map</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Demap.params.state_map">¶</a> – Mapping from string state label to integer output value, e.g.
+<code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code> for the standard binary convention.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Demap.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'ignore',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.ir.measure.Demap.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction" title="qat.runtime.post_processing.apply_demap_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_demap_instruction()</span></code></a>.</p>
+</section>
+<section id="step-5-results-format">
+<h3><a class="toc-backref" href="#id14" role="doc-backlink">Step 5 — Results format</a><a class="headerlink" href="#step-5-results-format" title="Link to this heading"></a></h3>
+<p id="results-format-semantics"><a class="reference internal" href="../qat.runtime.passes.transform.html#qat.runtime.passes.transform.ResultTransform" title="qat.runtime.passes.transform.ResultTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultTransform</span></code></a> formats final results by
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">results_format</span></code>.</p>
+<dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">raw()</span></code></dt><dd><p>Complex IQ arrays (equalised path output).</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">binary()</span></code></dt><dd><p>Per-shot mapped int values.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">binary_count()</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">{label:</span> <span class="pre">count}</span></code> from discriminated string labels (retained shots only).</p>
+</dd>
+</dl>
+<p><strong>Semantic matrix</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 40.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Format</p></th>
+<th class="head"><p>Post-selection <strong>off</strong></p></th>
+<th class="head"><p>Post-selection <strong>on</strong> (e.g. 3 of 10 filtered)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">raw()</span></code></p></td>
+<td><p>10 complex IQ values</p></td>
+<td><p>7 complex IQ values</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">binary()</span></code></p></td>
+<td><p>10 mapped int values</p></td>
+<td><p>7 mapped int values</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">binary_count()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">6,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">4}</span></code> over 10 shots</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">4,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">3}</span></code> over 7 retained shots</p></td>
+</tr>
+</tbody>
+</table>
+<p>When <code class="docutils literal notranslate"><span class="pre">results_format</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, dynamic structure return is used.</p>
+</section>
+</section>
+<section id="ir-encoding">
+<h2><a class="toc-backref" href="#id15" role="doc-backlink">IR encoding</a><a class="headerlink" href="#ir-encoding" title="Link to this heading"></a></h2>
+<dl>
+<dt><a class="reference internal" href="../qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a></dt><dd><p>Frontend path (QASM2/QASM3/QIR/tket). Emits <code class="docutils literal notranslate"><span class="pre">MeasureBlock</span></code>, optional
+<code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code> (SCOPE only), then granular instructions via
+<a class="reference internal" href="../qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a>.</p>
+<p>Frontends that require shot filtering call
+<a class="reference internal" href="../qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a>,
+which inserts <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> before <code class="docutils literal notranslate"><span class="pre">Demap</span></code>.</p>
+</dd>
+<dt><a class="reference internal" href="../qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_single_shot_z()</span></code></a></dt><dd><p>Customer-facing path. Emits legacy
+<code class="docutils literal notranslate"><span class="pre">PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)</span></code> and does not emit granular
+instructions.</p>
+</dd>
+</dl>
+<p>Legacy <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostProcessing" title="qat.ir.measure.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a> instructions remain supported for
+backward compatibility.</p>
+</section>
+<section id="runtime-execution">
+<h2><a class="toc-backref" href="#id16" role="doc-backlink">Runtime execution</a><a class="headerlink" href="#runtime-execution" title="Link to this heading"></a></h2>
+<p><a class="reference internal" href="../qat.runtime.passes.transform.html#qat.runtime.passes.transform.AcquisitionPostprocessing" title="qat.runtime.passes.transform.AcquisitionPostprocessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquisitionPostprocessing</span></code></a> applies
+<code class="docutils literal notranslate"><span class="pre">Equalise</span></code>/<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>/<code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>/<code class="docutils literal notranslate"><span class="pre">Demap</span></code> helpers, constructs a
+single global mask, filters all outputs, and stores post-selection metadata.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.PostSelectionResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectionResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shots_requested</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots_retained</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.PostSelectionResult" title="Link to this definition"></a></dt>
+<dd><p>Records the outcome of post-selection applied during acquisition post-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.passes.analysis.PostSelectionResult.params.shots_requested"></span><strong>shots_requested</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.PostSelectionResult.params.shots_requested">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Total shots compiled and executed.</p></li>
+<li><p><span class="target" id="qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained"></span><strong>shots_retained</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of shots that survived post-selection.</p></li>
+<li><p><span class="target" id="qat.runtime.passes.analysis.PostSelectionResult.params.global_mask"></span><strong>global_mask</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.PostSelectionResult.params.global_mask">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – Boolean array of shape <code class="docutils literal notranslate"><span class="pre">(shots_requested,)</span></code> where <code class="docutils literal notranslate"><span class="pre">True</span></code>
+marks a retained shot. <code class="docutils literal notranslate"><span class="pre">None</span></code> if no post-selection was applied.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="pre-selection-planned">
+<span id="id7"></span><h2><a class="toc-backref" href="#id17" role="doc-backlink">Pre-selection (planned)</a><a class="headerlink" href="#pre-selection-planned" title="Link to this heading"></a></h2>
+<p>Pre-selection measures each qubit before first use and discards shots where the
+qubit is not in the expected ground state.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Pre-selection is <strong>not yet implemented</strong>.</p>
+</div>
+<p><strong>Per-qubit flag</strong> — <code class="docutils literal notranslate"><span class="pre">preselect_required</span></code> on
+<a class="reference internal" href="../qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a> (default <code class="docutils literal notranslate"><span class="pre">False</span></code>), meaningful when
+<code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> has at least one disallowed state.</p>
+<p><strong>Compiler config flag</strong> — a future <code class="docutils literal notranslate"><span class="pre">CompilerConfig</span></code> option will enable or
+disable pre-selection globally.</p>
+<p><strong>Middleend pass</strong> — <code class="docutils literal notranslate"><span class="pre">AddPreselectionMeasurement</span></code> will insert a pre-selection
+measurement (with configured method and <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>) before each qubit’s
+first use when enabled and required.</p>
+<p><strong>Runtime</strong> — no new runtime machinery required.</p>
+</section>
+<section id="see-also">
+<h2><a class="toc-backref" href="#id18" role="doc-backlink">See also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference internal" href="../qat.ir.measure.html#module-qat.ir.measure" title="qat.ir.measure"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.ir.measure</span></code></a> — instruction model docs (canonical API semantics).</p></li>
+<li><p><a class="reference internal" href="../qat.runtime.post_processing.html#module-qat.runtime.post_processing" title="qat.runtime.post_processing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.runtime.post_processing</span></code></a> — runtime helper docs.</p></li>
+<li><p><a class="reference internal" href="../qat.model.post_processing.html#module-qat.model.post_processing" title="qat.model.post_processing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.model.post_processing</span></code></a> — classification model docs.</p></li>
+<li><p><a class="reference internal" href="../qat.runtime.passes.transform.html#qat.runtime.passes.transform.AcquisitionPostprocessing" title="qat.runtime.passes.transform.AcquisitionPostprocessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.runtime.passes.transform.AcquisitionPostprocessing</span></code></a></p></li>
+<li><p><a class="reference internal" href="../qat.runtime.passes.transform.html#qat.runtime.passes.transform.ResultTransform" title="qat.runtime.passes.transform.ResultTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.runtime.passes.transform.ResultTransform</span></code></a></p></li>
+<li><p><a class="reference internal" href="../qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.PostSelectionResult" title="qat.runtime.passes.analysis.PostSelectionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.runtime.passes.analysis.PostSelectionResult</span></code></a></p></li>
+<li><p><a class="reference internal" href="execution.html#execution"><span class="std std-ref">Execution</span></a></p></li>
+</ul>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="execution.html" class="btn btn-neutral float-left" title="Execution" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="simulators.html" class="btn btn-neutral float-right" title="Using QAT with simulators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../../2.6.0/index.html">2.6.0</a></dd>
+      <dd><a href="../../2.7.0/index.html">2.7.0</a></dd>
+      <dd><a href="../../3.0.0/index.html">3.0.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="post_processing_pipeline.html">main</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.frontend.parsers.qir module &mdash; qat-compiler 3.0.0.post237.dev20260520130331 documentation</title>
+  <title>qat.frontend.parsers.qir module &mdash; qat-compiler 3.0.0.post238.dev20260520141917 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -56,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -567,7 +568,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.frontend.parsers.qir.QIRParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QIRParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QIRParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">results_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_selection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.frontend.parsers.qir.QIRParser" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Used to parse QIR files and walk the AST to assemble a quantum program.</p>
 <p>The parser makes API calls to the instruction builder passed at instantiation to allow

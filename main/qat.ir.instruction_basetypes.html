@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.instruction_basetypes module &mdash; qat-compiler 3.0.0.post237.dev20260520130331 documentation</title>
+  <title>qat.ir.instruction_basetypes module &mdash; qat-compiler 3.0.0.post238.dev20260520141917 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -56,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -537,6 +538,21 @@
 
   <section id="module-qat.ir.instruction_basetypes">
 <span id="qat-ir-instruction-basetypes-module"></span><h1>qat.ir.instruction_basetypes module<a class="headerlink" href="#module-qat.ir.instruction_basetypes" title="Link to this heading"></a></h1>
+<section id="qat-ir-instruction-basetypes">
+<h2>qat.ir.instruction_basetypes<a class="headerlink" href="#qat-ir-instruction-basetypes" title="Link to this heading"></a></h2>
+<p>Module containing small enums used to describe acquisition and post-processing
+semantics in the QAT IR. These types are used by instructions such as
+<code class="docutils literal notranslate"><span class="pre">Acquire</span></code> and <code class="docutils literal notranslate"><span class="pre">PostProcessing</span></code> to describe how readout data should be
+handled by the runtime.</p>
+<p>The public symbols are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qat.ir.instruction_basetypes.PostProcessType" title="qat.ir.instruction_basetypes.PostProcessType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessType</span></code></a> – the kind of post-processing to apply to readout
+data.</p></li>
+<li><p><a class="reference internal" href="#qat.ir.instruction_basetypes.ProcessAxis" title="qat.ir.instruction_basetypes.ProcessAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></a> – the axis of the readout data to operate on.</p></li>
+<li><p><a class="reference internal" href="#qat.ir.instruction_basetypes.AcquireMode" title="qat.ir.instruction_basetypes.AcquireMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireMode</span></code></a> – the hardware acquisition mode used by an acquire
+instruction.</p></li>
+</ul>
+</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.ir.instruction_basetypes.AcquireMode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_basetypes.AcquireMode" title="Link to this definition"></a></dt>

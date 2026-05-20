@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime.passes.analysis module &mdash; qat-compiler 3.0.0.post237.dev20260520130331 documentation</title>
+  <title>qat.runtime.passes.analysis module &mdash; qat-compiler 3.0.0.post238.dev20260520141917 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -56,6 +56,7 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -538,6 +539,50 @@
 
   <section id="module-qat.runtime.passes.analysis">
 <span id="qat-runtime-passes-analysis-module"></span><h1>qat.runtime.passes.analysis module<a class="headerlink" href="#module-qat.runtime.passes.analysis" title="Link to this heading"></a></h1>
+<p>Runtime analysis passes for result indexing and post-selection.</p>
+<p>This module provides analysis passes that run prior to result transformation. They are
+responsible for deriving mappings between acquired output variables and physical qubit
+indices, and for recording post-selection metadata produced by post-processing.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.DiscriminateResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiscriminateResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.DiscriminateResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<p>Stores the string state-label arrays produced by the
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> stage of the granular post-processing pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.analysis.DiscriminateResult.params.outputs"></span><strong>outputs</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.DiscriminateResult.params.outputs">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – Mapping from output variable name to a string ndarray of state labels
+(e.g. <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;2&quot;</span></code>). The global post-selection mask has already been
+applied when this result is stored.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.DiscriminateResult.outputs">
+<span class="sig-name descname"><span class="pre">outputs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.DiscriminateResult.outputs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.EqualiseResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualiseResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.EqualiseResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<p>Stores the equalised (affine-transformed) complex IQ arrays produced by the
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> stage of the granular post-processing pipeline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.analysis.EqualiseResult.params.outputs"></span><strong>outputs</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.EqualiseResult.params.outputs">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – Mapping from output variable name to the complex-valued IQ array after
+equalisation. Arrays are indexed by shot (and optionally by time for SCOPE mode).
+The global post-selection mask has already been applied when this result is stored.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.EqualiseResult.outputs">
+<span class="sig-name descname"><span class="pre">outputs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.EqualiseResult.outputs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingAnalysis">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IndexMappingAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingAnalysis" title="Link to this definition"></a></dt>
@@ -557,7 +602,7 @@ Also looks for classical registers of the form <code class="code docutils litera
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">any</span></code>]</span>) – The dictionary of results acquired from the target machine.</p></li>
+<li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span>) – The dictionary of results acquired from the target machine.</p></li>
 <li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.res_mgr"></span><strong>res_mgr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.res_mgr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a></span>) – The results manager to save the mapping.</p></li>
 <li><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package"></span><strong>package</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingAnalysis.run.params.package">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder" title="qat.ir.instruction_builder.InstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">InstructionBuilder</span></code></a> | <a class="reference internal" href="qat.executables.html#qat.executables.Executable" title="qat.executables.Executable"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executable</span></code></a></span>) – The executable program containing the results-processing
 information should be passed as a keyword argument.</p></li>
@@ -598,9 +643,47 @@ information should be passed as a keyword argument.</p></li>
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingResult">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IndexMappingResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingResult" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<p>Result containing a mapping from output variable names to qubit indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.runtime.passes.analysis.IndexMappingResult.params.mapping"></span><strong>mapping</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.IndexMappingResult.params.mapping">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Dictionary mapping variable name to physical qubit index.</p>
+</dd>
+</dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.runtime.passes.analysis.IndexMappingResult.mapping">
 <span class="sig-name descname"><span class="pre">mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.IndexMappingResult.mapping" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.PostSelectionResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectionResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shots_requested</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shots_retained</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.passes.analysis.PostSelectionResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultInfoMixin" title="qat.core.result_base.ResultInfoMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultInfoMixin</span></code></a></p>
+<p>Records the outcome of post-selection applied during acquisition post-processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.passes.analysis.PostSelectionResult.params.shots_requested"></span><strong>shots_requested</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.PostSelectionResult.params.shots_requested">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Total shots compiled and executed.</p></li>
+<li><p><span class="target" id="qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained"></span><strong>shots_retained</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of shots that survived post-selection.</p></li>
+<li><p><span class="target" id="qat.runtime.passes.analysis.PostSelectionResult.params.global_mask"></span><strong>global_mask</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.passes.analysis.PostSelectionResult.params.global_mask">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span>) – Boolean array of shape <code class="docutils literal notranslate"><span class="pre">(shots_requested,)</span></code> where <code class="docutils literal notranslate"><span class="pre">True</span></code>
+marks a retained shot. <code class="docutils literal notranslate"><span class="pre">None</span></code> if no post-selection was applied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.PostSelectionResult.global_mask">
+<span class="sig-name descname"><span class="pre">global_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.runtime.passes.analysis.PostSelectionResult.global_mask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.PostSelectionResult.shots_requested">
+<span class="sig-name descname"><span class="pre">shots_requested</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.runtime.passes.analysis.PostSelectionResult.shots_requested" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.runtime.passes.analysis.PostSelectionResult.shots_retained">
+<span class="sig-name descname"><span class="pre">shots_retained</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.runtime.passes.analysis.PostSelectionResult.shots_retained" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

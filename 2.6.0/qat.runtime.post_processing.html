@@ -335,6 +335,99 @@
 
   <section id="module-qat.runtime.post_processing">
 <span id="qat-runtime-post-processing-module"></span><h1>qat.runtime.post_processing module<a class="headerlink" href="#module-qat.runtime.post_processing" title="Link to this heading"></a></h1>
+<p>Runtime post-processing utilities.</p>
+<p>This module provides helpers to map raw IQ readout arrays into processed
+forms expected by higher-level code.  It implements the supported legacy
+<code class="docutils literal notranslate"><span class="pre">PostProcessType</span></code> operations (mean, linear map, discriminate), plus the
+granular post-processing pipeline functions (<a class="reference internal" href="#qat.runtime.post_processing.apply_equalise" title="qat.runtime.post_processing.apply_equalise"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_equalise()</span></code></a>,
+<a class="reference internal" href="#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_discriminate_instruction()</span></code></a>, <a class="reference internal" href="#qat.runtime.post_processing.apply_post_select" title="qat.runtime.post_processing.apply_post_select"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_post_select()</span></code></a>,
+<a class="reference internal" href="#qat.runtime.post_processing.apply_demap_instruction" title="qat.runtime.post_processing.apply_demap_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_demap_instruction()</span></code></a>) and small helpers for axis bookkeeping.</p>
+<p>For a full description of the granular pipeline and how each step fits together,
+see the <span class="xref std std-ref">post_processing_pipeline</span> guide.</p>
+<p>The legacy <code class="docutils literal notranslate"><span class="pre">LINEAR_MAP_COMPLEX_TO_REAL</span></code> path is preserved unchanged for
+backward compatibility.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.runtime.post_processing.apply_demap_instruction">
+<span class="sig-name descname"><span class="pre">apply_demap_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.post_processing.apply_demap_instruction" title="Link to this definition"></a></dt>
+<dd><p>Runtime implementation of <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.ir.measure.Demap</span></code></a>.</p>
+<p>Demap string state labels to integer output values using a <code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code> instruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.post_processing.apply_demap_instruction.params.state_ids"></span><strong>state_ids</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_demap_instruction.params.state_ids">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – String state-label array produced by a <code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code> step.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_demap_instruction.params.instr"></span><strong>instr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_demap_instruction.params.instr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a></span>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code> instruction carrying the <code class="docutils literal notranslate"><span class="pre">state_map</span></code> dict.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_demap_instruction.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_demap_instruction.params.axes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Current axis map.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Demapped int values and unchanged axis map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.runtime.post_processing.apply_discriminate_instruction">
+<span class="sig-name descname"><span class="pre">apply_discriminate_instruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.post_processing.apply_discriminate_instruction" title="Link to this definition"></a></dt>
+<dd><p>Runtime implementation of <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.ir.measure.Discriminate</span></code></a>.</p>
+<p>Discriminate equalised values to string state labels using a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code> instruction.</p>
+<p>For the threshold path (<code class="docutils literal notranslate"><span class="pre">instr.threshold</span> <span class="pre">is</span> <span class="pre">not</span> <span class="pre">None</span></code>) values above the
+threshold map to <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code> and values at or below map to <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>.</p>
+<p>For the ML path (<code class="docutils literal notranslate"><span class="pre">instr.method</span></code> is set) normalised Gaussian likelihoods
+are computed using a single global <code class="docutils literal notranslate"><span class="pre">noise_est</span></code>; the state with the highest
+likelihood wins and its <code class="docutils literal notranslate"><span class="pre">label</span></code> string is returned.  Likelihoods are
+computed in log-domain with log-sum-exp stabilisation to avoid underflow.
+When <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, shots below the minimum confidence threshold are
+labelled <code class="xref py py-data docutils literal notranslate"><span class="pre">BG_LABEL</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.post_processing.apply_discriminate_instruction.params.response"></span><strong>response</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_discriminate_instruction.params.response">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – Equalised (real or complex) readout array.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_discriminate_instruction.params.instr"></span><strong>instr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_discriminate_instruction.params.instr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a></span>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code> instruction.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_discriminate_instruction.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_discriminate_instruction.params.axes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Current axis map.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String state-label array and unchanged axis map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.runtime.post_processing.apply_equalise">
+<span class="sig-name descname"><span class="pre">apply_equalise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.post_processing.apply_equalise" title="Link to this definition"></a></dt>
+<dd><p>Runtime implementation of <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.ir.measure.Equalise</span></code></a>.</p>
+<p>Applies the affine <code class="docutils literal notranslate"><span class="pre">[I',</span> <span class="pre">Q']</span> <span class="pre">=</span> <span class="pre">A</span> <span class="pre">&#64;</span> <span class="pre">[I,</span> <span class="pre">Q]</span> <span class="pre">+</span> <span class="pre">b</span></code> transform to the
+complex readout array and returns the result as a complex array
+<code class="docutils literal notranslate"><span class="pre">I'</span> <span class="pre">+</span> <span class="pre">j</span> <span class="pre">Q'</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.post_processing.apply_equalise.params.response"></span><strong>response</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_equalise.params.response">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – Complex IQ readout array (arbitrary batch shape).</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_equalise.params.instr"></span><strong>instr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_equalise.params.instr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a></span>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code> instruction carrying <code class="docutils literal notranslate"><span class="pre">transform</span></code> and
+<code class="docutils literal notranslate"><span class="pre">offset</span></code>.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_equalise.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_equalise.params.axes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Current axis map.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Complex-valued transformed data and unchanged axis map.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">instr.transform</span></code> is not shape <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">2)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">instr.offset</span></code> is not shape <code class="docutils literal notranslate"><span class="pre">(2,)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.runtime.post_processing.apply_post_processing">
 <span class="sig-name descname"><span class="pre">apply_post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">post_processing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.post_processing.apply_post_processing" title="Link to this definition"></a></dt>
@@ -355,6 +448,32 @@ series.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The processed results as an array and the axis map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.runtime.post_processing.apply_post_select">
+<span class="sig-name descname"><span class="pre">apply_post_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.runtime.post_processing.apply_post_select" title="Link to this definition"></a></dt>
+<dd><p>Runtime implementation of <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">qat.ir.measure.PostSelect</span></code></a>.</p>
+<p>Build a per-shot validity mask from a <code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code> instruction.</p>
+<p>Shots whose state label appears in <code class="docutils literal notranslate"><span class="pre">instr.disallowed_states</span></code> are marked
+<code class="docutils literal notranslate"><span class="pre">False</span></code> in the returned validity mask. When <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> is empty
+every shot is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.runtime.post_processing.apply_post_select.params.state_ids"></span><strong>state_ids</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_select.params.state_ids">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – String state-label array produced by a <code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code> step.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_post_select.params.instr"></span><strong>instr</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_select.params.instr">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a></span>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code> instruction.</p></li>
+<li><p><span class="target" id="qat.runtime.post_processing.apply_post_select.params.axes"></span><strong>axes</strong><a class="paramlink headerlink reference internal" href="#qat.runtime.post_processing.apply_post_select.params.axes">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Current axis map (not used; present for interface consistency).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple of <code class="docutils literal notranslate"><span class="pre">(state_ids,</span> <span class="pre">validity_mask)</span></code> where <code class="docutils literal notranslate"><span class="pre">validity_mask</span></code>
+is a boolean ndarray with the same shape as <code class="docutils literal notranslate"><span class="pre">state_ids</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
