@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.device module &mdash; qat-compiler 3.0.0.post239.dev20260521130953 documentation</title>
+  <title>qat.model.device module &mdash; qat-compiler 3.0.0.post240.dev20260521165949 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -56,7 +56,8 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Readout Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/shot_selection.html">Shot Selection (Pre &amp; Post)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -1077,9 +1078,11 @@ post-process methods. <code class="docutils literal notranslate"><span class="pr
 <li><p><span class="target" id="qat.model.device.Qubit.params.mean_z_map_args"></span><strong>mean_z_map_args</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.mean_z_map_args">¶</a> – (deprecated) Arguments for linear mapping (mutually exclusive with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code>).</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.discriminator"></span><strong>discriminator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.discriminator">¶</a> – Discriminator value for measurement.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.post_process_method"></span><strong>post_process_method</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.post_process_method">¶</a> – Post-processing method used to map complex IQ values to states.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.preselect_required"></span><strong>preselect_required</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.preselect_required">¶</a> – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, a pre-selection measurement is intended
-to be inserted before this qubit’s first use in the circuit once pre-selection
-is enabled via the compiler config and the corresponding pass is available.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.preselect_disallowed_states"></span><strong>preselect_disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.preselect_disallowed_states">¶</a> – State labels that cause the shot
+to be discarded during pre-selection (e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;1&quot;}</span></code> for a standard
+qubit). When non-empty, pre-selection is enabled for this qubit
+provided the compiler’s <code class="docutils literal notranslate"><span class="pre">pre_selection</span></code> flag is also enabled.
+Defaults to the empty set (no pre-selection).</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.direct_x_pi"></span><strong>direct_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.direct_x_pi">¶</a> – Whether direct X(pi) pulse is used.</p></li>
 </ul>
 </dd>
@@ -1163,8 +1166,8 @@ validated to form a valid model.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.device.Qubit.preselect_required">
-<span class="sig-name descname"><span class="pre">preselect_required</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#qat.model.device.Qubit.preselect_required" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.device.Qubit.preselect_disallowed_states">
+<span class="sig-name descname"><span class="pre">preselect_disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set[str]</span></em><a class="headerlink" href="#qat.model.device.Qubit.preselect_disallowed_states" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1288,8 +1291,8 @@ validated to form a valid model.</p>
 <li><p><span class="target" id="qat.model.device.Resonator.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.physical_channel">¶</a> – The physical channel that carries the pulses to the physical
 resonator.</p></li>
 <li><p><span class="target" id="qat.model.device.Resonator.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.pulse_channels">¶</a> – The pulse channels for controlling the resonator.</p></li>
-<li><p><span class="target" id="qat.model.device.Resonator.params.measure_pulse"></span><strong>measure_pulse</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.measure_pulse">¶</a> – Calibrated parameters for the measure pulse on the resonator.</p></li>
-<li><p><span class="target" id="qat.model.device.Resonator.params.acquire"></span><strong>acquire</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.acquire">¶</a> – Calibrated parameters for the acquire instruction.</p></li>
+<li><p><span class="target" id="qat.model.device.Resonator.params.relaxation_delay"></span><strong>relaxation_delay</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Resonator.params.relaxation_delay">¶</a> – Post-acquisition relaxation delay allowing the resonator to
+ring down before subsequent operations.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1326,6 +1329,11 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Resonator.pulse_channels">
 <span class="sig-name descname"><span class="pre">pulse_channels</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ResonatorPulseChannels</span></em><a class="headerlink" href="#qat.model.device.Resonator.pulse_channels" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.model.device.Resonator.relaxation_delay">
+<span class="sig-name descname"><span class="pre">relaxation_delay</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CalibratablePositiveFloat</span></em><a class="headerlink" href="#qat.model.device.Resonator.relaxation_delay" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1371,6 +1379,9 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.model.device.ResonatorPulseChannels">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResonatorPulseChannels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.ResonatorPulseChannels" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.device.PulseChannelSet" title="qat.model.device.PulseChannelSet"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseChannelSet</span></code></a></p>
+<p>Encapsulates the measure and acquire pulse channels for a resonator.</p>
+<p>These are often used together, e.g., in measurement of a qubit, and so are grouped
+together here for convenience.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>

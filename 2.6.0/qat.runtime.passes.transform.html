@@ -444,7 +444,10 @@ now produce granular <code class="docutils literal notranslate"><span class="pre
 appear in <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.DiscriminateResult" title="qat.runtime.passes.analysis.DiscriminateResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateResult</span></code></a>.  This includes
 qubits with <code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code>,
 <code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code>, and legacy
-<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> qubits.</p>
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> qubits.  Pre-selection acquires (<code class="docutils literal notranslate"><span class="pre">presel_*</span></code>) use a shorter
+chain (<code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>, no <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) and are
+for internal runtime use only — they drive the validity mask but are never returned
+to the user.</p>
 <p><strong>Per-variable routing</strong></p>
 <p>Routing decisions are made per output variable (by looking up the variable in
 <code class="docutils literal notranslate"><span class="pre">DiscriminateResult.outputs</span></code>) rather than with a single execution-wide flag.
@@ -516,7 +519,8 @@ should be passed as a keyword argument.</p></li>
 <code class="docutils literal notranslate"><span class="pre">DynamicStructureReturn</span></code>) to shape final results.</p>
 <p><strong>Granular pipeline routing</strong></p>
 <p>When the granular post-processing pipeline (<code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> →
-<code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) has been used, intermediate outputs are stored as
+<code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) has been used for end-of-circuit measurements,
+intermediate outputs are stored as
 <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.EqualiseResult" title="qat.runtime.passes.analysis.EqualiseResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseResult</span></code></a> and
 <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.DiscriminateResult" title="qat.runtime.passes.analysis.DiscriminateResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateResult</span></code></a> in <code class="docutils literal notranslate"><span class="pre">res_mgr</span></code>.
 <code class="docutils literal notranslate"><span class="pre">ResultTransform</span></code> reads these to implement the requested format:</p>

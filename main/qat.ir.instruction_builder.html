@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.instruction_builder module &mdash; qat-compiler 3.0.0.post239.dev20260521130953 documentation</title>
+  <title>qat.ir.instruction_builder module &mdash; qat-compiler 3.0.0.post240.dev20260521165949 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -56,7 +56,8 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Readout Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/shot_selection.html">Shot Selection (Pre &amp; Post)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -1137,7 +1138,7 @@ the repeat count passed to <code class="docutils literal notranslate"><span clas
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The variable name to attach to the instruction.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – List of state labels to filter out (e.g., [“1”]).</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Set of state labels to filter out (e.g., <code class="docutils literal notranslate"><span class="pre">{&quot;1&quot;}</span></code>).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.instruction_basetypes module &mdash; qat-compiler 3.0.0.post239.dev20260521130953 documentation</title>
+  <title>qat.ir.instruction_basetypes module &mdash; qat-compiler 3.0.0.post240.dev20260521165949 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -56,7 +56,8 @@
 <li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Readout Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/shot_selection.html">Shot Selection (Pre &amp; Post)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -551,6 +552,8 @@ data.</p></li>
 <li><p><a class="reference internal" href="#qat.ir.instruction_basetypes.ProcessAxis" title="qat.ir.instruction_basetypes.ProcessAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProcessAxis</span></code></a> – the axis of the readout data to operate on.</p></li>
 <li><p><a class="reference internal" href="#qat.ir.instruction_basetypes.AcquireMode" title="qat.ir.instruction_basetypes.AcquireMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireMode</span></code></a> – the hardware acquisition mode used by an acquire
 instruction.</p></li>
+<li><p><a class="reference internal" href="#qat.ir.instruction_basetypes.AcquirePurpose" title="qat.ir.instruction_basetypes.AcquirePurpose"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquirePurpose</span></code></a> – the semantic purpose of an acquire instruction
+(e.g. circuit measurement vs pre-selection).</p></li>
 </ul>
 </section>
 <dl class="py class">
@@ -582,6 +585,40 @@ control hardware.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.instruction_basetypes.AcquireMode.SCOPE">
 <span class="sig-name descname"><span class="pre">SCOPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'scope'</span></em><a class="headerlink" href="#qat.ir.instruction_basetypes.AcquireMode.SCOPE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.ir.instruction_basetypes.AcquirePurpose">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquirePurpose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_basetypes.AcquirePurpose" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Semantic purpose of an <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire" title="qat.ir.measure.Acquire"><code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code></a> instruction.</p>
+<p>Used to distinguish regular circuit measurements from auxiliary
+acquisitions such as pre-selection checks so that downstream
+validation passes (e.g.
+<a class="reference internal" href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.NoMidCircuitMeasurementValidation" title="qat.middleend.passes.validation.NoMidCircuitMeasurementValidation"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoMidCircuitMeasurementValidation</span></code></a>)
+can treat them differently.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>MEASUREMENT</strong> – A standard end-of-circuit or mid-circuit
+measurement requested by the user’s program.</p></li>
+<li><p><strong>PRE_SELECTION</strong> – An acquisition injected by the compiler to
+verify that a qubit is in its ground state before the circuit
+begins. Shots that fail are discarded via
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.instruction_basetypes.AcquirePurpose.MEASUREMENT">
+<span class="sig-name descname"><span class="pre">MEASUREMENT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'measurement'</span></em><a class="headerlink" href="#qat.ir.instruction_basetypes.AcquirePurpose.MEASUREMENT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.instruction_basetypes.AcquirePurpose.PRE_SELECTION">
+<span class="sig-name descname"><span class="pre">PRE_SELECTION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pre_selection'</span></em><a class="headerlink" href="#qat.ir.instruction_basetypes.AcquirePurpose.PRE_SELECTION" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

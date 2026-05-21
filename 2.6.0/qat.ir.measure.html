@@ -361,6 +361,10 @@ equivalent to a complex multiplier of <code class="docutils literal notranslate"
 <li><p><span class="target" id="qat.ir.measure.Acquire.params.threshold"></span><strong>threshold</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.threshold">¶</a> – Optional threshold value for discriminating the acquired value
 into a binary state label. Ignored if <cite>filter</cite> is provided or if <cite>mode</cite> is not
 <cite>AcquireMode.INTEGRATOR</cite>.</p></li>
+<li><p><span class="target" id="qat.ir.measure.Acquire.params.purpose"></span><strong>purpose</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.Acquire.params.purpose">¶</a> – Semantic purpose of this acquisition. Defaults to
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquirePurpose.MEASUREMENT</span></code>. Set to
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">AcquirePurpose.PRE_SELECTION</span></code> for compiler-injected
+ground-state checks.</p></li>
 </ul>
 </dd>
 </dl>
@@ -402,6 +406,11 @@ validated to form a valid model.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.ir.measure.Acquire.pulse_channel">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pulse_channel</span></span><a class="headerlink" href="#qat.ir.measure.Acquire.pulse_channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.ir.measure.Acquire.purpose">
+<span class="sig-name descname"><span class="pre">purpose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AcquirePurpose</span></em><a class="headerlink" href="#qat.ir.measure.Acquire.purpose" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -692,11 +701,20 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.measure.PostSelect">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.PostSelect" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Remove shots whose state label appears in <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code>.</p>
-<p>Emitting this instruction with an empty <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> list is a
-no-op (all shots are considered valid) but is safe to emit unconditionally
-so that the pipeline structure is uniform.</p>
+<p>Mark shots for filtering based on discriminated state labels.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> follows <a class="reference internal" href="#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> in the readout pipeline.
+It does <strong>not</strong> remove shots inline — instead it records a per-output
+boolean validity mask.  Shots whose state label appears in
+<code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> are marked invalid; the runtime ANDs all masks
+together and filters once at the end.</p>
+<p>Emitting this instruction with an empty <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> set is a
+no-op (all shots are considered valid) but is safe to emit
+unconditionally so that the pipeline structure is uniform.</p>
 <p>Runtime implementation: <a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select" title="qat.runtime.post_processing.apply_post_select"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_post_select()</span></code></a>.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><span class="xref std std-ref">shot_selection</span> for full pre/post-selection docs.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -704,7 +722,7 @@ so that the pipeline structure is uniform.</p>
 screened.</p></li>
 <li><p><span class="target" id="qat.ir.measure.PostSelect.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.disallowed_states">¶</a> – String state labels that should be marked
 invalid. Shots mapped to these labels will have their validity mask
-entry set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+entry set to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Order is not significant.</p></li>
 </ul>
 </dd>
 </dl>
@@ -714,7 +732,7 @@ validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.measure.PostSelect.disallowed_states">
-<span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[str]</span></em><a class="headerlink" href="#qat.ir.measure.PostSelect.disallowed_states" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set[str]</span></em><a class="headerlink" href="#qat.ir.measure.PostSelect.disallowed_states" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

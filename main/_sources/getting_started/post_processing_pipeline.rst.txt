@@ -1,23 +1,15 @@
 .. _post_processing_pipeline:
-.. _post_selection:
 
-Granular Post-Processing Pipeline
-==================================
+Readout Post-Processing
+=======================
 
-This page explains how QAT's granular readout pipeline fits together. For
-field-level API details, rely on the autodoc sections rendered from code
-(docstrings) below.
+This page explains how QAT's granular readout pipeline transforms raw IQ
+acquisition data into state labels and numeric values.  For shot-level
+filtering (pre-selection and post-selection), see :ref:`shot_selection`.
 
 Pipeline order:
 
 ``Equalise`` → ``Discriminate`` → ``PostSelect`` → ``Demap``
-
-Post-selection discards shots based on discriminated state labels.
-
-.. note::
-
-    **Post-selection** is implemented. **Pre-selection** is planned; see
-    :ref:`pre_selection_planned`.
 
 .. contents::
    :local:
@@ -35,8 +27,8 @@ The data flow spans three layers:
 2. **IR builder** —
    Frontends emit granular readout instructions from that method.
 3. **Runtime pass** —
-   Runtime applies instructions, builds masks, filters invalid shots, and formats
-   final outputs.
+   Runtime applies instructions, builds masks, filters invalid shots,
+   and formats final outputs.
 
 .. code-block:: text
 
@@ -49,13 +41,13 @@ The data flow spans three layers:
       ├─ emit_granular_post_processing()
       │    └─ Equalise → Discriminate → Demap
       └─ emit_post_select()  (if disallowed states configured)
-           └─ PostSelect (inserted before Demap)
+           └─ PostSelect (inserted before Demap)  → see shot_selection
                │
                ▼
     AcquisitionPostprocessing pass (runtime)
       ├─ apply_equalise()
       ├─ apply_discriminate_instruction()
-      ├─ apply_post_select() → validity_mask
+      ├─ apply_post_select() → validity_mask      → see shot_selection
       └─ apply_demap_instruction()
       │
       ├─ global_mask = AND of all per-output masks
@@ -131,17 +123,11 @@ Configuration lives on :class:`~qat.model.device.Qubit` via
 
 
 Step 3 — PostSelect
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
 
-.. autoclass:: qat.ir.measure.PostSelect
-   :members:
-   :show-inheritance:
-
-.. note::
-    PostSelect does not remove shots inline. Runtime combines per-output masks
-    into one global mask and applies filtering after per-output processing.
-
-Runtime implementation: :func:`~qat.runtime.post_processing.apply_post_select`.
+``PostSelect`` sits between ``Discriminate`` and ``Demap`` and marks shots
+for filtering based on discriminated state labels.  For full details on
+post-selection and pre-selection, see :ref:`shot_selection`.
 
 
 Step 4 — Demap
@@ -178,8 +164,8 @@ Step 5 — Results format
    :widths: 20 40 40
 
    * - Format
-     - Post-selection **off**
-     - Post-selection **on** (e.g. 3 of 10 filtered)
+     - Selection **off**
+     - Selection **on** (e.g. 3 of 10 filtered)
    * - ``raw()``
      - 10 complex IQ values
      - 7 complex IQ values
@@ -201,10 +187,6 @@ IR encoding
     ``PostProcessing(MEAN, TIME)`` (SCOPE only), then granular instructions via
     :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing`.
 
-    Frontends that require shot filtering call
-    :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select`,
-    which inserts ``PostSelect`` before ``Demap``.
-
 :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.measure_single_shot_z`
     Customer-facing path. Emits legacy
     ``PostProcessing(LINEAR_MAP_COMPLEX_TO_REAL)`` and does not emit granular
@@ -218,45 +200,17 @@ Runtime execution
 -----------------
 
 :class:`~qat.runtime.passes.transform.AcquisitionPostprocessing` applies
-``Equalise``/``Discriminate``/``PostSelect``/``Demap`` helpers, constructs a
-single global mask, filters all outputs, and stores post-selection metadata.
-
-.. autoclass:: qat.runtime.passes.analysis.PostSelectionResult
-   :members:
-
-
-.. _pre_selection_planned:
-
-Pre-selection (planned)
------------------------
-
-Pre-selection measures each qubit before first use and discards shots where the
-qubit is not in the expected ground state.
-
-.. note::
-    Pre-selection is **not yet implemented**.
-
-**Per-qubit flag** — ``preselect_required`` on
-:class:`~qat.model.device.Qubit` (default ``False``), meaningful when
-``post_process_method`` has at least one disallowed state.
-
-**Compiler config flag** — a future ``CompilerConfig`` option will enable or
-disable pre-selection globally.
-
-**Middleend pass** — ``AddPreselectionMeasurement`` will insert a pre-selection
-measurement (with configured method and ``PostSelect``) before each qubit's
-first use when enabled and required.
-
-**Runtime** — no new runtime machinery required.
+the full ``Equalise``/``Discriminate``/``PostSelect``/``Demap`` chain.
+See :ref:`shot_selection` for details on mask construction and filtering.
 
 
 See also
 --------
 
+* :ref:`shot_selection` — shot filtering (pre-selection & post-selection).
 * :mod:`qat.ir.measure` — instruction model docs (canonical API semantics).
 * :mod:`qat.runtime.post_processing` — runtime helper docs.
 * :mod:`qat.model.post_processing` — classification model docs.
 * :class:`qat.runtime.passes.transform.AcquisitionPostprocessing`
 * :class:`qat.runtime.passes.transform.ResultTransform`
-* :class:`qat.runtime.passes.analysis.PostSelectionResult`
 * :ref:`execution`

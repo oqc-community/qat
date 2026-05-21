@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Getting started with QAT &mdash; qat-compiler 3.0.0.post239.dev20260521130953 documentation</title>
+  <title>Getting started with QAT &mdash; qat-compiler 3.0.0.post240.dev20260521165949 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -57,7 +57,8 @@
 <li class="toctree-l2"><a class="reference internal" href="qat_config.html">QAT Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="compilation.html">Compilation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="execution.html">Execution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html">Granular Post-Processing Pipeline</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html">Readout Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shot_selection.html">Shot Selection (Pre &amp; Post)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="simulators.html">Using QAT with simulators</a></li>
 </ul>
 </li>
@@ -633,7 +634,7 @@ an adapter to Qiskit’s AerSimulator and our realistic (but limited) real time 
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="post_processing_pipeline.html">Granular Post-Processing Pipeline</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="post_processing_pipeline.html">Readout Post-Processing</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#pipeline-steps">Pipeline steps</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="post_processing_pipeline.html#step-1-equalise">Step 1 — Equalise</a><ul>
@@ -645,10 +646,7 @@ an adapter to Qiskit’s AerSimulator and our realistic (but limited) real time 
 <li class="toctree-l4"><a class="reference internal" href="post_processing_pipeline.html#configuring-classification-methods">Configuring classification methods</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="post_processing_pipeline.html#step-3-postselect">Step 3 — PostSelect</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="post_processing_pipeline.html#qat.ir.measure.PostSelect"><code class="docutils literal notranslate"><span class="pre">PostSelect</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l3"><a class="reference internal" href="post_processing_pipeline.html#step-3-postselect">Step 3 — PostSelect</a></li>
 <li class="toctree-l3"><a class="reference internal" href="post_processing_pipeline.html#step-4-demap">Step 4 — Demap</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="post_processing_pipeline.html#qat.ir.measure.Demap"><code class="docutils literal notranslate"><span class="pre">Demap</span></code></a></li>
 </ul>
@@ -657,12 +655,32 @@ an adapter to Qiskit’s AerSimulator and our realistic (but limited) real time 
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#ir-encoding">IR encoding</a></li>
-<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#runtime-execution">Runtime execution</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="post_processing_pipeline.html#qat.runtime.passes.analysis.PostSelectionResult"><code class="docutils literal notranslate"><span class="pre">PostSelectionResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#runtime-execution">Runtime execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#see-also">See also</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#pre-selection-planned">Pre-selection (planned)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="post_processing_pipeline.html#see-also">See also</a></li>
+<li class="toctree-l1"><a class="reference internal" href="shot_selection.html">Shot Selection (Pre &amp; Post)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="shot_selection.html#id1">Post-selection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="shot_selection.html#configuring-disallowed-states">Configuring disallowed states</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shot_selection.html#the-postselect-instruction">The PostSelect instruction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="shot_selection.html#qat.ir.measure.PostSelect"><code class="docutils literal notranslate"><span class="pre">PostSelect</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="shot_selection.html#ir-encoding">IR encoding</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shot_selection.html#runtime-mask-logic">Runtime mask logic</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="shot_selection.html#qat.runtime.passes.analysis.PostSelectionResult"><code class="docutils literal notranslate"><span class="pre">PostSelectionResult</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="shot_selection.html#pre-selection">Pre-selection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="shot_selection.html#enabling-pre-selection">Enabling pre-selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shot_selection.html#how-it-works">How it works</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="shot_selection.html#combined-behaviour">Combined behaviour</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shot_selection.html#api-reference">API reference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="shot_selection.html#see-also">See also</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="simulators.html">Using QAT with simulators</a><ul>

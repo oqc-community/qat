@@ -29,4 +29,5 @@ an adapter to Qiskit's AerSimulator and our realistic (but limited) real time ch
    compilation
    execution
    post_processing_pipeline
+   shot_selection
    simulators
