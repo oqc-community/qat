@@ -1609,7 +1609,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
             )
             if self.post_selection:
                 method = device.post_process_method
-                disallowed = method.disallowed_states if method is not None else []
+                disallowed = method.disallowed_states if method is not None else set()
                 self.builder.emit_post_select(acquire.output_variable, disallowed)
             self.builder.results_processing(
                 variable=variable.name, res_format=InlineResultsProcessing.Program

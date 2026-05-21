@@ -460,7 +460,10 @@ class InlineResultsProcessingTransform(TransformPass):
     appear in :class:`~qat.runtime.passes.analysis.DiscriminateResult`.  This includes
     qubits with :class:`~qat.model.post_processing.LinearMapToRealMethod`,
     :class:`~qat.model.post_processing.MaxLikelihoodMethod`, and legacy
-    ``mean_z_map_args`` qubits.
+    ``mean_z_map_args`` qubits.  Pre-selection acquires (``presel_*``) use a shorter
+    chain (``Equalise`` → ``Discriminate`` → ``PostSelect``, no ``Demap``) and are
+    for internal runtime use only — they drive the validity mask but are never returned
+    to the user.
 
     **Per-variable routing**
 
@@ -511,6 +514,8 @@ class InlineResultsProcessingTransform(TransformPass):
         # (multi-state, where majority-vote is meaningless).  LinearMapToRealMethod and
         # legacy granular acquires produce binary {0, 1} Demap outputs where
         # binary_average correctly majority-votes to a single 0/1 scalar.
+        # Note: pre-selection acquires (presel_*) have results_processing=Raw so
+        # binary_average is never triggered for them regardless.
         ml_granular_vars: set[str] = (
             {
                 var
@@ -636,7 +641,8 @@ class ResultTransform(TransformPass):
     **Granular pipeline routing**
 
     When the granular post-processing pipeline (``Equalise`` → ``Discriminate`` →
-    ``PostSelect`` → ``Demap``) has been used, intermediate outputs are stored as
+    ``PostSelect`` → ``Demap``) has been used for end-of-circuit measurements,
+    intermediate outputs are stored as
     :class:`~qat.runtime.passes.analysis.EqualiseResult` and
     :class:`~qat.runtime.passes.analysis.DiscriminateResult` in ``res_mgr``.
     ``ResultTransform`` reads these to implement the requested format:

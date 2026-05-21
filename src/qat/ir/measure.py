@@ -15,7 +15,12 @@ import numpy as np
 from pydantic import BeforeValidator, Field, PrivateAttr, field_validator, model_validator
 
 # The following things from legacy instructions are unchanged, so just import for now.
-from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
+from qat.ir.instruction_basetypes import (
+    AcquireMode,
+    AcquirePurpose,
+    PostProcessType,
+    ProcessAxis,
+)
 from qat.ir.instructions import (
     Delay,
     Instruction,
@@ -50,10 +55,15 @@ class Acquire(QuantumInstruction):
     :param threshold: Optional threshold value for discriminating the acquired value
       into a binary state label. Ignored if `filter` is provided or if `mode` is not
       `AcquireMode.INTEGRATOR`.
+    :param purpose: Semantic purpose of this acquisition. Defaults to
+        :attr:`AcquirePurpose.MEASUREMENT`. Set to
+        :attr:`AcquirePurpose.PRE_SELECTION` for compiler-injected
+        ground-state checks.
     """
 
     duration: float = 1e-6
     mode: AcquireMode = AcquireMode.INTEGRATOR
+    purpose: AcquirePurpose = AcquirePurpose.MEASUREMENT
     delay: float | None = 0.0
     filter: Pulse | None = Field(default=None)
     output_variable: str = Field(min_length=1)
@@ -231,23 +241,31 @@ class Discriminate(Instruction):
 
 
 class PostSelect(Instruction):
-    """Remove shots whose state label appears in ``disallowed_states``.
+    """Mark shots for filtering based on discriminated state labels.
 
-    Emitting this instruction with an empty ``disallowed_states`` list is a
-    no-op (all shots are considered valid) but is safe to emit unconditionally
-    so that the pipeline structure is uniform.
+    ``PostSelect`` follows :class:`Discriminate` in the readout pipeline.
+    It does **not** remove shots inline — instead it records a per-output
+    boolean validity mask.  Shots whose state label appears in
+    ``disallowed_states`` are marked invalid; the runtime ANDs all masks
+    together and filters once at the end.
+
+    Emitting this instruction with an empty ``disallowed_states`` set is a
+    no-op (all shots are considered valid) but is safe to emit
+    unconditionally so that the pipeline structure is uniform.
 
     Runtime implementation: :func:`qat.runtime.post_processing.apply_post_select`.
+
+    .. seealso:: :ref:`shot_selection` for full pre/post-selection docs.
 
     :param output_variable: Variable name whose state labels should be
         screened.
     :param disallowed_states: String state labels that should be marked
         invalid. Shots mapped to these labels will have their validity mask
-        entry set to ``False``.
+        entry set to ``False``. Order is not significant.
     """
 
     output_variable: str
-    disallowed_states: list[str] = Field(default_factory=list)
+    disallowed_states: set[str] = Field(default_factory=set)
 
 
 class Demap(Instruction):

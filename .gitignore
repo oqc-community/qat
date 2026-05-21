@@ -103,3 +103,4 @@ Thumbs.db
 
 # Reports
 reports/*
+/tmp/

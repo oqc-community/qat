@@ -74,7 +74,7 @@ class LinearMapToRealMethod(MethodBase):
     state ``"1"``.
 
     Set ``disallowed_states`` to filter out shots by their classified state
-    label (e.g. ``["1"]`` to discard shots **not** in the ground state).
+    label (e.g. ``{"1"}`` to discard shots **not** in the ground state).
     """
 
     method: Literal[MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL] = Field(
@@ -87,12 +87,20 @@ class LinearMapToRealMethod(MethodBase):
         default_factory=lambda: [1 + 0j, 0j],
         description="Arguments for the linear map.",
     )
-    disallowed_states: list[str] = Field(
-        default_factory=list,
-        description="List of disallowed state labels (matching the string labels used by "
+    disallowed_states: set[str] = Field(
+        default_factory=set,
+        description="Set of disallowed state labels (matching the string labels used by "
         "the granular pipeline). If a measurement is classified to a state whose label "
-        "appears in this list, the shot should be discarded.",
+        "appears in this set, the shot should be discarded.",
     )
+
+    @property
+    def declared_states(self) -> set[str]:
+        """All state labels known to this method.
+
+        :returns: ``{"0", "1"}`` for a standard threshold discriminator.
+        """
+        return {"0", "1"}
 
 
 class MLStateMap(NoExtraFieldsModel):
@@ -270,14 +278,28 @@ class MaxLikelihoodMethod(MethodBase):
         return self
 
     @property
-    def disallowed_states(self) -> list[str]:
+    def declared_states(self) -> set[str]:
+        """All state labels known to this method.
+
+        Includes labels from :attr:`states` and :data:`BG_LABEL` when
+        ``p_min > 0``.
+
+        :returns: Set of all recognised state label strings.
+        """
+        labels = {s.label for s in self.states}
+        if self.p_min > 0.0:
+            labels.add(BG_LABEL)
+        return labels
+
+    @property
+    def disallowed_states(self) -> set[str]:
         """State labels marked ``disallowed=True``, plus ``BG_LABEL`` if ``p_min > 0``.
 
-        :returns: List of disallowed state label strings.
+        :returns: Set of disallowed state label strings.
         """
-        labels = [s.label for s in self.states if s.disallowed]
+        labels = {s.label for s in self.states if s.disallowed}
         if self.p_min > 0.0:
-            labels.append(BG_LABEL)
+            labels.add(BG_LABEL)
         return labels
 
 

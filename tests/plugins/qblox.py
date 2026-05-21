@@ -1,8 +1,24 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
+import warnings
+
 import numpy as np
 import pytest
-from qblox_instruments import ClusterType
+
+# TODO: The qblox_instruments -> qcodes -> opentelemetry import chain triggers a
+# DeprecationWarning ("SelectableGroups dict interface is deprecated. Use select.")
+# during pytest's plugin-import phase on Python 3.10, before pyproject.toml
+# filterwarnings are applied.  We suppress it explicitly here so the import succeeds
+# early (caching the modules in sys.modules) and doctest collection of src/qat/…/qblox
+# files doesn't re-trigger the warning later.
+# Remove once opentelemetry/qcodes are updated to avoid the deprecated dict interface.
+with warnings.catch_warnings():
+    warnings.filterwarnings(
+        "ignore",
+        message="SelectableGroups dict interface is deprecated",
+        category=DeprecationWarning,
+    )
+    from qblox_instruments import ClusterType
 
 from qat.model.loaders.purr import QbloxModelLoader
 from qat.model.loaders.purr.qblox import DEFAULT_DUMMY_CONFIG, DEFAULT_QUBIT_COUNT
@@ -57,15 +73,15 @@ def qblox_resource(request, legacy_qblox_instrument_factory, function_seed):
     instrument = legacy_qblox_instrument_factory(id, name, address)
     instrument.connect()
 
-    def _qblox_resource(type: ClusterType):
-        qcm_type = type in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
-        qrm_type = type in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
-        rf_type = type in [
+    def _qblox_resource(type_: ClusterType):
+        qcm_type = type_ in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
+        qrm_type = type_ in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
+        rf_type = type_ in [
             ClusterType.CLUSTER_QCM_RF,
             ClusterType.CLUSTER_QRM_RF,
             ClusterType.CLUSTER_QRC,
         ]
-        qrc_type = type in [ClusterType.CLUSTER_QRC]
+        qrc_type = type_ in [ClusterType.CLUSTER_QRC]
         modules = instrument.driver.get_connected_modules(
             filter_fn=lambda mod: (
                 mod.is_qcm_type == qcm_type

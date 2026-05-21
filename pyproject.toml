@@ -105,6 +105,7 @@ sphinx-autodoc-typehints = "^3.0.0"
 sphinx-paramlinks = "^0.6.0"
 sphinx-multiversion = "^0.2.4"
 sphinx-pyproject = "^0.3.0"
+sphinxcontrib-mermaid = "^2.0.2"
 dunamai = "^1.24.1"
 myst-nb = "^1.3.0"
 
@@ -147,6 +148,7 @@ extensions = [
   "sphinx_autodoc_typehints",
   "sphinx_paramlinks",
   "sphinx.ext.graphviz",
+  "sphinxcontrib.mermaid",
   "myst_nb",
 ]
 templates_path = ["_templates"]
@@ -332,7 +334,9 @@ filterwarnings = [
   # TODO: Change to passive_reset_time. 428, 455
   'default:.*to modify the reset time of qubits to their ground state:UserWarning:',
   # TODO - `qblox-instruments` to fix deprecation warnings regarding QCodes
-  'default::qcodes.utils.deprecate.QCoDeSDeprecationWarning:',
+  'default:.*:RuntimeWarning:qcodes\\.utils\\.deprecate',
+  # TODO - remove when OpenTelemetry/QCoDeS dependency chain is updated
+  'ignore:SelectableGroups dict interface is deprecated\\. Use select\\.:DeprecationWarning',
   # TODO - remove when purr is dropped COMPILER-844
   'default:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning',
   'default:WaveformV1 support is deprecated:DeprecationWarning:qat.*.purr',

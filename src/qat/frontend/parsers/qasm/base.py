@@ -116,7 +116,7 @@ class AbstractParser(abc.ABC):
             builder.measure_with_granular_post_processing(qubit, output_variable=res_id)
             if self.post_selection:
                 method = qubit.post_process_method
-                disallowed = method.disallowed_states if method is not None else []
+                disallowed = method.disallowed_states if method is not None else set()
                 builder.emit_post_select(res_id, disallowed)
             creg.value = res_id
             builder.results_processing(res_id, self.results_format)

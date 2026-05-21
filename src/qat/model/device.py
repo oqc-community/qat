@@ -316,6 +316,12 @@ class PulseChannelSet(NoExtraFieldsModel):
 
 
 class ResonatorPulseChannels(PulseChannelSet):
+    """Encapsulates the measure and acquire pulse channels for a resonator.
+
+    These are often used together, e.g., in measurement of a qubit, and so are grouped
+    together here for convenience.
+    """
+
     measure: MeasurePulseChannel = Field(default=MeasurePulseChannel())
     acquire: AcquirePulseChannel = Field(default=AcquirePulseChannel())
 
@@ -330,13 +336,18 @@ class Resonator(Component):
     :param physical_channel: The physical channel that carries the pulses to the physical
         resonator.
     :param pulse_channels: The pulse channels for controlling the resonator.
-    :param measure_pulse: Calibrated parameters for the measure pulse on the resonator.
-    :param acquire: Calibrated parameters for the acquire instruction.
+    :param relaxation_delay: Post-acquisition relaxation delay allowing the resonator to
+        ring down before subsequent operations.
     """
 
     physical_channel: ResonatorPhysicalChannel
     pulse_channels: ResonatorPulseChannels = Field(
         frozen=True, default=ResonatorPulseChannels()
+    )
+    relaxation_delay: CalibratablePositiveFloat = Field(
+        default=2e-6,
+        ge=0,
+        description="Post-acquisition relaxation delay for resonator ring-down.",
     )
 
     @property
@@ -405,9 +416,11 @@ class Qubit(Component):
     :param mean_z_map_args: (deprecated) Arguments for linear mapping (mutually exclusive with ``post_process_method``).
     :param discriminator: Discriminator value for measurement.
     :param post_process_method: Post-processing method used to map complex IQ values to states.
-    :param preselect_required: When ``True``, a pre-selection measurement is intended
-        to be inserted before this qubit's first use in the circuit once pre-selection
-        is enabled via the compiler config and the corresponding pass is available.
+    :param preselect_disallowed_states: State labels that cause the shot
+        to be discarded during pre-selection (e.g. ``{"1"}`` for a standard
+        qubit). When non-empty, pre-selection is enabled for this qubit
+        provided the compiler's ``pre_selection`` flag is also enabled.
+        Defaults to the empty set (no pre-selection).
     :param direct_x_pi: Whether direct X(pi) pulse is used.
 
     :raises ValueError: If neither or both of ``mean_z_map_args`` and ``post_process_method`` are provided.
@@ -423,8 +436,12 @@ class Qubit(Component):
     post_process_method: PostProcessMethod | None = Field(
         discriminator="method", default=None
     )
-    preselect_required: bool = Field(
-        False, description="Whether preselect is required for this qubit."
+    preselect_disallowed_states: set[str] = Field(
+        default_factory=set,
+        description="State labels that cause the shot to be discarded "
+        "during pre-selection. The background state (BG_LABEL) is always "
+        "implicitly added at the pass level. Empty set means pre-selection "
+        "is disabled for this qubit.",
     )
     direct_x_pi: bool = False
 
@@ -435,6 +452,22 @@ class Qubit(Component):
         if has_mean_z_map_args == has_state_post_process:
             raise ValueError(
                 "Exactly one of 'mean_z_map_args' or 'post_process_method' must be provided, but not both or neither."
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_preselect_disallowed_labels(self):
+        """Check that pre-selection labels match known states."""
+        if not self.preselect_disallowed_states or self.post_process_method is None:
+            return self
+        unknown = (
+            self.preselect_disallowed_states - self.post_process_method.declared_states
+        )
+        if unknown:
+            raise ValueError(
+                f"preselect_disallowed_states contains labels "
+                f"not recognised by post_process_method: "
+                f"{sorted(unknown)}"
             )
         return self
 

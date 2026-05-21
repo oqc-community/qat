@@ -13,6 +13,8 @@ The public symbols are:
 - :class:`ProcessAxis` -- the axis of the readout data to operate on.
 - :class:`AcquireMode` -- the hardware acquisition mode used by an acquire
   instruction.
+- :class:`AcquirePurpose` -- the semantic purpose of an acquire instruction
+  (e.g. circuit measurement vs pre-selection).
 """
 
 from enum import Enum
@@ -70,6 +72,30 @@ class AcquireMode(Enum):
     RAW = "raw"
     SCOPE = "scope"
     INTEGRATOR = "integrator"
+
+    def __repr__(self):
+        return self.name
+
+
+class AcquirePurpose(Enum):
+    """Semantic purpose of an :class:`~qat.ir.measure.Acquire` instruction.
+
+    Used to distinguish regular circuit measurements from auxiliary
+    acquisitions such as pre-selection checks so that downstream
+    validation passes (e.g.
+    :class:`~qat.middleend.passes.validation.NoMidCircuitMeasurementValidation`)
+    can treat them differently.
+
+    :cvar MEASUREMENT: A standard end-of-circuit or mid-circuit
+        measurement requested by the user's program.
+    :cvar PRE_SELECTION: An acquisition injected by the compiler to
+        verify that a qubit is in its ground state before the circuit
+        begins. Shots that fail are discarded via
+        :class:`~qat.ir.measure.PostSelect`.
+    """
+
+    MEASUREMENT = "measurement"
+    PRE_SELECTION = "pre_selection"
 
     def __repr__(self):
         return self.name

@@ -254,7 +254,7 @@ def apply_post_select(
     :returns: A tuple of ``(state_ids, validity_mask)`` where ``validity_mask``
         is a boolean ndarray with the same shape as ``state_ids``.
     """
-    disallowed = np.asarray(instr.disallowed_states)
+    disallowed = list(instr.disallowed_states)
     validity_mask = ~np.isin(state_ids, disallowed)
     return state_ids, validity_mask
 
@@ -268,6 +268,13 @@ def apply_demap_instruction(
 
     Demap string state labels to integer output values using a :class:`Demap` instruction.
 
+    Labels that do not appear in ``instr.state_map`` (including the background label
+    :data:`~qat.model.post_processing.BG_LABEL` emitted by a ``p_min`` threshold) are
+    mapped to the sentinel value ``-1``.  When a :class:`~qat.ir.measure.PostSelect`
+    instruction precedes ``Demap`` in the post-processing chain, the subsequent
+    :func:`~qat.runtime.passes.transform._build_and_apply_global_mask` step will remove
+    these sentinel shots from the final results.
+
     :param state_ids: String state-label array produced by a :class:`Discriminate` step.
     :param instr: The :class:`Demap` instruction carrying the ``state_map`` dict.
     :param axes: Current axis map.
@@ -275,12 +282,8 @@ def apply_demap_instruction(
     """
     state_ids = np.asarray(state_ids)
     lookup = instr.state_map
-    if BG_LABEL not in lookup and np.any(state_ids == BG_LABEL):
-        raise RuntimeError(
-            f"Discriminate emitted the background label {BG_LABEL!r} (p_min rejection) "
-            "but no PostSelect instruction was emitted to handle it. "
-            "Ensure post_selection is enabled in CompilerConfig when p_min > 0."
-        )
+    if state_ids.size == 0:
+        return np.empty(0, dtype=int), axes
     mapped = np.vectorize(lambda k: lookup.get(k, -1))(state_ids).astype(int)
     return mapped, axes
 

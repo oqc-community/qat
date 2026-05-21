@@ -545,7 +545,7 @@ def test_post_selection_enabled_via_compiler_config():
     )  # Discriminate, PostSelect, Demap (no Equalise since transform/offset are None)
     assert isinstance(post_processing[0], Discriminate)
     assert isinstance(post_processing[1], PostSelect)
-    assert post_processing[1].disallowed_states == ["2"]
+    assert post_processing[1].disallowed_states == {"2"}
     assert isinstance(post_processing[2], Demap)
 
 

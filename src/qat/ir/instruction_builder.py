@@ -1180,12 +1180,12 @@ class QuantumInstructionBuilder(InstructionBuilder):
     def emit_post_select(
         self,
         output_variable: str,
-        disallowed_states: list[str],
+        disallowed_states: set[str],
     ) -> QuantumInstructionBuilder:
         """Emit a PostSelect instruction with given disallowed states.
 
         :param output_variable: The variable name to attach to the instruction.
-        :param disallowed_states: List of state labels to filter out (e.g., ["1"]).
+        :param disallowed_states: Set of state labels to filter out (e.g., ``{"1"}``).
         :returns: The builder instance.
         """
         if not disallowed_states:

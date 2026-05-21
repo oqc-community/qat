@@ -12,6 +12,7 @@ from qat.middleend.passes.transform import (
     FreqShiftSanitisation,
     InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
+    InsertPreSelectionMeasurement,
     InstructionGranularitySanitisation,
     InstructionLengthSanitisation,
     LowerSyncsToDelays,
@@ -76,14 +77,19 @@ class DefaultMiddleend(CustomMiddleend):
             target_data = TargetData()
         return (
             PassManager()
-            | PopulateWaveformSampleTime(model, target_data)
             | HardwareConfigValidity(model)
             | ActivePulseChannelAnalysis(model)
+            # Preselection must run for every shot, so sanitise repeats before preselection
+            | RepeatSanitisation(target_data)
+            | InsertPreSelectionMeasurement(model)
+            # Must run after InsertPreSelectionMeasurement so injected filter waveforms
+            # (SampledWaveform with use_weights=True) get their sample_time populated
+            # before InstructionGranularitySanitisation divides by it.
+            | PopulateWaveformSampleTime(model, target_data)
             | InactivePulseChannelSanitisation()
             | FrequencySetupValidation(model, target_data)
             | DynamicFrequencyValidation(model, target_data)
             # Sanitising input IR to make it complete
-            | RepeatSanitisation(target_data)
             | ReturnSanitisation()
             | SynchronizeTask()
             | ReadoutValidation()

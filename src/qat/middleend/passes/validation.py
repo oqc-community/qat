@@ -9,7 +9,7 @@ from compiler_config.config import CompilerConfig, ErrorMitigationConfig, Result
 from qat.core.config.configure import get_config
 from qat.core.pass_base import ValidationPass
 from qat.core.result_base import ResultManager
-from qat.ir.instruction_basetypes import AcquireMode, ProcessAxis
+from qat.ir.instruction_basetypes import AcquireMode, AcquirePurpose, ProcessAxis
 from qat.ir.instruction_builder import InstructionBuilder, QuantumInstructionBuilder
 from qat.ir.instructions import FrequencySet, FrequencyShift, Instruction, Repeat, Return
 from qat.ir.measure import Acquire, PostProcessing
@@ -279,6 +279,8 @@ class NoMidCircuitMeasurementValidation(ValidationPass):
 
         for instr in ir:
             if isinstance(instr, Acquire):
+                if instr.purpose == AcquirePurpose.PRE_SELECTION:
+                    continue
                 consumed_acquire_pc.add(instr.target)
 
             # Check if we have a measure in the middle of the circuit somewhere.
