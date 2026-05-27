@@ -191,7 +191,7 @@ class CalibratablePulse(NoExtraFieldsModel):
 
 
 class CalibratableAcquire(NoExtraFieldsModel):
-    delay: CalibratablePositiveFloat = Field(default=180e-08, ge=0)
+    delay: CalibratablePositiveFloat = Field(default=180e-09, ge=0)
     width: CalibratablePositiveFloat = Field(default=1e-06, ge=0)
     sync: bool = True
     weights: ComplexNDArray | FloatNDArray = Field(

@@ -263,6 +263,28 @@ class TestEchoPipelineWithCircuits:
         for acquire in executable.acquires.values():
             assert acquire.mode == AcquireMode.INTEGRATOR
 
+    def test_acquire_overlaps_measure(self, executable, request):
+        """Checks that the acquire window overlaps the measurement pulse on each resonator
+        channel."""
+        if "openpulse" in request.node.callspec.id:
+            pytest.skip("Openpulse has more expressive use of acquires.")
+
+        for program in executable.programs:
+            for qubit in self.model.qubits.values():
+                resonator_uuid = qubit.resonator.physical_channel.uuid
+                channel_data = program.channel_data[resonator_uuid]
+
+                for acquire in channel_data.acquires:
+                    acq_slice = channel_data.buffer[
+                        acquire.position : acquire.position + acquire.length
+                    ]
+                    assert np.any(np.abs(acq_slice) > 0), (
+                        f"Acquire [{acquire.position}, "
+                        f"{acquire.position + acquire.length - 1}] does not "
+                        f"overlap any measurement pulse samples on channel "
+                        f"{resonator_uuid}"
+                    )
+
     def test_executable_has_correct_returns(
         self, executable: Executable[WaveformProgram], num_registers: int
     ):
