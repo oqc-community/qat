@@ -120,14 +120,6 @@ Local developer commands:
   required to merge.
 - New features should be accompanied by unit tests and, where appropriate, a docstring example.
 - Do not merge if `legacy`/`purr` tests are newly broken without a linked ticket.
-- When asked to create a PR, create section titles "Summary", "Motivation", "Testing", "Related
-  Issues" and "Notes" in the PR description to provide a clear description of the change, the
-  motivation, any relevant context or links to issues/tickets, and testing performed. The title of
-  the PR must follow the format "<jira-ticket>: <short summary>" (e.g. "COMPILER-123: Add new
-  optimization pass for CNOT gates").
-- When creating or editing PRs with `gh`, do not pass markdown containing backticks directly via
-  `--body`; use `--body-file` (or otherwise fully protect shell quoting) to avoid command
-  substitution corrupting the PR description.
 
 ## What to avoid
 
@@ -136,19 +128,10 @@ Local developer commands:
   `qat.purr.utils.logger`.
 - Pydantic v2 is in use; do not use v1-style validators or `__fields__`.
 
-## Collaboration preferences
+## Workflow skills
 
-- Whenever a lesson is learned during a session (e.g. a process mistake, a gotcha, a debugging
-  finding) or you are asked to remember a new working preference, immediately record it in the
-  relevant section of this file so it is available in future sessions without needing to be
-  re-discovered. Keep entries concise — a brief reminder is enough, not a how-to guide.
-- When fetching PR review threads via the GitHub GraphQL API, always paginate through all pages
-  using `pageInfo { hasNextPage endCursor }` — `gh` returns at most 100 threads per call and will
-  silently truncate results without warning.
-- When asked to examine open PR review comments:
-  1. Fetch **all** threads on the current branch's PR (paginate fully), filter to unresolved ones.
-  1. Produce a report classifying each as: code fix 🔧, reply-to-close ✅, or investigate 🔍.
-  1. Allow the user to select one or more actions to work on.
-  1. On approval of one or more actions: batch all code fixes together and wait for user review.
-  1. After user review, commit, push, then reply "Fixed in `<sha>`" and resolve each affected
-     thread.
+- Use `.github/copilot/skills/pr-description.md` for PR title/body preparation.
+- Use `.github/copilot/skills/jira-ticket.md` for Jira ticket creation and updates.
+- Use `.github/copilot/skills/pr-review-threads.md` for review-thread triage.
+- If a workflow lesson or gotcha is discovered during a session, suggest adding it to the relevant
+  skill file or this document via a follow-up commit.

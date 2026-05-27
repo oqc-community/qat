@@ -345,7 +345,7 @@ class Resonator(Component):
         frozen=True, default=ResonatorPulseChannels()
     )
     relaxation_delay: CalibratablePositiveFloat = Field(
-        default=2e-6,
+        default=5e-6,
         ge=0,
         description="Post-acquisition relaxation delay for resonator ring-down.",
     )
