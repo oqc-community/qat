@@ -46,7 +46,7 @@ class BaseRuntime(abc.ABC):
         self.results_pipeline = results_pipeline
 
     @abc.abstractmethod
-    def execute(package, *args, **kwargs): ...
+    def execute(self, package, *args, **kwargs): ...
 
     def default_pipeline(self, target_data: TargetData | None = None):
         return (
