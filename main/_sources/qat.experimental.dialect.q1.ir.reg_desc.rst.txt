@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1.ir.reg\_desc module
+===============================================
+
+.. automodule:: qat.experimental.dialect.q1.ir.reg_desc
+   :members:
+   :undoc-members:
+   :show-inheritance:
