@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.abstract_ops module &mdash; qat-compiler 3.0.0.post244.dev20260601100213 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.abstract_ops module &mdash; qat-compiler 3.0.0.post245.dev20260601131120 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -704,6 +704,40 @@ destination register.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IRsIOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imm1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imm2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
+<p>A base class for QBlox Q1 operations that have an immediate, a source register, and
+then another immediate.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.assembly_line_args">
+<span class="sig-name descname"><span class="pre">assembly_line_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.assembly_line_args" title="Link to this definition"></a></dt>
+<dd><p>Instruction arguments in the order they should be printed in the assembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterType</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.imm1">
+<span class="sig-name descname"><span class="pre">imm1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._PropertyFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.imm1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.imm2">
+<span class="sig-name descname"><span class="pre">imm2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._PropertyFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.imm2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.rs">
+<span class="sig-name descname"><span class="pre">rs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.IRsIOperation.rs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.NullaryOperation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NullaryOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.NullaryOperation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
@@ -828,6 +862,34 @@ one immediate operand.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RdRdOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
+<p>A base class for QBlox Q1 operations that produce two destination registers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation.assembly_line_args">
+<span class="sig-name descname"><span class="pre">assembly_line_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation.assembly_line_args" title="Link to this definition"></a></dt>
+<dd><p>Instruction arguments in the order they should be printed in the assembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterType</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation.rd1">
+<span class="sig-name descname"><span class="pre">rd1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._ResultFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation.rd1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation.rd2">
+<span class="sig-name descname"><span class="pre">rd2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._ResultFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation.rd2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RdRsOperation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RdRsOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RdRsOperation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
@@ -886,6 +948,35 @@ immediate operands.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsIIOperation.rs">
 <span class="sig-name descname"><span class="pre">rs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsIIOperation.rs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RsIOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
+<p>A base class for QBlox Q1 operations that have one source register followed by one
+immediate operand.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation.assembly_line_args">
+<span class="sig-name descname"><span class="pre">assembly_line_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation.assembly_line_args" title="Link to this definition"></a></dt>
+<dd><p>Instruction arguments in the order they should be printed in the assembly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterType</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation.imm">
+<span class="sig-name descname"><span class="pre">imm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._PropertyFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation.imm" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation.rs">
+<span class="sig-name descname"><span class="pre">rs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsIOperation.rs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1011,40 +1102,6 @@ destination register.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RsRsIOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
-<p>A base class for QBlox Q1 operations that have two source registers followed by one
-immediate operand.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.assembly_line_args">
-<span class="sig-name descname"><span class="pre">assembly_line_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.assembly_line_args" title="Link to this definition"></a></dt>
-<dd><p>Instruction arguments in the order they should be printed in the assembly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterType</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.imm">
-<span class="sig-name descname"><span class="pre">imm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._PropertyFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.imm" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.rs1">
-<span class="sig-name descname"><span class="pre">rs1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.rs1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.rs2">
-<span class="sig-name descname"><span class="pre">rs2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsIOperation.rs2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsOperation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RsRsOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsOperation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
@@ -1107,45 +1164,6 @@ destination register.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RsRsRdRdOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
-<p>A base class for QBlox Q1 operations with two source registers and two destination
-registers.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.assembly_line_args">
-<span class="sig-name descname"><span class="pre">assembly_line_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.assembly_line_args" title="Link to this definition"></a></dt>
-<dd><p>Instruction arguments in the order they should be printed in the assembly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterType</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rd1">
-<span class="sig-name descname"><span class="pre">rd1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OpResult[RInvT]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._ResultFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rd1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rd2">
-<span class="sig-name descname"><span class="pre">rd2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OpResult[RInvT]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._ResultFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rd2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rs1">
-<span class="sig-name descname"><span class="pre">rs1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rs1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rs2">
-<span class="sig-name descname"><span class="pre">rs2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRdRdOperation.rs2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsIOperation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RsRsRsIOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">imm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsIOperation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
@@ -1180,39 +1198,6 @@ immediate operand.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsIOperation.rs3">
 <span class="sig-name descname"><span class="pre">rs3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsIOperation.rs3" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RsRsRsOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rs3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Instruction</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">RInvT</span></code>]</p>
-<p>A base class for QBlox Q1 operations that have three source registers.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.assembly_line_args">
-<span class="sig-name descname"><span class="pre">assembly_line_args</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.assembly_line_args" title="Link to this definition"></a></dt>
-<dd><p>Instruction arguments in the order they should be printed in the assembly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterType</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.rs1">
-<span class="sig-name descname"><span class="pre">rs1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.rs1" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.rs2">
-<span class="sig-name descname"><span class="pre">rs2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.rs2" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.rs3">
-<span class="sig-name descname"><span class="pre">rs3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._OperandFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.RsRsRsOperation.rs3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
