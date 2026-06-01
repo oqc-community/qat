@@ -353,6 +353,61 @@ class RsRsOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs1, self.rs2
 
 
+class RsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have one source register followed by one
+    immediate operand."""
+
+    rs = operand_def(RInvT)
+    imm = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        rs: RInvT,
+        imm: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm, int):
+            imm = IntegerAttr(imm, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs],
+            properties={
+                "imm": imm,
+                "comment": comment,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.rs, self.imm
+
+
+class RdRdOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that produce two destination registers."""
+
+    rd1 = result_def(RInvT)
+    rd2 = result_def(RInvT)
+
+    def __init__(
+        self,
+        rd1: RInvT,
+        rd2: RInvT,
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            properties={"comment": comment},
+            result_types=[rd1, rd2],
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.rd1, self.rd2
+
+
 # endregion
 
 # region Ternary formats
@@ -462,65 +517,6 @@ class RsIRdOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs, self.imm, self.rd
 
 
-class RsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
-    """A base class for QBlox Q1 operations that have two source registers followed by one
-    immediate operand."""
-
-    rs1 = operand_def(RInvT)
-    rs2 = operand_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
-
-    def __init__(
-        self,
-        rs1: Operation | SSAValue,
-        rs2: Operation | SSAValue,
-        imm: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
-        if isinstance(comment, str):
-            comment = StringAttr(comment)
-
-        super().__init__(
-            operands=[rs1, rs2],
-            properties={
-                "imm": imm,
-                "comment": comment,
-            },
-        )
-
-    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
-        return self.rs1, self.rs2, self.imm
-
-
-class RsRsRsOperation(Q1Instruction, ABC, Generic[RInvT]):
-    """A base class for QBlox Q1 operations that have three source registers."""
-
-    rs1 = operand_def(RInvT)
-    rs2 = operand_def(RInvT)
-    rs3 = operand_def(RInvT)
-
-    def __init__(
-        self,
-        rs1: Operation | SSAValue,
-        rs2: Operation | SSAValue,
-        rs3: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        if isinstance(comment, str):
-            comment = StringAttr(comment)
-
-        super().__init__(
-            operands=[rs1, rs2, rs3],
-            properties={"comment": comment},
-        )
-
-    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
-        return self.rs1, self.rs2, self.rs3
-
-
 class RsRsRdOperation(Q1Instruction, ABC, Generic[RInvT]):
     """A base class for QBlox Q1 operations that have two source registers followed by one
     destination register."""
@@ -547,11 +543,6 @@ class RsRsRdOperation(Q1Instruction, ABC, Generic[RInvT]):
 
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
         return self.rs1, self.rs2, self.rd
-
-
-# endregion
-
-# region Quaternary formats
 
 
 class IIIOperation(Q1Instruction, ABC):
@@ -591,6 +582,48 @@ class IIIOperation(Q1Instruction, ABC):
 
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
         return self.imm1, self.imm2, self.imm3
+
+
+class IRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have an immediate, a source register, and
+    then another immediate."""
+
+    imm1 = prop_def(IntegerAttr[UI32])
+    rs = operand_def(RInvT)
+    imm2 = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        imm1: int | IntegerAttr[UI32],
+        rs: RInvT,
+        imm2: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm1, int):
+            imm1 = IntegerAttr(imm1, ui32)
+
+        if isinstance(imm2, int):
+            imm2 = IntegerAttr(imm2, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs],
+            properties={
+                "imm1": imm1,
+                "imm2": imm2,
+                "comment": comment,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm1, self.rs, self.imm2
+
+
+# endregion
+
+# region Quaternary formats
 
 
 class IIIIOperation(Q1Instruction, ABC):
@@ -671,36 +704,6 @@ class RsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
 
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
         return self.rs1, self.rs2, self.rs3, self.imm
-
-
-class RsRsRdRdOperation(Q1Instruction, ABC, Generic[RInvT]):
-    """A base class for QBlox Q1 operations with two source registers and two destination
-    registers."""
-
-    rs1 = operand_def(RInvT)
-    rs2 = operand_def(RInvT)
-    rd1: OpResult[RInvT] = result_def(RInvT)
-    rd2: OpResult[RInvT] = result_def(RInvT)
-
-    def __init__(
-        self,
-        rs1: Operation | SSAValue,
-        rs2: Operation | SSAValue,
-        rd1: RInvT,
-        rd2: RInvT,
-        comment: str | StringAttr | None = None,
-    ):
-        if isinstance(comment, str):
-            comment = StringAttr(comment)
-
-        super().__init__(
-            operands=[rs1, rs2],
-            properties={"comment": comment},
-            result_types=[rd1, rd2],
-        )
-
-    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
-        return self.rs1, self.rs2, self.rd1, self.rd2
 
 
 # endregion

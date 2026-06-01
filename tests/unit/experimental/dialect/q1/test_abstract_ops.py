@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import pytest
-from xdsl.dialects.builtin import IntegerAttr, IntegerType, StringAttr
+from xdsl.dialects.builtin import IntegerAttr, IntegerType
 from xdsl.irdl import irdl_op_definition
 from xdsl.utils.test_value import create_ssa_value
 
@@ -13,10 +13,7 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     IIOperation,
     Q1Instruction,
     RdIOperation,
-    RsRsIOperation,
     RsRsRdOperation,
-    RsRsRdRdOperation,
-    RsRsRsOperation,
     _assembly_arg_str,
 )
 from qat.experimental.dialect.q1.ir.imm_desc import ui32
@@ -39,16 +36,6 @@ class DummyRdIOp(RdIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class DummyRsRsIOp(RsRsIOperation[IntRegisterType]):
-    name = "q1.rri.dummy"
-
-
-@irdl_op_definition
-class DummyRsRsRsOp(RsRsRsOperation[IntRegisterType]):
-    name = "q1.rrr.dummy"
-
-
-@irdl_op_definition
 class DummyRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     name = "q1.rrd.dummy"
 
@@ -56,11 +43,6 @@ class DummyRsRsRdOp(RsRsRdOperation[IntRegisterType]):
 @irdl_op_definition
 class DummyIIIOp(IIIOperation):
     name = "q1.iii.dummy"
-
-
-@irdl_op_definition
-class DummyRsRsRdRdOp(RsRsRdRdOperation[IntRegisterType]):
-    name = "q1.rrdd.dummy"
 
 
 def test_assembly_arg_str():
@@ -100,35 +82,6 @@ def test_rdi_operation_with_integer_attr_imm():
     )
 
 
-def test_rri_operation_init_and_assembly_line_args():
-    op = DummyRsRsIOp(
-        create_ssa_value(Registers.R1),
-        create_ssa_value(Registers.R2),
-        19,
-        comment="hello",
-    )
-    assert op.comment == StringAttr("hello")
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "R1",
-        "R2",
-        "19",
-    )
-
-
-def test_rrr_operation_init_and_assembly_line_args():
-    op = DummyRsRsRsOp(
-        create_ssa_value(Registers.R1),
-        create_ssa_value(Registers.R2),
-        create_ssa_value(Registers.R3),
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "R1",
-        "R2",
-        "R3",
-    )
-
-
 def test_rrd_operation_comment_branch():
     op = DummyRsRsRdOp(
         create_ssa_value(Registers.R1),
@@ -149,20 +102,4 @@ def test_iii_operation_init_and_assembly_line_args():
         "1",
         "2",
         "3",
-    )
-
-
-def test_rrdd_operation_init_and_assembly_line_args():
-    op = DummyRsRsRdRdOp(
-        create_ssa_value(Registers.R1),
-        create_ssa_value(Registers.R2),
-        Registers.R5,
-        Registers.R6,
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "R1",
-        "R2",
-        "R5",
-        "R6",
     )

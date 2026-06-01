@@ -27,14 +27,18 @@ from xdsl.traits import Commutative, IsTerminator, Pure
 from qat.experimental.dialect.q1.ir.abstract_ops import (
     AssemblyInstructionArg,
     IIIIOperation,
+    IIIOperation,
     IIOperation,
     IOperation,
     IRdOperation,
+    IRsIOperation,
     NullaryOperation,
     Q1AsmOperation,
     RdIOperation,
+    RdRdOperation,
     RdRsOperation,
     RsIIOperation,
+    RsIOperation,
     RsIRdOperation,
     RsIRsOperation,
     RsOperation,
@@ -49,7 +53,7 @@ from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 
 # region Q1 Core Instructions (Classical Logic & Flow)
 
-# region Base Core Instructions
+# region Core Instructions
 
 
 @irdl_op_definition
@@ -219,7 +223,7 @@ class NopOp(NullaryOperation):
 
 # endregion
 
-# region Jump / Program Flow Instructions
+# region Jump Instructions
 
 
 @irdl_op_definition
@@ -1042,7 +1046,7 @@ class LoopRROp(RdRsOperation[IntRegisterType]):
 
 # endregion
 
-# region Arithmetic & Bitwise Instructions
+# region Arithmetic Instructions
 
 
 @irdl_op_definition
@@ -1559,7 +1563,7 @@ class AsrRRROp(RsRsRdOperation[IntRegisterType]):
 
 # endregion
 
-# region Latched Parameter (FPGA-level setups) Instructions
+# region Latched Instructions
 
 
 @irdl_op_definition
@@ -1947,6 +1951,658 @@ class SetAwgOffsRROp(RsRsOperation[IntRegisterType]):
         """Semantic alias for the second generic rs field."""
 
         return self.rs2
+
+
+# endregion
+
+# region LINQ Feedback Instructions
+
+# region Universal Receive Instructions
+
+
+@irdl_op_definition
+class FbPopDataIROp(IRdOperation[IntRegisterType]):
+    """Pop the next entry whose id matches the immediate from the feedback queue and write
+    the associated data value into the destination register."""
+
+    name = "q1.ir.fb_pop_data"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        destination: IntRegisterType,
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, destination, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def destination(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class FbPullDataRROp(RdRdOperation[IntRegisterType]):
+    """Pull the first available entry from the feedback queue regardless of id, writing the
+    entry's id into ``destination_id`` and the associated data into `destination`."""
+
+    name = "q1.rr.fb_pull_data"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        destination_id: IntRegisterType,
+        destination: IntRegisterType,
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(destination_id, destination, comment=comment)
+
+    @property
+    def destination_id(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def destination(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
+
+
+# endregion
+
+# region Universal Transmit Instructions
+
+
+@irdl_op_definition
+class FbComDataIIIOp(IIIOperation):
+    """Send an immediate value over LINQ tagged with the given id and wait duration ns."""
+
+    name = "q1.iii.fb_com_data"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        value: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, value, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def value(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class FbComDataIRIOp(IRsIOperation[IntRegisterType]):
+    """Send a register value over LINQ tagged with the given id and wait duration ns."""
+
+    name = "q1.iri.fb_com_data"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        value: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, value, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def value(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class FbCmdIIIOp(IIIOperation):
+    """Send an immediate command value over LINQ tagged with the given id and wait duration
+    ns."""
+
+    name = "q1.iii.fb_cmd"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        value: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, value, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def value(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class FbCmdIRIOp(IRsIOperation[IntRegisterType]):
+    """Send a register command value over LINQ tagged with the given id and wait duration
+    ns."""
+
+    name = "q1.iri.fb_cmd"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        value: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, value, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def value(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class FbComCfgIIIIOp(IIIIOperation):
+    """Configure write-combine mode, bit position, payload length, and wait duration for
+    subsequent fb_com_data transmissions."""
+
+    name = "q1.iiii.fb_com_cfg"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        wc: int | IntegerAttr[UI32],
+        bit_pos: int | IntegerAttr[UI32],
+        length: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(wc, bit_pos, length, duration, comment=comment)
+
+    @property
+    def wc(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bit_pos(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def length(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+    @property
+    def duration(self):
+        """Semantic alias for the fourth generic imm field."""
+
+        return self.imm4
+
+
+@irdl_op_definition
+class FbComExtraIIIOp(IIIOperation):
+    """Enable or disable inclusion of extra bytes in the LINQ data payload and wait duration
+    ns.
+
+    Signature: enable: I, extra: I, duration: I
+    """
+
+    name = "q1.iii.fb_com_extra"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        enable: int | IntegerAttr[UI32],
+        extra: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(enable, extra, duration, comment=comment)
+
+    @property
+    def enable(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def extra(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+# endregion
+
+# region Readout LINQ Instructions
+
+
+@irdl_op_definition
+class FbAcqTbIdIIOp(IIOperation):
+    """Configure the id tag attached to thresholded bits (TB) sent over LINQ (immediate
+    variant) and wait duration ns.
+
+    Setting id = 0 disables transmission.
+    """
+
+    name = "q1.ii.fb_acq_tb_id"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class FbAcqTbIdRIOp(RsIOperation[IntRegisterType]):
+    """Configure the id tag attached to thresholded bits (TB) sent over LINQ (register
+    variant) and wait duration ns.
+
+    Setting id = 0 disables transmission.
+    """
+
+    name = "q1.ri.fb_acq_tb_id"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class FbAcqTbCfgIIIIOp(IIIIOperation):
+    """Configure write-combine mode, bit position, payload length, and wait duration for
+    thresholded-bit transmissions."""
+
+    name = "q1.iiii.fb_acq_tb_cfg"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        wc: int | IntegerAttr[UI32],
+        bit_pos: int | IntegerAttr[UI32],
+        length: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(wc, bit_pos, length, duration, comment=comment)
+
+    @property
+    def wc(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bit_pos(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def length(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+    @property
+    def duration(self):
+        """Semantic alias for the fourth generic imm field."""
+
+        return self.imm4
+
+
+@irdl_op_definition
+class FbAcqTbValidIIOp(IIOperation):
+    """Configure the valid bit for thresholded bits (TB) sent over LINQ (immediate variant)
+    and wait duration ns."""
+
+    name = "q1.ii.fb_acq_tb_valid"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        valid: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(valid, duration, comment=comment)
+
+    @property
+    def valid(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class FbAcqTbValidRIOp(RsIOperation[IntRegisterType]):
+    """Configure the valid bit for thresholded bits (TB) sent over LINQ (register variant)
+    and wait duration ns."""
+
+    name = "q1.ri.fb_acq_tb_valid"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        valid: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(valid, duration, comment=comment)
+
+    @property
+    def valid(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class FbAcqTbExtraIIIOp(IIIOperation):
+    """Enable or disable inclusion of extra bytes in the TB payload and wait duration ns."""
+
+    name = "q1.iii.fb_acq_tb_extra"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        enable: int | IntegerAttr[UI32],
+        extra: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(enable, extra, duration, comment=comment)
+
+    @property
+    def enable(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def extra(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class FbAcqTbMockIIIIOp(IIIIOperation):
+    """Transmit mock thresholded bits instead of real TB data when enable = 1."""
+
+    name = "q1.iiii.fb_acq_tb_mock"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        enable: int | IntegerAttr[UI32],
+        valid: int | IntegerAttr[UI32],
+        data: int | IntegerAttr[UI32],
+        count: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(enable, valid, data, count, comment=comment)
+
+    @property
+    def enable(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def valid(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def data(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+    @property
+    def count(self):
+        """Semantic alias for the fourth generic imm field."""
+
+        return self.imm4
+
+
+@irdl_op_definition
+class FbAcqIqIdIIOp(IIOperation):
+    """Configure the id tag attached to IQ data sent over LINQ (immediate variant) and wait
+    duration ns.
+
+    Setting id = 0 disables transmission.
+    """
+
+    name = "q1.ii.fb_acq_iq_id"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class FbAcqIqIdRIOp(RsIOperation[IntRegisterType]):
+    """Configure the id tag attached to IQ data sent over LINQ (register variant) and wait
+    duration ns.
+
+    Setting id = 0 disables transmission.
+    """
+
+    name = "q1.ri.fb_acq_iq_id"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        id: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(id, duration, comment=comment)
+
+    @property
+    def id(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class FbAcqIqShiftIIOp(IIOperation):
+    """Right-shift IQ values by shift bits before LINQ transmission to reduce resolution,
+    then wait duration ns."""
+
+    name = "q1.ii.fb_acq_iq_shift"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        shift: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(shift, duration, comment=comment)
+
+    @property
+    def shift(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
 
 
 # endregion
