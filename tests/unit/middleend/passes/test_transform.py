@@ -406,7 +406,7 @@ class TestPydPhaseOptimisation:
 
         for inst in builder.instructions[:-1]:
             assert isinstance(inst, PhaseSet)
-        channels = set([inst.target for inst in builder.instructions[:-1]])
+        channels = {inst.target for inst in builder.instructions[:-1]}
         assert len(channels) == builder.number_of_instructions - 1
 
     def test_empty_constructor(self):
@@ -604,9 +604,9 @@ class TestMeasurePhaseResetSanitisation:
         # A phase reset should be added for each measure instruction.
         assert ir.number_of_instructions == n_instr_before + self.hw.number_of_qubits
 
-        ref_measure_pulse_channels = set(
-            [qubit.measure_pulse_channel.uuid for qubit in self.hw.qubits.values()]
-        )
+        ref_measure_pulse_channels = {
+            qubit.measure_pulse_channel.uuid for qubit in self.hw.qubits.values()
+        }
         measure_pulse_channels = set()
 
         for i, instr in enumerate(ir.instructions):
@@ -1560,9 +1560,10 @@ class TestResetsToDelays:
         delay_instrs = [instr for instr in builder if isinstance(instr, Delay)]
         assert len(delay_instrs) == 2
         delay_targets = {delay.target for delay in delay_instrs}
-        assert delay_targets == set(
-            [qubit.measure_pulse_channel.uuid, qubit.acquire_pulse_channel.uuid]
-        )
+        assert delay_targets == {
+            qubit.measure_pulse_channel.uuid,
+            qubit.acquire_pulse_channel.uuid,
+        }
 
 
 class TestSquashDelaysOptimisation:
@@ -1877,9 +1878,9 @@ class TestFreqShiftSanitisation:
             model
         )
         assert freq_shift_pulse_channels == set(found_pulse_channels.keys())
-        assert set(found_pulse_channels.values()) == set(
-            [model.qubit_with_index(i) for i in range(2)]
-        )
+        assert set(found_pulse_channels.values()) == {
+            model.qubit_with_index(i) for i in range(2)
+        }
 
     def test_add_freq_shift_to_block_ignored_for_no_quantum_instructions(
         self, basic_builder, freq_shift_pulse_channels
@@ -1887,7 +1888,7 @@ class TestFreqShiftSanitisation:
         builder = FreqShiftSanitisation.add_freq_shift_to_ir(
             basic_builder, freq_shift_pulse_channels
         )
-        assert all([not isinstance(inst, Pulse) for inst in builder])
+        assert all(not isinstance(inst, Pulse) for inst in builder)
 
     def test_add_freq_shift_to_block_ignored_for_no_duration(
         self, model, freq_shift_pulse_channels
@@ -2410,7 +2411,7 @@ class TestSynchronizeTask:
 
         ir = SynchronizeTask().run(builder, res_mgr)
         assert isinstance(ir.instructions[-1], Synchronize)
-        assert ir.instructions[-1].targets == set([drive_chan.uuid, measure_chan.uuid])
+        assert ir.instructions[-1].targets == {drive_chan.uuid, measure_chan.uuid}
 
     def test_synchronize_task_not_adding_if_inactive(self, model):
         res_mgr = ResultManager()

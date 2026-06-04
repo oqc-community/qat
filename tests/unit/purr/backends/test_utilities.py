@@ -107,9 +107,9 @@ def test_gaussian_square(width, std_dev, zero_at_edges):
 
     # Test the shape looks like we expect it
     square_edge = width / 2 + 1e-8  # add small amount to deal with float errors
-    assert all([val < 1.0 for val in y[x < -square_edge]])
-    assert all([val < 1.0 for val in y[x > square_edge]])
-    assert all([np.isclose(val, 1.0) for val in y[(x > -square_edge) * (x < square_edge)]])
+    assert all(val < 1.0 for val in y[x < -square_edge])
+    assert all(val < 1.0 for val in y[x > square_edge])
+    assert all(np.isclose(val, 1.0) for val in y[(x > -square_edge) * (x < square_edge)])
 
     # Test zero at the edges
     if zero_at_edges:

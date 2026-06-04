@@ -425,11 +425,9 @@ class QuantumHardwareModel(HardwareModel, Calibratable):
     def is_calibrated(self):
         def check_devices(target_devices):
             return all(
-                [
-                    device.is_calibrated
-                    for device in target_devices.values()
-                    if isinstance(device, Calibratable)
-                ]
+                device.is_calibrated
+                for device in target_devices.values()
+                if isinstance(device, Calibratable)
             )
 
         return (

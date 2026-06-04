@@ -34,11 +34,11 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 3
-        assert set(res.targets) == set([drive_chan, measure_chan, acquire_chan])
+        assert set(res.targets) == {drive_chan, measure_chan, acquire_chan}
         assert len(res.target_map) == 3
-        assert all([val == qubit for val in res.target_map.values()])
-        assert set(res.target_map.keys()) == set([drive_chan, measure_chan, acquire_chan])
-        assert set(res.from_qubit(qubit)) == set([drive_chan, measure_chan, acquire_chan])
+        assert all(val == qubit for val in res.target_map.values())
+        assert set(res.target_map.keys()) == {drive_chan, measure_chan, acquire_chan}
+        assert set(res.from_qubit(qubit)) == {drive_chan, measure_chan, acquire_chan}
 
     def test_syncs_dont_add_extra_channels(self):
         builder = self.model.create_builder()
@@ -54,7 +54,7 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActiveChannelResults)
         assert len(res.targets) == 1
-        assert set(res.targets) == set([drive_chan])
+        assert set(res.targets) == {drive_chan}
 
     def test_rogue_pulse_channel(self):
         phys_chan = next(iter(self.model.physical_channels.values()))

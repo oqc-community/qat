@@ -369,9 +369,9 @@ class TestConvertToPydanticIRPass:
     @pytest.mark.parametrize(
         "legacy_enum",
         [
-            *[val for val in instruction_basetypes.AcquireMode],
-            *[val for val in instruction_basetypes.PostProcessType],
-            *[val for val in instruction_basetypes.ProcessAxis],
+            *list(instruction_basetypes.AcquireMode),
+            *list(instruction_basetypes.PostProcessType),
+            *list(instruction_basetypes.ProcessAxis),
         ],
     )
     def test_convert_enums(self, legacy_enum):
@@ -579,9 +579,9 @@ class TestConvertToPydanticIRPass:
             assert converted_inst.__class__.__name__ == "Reset"
             assert converted_inst.__class__.__module__.startswith("qat.ir")
             assert isinstance(converted_inst.targets, FrozenSet)
-            assert converted_inst.qubit_targets == set(
-                [self.legacy_model.get_devices_from_pulse_channel(target)[0].index]
-            )
+            assert converted_inst.qubit_targets == {
+                self.legacy_model.get_devices_from_pulse_channel(target)[0].index
+            }
             assert converted_inst.duration == legacy_inst.duration
 
     @pytest.mark.parametrize(

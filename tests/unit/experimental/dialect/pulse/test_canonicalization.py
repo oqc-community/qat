@@ -344,7 +344,7 @@ class TestConstantFoldingIsUnsuccessful:
             super().__init__(result_types=[result_type], properties={"value": value})
 
         def fold(self):
-            return tuple()
+            return ()
 
     @irdl_op_definition
     class _ConstantOp(IRDLOperation, HasFolderInterface):

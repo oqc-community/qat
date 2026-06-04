@@ -186,7 +186,7 @@ extend-select = [
   "W",   # pycodestyle warnings
   "UP",  # pyupgrade
   #  "PL",   # pylint
-  #  "C4",   # flake8-comprehensions
+  "C4",  # flake8-comprehensions
   "SIM", # flake8-simplify
   #  "TID",  # flake8-tidy-imports
   #  "A",    # flake8-builtins

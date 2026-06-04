@@ -200,8 +200,8 @@ class AbstractQbloxLiveEngine(LiveDeviceEngine, InvokerMixin):
         sweeps = triage_result.sweeps
         repeats = triage_result.repeats
         pp_map = triage_result.pp_map
-        sweep_counts = list(len(next(iter(s.variables.values()))) for s in sweeps)
-        repeat_counts = list(r.repeat_count for r in repeats)
+        sweep_counts = [len(next(iter(s.variables.values()))) for s in sweeps]
+        repeat_counts = [r.repeat_count for r in repeats]
 
         results = {}
         for pulse_channel_id, acquisitions in playback.items():

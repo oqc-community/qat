@@ -186,7 +186,9 @@ class QbloxControlHardware(ControlHardware):
                 dummy_cfg=self.dummy_cfg if self.address is None else None,
             )
             self._driver.reset()
-            self._modules = {m: True for m in self._driver.get_connected_modules().values()}
+            self._modules = dict.fromkeys(
+                self._driver.get_connected_modules().values(), True
+            )
             self.is_connected = True
 
         log.info(self._driver.get_system_status())

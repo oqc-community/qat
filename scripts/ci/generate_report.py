@@ -69,7 +69,7 @@ def get_reports(report_path):
             all_details["failure"].extend(details["failure"])
             all_details["skipped"].extend(details["skipped"])
             all_details["error"].extend(details["error"])
-    success = all([s["outcome"] == "success" for sm in summaries.values() for s in sm])
+    success = all(s["outcome"] == "success" for sm in summaries.values() for s in sm)
 
     return summaries, all_details, success
 

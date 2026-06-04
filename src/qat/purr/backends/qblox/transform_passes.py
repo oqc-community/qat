@@ -74,7 +74,7 @@ class ReturnSanitisation(TransformPass):
                 ir.instructions.remove(ret)
         else:
             # If we don't have an explicit return, imply all results.
-            unique_variables = set(acq.output_variable for acq in acquires)
+            unique_variables = {acq.output_variable for acq in acquires}
 
         ir.returns(list(unique_variables))
 

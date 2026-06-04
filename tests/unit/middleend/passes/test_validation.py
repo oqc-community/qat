@@ -460,7 +460,7 @@ class TestHardwareConfigValidity:
         self, mitigation_config, legacy
     ):
         hw = self.get_hw(legacy=legacy)
-        qubit_indices = [i for i in range(4)]
+        qubit_indices = list(range(4))
         linear = generate_random_linear(qubit_indices)
         hw.error_mitigation = ErrorMitigation(
             readout_mitigation=ReadoutMitigation(linear=linear)
@@ -515,7 +515,7 @@ class TestHardwareConfigValidity:
         self, results_format, mitigation_config, legacy
     ):
         hw = self.get_hw(legacy=legacy)
-        qubit_indices = [i for i in range(4)]
+        qubit_indices = list(range(4))
         linear = generate_random_linear(qubit_indices)
         hw.error_mitigation = ErrorMitigation(
             readout_mitigation=ReadoutMitigation(linear=linear)

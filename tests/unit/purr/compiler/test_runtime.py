@@ -21,7 +21,7 @@ def test_new_quantum_runtime():
     pipeline = runtime.build_pass_pipeline()
     assert pipeline.passes
     assert len(pipeline.passes) == 5
-    assert not any([m for m in pipeline.passes if isinstance(m._pass, AnalysisPass)])
-    assert any([m for m in pipeline.passes if isinstance(m._pass, TransformPass)])
-    assert any([m for m in pipeline.passes if isinstance(m._pass, ValidationPass)])
+    assert not any(m for m in pipeline.passes if isinstance(m._pass, AnalysisPass))
+    assert any(m for m in pipeline.passes if isinstance(m._pass, TransformPass))
+    assert any(m for m in pipeline.passes if isinstance(m._pass, ValidationPass))
     runtime.run_pass_pipeline(builder, res_mgr, met_mgr, model, engine)

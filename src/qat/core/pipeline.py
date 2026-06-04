@@ -192,7 +192,7 @@ class PipelineSet:
 
         pipes = []
         for Pdesc in pipeline_descriptions:
-            attrs = dict()
+            attrs = {}
             if hasattr(Pdesc, "hardware_loader"):
                 attrs["loader"] = CacheAccessLoader(
                     available_hardware, Pdesc.hardware_loader

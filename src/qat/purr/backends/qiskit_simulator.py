@@ -451,7 +451,7 @@ class QiskitRuntime(QuantumRuntime):
             results, builder.instructions, error_mitigation
         )
 
-        if all([is_generated_name(k) for k in results.keys()]):
+        if all(is_generated_name(k) for k in results.keys()):
             if len(results) == 1:
                 results = list(results.values())[0]
             else:

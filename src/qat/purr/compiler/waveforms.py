@@ -14,7 +14,7 @@ class WaveformDef:
 
 
 class AbstractWaveform(Pulse):
-    actual_waveforms: dict[str, "AbstractWaveform"] = dict()
+    actual_waveforms: dict[str, "AbstractWaveform"] = {}
     waveform_definition: WaveformDef = None
 
     def __init_subclass__(cls: "AbstractWaveform"):

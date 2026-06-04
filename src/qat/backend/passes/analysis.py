@@ -70,7 +70,7 @@ class TimelineAnalysis(AnalysisPass):
         :param model: The hardware model that holds calibrated information on the qubits on the QPU.
         :param target_data: Target-related information.
         """
-        self.sample_times_map = dict()
+        self.sample_times_map = {}
         for qubit in model.qubits.values():
             self.sample_times_map[qubit.physical_channel.uuid] = (
                 target_data.QUBIT_DATA.sample_time

@@ -165,7 +165,7 @@ class ConvertToPydanticIR(TransformPass):
         **kwargs,
     ):
         """Convert a ResultInfoMixin instance."""
-        data = dict()
+        data = {}
         kwargs["as_index"] = False
         for attr, val in vars(value).items():
             data[attr] = self._convert_element(val, *args, **kwargs)
@@ -338,7 +338,7 @@ class ConvertToPydanticIR(TransformPass):
         **kwargs,
     ):
         """Convert an Instruction instance."""
-        data = dict()
+        data = {}
         for name, var in vars(value).items():
             if name == "quantum_targets":
                 data["targets"] = frozenset(self._convert_element(var, *args, **kwargs))
@@ -352,7 +352,7 @@ class ConvertToPydanticIR(TransformPass):
     @_convert_element.register(Synchronize)
     def _(self, value: Synchronize, *args, **kwargs):
         """Convert a Synchronize instance."""
-        data = dict()
+        data = {}
         for name, var in vars(value).items():
             if name == "quantum_targets":
                 data["targets"] = frozenset(self._convert_element(var, *args, **kwargs))
@@ -366,7 +366,7 @@ class ConvertToPydanticIR(TransformPass):
     @_convert_element.register(QuantumInstruction)
     def _(self, value: QuantumInstruction, *args, **kwargs):
         """Convert a QuantumInstruction instance."""
-        data = dict()
+        data = {}
         for name, var in vars(value).items():
             if name == "quantum_targets":
                 targets = self._convert_element(var, *args, **kwargs)
@@ -380,12 +380,10 @@ class ConvertToPydanticIR(TransformPass):
     @_convert_element.register(Reset)
     def _(self, value: Reset, *args, **kwargs):
         """Convert a Reset instance."""
-        qubit_targets = set(
-            [
-                self._pulse_channel_to_qubit_index_map[target.id]
-                for target in value.quantum_targets
-            ]
-        )
+        qubit_targets = {
+            self._pulse_channel_to_qubit_index_map[target.id]
+            for target in value.quantum_targets
+        }
         duration = self._convert_element(value.duration, *args, **kwargs)
         return [
             pyd_instructions.Reset(
@@ -422,7 +420,7 @@ class ConvertToPydanticIR(TransformPass):
         **kwargs,
     ):
         """Convert a Repeat instance."""
-        data = dict()
+        data = {}
         for name, var in vars(value).items():
             if name == "repeat_count":
                 repeat = pyd_instructions.Repeat(
@@ -510,8 +508,8 @@ class ConvertToPydanticIR(TransformPass):
         **kwargs,
     ):
         """Convert a Pulse instance."""
-        waveform_data = dict()
-        pulse_data = dict()
+        waveform_data = {}
+        pulse_data = {}
         for name, var in vars(value).items():
             if name == "quantum_targets":
                 pulse_data["targets"] = frozenset(

@@ -68,10 +68,10 @@ class Executable(BaseModel, Generic[Program]):
     :param shots: The total number of shots performed in the :class:`Executable`.
     """
 
-    programs: list[Program] = []
-    acquires: dict[str, AcquireData] = dict()
-    assigns: list[Assign] = []
-    returns: set[str] = set()
+    programs: list[Program] = Field(default_factory=list)
+    acquires: dict[str, AcquireData] = Field(default_factory=dict)
+    assigns: list[Assign] = Field(default_factory=list)
+    returns: set[str] = Field(default_factory=set)
     calibration_id: str = ""
     shots: PositiveInt | None = None
 
@@ -102,7 +102,7 @@ class Executable(BaseModel, Generic[Program]):
     def _validate_programs_are_the_same_type(cls, programs):
         """Ensures that if multiple programs are provided, they are all of the same type."""
         if isinstance(programs, list):
-            types = set(type(p) for p in programs)
+            types = {type(p) for p in programs}
             if len(types) > 1:
                 raise ValueError(
                     f"All programs in the executable must be of the same type. Saw {types}."

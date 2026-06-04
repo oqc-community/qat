@@ -110,7 +110,7 @@ class QiskitSimplifyResults(TransformPass):
         :param acquisitions: Acquisition data returned from the Qiskit simulator.
         :return: The acquisition data simplified.
         """
-        if all([is_generated_name(k) for k in acquisitions.keys()]):
+        if all(is_generated_name(k) for k in acquisitions.keys()):
             if len(acquisitions) == 1:
                 acquisitions = list(acquisitions.values())[0]
             else:

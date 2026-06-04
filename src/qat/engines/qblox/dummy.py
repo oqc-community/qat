@@ -70,7 +70,9 @@ class DummyQbloxInstrument(QbloxLeafInstrument):
         if self._driver is None or not Cluster.is_valid(self._driver):
             self._driver: Cluster = Cluster(name=self.name, dummy_cfg=self.dummy_config)
             self._driver.reset()
-            self._modules = {m: True for m in self._driver.get_connected_modules().values()}
+            self._modules = dict.fromkeys(
+                self._driver.get_connected_modules().values(), True
+            )
             self.is_connected = True
 
         log.info(self._driver.get_system_status())

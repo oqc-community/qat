@@ -34,7 +34,7 @@ class Qasm2Parser(AbstractParser):
         super().__init__()
         self.order_result_vars = order_result_vars
         self.raw_results = raw_results
-        self._cached_parses: dict[int, DAGCircuit] = dict()
+        self._cached_parses: dict[int, DAGCircuit] = {}
 
     def __repr__(self):
         return self.__class__.__name__
@@ -120,7 +120,7 @@ class Qasm2Parser(AbstractParser):
         for key in register_keys:
             builder.assign(key, [val.value for val in context.registers.classic[key].bits])
 
-        builder.returns([key for key in register_keys])
+        builder.returns(list(register_keys))
         return builder
 
     def process_gate(
@@ -356,7 +356,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
                 )
 
         if self.disable_if and any(
-            [node.op for node in circ.op_nodes() if isinstance(node.op, IfElseOp)]
+            node.op for node in circ.op_nodes() if isinstance(node.op, IfElseOp)
         ):
             raise ValueError("If's are currently unable to be used.")
 

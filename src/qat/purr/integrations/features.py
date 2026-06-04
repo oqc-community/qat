@@ -72,9 +72,9 @@ class Constraints:
 
 class OpenPulseFeatures(FeatureMetadata):
     def __init__(self):
-        self.ports = dict()
-        self.frames = dict()
-        self.waveforms = dict()
+        self.ports = {}
+        self.frames = {}
+        self.waveforms = {}
         self.constraints: Constraints | None = None
 
     def for_hardware(self, hardware):
@@ -100,24 +100,24 @@ class OpenPulseFeatures(FeatureMetadata):
                     if isinstance(qubit, Qubit)
                 ]
             )
-            self.frames[frame_name] = dict(
-                qubits=qubits,
-                port_id=extern_port_name(frame.physical_channel),
-                frequency=frame.frequency,
-                bandwidth_centre=frame.baseband_frequency,
-                phase=0.0,
-            )
+            self.frames[frame_name] = {
+                "qubits": qubits,
+                "port_id": extern_port_name(frame.physical_channel),
+                "frequency": frame.frequency,
+                "bandwidth_centre": frame.baseband_frequency,
+                "phase": 0.0,
+            }
 
         for port_name, port in get_port_mappings(hardware).items():
-            self.ports[port_name] = dict(
-                direction="two-way" if port.acquire_allowed else "one-way",
-                type="port_type_1",
-                associated_qubits=[
+            self.ports[port_name] = {
+                "direction": "two-way" if port.acquire_allowed else "one-way",
+                "type": "port_type_1",
+                "associated_qubits": [
                     _find_qubit(qb).index
                     for qb in hardware.quantum_devices.values()
                     if qb.physical_channel == port
                 ],
-            )
+            }
 
         self.waveforms = {
             key: vars(value.waveform_definition)

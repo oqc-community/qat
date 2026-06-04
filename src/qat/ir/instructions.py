@@ -411,7 +411,7 @@ class QuantumInstructionBlock(QuantumInstruction, InstructionBlock):
     targets: Annotated[ValidatedSet[str], BeforeValidator(_validate_set)] = Field(
         default_factory=lambda: ValidatedSet[str]()
     )
-    _duration_per_target: dict[str, float] = defaultdict(lambda: 0.0, dict())
+    _duration_per_target: dict[str, float] = defaultdict(lambda: 0.0, {})
 
     def add(self, *instructions: QuantumInstruction):
         super().add(*instructions)

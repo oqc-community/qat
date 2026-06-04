@@ -48,7 +48,7 @@ from qat.model.loaders.purr.rtcs import RTCSModelLoader
 from qat.pipelines.legacy.rtcs import LegacyRTCSPipeline
 
 loader = RTCSModelLoader()
-pipeline = LegacyRTCSPipeline(config=dict(name="rtcs"), loader=loader)
+pipeline = LegacyRTCSPipeline(config={"name": "rtcs"}, loader=loader)
 
 results, metrics = QAT().run(qasm, pipeline=pipeline, compiler_config=config)
 print(results)

@@ -98,7 +98,7 @@ class TestPydPartitionByPulseChannel:
         assert "test" in partitioned_ir.pp_map
         assert isinstance(partitioned_ir.pp_map["test"], list)
         assert len(partitioned_ir.pp_map["test"]) == 2
-        assert all([isinstance(pp, PostProcessing) for pp in partitioned_ir.pp_map["test"]])
+        assert all(isinstance(pp, PostProcessing) for pp in partitioned_ir.pp_map["test"])
 
     def test_results_processing_missing_var(self, builder):
         incomplete_builder = PydQuantumInstructionBuilder(

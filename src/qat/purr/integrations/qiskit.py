@@ -110,10 +110,9 @@ class QatBackend(BasicSimulator):
                 if len(creg_names) == 1:
                     creg_name = creg_names[0]
                     counts_qat = results_data[creg_name]
-                    counts_qiskit = dict(
-                        (hex(int(key[::-1], 2)), value)
-                        for (key, value) in counts_qat.items()
-                    )
+                    counts_qiskit = {
+                        hex(int(key[::-1], 2)): value for (key, value) in counts_qat.items()
+                    }
                     results.append(
                         ExperimentResult(
                             self.comp_config.repeats,

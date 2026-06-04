@@ -89,13 +89,13 @@ class TestEngineDescription:
 
 
 mock_compile_pipeline = WaveformCompilePipeline(
-    config=dict(name="mock_compile"), loader=LucyModelLoader()
+    config={"name": "mock_compile"}, loader=LucyModelLoader()
 ).pipeline
 mock_execute_pipeline = EchoExecutePipeline(
-    config=dict(name="mock_execute"), loader=LucyModelLoader()
+    config={"name": "mock_execute"}, loader=LucyModelLoader()
 ).pipeline
 mock_full_pipeline = EchoPipeline(
-    config=dict(name="mock_full"), loader=LucyModelLoader()
+    config={"name": "mock_full"}, loader=LucyModelLoader()
 ).pipeline
 
 
@@ -424,10 +424,10 @@ class TestPipelineClassDescription:
             frontend="qat.frontend.FallthroughFrontend",
             middleend="qat.middleend.FallthroughMiddleend",
             backend="qat.backend.PydWaveformBackend",
-            runtime=dict(
-                type="qat.runtime.SimpleRuntime",
-                config={"connection_mode": ConnectionMode.ALWAYS_ON_EXECUTE},
-            ),
+            runtime={
+                "type": "qat.runtime.SimpleRuntime",
+                "config": {"connection_mode": ConnectionMode.ALWAYS_ON_EXECUTE},
+            },
             engine=None,
         )
         P = desc.construct(loader=loader)

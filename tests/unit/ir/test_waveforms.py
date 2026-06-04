@@ -17,7 +17,7 @@ from qat.ir.waveforms import (
 
 
 class TestWaveformHashing:
-    class_names = set(waveform_classes) - set([SampledWaveform])
+    class_names = set(waveform_classes) - {SampledWaveform}
 
     def test_different_clashes(self):
         for cls in self.class_names:

@@ -182,7 +182,7 @@ class SquashCNOTs(TransformPass):
             for pos, gate in enumerate(ir.instructions)
             if isinstance(gate, CNOT)
         ]
-        unique_pairs = set([cnot[1] for cnot in cnots])
+        unique_pairs = {cnot[1] for cnot in cnots}
         qubits_cnot_map = {
             pair: [cnot[0] for cnot in cnots if cnot[1] == pair] for pair in unique_pairs
         }

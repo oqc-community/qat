@@ -33,7 +33,7 @@ class CircuitBuilder:
 
     def add(self, gate):
         """Adds an operation to the circuit, validating the qubits indices are valid."""
-        if not all([qubit < self.num_qubits for qubit in gate.qubits]):
+        if not all(qubit < self.num_qubits for qubit in gate.qubits):
             raise ValueError(
                 f"The operation {gate} contains qubits with indices outside the valid "
                 "range."

@@ -453,7 +453,7 @@ class TestRuntimeExpression:
     Tests serialization as that is a fundamental part of how this is used.
     """
 
-    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    @pytest.mark.parametrize("expected_type", list(VariableType))
     def test_runtime_expression_with_different_types(self, expected_type):
         """Checks instantiation of RuntimeExpression with different variable types."""
 
@@ -463,7 +463,7 @@ class TestRuntimeExpression:
         )
         assert expr.evaluated_type == expected_type
 
-    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    @pytest.mark.parametrize("expected_type", list(VariableType))
     def test_subtyped_runtime_expression(self, expected_type):
         """Tests subtyping of RuntimeExpression within a Pydantic BaseModel, ensuring that
         the correct type validation is enforced."""
@@ -487,7 +487,7 @@ class TestRuntimeExpression:
                 )
             )
 
-    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    @pytest.mark.parametrize("expected_type", list(VariableType))
     def test_serialization_roundtrip(self, expected_type):
         """Tests that a RuntimeExpression with a specific evaluated type can be serialized
         to a dict and deserialized back, preserving the structure and types."""
@@ -500,7 +500,7 @@ class TestRuntimeExpression:
         loaded_expr = RuntimeExpression(**data)
         assert loaded_expr == expr
 
-    @pytest.mark.parametrize("expected_type", [val for val in VariableType])
+    @pytest.mark.parametrize("expected_type", list(VariableType))
     def test_json_serialization_roundtrip(self, expected_type):
         """Tests that a RuntimeExpression with a specific evaluated type can be serialized
         to JSON and deserialized back, preserving the structure and types."""

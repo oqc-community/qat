@@ -58,7 +58,7 @@ class HardwareModelMapper:
     def __init__(self, legacy_model: QuantumHardwareModel, model: PhysicalHardwareModel):
         self.legacy_model = legacy_model
         self.model = model
-        self._pulse_channel_map: dict[str, str] = dict()
+        self._pulse_channel_map: dict[str, str] = {}
 
     def validate_physical_properties(self):
         """Validates the physical properties of the hardware model in the IR against the
@@ -93,7 +93,7 @@ class HardwareModelMapper:
         """Creates a mapping of physical channel full ids from the legacy model to the
         pydantic model, to allow for validation of pulse channel properties."""
 
-        mapping = dict()
+        mapping = {}
         for legacy_qubit in self.legacy_model.qubits:
             qubit = self.model.qubit_with_index(legacy_qubit.index)
             mapping[legacy_qubit.physical_channel.full_id()] = qubit.physical_channel.uuid
@@ -129,14 +129,14 @@ class HardwareModelMapper:
             )
 
     def _validate_coupling_mapping(self):
-        legacy_couplings = set(
+        legacy_couplings = {
             coupling.direction for coupling in self.legacy_model.qubit_direction_couplings
-        )
-        couplings = set(
+        }
+        couplings = {
             (control, target)
             for control, targets in self.model.logical_connectivity.items()
             for target in targets
-        )
+        }
 
         if legacy_couplings != couplings:
             raise MismatchingHardwareModelError(
@@ -556,10 +556,10 @@ class PurrConverter:
         model_mapper: HardwareModelMapper,
         **kwargs,
     ) -> list[Instructions.Synchronize]:
-        targets = set(
+        targets = {
             model_mapper.get_pulse_channel_id(target)
             for target in instruction.quantum_targets
-        )
+        }
         if len(targets) < 2:
             return []
         return [Instructions.Synchronize(targets=targets)]
@@ -574,14 +574,14 @@ class PurrConverter:
         # Pulses are now represented by waveforms with the waveform attributes, and pulse
         # for where that waveform is played.
 
-        waveform_data = dict()
-        pulse_data = dict()
+        waveform_data = {}
+        pulse_data = {}
         # Pulse contains many attributes, so we iterate using vars...
         for name, var in vars(instruction).items():
             if name == "quantum_targets":
-                pulse_data["targets"] = set(
+                pulse_data["targets"] = {
                     model_mapper.get_pulse_channel_id(target) for target in var
-                )
+                }
             elif name in ("ignore_channel_scale", "duration"):
                 pulse_data[name] = var
             else:
@@ -612,10 +612,10 @@ class PurrConverter:
         return [
             WaveformInstructions.Pulse(
                 waveform=waveform,
-                targets=set(
+                targets={
                     model_mapper.get_pulse_channel_id(target)
                     for target in instruction.quantum_targets
-                ),
+                },
                 duration=instruction.duration,
             )
         ]

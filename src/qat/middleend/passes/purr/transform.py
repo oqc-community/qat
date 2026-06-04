@@ -231,7 +231,7 @@ class PhaseOptimisation(TransformPass):
             optimisation.
         """
 
-        accum_phaseshifts: dict[str, PhaseShift | PhaseSet] = dict()
+        accum_phaseshifts: dict[str, PhaseShift | PhaseSet] = {}
         optimized_instructions: list[Instruction] = []
         for instruction in ir.instructions:
             if isinstance(instruction, PhaseShift | PhaseSet) and isinstance(
@@ -269,7 +269,7 @@ class PhaseOptimisation(TransformPass):
                         optimized_instructions.append(accum_phaseshifts.pop(key))
                 optimized_instructions.append(instruction)
             elif isinstance(instruction, Jump | Label):
-                accum_phaseshifts = dict()
+                accum_phaseshifts = {}
                 optimized_instructions.append(instruction)
             else:
                 optimized_instructions.append(instruction)
@@ -809,9 +809,7 @@ class EndOfTaskResetSanitisation(TransformPass):
         """
 
         active_pulse_channels = res_mgr.lookup_by_type(ActiveChannelResults)
-        qubit_map: dict[Qubit, None | bool] = {
-            qubit: None for qubit in active_pulse_channels.qubits
-        }
+        qubit_map: dict[Qubit, None | bool] = dict.fromkeys(active_pulse_channels.qubits)
 
         for inst in reversed(ir.instructions):
             if not isinstance(inst, Pulse | CustomPulse | Acquire | Reset):
@@ -828,7 +826,7 @@ class EndOfTaskResetSanitisation(TransformPass):
                 if qubit_map[target] is None:
                     qubit_map[target] = False
 
-            if all([val is not None for val in qubit_map.values()]):
+            if all(val is not None for val in qubit_map.values()):
                 break
 
         for qubit, val in qubit_map.items():
@@ -992,7 +990,7 @@ class EvaluatePulses(TransformPass):
     def run(self, ir: InstructionBuilder, *args, **kwargs) -> InstructionBuilder:
         """:param ir: The list of instructions as an instruction builder."""
 
-        pulses: dict[str, CustomPulse] = dict()
+        pulses: dict[str, CustomPulse] = {}
 
         instructions = []
         for inst in ir.instructions:
@@ -1095,7 +1093,7 @@ class ReturnSanitisation(TransformPass):
                 ir._instructions.remove(ret)
         else:
             # If we don't have an explicit return, imply all results.
-            unique_variables = set(acq.output_variable for acq in acquires)
+            unique_variables = {acq.output_variable for acq in acquires}
 
         ir.returns(list(unique_variables))
         return ir
@@ -1148,7 +1146,7 @@ class RepeatSanitisation(TransformPass):
                 num_shots = repeats[0].repeat_count
             if not passive_reset_time_configured:
                 passive_reset_time = repeats[0].passive_reset_time
-            if not all([rep.repeat_count == num_shots for rep in repeats]):
+            if not all(rep.repeat_count == num_shots for rep in repeats):
                 raise ValueError(
                     "Inconsistent repeat_count information found. "
                     + f"Repeat instruction values: {[rep.repeat_count for rep in repeats]}"
@@ -1158,7 +1156,7 @@ class RepeatSanitisation(TransformPass):
                         else "."
                     )
                 )
-            if not all([rep.passive_reset_time == passive_reset_time for rep in repeats]):
+            if not all(rep.passive_reset_time == passive_reset_time for rep in repeats):
                 raise ValueError(
                     "Inconsistent passive_reset_time information found. "
                     + f"Repeat instruction values: {[rep.passive_reset_time for rep in repeats]}"
@@ -1216,7 +1214,7 @@ class FreqShiftSanitisation(TransformPass):
     def get_freq_shift_channels(self) -> dict[PulseChannel, Qubit]:
         """Returns all active frequency shift pulse channels found in the hardware model."""
 
-        channels: dict[PulseChannel, Qubit] = dict()
+        channels: dict[PulseChannel, Qubit] = {}
         for qubit in self.model.qubits:
             try:
                 freq_shift_pulse_ch = qubit.get_freq_shift_channel()

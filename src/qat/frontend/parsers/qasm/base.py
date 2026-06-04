@@ -49,7 +49,7 @@ class AbstractParser(abc.ABC):
     def __init__(self):
         self.results_format = InlineResultsProcessing.Program
         self.post_selection = False
-        self._cached_parses: dict[int, Any] = dict()
+        self._cached_parses: dict[int, Any] = {}
 
     def can_parse(self, qasm: str) -> ParseResults:
         try:

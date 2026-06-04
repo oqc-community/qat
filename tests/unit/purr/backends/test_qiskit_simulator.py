@@ -408,7 +408,7 @@ class TestQiskitSimulator:
     def test_multiple_cregs(self, qasm, result_expectations):
         hw = get_default_qiskit_hardware()
         result, _ = execute_qasm_with_metrics(get_qasm2(qasm), hw)
-        assert all([key in result.keys() for key in result_expectations.keys()])
+        assert all(key in result.keys() for key in result_expectations.keys())
         for key, vals in result_expectations.items():
             if isinstance(vals, dict):
                 assert result[key] == vals

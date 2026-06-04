@@ -32,7 +32,7 @@ def run_calibration(runtime: RuntimeOrModel, args: "CalibrationArguments"):
     calibration.run(runtime.model, runtime, args)
 
 
-_standard_calibrations: dict[str, "BuiltinRemoteCalibration"] = dict()
+_standard_calibrations: dict[str, "BuiltinRemoteCalibration"] = {}
 
 
 class CustomCalibration(RemoteCalibration):

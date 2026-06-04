@@ -685,10 +685,8 @@ class TestBaseQuantum:
             assert ch not in position_map.keys()
         for ch, positions in position_map.items():
             assert not all(
-                [
-                    isinstance(p.instruction, Delay | PhaseShift | PhaseReset)
-                    for p in positions
-                ]
+                isinstance(p.instruction, Delay | PhaseShift | PhaseReset)
+                for p in positions
             )
 
     def test_create_duration_timeline_mapping(self):

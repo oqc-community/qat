@@ -51,7 +51,7 @@ class PartitionByPulseChannel(LoweringPass):
         :param ir: The list of instructions stored in a :class:`InstructionBuilder`.
         :param res_mgr: The result manager to save the analysis results.
         """
-        shared_instructions = list()
+        shared_instructions = []
         variables = defaultdict(list)
         partitioned_ir = PartitionedIR()
 

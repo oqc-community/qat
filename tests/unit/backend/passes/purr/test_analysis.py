@@ -90,10 +90,8 @@ class TestAnalysisPasses:
         ret_inst = result.returns[0]
         assert isinstance(ret_inst, Return)
         assert all(
-            [
-                var.output_variable in ret_inst.variables
-                for var in itertools.chain(*acquire_map.values())
-            ]
+            var.output_variable in ret_inst.variables
+            for var in itertools.chain(*acquire_map.values())
         )
 
         active_targets = result.active_targets
@@ -172,11 +170,11 @@ class TestAnalysisPasses:
             assert len(scoping_result.scope2symbols) == len(sweeps) + len(repeats)
 
             sweeps = [inst for inst in instructions if isinstance(inst, Sweep)]
-            device_updates = set(
+            device_updates = {
                 inst
                 for inst in instructions
                 if isinstance(inst, DeviceUpdate) and isinstance(inst.value, Variable)
-            )
+            }
             acquires = [inst for inst in instructions if isinstance(inst, Acquire)]
             end_sweeps = [inst for inst in instructions if isinstance(inst, EndSweep)]
 

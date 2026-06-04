@@ -36,12 +36,12 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 3
-        channel_ids = set([drive_chan.uuid, measure_chan.uuid, acquire_chan.uuid])
+        channel_ids = {drive_chan.uuid, measure_chan.uuid, acquire_chan.uuid}
         assert res.targets == channel_ids
         assert len(res.targets) == 3
-        assert all([val == qubit for val in res.pulse_channel_to_qubit_map.values()])
-        assert set([channel.uuid for channel in res.from_qubit(qubit)]) == channel_ids
-        assert res.qubits == set([qubit])
+        assert all(val == qubit for val in res.pulse_channel_to_qubit_map.values())
+        assert {channel.uuid for channel in res.from_qubit(qubit)} == channel_ids
+        assert res.qubits == {qubit}
 
         physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
         assert physical_qubit_indices == [0]
@@ -60,7 +60,7 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 1
-        assert res.targets == set([drive_chan.uuid])
+        assert res.targets == {drive_chan.uuid}
 
     def test_no_active_qubits(self):
         builder = QuantumInstructionBuilder(self.model)
@@ -143,12 +143,12 @@ class TestActivePulseChannelAnalysis:
         builder = ActivePulseChannelAnalysis(self.model).run(builder, res_mgr, met_mgr)
         res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         assert len(res.targets) == 2
-        channel_ids = set([drive_channel.uuid, pulse_channel.uuid])
+        channel_ids = {drive_channel.uuid, pulse_channel.uuid}
         assert res.targets == channel_ids
         assert len(res.targets) == 2
-        assert all([val == qubit for val in res.pulse_channel_to_qubit_map.values()])
-        assert set([channel.uuid for channel in res.from_qubit(qubit)]) == channel_ids
-        assert res.qubits == set([qubit])
+        assert all(val == qubit for val in res.pulse_channel_to_qubit_map.values())
+        assert {channel.uuid for channel in res.from_qubit(qubit)} == channel_ids
+        assert res.qubits == {qubit}
 
         physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
         assert physical_qubit_indices == [0]

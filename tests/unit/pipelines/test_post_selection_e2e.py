@@ -271,7 +271,7 @@ def test_post_selection_max_likelihood_two_qubits_and_mask(function_seed):
             )
 
     original_execute = pipeline.engine.execute
-    offsets: dict[str, int] = {var: 0 for var in iq_by_var}
+    offsets: dict[str, int] = dict.fromkeys(iq_by_var, 0)
 
     def noisy_execute(program, **kwargs):
         result = original_execute(program, **kwargs)
@@ -396,7 +396,7 @@ def test_post_selection_ml_and_linear_map_two_qubits_and_mask(function_seed):
             iq_by_var[var] = np.concatenate([pos, neg])
 
     original_execute = pipeline.engine.execute
-    offsets: dict[str, int] = {var: 0 for var in iq_by_var}
+    offsets: dict[str, int] = dict.fromkeys(iq_by_var, 0)
 
     def noisy_execute(program, **kwargs):
         result = original_execute(program, **kwargs)

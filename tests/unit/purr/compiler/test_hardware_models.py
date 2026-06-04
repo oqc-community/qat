@@ -167,7 +167,7 @@ class TestReadoutMitigation:
 )
 @pytest.mark.legacy
 class TestLinearReadoutMitigation(TestReadoutMitigation):
-    @pytest.mark.parametrize("qubit_count", [i for i in range(2, 9)])
+    @pytest.mark.parametrize("qubit_count", list(range(2, 9)))
     @pytest.mark.parametrize("random_cal", [True, False])
     def test_something_changes_qasm(
         self, get_hardware, qubit_count, random_cal, config_options
@@ -181,7 +181,7 @@ class TestLinearReadoutMitigation(TestReadoutMitigation):
         for config in config_options:
             if random_cal:
                 assert result["b"] != result[config]
-                assert all([i > 0 for i in result[config].values()])
+                assert all(i > 0 for i in result[config].values())
             else:
                 original = result["b"]
                 zero = "0" * qubit_count
@@ -243,7 +243,7 @@ class TestLinearReadoutMitigation(TestReadoutMitigation):
 )
 @pytest.mark.legacy
 class TestMatrixReadoutMitigation(TestReadoutMitigation):
-    @pytest.mark.parametrize("qubit_count", [i for i in range(2, 9)])
+    @pytest.mark.parametrize("qubit_count", list(range(2, 9)))
     @pytest.mark.parametrize("random_cal", [True, False])
     def test_something_changes_qasm(
         self, get_hardware, qubit_count, random_cal, config_options
@@ -257,7 +257,7 @@ class TestMatrixReadoutMitigation(TestReadoutMitigation):
         for config in config_options:
             if random_cal:
                 assert result["b"] != result[config]
-                assert all([i > 0 for i in result[config].values()])
+                assert all(i > 0 for i in result[config].values())
             else:
                 original = result["b"]
                 zero = "0" * qubit_count

@@ -127,7 +127,7 @@ class QuantumRuntime(MetricsMixin):
             If we only have one result after this, just return that list directly
             instead, as it's probably just a single experiment.
             """
-            if all([is_generated_name(k) for k in simplify_target.keys()]):
+            if all(is_generated_name(k) for k in simplify_target.keys()):
                 if len(simplify_target) == 1:
                     return list(simplify_target.values())[0]
                 else:
@@ -337,7 +337,7 @@ def _binary_count(results_list, repeats):
     ):
         binary_results = [binary_results]
 
-    result_count = dict()
+    result_count = {}
     for qubit_result in [list(get_tuple(binary_results, i)) for i in range(repeats)]:
         key = flatten(qubit_result)
         value = result_count.get(key, 0)

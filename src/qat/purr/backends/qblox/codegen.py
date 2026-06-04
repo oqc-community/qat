@@ -872,7 +872,7 @@ class QbloxContext(ABC):
     def enter_repeat(inst: Repeat, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = set([n for (n, insts) in context.inits.items() if inst in insts])
+            var_names = {n for (n, insts) in context.inits.items() if inst in insts}
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]
@@ -920,7 +920,7 @@ class QbloxContext(ABC):
     def enter_sweep(inst: Sweep, contexts: dict):
         iter_name = f"{hash(inst)}"
         for context in contexts.values():
-            var_names = set([n for (n, insts) in context.inits.items() if inst in insts])
+            var_names = {n for (n, insts) in context.inits.items() if inst in insts}
             for name in var_names:
                 register = context.alloc_mgr.registers[name]
                 bound = context.iter_bounds[name]

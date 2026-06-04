@@ -127,7 +127,7 @@ class TestEchoHardwareModelConversion:
         pyd_hw, leg_hw = get_echo_hw_pair(num_qubits, seed=seed)
 
         logical_coupling = defaultdict(set)
-        quality_mapping = dict()
+        quality_mapping = {}
         for coupling in leg_hw.qubit_direction_couplings:
             logical_coupling[coupling.direction[0]].add(coupling.direction[1])
             quality_mapping[coupling.direction] = coupling.quality / 100.0

@@ -41,7 +41,7 @@ class TestBaseContainer:
         assert PydListBase(random_floats1) != random_floats2
 
     def test_equals_set(self, seed):
-        random_floats1 = set([random.Random(seed).uniform(0.01, 1) for _ in range(10)])
+        random_floats1 = {random.Random(seed).uniform(0.01, 1) for _ in range(10)}
         random_floats2 = deepcopy(random_floats1)
         assert PydSetBase(random_floats1) == PydSetBase(random_floats2)
         assert PydSetBase(random_floats1) == random_floats2

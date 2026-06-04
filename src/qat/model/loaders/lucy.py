@@ -111,7 +111,7 @@ class LucyModelLoader(BasePhysicalModelLoader):
     def _generate_physical_connectivity(self) -> dict[int, set[int]]:
         """Physical connectivity is bidirectional."""
 
-        coupling_map = dict()
+        coupling_map = {}
         for i in range(self.qubit_count):
             left_neighbor = self.start_index + (i - 1) % self.qubit_count
             right_neighbor = self.start_index + (i + 1) % self.qubit_count

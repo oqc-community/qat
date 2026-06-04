@@ -39,7 +39,7 @@ class TestCircuitBuilder:
         circuit.barrier(2)
         circuit.barrier(1, 3)
         assert len(circuit.instructions) == 2
-        assert all([isinstance(inst, Barrier) for inst in circuit.instructions])
+        assert all(isinstance(inst, Barrier) for inst in circuit.instructions)
         assert circuit.instructions[0].qubits == [
             2,
         ]

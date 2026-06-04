@@ -27,7 +27,7 @@ class TestDefaultPulseDecompositions:
             model.qubit_with_index(0).cross_resonance_cancellation_pulse_channels
         )
         assert len(instrs) == num_instructions
-        assert all([isinstance(instr, PhaseShift) for instr in instrs])
+        assert all(isinstance(instr, PhaseShift) for instr in instrs)
 
     def test_ECR_decomposition(self, function_seed):
         """Tests that the ECR decomposes into native pulse instructions, and ZX_pi_4 gives

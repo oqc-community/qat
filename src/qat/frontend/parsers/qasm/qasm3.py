@@ -29,6 +29,7 @@ from lark.visitors import Interpreter
 from openqasm3 import ast
 from openqasm3.parser import QASM3ParsingError, parse as oq3_parse
 from openqasm3.visitor import QASMVisitor
+from pydantic import Field
 
 from qat.frontend.parsers.qasm.base import AbstractParser, QasmContext, QasmParseError
 from qat.frontend.register import BitRegister, CregIndexValue, QubitRegister, Registers
@@ -75,7 +76,7 @@ WAVEFORM_RE = re.compile(r"\bwaveform\s.*?\s*=\s*\[([^\]]*)\]")
 
 
 class OpenPulseContext(QasmContext):
-    calibration_methods: dict[str, Any] = dict()
+    calibration_methods: dict[str, Any] = Field(default_factory=dict)
 
 
 def get_frame_mappings(hw: PhysicalHardwareModel):
@@ -127,10 +128,8 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
     def _includes_standard_gates(self, qasm_str: str) -> bool:
         return any(
-            [
-                include in qasm_str
-                for include in ('include "qelib1.inc";', 'include "stdgates.inc";')
-            ]
+            include in qasm_str
+            for include in ('include "qelib1.inc";', 'include "stdgates.inc";')
         )
 
     def load_default_gates(self, context: QasmContext) -> QasmContext:
@@ -424,7 +423,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                     [val.value for val in context.registers.classic[key].bits],
                 )
 
-            self.builder.returns([key for key in register_keys])
+            self.builder.returns(list(register_keys))
 
     def add_delay(
         self, delay: float, qubits: list[Qubit], builder: QuantumInstructionBuilder
@@ -507,9 +506,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._calibration_context: OpenPulseContext | None = None
         self._current_context: OpenPulseContext | None = None
         self._q3_patcher: Qasm3ParserBase = Qasm3ParserBase()
-        self._port_mappings: dict[str, PhysicalChannel] = dict()
-        self._frame_mappings: dict[str, PulseChannel] = dict()
-        self._cached_parses: dict[int, Any] = dict()
+        self._port_mappings: dict[str, PhysicalChannel] = {}
+        self._frame_mappings: dict[str, PulseChannel] = {}
+        self._cached_parses: dict[int, Any] = {}
 
         self._has_qasm_version = False
         self._has_calibration_version = False
@@ -562,8 +561,8 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._general_context = None
         self._calibration_context = None
         self._current_context = None
-        self._port_mappings = dict()
-        self._frame_mappings = dict()
+        self._port_mappings = {}
+        self._frame_mappings = {}
         self._has_calibration_version = False
         self._has_qasm_version = False
         self._has_open_pulse = False
@@ -675,7 +674,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 return node, None
 
             if (
-                any([isinstance(node, Token) for node in node.children])
+                any(isinstance(node, Token) for node in node.children)
                 or len(node.children) > 1
             ):
                 if len(node.children) == 1:
@@ -871,7 +870,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         else:
             raise ValueError("Unknown waveform definition.")
 
-        _empty = tuple()
+        _empty = ()
 
         def _validate_waveform_args(
             *,
@@ -1772,6 +1771,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     ],
                 )
 
-            builder.returns([key for key in register_keys])
+            builder.returns(list(register_keys))
 
         return self._reset_and_return()

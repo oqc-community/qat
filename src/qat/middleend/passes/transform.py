@@ -1016,9 +1016,7 @@ class EndOfTaskResetSanitisation(TransformPass):
         """
 
         active_pulse_channels = res_mgr.lookup_by_type(ActivePulseChannelResults)
-        qubit_map: dict[Qubit, None | bool] = {
-            qubit: None for qubit in active_pulse_channels.qubits
-        }
+        qubit_map: dict[Qubit, None | bool] = dict.fromkeys(active_pulse_channels.qubits)
 
         for inst in reversed(ir.instructions):
             if not isinstance(inst, Pulse | Acquire | Reset):
@@ -1034,7 +1032,7 @@ class EndOfTaskResetSanitisation(TransformPass):
                 if qubit_map[qubit] is None:
                     qubit_map[qubit] = False
 
-            if all([valid_reset is not None for valid_reset in qubit_map.values()]):
+            if all(valid_reset is not None for valid_reset in qubit_map.values()):
                 break
 
         for qubit, valid_reset in qubit_map.items():
@@ -1088,7 +1086,7 @@ class FreqShiftSanitisation(TransformPass):
     @staticmethod
     def get_active_freq_shift_pulse_channels(model) -> dict[FreqShiftPulseChannel, Qubit]:
         """Returns all active frequency shift pulse channels found in the hardware model."""
-        pulse_channels = dict()
+        pulse_channels = {}
         for qubit in model.qubits.values():
             freq_shift_pulse_ch = qubit.freq_shift_pulse_channel
             if freq_shift_pulse_ch.active:
@@ -1233,7 +1231,7 @@ class LowerSyncsToDelays(TransformPass):
             if sync_durations[i] > 0.0
         ]
         new_instructions.extend(delay_instrs)
-        durations.update({target: max_duration for target in targets})
+        durations.update(dict.fromkeys(targets, max_duration))
 
 
 class EvaluateWaveforms(TransformPass):

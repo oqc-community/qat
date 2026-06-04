@@ -35,7 +35,7 @@ def cls_name(cls):
 def get_non_abstract_subgates(cls: type):
     """Finds all non-abstract subclasses of a class."""
     classes = set()
-    unchecked_classes = set([cls])
+    unchecked_classes = {cls}
     while len(unchecked_classes) != 0:
         next_cls = next(iter(unchecked_classes))
         if not isabstract(next_cls):

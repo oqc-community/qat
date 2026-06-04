@@ -217,7 +217,7 @@ class TestQasm3Parser:
             if isinstance(inst, Pulse) and isinstance(inst.waveform, SquareWaveform)
         ]
         assert len(ess_pulses) == 2
-        assert all([len(inst.targets) == 1 for inst in ess_pulses])
+        assert all(len(inst.targets) == 1 for inst in ess_pulses)
 
         # Test the ecrs on (0, 1) and (2, 3) are unchanged by the override.
         circuit = QuantumInstructionBuilder(hardware_model=cyclic_hardware_model)
@@ -380,7 +380,7 @@ class TestQasm3Parser:
         ]
         assert len(acquire_instructions) == 2
 
-        output_variables = set(acquire.output_variable for acquire in acquire_instructions)
+        output_variables = {acquire.output_variable for acquire in acquire_instructions}
 
         assigns = [inst for inst in builder.instructions if isinstance(inst, Assign)]
         num_assigns = len(assigns)
@@ -391,7 +391,7 @@ class TestQasm3Parser:
 
         # The output variables are stored within variables in the assign
         # The post-processing is robust to both strings and variables here...
-        assign_variables = set(var.name for var in assigns[0].value)
+        assign_variables = {var.name for var in assigns[0].value}
         assert output_variables == assign_variables
 
     def test_basic_with_assign(self, hardware_model):
@@ -404,7 +404,7 @@ class TestQasm3Parser:
         )
         assert isinstance(builder, QuantumInstructionBuilder)
         acquires = [inst for inst in builder if isinstance(inst, Acquire)]
-        output_variables = set(acquire.output_variable for acquire in acquires)
+        output_variables = {acquire.output_variable for acquire in acquires}
 
         # Assigns are stored as strings
         assigns = [inst for inst in builder if isinstance(inst, Assign)]

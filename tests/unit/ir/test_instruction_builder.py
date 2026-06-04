@@ -823,8 +823,8 @@ class TestMeasure:
         def _expected_pp_signatures(method: str, proc_axis: ProcessAxis):
             mean_time = (PostProcessType.MEAN, (ProcessAxis.TIME,))
             mean_sequence = (PostProcessType.MEAN, (ProcessAxis.SEQUENCE,))
-            linear_map = (PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, tuple())
-            discriminate = (PostProcessType.DISCRIMINATE, tuple())
+            linear_map = (PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL, ())
+            discriminate = (PostProcessType.DISCRIMINATE, ())
 
             if method == "measure_single_shot_z":
                 return (

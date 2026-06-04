@@ -18,7 +18,7 @@ class TestDefaultGateDecompositions:
         gate = gate(**params)
         decomps = DefaultGateDecompositions()
         decomposed_gates = decomps.decompose(gate)
-        assert all([isinstance(g, tuple(decomps.end_nodes)) for g in decomposed_gates])
+        assert all(isinstance(g, tuple(decomps.end_nodes)) for g in decomposed_gates)
 
         # Test the decomposition gives the same unitary operator
         U1 = StateOperator(1).apply_gate(gate)
@@ -34,7 +34,7 @@ class TestDefaultGateDecompositions:
         gate = gate(qubit1=qubit1, qubit2=qubit2, **params)
         decomps = DefaultGateDecompositions()
         decomposed_gates = decomps.decompose(gate)
-        assert all([isinstance(g, tuple(decomps.end_nodes)) for g in decomposed_gates])
+        assert all(isinstance(g, tuple(decomps.end_nodes)) for g in decomposed_gates)
 
         # Test the decomposition gives the same unitary operator
         U1 = StateOperator(2).apply_gate(gate)

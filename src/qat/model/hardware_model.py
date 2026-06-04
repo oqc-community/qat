@@ -159,27 +159,21 @@ class PhysicalHardwareModel(LogicalHardwareModel):
         """Validates that physical connectivity graph matches the cross-resonance pulse
         channels used in couplings."""
 
-        connectivity_edges = set(
-            [
-                (q1, q2)
-                for q1, connections in self.physical_connectivity.items()
-                for q2 in connections
-            ]
-        )
-        cr_edges = set(
-            [
-                (q1, q2)
-                for q1, qubit in self.qubits.items()
-                for q2 in qubit.cross_resonance_pulse_channels
-            ]
-        )
-        crc_edges = set(
-            [
-                (q2, q1)
-                for q1, qubit in self.qubits.items()
-                for q2 in qubit.cross_resonance_cancellation_pulse_channels
-            ]
-        )
+        connectivity_edges = {
+            (q1, q2)
+            for q1, connections in self.physical_connectivity.items()
+            for q2 in connections
+        }
+        cr_edges = {
+            (q1, q2)
+            for q1, qubit in self.qubits.items()
+            for q2 in qubit.cross_resonance_pulse_channels
+        }
+        crc_edges = {
+            (q2, q1)
+            for q1, qubit in self.qubits.items()
+            for q2 in qubit.cross_resonance_cancellation_pulse_channels
+        }
 
         if connectivity_edges != cr_edges:
             raise ValueError(

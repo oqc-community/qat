@@ -24,7 +24,7 @@ class DecompositionBase:
     mind.
     """
 
-    end_nodes = tuple()
+    end_nodes = ()
 
     def __init__(
         self,

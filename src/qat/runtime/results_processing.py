@@ -15,7 +15,7 @@ def binary_average(results_list):
     Averages all repeat results and returns a definitive 1/0 for each qubit measurement.
     """
     # If we have many sweeps/repeats loop through all of them and sum.
-    if all([isinstance(val, list) for val in results_list]):
+    if all(isinstance(val, list) for val in results_list):
         binary_results = [binary_average(nested) for nested in results_list]
     else:
         binary_results = binary(results_list)
@@ -122,7 +122,7 @@ def binary_count(results_list, repeats):
     ):
         binary_results = [binary_results]
 
-    result_count = dict()
+    result_count = {}
     for qubit_result in [list(get_tuple(binary_results, i)) for i in range(repeats)]:
         key = flatten(qubit_result)
         value = result_count.get(key, 0)

@@ -22,7 +22,7 @@ def randomized_benchmarking(hardware, nseeds, *args, **kwargs):
     lengths = kwargs.pop("lengths", [1, 2, 4])
     physical_qubits = kwargs.pop("physical_qubits", [0])
 
-    results = dict()
+    results = {}
     index = 0
     for seed in range(nseeds):
         circuit_list = []

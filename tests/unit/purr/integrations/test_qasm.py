@@ -114,7 +114,7 @@ class TestQASM2:
         if gate.num_params > 0:
             args_list = product(*[thetas for _ in range(gate.num_params)])
         else:
-            args_list = [tuple()]
+            args_list = [()]
 
         for args in args_list:
             # Contruct the qasm gate.
@@ -155,7 +155,7 @@ class TestQASM3:
         comp = CompilerConfig()
         comp.results_format.binary_count()
         results = execute_qasm(get_qasm3("named_defcal_arg.qasm"), hw, compiler_config=comp)
-        results = next(iter(results.values()), dict())
+        results = next(iter(results.values()), {})
         assert len(results) == 1
         assert results["00"] == 1000
 
@@ -172,7 +172,7 @@ class TestQASM3:
 
         # Assert the distribution is mostly correct. Don't care about absolute accuracy,
         # just that it's spread equally.
-        assert not any([val for val in results["c"].values() if (val / 1000) < 0.15])
+        assert not any(val for val in results["c"].values() if (val / 1000) < 0.15)
 
     @pytest.mark.legacy
     def test_zmap(self):
@@ -300,7 +300,7 @@ class TestQASM3:
             if hasattr(inst, "shape") and (inst.shape is PulseShapeType.SQUARE)
         ]
         assert len(ess_pulses) == 2
-        assert all([len(inst.quantum_targets) == 1 for inst in ess_pulses])
+        assert all(len(inst.quantum_targets) == 1 for inst in ess_pulses)
         assert ess_pulses[0].quantum_targets[0].partial_id() == "q1_frame"
         assert ess_pulses[1].quantum_targets[0].partial_id() == "q2_frame"
 
@@ -729,7 +729,7 @@ class TestQASM3:
         if num_params > 0:
             args_list = product(*[thetas for _ in range(num_params)])
         else:
-            args_list = [tuple()]
+            args_list = [()]
 
         for args in args_list:
             # contruct the qasm qate
@@ -763,7 +763,7 @@ class TestQASM3:
         ]
         assert len(acquire_instructions) == 2
 
-        output_variables = set(acquire.output_variable for acquire in acquire_instructions)
+        output_variables = {acquire.output_variable for acquire in acquire_instructions}
 
         assigns = [inst for inst in builder.instructions if isinstance(inst, Assign)]
         num_assigns = len(assigns)
@@ -774,7 +774,7 @@ class TestQASM3:
 
         # The output variables are stored within variables in the assign
         # The post-processing is robust to both strings and variables here...
-        assign_variables = set(var.name for var in assigns[0].value)
+        assign_variables = {var.name for var in assigns[0].value}
         assert output_variables == assign_variables
 
     def test_basic_with_assign(self):
@@ -787,7 +787,7 @@ class TestQASM3:
         builder = parser.parse(hardware_model.create_builder(), qasm)
         assert isinstance(builder, QuantumInstructionBuilder)
         acquires = [inst for inst in builder.instructions if isinstance(inst, Acquire)]
-        output_variables = set(acquire.output_variable for acquire in acquires)
+        output_variables = {acquire.output_variable for acquire in acquires}
 
         assigns = [inst for inst in builder.instructions if isinstance(inst, Assign)]
         num_assigns = len(assigns)
@@ -797,7 +797,7 @@ class TestQASM3:
         assert num_variables_in_assign == 2
 
         assert all(isinstance(val, Variable) for val in assigns[0].value)
-        assign_variables = set(val.name for val in assigns[0].value)
+        assign_variables = {val.name for val in assigns[0].value}
         assert assign_variables == output_variables
 
 
@@ -866,28 +866,28 @@ class TestQASM3Features:
     @pytest.mark.parametrize(
         "file, params",
         [
-            (Path("classical", "break.qasm"), dict()),
-            (Path("classical", "continue.qasm"), dict()),
-            (Path("classical", "for.qasm"), dict()),
-            (Path("classical", "functions.qasm"), dict()),
-            (Path("classical", "if_else.qasm"), dict()),
-            (Path("classical", "while.qasm"), dict()),
-            (Path("gates", "modifiers", "ctrl.qasm"), dict()),
-            (Path("gates", "modifiers", "inv.qasm"), dict()),
-            (Path("gates", "modifiers", "negctrl.qasm"), dict()),
-            (Path("gates", "modifiers", "pow.qasm"), dict()),
-            (Path("keywords", "constant.qasm"), dict()),
-            (Path("keywords", "def.qasm"), dict()),
-            (Path("pulse", "functions", "durationof.qasm"), dict()),
-            (Path("pulse", "instructions", "capture.qasm"), dict(capture_version="0")),
-            (Path("pulse", "instructions", "capture.qasm"), dict(capture_version="4")),
-            (Path("types", "angle.qasm"), dict()),
-            (Path("types", "array.qasm"), dict()),
-            (Path("types", "complex.qasm"), dict()),
-            (Path("types", "duration.qasm"), dict()),
-            (Path("types", "float.qasm"), dict()),
-            (Path("types", "int.qasm"), dict()),
-            (Path("types", "stretch.qasm"), dict()),
+            (Path("classical", "break.qasm"), {}),
+            (Path("classical", "continue.qasm"), {}),
+            (Path("classical", "for.qasm"), {}),
+            (Path("classical", "functions.qasm"), {}),
+            (Path("classical", "if_else.qasm"), {}),
+            (Path("classical", "while.qasm"), {}),
+            (Path("gates", "modifiers", "ctrl.qasm"), {}),
+            (Path("gates", "modifiers", "inv.qasm"), {}),
+            (Path("gates", "modifiers", "negctrl.qasm"), {}),
+            (Path("gates", "modifiers", "pow.qasm"), {}),
+            (Path("keywords", "constant.qasm"), {}),
+            (Path("keywords", "def.qasm"), {}),
+            (Path("pulse", "functions", "durationof.qasm"), {}),
+            (Path("pulse", "instructions", "capture.qasm"), {"capture_version": "0"}),
+            (Path("pulse", "instructions", "capture.qasm"), {"capture_version": "4"}),
+            (Path("types", "angle.qasm"), {}),
+            (Path("types", "array.qasm"), {}),
+            (Path("types", "complex.qasm"), {}),
+            (Path("types", "duration.qasm"), {}),
+            (Path("types", "float.qasm"), {}),
+            (Path("types", "int.qasm"), {}),
+            (Path("types", "stretch.qasm"), {}),
         ],
         ids=lambda file: str(file),
     )
@@ -912,16 +912,10 @@ class TestQASM3Features:
         syncs = [inst for inst in builder.instructions if isinstance(inst, Synchronize)]
         assert len(syncs) == 1
 
-        expected_channels = set(
-            [
-                chan.full_id()
-                for device in devices
-                for chan in device.pulse_channels.values()
-            ]
-        )
-        assert (
-            set([chan.full_id() for chan in syncs[0].quantum_targets]) == expected_channels
-        )
+        expected_channels = {
+            chan.full_id() for device in devices for chan in device.pulse_channels.values()
+        }
+        assert {chan.full_id() for chan in syncs[0].quantum_targets} == expected_channels
 
     def test_cx(self, model, feature_testpath):
         qubits = model.qubits[:2]

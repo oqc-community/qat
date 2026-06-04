@@ -19,13 +19,13 @@ with pytest.warns(DeprecationWarning):
         @pytest.mark.parametrize(
             "pipeline",
             [
-                MockExecuteUpdateablePipeline(config=dict(name="test"), loader=loader),
+                MockExecuteUpdateablePipeline(config={"name": "test"}, loader=loader),
                 MockExecuteUpdateablePipeline(
-                    config=dict(name="test"), loader=loader
+                    config={"name": "test"}, loader=loader
                 ).pipeline,
-                MockCompileUpdateablePipeline(config=dict(name="test"), loader=loader),
+                MockCompileUpdateablePipeline(config={"name": "test"}, loader=loader),
                 MockCompileUpdateablePipeline(
-                    config=dict(name="test"), loader=loader
+                    config={"name": "test"}, loader=loader
                 ).pipeline,
             ],
         )
@@ -36,8 +36,8 @@ with pytest.warns(DeprecationWarning):
         @pytest.mark.parametrize(
             "pipeline",
             [
-                MockUpdateablePipeline(config=dict(name="test"), loader=loader),
-                MockUpdateablePipeline(config=dict(name="test"), loader=loader).pipeline,
+                MockUpdateablePipeline(config={"name": "test"}, loader=loader),
+                MockUpdateablePipeline(config={"name": "test"}, loader=loader).pipeline,
             ],
         )
         def test_can_instantiate_compile_pipeline_cache(self, pipeline):
@@ -56,13 +56,13 @@ with pytest.warns(DeprecationWarning):
         @pytest.mark.parametrize(
             "pipeline",
             [
-                MockExecuteUpdateablePipeline(config=dict(name="test"), loader=loader),
+                MockExecuteUpdateablePipeline(config={"name": "test"}, loader=loader),
                 MockExecuteUpdateablePipeline(
-                    config=dict(name="test"), loader=loader
+                    config={"name": "test"}, loader=loader
                 ).pipeline,
-                MockCompileUpdateablePipeline(config=dict(name="test"), loader=loader),
+                MockCompileUpdateablePipeline(config={"name": "test"}, loader=loader),
                 MockCompileUpdateablePipeline(
-                    config=dict(name="test"), loader=loader
+                    config={"name": "test"}, loader=loader
                 ).pipeline,
             ],
         )
@@ -73,8 +73,8 @@ with pytest.warns(DeprecationWarning):
         @pytest.mark.parametrize(
             "pipeline",
             [
-                MockUpdateablePipeline(config=dict(name="test"), loader=loader),
-                MockUpdateablePipeline(config=dict(name="test"), loader=loader).pipeline,
+                MockUpdateablePipeline(config={"name": "test"}, loader=loader),
+                MockUpdateablePipeline(config={"name": "test"}, loader=loader).pipeline,
             ],
         )
         def test_can_instantiate_compile_pipeline_cache(self, pipeline):

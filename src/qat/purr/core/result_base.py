@@ -98,7 +98,7 @@ class ResultManager:
             self._results.remove(found)
 
     def cleanup(self):
-        self._results = set(res for res in self._results if res.is_valid)
+        self._results = {res for res in self._results if res.is_valid}
 
     def update(self, other_res_mgr):
         if not isinstance(other_res_mgr, ResultManager):

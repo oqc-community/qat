@@ -50,16 +50,15 @@ def random_resource(type: ClusterType, name: str, address: str = None):
     qcm_type = type in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
     qrm_type = type in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
     rf_type = type in [ClusterType.CLUSTER_QCM_RF, ClusterType.CLUSTER_QRM_RF]
-    modules = [
-        module
-        for module in cluster.get_connected_modules(
+    modules = list(
+        cluster.get_connected_modules(
             filter_fn=lambda mod: (
                 mod.is_qcm_type == qcm_type
                 and mod.is_qrm_type == qrm_type
                 and mod.is_rf_type == rf_type
             )
         ).values()
-    ]
+    )
     module = np.random.choice(modules)
     sequencer = np.random.choice(module.sequencers)
 

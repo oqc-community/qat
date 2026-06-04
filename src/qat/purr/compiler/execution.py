@@ -427,7 +427,7 @@ class QuantumExecutionEngine(InstructionExecutionEngine):
             ]}
         """
         results: dict[PulseChannel, list[PositionData]] = {}
-        total_durations: dict[PulseChannel, int] = dict()
+        total_durations: dict[PulseChannel, int] = {}
 
         for instruction in instructions:
             # TODO: Acquire is a special quantum target for post processing.
@@ -749,7 +749,7 @@ def _binary_average(results_list):
     """Averages all repeat results and returns a definitive 1/0 for each qubit
     measurement."""
     # If we have many sweeps/repeats loop through all of them and sum.
-    if all([isinstance(val, list) for val in results_list]):
+    if all(isinstance(val, list) for val in results_list):
         binary_results = [_binary_average(nested) for nested in results_list]
     else:
         binary_results = _binary(results_list)
@@ -901,7 +901,7 @@ class InjectionMetadata:
     field: str = "_$injection_metadata"
 
     def __init__(self):
-        self.variables: dict[str, ValueReplacement] = dict()
+        self.variables: dict[str, ValueReplacement] = {}
 
     def inject(self, node, replacements: dict, index):
         for field, replacer in self.variables.items():
@@ -1069,10 +1069,10 @@ class SweepIterator:
                     injection_meta.variables[field] = VariableInjector(value)
                 elif (
                     isinstance(value, tuple | list)
-                    and any([isinstance(val, Variable) for val in value])
+                    and any(isinstance(val, Variable) for val in value)
                 ) or (
                     isinstance(value, dict)
-                    and any([isinstance(val, Variable) for val in value.values()])
+                    and any(isinstance(val, Variable) for val in value.values())
                 ):
                     injection_meta.variables[field] = IteratorInjector(value)
 

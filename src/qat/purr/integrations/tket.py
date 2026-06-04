@@ -676,7 +676,7 @@ def run_multiQ_tket_optimizations(
 
                 for subgraph in coupling_subgraphs:
                     if circ.n_qubits <= len(
-                        set([qubit for coupling in subgraph for qubit in coupling])
+                        {qubit for coupling in subgraph for qubit in coupling}
                     ):
                         architecture = Architecture(subgraph)
                         optimizations_failed = not optimize_circuit(

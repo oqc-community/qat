@@ -120,7 +120,7 @@ class VerificationEngine(QuantumExecutionEngine, ABC):
             interrupt.if_triggered(metadata, throw=True)
             self.verify_instructions(package.instructions, package.meta_instructions)
 
-        return dict()
+        return {}
 
     def _process_results(self, results, qfile: "QatFile"):
         return results
@@ -141,7 +141,7 @@ class LucyVerificationEngine(VerificationEngine):
         pc2samples = {pc: positions[-1].end for pc, positions in timeline.items()}
         durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
 
-        circuit_duration = max([duration for duration in durations.values()])
+        circuit_duration = max(durations.values())
 
         log.debug(f"The circuit duration is {circuit_duration / 1e-6} microseconds.")
 

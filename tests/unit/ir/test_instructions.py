@@ -280,7 +280,7 @@ class TestQuantumInstruction:
 
     def test_list_to_set_removes_redundancy(self, caplog):
         inst = QuantumInstruction(targets=["test", "test"])
-        assert inst.targets == set(["test"])
+        assert inst.targets == {"test"}
 
     @pytest.mark.parametrize(
         "targets", [2, np.array([1.0, 2.0]), [2, np.array([1.0, 2.0])]]

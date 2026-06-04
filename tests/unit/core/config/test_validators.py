@@ -79,7 +79,7 @@ class TestIsPipelineInstance:
     )
     def test_with_pipeline_instance(self, pipeline_loader):
         model = MockModelLoader().load()
-        pipeline = pipeline_loader(config=dict(name="test_pipeline"), model=model)
+        pipeline = pipeline_loader(config={"name": "test_pipeline"}, model=model)
         assert is_pipeline_instance(pipeline.pipeline) is pipeline.pipeline
         with pytest.raises(ValueError, match="is not a valid Pipeline instance"):
             is_pipeline_instance(pipeline)

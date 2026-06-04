@@ -25,12 +25,12 @@ class ActiveChannelResults(ResultInfoMixin):
     channels and qubits.
     """
 
-    target_map: dict[PulseChannel, Qubit] = field(default_factory=lambda: dict())
+    target_map: dict[PulseChannel, Qubit] = field(default_factory=dict)
 
     @property
     def physical_qubit_indices(self) -> set[int]:
         """Returns a list of all active physical qubit indices."""
-        return set([qubit.index for qubit in self.target_map.values()])
+        return {qubit.index for qubit in self.target_map.values()}
 
     @property
     def targets(self) -> list[PulseChannel]:
@@ -110,7 +110,7 @@ class ActivePulseChannelAnalysis(AnalysisPass):
             else:
                 result.unassigned.append(target)
 
-        phys_q_indices = sorted(list(result.physical_qubit_indices))
+        phys_q_indices = sorted(result.physical_qubit_indices)
         log.info(f"Physical qubits used in this circuit: {phys_q_indices}")
         met_mgr.record_metric(MetricsType.PhysicalQubitIndices, phys_q_indices)
 

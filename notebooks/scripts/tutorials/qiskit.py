@@ -48,7 +48,7 @@ from qat.model.loaders.purr.qiskit import QiskitModelLoader
 from qat.pipelines.legacy.qiskit import LegacyQiskitPipeline
 
 loader = QiskitModelLoader(qubit_count=20)
-pipeline = LegacyQiskitPipeline(config=dict(name="qiskit"), loader=loader)
+pipeline = LegacyQiskitPipeline(config={"name": "qiskit"}, loader=loader)
 
 results, metrics = QAT().run(qasm, pipeline=pipeline, compiler_config=config)
 print(results)

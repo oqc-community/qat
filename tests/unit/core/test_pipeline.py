@@ -114,7 +114,7 @@ class TestEngineSet:
         """Checks that reloading a model for an engine without a model does not raise an
         error."""
         engine = InitableEngine()
-        engine_set = EngineSet(dict(engine=engine), {})
+        engine_set = EngineSet({"engine": engine}, {})
         assert not hasattr(engine, "model")
 
         # This should not raise an error
@@ -206,7 +206,7 @@ class TestPipelineSet:
             for i in range(2)
         ]
         pipelines = PipelineSet(pipelines)
-        assert all([len(pipelines.get(f"test{i}").model.qubits) == 2 for i in range(2)])
+        assert all(len(pipelines.get(f"test{i}").model.qubits) == 2 for i in range(2))
         pipelines.reload_model("test0")
         assert len(pipelines.get("test0").model.qubits) == 3
         assert len(pipelines.get("test1").model.qubits) == 2
@@ -225,9 +225,9 @@ class TestPipelineSet:
                 config=MockPipelineConfig(name="test3"), model=MockModelLoader().load()
             )
         )
-        assert all([len(pipelines.get(f"test{i}").model.qubits) == 2 for i in range(2)])
+        assert all(len(pipelines.get(f"test{i}").model.qubits) == 2 for i in range(2))
         pipelines.reload_all_models()
-        assert all([len(pipelines.get(f"test{i}").model.qubits) == 3 for i in range(2)])
+        assert all(len(pipelines.get(f"test{i}").model.qubits) == 3 for i in range(2))
         assert len(pipelines.get("test3").model.qubits) == 2
 
 

@@ -531,10 +531,10 @@ class FrequencySetupValidation(ValidationPass):
 
         active_channel_res = res_mgr.lookup_by_type(ActivePulseChannelResults)
         pulse_channels = active_channel_res.targets
-        physical_channels = set(
+        physical_channels = {
             ir.get_pulse_channel(pulse_channel).physical_channel_id
             for pulse_channel in pulse_channels
-        )
+        }
 
         violations = self._find_physical_channel_violations(physical_channels)
         violations.extend(self._find_pulse_channel_violations(pulse_channels, ir))

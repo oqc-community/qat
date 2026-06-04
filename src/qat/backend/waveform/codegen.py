@@ -156,9 +156,7 @@ class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
         pulse_channel_buffers = {}
         for pulse_channel_id in timeline_res.target_map:
             # The buffer is trivial if there are no waveforms
-            if not any(
-                [isinstance(inst, Pulse) for inst in ir.target_map[pulse_channel_id]]
-            ):
+            if not any(isinstance(inst, Pulse) for inst in ir.target_map[pulse_channel_id]):
                 continue
 
             pulse_channel = ir.get_pulse_channel(pulse_channel_id)
@@ -209,7 +207,7 @@ class WaveformBackend(BaseBackend[WaveformProgram], InvokerMixin):
             for each instruction.
         """
         execute_acquire_dict = defaultdict(list)
-        runtime_acquire_dict = dict()
+        runtime_acquire_dict = {}
         for pulse_channel_id, acquire_list in ir.acquire_map.items():
             pulse_channel = ir.get_pulse_channel(pulse_channel_id)
             phys_channel = self.model.physical_channel_with_id(

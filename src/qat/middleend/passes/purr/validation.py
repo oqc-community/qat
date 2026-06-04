@@ -117,7 +117,7 @@ class PhysicalChannelAmplitudeValidation(ValidationPass):
                         continue
 
                     tmp = phys_chs_amps[phys_chan_id]
-                    if all([chan in instruction.quantum_targets for chan in tmp.keys()]):
+                    if all(chan in instruction.quantum_targets for chan in tmp.keys()):
                         phys_chs_amps[phys_chan_id] = dict.fromkeys(tmp.keys(), 0.0)
                     handled_phys_chan_ids.append(phys_chan_id)
 
@@ -487,9 +487,9 @@ class FrequencySetupValidation(ValidationPass):
 
         active_channel_res = res_mgr.lookup_by_type(ActiveChannelResults)
         pulse_channels = active_channel_res.targets
-        physical_channels = set(
-            [pulse_channel.physical_channel for pulse_channel in pulse_channels]
-        )
+        physical_channels = {
+            pulse_channel.physical_channel for pulse_channel in pulse_channels
+        }
 
         violations = []
         for physical_channel in physical_channels:

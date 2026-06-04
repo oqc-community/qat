@@ -138,7 +138,7 @@ class InstructionBuilder:
         invalid_label_names is a set of names to be re-generated, existing_names is the full
         set of existing names (union of all builders names' who are being merged).
         """
-        regenerated_names = dict()
+        regenerated_names = {}
         for inst in self._instructions:
             if not isinstance(inst, Label) or inst.name not in invalid_label_names:
                 continue

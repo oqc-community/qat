@@ -205,7 +205,7 @@ class TestPhaseOptimisation:
         PhaseOptimisation().run(builder, res_mgr=ResultManager(), met_mgr=MetricsManager())
         for inst in builder.instructions[:-1]:
             assert isinstance(inst, PhaseSet)
-        channels = set([inst.channel for inst in builder.instructions[:-1]])
+        channels = {inst.channel for inst in builder.instructions[:-1]}
         assert len(channels) == len(builder.instructions) - 1
 
     def test_empty_constructor(self, hw):
@@ -1137,9 +1137,7 @@ class TestMeasurePhaseResetSanitisation:
         # A phase reset should be added for each measure instruction.
         assert len(ir.instructions) == n_instr_before + len(hw.qubits)
 
-        ref_measure_pulse_channels = set(
-            [qubit.get_measure_channel() for qubit in hw.qubits]
-        )
+        ref_measure_pulse_channels = {qubit.get_measure_channel() for qubit in hw.qubits}
         measure_pulse_channels = set()
         for i, instr in enumerate(ir.instructions):
             if isinstance(instr, MeasurePulse):
@@ -1399,7 +1397,7 @@ class TestSynchronizeTask:
 
         ir = SynchronizeTask().run(builder, res_mgr)
         assert isinstance(ir.instructions[-1], Synchronize)
-        assert set(ir.instructions[-1].quantum_targets) == set([drive_chan, measure_chan])
+        assert set(ir.instructions[-1].quantum_targets) == {drive_chan, measure_chan}
 
     def test_synchronize_task_not_adding_if_inactive(self, model):
         res_mgr = ResultManager()
@@ -1454,7 +1452,7 @@ class TestEndOfTaskResetSanitisation:
             if isinstance(inst, Reset)
         ]
         assert len(reset_channels) == 2
-        assert set(reset_channels) == set([qubit.get_drive_channel() for qubit in qubits])
+        assert set(reset_channels) == {qubit.get_drive_channel() for qubit in qubits}
 
     def test_mid_circuit_reset_is_ignored(self, model):
         qubit = model.qubits[0]
@@ -1480,7 +1478,7 @@ class TestEndOfTaskResetSanitisation:
             if isinstance(inst, Reset)
         ]
         assert len(reset_channels) == 2
-        assert set(reset_channels) == set([qubit.get_drive_channel()])
+        assert set(reset_channels) == {qubit.get_drive_channel()}
 
     def test_inactive_instruction_after_reset_ignored(self, model):
         qubit = model.qubits[0]
@@ -1713,9 +1711,10 @@ class TestResetsToDelays:
         assert len(reset_instrs) == 0
         delay_instrs = [instr for instr in builder.instructions if isinstance(instr, Delay)]
         assert len(delay_instrs) == 1
-        assert set(delay_instrs[0].quantum_targets) == set(
-            [qubit.get_acquire_channel(), qubit.get_measure_channel()]
-        )
+        assert set(delay_instrs[0].quantum_targets) == {
+            qubit.get_acquire_channel(),
+            qubit.get_measure_channel(),
+        }
 
 
 class MockPulseShapeType(Enum):
@@ -2280,7 +2279,7 @@ class TestFreqShiftSanitisation:
         channels = self.add_freq_shift_channels(hw, [0, 1])
         builder = self.get_classical_builder(hw)
         builder = FreqShiftSanitisation(hw).add_freq_shift_to_ir(builder, channels)
-        assert all([not isinstance(inst, Pulse) for inst in builder.instructions])
+        assert all(not isinstance(inst, Pulse) for inst in builder.instructions)
 
     def test_add_freq_shift_to_block_ignored_for_no_duration(self, hw):
         channels = self.add_freq_shift_channels(hw, [0, 1])

@@ -164,7 +164,7 @@ class TestAssignResultsTransform:
     def test_only_returns_what_is_asked(self):
         """Only variable names listed in the package returns set appear in the output."""
         results = {"q0": np.random.rand(100), "q1": np.random.rand(100)}
-        payload = Executable(programs=[], acquires={}, returns=set(["q0"]))
+        payload = Executable(programs=[], acquires={}, returns={"q0"})
         results = AssignResultsTransform().run(results, package=payload)
         assert "q0" in results
         assert "q1" not in results
@@ -180,7 +180,7 @@ class TestAssignResultsTransform:
         package = Executable(
             programs=[],
             acquires={},
-            returns=set(["c"]),
+            returns={"c"},
             assigns=[
                 PydAssign(
                     name="c",

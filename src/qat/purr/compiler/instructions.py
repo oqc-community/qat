@@ -86,7 +86,7 @@ def _add_channels(
             )
         unique_targets.add(target)
 
-    return sorted(list(unique_targets), key=lambda x: x.full_id())
+    return sorted(unique_targets, key=lambda x: x.full_id())
 
 
 class Repeat(Instruction):

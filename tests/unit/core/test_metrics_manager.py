@@ -7,9 +7,7 @@ from qat.core.metrics_base import MetricsManager
 
 
 class TestMetricsManager:
-    @pytest.mark.parametrize(
-        "flag", [*[mt for mt in MetricsType], MetricsType.Experimental]
-    )
+    @pytest.mark.parametrize("flag", [*list(MetricsType), MetricsType.Experimental])
     def test_metrics_recording(self, flag):
         met_mgr = MetricsManager(flag)
 

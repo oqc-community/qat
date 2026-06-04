@@ -378,7 +378,7 @@ class LiveDeviceEngine(QuantumExecutionEngine):
         pc2samples = {pc: positions[-1].end for pc, positions in position_map.items()}
         durations = {pc: samples * pc.sample_time for pc, samples in pc2samples.items()}
 
-        circuit_duration = max([duration for duration in durations.values()])
+        circuit_duration = max(durations.values())
 
         return circuit_duration + passive_reset_time
 

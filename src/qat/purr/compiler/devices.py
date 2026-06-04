@@ -143,11 +143,11 @@ class Calibratable:
         """Checks whether this field value/name should be serialized as a calibration
         value."""
         if isinstance(val, list | tuple):
-            return all([self._is_serializable(val_) for val_ in val])
+            return all(self._is_serializable(val_) for val_ in val)
 
         if isinstance(val, dict):
-            return all([self._is_serializable(val_) for val_ in val.keys()]) and all(
-                [self._is_serializable(val_) for val_ in val.values()]
+            return all(self._is_serializable(val_) for val_ in val.keys()) and all(
+                self._is_serializable(val_) for val_ in val.values()
             )
 
         if isinstance(val, Enum):
@@ -745,7 +745,7 @@ class Qubit(QuantumDevice):
         self.coupled_qubits: list[Qubit] = []
         self.mean_z_map_args = [1.0, 0.0]
         self.discriminator = [0.0]
-        self.pulse_hw_zx_pi_4 = dict()
+        self.pulse_hw_zx_pi_4 = {}
         self.default_pulse_channel_type = ChannelType.drive
         self.direct_x_pi = False
 

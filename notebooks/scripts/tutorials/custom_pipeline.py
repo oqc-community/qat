@@ -95,5 +95,5 @@ class MyCoolPipeline(UpdateablePipeline):
 model = LucyModelLoader(qubit_count=8).load()
 target_data = TargetData()
 pipeline_instance = MyCoolPipeline(
-    config=dict(name="my_pipeline"), model=model, target_data=target_data
+    config={"name": "my_pipeline"}, model=model, target_data=target_data
 )

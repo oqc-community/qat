@@ -127,8 +127,8 @@ class BitRegister:
 
 class Registers:
     def __init__(self):
-        self.quantum: dict[str, QubitRegister] = dict()
-        self.classic: dict[str, BitRegister] = dict()
+        self.quantum: dict[str, QubitRegister] = {}
+        self.classic: dict[str, BitRegister] = {}
 
 
 class QasmContext:
@@ -137,8 +137,8 @@ class QasmContext:
 
     def __init__(self, registers=None, gates=None, variables=None):
         self.registers: Registers = registers or Registers()
-        self.variables: dict[str, Variable] = variables or dict()
-        self.gates: dict[str, Any] = gates or dict()
+        self.variables: dict[str, Variable] = variables or {}
+        self.gates: dict[str, Any] = gates or {}
 
 
 class CregIndexValue:
@@ -160,7 +160,7 @@ class CregIndexValue:
 class AbstractParser:
     def __init__(self):
         self.results_format = InlineResultsProcessing.Program
-        self._cached_parses: dict[int, Any] = dict()
+        self._cached_parses: dict[int, Any] = {}
 
     def can_parse(self, qasm: str) -> ParseResults:
         try:
@@ -357,7 +357,7 @@ class Qasm2Parser(AbstractParser):
         super().__init__()
         self.order_result_vars = order_result_vars
         self.raw_results = raw_results
-        self._cached_parses: dict[int, DAGCircuit] = dict()
+        self._cached_parses: dict[int, DAGCircuit] = {}
 
     def __repr__(self):
         return self.__class__.__name__
@@ -435,7 +435,7 @@ class Qasm2Parser(AbstractParser):
         for key in register_keys:
             builder.assign(key, [val.value for val in context.registers.classic[key].bits])
 
-        builder.returns([key for key in register_keys])
+        builder.returns(list(register_keys))
         return builder
 
     def process_gate(
@@ -639,7 +639,7 @@ class RestrictedQasm2Parser(Qasm2Parser):
                 )
 
         if self.disable_if and any(
-            [node.op for node in circ.op_nodes() if isinstance(node.op, IfElseOp)]
+            node.op for node in circ.op_nodes() if isinstance(node.op, IfElseOp)
         ):
             raise ValueError("If's are currently unable to be used.")
 
@@ -669,7 +669,7 @@ def _create_lark_parser():
 class OpenPulseContext(QasmContext):
     def __init__(self, registers=None, gates=None, variables=None, cali_methods=None):
         super().__init__(registers, gates, variables)
-        self.calibration_methods: dict[str, Any] = cali_methods or dict()
+        self.calibration_methods: dict[str, Any] = cali_methods or {}
 
 
 def get_frame_mappings(model: QuantumHardwareModel):
@@ -748,10 +748,8 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
 
     def _includes_standard_gates(self, qasm_str: str) -> bool:
         return any(
-            [
-                include in qasm_str
-                for include in ('include "qelib1.inc";', 'include "stdgates.inc";')
-            ]
+            include in qasm_str
+            for include in ('include "qelib1.inc";', 'include "stdgates.inc";')
         )
 
     def load_default_gates(self, context) -> QasmContext:
@@ -996,7 +994,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
         gate_context = QasmContext(
             Registers(),
             context.gates,
-            dict(),
+            {},
         )
 
         if (gate_def := context.gates.get(gate_name, None)) is not None:
@@ -1037,7 +1035,7 @@ class Qasm3ParserBase(AbstractParser, QASMVisitor):
                     [val.value for val in context.registers.classic[key].bits],
                 )
 
-            self.builder.returns([key for key in register_keys])
+            self.builder.returns(list(register_keys))
 
     def add_delay(self, delay, qubits, builder: InstructionBuilder):
         self._add_delay(delay, qubits, builder)
@@ -1088,9 +1086,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._calibration_context: OpenPulseContext | None = None
         self._current_context: OpenPulseContext | None = None
         self._q3_patcher: Qasm3ParserBase = Qasm3ParserBase()
-        self._port_mappings: dict[str, PhysicalChannel] = dict()
-        self._frame_mappings: dict[str, PulseChannel] = dict()
-        self._cached_parses: dict[int, Any] = dict()
+        self._port_mappings: dict[str, PhysicalChannel] = {}
+        self._frame_mappings: dict[str, PulseChannel] = {}
+        self._cached_parses: dict[int, Any] = {}
 
         self._has_qasm_version = False
         self._has_calibration_version = False
@@ -1131,8 +1129,8 @@ class Qasm3Parser(Interpreter, AbstractParser):
         self._general_context = None
         self._calibration_context = None
         self._current_context = None
-        self._port_mappings = dict()
-        self._frame_mappings = dict()
+        self._port_mappings = {}
+        self._frame_mappings = {}
         self._has_calibration_version = False
         self._has_qasm_version = False
         self._has_open_pulse = False
@@ -1248,7 +1246,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
                 return node, None
 
             if (
-                any([isinstance(node, Token) for node in node.children])
+                any(isinstance(node, Token) for node in node.children)
                 or len(node.children) > 1
             ):
                 if len(node.children) == 1:
@@ -1443,7 +1441,7 @@ class Qasm3Parser(Interpreter, AbstractParser):
         else:
             raise ValueError("Unknown waveform definition.")
 
-        _empty = tuple()
+        _empty = ()
 
         def _validate_waveform_args(
             *,
@@ -2305,6 +2303,6 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     ],
                 )
 
-            builder.returns([key for key in register_keys])
+            builder.returns(list(register_keys))
 
         return self._reset_and_return()
