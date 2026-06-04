@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using the real-time chip simulator in new QAT &mdash; qat-compiler 3.0.0.post246.dev20260603120934 documentation</title>
+  <title>Using the real-time chip simulator in new QAT &mdash; qat-compiler 3.0.0.post247.dev20260604113017 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -570,7 +570,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">qat.pipelines.legacy.rtcs</span><span class="w"> </span><span class="kn">import</span> <span class="n">LegacyRTCSPipeline</span>
 
 <span class="n">loader</span> <span class="o">=</span> <span class="n">RTCSModelLoader</span><span class="p">()</span>
-<span class="n">pipeline</span> <span class="o">=</span> <span class="n">LegacyRTCSPipeline</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;rtcs&quot;</span><span class="p">),</span> <span class="n">loader</span><span class="o">=</span><span class="n">loader</span><span class="p">)</span>
+<span class="n">pipeline</span> <span class="o">=</span> <span class="n">LegacyRTCSPipeline</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;rtcs&quot;</span><span class="p">},</span> <span class="n">loader</span><span class="o">=</span><span class="n">loader</span><span class="p">)</span>
 
 <span class="n">results</span><span class="p">,</span> <span class="n">metrics</span> <span class="o">=</span> <span class="n">QAT</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">qasm</span><span class="p">,</span> <span class="n">pipeline</span><span class="o">=</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">compiler_config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
@@ -578,7 +578,7 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;c&#39;: {&#39;11&#39;: 498, &#39;00&#39;: 355, &#39;01&#39;: 53, &#39;10&#39;: 94}}
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;c&#39;: {&#39;00&#39;: 343, &#39;11&#39;: 503, &#39;10&#39;: 85, &#39;01&#39;: 69}}
 </pre></div>
 </div>
 </div>

@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_12211c50e1eb0c51_builder_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -615,10 +615,10 @@
     <p class="pln"><span class="n"><a id="t531" href="#t531">531</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t532" href="#t532">532</a></span><span class="t">        <span class="nam">active_channel_res</span> <span class="op">=</span> <span class="nam">res_mgr</span><span class="op">.</span><span class="nam">lookup_by_type</span><span class="op">(</span><span class="nam">ActivePulseChannelResults</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t533" href="#t533">533</a></span><span class="t">        <span class="nam">pulse_channels</span> <span class="op">=</span> <span class="nam">active_channel_res</span><span class="op">.</span><span class="nam">targets</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t534" href="#t534">534</a></span><span class="t">        <span class="nam">physical_channels</span> <span class="op">=</span> <span class="nam">set</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t534" href="#t534">534</a></span><span class="t">        <span class="nam">physical_channels</span> <span class="op">=</span> <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t535" href="#t535">535</a></span><span class="t">            <span class="nam">ir</span><span class="op">.</span><span class="nam">get_pulse_channel</span><span class="op">(</span><span class="nam">pulse_channel</span><span class="op">)</span><span class="op">.</span><span class="nam">physical_channel_id</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t536" href="#t536">536</a></span><span class="t">            <span class="key">for</span> <span class="nam">pulse_channel</span> <span class="key">in</span> <span class="nam">pulse_channels</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t537" href="#t537">537</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t537" href="#t537">537</a></span><span class="t">        <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t538" href="#t538">538</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t539" href="#t539">539</a></span><span class="t">        <span class="nam">violations</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_find_physical_channel_violations</span><span class="op">(</span><span class="nam">physical_channels</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t540" href="#t540">540</a></span><span class="t">        <span class="nam">violations</span><span class="op">.</span><span class="nam">extend</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">_find_pulse_channel_violations</span><span class="op">(</span><span class="nam">pulse_channels</span><span class="op">,</span> <span class="nam">ir</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -676,7 +676,7 @@
             <a class="nav" href="z_12211c50e1eb0c51_builder_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
     </div>
 </footer>

@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_012691bdebfaace8_transform_passes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -211,7 +211,7 @@
     <p class="pln"><span class="n"><a id="t127" href="#t127">127</a></span><span class="t"><span class="str">            If we only have one result after this, just return that list directly</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t"><span class="str">            instead, as it's probably just a single experiment.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t"><span class="str">            """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">            <span class="key">if</span> <span class="nam">all</span><span class="op">(</span><span class="op">[</span><span class="nam">is_generated_name</span><span class="op">(</span><span class="nam">k</span><span class="op">)</span> <span class="key">for</span> <span class="nam">k</span> <span class="key">in</span> <span class="nam">simplify_target</span><span class="op">.</span><span class="nam">keys</span><span class="op">(</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t">            <span class="key">if</span> <span class="nam">all</span><span class="op">(</span><span class="nam">is_generated_name</span><span class="op">(</span><span class="nam">k</span><span class="op">)</span> <span class="key">for</span> <span class="nam">k</span> <span class="key">in</span> <span class="nam">simplify_target</span><span class="op">.</span><span class="nam">keys</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t">                <span class="key">if</span> <span class="nam">len</span><span class="op">(</span><span class="nam">simplify_target</span><span class="op">)</span> <span class="op">==</span> <span class="num">1</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">                    <span class="key">return</span> <span class="nam">list</span><span class="op">(</span><span class="nam">simplify_target</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="num">0</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">                <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -421,7 +421,7 @@
     <p class="pln"><span class="n"><a id="t337" href="#t337">337</a></span><span class="t">    <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t338" href="#t338">338</a></span><span class="t">        <span class="nam">binary_results</span> <span class="op">=</span> <span class="op">[</span><span class="nam">binary_results</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t339" href="#t339">339</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t340" href="#t340">340</a></span><span class="t">    <span class="nam">result_count</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t340" href="#t340">340</a></span><span class="t">    <span class="nam">result_count</span> <span class="op">=</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t341" href="#t341">341</a></span><span class="t">    <span class="key">for</span> <span class="nam">qubit_result</span> <span class="key">in</span> <span class="op">[</span><span class="nam">list</span><span class="op">(</span><span class="nam">get_tuple</span><span class="op">(</span><span class="nam">binary_results</span><span class="op">,</span> <span class="nam">i</span><span class="op">)</span><span class="op">)</span> <span class="key">for</span> <span class="nam">i</span> <span class="key">in</span> <span class="nam">range</span><span class="op">(</span><span class="nam">repeats</span><span class="op">)</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t342" href="#t342">342</a></span><span class="t">        <span class="nam">key</span> <span class="op">=</span> <span class="nam">flatten</span><span class="op">(</span><span class="nam">qubit_result</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t343" href="#t343">343</a></span><span class="t">        <span class="nam">value</span> <span class="op">=</span> <span class="nam">result_count</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">key</span><span class="op">,</span> <span class="num">0</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -519,7 +519,7 @@
             <a class="nav" href="z_012691bdebfaace8_transform_passes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
     </div>
 </footer>

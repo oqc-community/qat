@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_012691bdebfaace8_builders_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -204,7 +204,7 @@
     <p class="mis show_mis"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">            <span class="nam">interrupt</span><span class="op">.</span><span class="nam">if_triggered</span><span class="op">(</span><span class="nam">metadata</span><span class="op">,</span> <span class="nam">throw</span><span class="op">=</span><span class="key">True</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">verify_instructions</span><span class="op">(</span><span class="nam">package</span><span class="op">.</span><span class="nam">instructions</span><span class="op">,</span> <span class="nam">package</span><span class="op">.</span><span class="nam">meta_instructions</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">        <span class="key">return</span> <span class="nam">dict</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">        <span class="key">return</span> <span class="op">{</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t124" href="#t124">124</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t125" href="#t125">125</a></span><span class="t">    <span class="key">def</span> <span class="nam">_process_results</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">results</span><span class="op">,</span> <span class="nam">qfile</span><span class="op">:</span> <span class="str">"QatFile"</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t126" href="#t126">126</a></span><span class="t">        <span class="key">return</span> <span class="nam">results</span>&nbsp;</span><span class="r"></span></p>
@@ -225,7 +225,7 @@
     <p class="mis show_mis"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">        <span class="nam">pc2samples</span> <span class="op">=</span> <span class="op">{</span><span class="nam">pc</span><span class="op">:</span> <span class="nam">positions</span><span class="op">[</span><span class="op">-</span><span class="num">1</span><span class="op">]</span><span class="op">.</span><span class="nam">end</span> <span class="key">for</span> <span class="nam">pc</span><span class="op">,</span> <span class="nam">positions</span> <span class="key">in</span> <span class="nam">timeline</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">        <span class="nam">durations</span> <span class="op">=</span> <span class="op">{</span><span class="nam">pc</span><span class="op">:</span> <span class="nam">samples</span> <span class="op">*</span> <span class="nam">pc</span><span class="op">.</span><span class="nam">sample_time</span> <span class="key">for</span> <span class="nam">pc</span><span class="op">,</span> <span class="nam">samples</span> <span class="key">in</span> <span class="nam">pc2samples</span><span class="op">.</span><span class="nam">items</span><span class="op">(</span><span class="op">)</span><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">        <span class="nam">circuit_duration</span> <span class="op">=</span> <span class="nam">max</span><span class="op">(</span><span class="op">[</span><span class="nam">duration</span> <span class="key">for</span> <span class="nam">duration</span> <span class="key">in</span> <span class="nam">durations</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">        <span class="nam">circuit_duration</span> <span class="op">=</span> <span class="nam">max</span><span class="op">(</span><span class="nam">durations</span><span class="op">.</span><span class="nam">values</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">        <span class="nam">log</span><span class="op">.</span><span class="nam">debug</span><span class="op">(</span><span class="str">f"The circuit duration is {circuit_duration / 1e-6} microseconds."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t147" href="#t147">147</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -253,7 +253,7 @@
             <a class="nav" href="z_012691bdebfaace8_builders_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
     </div>
 </footer>

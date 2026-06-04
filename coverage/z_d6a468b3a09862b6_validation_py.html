@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_2b630429134f6057_transform_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -201,7 +201,7 @@
     <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">                        <span class="key">continue</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">                    <span class="nam">tmp</span> <span class="op">=</span> <span class="nam">phys_chs_amps</span><span class="op">[</span><span class="nam">phys_chan_id</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">                    <span class="key">if</span> <span class="nam">all</span><span class="op">(</span><span class="op">[</span><span class="nam">chan</span> <span class="key">in</span> <span class="nam">instruction</span><span class="op">.</span><span class="nam">quantum_targets</span> <span class="key">for</span> <span class="nam">chan</span> <span class="key">in</span> <span class="nam">tmp</span><span class="op">.</span><span class="nam">keys</span><span class="op">(</span><span class="op">)</span><span class="op">]</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">                    <span class="key">if</span> <span class="nam">all</span><span class="op">(</span><span class="nam">chan</span> <span class="key">in</span> <span class="nam">instruction</span><span class="op">.</span><span class="nam">quantum_targets</span> <span class="key">for</span> <span class="nam">chan</span> <span class="key">in</span> <span class="nam">tmp</span><span class="op">.</span><span class="nam">keys</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">                        <span class="nam">phys_chs_amps</span><span class="op">[</span><span class="nam">phys_chan_id</span><span class="op">]</span> <span class="op">=</span> <span class="nam">dict</span><span class="op">.</span><span class="nam">fromkeys</span><span class="op">(</span><span class="nam">tmp</span><span class="op">.</span><span class="nam">keys</span><span class="op">(</span><span class="op">)</span><span class="op">,</span> <span class="num">0.0</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">                    <span class="nam">handled_phys_chan_ids</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">phys_chan_id</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t123" href="#t123">123</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -571,9 +571,9 @@
     <p class="pln"><span class="n"><a id="t487" href="#t487">487</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t488" href="#t488">488</a></span><span class="t">        <span class="nam">active_channel_res</span> <span class="op">=</span> <span class="nam">res_mgr</span><span class="op">.</span><span class="nam">lookup_by_type</span><span class="op">(</span><span class="nam">ActiveChannelResults</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t489" href="#t489">489</a></span><span class="t">        <span class="nam">pulse_channels</span> <span class="op">=</span> <span class="nam">active_channel_res</span><span class="op">.</span><span class="nam">targets</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t490" href="#t490">490</a></span><span class="t">        <span class="nam">physical_channels</span> <span class="op">=</span> <span class="nam">set</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t491" href="#t491">491</a></span><span class="t">            <span class="op">[</span><span class="nam">pulse_channel</span><span class="op">.</span><span class="nam">physical_channel</span> <span class="key">for</span> <span class="nam">pulse_channel</span> <span class="key">in</span> <span class="nam">pulse_channels</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t492" href="#t492">492</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t490" href="#t490">490</a></span><span class="t">        <span class="nam">physical_channels</span> <span class="op">=</span> <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t491" href="#t491">491</a></span><span class="t">            <span class="nam">pulse_channel</span><span class="op">.</span><span class="nam">physical_channel</span> <span class="key">for</span> <span class="nam">pulse_channel</span> <span class="key">in</span> <span class="nam">pulse_channels</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t492" href="#t492">492</a></span><span class="t">        <span class="op">}</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t493" href="#t493">493</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t494" href="#t494">494</a></span><span class="t">        <span class="nam">violations</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t495" href="#t495">495</a></span><span class="t">        <span class="key">for</span> <span class="nam">physical_channel</span> <span class="key">in</span> <span class="nam">physical_channels</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -782,7 +782,7 @@
             <a class="nav" href="z_2b630429134f6057_transform_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-03 12:19 +0000
+            created at 2026-06-04 11:40 +0000
         </p>
     </div>
 </footer>
