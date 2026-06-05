@@ -1324,10 +1324,12 @@ class CreateFrameOp(IRDLOperation):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
 
     :ivar frequency: The frequency of the frame.
     :ivar physical_channel: A string property containing the physical channel identifier.
+    :ivar port_kind: The class of port associated with this frame, encoded in the
+        parameterization of :class:`FrameType` on the operation result.
     :ivar imbalance: An optional attribute that stores the imbalance between I and Q paths,
         obtained from mixer calibrations.
     :ivar phase_offset: An optional attribute that stores the phase offset between I and Q
@@ -1362,6 +1364,7 @@ class CreateFrameOp(IRDLOperation):
         self,
         frequency: SSAValue | Operation,
         physical_channel: StringAttr,
+        port_kind: StringAttr | None = None,
         imbalance: FloatAttr | None = None,
         phase_offset: FloatAttr | None = None,
         acquire_allowed: BoolAttr | None = None,
@@ -1372,6 +1375,8 @@ class CreateFrameOp(IRDLOperation):
         :param frequency: The SSA value representing the frequency of the frame.
         :param physical_channel: The string attribute containing the physical channel
             identifier.
+        :param port_kind: The string attribute identifying the class of port
+            associated with this frame. Defaults to "output" when not provided.
         :param imbalance: The float attribute representing the imbalance between I
             and Q paths, obtained from mixer calibrations. Optional.
         :param phase_offset: The float attribute representing the phase offset between I
@@ -1395,12 +1400,20 @@ class CreateFrameOp(IRDLOperation):
         if track_phase is not None:
             attributes["track_phase"] = track_phase
 
+        if port_kind is None:
+            port_kind = StringAttr("output")
+
         return super().__init__(
             operands=[frequency],
             properties={"physical_channel": physical_channel},
             attributes=attributes,
-            result_types=[FrameType()],
+            result_types=[FrameType(port_kind)],
         )
+
+    @property
+    def port_kind(self) -> StringAttr:
+        """Returns the port-kind token encoded in the parameterized frame result type."""
+        return self.result.type.port_kind
 
 
 class PhaseOp(IRDLOperation, ABC):
@@ -1421,7 +1434,8 @@ class PhaseOp(IRDLOperation, ABC):
         :param phase: The SSA value representing the phase operand, which specifies the
             amount by which to manipulate the phase.
         """
-        return super().__init__(operands=[frame, phase], result_types=[FrameType()])
+        frame_ssa = SSAValue.get(frame, type=FrameType)
+        return super().__init__(operands=[frame, phase], result_types=[frame_ssa.type])
 
 
 @irdl_op_definition
@@ -1437,9 +1451,9 @@ class PhaseShiftOp(PhaseOp):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
         %phase = pulse.constant<1.5708> : !pulse.phase
-        %frame2 = pulse.phase_shift(%frame, %phase) : !pulse.frame
+        %frame2 = pulse.phase_shift(%frame, %phase) : !pulse.frame<"output">
 
     :ivar frame: The SSA value representing the frame whose phase is being shifted.
     :ivar phase: The SSA value representing the phase operand, which specifies the amount by
@@ -1460,9 +1474,9 @@ class PhaseSetOp(PhaseOp):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
         %phase = pulse.constant<1.5708> : !pulse.phase
-        %frame2 = pulse.phase_set(%frame, %phase) : !pulse.frame
+        %frame2 = pulse.phase_set(%frame, %phase) : !pulse.frame<"output">
 
     :ivar frame: The SSA value representing the frame whose phase is being set.
     :ivar phase: The SSA value representing the phase operand, which specifies the value to
@@ -1485,8 +1499,8 @@ class WaitOp(IRDLOperation):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
-        %frame2 = pulse.wait(%frame, %duration) : !pulse.frame
+            : !pulse.frame<"output">
+        %frame2 = pulse.wait(%frame, %duration) : !pulse.frame<"output">
 
     .. note::
 
@@ -1512,7 +1526,8 @@ class WaitOp(IRDLOperation):
         :param duration: The SSA value representing the amount of time to wait, of type
             pulse.time.
         """
-        return super().__init__(operands=[frame, duration], result_types=[FrameType()])
+        frame_ssa = SSAValue.get(frame, type=FrameType)
+        return super().__init__(operands=[frame, duration], result_types=[frame_ssa.type])
 
 
 @irdl_op_definition
@@ -1527,10 +1542,11 @@ class SynchronizeOp(IRDLOperation):
     .. code-block:: mlir
 
         %frame1 = pulse.create_frame(%frequency1) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
         %frame2 = pulse.create_frame(%frequency2) {physical_channel = "channel_2"}
-            : !pulse.frame
-        %frame3, %frame4 = pulse.sync(%frame1,%frame2) : (!pulse.frame, !pulse.frame)
+            : !pulse.frame<"output">
+        %frame3, %frame4 = pulse.sync(%frame1, %frame2)
+            : (!pulse.frame<"output">, !pulse.frame<"output">)
 
     :ivar frames: A list of SSA values representing the frames to be synchronized.
     :ivar result: A list of SSA values representing the resulting synchronized frames, which
@@ -1549,9 +1565,8 @@ class SynchronizeOp(IRDLOperation):
         :param frames: A variable number of SSA values representing the frames to be
             synchronized.
         """
-        return super().__init__(
-            operands=[frames], result_types=[[FrameType() for _ in frames]]
-        )
+        frame_types = [SSAValue.get(frame, type=FrameType).type for frame in frames]
+        return super().__init__(operands=[frames], result_types=[frame_types])
 
     def verify(self):
         """Verifies that at least two frames are being synchronized, and that the number of
@@ -1575,11 +1590,11 @@ class PulseOp(IRDLOperation):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
         %duration = arith.constant<128e-9> : !pulse.time
         %amplitude = arith.constant<0.5> : !pulse.amplitude
         %waveform = pulse.square_waveform(%duration, %amplitude) : !pulse.waveform
-        %frame2 = pulse.pulse(%frame, %waveform) : !pulse.frame
+        %frame2 = pulse.pulse(%frame, %waveform) : !pulse.frame<"output">
 
     :ivar frame: The SSA value representing the frame on which to play the pulse.
     :ivar waveform: The SSA value representing the waveform to be played, of type
@@ -1601,7 +1616,8 @@ class PulseOp(IRDLOperation):
         :param waveform: The SSA value representing the waveform to be played, of type
             pulse.waveform.
         """
-        return super().__init__(operands=[frame, waveform], result_types=[FrameType()])
+        frame_ssa = SSAValue.get(frame, type=FrameType)
+        return super().__init__(operands=[frame, waveform], result_types=[frame_ssa.type])
 
 
 @irdl_op_definition
@@ -1615,12 +1631,12 @@ class StartContinuousWaveformOp(IRDLOperation):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %frame2 = pulse.start_continuous_waveform(%frame, %amplitude) : !pulse.frame
+        %frame2 = pulse.start_continuous_waveform(%frame, %amplitude) : !pulse.frame<"output">
         %duration = pulse.constant<800e-9> : !pulse.time
-        %frame3 = pulse.wait(%frame2, %duration) : !pulse.frame
-        %frame4 = pulse.stop_continuous_waveform(%frame3) : !pulse.frame
+        %frame3 = pulse.wait(%frame2, %duration) : !pulse.frame<"output">
+        %frame4 = pulse.stop_continuous_waveform(%frame3) : !pulse.frame<"output">
 
     :ivar frame: The SSA value representing the frame on which to start the continuous
         waveform.
@@ -1643,7 +1659,8 @@ class StartContinuousWaveformOp(IRDLOperation):
         :param amplitude: The SSA value representing the amplitude of the continuous
             waveform, of type pulse.amplitude.
         """
-        return super().__init__(operands=[frame, amplitude], result_types=[FrameType()])
+        frame_ssa = SSAValue.get(frame, type=FrameType)
+        return super().__init__(operands=[frame, amplitude], result_types=[frame_ssa.type])
 
 
 @irdl_op_definition
@@ -1668,7 +1685,8 @@ class StopContinuousWaveformOp(IRDLOperation):
         :param frame: The SSA value representing the frame on which to stop the continuous
             waveform.
         """
-        return super().__init__(operands=[frame], result_types=[FrameType()])
+        frame_ssa = SSAValue.get(frame, type=FrameType)
+        return super().__init__(operands=[frame], result_types=[frame_ssa.type])
 
 
 @irdl_op_definition
@@ -1681,10 +1699,10 @@ class AcquireOp(IRDLOperation):
     .. code-block:: mlir
 
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+            : !pulse.frame<"output">
         %duration = pulse.constant<800e-9> : !pulse.time
         %frame_result, %waveform_result = pulse.acquire(%frame, %duration)
-            : (!pulse.frame, !pulse.waveform)
+            : (!pulse.frame<"output">, !pulse.waveform)
 
 
     :ivar frame: The SSA value representing the frame on which to perform the acquisition.
@@ -1711,6 +1729,7 @@ class AcquireOp(IRDLOperation):
         :param duration: The SSA value representing the duration of the acquisition, of type
             pulse.time.
         """
+        frame_ssa = SSAValue.get(frame, type=FrameType)
         return super().__init__(
-            operands=[frame, duration], result_types=[FrameType(), WaveformType()]
+            operands=[frame, duration], result_types=[frame_ssa.type, WaveformType()]
         )

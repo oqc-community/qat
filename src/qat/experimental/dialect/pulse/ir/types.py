@@ -2,8 +2,9 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 from typing import TypeVar
 
+from xdsl.dialects.builtin import StringAttr
 from xdsl.ir import TypeAttribute
-from xdsl.irdl import ParametrizedAttribute, irdl_attr_definition
+from xdsl.irdl import ParametrizedAttribute, irdl_attr_definition, param_def
 
 
 @irdl_attr_definition
@@ -52,9 +53,21 @@ class FrameType(ParametrizedAttribute, TypeAttribute):
     phase and time evolution relative to that frequency.
 
     Used with the intent of manipulating a quantum component.
+
+    :ivar port_kind: A target-resolved token used to identify the port class for this frame,
+        without encoding hardware object details directly in the IR. This name can take any
+        string, but is expected to match a meaningful port class in the context of the
+        system data. The default is "output", which for example, is the standard port kind
+        for a qubit drive frame.
     """
 
     name = "pulse.frame"
+    port_kind: StringAttr = param_def()
+
+    def __init__(self, port_kind: StringAttr | str = "output"):
+        if isinstance(port_kind, str):
+            port_kind = StringAttr(port_kind)
+        return super().__init__(port_kind)
 
 
 @irdl_attr_definition
