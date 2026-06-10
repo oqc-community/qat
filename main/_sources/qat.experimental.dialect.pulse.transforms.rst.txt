@@ -13,3 +13,4 @@ Submodules
    :maxdepth: 4
 
    qat.experimental.dialect.pulse.transforms.constants
+   qat.experimental.dialect.pulse.transforms.frame_no_op_elimination

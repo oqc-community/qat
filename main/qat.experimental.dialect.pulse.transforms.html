@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms package &mdash; qat-compiler 3.0.0.post250.dev20260610143248 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms package &mdash; qat-compiler 3.0.0.post252.dev20260610211731 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -546,34 +546,6 @@
 
   <section id="module-qat.experimental.dialect.pulse.transforms">
 <span id="qat-experimental-dialect-pulse-transforms-package"></span><h1>qat.experimental.dialect.pulse.transforms package<a class="headerlink" href="#module-qat.experimental.dialect.pulse.transforms" title="Link to this heading"></a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FoldConstantConstantOp</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
-<p>Finds arithmetic operations whose operands are both constant-like and folds them into
-a single <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code> with the result of the operation as its value.</p>
-<p>This is hooked in from canonicalization passes, and eliminates redundant arithmetic
-operations in the pulse dialect.</p>
-<p>For example,</p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frequency1 = pulse.constant&lt;5e9&gt; : !pulse.frequency
-%frequency2 = pulse.constant&lt;1e9&gt; : !pulse.frequency
-%result = pulse.add(%frequency1, %frequency2) : !pulse.frequency
-</pre></div>
-</div>
-<p>can be replaced with</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp.match_and_rewrite">
-<span class="sig-name descname"><span class="pre">match_and_rewrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewriter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PatternRewriter</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.FoldConstantConstantOp.match_and_rewrite" title="Link to this definition"></a></dt>
-<dd><p>Match an operation, and optionally perform a rewrite using the rewriter.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
@@ -581,6 +553,10 @@ operations in the pulse dialect.</p>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html">qat.experimental.dialect.pulse.transforms.constants module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp"><code class="docutils literal notranslate"><span class="pre">FoldConstantConstantOp</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">FoldConstantConstantOp.match_and_rewrite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp"><code class="docutils literal notranslate"><span class="pre">FoldMaxTimeOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">FoldMaxTimeOp.match_and_rewrite()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter"><code class="docutils literal notranslate"><span class="pre">PulseConstantFoldAdapter</span></code></a><ul>
@@ -593,6 +569,17 @@ operations in the pulse dialect.</p>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.WaveformConstantFoldAdapter"><code class="docutils literal notranslate"><span class="pre">WaveformConstantFoldAdapter</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.WaveformConstantFoldAdapter.fold"><code class="docutils literal notranslate"><span class="pre">WaveformConstantFoldAdapter.fold()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html">qat.experimental.dialect.pulse.transforms.frame_no_op_elimination module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroPhaseShiftOp"><code class="docutils literal notranslate"><span class="pre">FoldZeroPhaseShiftOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroPhaseShiftOp.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">FoldZeroPhaseShiftOp.match_and_rewrite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroWaitOp"><code class="docutils literal notranslate"><span class="pre">FoldZeroWaitOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroWaitOp.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">FoldZeroWaitOp.match_and_rewrite()</span></code></a></li>
 </ul>
 </li>
 </ul>

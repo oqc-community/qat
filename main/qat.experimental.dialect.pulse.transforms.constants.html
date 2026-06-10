@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.constants module &mdash; qat-compiler 3.0.0.post250.dev20260610143248 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.constants module &mdash; qat-compiler 3.0.0.post252.dev20260610211731 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.experimental.dialect.pulse.units module" href="qat.experimental.dialect.pulse.units.html" />
+    <link rel="next" title="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination module" href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html" />
     <link rel="prev" title="qat.experimental.dialect.pulse.transforms package" href="qat.experimental.dialect.pulse.transforms.html" /> 
 </head>
 
@@ -576,6 +576,25 @@ operations in the pulse dialect.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FoldMaxTimeOp</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
+<p>Finds <code class="xref py py-class docutils literal notranslate"><span class="pre">MaxTimeOp</span></code> that has constant operands and folds it into the constant
+with maximum time.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp.match_and_rewrite">
+<span class="sig-name descname"><span class="pre">match_and_rewrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewriter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PatternRewriter</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp.match_and_rewrite" title="Link to this definition"></a></dt>
+<dd><p>Match an operation, and optionally perform a rewrite using the rewriter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseConstantFoldAdapter</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
@@ -656,7 +675,7 @@ folded.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.experimental.dialect.pulse.transforms.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.pulse.transforms package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.experimental.dialect.pulse.units.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.pulse.units module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

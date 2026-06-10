@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.traits module &mdash; qat-compiler 3.0.0.post250.dev20260610143248 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.traits module &mdash; qat-compiler 3.0.0.post252.dev20260610211731 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -547,6 +547,8 @@
 
   <section id="module-qat.experimental.dialect.pulse.ir.traits">
 <span id="qat-experimental-dialect-pulse-ir-traits-module"></span><h1>qat.experimental.dialect.pulse.ir.traits module<a class="headerlink" href="#module-qat.experimental.dialect.pulse.ir.traits" title="Link to this heading"></a></h1>
+<p>Contains traits that are used to describe properties of operations in the pulse dialect,
+and to apply canonicalization patterns to operations in the pulse dialect.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.AdvancesTimeTrait">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AdvancesTimeTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.AdvancesTimeTrait" title="Link to this definition"></a></dt>
@@ -554,6 +556,28 @@
 <p>A trait that signifies an operation advances time on the frame(s) it acts on.</p>
 <p>The time does not need to be known at compile time, and in that sense, can be runtime
 dynamic.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.FrameCanonicalizationPatternsTrait">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameCanonicalizationPatternsTrait</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.FrameCanonicalizationPatternsTrait" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HasCanonicalizationPatternsTrait</span></code></p>
+<p>Applies canonicalization to operations that act on frames.</p>
+<p>Including:</p>
+<ul class="simple">
+<li><p>Phase shifts that are modulo 2pi equal to zero.</p></li>
+<li><p>Waits that are equal to zero.</p></li>
+</ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.FrameCanonicalizationPatternsTrait.get_canonicalization_patterns">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_canonicalization_patterns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.FrameCanonicalizationPatternsTrait.get_canonicalization_patterns" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
