@@ -9,10 +9,15 @@ from xdsl.irdl import irdl_op_definition
 from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1.ir.abstract_ops import (
+    IIIIIOperation,
     IIIOperation,
     IIOperation,
+    IRsIIOperation,
+    IRsIRsIOperation,
+    IRsRsRsIOperation,
     Q1Instruction,
     RdIOperation,
+    RsRsIOperation,
     RsRsRdOperation,
     _assembly_arg_str,
 )
@@ -43,6 +48,31 @@ class DummyRsRsRdOp(RsRsRdOperation[IntRegisterType]):
 @irdl_op_definition
 class DummyIIIOp(IIIOperation):
     name = "q1.iii.dummy"
+
+
+@irdl_op_definition
+class DummyIRsIIOp(IRsIIOperation[IntRegisterType]):
+    name = "q1.irii.dummy"
+
+
+@irdl_op_definition
+class DummyRsRsIOp(RsRsIOperation[IntRegisterType]):
+    name = "q1.rri.dummy"
+
+
+@irdl_op_definition
+class DummyIRsRsRsIOp(IRsRsRsIOperation[IntRegisterType]):
+    name = "q1.irrri.dummy"
+
+
+@irdl_op_definition
+class DummyIIIIIOp(IIIIIOperation):
+    name = "q1.iiiii.dummy"
+
+
+@irdl_op_definition
+class DummyIRsIRsIOp(IRsIRsIOperation[IntRegisterType]):
+    name = "q1.iriri.dummy"
 
 
 def test_assembly_arg_str():
@@ -102,4 +132,81 @@ def test_iii_operation_init_and_assembly_line_args():
         "1",
         "2",
         "3",
+    )
+
+
+def test_iiiii_operation_init_and_assembly_line_args():
+    op = DummyIIIIIOp(1, 2, 3, 4, 5, comment="hello")
+    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+    )
+
+
+def test_iriri_operation_init_and_assembly_line_args():
+    op = DummyIRsIRsIOp(
+        1,
+        create_ssa_value(Registers.R2),
+        3,
+        create_ssa_value(Registers.R4),
+        5,
+        comment="hello",
+    )
+    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
+        "1",
+        "R2",
+        "3",
+        "R4",
+        "5",
+    )
+
+
+def test_rri_operation_init_and_assembly_line_args():
+    op = DummyRsRsIOp(
+        create_ssa_value(Registers.R1),
+        create_ssa_value(Registers.R2),
+        3,
+        comment="hello",
+    )
+    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
+        "R1",
+        "R2",
+        "3",
+    )
+
+
+def test_irii_operation_init_and_assembly_line_args():
+    op = DummyIRsIIOp(
+        1,
+        create_ssa_value(Registers.R2),
+        3,
+        4,
+        comment="hello",
+    )
+    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
+        "1",
+        "R2",
+        "3",
+        "4",
+    )
+
+
+def test_irrri_operation_init_and_assembly_line_args():
+    op = DummyIRsRsRsIOp(
+        1,
+        create_ssa_value(Registers.R2),
+        create_ssa_value(Registers.R3),
+        create_ssa_value(Registers.R4),
+        5,
+        comment="hello",
+    )
+    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
+        "1",
+        "R2",
+        "R3",
+        "R4",
+        "5",
     )

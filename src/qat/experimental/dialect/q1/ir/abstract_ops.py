@@ -517,6 +517,39 @@ class RsIRdOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs, self.imm, self.rd
 
 
+class RsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have two source registers followed by one
+    immediate operand."""
+
+    rs1 = operand_def(RInvT)
+    rs2 = operand_def(RInvT)
+    imm = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        rs1: Operation | SSAValue,
+        rs2: Operation | SSAValue,
+        imm: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm, int):
+            imm = IntegerAttr(imm, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs1, rs2],
+            properties={
+                "imm": imm,
+                "comment": comment,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.rs1, self.rs2, self.imm
+
+
 class RsRsRdOperation(Q1Instruction, ABC, Generic[RInvT]):
     """A base class for QBlox Q1 operations that have two source registers followed by one
     destination register."""
@@ -671,6 +704,49 @@ class IIIIOperation(Q1Instruction, ABC):
         return self.imm1, self.imm2, self.imm3, self.imm4
 
 
+class IRsIIOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have one immediate operand followed by one
+    source register followed by two immediate operands."""
+
+    imm1 = prop_def(IntegerAttr[UI32])
+    rs = operand_def(RInvT)
+    imm2 = prop_def(IntegerAttr[UI32])
+    imm3 = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        imm1: int | IntegerAttr[UI32],
+        rs: Operation | SSAValue,
+        imm2: int | IntegerAttr[UI32],
+        imm3: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm1, int):
+            imm1 = IntegerAttr(imm1, ui32)
+
+        if isinstance(imm2, int):
+            imm2 = IntegerAttr(imm2, ui32)
+
+        if isinstance(imm3, int):
+            imm3 = IntegerAttr(imm3, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs],
+            properties={
+                "comment": comment,
+                "imm1": imm1,
+                "imm2": imm2,
+                "imm3": imm3,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm1, self.rs, self.imm2, self.imm3
+
+
 class RsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
     """A base class for QBlox Q1 operations that have three source registers followed by one
     immediate operand."""
@@ -704,6 +780,148 @@ class RsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
 
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
         return self.rs1, self.rs2, self.rs3, self.imm
+
+
+# endregion
+
+# region Quinary formats
+
+
+class IIIIIOperation(Q1Instruction, ABC):
+    """A base class for QBlox Q1 operations that have five immediate operands."""
+
+    imm1 = prop_def(IntegerAttr[UI32])
+    imm2 = prop_def(IntegerAttr[UI32])
+    imm3 = prop_def(IntegerAttr[UI32])
+    imm4 = prop_def(IntegerAttr[UI32])
+    imm5 = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        imm1: int | IntegerAttr[UI32],
+        imm2: int | IntegerAttr[UI32],
+        imm3: int | IntegerAttr[UI32],
+        imm4: int | IntegerAttr[UI32],
+        imm5: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm1, int):
+            imm1 = IntegerAttr(imm1, ui32)
+
+        if isinstance(imm2, int):
+            imm2 = IntegerAttr(imm2, ui32)
+
+        if isinstance(imm3, int):
+            imm3 = IntegerAttr(imm3, ui32)
+
+        if isinstance(imm4, int):
+            imm4 = IntegerAttr(imm4, ui32)
+
+        if isinstance(imm5, int):
+            imm5 = IntegerAttr(imm5, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            properties={
+                "comment": comment,
+                "imm1": imm1,
+                "imm2": imm2,
+                "imm3": imm3,
+                "imm4": imm4,
+                "imm5": imm5,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm1, self.imm2, self.imm3, self.imm4, self.imm5
+
+
+class IRsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have three source registers surrounded by
+    two immediate operands."""
+
+    imm1 = prop_def(IntegerAttr[UI32])
+    rs1 = operand_def(RInvT)
+    rs2 = operand_def(RInvT)
+    rs3 = operand_def(RInvT)
+    imm2 = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        imm1: int | IntegerAttr[UI32],
+        rs1: Operation | SSAValue,
+        rs2: Operation | SSAValue,
+        rs3: Operation | SSAValue,
+        imm2: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm1, int):
+            imm1 = IntegerAttr(imm1, ui32)
+
+        if isinstance(imm2, int):
+            imm2 = IntegerAttr(imm2, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs1, rs2, rs3],
+            properties={
+                "comment": comment,
+                "imm1": imm1,
+                "imm2": imm2,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm1, self.rs1, self.rs2, self.rs3, self.imm2
+
+
+class IRsIRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have an immediate operand surrounded by two
+    source registers, surrounded by two immediate operands."""
+
+    imm1 = prop_def(IntegerAttr[UI32])
+    rs1 = operand_def(RInvT)
+    imm2 = prop_def(IntegerAttr[UI32])
+    rs2 = operand_def(RInvT)
+    imm3 = prop_def(IntegerAttr[UI32])
+
+    def __init__(
+        self,
+        imm1: int | IntegerAttr[UI32],
+        rs1: Operation | SSAValue,
+        imm2: int | IntegerAttr[UI32],
+        rs2: Operation | SSAValue,
+        imm3: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(imm1, int):
+            imm1 = IntegerAttr(imm1, ui32)
+
+        if isinstance(imm2, int):
+            imm2 = IntegerAttr(imm2, ui32)
+
+        if isinstance(imm3, int):
+            imm3 = IntegerAttr(imm3, ui32)
+
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs1, rs2],
+            properties={
+                "comment": comment,
+                "imm1": imm1,
+                "imm2": imm2,
+                "imm3": imm3,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm1, self.rs1, self.imm2, self.rs2, self.imm3
 
 
 # endregion

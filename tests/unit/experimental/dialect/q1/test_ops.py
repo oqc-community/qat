@@ -11,6 +11,16 @@ from xdsl.traits import Commutative, IsTerminator, Pure
 from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1 import (
+    AcquireDigitalIIIOp,
+    AcquireDigitalIRIOp,
+    AcquireIIIOp,
+    AcquireIRIOp,
+    AcquireTimetagsIIIIIOp,
+    AcquireTimetagsIRIRIOp,
+    AcquireTtlIIIIOp,
+    AcquireTtlIRIIOp,
+    AcquireWeighedIIIIIOp,
+    AcquireWeighedIRRRIOp,
     AddRIROp,
     AddRRROp,
     AndRIROp,
@@ -73,6 +83,8 @@ from qat.experimental.dialect.q1 import (
     JzIOp,
     JzROp,
     LabelOp,
+    LatchRstIOp,
+    LatchRstROp,
     LoopRIOp,
     LoopRROp,
     MoveIROp,
@@ -82,6 +94,8 @@ from qat.experimental.dialect.q1 import (
     NotRROp,
     OrRIROp,
     OrRRROp,
+    PlayIIIOp,
+    PlayRRIOp,
     ResetPhOp,
     SetAwgGainIIOp,
     SetAwgGainRROp,
@@ -91,6 +105,8 @@ from qat.experimental.dialect.q1 import (
     SetCondRRRIOp,
     SetFreqIOp,
     SetFreqROp,
+    SetLatchEnIIOp,
+    SetLatchEnRIOp,
     SetMrkIOp,
     SetMrkROp,
     SetPhDeltaIOp,
@@ -102,6 +118,15 @@ from qat.experimental.dialect.q1 import (
     StopROp,
     SubRIROp,
     SubRRROp,
+    UpdParamIOp,
+    UpdThresIIIOp,
+    UpdThresIRIOp,
+    WaitIOp,
+    WaitROp,
+    WaitSyncIOp,
+    WaitSyncROp,
+    WaitTriggerIIOp,
+    WaitTriggerRROp,
     XorRIROp,
     XorRRROp,
 )
@@ -917,6 +942,396 @@ def test_imm_imm_format(op_type, mnemonic, comment, expected_traits):
     assert op2.imm2 == IntegerAttr(b_val, ui32)
 
 
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (LatchRstIOp, "latch_rst", (HasRegisterConstraintsTrait,)),
+        (
+            WaitIOp,
+            "wait",
+            (
+                Pure(),
+                HasRegisterConstraintsTrait,
+            ),
+        ),
+        (
+            WaitSyncIOp,
+            "wait_sync",
+            (
+                Pure(),
+                HasRegisterConstraintsTrait,
+            ),
+        ),
+        (UpdParamIOp, "upd_param", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 300
+
+    op = op_type(imm1, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert op.properties["imm"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm,)
+    assert len(expected_traits) == len(op.traits.traits)
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (SetLatchEnIIOp, "set_latch_en", (HasRegisterConstraintsTrait,)),
+        (
+            WaitTriggerIIOp,
+            "wait_trigger",
+            (
+                Pure(),
+                HasRegisterConstraintsTrait,
+            ),
+        ),
+    ],
+)
+def test_rt_imm_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 300
+    imm2 = 400
+
+    op = op_type(imm1, imm2, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.imm2)
+    assert len(expected_traits) == len(op.traits.traits)
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (PlayIIIOp, "play", (HasRegisterConstraintsTrait,)),
+        (AcquireIIIOp, "acquire", (HasRegisterConstraintsTrait,)),
+        (AcquireDigitalIIIOp, "acquire_digital", (HasRegisterConstraintsTrait,)),
+        (UpdThresIIIOp, "upd_thres", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_imm_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 300
+    imm2 = 500
+    imm3 = 700
+
+    op = op_type(imm1, imm2, imm3, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.properties["imm3"] == IntegerAttr(value=IntAttr(data=imm3), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.imm2, op.imm3)
+    assert len(expected_traits) == len(op.traits.traits)
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (AcquireTtlIIIIOp, "acquire_ttl", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_imm_imm_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 300
+    imm2 = 400
+    imm3 = 500
+    imm4 = 600
+
+    op = op_type(imm1, imm2, imm3, imm4, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.properties["imm3"] == IntegerAttr(value=IntAttr(data=imm3), value_type=ui32)
+    assert op.properties["imm4"] == IntegerAttr(value=IntAttr(data=imm4), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.imm2, op.imm3, op.imm4)
+    assert len(expected_traits) == len(op.traits.traits)
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (AcquireWeighedIIIIIOp, "acquire_weighed", (HasRegisterConstraintsTrait,)),
+        (AcquireTimetagsIIIIIOp, "acquire_timetags", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_imm_imm_imm_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 300
+    imm2 = 400
+    imm3 = 500
+    imm4 = 600
+    imm5 = 700
+
+    op = op_type(imm1, imm2, imm3, imm4, imm5, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.properties["imm3"] == IntegerAttr(value=IntAttr(data=imm3), value_type=ui32)
+    assert op.properties["imm4"] == IntegerAttr(value=IntAttr(data=imm4), value_type=ui32)
+    assert op.properties["imm5"] == IntegerAttr(value=IntAttr(data=imm5), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.imm2, op.imm3, op.imm4, op.imm5)
+
+    assert len(expected_traits) == len(op.traits.traits)
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (LatchRstROp, "latch_rst", (HasRegisterConstraintsTrait,)),
+        (
+            WaitROp,
+            "wait",
+            (
+                Pure(),
+                HasRegisterConstraintsTrait,
+            ),
+        ),
+        (
+            WaitSyncROp,
+            "wait_sync",
+            (
+                Pure(),
+                HasRegisterConstraintsTrait,
+            ),
+        ),
+    ],
+)
+def test_rt_rs_format(op_type, mnemonic, comment, expected_traits):
+    r1 = create_ssa_value(Registers.R1)
+
+    op = op_type(r1, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert op.assembly_line_args() == (op.rs,)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (
+            WaitTriggerRROp,
+            "wait_trigger",
+            (
+                Pure(),
+                HasRegisterConstraintsTrait,
+            ),
+        ),
+    ],
+)
+def test_rt_rs_rs_format(op_type, mnemonic, comment, expected_traits):
+    r1 = create_ssa_value(Registers.R1)
+    r2 = create_ssa_value(Registers.R2)
+
+    op = op_type(r1, r2, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs1.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert isinstance(op.rs2.type, IntRegisterType)
+    assert r2.type.register_name.data == "R2"
+    assert r2.type.index == Registers.R2.index
+    assert op.assembly_line_args() == (op.rs1, op.rs2)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (SetLatchEnRIOp, "set_latch_en", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_rs_imm_format(op_type, mnemonic, comment, expected_traits):
+    r1 = create_ssa_value(Registers.R1)
+    imm1 = 300
+
+    op = op_type(r1, imm1, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert op.properties["imm"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.assembly_line_args() == (op.rs, op.imm)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (PlayRRIOp, "play", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_rs_rs_imm_format(op_type, mnemonic, comment, expected_traits):
+    r1 = create_ssa_value(Registers.R1)
+    r2 = create_ssa_value(Registers.R2)
+    imm1 = 300
+
+    op = op_type(r1, r2, imm1, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs1.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert isinstance(op.rs2.type, IntRegisterType)
+    assert r2.type.register_name.data == "R2"
+    assert r2.type.index == Registers.R2.index
+    assert op.properties["imm"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.assembly_line_args() == (op.rs1, op.rs2, op.imm)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (AcquireTtlIRIIOp, "acquire_ttl", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_rs_imm_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 100
+    r1 = create_ssa_value(Registers.R1)
+    imm2 = 300
+    imm3 = 500
+
+    op = op_type(imm1, r1, imm2, imm3, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.properties["imm3"] == IntegerAttr(value=IntAttr(data=imm3), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.rs, op.imm2, op.imm3)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (AcquireIRIOp, "acquire", (HasRegisterConstraintsTrait,)),
+        (AcquireDigitalIRIOp, "acquire_digital", (HasRegisterConstraintsTrait,)),
+        (UpdThresIRIOp, "upd_thres", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_rs_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 100
+    r1 = create_ssa_value(Registers.R1)
+    imm2 = 300
+
+    op = op_type(imm1, r1, imm2, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.rs, op.imm2)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (AcquireTimetagsIRIRIOp, "acquire_timetags", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_rs_imm_rs_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 100
+    r1 = create_ssa_value(Registers.R1)
+    imm2 = 300
+    r2 = create_ssa_value(Registers.R2)
+    imm3 = 500
+
+    op = op_type(imm1, r1, imm2, r2, imm3, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs1.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert isinstance(op.rs2.type, IntRegisterType)
+    assert r2.type.register_name.data == "R2"
+    assert r2.type.index == Registers.R2.index
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.properties["imm3"] == IntegerAttr(value=IntAttr(data=imm3), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.rs1, op.imm2, op.rs2, op.imm3)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
+@pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
+@pytest.mark.parametrize(
+    "op_type,mnemonic,expected_traits",
+    [
+        (AcquireWeighedIRRRIOp, "acquire_weighed", (HasRegisterConstraintsTrait,)),
+    ],
+)
+def test_rt_imm_rs_rs_rs_imm_format(op_type, mnemonic, comment, expected_traits):
+    imm1 = 100
+    r1 = create_ssa_value(Registers.R1)
+    r2 = create_ssa_value(Registers.R2)
+    r3 = create_ssa_value(Registers.R3)
+    imm2 = 300
+
+    op = op_type(imm1, r1, r2, r3, imm2, comment=comment)
+    assert op.assembly_mnemonic() == mnemonic
+    assert isinstance(op.rs1.type, IntRegisterType)
+    assert r1.type.register_name.data == "R1"
+    assert r1.type.index == Registers.R1.index
+    assert isinstance(op.rs2.type, IntRegisterType)
+    assert r2.type.register_name.data == "R2"
+    assert r2.type.index == Registers.R2.index
+    assert isinstance(op.rs3.type, IntRegisterType)
+    assert r3.type.register_name.data == "R3"
+    assert r3.type.index == Registers.R3.index
+    assert op.properties["imm1"] == IntegerAttr(value=IntAttr(data=imm1), value_type=ui32)
+    assert op.properties["imm2"] == IntegerAttr(value=IntAttr(data=imm2), value_type=ui32)
+    assert op.assembly_line_args() == (op.imm1, op.rs1, op.rs2, op.rs3, op.imm2)
+    assert len(expected_traits) == len(op.traits.traits)
+
+    for trait in expected_traits:
+        assert op.has_trait(trait)
+
+
 class TestSemAliasing:
     """Tests for semantic aliasing of operation operands."""
 
@@ -1173,3 +1588,160 @@ class TestSemAliasing:
         loop_rr = LoopRROp(Registers.R20, create_ssa_value(Registers.R21))
         assert loop_rr.source == loop_rr.rd
         assert loop_rr.address == loop_rr.rs
+
+    def test_rt_wait_sem_alias(self) -> None:
+        op = WaitIOp(duration=100)
+        assert op.duration == op.imm
+
+        op = WaitROp(duration=create_ssa_value(Registers.R14))
+        assert op.duration == op.rs
+
+    def test_rt_wait_sync_sem_alias(self) -> None:
+        op = WaitSyncIOp(duration=200)
+        assert op.duration == op.imm
+
+        op = WaitSyncROp(duration=create_ssa_value(Registers.R12))
+        assert op.duration == op.rs
+
+    def test_rt_wait_trigger_sem_alias(self) -> None:
+        op = WaitTriggerIIOp(trigger=2, duration=50)
+        assert op.trigger == op.imm1
+        assert op.duration == op.imm2
+
+        op = WaitTriggerRROp(
+            trigger=create_ssa_value(Registers.R13),
+            duration=create_ssa_value(Registers.R14),
+        )
+        assert op.trigger == op.rs1
+        assert op.duration == op.rs2
+
+    def test_rt_play_sem_alias(self) -> None:
+        op = PlayRRIOp(
+            wave_0=create_ssa_value(Registers.R12),
+            wave_1=create_ssa_value(Registers.R13),
+            duration=100,
+        )
+        assert op.wave_0 == op.rs1
+        assert op.wave_1 == op.rs2
+        assert op.duration == op.imm
+
+        op = PlayIIIOp(wave_0=3, wave_1=2, duration=100)
+        assert op.wave_0 == op.imm1
+        assert op.wave_1 == op.imm2
+        assert op.duration == op.imm3
+
+    def test_rt_acquire_sem_alias(self) -> None:
+        op = AcquireIRIOp(acquisition=44, bin=create_ssa_value(Registers.R13), duration=128)
+        assert op.acquisition == op.imm1
+        assert op.bin == op.rs
+        assert op.duration == op.imm2
+
+        op = AcquireIIIOp(acquisition=100, bin=2, duration=50)
+        assert op.acquisition == op.imm1
+        assert op.bin == op.imm2
+        assert op.duration == op.imm3
+
+    def test_rt_acquire_weighted_sem_alias(self) -> None:
+        op = AcquireWeighedIRRRIOp(
+            acquisition=10,
+            bin=create_ssa_value(Registers.R13),
+            weight_0=create_ssa_value(Registers.R14),
+            weight_1=create_ssa_value(Registers.R15),
+            duration=100,
+        )
+        assert op.acquisition == op.imm1
+        assert op.bin == op.rs1
+        assert op.weight_0 == op.rs2
+        assert op.weight_1 == op.rs3
+        assert op.duration == op.imm2
+
+        op = AcquireWeighedIIIIIOp(
+            acquisition=20, bin=3, weight_0=2, weight_1=1, duration=350
+        )
+        assert op.acquisition == op.imm1
+        assert op.bin == op.imm2
+        assert op.weight_0 == op.imm3
+        assert op.weight_1 == op.imm4
+        assert op.duration == op.imm5
+
+    def test_rt_acquire_ttl_sem_alias(self) -> None:
+        op = AcquireTtlIRIIOp(
+            acquisition=5, bin=create_ssa_value(Registers.R13), enable=1, duration=20
+        )
+        assert op.acquisition == op.imm1
+        assert op.bin == op.rs
+        assert op.enable == op.imm2
+        assert op.duration == op.imm3
+
+        op = AcquireTtlIIIIOp(acquisition=10, bin=5, enable=0, duration=400)
+        assert op.acquisition == op.imm1
+        assert op.bin == op.imm2
+        assert op.enable == op.imm3
+        assert op.duration == op.imm4
+
+    def test_rt_acquire_timetags_sem_alias(self) -> None:
+        op = AcquireTimetagsIRIRIOp(
+            acq_idx=3,
+            bin_idx=create_ssa_value(Registers.R13),
+            enable=1,
+            fine_delay=create_ssa_value(Registers.R14),
+            duration=100,
+        )
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.rs1
+        assert op.enable == op.imm2
+        assert op.fine_delay == op.rs2
+        assert op.duration == op.imm3
+
+        op = AcquireTimetagsIIIIIOp(
+            acq_idx=4, bin_idx=1, enable=0, fine_delay=40, duration=200
+        )
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.imm2
+        assert op.enable == op.imm3
+        assert op.fine_delay == op.imm4
+        assert op.duration == op.imm5
+
+    def test_rt_acquire_digital_sem_alias(self) -> None:
+        op = AcquireDigitalIIIOp(acq_idx=7, bin_idx=4, duration=30)
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.imm2
+        assert op.duration == op.imm3
+
+        op = AcquireDigitalIRIOp(
+            acq_idx=1, bin_idx=create_ssa_value(Registers.R13), duration=28
+        )
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.rs
+        assert op.duration == op.imm2
+
+    def test_rt_upd_thres_sem_alias(self) -> None:
+        op = UpdThresIIIOp(index=12, value=40, duration=250)
+        assert op.index == op.imm1
+        assert op.value == op.imm2
+        assert op.duration == op.imm3
+
+        op = UpdThresIRIOp(index=3, value=create_ssa_value(Registers.R13), duration=150)
+        assert op.index == op.imm1
+        assert op.value == op.rs
+        assert op.duration == op.imm2
+
+    def test_rt_upd_param_sem_alias(self) -> None:
+        op = UpdParamIOp(duration=100)
+        assert op.duration == op.imm
+
+    def test_rt_latch_rst_sem_alias(self) -> None:
+        op = LatchRstIOp(duration=300)
+        assert op.duration == op.imm
+
+        op = LatchRstROp(duration=create_ssa_value(Registers.R12))
+        assert op.duration == op.rs
+
+    def test_rt_latch_en_sem_alias(self) -> None:
+        op = SetLatchEnIIOp(enable=1, duration=300)
+        assert op.enable == op.imm1
+        assert op.duration == op.imm2
+
+        op = SetLatchEnRIOp(enable=create_ssa_value(Registers.R13), duration=300)
+        assert op.enable == op.rs
+        assert op.duration == op.imm

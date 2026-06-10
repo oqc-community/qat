@@ -26,12 +26,16 @@ from xdsl.traits import Commutative, IsTerminator, Pure
 
 from qat.experimental.dialect.q1.ir.abstract_ops import (
     AssemblyInstructionArg,
+    IIIIIOperation,
     IIIIOperation,
     IIIOperation,
     IIOperation,
     IOperation,
     IRdOperation,
+    IRsIIOperation,
     IRsIOperation,
+    IRsIRsIOperation,
+    IRsRsRsIOperation,
     NullaryOperation,
     Q1AsmOperation,
     RdIOperation,
@@ -43,6 +47,7 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     RsIRsOperation,
     RsOperation,
     RsRdOperation,
+    RsRsIOperation,
     RsRsOperation,
     RsRsRdOperation,
     RsRsRsIOperation,
@@ -2597,6 +2602,968 @@ class FbAcqIqShiftIIOp(IIOperation):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+# endregion
+
+# endregion
+
+# region Q1 Real-time Instructions
+
+
+@irdl_op_definition
+class SetLatchEnIIOp(IIOperation):
+    """Enable/Disable all trigger network address counters from an immediate value. When
+    enabled counters will count all triggers on the trigger network. When disabled the
+    counters hold their previous values.
+
+    Duration specifies the amount of time spent on the instruction in ns
+    """
+
+    name = "q1.ii.set_latch_en"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        enable: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(enable, duration, comment=comment)
+
+    @property
+    def enable(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class SetLatchEnRIOp(RsIOperation[IntRegisterType]):
+    """Enable/Disable all trigger network address counters. When enabled counters will count
+    all triggers on the trigger network. When disabled the counters hold their previous
+    values.
+
+    Duration specifies the amount of time spent on the instruction in ns
+    """
+
+    name = "q1.ri.set_latch_en"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        enable: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(enable, duration, comment=comment)
+
+    @property
+    def enable(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class LatchRstIOp(IOperation):
+    """Resets all trigger network address counters to 0.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.i.latch_rst"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class LatchRstROp(RsOperation[IntRegisterType]):
+    """Resets all trigger network address counters to 0.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.r.latch_rst"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        duration: Operation | SSAValue,
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+
+@irdl_op_definition
+class WaitIOp(IOperation):
+    """Waits for the specified duration in ns."""
+
+    name = "q1.i.wait"
+
+    traits = traits_def(Pure())
+
+    def __init__(
+        self,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class WaitROp(RsOperation[IntRegisterType]):
+    """Waits for the specified duration in ns."""
+
+    name = "q1.r.wait"
+
+    traits = traits_def(Pure())
+
+    def __init__(
+        self,
+        duration: Operation | SSAValue,
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+
+@irdl_op_definition
+class WaitTriggerIIOp(IIOperation):
+    """Wait for a hardware trigger. Duration specifies the timeout in ns.
+
+    Warning: Minimum time between wait_trigger and set_cond is 8ns.
+    """
+
+    name = "q1.ii.wait_trigger"
+
+    traits = traits_def(Pure())
+
+    def __init__(
+        self,
+        trigger: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(trigger, duration, comment=comment)
+
+    @property
+    def trigger(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class WaitTriggerRROp(RsRsOperation[IntRegisterType]):
+    """Wait for a hardware trigger.
+
+    Duration specifies the timeout in ns.
+    """
+
+    name = "q1.rr.wait_trigger"
+
+    traits = traits_def(Pure())
+
+    def __init__(
+        self,
+        trigger: Operation | SSAValue,
+        duration: Operation | SSAValue,
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(trigger, duration, comment=comment)
+
+    @property
+    def trigger(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+
+@irdl_op_definition
+class WaitSyncIOp(IOperation):
+    """Wait for SYNQ to complete all previous tasks of all the sequencers.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.i.wait_sync"
+
+    traits = traits_def(Pure())
+
+    def __init__(
+        self,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class WaitSyncROp(RsOperation[IntRegisterType]):
+    """Wait for SYNQ to complete all previous tasks of all the sequencers.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.r.wait_sync"
+
+    traits = traits_def(Pure())
+
+    def __init__(
+        self,
+        duration: Operation | SSAValue,
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+
+@irdl_op_definition
+class UpdParamIOp(IOperation):
+    """Update the latched parameters and then wait for number of ns specified by
+    duration."""
+
+    name = "q1.i.upd_param"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(duration, comment=comment)
+
+    @property
+    def duration(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class PlayIIIOp(IIIOperation):
+    """Update the latched parameters, interrupt waves being played and start playing AWG
+    waveforms stored at indexes wave_0 on path 0 and wave_1 on path 1.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iii.play"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        wave_0: int | IntegerAttr[UI32],
+        wave_1: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(wave_0, wave_1, duration, comment=comment)
+
+    @property
+    def wave_0(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def wave_1(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class PlayRRIOp(RsRsIOperation[IntRegisterType]):
+    """Update the latched parameters, interrupt waves being played and start playing AWG
+    waveforms stored at indexes wave_0 on path 0 and wave_1 on path 1.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.rri.play"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        wave_0: Operation | SSAValue,
+        wave_1: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(wave_0, wave_1, duration, comment=comment)
+
+    @property
+    def wave_0(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def wave_1(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def duration(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class AcquireIIIOp(IIIOperation):
+    """Update the latched parameters, interrupt currently active acquisitions and start the
+    acquisition specified and store data in index provided by bin.
+
+    Integration is executed using a square weight with preset length from the QCoDeS
+    parameter.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iii.acquire"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acquisition: int | IntegerAttr[UI32],
+        bin: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acquisition, bin, duration, comment=comment)
+
+    @property
+    def acquisition(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class AcquireIRIOp(IRsIOperation[IntRegisterType]):
+    """Update the latched parameters, interrupt currently active acquisitions and start the
+    acquisition specified and store data in index provided by bin.
+
+    Integration is executed using a square weight with preset length from the QCoDeS
+    parameter.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iri.acquire"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acquisition: int | IntegerAttr[UI32],
+        bin: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acquisition, bin, duration, comment=comment)
+
+    @property
+    def acquisition(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class AcquireWeighedIIIIIOp(IIIIIOperation):
+    """Update the latched parameters, interrupt currently active acquisitions and start the
+    acquisition specified and store data in index provided by bin.
+
+    Integration is executed using weights stored at indices weight_0 for path 0 and weight_1
+    for path 1.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iiiii.acquire_weighed"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acquisition: int | IntegerAttr[UI32],
+        bin: int | IntegerAttr[UI32],
+        weight_0: int | IntegerAttr[UI32],
+        weight_1: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acquisition, bin, weight_0, weight_1, duration, comment=comment)
+
+    @property
+    def acquisition(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def weight_0(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+    @property
+    def weight_1(self):
+        """Semantic alias for the fourth generic imm field."""
+
+        return self.imm4
+
+    @property
+    def duration(self):
+        """Semantic alias for the fifth generic imm field."""
+
+        return self.imm5
+
+
+@irdl_op_definition
+class AcquireWeighedIRRRIOp(IRsRsRsIOperation[IntRegisterType]):
+    """Update the latched parameters, interrupt currently active acquisitions and start the
+    acquisition specified and store data in index provided by bin. Integration is executed
+    using weights stored at indices weight_0 for path 0 and weight_1 for path 1.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.irrri.acquire_weighed"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acquisition: int | IntegerAttr[UI32],
+        bin: Operation | SSAValue,
+        weight_0: Operation | SSAValue,
+        weight_1: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acquisition, bin, weight_0, weight_1, duration, comment=comment)
+
+    @property
+    def acquisition(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def weight_0(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def weight_1(self):
+        """Semantic alias for the third generic rs field."""
+
+        return self.rs3
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class AcquireTtlIIIIOp(IIIIOperation):
+    """Update the latched parameters, start the TTL trigger acquisition provided by the
+    index in acquisition, store data in index provided by bin.
+
+    Enable TTL trigger by writing 1 to enable, disable after by writing 0 to enable
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iiii.acquire_ttl"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acquisition: int | IntegerAttr[UI32],
+        bin: int | IntegerAttr[UI32],
+        enable: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acquisition, bin, enable, duration, comment=comment)
+
+    @property
+    def acquisition(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def enable(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+    @property
+    def duration(self):
+        """Semantic alias for the fourth generic imm field."""
+
+        return self.imm4
+
+
+@irdl_op_definition
+class AcquireTtlIRIIOp(IRsIIOperation[IntRegisterType]):
+    """Update the latched parameters, start the TTL trigger acquisition provided by the
+    index in acquisition, store data in index provided by bin.
+
+    Enable TTL trigger by writing 1 to enable, disable afterwards by writing 0 to enable
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.irii.acquire_ttl"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acquisition: int | IntegerAttr[UI32],
+        bin: Operation | SSAValue,
+        enable: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acquisition, bin, enable, duration, comment=comment)
+
+    @property
+    def acquisition(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def enable(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class AcquireTimetagsIIIIIOp(IIIIIOperation):
+    """Depending on enable, open or close the time tag counting acquisition window.
+
+    fine_delay adjusts the start of the acquisition window relative to current sequencer
+    time.
+
+    acq_idx and bin_idx are defined by a closing acquire_timetags instruction.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iiiii.acquire_timetags"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: int | IntegerAttr[UI32],
+        enable: int | IntegerAttr[UI32],
+        fine_delay: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acq_idx, bin_idx, enable, fine_delay, duration, comment=comment)
+
+    @property
+    def acq_idx(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin_idx(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def enable(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+    @property
+    def fine_delay(self):
+        """Semantic alias for the fourth generic imm field."""
+
+        return self.imm4
+
+    @property
+    def duration(self):
+        """Semantic alias for the fifth generic imm field."""
+
+        return self.imm5
+
+
+@irdl_op_definition
+class AcquireTimetagsIRIRIOp(IRsIRsIOperation[IntRegisterType]):
+    """Depending on enable, open or close the time tag counting acquisition window.
+
+    fine_delay adjusts the start of the acquisition window relative to current sequencer
+    time.
+
+    acq_idx and bin_idx are defined by a closing acquire_timetags instruction.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iriri.acquire_timetags"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: Operation | SSAValue,
+        enable: int | IntegerAttr[UI32],
+        fine_delay: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acq_idx, bin_idx, enable, fine_delay, duration, comment=comment)
+
+    @property
+    def acq_idx(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin_idx(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def enable(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def fine_delay(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class AcquireDigitalIIIOp(IIIOperation):
+    """Updates latched parameters, samples and records the inputs mapped to the sequencer.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iii.acquire_digital"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acq_idx, bin_idx, duration, comment=comment)
+
+    @property
+    def acq_idx(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin_idx(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class AcquireDigitalIRIOp(IRsIOperation[IntRegisterType]):
+    """Updates latched parameters, samples and records the inputs mapped to the sequencer.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iri.acquire_digital"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(acq_idx, bin_idx, duration, comment=comment)
+
+    @property
+    def acq_idx(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def bin_idx(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def duration(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+
+@irdl_op_definition
+class UpdThresIIIOp(IIIOperation):
+    """Updates latched parameters and sets the event count threshold at the index given.
+    Threshold determines how the number of detected edge events in acquire_timetags window
+    maps to measurement outcome.
+
+    Duration must be >= 4 ns.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iii.upd_thres"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        index: int | IntegerAttr[UI32],
+        value: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(index, value, duration, comment=comment)
+
+    @property
+    def index(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def value(self):
+        """Semantic alias for the second generic imm field."""
+
+        return self.imm2
+
+    @property
+    def duration(self):
+        """Semantic alias for the third generic imm field."""
+
+        return self.imm3
+
+
+@irdl_op_definition
+class UpdThresIRIOp(IRsIOperation[IntRegisterType]):
+    """Updates latched parameters and sets the event count threshold at the index given.
+    Threshold determines how the number of detected edge events in acquire_timetags window
+    maps to measurement outcome.
+
+    Duration must be >= 4 ns.
+
+    Duration specifies the amount of time spent at the beginning of the instruction in ns
+    """
+
+    name = "q1.iri.upd_thres"
+
+    traits = traits_def()
+
+    def __init__(
+        self,
+        index: int | IntegerAttr[UI32],
+        value: Operation | SSAValue,
+        duration: int | IntegerAttr[UI32],
+        comment: str | StringAttr | None = None,
+    ):
+        super().__init__(index, value, duration, comment=comment)
+
+    @property
+    def index(self):
+        """Semantic alias for the first generic imm field."""
+
+        return self.imm1
+
+    @property
+    def value(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
 
     @property
     def duration(self):
