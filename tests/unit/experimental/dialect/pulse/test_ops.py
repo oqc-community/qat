@@ -33,6 +33,7 @@ from qat.experimental.dialect.pulse.ir import (
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    MaxTimeOp,
     ModulateOp,
     ModuloOp,
     PhaseAttr,
@@ -223,6 +224,50 @@ class TestSubOp:
     )
     def test_py_operation(self, lhs, rhs, result):
         assert np.allclose(SubOp.py_operation(lhs, rhs), result)
+
+
+class TestMaxTimeOp:
+    """Basic tests to check the operation is defined correctly."""
+
+    @pytest.mark.parametrize(
+        "times, expected",
+        [
+            ([TimeAttr(64e-9), TimeAttr(128e-9)], TimeAttr(128e-9)),
+            ([TimeAttr(192e-9), TimeAttr(64e-9), TimeAttr(128e-9)], TimeAttr(192e-9)),
+            ([TimeAttr(256e-9)], TimeAttr(256e-9)),
+        ],
+    )
+    def test_initialization(self, times, expected):
+        constants = [ConstantOp(time) for time in times]
+        op = MaxTimeOp(*(constant.results[0] for constant in constants))
+
+        assert list(op.times) == [constant.results[0] for constant in constants]
+        assert expected.associated_type is TimeType
+        assert op.result.type == TimeType()
+        op.verify()
+
+    @pytest.mark.parametrize(
+        "attr",
+        [
+            PhaseAttr(0.5),
+            FrequencyAttr(5.5e9),
+            AmplitudeAttr(0.5 - 0.5j),
+            SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)),
+        ],
+    )
+    def test_invalid_operand_types(self, attr):
+        constant1 = ConstantOp(attr)
+        constant2 = ConstantOp(attr)
+        op = MaxTimeOp(constant1.results[0], constant2.results[0])
+
+        with pytest.raises(VerifyException, match="operand 'times'"):
+            op.verify()
+
+    def test_requires_at_least_one_operand(self):
+        """Test that MaxTimeOp requires at least one time operand."""
+        op = MaxTimeOp()
+        with pytest.raises(VerifyException, match="operand 'times'"):
+            op.verify()
 
 
 class TestModulateOp:

@@ -16,9 +16,11 @@ from xdsl.dialects.builtin import (
 from xdsl.interfaces import HasFolderInterface
 from xdsl.irdl import (
     AnyOf,
+    AtLeast,
     Attribute,
     IRDLOperation,
     Operation,
+    RangeOf,
     SSAValue,
     VarConstraint,
     attr_def,
@@ -61,7 +63,11 @@ from .attributes import (
     TimeAttr,
 )
 from .interfaces import IsAnalyticalWaveformInterface
-from .traits import AdvancesTimeTrait, PulseTypesCanonicalizationPatternsTrait
+from .traits import (
+    AdvancesTimeTrait,
+    FrameCanonicalizationPatternsTrait,
+    PulseTypesCanonicalizationPatternsTrait,
+)
 from .types import (
     PULSE_VAR_TYPE,
     AmplitudeType,
@@ -384,6 +390,46 @@ class ScaleOp(BinaryOp, Generic[PULSE_VAR_TYPE]):
         This is used for constant folding.
         """
         return lhs * rhs
+
+
+@irdl_op_definition
+class MaxTimeOp(IRDLOperation):
+    """Finds the maximum of a variable number of time operands, returning a time result.
+
+    This is used to resolve the maximum duration of a set of operations, which is
+    particularly relevant for resolving the duration of synchronizations between multiple
+    frames.
+
+    Example of how this looks in textual MLIR:
+
+    .. code-block:: mlir
+
+        %time1 = pulse.constant<128e-9> : !pulse.time
+        %time2 = pulse.constant<256e-9> : !pulse.time
+        %time3 = pulse.constant<64e-9> : !pulse.time
+        %max_time = pulse.max_time(%time1, %time2, %time3) : !pulse.time
+
+    :ivar times: A variable number of SSA values representing time operands, which must all
+        be of type pulse.time. At least one operand is required.
+    :ivar result: The SSA value representing the maximum of the time operands, which can be
+        used as an operand in later operations.
+    """
+
+    name = "pulse.max_time"
+    traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
+
+    times = var_operand_def(RangeOf(TimeType).of_length(AtLeast(1)))
+    result = result_def(TimeType)
+
+    def __init__(
+        self,
+        *times: SSAValue[TimeType] | Operation,
+    ):
+        """
+        :param times: A variable number of SSA values representing time operands, which must
+            all be of type pulse.time.
+        """
+        return super().__init__(operands=[times], result_types=[TimeType()])
 
 
 @irdl_op_definition
@@ -1463,6 +1509,7 @@ class PhaseShiftOp(PhaseOp):
     """
 
     name = "pulse.phase_shift"
+    traits = traits_def(FrameCanonicalizationPatternsTrait())
 
 
 @irdl_op_definition
@@ -1514,7 +1561,7 @@ class WaitOp(IRDLOperation):
     """
 
     name = "pulse.wait"
-    traits = traits_def(AdvancesTimeTrait())
+    traits = traits_def(AdvancesTimeTrait(), FrameCanonicalizationPatternsTrait())
 
     frame = operand_def(FrameType)
     duration = operand_def(TimeType)

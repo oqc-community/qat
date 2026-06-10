@@ -30,10 +30,12 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     FrequencyAttr,
     FrequencyType,
+    MaxTimeOp,
     ModulateOp,
     ModuloOp,
     PhaseAttr,
     PhaseType,
+    Pulse,
     PulseTypesCanonicalizationPatternsTrait,
     SampledWaveformAttr,
     ScaleOp,
@@ -43,6 +45,10 @@ from qat.experimental.dialect.pulse.ir import (
     WaveformType,
 )
 from qat.experimental.dialect.pulse.units import FrequencyUnits, TimeUnits
+
+from tests.unit.utils.ir import create_context, get_operations_with_type
+
+_CONTEXT = create_context(Pulse)
 
 
 @irdl_op_definition
@@ -56,6 +62,18 @@ class _DummyOp(IRDLOperation):
 
     def __init__(self, arg):
         super().__init__(operands=[arg])
+
+
+@irdl_op_definition
+class _DummyOpWithResult(IRDLOperation):
+    """Returns a result of a given type to test types from non-constants."""
+
+    name = "dummy_with_result"
+
+    result = result_def()
+
+    def __init__(self, result_type):
+        super().__init__(result_types=[result_type])
 
 
 _SAMPLE_TIME_ATTR = TimeAttr(0.5, TimeUnits.NANOSECOND)
@@ -562,3 +580,123 @@ class TestConstantFoldingIsUnsuccessful:
         assert module.body.ops.first is constant1
         assert module.body.ops.first.next_op is constant2
         assert module.body.ops.first.next_op.next_op is add_op
+
+
+class TestMaxTimeOpConstantFolding:
+    """Runs tests to make sure constantly folding works on MaxTimeOp.
+
+    * Tests only constant operands are folded.
+    * Tests no folding is done if any operand is not constant.
+    * Tests chains of time additions, fed into a MaxTimeOp, are folded into a single
+      constant.
+    """
+
+    def test_constant_folding_on_max_time_op(self):
+        """Tests that if all operands of a MaxTimeOp are constant, it is folded to a single
+        constant with the maximum time value."""
+        time1 = TimeAttr(200, TimeUnits.NANOSECOND)
+        time2 = TimeAttr(300, TimeUnits.NANOSECOND)
+        time3 = TimeAttr(400, TimeUnits.NANOSECOND)
+
+        const1 = ConstantOp(time1)
+        const2 = ConstantOp(time2)
+        const3 = ConstantOp(time3)
+
+        max_time_op = MaxTimeOp(const1.result, const2.result, const3.result)
+
+        # Ensure constants are not folded away.
+        dummy_op = _DummyOp(max_time_op.result)
+        dummy_op2 = _DummyOp(const1.result)
+        dummy_op3 = _DummyOp(const2.result)
+        dummy_op4 = _DummyOp(const3.result)
+        module = ModuleOp(
+            ops=[
+                const1,
+                const2,
+                const3,
+                max_time_op,
+                dummy_op,
+                dummy_op2,
+                dummy_op3,
+                dummy_op4,
+            ]
+        )
+        assert len(module.body.ops) == 8
+
+        CanonicalizePass().apply(_CONTEXT, module)
+
+        max_time_ops = get_operations_with_type(module, MaxTimeOp)
+        assert len(max_time_ops) == 0, (
+            f"Expected MaxTimeOp to be folded away, but found {len(max_time_ops)}"
+        )
+        constant_ops = get_operations_with_type(module, ConstantOp)
+        assert len(constant_ops) == 3, (
+            f"Expected 3 ConstantOps (including the folded MaxTimeOp), but found "
+            f"{len(constant_ops)}"
+        )
+        dummy_op = get_operations_with_type(module, _DummyOp)
+        assert len(dummy_op) == 4, f"Expected 4 _DummyOps, but found {len(dummy_op)}"
+        folded_constant = dummy_op[0].arg
+        assert folded_constant.owner is const3, (
+            f"Expected folded constant to be the one with the maximum time value, but it "
+            f"was {folded_constant.owner}"
+        )
+
+    def test_no_folding_on_max_time_op_with_non_constant_operand(self):
+        """Tests that if any operand of a MaxTimeOp is not constant, no folding is done."""
+        time1 = TimeAttr(200, TimeUnits.NANOSECOND)
+        time2 = TimeAttr(300, TimeUnits.NANOSECOND)
+
+        const1 = ConstantOp(time1)
+        const2 = ConstantOp(time2)
+        dummy_result = _DummyOpWithResult(const1.result)
+
+        max_time_op = MaxTimeOp(const1.result, const2.result, dummy_result.result)
+        dummy_op = _DummyOp(max_time_op.result)
+
+        module = ModuleOp(ops=[const1, const2, dummy_result, max_time_op, dummy_op])
+        assert len(module.body.ops) == 5
+
+        CanonicalizePass().apply(_CONTEXT, module)
+
+        max_time_ops = get_operations_with_type(module, MaxTimeOp)
+        assert len(max_time_ops) == 1, (
+            f"Expected MaxTimeOp to not be folded away, but found {len(max_time_ops)}"
+        )
+
+    def test_folding_chain_of_time_additions_into_max_time_op(self):
+        """Tests that if we have a chain of time additions, fed into a MaxTimeOp, the whole
+        chain is folded into a single constant with the maximum time value."""
+        time1 = TimeAttr(100, TimeUnits.NANOSECOND)
+        time2 = TimeAttr(200, TimeUnits.NANOSECOND)
+        time3 = TimeAttr(300, TimeUnits.NANOSECOND)
+        time4 = TimeAttr(400, TimeUnits.NANOSECOND)
+
+        const1 = ConstantOp(time1)
+        const2 = ConstantOp(time2)
+        const3 = ConstantOp(time3)
+        const4 = ConstantOp(time4)
+
+        add_op1 = AddOp(const1.result, const2.result, TimeType())
+        add_op2 = AddOp(add_op1.result, const3.result, TimeType())
+        max_time_op = MaxTimeOp(add_op2.result, const4.result)
+
+        dummy_op = _DummyOp(max_time_op.result)
+        module = ModuleOp(
+            ops=[const1, const2, const3, const4, add_op1, add_op2, max_time_op, dummy_op]
+        )
+        assert len(module.body.ops) == 8
+
+        CanonicalizePass().apply(_CONTEXT, module)
+
+        max_time_ops = get_operations_with_type(module, MaxTimeOp)
+        assert len(max_time_ops) == 0, (
+            f"Expected MaxTimeOp to be folded away, but found {len(max_time_ops)}"
+        )
+        dummy_op = get_operations_with_type(module, _DummyOp)
+        assert len(dummy_op) == 1, f"Expected 1 _DummyOp, but found {len(dummy_op)}"
+        folded_constant = dummy_op[0].arg.owner
+        assert isinstance(folded_constant, ConstantOp), (
+            f"Expected folded constant to be a ConstantOp, but it was {folded_constant}"
+        )
+        assert folded_constant.value.value.data == 100 + 200 + 300

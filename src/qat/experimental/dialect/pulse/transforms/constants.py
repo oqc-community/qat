@@ -20,6 +20,7 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     FrequencyAttr,
     FrequencyType,
+    MaxTimeOp,
     PhaseAttr,
     PhaseType,
     PulseNumericTypedAttr,
@@ -230,3 +231,20 @@ class FoldConstantConstantOp(RewritePattern):
 
         folded_op = ConstantOp(folded_attr, result_type)
         rewriter.replace_op(op, folded_op)
+
+
+class FoldMaxTimeOp(RewritePattern):
+    """Finds :class:`MaxTimeOp` that has constant operands and folds it into the constant
+    with maximum time."""
+
+    @op_type_rewrite_pattern
+    def match_and_rewrite(self, op: MaxTimeOp, rewriter: PatternRewriter):
+        """Matches and applies the rewrite if an appropriate condition is found."""
+
+        operands = [operand.owner for operand in op.operands]
+        if not all(isinstance(operand, ConstantOp) for operand in operands):
+            return
+
+        operand_values = [operand.fold()[0].literal_value for operand in operands]
+        max_index = np.argmax(operand_values)
+        rewriter.replace_op(op, [], operands[max_index].results)

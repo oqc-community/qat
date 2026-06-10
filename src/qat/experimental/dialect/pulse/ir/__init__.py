@@ -42,6 +42,7 @@ from .ops import (
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
     InternalBinaryOp,
+    MaxTimeOp,
     ModulateOp,
     ModuloOp,
     PhaseOp,
@@ -63,7 +64,11 @@ from .ops import (
     SynchronizeOp,
     WaitOp,
 )
-from .traits import AdvancesTimeTrait, PulseTypesCanonicalizationPatternsTrait
+from .traits import (
+    AdvancesTimeTrait,
+    FrameCanonicalizationPatternsTrait,
+    PulseTypesCanonicalizationPatternsTrait,
+)
 from .types import (
     AmplitudeType,
     FrameType,
@@ -85,6 +90,7 @@ _ops = [
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    MaxTimeOp,
     ModulateOp,
     ModuloOp,
     PhaseSetOp,
@@ -112,6 +118,7 @@ _interfaces = [
 
 _traits = [
     AdvancesTimeTrait,
+    FrameCanonicalizationPatternsTrait,
     PulseTypesCanonicalizationPatternsTrait,
 ]
 
