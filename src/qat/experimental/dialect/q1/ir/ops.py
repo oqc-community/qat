@@ -56,8 +56,6 @@ from qat.experimental.dialect.q1.ir.attrs import LabelAttr
 from qat.experimental.dialect.q1.ir.imm_desc import UI32
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 
-# region Q1 Core Instructions (Classical Logic & Flow)
-
 # region Core Instructions
 
 
@@ -1581,16 +1579,16 @@ class SetCondIIIIOp(IIIIOperation):
 
     def __init__(
         self,
-        enable: int | IntegerAttr[UI32],
+        cond_en: int | IntegerAttr[UI32],
         mask: int | IntegerAttr[UI32],
-        operator: int | IntegerAttr[UI32],
-        else_duration: int | IntegerAttr[UI32],
+        op: int | IntegerAttr[UI32],
+        else_cnt: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, mask, operator, else_duration, comment=comment)
+        super().__init__(cond_en, mask, op, else_cnt, comment=comment)
 
     @property
-    def enable(self):
+    def cond_en(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -1602,13 +1600,13 @@ class SetCondIIIIOp(IIIIOperation):
         return self.imm2
 
     @property
-    def operator(self):
+    def op(self):
         """Semantic alias for the third generic imm field."""
 
         return self.imm3
 
     @property
-    def else_duration(self):
+    def else_cnt(self):
         """Semantic alias for the fourth generic imm field."""
 
         return self.imm4
@@ -1624,16 +1622,16 @@ class SetCondRRRIOp(RsRsRsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        enable: Operation | SSAValue,
+        cond_en: Operation | SSAValue,
         mask: Operation | SSAValue,
-        operator: Operation | SSAValue,
-        else_duration: int | IntegerAttr[UI32],
+        op: Operation | SSAValue,
+        else_cnt: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, mask, operator, else_duration, comment=comment)
+        super().__init__(cond_en, mask, op, else_cnt, comment=comment)
 
     @property
-    def enable(self):
+    def cond_en(self):
         """Semantic alias for the first generic rs field."""
 
         return self.rs1
@@ -1645,13 +1643,13 @@ class SetCondRRRIOp(RsRsRsIOperation[IntRegisterType]):
         return self.rs2
 
     @property
-    def operator(self):
+    def op(self):
         """Semantic alias for the third generic rs field."""
 
         return self.rs3
 
     @property
-    def else_duration(self):
+    def else_cnt(self):
         """Semantic alias for the generic imm field."""
 
         return self.imm
@@ -1667,13 +1665,13 @@ class SetMrkIOp(IOperation):
 
     def __init__(
         self,
-        mask: int | IntegerAttr[UI32],
+        mrk: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(mask, comment=comment)
+        super().__init__(mrk, comment=comment)
 
     @property
-    def mask(self):
+    def mrk(self):
         """Semantic alias for the generic imm field."""
 
         return self.imm
@@ -1689,13 +1687,13 @@ class SetMrkROp(RsOperation[IntRegisterType]):
 
     def __init__(
         self,
-        mask: Operation | SSAValue,
+        mrk: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(mask, comment=comment)
+        super().__init__(mrk, comment=comment)
 
     @property
-    def mask(self):
+    def mrk(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -1711,13 +1709,13 @@ class SetFreqIOp(IOperation):
 
     def __init__(
         self,
-        frequency: int | IntegerAttr[UI32],
+        nco_freq: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(frequency, comment=comment)
+        super().__init__(nco_freq, comment=comment)
 
     @property
-    def frequency(self):
+    def nco_freq(self):
         """Semantic alias for the generic imm field."""
 
         return self.imm
@@ -1733,13 +1731,13 @@ class SetFreqROp(RsOperation[IntRegisterType]):
 
     def __init__(
         self,
-        frequency: Operation | SSAValue,
+        nco_freq: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(frequency, comment=comment)
+        super().__init__(nco_freq, comment=comment)
 
     @property
-    def frequency(self):
+    def nco_freq(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -1764,13 +1762,13 @@ class SetPhIOp(IOperation):
 
     def __init__(
         self,
-        phase_offset: int | IntegerAttr[UI32],
+        nco_po: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(phase_offset, comment=comment)
+        super().__init__(nco_po, comment=comment)
 
     @property
-    def phase_offset(self):
+    def nco_po(self):
         """Semantic alias for the generic imm field."""
 
         return self.imm
@@ -1786,13 +1784,13 @@ class SetPhROp(RsOperation[IntRegisterType]):
 
     def __init__(
         self,
-        phase_offset: Operation | SSAValue,
+        nco_po: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(phase_offset, comment=comment)
+        super().__init__(nco_po, comment=comment)
 
     @property
-    def phase_offset(self):
+    def nco_po(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -1808,13 +1806,13 @@ class SetPhDeltaIOp(IOperation):
 
     def __init__(
         self,
-        phase_delta: int | IntegerAttr[UI32],
+        nco_delta_po: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(phase_delta, comment=comment)
+        super().__init__(nco_delta_po, comment=comment)
 
     @property
-    def phase_delta(self):
+    def nco_delta_po(self):
         """Semantic alias for the generic imm field."""
 
         return self.imm
@@ -1830,13 +1828,13 @@ class SetPhDeltaROp(RsOperation[IntRegisterType]):
 
     def __init__(
         self,
-        phase_delta: Operation | SSAValue,
+        nco_delta_po: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(phase_delta, comment=comment)
+        super().__init__(nco_delta_po, comment=comment)
 
     @property
-    def phase_delta(self):
+    def nco_delta_po(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -1910,20 +1908,20 @@ class SetAwgOffsIIOp(IIOperation):
 
     def __init__(
         self,
-        offset0: int | IntegerAttr[UI32],
-        offset1: int | IntegerAttr[UI32],
+        offs0: int | IntegerAttr[UI32],
+        offs1: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(offset0, offset1, comment=comment)
+        super().__init__(offs0, offs1, comment=comment)
 
     @property
-    def offset0(self):
+    def offs0(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def offset1(self):
+    def offs1(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
@@ -1939,20 +1937,20 @@ class SetAwgOffsRROp(RsRsOperation[IntRegisterType]):
 
     def __init__(
         self,
-        offset0: Operation | SSAValue,
-        offset1: Operation | SSAValue,
+        offs0: Operation | SSAValue,
+        offs1: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(offset0, offset1, comment=comment)
+        super().__init__(offs0, offs1, comment=comment)
 
     @property
-    def offset0(self):
+    def offs0(self):
         """Semantic alias for the first generic rs field."""
 
         return self.rs1
 
     @property
-    def offset1(self):
+    def offs1(self):
         """Semantic alias for the second generic rs field."""
 
         return self.rs2
@@ -1998,7 +1996,8 @@ class FbPopDataIROp(IRdOperation[IntRegisterType]):
 @irdl_op_definition
 class FbPullDataRROp(RdRdOperation[IntRegisterType]):
     """Pull the first available entry from the feedback queue regardless of id, writing the
-    entry's id into ``destination_id`` and the associated data into `destination`."""
+    entry's id into :attr:`destination_id` and the associated data into
+    :attr:`destination`."""
 
     name = "q1.rr.fb_pull_data"
 
@@ -2006,11 +2005,11 @@ class FbPullDataRROp(RdRdOperation[IntRegisterType]):
 
     def __init__(
         self,
-        destination_id: IntRegisterType,
+        id: IntRegisterType,
         destination: IntRegisterType,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(destination_id, destination, comment=comment)
+        super().__init__(id, destination, comment=comment)
 
     @property
     def destination_id(self):
@@ -2188,12 +2187,12 @@ class FbComCfgIIIIOp(IIIIOperation):
     def __init__(
         self,
         wc: int | IntegerAttr[UI32],
-        bit_pos: int | IntegerAttr[UI32],
+        shift: int | IntegerAttr[UI32],
         length: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(wc, bit_pos, length, duration, comment=comment)
+        super().__init__(wc, shift, length, duration, comment=comment)
 
     @property
     def wc(self):
@@ -2202,7 +2201,7 @@ class FbComCfgIIIIOp(IIIIOperation):
         return self.imm1
 
     @property
-    def bit_pos(self):
+    def shift(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
@@ -2234,15 +2233,15 @@ class FbComExtraIIIOp(IIIOperation):
 
     def __init__(
         self,
-        enable: int | IntegerAttr[UI32],
+        extra_vld: int | IntegerAttr[UI32],
         extra: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, extra, duration, comment=comment)
+        super().__init__(extra_vld, extra, duration, comment=comment)
 
     @property
-    def enable(self):
+    def extra_vld(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -2343,12 +2342,12 @@ class FbAcqTbCfgIIIIOp(IIIIOperation):
     def __init__(
         self,
         wc: int | IntegerAttr[UI32],
-        bit_pos: int | IntegerAttr[UI32],
+        shift: int | IntegerAttr[UI32],
         length: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(wc, bit_pos, length, duration, comment=comment)
+        super().__init__(wc, shift, length, duration, comment=comment)
 
     @property
     def wc(self):
@@ -2357,7 +2356,7 @@ class FbAcqTbCfgIIIIOp(IIIIOperation):
         return self.imm1
 
     @property
-    def bit_pos(self):
+    def shift(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
@@ -2386,14 +2385,14 @@ class FbAcqTbValidIIOp(IIOperation):
 
     def __init__(
         self,
-        valid: int | IntegerAttr[UI32],
+        tb_valid: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(valid, duration, comment=comment)
+        super().__init__(tb_valid, duration, comment=comment)
 
     @property
-    def valid(self):
+    def tb_valid(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -2416,14 +2415,14 @@ class FbAcqTbValidRIOp(RsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        valid: Operation | SSAValue,
+        tb_valid: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(valid, duration, comment=comment)
+        super().__init__(tb_valid, duration, comment=comment)
 
     @property
-    def valid(self):
+    def tb_valid(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -2445,15 +2444,15 @@ class FbAcqTbExtraIIIOp(IIIOperation):
 
     def __init__(
         self,
-        enable: int | IntegerAttr[UI32],
+        extra_vld: int | IntegerAttr[UI32],
         extra: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, extra, duration, comment=comment)
+        super().__init__(extra_vld, extra, duration, comment=comment)
 
     @property
-    def enable(self):
+    def extra_vld(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -2481,34 +2480,34 @@ class FbAcqTbMockIIIIOp(IIIIOperation):
 
     def __init__(
         self,
-        enable: int | IntegerAttr[UI32],
-        valid: int | IntegerAttr[UI32],
-        data: int | IntegerAttr[UI32],
-        count: int | IntegerAttr[UI32],
+        mock_en: int | IntegerAttr[UI32],
+        mock_vld: int | IntegerAttr[UI32],
+        mock_data: int | IntegerAttr[UI32],
+        duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, valid, data, count, comment=comment)
+        super().__init__(mock_en, mock_vld, mock_data, duration, comment=comment)
 
     @property
-    def enable(self):
+    def mock_en(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def valid(self):
+    def mock_vld(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
 
     @property
-    def data(self):
+    def mock_data(self):
         """Semantic alias for the third generic imm field."""
 
         return self.imm3
 
     @property
-    def count(self):
+    def duration(self):
         """Semantic alias for the fourth generic imm field."""
 
         return self.imm4
@@ -2632,14 +2631,14 @@ class SetLatchEnIIOp(IIOperation):
 
     def __init__(
         self,
-        enable: int | IntegerAttr[UI32],
+        latch_en: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, duration, comment=comment)
+        super().__init__(latch_en, duration, comment=comment)
 
     @property
-    def enable(self):
+    def latch_en(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -2666,14 +2665,14 @@ class SetLatchEnRIOp(RsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        enable: Operation | SSAValue,
+        latch_en: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(enable, duration, comment=comment)
+        super().__init__(latch_en, duration, comment=comment)
 
     @property
-    def enable(self):
+    def latch_en(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -2792,14 +2791,14 @@ class WaitTriggerIIOp(IIOperation):
 
     def __init__(
         self,
-        trigger: int | IntegerAttr[UI32],
+        trig_addr: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(trigger, duration, comment=comment)
+        super().__init__(trig_addr, duration, comment=comment)
 
     @property
-    def trigger(self):
+    def trig_addr(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -2824,14 +2823,14 @@ class WaitTriggerRROp(RsRsOperation[IntRegisterType]):
 
     def __init__(
         self,
-        trigger: Operation | SSAValue,
+        trig_addr: Operation | SSAValue,
         duration: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(trigger, duration, comment=comment)
+        super().__init__(trig_addr, duration, comment=comment)
 
     @property
-    def trigger(self):
+    def trig_addr(self):
         """Semantic alias for the first generic rs field."""
 
         return self.rs1
@@ -2930,21 +2929,21 @@ class PlayIIIOp(IIIOperation):
 
     def __init__(
         self,
-        wave_0: int | IntegerAttr[UI32],
-        wave_1: int | IntegerAttr[UI32],
+        wave0: int | IntegerAttr[UI32],
+        wave1: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(wave_0, wave_1, duration, comment=comment)
+        super().__init__(wave0, wave1, duration, comment=comment)
 
     @property
-    def wave_0(self):
+    def wave0(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def wave_1(self):
+    def wave1(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
@@ -2970,21 +2969,21 @@ class PlayRRIOp(RsRsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        wave_0: Operation | SSAValue,
-        wave_1: Operation | SSAValue,
+        wave0: Operation | SSAValue,
+        wave1: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(wave_0, wave_1, duration, comment=comment)
+        super().__init__(wave0, wave1, duration, comment=comment)
 
     @property
-    def wave_0(self):
+    def wave0(self):
         """Semantic alias for the first generic rs field."""
 
         return self.rs1
 
     @property
-    def wave_1(self):
+    def wave1(self):
         """Semantic alias for the second generic rs field."""
 
         return self.rs2
@@ -3013,21 +3012,21 @@ class AcquireIIIOp(IIIOperation):
 
     def __init__(
         self,
-        acquisition: int | IntegerAttr[UI32],
-        bin: int | IntegerAttr[UI32],
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acquisition, bin, duration, comment=comment)
+        super().__init__(acq_idx, bin_idx, duration, comment=comment)
 
     @property
-    def acquisition(self):
+    def acq_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def bin(self):
+    def bin_idx(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
@@ -3056,21 +3055,21 @@ class AcquireIRIOp(IRsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        acquisition: int | IntegerAttr[UI32],
-        bin: Operation | SSAValue,
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acquisition, bin, duration, comment=comment)
+        super().__init__(acq_idx, bin_idx, duration, comment=comment)
 
     @property
-    def acquisition(self):
+    def acq_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def bin(self):
+    def bin_idx(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
@@ -3099,35 +3098,37 @@ class AcquireWeighedIIIIIOp(IIIIIOperation):
 
     def __init__(
         self,
-        acquisition: int | IntegerAttr[UI32],
-        bin: int | IntegerAttr[UI32],
-        weight_0: int | IntegerAttr[UI32],
-        weight_1: int | IntegerAttr[UI32],
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: int | IntegerAttr[UI32],
+        weight_idx0: int | IntegerAttr[UI32],
+        weight_idx1: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acquisition, bin, weight_0, weight_1, duration, comment=comment)
+        super().__init__(
+            acq_idx, bin_idx, weight_idx0, weight_idx1, duration, comment=comment
+        )
 
     @property
-    def acquisition(self):
+    def acq_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def bin(self):
+    def bin_idx(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
 
     @property
-    def weight_0(self):
+    def weight_idx0(self):
         """Semantic alias for the third generic imm field."""
 
         return self.imm3
 
     @property
-    def weight_1(self):
+    def weight_idx1(self):
         """Semantic alias for the fourth generic imm field."""
 
         return self.imm4
@@ -3154,35 +3155,37 @@ class AcquireWeighedIRRRIOp(IRsRsRsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        acquisition: int | IntegerAttr[UI32],
-        bin: Operation | SSAValue,
-        weight_0: Operation | SSAValue,
-        weight_1: Operation | SSAValue,
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: Operation | SSAValue,
+        weight_idx0: Operation | SSAValue,
+        weight_idx1: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acquisition, bin, weight_0, weight_1, duration, comment=comment)
+        super().__init__(
+            acq_idx, bin_idx, weight_idx0, weight_idx1, duration, comment=comment
+        )
 
     @property
-    def acquisition(self):
+    def acq_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def bin(self):
+    def bin_idx(self):
         """Semantic alias for the first generic rs field."""
 
         return self.rs1
 
     @property
-    def weight_0(self):
+    def weight_idx0(self):
         """Semantic alias for the second generic rs field."""
 
         return self.rs2
 
     @property
-    def weight_1(self):
+    def weight_idx1(self):
         """Semantic alias for the third generic rs field."""
 
         return self.rs3
@@ -3210,28 +3213,28 @@ class AcquireTtlIIIIOp(IIIIOperation):
 
     def __init__(
         self,
-        acquisition: int | IntegerAttr[UI32],
-        bin: int | IntegerAttr[UI32],
-        enable: int | IntegerAttr[UI32],
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: int | IntegerAttr[UI32],
+        ttl_en: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acquisition, bin, enable, duration, comment=comment)
+        super().__init__(acq_idx, bin_idx, ttl_en, duration, comment=comment)
 
     @property
-    def acquisition(self):
+    def acq_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def bin(self):
+    def bin_idx(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
 
     @property
-    def enable(self):
+    def ttl_en(self):
         """Semantic alias for the third generic imm field."""
 
         return self.imm3
@@ -3259,28 +3262,28 @@ class AcquireTtlIRIIOp(IRsIIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        acquisition: int | IntegerAttr[UI32],
-        bin: Operation | SSAValue,
-        enable: int | IntegerAttr[UI32],
+        acq_idx: int | IntegerAttr[UI32],
+        bin_idx: Operation | SSAValue,
+        ttl_en: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acquisition, bin, enable, duration, comment=comment)
+        super().__init__(acq_idx, bin_idx, ttl_en, duration, comment=comment)
 
     @property
-    def acquisition(self):
+    def acq_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
 
     @property
-    def bin(self):
+    def bin_idx(self):
         """Semantic alias for the generic rs field."""
 
         return self.rs
 
     @property
-    def enable(self):
+    def ttl_en(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
@@ -3312,12 +3315,14 @@ class AcquireTimetagsIIIIIOp(IIIIIOperation):
         self,
         acq_idx: int | IntegerAttr[UI32],
         bin_idx: int | IntegerAttr[UI32],
-        enable: int | IntegerAttr[UI32],
-        fine_delay: int | IntegerAttr[UI32],
+        window_en: int | IntegerAttr[UI32],
+        fine_acq_delay: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acq_idx, bin_idx, enable, fine_delay, duration, comment=comment)
+        super().__init__(
+            acq_idx, bin_idx, window_en, fine_acq_delay, duration, comment=comment
+        )
 
     @property
     def acq_idx(self):
@@ -3332,13 +3337,13 @@ class AcquireTimetagsIIIIIOp(IIIIIOperation):
         return self.imm2
 
     @property
-    def enable(self):
+    def window_en(self):
         """Semantic alias for the third generic imm field."""
 
         return self.imm3
 
     @property
-    def fine_delay(self):
+    def fine_acq_delay(self):
         """Semantic alias for the fourth generic imm field."""
 
         return self.imm4
@@ -3370,12 +3375,14 @@ class AcquireTimetagsIRIRIOp(IRsIRsIOperation[IntRegisterType]):
         self,
         acq_idx: int | IntegerAttr[UI32],
         bin_idx: Operation | SSAValue,
-        enable: int | IntegerAttr[UI32],
-        fine_delay: Operation | SSAValue,
+        window_en: int | IntegerAttr[UI32],
+        fine_acq_delay: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(acq_idx, bin_idx, enable, fine_delay, duration, comment=comment)
+        super().__init__(
+            acq_idx, bin_idx, window_en, fine_acq_delay, duration, comment=comment
+        )
 
     @property
     def acq_idx(self):
@@ -3390,13 +3397,13 @@ class AcquireTimetagsIRIRIOp(IRsIRsIOperation[IntRegisterType]):
         return self.rs1
 
     @property
-    def enable(self):
+    def window_en(self):
         """Semantic alias for the second generic imm field."""
 
         return self.imm2
 
     @property
-    def fine_delay(self):
+    def fine_acq_delay(self):
         """Semantic alias for the second generic rs field."""
 
         return self.rs2
@@ -3503,15 +3510,15 @@ class UpdThresIIIOp(IIIOperation):
 
     def __init__(
         self,
-        index: int | IntegerAttr[UI32],
+        dio_thres_idx: int | IntegerAttr[UI32],
         value: int | IntegerAttr[UI32],
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(index, value, duration, comment=comment)
+        super().__init__(dio_thres_idx, value, duration, comment=comment)
 
     @property
-    def index(self):
+    def dio_thres_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1
@@ -3546,15 +3553,15 @@ class UpdThresIRIOp(IRsIOperation[IntRegisterType]):
 
     def __init__(
         self,
-        index: int | IntegerAttr[UI32],
+        dio_thres_idx: int | IntegerAttr[UI32],
         value: Operation | SSAValue,
         duration: int | IntegerAttr[UI32],
         comment: str | StringAttr | None = None,
     ):
-        super().__init__(index, value, duration, comment=comment)
+        super().__init__(dio_thres_idx, value, duration, comment=comment)
 
     @property
-    def index(self):
+    def dio_thres_idx(self):
         """Semantic alias for the first generic imm field."""
 
         return self.imm1

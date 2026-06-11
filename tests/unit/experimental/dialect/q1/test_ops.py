@@ -462,9 +462,7 @@ def test_imm_rd_format(op_type, mnemonic, comment, expected_traits):
 @pytest.mark.parametrize("comment", ["test-comment", StringAttr("test-comment")])
 @pytest.mark.parametrize("expected_traits", [(HasRegisterConstraintsTrait,)])
 def test_fb_pull_data_rd_rd_format(comment, expected_traits):
-    op = FbPullDataRROp(
-        destination_id=Registers.R0, destination=Registers.R1, comment=comment
-    )
+    op = FbPullDataRROp(id=Registers.R0, destination=Registers.R1, comment=comment)
     assert op.assembly_mnemonic() == "fb_pull_data"
     assert isinstance(op.rd1.type, IntRegisterType)
     assert isinstance(op.rd2.type, IntRegisterType)
@@ -601,7 +599,7 @@ def test_rs_imm_format(op_type, mnemonic, comment, expected_traits):
     if op_type in (FbAcqTbIdRIOp, FbAcqIqIdRIOp):
         assert op.id == op.rs
     if op_type is FbAcqTbValidRIOp:
-        assert op.valid == op.rs
+        assert op.tb_valid == op.rs
     assert op.duration == op.imm
     assert len(expected_traits) == len(op.traits.traits)
     for trait in expected_traits:
@@ -683,7 +681,7 @@ def test_imm_imm_imm_format(op_type, mnemonic, comment, expected_traits):
     if op_type is FbCmdIIIOp:
         assert op.value == op.imm2
     if op_type in (FbComExtraIIIOp, FbAcqTbExtraIIIOp):
-        assert op.enable == op.imm1
+        assert op.extra_vld == op.imm1
         assert op.extra == op.imm2
         assert op.duration == op.imm3
     assert len(expected_traits) == len(op.traits.traits)
@@ -787,14 +785,14 @@ def test_fb_imm_imm_imm_imm_format(op_type, mnemonic, comment, expected_traits):
     assert op.assembly_line_args() == (op.imm1, op.imm2, op.imm3, op.imm4)
     if op_type in (FbComCfgIIIIOp, FbAcqTbCfgIIIIOp):
         assert op.wc == op.imm1
-        assert op.bit_pos == op.imm2
+        assert op.shift == op.imm2
         assert op.length == op.imm3
         assert op.duration == op.imm4
     if op_type is FbAcqTbMockIIIIOp:
-        assert op.enable == op.imm1
-        assert op.valid == op.imm2
-        assert op.data == op.imm3
-        assert op.count == op.imm4
+        assert op.mock_en == op.imm1
+        assert op.mock_vld == op.imm2
+        assert op.mock_data == op.imm3
+        assert op.duration == op.imm4
     assert len(expected_traits) == len(op.traits.traits)
     for trait in expected_traits:
         assert op.has_trait(trait)
@@ -834,7 +832,7 @@ def test_fb_imm_imm_format(op_type, mnemonic, comment, expected_traits):
         assert op.id == op.imm1
         assert op.duration == op.imm2
     if op_type is FbAcqTbValidIIOp:
-        assert op.valid == op.imm1
+        assert op.tb_valid == op.imm1
         assert op.duration == op.imm2
     if op_type is FbAcqIqShiftIIOp:
         assert op.shift == op.imm1
@@ -1509,31 +1507,31 @@ class TestSemAliasing:
     def test_parameter_setting(self) -> None:
         # SetMrk
         mrk_imm = SetMrkIOp(0x1234)
-        assert mrk_imm.mask == mrk_imm.imm
+        assert mrk_imm.mrk == mrk_imm.imm
 
         mrk_reg = SetMrkROp(create_ssa_value(Registers.R8))
-        assert mrk_reg.mask == mrk_reg.rs
+        assert mrk_reg.mrk == mrk_reg.rs
 
         # SetFreq
         freq_imm = SetFreqIOp(5000000)
-        assert freq_imm.frequency == freq_imm.imm
+        assert freq_imm.nco_freq == freq_imm.imm
 
         freq_reg = SetFreqROp(create_ssa_value(Registers.R9))
-        assert freq_reg.frequency == freq_reg.rs
+        assert freq_reg.nco_freq == freq_reg.rs
 
         # SetPh
         ph_imm = SetPhIOp(1000)
-        assert ph_imm.phase_offset == ph_imm.imm
+        assert ph_imm.nco_po == ph_imm.imm
 
         ph_reg = SetPhROp(create_ssa_value(Registers.R10))
-        assert ph_reg.phase_offset == ph_reg.rs
+        assert ph_reg.nco_po == ph_reg.rs
 
         # SetPhDelta
         phd_imm = SetPhDeltaIOp(500)
-        assert phd_imm.phase_delta == phd_imm.imm
+        assert phd_imm.nco_delta_po == phd_imm.imm
 
         phd_reg = SetPhDeltaROp(create_ssa_value(Registers.R11))
-        assert phd_reg.phase_delta == phd_reg.rs
+        assert phd_reg.nco_delta_po == phd_reg.rs
 
     def test_awg(self) -> None:
         # SetAwgGain
@@ -1549,36 +1547,36 @@ class TestSemAliasing:
         assert gain_reg.gain1 == gain_reg.rs2
 
         # SetAwgOffs
-        offs_imm = SetAwgOffsIIOp(offset0=200, offset1=250)
-        assert offs_imm.offset0 == offs_imm.imm1
-        assert offs_imm.offset1 == offs_imm.imm2
+        offs_imm = SetAwgOffsIIOp(offs0=200, offs1=250)
+        assert offs_imm.offs0 == offs_imm.imm1
+        assert offs_imm.offs1 == offs_imm.imm2
 
         offs_reg = SetAwgOffsRROp(
-            offset0=create_ssa_value(Registers.R14),
-            offset1=create_ssa_value(Registers.R15),
+            offs0=create_ssa_value(Registers.R14),
+            offs1=create_ssa_value(Registers.R15),
         )
-        assert offs_reg.offset0 == offs_reg.rs1
-        assert offs_reg.offset1 == offs_reg.rs2
+        assert offs_reg.offs0 == offs_reg.rs1
+        assert offs_reg.offs1 == offs_reg.rs2
 
     def test_set_cond(self) -> None:
         # Immediate version
-        cond_imm = SetCondIIIIOp(enable=1, mask=2, operator=3, else_duration=4)
-        assert cond_imm.enable == cond_imm.imm1
+        cond_imm = SetCondIIIIOp(cond_en=1, mask=2, op=3, else_cnt=4)
+        assert cond_imm.cond_en == cond_imm.imm1
         assert cond_imm.mask == cond_imm.imm2
-        assert cond_imm.operator == cond_imm.imm3
-        assert cond_imm.else_duration == cond_imm.imm4
+        assert cond_imm.op == cond_imm.imm3
+        assert cond_imm.else_cnt == cond_imm.imm4
 
         # Register version
         cond_reg = SetCondRRRIOp(
-            enable=create_ssa_value(Registers.R16),
+            cond_en=create_ssa_value(Registers.R16),
             mask=create_ssa_value(Registers.R17),
-            operator=create_ssa_value(Registers.R18),
-            else_duration=100,
+            op=create_ssa_value(Registers.R18),
+            else_cnt=100,
         )
-        assert cond_reg.enable == cond_reg.rs1
+        assert cond_reg.cond_en == cond_reg.rs1
         assert cond_reg.mask == cond_reg.rs2
-        assert cond_reg.operator == cond_reg.rs3
-        assert cond_reg.else_duration == cond_reg.imm
+        assert cond_reg.op == cond_reg.rs3
+        assert cond_reg.else_cnt == cond_reg.imm
 
     def test_loop(self) -> None:
         loop_ri = LoopRIOp(Registers.R19, 500)
@@ -1604,102 +1602,102 @@ class TestSemAliasing:
         assert op.duration == op.rs
 
     def test_rt_wait_trigger_sem_alias(self) -> None:
-        op = WaitTriggerIIOp(trigger=2, duration=50)
-        assert op.trigger == op.imm1
+        op = WaitTriggerIIOp(trig_addr=2, duration=50)
+        assert op.trig_addr == op.imm1
         assert op.duration == op.imm2
 
         op = WaitTriggerRROp(
-            trigger=create_ssa_value(Registers.R13),
+            trig_addr=create_ssa_value(Registers.R13),
             duration=create_ssa_value(Registers.R14),
         )
-        assert op.trigger == op.rs1
+        assert op.trig_addr == op.rs1
         assert op.duration == op.rs2
 
     def test_rt_play_sem_alias(self) -> None:
         op = PlayRRIOp(
-            wave_0=create_ssa_value(Registers.R12),
-            wave_1=create_ssa_value(Registers.R13),
+            wave0=create_ssa_value(Registers.R12),
+            wave1=create_ssa_value(Registers.R13),
             duration=100,
         )
-        assert op.wave_0 == op.rs1
-        assert op.wave_1 == op.rs2
+        assert op.wave0 == op.rs1
+        assert op.wave1 == op.rs2
         assert op.duration == op.imm
 
-        op = PlayIIIOp(wave_0=3, wave_1=2, duration=100)
-        assert op.wave_0 == op.imm1
-        assert op.wave_1 == op.imm2
+        op = PlayIIIOp(wave0=3, wave1=2, duration=100)
+        assert op.wave0 == op.imm1
+        assert op.wave1 == op.imm2
         assert op.duration == op.imm3
 
     def test_rt_acquire_sem_alias(self) -> None:
-        op = AcquireIRIOp(acquisition=44, bin=create_ssa_value(Registers.R13), duration=128)
-        assert op.acquisition == op.imm1
-        assert op.bin == op.rs
+        op = AcquireIRIOp(acq_idx=44, bin_idx=create_ssa_value(Registers.R13), duration=128)
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.rs
         assert op.duration == op.imm2
 
-        op = AcquireIIIOp(acquisition=100, bin=2, duration=50)
-        assert op.acquisition == op.imm1
-        assert op.bin == op.imm2
+        op = AcquireIIIOp(acq_idx=100, bin_idx=2, duration=50)
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.imm2
         assert op.duration == op.imm3
 
     def test_rt_acquire_weighted_sem_alias(self) -> None:
         op = AcquireWeighedIRRRIOp(
-            acquisition=10,
-            bin=create_ssa_value(Registers.R13),
-            weight_0=create_ssa_value(Registers.R14),
-            weight_1=create_ssa_value(Registers.R15),
+            acq_idx=10,
+            bin_idx=create_ssa_value(Registers.R13),
+            weight_idx0=create_ssa_value(Registers.R14),
+            weight_idx1=create_ssa_value(Registers.R15),
             duration=100,
         )
-        assert op.acquisition == op.imm1
-        assert op.bin == op.rs1
-        assert op.weight_0 == op.rs2
-        assert op.weight_1 == op.rs3
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.rs1
+        assert op.weight_idx0 == op.rs2
+        assert op.weight_idx1 == op.rs3
         assert op.duration == op.imm2
 
         op = AcquireWeighedIIIIIOp(
-            acquisition=20, bin=3, weight_0=2, weight_1=1, duration=350
+            acq_idx=20, bin_idx=3, weight_idx0=2, weight_idx1=1, duration=350
         )
-        assert op.acquisition == op.imm1
-        assert op.bin == op.imm2
-        assert op.weight_0 == op.imm3
-        assert op.weight_1 == op.imm4
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.imm2
+        assert op.weight_idx0 == op.imm3
+        assert op.weight_idx1 == op.imm4
         assert op.duration == op.imm5
 
     def test_rt_acquire_ttl_sem_alias(self) -> None:
         op = AcquireTtlIRIIOp(
-            acquisition=5, bin=create_ssa_value(Registers.R13), enable=1, duration=20
+            acq_idx=5, bin_idx=create_ssa_value(Registers.R13), ttl_en=1, duration=20
         )
-        assert op.acquisition == op.imm1
-        assert op.bin == op.rs
-        assert op.enable == op.imm2
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.rs
+        assert op.ttl_en == op.imm2
         assert op.duration == op.imm3
 
-        op = AcquireTtlIIIIOp(acquisition=10, bin=5, enable=0, duration=400)
-        assert op.acquisition == op.imm1
-        assert op.bin == op.imm2
-        assert op.enable == op.imm3
+        op = AcquireTtlIIIIOp(acq_idx=10, bin_idx=5, ttl_en=0, duration=400)
+        assert op.acq_idx == op.imm1
+        assert op.bin_idx == op.imm2
+        assert op.ttl_en == op.imm3
         assert op.duration == op.imm4
 
     def test_rt_acquire_timetags_sem_alias(self) -> None:
         op = AcquireTimetagsIRIRIOp(
             acq_idx=3,
             bin_idx=create_ssa_value(Registers.R13),
-            enable=1,
-            fine_delay=create_ssa_value(Registers.R14),
+            window_en=1,
+            fine_acq_delay=create_ssa_value(Registers.R14),
             duration=100,
         )
         assert op.acq_idx == op.imm1
         assert op.bin_idx == op.rs1
-        assert op.enable == op.imm2
-        assert op.fine_delay == op.rs2
+        assert op.window_en == op.imm2
+        assert op.fine_acq_delay == op.rs2
         assert op.duration == op.imm3
 
         op = AcquireTimetagsIIIIIOp(
-            acq_idx=4, bin_idx=1, enable=0, fine_delay=40, duration=200
+            acq_idx=4, bin_idx=1, window_en=0, fine_acq_delay=40, duration=200
         )
         assert op.acq_idx == op.imm1
         assert op.bin_idx == op.imm2
-        assert op.enable == op.imm3
-        assert op.fine_delay == op.imm4
+        assert op.window_en == op.imm3
+        assert op.fine_acq_delay == op.imm4
         assert op.duration == op.imm5
 
     def test_rt_acquire_digital_sem_alias(self) -> None:
@@ -1716,13 +1714,15 @@ class TestSemAliasing:
         assert op.duration == op.imm2
 
     def test_rt_upd_thres_sem_alias(self) -> None:
-        op = UpdThresIIIOp(index=12, value=40, duration=250)
-        assert op.index == op.imm1
+        op = UpdThresIIIOp(dio_thres_idx=12, value=40, duration=250)
+        assert op.dio_thres_idx == op.imm1
         assert op.value == op.imm2
         assert op.duration == op.imm3
 
-        op = UpdThresIRIOp(index=3, value=create_ssa_value(Registers.R13), duration=150)
-        assert op.index == op.imm1
+        op = UpdThresIRIOp(
+            dio_thres_idx=3, value=create_ssa_value(Registers.R13), duration=150
+        )
+        assert op.dio_thres_idx == op.imm1
         assert op.value == op.rs
         assert op.duration == op.imm2
 
@@ -1738,10 +1738,10 @@ class TestSemAliasing:
         assert op.duration == op.rs
 
     def test_rt_latch_en_sem_alias(self) -> None:
-        op = SetLatchEnIIOp(enable=1, duration=300)
-        assert op.enable == op.imm1
+        op = SetLatchEnIIOp(latch_en=1, duration=300)
+        assert op.latch_en == op.imm1
         assert op.duration == op.imm2
 
-        op = SetLatchEnRIOp(enable=create_ssa_value(Registers.R13), duration=300)
-        assert op.enable == op.rs
+        op = SetLatchEnRIOp(latch_en=create_ssa_value(Registers.R13), duration=300)
+        assert op.latch_en == op.rs
         assert op.duration == op.imm

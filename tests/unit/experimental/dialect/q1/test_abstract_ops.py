@@ -3,9 +3,13 @@
 
 from __future__ import annotations
 
+from io import StringIO
+
 import pytest
-from xdsl.dialects.builtin import IntegerAttr, IntegerType
+from xdsl.dialects.builtin import IntegerAttr, IntegerType, StringAttr
 from xdsl.irdl import irdl_op_definition
+from xdsl.parser import Parser
+from xdsl.printer import Printer
 from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1.ir.abstract_ops import (
@@ -13,6 +17,7 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     IIIOperation,
     IIOperation,
     IRsIIOperation,
+    IRsIOperation,
     IRsIRsIOperation,
     IRsRsRsIOperation,
     Q1Instruction,
@@ -75,11 +80,17 @@ class DummyIRsIRsIOp(IRsIRsIOperation[IntRegisterType]):
     name = "q1.iriri.dummy"
 
 
+@irdl_op_definition
+class DummyIRsIOp(IRsIOperation[IntRegisterType]):
+    name = "q1.iri.dummy"
+
+
 def test_assembly_arg_str():
     assert _assembly_arg_str("plain") == "plain"
     assert _assembly_arg_str(Registers.R4) == "R4"
     assert _assembly_arg_str(IntegerAttr(11, ui32)) == "11"
     assert _assembly_arg_str(create_ssa_value(Registers.R5)) == "R5"
+    assert _assembly_arg_str(StringAttr("text")) == "text"
 
     bad_ssa = create_ssa_value(IntegerType(32))
     with pytest.raises(ValueError, match="Unexpected register type"):
@@ -209,4 +220,31 @@ def test_irrri_operation_init_and_assembly_line_args():
         "R3",
         "R4",
         "5",
+    )
+
+
+def test_parse_with_multiple_operands():
+    op = DummyRsRsRdOp.parse(Parser(None, "(%0, %1) : (i32, i32) -> (i32)"))
+    assert len(op.operands) == 2
+    assert len(op.results) == 1
+
+
+def test_parse_accepts_attributes_in_mlir_position():
+    op = BadOp.parse(Parser(None, '() {tag = "x"} : () -> ()'))
+    assert op.attributes["tag"] == StringAttr("x")
+
+
+def test_print_emits_attributes_when_present_in_memory():
+    op = BadOp.create(attributes={"tag": StringAttr("x")})
+    output = StringIO()
+    op.print(Printer(output))
+    assert '{tag = "x"}' in output.getvalue()
+
+
+def test_irsi_operation_converts_integer_immediates():
+    op = DummyIRsIOp(1, create_ssa_value(Registers.R2), 3)
+    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
+        "1",
+        "R2",
+        "3",
     )

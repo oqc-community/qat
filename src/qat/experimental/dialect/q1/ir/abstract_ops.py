@@ -11,6 +11,7 @@ the opcode-specific name and traits.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Sequence
 from re import compile
 from typing import Generic, TypeAlias
 
@@ -18,8 +19,10 @@ from xdsl.backend.assembly_printer import AssemblyPrinter, OneLineAssemblyPrinta
 from xdsl.backend.register_allocatable import HasRegisterConstraints, RegisterConstraints
 from xdsl.backend.register_type import RegisterType
 from xdsl.dialects.builtin import IntegerAttr, StringAttr
-from xdsl.ir import Operation, OpResult, SSAValue
+from xdsl.ir import Attribute, Operation, OpResult, SSAValue
 from xdsl.irdl import IRDLOperation, operand_def, opt_prop_def, prop_def, result_def
+from xdsl.parser import Parser
+from xdsl.printer import Printer
 
 from qat.experimental.dialect.q1.ir.imm_desc import UI32, ui32
 from qat.experimental.dialect.q1.ir.reg_desc import RInvT
@@ -45,9 +48,78 @@ def _assembly_arg_str(arg: AssemblyInstructionArg) -> str:
 
 
 class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
-    """Base class for operations that can be assembly printed."""
+    """Base class for operations that can be printed and parsed.
+
+    Printing support textual IR and assembly which are implemented by :meth:`print`
+    and :meth:`assembly_line` respectively.
+
+    Parsing currently covers parsing only textual IR which is implemented
+    by :meth:`parse` and :meth:`parse_op_type`
+    """
 
     comment = opt_prop_def(StringAttr)
+
+    @classmethod
+    def parse(cls, parser: Parser) -> Q1AsmOperation:
+        """Parse a Q1 operation from IR textual form.
+
+        Expects the MLIR generic operation format:
+            op-name(operands) <{properties}> {attributes} : (input_types) -> (result_types)
+        """
+
+        operands = parser.parse_op_args_list()
+
+        properties = parser.parse_optional_properties_dict()
+        attributes = parser.parse_optional_attr_dict()
+
+        operand_types, result_types = cls.parse_op_type(parser)
+        operand_position = parser.pos
+
+        for property_name in cls.get_irdl_definition().properties:
+            if property_name in attributes:
+                properties.setdefault(property_name, attributes.pop(property_name))
+
+        resolved_operands = parser.resolve_operands(
+            operands,
+            operand_types,
+            operand_position,
+        )
+        return cls.create(
+            operands=resolved_operands,
+            result_types=result_types,
+            properties=properties,
+            attributes=attributes,
+        )
+
+    @classmethod
+    def parse_op_type(
+        cls, parser: Parser
+    ) -> tuple[Sequence[Attribute], Sequence[Attribute]]:
+        """Parse the operation type (operand and result types)."""
+
+        parser.parse_punctuation(":")
+        func_type = parser.parse_function_type()
+        return func_type.inputs.data, func_type.outputs.data
+
+    def print(self, printer: Printer) -> None:
+        """Print a Q1 operation in IR textual form."""
+
+        printer.print_string(" (")
+        printer.print_list(self.operands, printer.print_operand)
+        printer.print_string(")")
+        if self.properties:
+            printer.print_string(" <")
+            printer.print_attr_dict(self.properties)
+            printer.print_string(">")
+        if self.attributes:
+            printer.print_op_attributes(self.attributes)
+        self.print_op_type(printer)
+
+    def print_op_type(self, printer: Printer) -> None:
+        """Print the operation type signature."""
+
+        printer.print_string(" : ")
+        printer.print_operation_type(self)
 
     def assembly_mnemonic(self) -> str:
         """Because operation name must match q1.<format>.<mnemonic>, the instruction name
@@ -68,7 +140,7 @@ class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
         raise NotImplementedError
 
     def assembly_line(self) -> str | None:
-        """Default assembly code generator."""
+        """Emits Q1 assembly instruction line corresponding to this operation."""
 
         instruction_name = self.assembly_mnemonic()
         arg_str = ", ".join(
