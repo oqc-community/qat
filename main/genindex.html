@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post252.dev20260610211731 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post253.dev20260611001806 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -605,6 +605,8 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1.html">qat.experimental.dialect.q1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.ir.html">qat.experimental.dialect.q1.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a></li>
 </ul>
 </li>
 </ul>
@@ -1087,9 +1089,21 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireDigitalIRIOp.acq_idx">(AcquireDigitalIRIOp property)</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIIIOp.acq_idx">(AcquireIIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIRIOp.acq_idx">(AcquireIRIOp property)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIIIIIOp.acq_idx">(AcquireTimetagsIIIIIOp property)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIRIRIOp.acq_idx">(AcquireTimetagsIRIRIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIIIIOp.acq_idx">(AcquireTtlIIIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIRIIOp.acq_idx">(AcquireTtlIRIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.acq_idx">(AcquireWeighedIIIIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.acq_idx">(AcquireWeighedIRRRIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ConnectionConfig.acq_Q">acq_Q (ConnectionConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.ConnectionConfig.acq_Q">[1]</a>
@@ -1224,22 +1238,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp">AcquireWeighedIRRRIOp (class in qat.experimental.dialect.q1.ir.ops)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIIIOp.acquisition">acquisition (AcquireIIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIRIOp.acquisition">(AcquireIRIOp property)</a>
+      <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.acquisition">acquisition (Acquisition attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.acquisition">[1]</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIIIIOp.acquisition">(AcquireTtlIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIRIIOp.acquisition">(AcquireTtlIRIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.acquisition">(AcquireWeighedIIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.acquisition">(AcquireWeighedIRRRIOp property)</a>
-</li>
-        <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition.acquisition">(Acquisition attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.Acquisition.acquisition">[1]</a>
-</li>
-      </ul></li>
       <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.Acquisition">Acquisition (class in qat.backend.qblox.acquisition)</a>
 
       <ul>
@@ -2274,34 +2274,32 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel.bias_value">bias_value (DCBiasChannel property)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIIIOp.bin">bin (AcquireIIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIRIOp.bin">(AcquireIRIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIIIIOp.bin">(AcquireTtlIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIRIIOp.bin">(AcquireTtlIRIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.bin">(AcquireWeighedIIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.bin">(AcquireWeighedIRRRIOp property)</a>
-</li>
-      </ul></li>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireDigitalIIIOp.bin_idx">bin_idx (AcquireDigitalIIIOp property)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireDigitalIRIOp.bin_idx">(AcquireDigitalIRIOp property)</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIIIOp.bin_idx">(AcquireIIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireIRIOp.bin_idx">(AcquireIRIOp property)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIIIIIOp.bin_idx">(AcquireTimetagsIIIIIOp property)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIRIRIOp.bin_idx">(AcquireTimetagsIRIRIOp property)</a>
 </li>
-      </ul></li>
-      <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary">binary() (in module qat.runtime.results_processing)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIIIIOp.bin_idx">(AcquireTtlIIIIOp property)</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIRIIOp.bin_idx">(AcquireTtlIRIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.bin_idx">(AcquireWeighedIIIIIOp property)</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.bin_idx">(AcquireWeighedIRRRIOp property)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary">binary() (in module qat.runtime.results_processing)</a>
+</li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_average">binary_average() (in module qat.runtime.results_processing)</a>
 </li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_count">binary_count() (in module qat.runtime.results_processing)</a>
@@ -2350,12 +2348,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.bit_declaration_statement">bit_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.bit_declaration_statement">[1]</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbCfgIIIIOp.bit_pos">bit_pos (FbAcqTbCfgIIIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComCfgIIIIOp.bit_pos">(FbComCfgIIIIOp property)</a>
-</li>
-      </ul></li>
       <li><a href="qat.frontend.register.html#qat.frontend.register.BitRegister">BitRegister (class in qat.frontend.register)</a>
 
       <ul>
@@ -3126,6 +3118,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger">CompositeLogger (class in qat.purr.utils.logger)</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondIIIIOp.cond_en">cond_en (SetCondIIIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.cond_en">(SetCondRRRIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.condition">condition (Jump attribute)</a>
 </li>
       <li><a href="qat.core.config.descriptions.html#id1">config (ClassDescription attribute)</a>, <a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ClassDescription.config">[1]</a>
@@ -3588,12 +3586,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp">(class in qat.experimental.dialect.pulse.ir.ops)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.count">count (FbAcqTbMockIIIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.IterBound.count">(IterBound attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.count">[1]</a>
+      <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.IterBound.count">count (IterBound attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.count">[1]</a>
 </li>
-      </ul></li>
       <li><a href="qat.model.loaders.lucy.html#qat.model.loaders.lucy.LucyModelLoader.params.coupling_direction">coupling_direction (qat.model.loaders.lucy.LucyModelLoader parameter)</a>
 </li>
       <li><a href="qat.model.loaders.lucy.html#qat.model.loaders.lucy.LucyModelLoader.params.coupling_qualities">coupling_qualities (qat.model.loaders.lucy.LucyModelLoader parameter)</a>
@@ -3778,7 +3772,7 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.cswap">cswap() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cswap">[1]</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.emit.params.ctx">ctx (qat.experimental.dialect.q1.Q1asmTarget.emit parameter)</a>
+      <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit.params.ctx">ctx (qat.experimental.dialect.q1.target.Q1asmTarget.emit parameter)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketBuilder.custom_gate">custom_gate() (TketBuilder method)</a>
 </li>
@@ -3834,11 +3828,9 @@ window.runMermaid = runMermaid;</script>
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.data">data (FbAcqTbMockIIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.data">data (FrequencyUnitsData attribute)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.data">(FrequencyUnitsData attribute)</a>
-</li>
         <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.data">(PathData attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.data">[1]</a>
 </li>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.output.params.data">(qat.purr.utils.logger.BasicLogger.output parameter)</a>
@@ -4092,6 +4084,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.qblox.codegen_base.html#qat.purr.backends.qblox.codegen_base.DfsTraversal">(class in qat.purr.backends.qblox.codegen_base)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.UpdThresIIIOp.dio_thres_idx">dio_thres_idx (UpdThresIIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.UpdThresIRIOp.dio_thres_idx">(UpdThresIRIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.params.direct_x_pi">direct_x_pi (qat.model.device.Qubit parameter)</a>
 
       <ul>
@@ -4271,6 +4269,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbIdRIOp.duration">(FbAcqTbIdRIOp property)</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.duration">(FbAcqTbMockIIIIOp property)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbValidIIOp.duration">(FbAcqTbValidIIOp property)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbValidRIOp.duration">(FbAcqTbValidRIOp property)</a>
@@ -4432,10 +4432,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.Qasm2Parser.ecr_gate">ecr_gate (Qasm2Parser attribute)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.ecr_gate">[1]</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondIIIIOp.else_duration">else_duration (SetCondIIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondIIIIOp.else_cnt">else_cnt (SetCondIIIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.else_duration">(SetCondRRRIOp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.else_cnt">(SetCondRRRIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.frontend.auto.html#qat.frontend.auto.AutoFrontend.emit">emit() (AutoFrontend method)</a>
@@ -4471,7 +4471,7 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.frontend.purr.html#qat.frontend.purr.PurrFrontend.emit">(PurrFrontend method)</a>, <a href="qat.frontend.purr.purr.html#qat.frontend.purr.purr.PurrFrontend.emit">[1]</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.emit">(Q1asmTarget method)</a>
+        <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit">(Q1asmTarget method)</a>
 </li>
         <li><a href="qat.frontend.qat_ir.html#qat.frontend.qat_ir.QatFrontend.emit">(QatFrontend method)</a>
 </li>
@@ -4496,30 +4496,6 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select">emit_post_select() (QuantumInstructionBuilder method)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIIIIIOp.enable">enable (AcquireTimetagsIIIIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIRIRIOp.enable">(AcquireTimetagsIRIRIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIIIIOp.enable">(AcquireTtlIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIRIIOp.enable">(AcquireTtlIRIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbExtraIIIOp.enable">(FbAcqTbExtraIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.enable">(FbAcqTbMockIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComExtraIIIOp.enable">(FbComExtraIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondIIIIOp.enable">(SetCondIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.enable">(SetCondRRRIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetLatchEnIIOp.enable">(SetLatchEnIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetLatchEnRIOp.enable">(SetLatchEnRIOp property)</a>
-</li>
-      </ul></li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.enable">enable() (CompilationMetrics method)</a>
 
       <ul>
@@ -5016,6 +4992,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseShapeType.EXTRA_SOFT_SQUARE">EXTRA_SOFT_SQUARE (PulseShapeType attribute)</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbExtraIIIOp.extra_vld">extra_vld (FbAcqTbExtraIIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComExtraIIIOp.extra_vld">(FbComExtraIIIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.MeasurementStatistics.extract_branch_trajectory">extract_branch_trajectory() (MeasurementStatistics method)</a>
 </li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.BindingPass.extract_iter_bound">extract_iter_bound() (BindingPass static method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.BindingPass.extract_iter_bound">[1]</a>
@@ -5144,10 +5126,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.calibrations.remote.html#qat.purr.backends.calibrations.remote.find_calibration">find_calibration() (in module qat.purr.backends.calibrations.remote)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIIIIIOp.fine_delay">fine_delay (AcquireTimetagsIIIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIIIIIOp.fine_acq_delay">fine_acq_delay (AcquireTimetagsIIIIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIRIRIOp.fine_delay">(AcquireTimetagsIRIRIOp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIRIRIOp.fine_acq_delay">(AcquireTimetagsIRIRIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ModuleConfig.fir">fir (ModuleConfig attribute)</a>
@@ -5354,10 +5336,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.model.device.html#qat.model.device.PhysicalBaseband.params.frequency">(qat.model.device.PhysicalBaseband parameter)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.PulseChannel.params.frequency">(qat.model.device.PulseChannel parameter)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetFreqIOp.frequency">(SetFreqIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetFreqROp.frequency">(SetFreqROp property)</a>
 </li>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.Sin.frequency">(Sin attribute)</a>
 </li>
@@ -6859,10 +6837,6 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.index">(QRPairModel attribute)</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.UpdThresIIIOp.index">(UpdThresIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.UpdThresIRIOp.index">(UpdThresIRIOp property)</a>
-</li>
       </ul></li>
       <li><a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.index_by_name">index_by_name() (IntRegisterType class method)</a>
 </li>
@@ -7640,6 +7614,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.lark_parser">lark_parser (Qasm3Parser attribute)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.lark_parser">[1]</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetLatchEnIIOp.latch_en">latch_en (SetLatchEnIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetLatchEnRIOp.latch_en">(SetLatchEnRIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode.LATCH_RST">LATCH_RST (Opcode attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.LATCH_RST">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.latch_rst">latch_rst() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.latch_rst">[1]</a>
@@ -7934,10 +7914,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.InstructionExecutionEngine.load_model">load_model() (InstructionExecutionEngine method)</a>
 </li>
-      <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.load_object_from_log_folder">load_object_from_log_folder() (in module qat.purr.utils.logger)</a>
+</li>
       <li><a href="qat.frontend.qasm.html#qat.frontend.qasm.load_qasm_file">load_qasm_file() (in module qat.frontend.qasm)</a>
 </li>
       <li><a href="qat.frontend.qir.html#qat.frontend.qir.load_qir_file">load_qir_file() (in module qat.frontend.qir)</a>
@@ -8330,10 +8310,6 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.mask">(SetCondRRRIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetMrkIOp.mask">(SetMrkIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetMrkROp.mask">(SetMrkROp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp.match_and_rewrite">match_and_rewrite() (FoldConstantConstantOp method)</a>
@@ -8951,6 +8927,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap">MLStateMap (class in qat.model.post_processing)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap">[1]</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.mock_data">mock_data (FbAcqTbMockIIIIOp property)</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.mock_en">mock_en (FbAcqTbMockIIIIOp property)</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.mock_vld">mock_vld (FbAcqTbMockIIIIOp property)</a>
 </li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.MOD">MOD (BinaryOp attribute)</a>
 </li>
@@ -9946,6 +9928,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#module-qat.experimental.dialect.q1">qat.experimental.dialect.q1</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.errors.html#module-qat.experimental.dialect.q1.errors">qat.experimental.dialect.q1.errors</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.html#module-qat.experimental.dialect.q1.ir">qat.experimental.dialect.q1.ir</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#module-qat.experimental.dialect.q1.ir.abstract_ops">qat.experimental.dialect.q1.ir.abstract_ops</a>
@@ -9957,6 +9941,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#module-qat.experimental.dialect.q1.ir.ops">qat.experimental.dialect.q1.ir.ops</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.reg_desc.html#module-qat.experimental.dialect.q1.ir.reg_desc">qat.experimental.dialect.q1.ir.reg_desc</a>
+</li>
+        <li><a href="qat.experimental.dialect.q1.target.html#module-qat.experimental.dialect.q1.target">qat.experimental.dialect.q1.target</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.transforms.html#module-qat.experimental.dialect.q1.transforms">qat.experimental.dialect.q1.transforms</a>
 </li>
@@ -10436,11 +10422,11 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.QbloxConfig.params.module">(qat.backend.qblox.config.specification.QbloxConfig parameter)</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.print_assembly.params.module">(qat.experimental.dialect.q1.print_assembly parameter)</a>
+        <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.print_assembly.params.module">(qat.experimental.dialect.q1.target.print_assembly parameter)</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.q1_code.params.module">(qat.experimental.dialect.q1.q1_code parameter)</a>
+        <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.q1_code.params.module">(qat.experimental.dialect.q1.target.q1_code parameter)</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.emit.params.module">(qat.experimental.dialect.q1.Q1asmTarget.emit parameter)</a>
+        <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit.params.module">(qat.experimental.dialect.q1.target.Q1asmTarget.emit parameter)</a>
 </li>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer.params.module">(qat.purr.backends.qblox.config.QbloxConfigHelper.calibrate_mixer parameter)</a>
 </li>
@@ -10473,6 +10459,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.MoveRROp">MoveRROp (class in qat.experimental.dialect.q1.ir.ops)</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetMrkIOp.mrk">mrk (SetMrkIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetMrkROp.mrk">(SetMrkROp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.output.params.msg">msg (qat.purr.utils.logger.BasicLogger.output parameter)</a>
 
       <ul>
@@ -10784,7 +10776,7 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.name">(PulseOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PulseOp.name">[1]</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.name">(Q1asmTarget attribute)</a>
+        <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.name">(Q1asmTarget attribute)</a>
 </li>
         <li><a href="qat.model.loaders.cache.html#qat.model.loaders.cache.CacheAccessLoader.params.name">(qat.model.loaders.cache.CacheAccessLoader parameter)</a>
 </li>
@@ -10941,6 +10933,18 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.nco">(SequencerConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.nco">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhDeltaIOp.nco_delta_po">nco_delta_po (SetPhDeltaIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhDeltaROp.nco_delta_po">(SetPhDeltaROp property)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetFreqIOp.nco_freq">nco_freq (SetFreqIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetFreqROp.nco_freq">(SetFreqROp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NCO_FREQ_LIMIT_STEPS">NCO_FREQ_LIMIT_STEPS (Constants attribute)</a>
 </li>
       <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.params.nco_freq_limit_steps">nco_freq_limit_steps (qat.backend.qblox.target_data.SequencerDescription parameter)</a>
@@ -10987,6 +10991,12 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.SequencerDescription.nco_phase_steps_per_deg">(SequencerDescription attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhIOp.nco_po">nco_po (SetPhIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhROp.nco_po">(SetPhROp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.NcoConfig">NcoConfig (class in qat.backend.qblox.config.specification)</a>
@@ -11135,6 +11145,18 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.RehydratableModel.object_type">object_type (RehydratableModel property)</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsIIOp.offs0">offs0 (SetAwgOffsIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsRROp.offs0">(SetAwgOffsRROp property)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsIIOp.offs1">offs1 (SetAwgOffsIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsRROp.offs1">(SetAwgOffsRROp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.Equalise.offset">offset (Equalise attribute)</a>
 
       <ul>
@@ -11147,18 +11169,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Equalise.params.offset">(qat.ir.measure.Equalise parameter)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Equalise.params.offset">[1]</a>
 </li>
         <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MaxLikelihoodMethod.params.offset">(qat.model.post_processing.MaxLikelihoodMethod parameter)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.params.offset">[1]</a>
-</li>
-      </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsIIOp.offset0">offset0 (SetAwgOffsIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsRROp.offset0">(SetAwgOffsRROp property)</a>
-</li>
-      </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsIIOp.offset1">offset1 (SetAwgOffsIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetAwgOffsRROp.offset1">(SetAwgOffsRROp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.AwgConfig.offset_path0">offset_path0 (AwgConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AwgConfig.offset_path0">[1]</a>
@@ -11183,6 +11193,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.PathData.oor">oor (PathData attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.PathData.oor">[1]</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondIIIIOp.op">op (SetCondIIIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.op">(SetCondRRRIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode">Opcode (class in qat.backend.qblox.ir)</a>
 
       <ul>
@@ -11213,10 +11229,6 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.operator">(OperatorInfo attribute)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondIIIIOp.operator">(SetCondIIIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.operator">(SetCondRRRIOp property)</a>
 </li>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryExpression.operator">(UnaryExpression attribute)</a>
 </li>
@@ -11571,10 +11583,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.OUTPUT">OUTPUT (LoggerLevel attribute)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.print_assembly.params.output">output (qat.experimental.dialect.q1.print_assembly parameter)</a>
+      <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.print_assembly.params.output">output (qat.experimental.dialect.q1.target.print_assembly parameter)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.emit.params.output">(qat.experimental.dialect.q1.Q1asmTarget.emit parameter)</a>
+        <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit.params.output">(qat.experimental.dialect.q1.target.Q1asmTarget.emit parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.output">output() (BasicLogger method)</a>
@@ -11732,6 +11744,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.LanguageFrontend.parse">parse() (LanguageFrontend method)</a>
 
       <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse">(Q1AsmOperation class method)</a>
+</li>
         <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.Qasm2Parser.parse">(Qasm2Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.parse">[1]</a>
 </li>
         <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.parse">(Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.parse">[1]</a>
@@ -11751,6 +11765,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.frontends.html#qat.purr.compiler.frontends.QIRFrontend.parse_and_execute">(QIRFrontend method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type">parse_op_type() (Q1AsmOperation class method)</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.parse_parameter">parse_parameter() (FrequencyUnitsData class method)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.FrequencyUnitsData.parse_parameter">[1]</a>
 
       <ul>
@@ -11901,12 +11917,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.QbloxLegalisationPass.phase_as_steps">phase_as_steps() (QbloxLegalisationPass static method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.phase_as_steps">[1]</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhDeltaIOp.phase_delta">phase_delta (SetPhDeltaIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhDeltaROp.phase_delta">(SetPhDeltaROp property)</a>
-</li>
-      </ul></li>
       <li><a href="qat.ir.pulse_channel.html#qat.ir.pulse_channel.PulseChannel.phase_iq_offset">phase_iq_offset (PulseChannel attribute)</a>, <a href="qat.model.device.html#qat.model.device.PulseChannel.phase_iq_offset">[1]</a>
 
       <ul>
@@ -11929,10 +11939,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.CreateFrameOp.params.phase_offset">(qat.experimental.dialect.pulse.ir.CreateFrameOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CreateFrameOp.params.phase_offset">(qat.experimental.dialect.pulse.ir.ops.CreateFrameOp parameter)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhIOp.phase_offset">(SetPhIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetPhROp.phase_offset">(SetPhROp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.phase_shift">phase_shift() (InstructionBuilder method)</a>
@@ -12275,12 +12281,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="getting_started/shot_selection.html#qat.ir.measure.PostSelect">PostSelect (class in qat.ir.measure)</a>, <a href="qat.ir.measure.html#qat.ir.measure.PostSelect">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="getting_started/shot_selection.html#qat.runtime.passes.analysis.PostSelectionResult">PostSelectionResult (class in qat.runtime.passes.analysis)</a>, <a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.PostSelectionResult">[1]</a>
 </li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryOp.POW">POW (BinaryOp attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.pp_map">pp_map (PartitionedIR attribute)</a>
 
       <ul>
@@ -12327,7 +12333,11 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.pretty_print">pretty_print() (QuantumInstructionBuilder method)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.print_assembly">print_assembly() (in module qat.experimental.dialect.q1)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print">print() (Q1AsmOperation method)</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.print_assembly">print_assembly() (in module qat.experimental.dialect.q1.target)</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print_op_type">print_op_type() (Q1AsmOperation method)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.print_parameter">print_parameter() (FrequencyUnitsData method)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.FrequencyUnitsData.print_parameter">[1]</a>
 
@@ -12881,7 +12891,7 @@ window.runMermaid = runMermaid;</script>
 <h2 id="Q">Q</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.q1_code">q1_code() (in module qat.experimental.dialect.q1)</a>
+      <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.q1_code">q1_code() (in module qat.experimental.dialect.q1.target)</a>
 </li>
       <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QbloxTargetData.params.Q1ASM_DATA">Q1ASM_DATA (qat.backend.qblox.target_data.QbloxTargetData parameter)</a>
 
@@ -12899,7 +12909,9 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation">Q1AsmOperation (class in qat.experimental.dialect.q1.ir.abstract_ops)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget">Q1asmTarget (class in qat.experimental.dialect.q1)</a>
+      <li><a href="qat.experimental.dialect.q1.errors.html#qat.experimental.dialect.q1.errors.Q1AsmParseError">Q1AsmParseError</a>
+</li>
+      <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget">Q1asmTarget (class in qat.experimental.dialect.q1.target)</a>
 </li>
       <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1Instruction">Q1Instruction (class in qat.experimental.dialect.q1.ir.abstract_ops)</a>
 </li>
@@ -13491,6 +13503,13 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.dialect.q1.errors
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.errors.html#module-qat.experimental.dialect.q1.errors">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.dialect.q1.ir
 
       <ul>
@@ -13530,6 +13549,13 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.reg_desc.html#module-qat.experimental.dialect.q1.ir.reg_desc">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.q1.target
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.target.html#module-qat.experimental.dialect.q1.target">module</a>
 </li>
       </ul></li>
       <li>
@@ -14351,6 +14377,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.qiskit.full.html#module-qat.pipelines.legacy.qiskit.full">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.rtcs
 
@@ -14358,8 +14386,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.rtcs.html#module-qat.pipelines.legacy.rtcs">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.rtcs.compile
 
@@ -17705,7 +17731,13 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqIqShiftIIOp.shift">shift (FbAcqIqShiftIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbCfgIIIIOp.shift">(FbAcqTbCfgIIIIOp property)</a>
 </li>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComCfgIIIIOp.shift">(FbComCfgIIIIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.shift_frequency">shift_frequency() (QbloxContext method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.shift_frequency">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.shift_phase">shift_phase() (QbloxContext method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.shift_phase">[1]</a>
@@ -18532,6 +18564,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSCoupling.targets">targets() (RTCSCoupling method)</a>
 </li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbValidIIOp.tb_valid">tb_valid (FbAcqTbValidIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbValidRIOp.tb_valid">(FbAcqTbValidRIOp property)</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.gates.gates_1q.html#qat.ir.gates.gates_1q.Tdg">Tdg (class in qat.ir.gates.gates_1q)</a>
 </li>
       <li><a href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.Tdg">Tdg() (CircuitBuilder method)</a>
@@ -19068,10 +19106,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult">(class in qat.purr.backends.qblox.analysis_passes)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.WaitTriggerIIOp.trigger">trigger (WaitTriggerIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.WaitTriggerIIOp.trig_addr">trig_addr (WaitTriggerIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.WaitTriggerRROp.trigger">(WaitTriggerRROp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.WaitTriggerRROp.trig_addr">(WaitTriggerRROp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.interrupt.html#qat.purr.compiler.interrupt.BasicInterrupt.trigger">trigger() (BasicInterrupt method)</a>
@@ -19164,6 +19202,12 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.ttl_acq">(SequencerConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.SequencerConfig.ttl_acq">[1]</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIIIIOp.ttl_en">ttl_en (AcquireTtlIIIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTtlIRIIOp.ttl_en">(AcquireTtlIRIIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.TtlAcqConfig">TtlAcqConfig (class in qat.backend.qblox.config.specification)</a>
@@ -19326,14 +19370,6 @@ window.runMermaid = runMermaid;</script>
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.valid">valid (FbAcqTbMockIIIIOp property)</a>
-
-      <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbValidIIOp.valid">(FbAcqTbValidIIOp property)</a>
-</li>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbValidRIOp.valid">(FbAcqTbValidRIOp property)</a>
-</li>
-      </ul></li>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.validate">validate() (AbstractQbloxLiveEngine method)</a>
 
       <ul>
@@ -19956,16 +19992,16 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.warning">warning() (CompositeLogger method)</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayIIIOp.wave_0">wave_0 (PlayIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayIIIOp.wave0">wave0 (PlayIIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRRIOp.wave_0">(PlayRRIOp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRRIOp.wave0">(PlayRRIOp property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayIIIOp.wave_1">wave_1 (PlayIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayIIIOp.wave1">wave1 (PlayIIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRRIOp.wave_1">(PlayRRIOp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRRIOp.wave1">(PlayRRIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform">Waveform (class in qat.ir.waveforms)</a>
@@ -20084,14 +20120,14 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.waveform.executable.html#qat.backend.waveform.executable.WaveformProgram">WaveformProgram (class in qat.backend.waveform.executable)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseFeatures.waveforms">waveforms (OpenPulseFeatures attribute)</a>
 
       <ul>
         <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Sequence.waveforms">(Sequence attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Sequence.waveforms">[1]</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.WaveformType">WaveformType (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
@@ -20112,16 +20148,16 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComCfgIIIIOp.wc">(FbComCfgIIIIOp property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.weight_0">weight_0 (AcquireWeighedIIIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.weight_idx0">weight_idx0 (AcquireWeighedIIIIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.weight_0">(AcquireWeighedIRRRIOp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.weight_idx0">(AcquireWeighedIRRRIOp property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.weight_1">weight_1 (AcquireWeighedIIIIIOp property)</a>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIIIIIOp.weight_idx1">weight_idx1 (AcquireWeighedIIIIIOp property)</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.weight_1">(AcquireWeighedIRRRIOp property)</a>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeighedIRRRIOp.weight_idx1">(AcquireWeighedIRRRIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.model.device.html#qat.model.device.CalibratableAcquire.weights">weights (CalibratableAcquire attribute)</a>
@@ -20246,6 +20282,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SquareWaveformOp.width">(SquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp.width">[1]</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.width">(Waveform attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIIIIIOp.window_en">window_en (AcquireTimetagsIIIIIOp property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireTimetagsIRIRIOp.window_en">(AcquireTimetagsIRIRIOp property)</a>
 </li>
       </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Label.with_random_name">with_random_name() (Label static method)</a>, <a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Label.with_random_name">[1]</a>

@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1.errors module
+=========================================
+
+.. automodule:: qat.experimental.dialect.q1.errors
+   :members:
+   :undoc-members:
+   :show-inheritance:

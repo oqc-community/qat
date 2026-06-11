@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.abstract_ops module &mdash; qat-compiler 3.0.0.post252.dev20260610211731 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.abstract_ops module &mdash; qat-compiler 3.0.0.post253.dev20260611001806 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -172,6 +172,8 @@
 <li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.dialect.q1.html">qat.experimental.dialect.q1 package</a><ul class="current">
 <li class="toctree-l6 current"><a class="reference internal" href="qat.experimental.dialect.q1.ir.html">qat.experimental.dialect.q1.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a></li>
 </ul>
 </li>
 </ul>
@@ -929,11 +931,15 @@ two immediate operands.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1AsmOperation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operands</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">successors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">OneLineAssemblyPrintable</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>Base class for operations that can be assembly printed.</p>
+<p>Base class for operations that can be printed and parsed.</p>
+<p>Printing support textual IR and assembly which are implemented by <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print"><code class="xref py py-meth docutils literal notranslate"><span class="pre">print()</span></code></a>
+and <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assembly_line()</span></code></a> respectively.</p>
+<p>Parsing currently covers parsing only textual IR which is implemented
+by <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse()</span></code></a> and <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_op_type()</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line">
 <span class="sig-name descname"><span class="pre">assembly_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line" title="Link to this definition"></a></dt>
-<dd><p>Default assembly code generator.</p>
+<dd><p>Emits Q1 assembly instruction line corresponding to this operation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
@@ -968,6 +974,54 @@ two immediate operands.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.comment">
 <span class="sig-name descname"><span class="pre">comment</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.operations._PropertyFieldDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.comment" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse" title="Link to this definition"></a></dt>
+<dd><p>Parse a Q1 operation from IR textual form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1AsmOperation</span></code></a></span></p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Expects the MLIR generic operation format:</dt><dd><p>op-name(operands) &lt;{properties}&gt; {attributes} : (input_types) -&gt; (result_types)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_op_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type" title="Link to this definition"></a></dt>
+<dd><p>Parse the operation type (operand and result types).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print">
+<span class="sig-name descname"><span class="pre">print</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print" title="Link to this definition"></a></dt>
+<dd><p>Print a Q1 operation in IR textual form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print_op_type">
+<span class="sig-name descname"><span class="pre">print_op_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.print_op_type" title="Link to this definition"></a></dt>
+<dd><p>Print the operation type signature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

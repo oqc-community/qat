@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1 package &mdash; qat-compiler 3.0.0.post252.dev20260610211731 documentation</title>
+  <title>qat.experimental.dialect.q1 package &mdash; qat-compiler 3.0.0.post253.dev20260611001806 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -172,6 +172,8 @@
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.experimental.dialect.q1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.ir.html">qat.experimental.dialect.q1.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a></li>
 </ul>
 </li>
 </ul>
@@ -545,71 +547,9 @@
 
   <section id="module-qat.experimental.dialect.q1">
 <span id="qat-experimental-dialect-q1-package"></span><h1>qat.experimental.dialect.q1 package<a class="headerlink" href="#module-qat.experimental.dialect.q1" title="Link to this heading"></a></h1>
-<p>Q1 dialect, based on the QBlox Q1 ISA
-[documentation](<a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html</a>).</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.Q1asmTarget">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1asmTarget</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.Q1asmTarget" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Target</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.Q1asmTarget.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.Q1asmTarget.emit" title="Link to this definition"></a></dt>
-<dd><p>Emits a Q1 module to Q1 assembly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.q1.Q1asmTarget.emit.params.ctx"></span><strong>ctx</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.Q1asmTarget.emit.params.ctx">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Context</span></code></span>) – xDSL context for the emission target.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.q1.Q1asmTarget.emit.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.Q1asmTarget.emit.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span>) – Module containing Q1 dialect operations.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.q1.Q1asmTarget.emit.params.output"></span><strong>output</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.Q1asmTarget.emit.params.output">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Text stream receiving the printed assembly.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.Q1asmTarget.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1asm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.Q1asmTarget.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.print_assembly">
-<span class="sig-name descname"><span class="pre">print_assembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.print_assembly" title="Link to this definition"></a></dt>
-<dd><p>Prints a Q1 module as Q1 assembly.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.q1.print_assembly.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.print_assembly.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span>) – Module containing Q1 operations.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.q1.print_assembly.params.output"></span><strong>output</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.print_assembly.params.output">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Text stream receiving the printed assembly.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.q1_code">
-<span class="sig-name descname"><span class="pre">q1_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.q1_code" title="Link to this definition"></a></dt>
-<dd><p>Returns the Q1 assembly text for a Q1 module.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.q1.q1_code.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.q1_code.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span>) – Module containing Q1 dialect operations.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Rendered Q1 assembly for the module.</p>
-</dd>
-</dl>
-</dd></dl>
-
+<p>Q1 dialect, based on the QBlox Q1 ISA.</p>
+<p>Documentation:
+<a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html</a></p>
 <section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
@@ -785,6 +725,27 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html#qat.experimental.dialect.q1.errors.Q1AsmParseError"><code class="docutils literal notranslate"><span class="pre">Q1AsmParseError</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget"><code class="docutils literal notranslate"><span class="pre">Q1asmTarget</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit"><code class="docutils literal notranslate"><span class="pre">Q1asmTarget.emit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.name"><code class="docutils literal notranslate"><span class="pre">Q1asmTarget.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.print_assembly"><code class="docutils literal notranslate"><span class="pre">print_assembly()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.q1_code"><code class="docutils literal notranslate"><span class="pre">q1_code()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
