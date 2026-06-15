@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
+from io import StringIO
+
 import pytest
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.utils.test_value import create_ssa_value
@@ -61,7 +63,7 @@ from qat.experimental.dialect.q1 import (
     SubRRROp,
     XorRIROp,
     XorRRROp,
-    q1_code,
+    emit_program,
 )
 from qat.experimental.dialect.q1.ir import ops as q1_ops
 from qat.experimental.dialect.q1.ir.reg_desc import Registers
@@ -524,7 +526,9 @@ def test_all_ops_assembly_output_matches_q1_code():
     ops = _all_concrete_q1_ops()
     module = ModuleOp(ops)
 
-    asm_lines = q1_code(module).splitlines()
+    stream = StringIO()
+    emit_program(module.body, stream)
+    asm_lines = stream.getvalue().splitlines()
     expected_lines = [op.assembly_line() for op in ops]
 
     assert asm_lines == expected_lines

@@ -7,7 +7,7 @@ from io import StringIO
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
 
-from qat.experimental.dialect.q1 import Q1, Q1asmTarget, print_assembly, q1_code
+from qat.experimental.dialect.q1 import Q1, Q1asmTarget, emit_program
 
 _expected_q1_op_names = {
     "q1.x.label",
@@ -135,14 +135,11 @@ def test_q1_module_helpers_emit_and_register_ops():
     module = ModuleOp([])
 
     explicit_stream = StringIO()
-    print_assembly(module, explicit_stream)
-
-    generated = q1_code(module)
-    assert generated == explicit_stream.getvalue()
+    emit_program(module.body, explicit_stream)
 
     target_stream = StringIO()
     Q1asmTarget().emit(ctx, module, target_stream)
-    assert target_stream.getvalue() == generated
+    assert target_stream.getvalue() == explicit_stream.getvalue()
 
     q1_op_names = {op.name for op in Q1.operations}
 

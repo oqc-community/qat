@@ -132,7 +132,7 @@ from qat.experimental.dialect.q1.ir.ops import (
     XorRRROp,
 )
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
-from qat.experimental.dialect.q1.target import Q1asmTarget, print_assembly, q1_code
+from qat.experimental.dialect.q1.target import Q1asmTarget, emit_program
 
 Q1 = Dialect(
     "q1",
