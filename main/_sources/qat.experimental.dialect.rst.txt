@@ -14,3 +14,4 @@ Subpackages
 
    qat.experimental.dialect.pulse
    qat.experimental.dialect.q1
+   qat.experimental.dialect.q1_sequence

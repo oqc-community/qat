@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1\_sequence.target module
+===================================================
+
+.. automodule:: qat.experimental.dialect.q1_sequence.target
+   :members:
+   :undoc-members:
+   :show-inheritance:
