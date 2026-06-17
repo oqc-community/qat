@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post257.dev20260617075111 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post258.dev20260617082228 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1736,8 +1736,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.ValidatedList.append">(ValidatedList method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.DeviceAssignSet.apply">apply() (DeviceAssignSet method)</a>
+      <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations.apply">apply() (ApplySquashContiguousOptimizations method)</a>
+
+      <ul>
+        <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.DeviceAssignSet.apply">(DeviceAssignSet method)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.apply_correction_qubit">apply_correction_qubit() (ApplyLinearReadoutMitigation method)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.apply_default_transforms">apply_default_transforms() (in module qat.purr.integrations.tket)</a>
@@ -1793,6 +1797,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyPostProcReadoutMitigation">ApplyPostProcReadoutMitigation (class in qat.purr.compiler.error_mitigation.readout_mitigation)</a>
 </li>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation">ApplyReadoutMitigation (class in qat.purr.compiler.error_mitigation.readout_mitigation)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations">ApplySquashContiguousOptimizations (class in qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.are_enabled">are_enabled() (CompilationMetrics method)</a>
 
@@ -3042,6 +3048,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.XorRRROp.comment">(XorRRROp attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.CommuteWaitBeforePhaseShift">CommuteWaitBeforePhaseShift (class in qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions)</a>
+</li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics">CompilationMetrics (class in qat.purr.compiler.metrics)</a>
 </li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.PipelineManager.remove.params.compile">compile (qat.core.pipeline.PipelineManager.remove parameter)</a>
@@ -5247,6 +5255,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp">FoldConstantConstantOp (class in qat.experimental.dialect.pulse.transforms.constants)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousPhases">FoldContiguousPhases (class in qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousWaits">FoldContiguousWaits (class in qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.folder_name">folder_name (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
@@ -8418,9 +8430,15 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.SetCondRRRIOp.mask">(SetCondRRRIOp property)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp.match_and_rewrite">match_and_rewrite() (FoldConstantConstantOp method)</a>
+      <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.CommuteWaitBeforePhaseShift.match_and_rewrite">match_and_rewrite() (CommuteWaitBeforePhaseShift method)</a>
 
       <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp.match_and_rewrite">(FoldConstantConstantOp method)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousPhases.match_and_rewrite">(FoldContiguousPhases method)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.FoldContiguousWaits.match_and_rewrite">(FoldContiguousWaits method)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp.match_and_rewrite">(FoldMaxTimeOp method)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroPhaseShiftOp.match_and_rewrite">(FoldZeroPhaseShiftOp method)</a>
@@ -10030,6 +10048,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#module-qat.experimental.dialect.pulse.transforms.frame_no_op_elimination">qat.experimental.dialect.pulse.transforms.frame_no_op_elimination</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#module-qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions">qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.units.html#module-qat.experimental.dialect.pulse.units">qat.experimental.dialect.pulse.units</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#module-qat.experimental.dialect.q1">qat.experimental.dialect.q1</a>
@@ -10663,6 +10683,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyPostProcReadoutMitigation.name">(ApplyPostProcReadoutMitigation attribute)</a>
 </li>
         <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation.name">(ApplyReadoutMitigation attribute)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations.name">(ApplySquashContiguousOptimizations attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AslRIROp.name">(AslRIROp attribute)</a>
 </li>
@@ -13639,6 +13661,13 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#module-qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.dialect.pulse.units
 
       <ul>
@@ -14534,6 +14563,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.qiskit.html#module-qat.pipelines.legacy.qiskit">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.qiskit.compile
 
@@ -14541,8 +14572,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.qiskit.compile.html#module-qat.pipelines.legacy.qiskit.compile">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.qiskit.execute
 

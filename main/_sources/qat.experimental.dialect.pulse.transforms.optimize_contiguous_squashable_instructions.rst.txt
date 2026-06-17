@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.optimize\_contiguous\_squashable\_instructions module
+===============================================================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -14,3 +14,4 @@ Submodules
 
    qat.experimental.dialect.pulse.transforms.constants
    qat.experimental.dialect.pulse.transforms.frame_no_op_elimination
+   qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions
