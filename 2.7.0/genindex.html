@@ -1692,9 +1692,13 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.emit.params.compiler_config">(qat.frontend.qir.QIRFrontend.emit parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.compiler_config">(qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InsertPreSelectionMeasurement.run.params.compiler_config">(qat.middleend.passes.transform.InsertPreSelectionMeasurement.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.run.params.compiler_config">(qat.middleend.passes.transform.ResetsToDelays.run parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.run.params.compiler_config">(qat.middleend.passes.transform.ResetTransformation.run parameter)</a>
 </li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ErrorMitigation.run.params.compiler_config">(qat.runtime.passes.transform.ErrorMitigation.run parameter)</a>
 </li>
@@ -2125,6 +2129,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.DCBiasChannel">DCBiasChannel (class in qat.purr.backends.live_devices)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.DDropResetQubitPulseChannel">DDropResetQubitPulseChannel (class in qat.model.device)</a>
+</li>
+      <li><a href="qat.model.device.html#qat.model.device.DDropResetResonatorPulseChannel">DDropResetResonatorPulseChannel (class in qat.model.device)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.DEBUG">DEBUG (LoggerLevel attribute)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.debug">debug() (CompositeLogger method)</a>
@@ -2203,9 +2211,11 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Delay">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.params.delay">delay (qat.ir.measure.Acquire parameter)</a>
+      <li><a href="qat.model.device.html#qat.model.device.DDropResetQubitPulseChannel.delay">delay (DDropResetQubitPulseChannel attribute)</a>
 
       <ul>
+        <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.params.delay">(qat.ir.measure.Acquire parameter)</a>
+</li>
         <li><a href="qat.model.device.html#qat.model.device.SecondStatePulseChannel.delay">(SecondStatePulseChannel attribute)</a>
 </li>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.delay">(SimpleAcquire attribute)</a>
@@ -2259,12 +2269,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.device_assign">device_assign() (InstructionBuilder method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.device_for_physical_channel_id">device_for_physical_channel_id() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.device_for_pulse_channel_id">device_for_pulse_channel_id() (PhysicalHardwareModel method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.device_update">device_update() (QbloxContext method)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.device_updates">device_updates (TriageResult attribute)</a>
@@ -3107,6 +3117,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.SweepIterator.get_current_sweep_iteration">get_current_sweep_iteration() (SweepIterator method)</a>
 </li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.get_ddrop_reset">get_ddrop_reset() (ResetTransformation method)</a>
+</li>
       <li><a href="qat.purr.backends.echo.html#qat.purr.backends.echo.get_default_echo_hardware">get_default_echo_hardware() (in module qat.purr.backends.echo)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.get_default_logger">get_default_logger() (in module qat.purr.utils.logger)</a>
@@ -3194,6 +3206,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.backend.graph.html#qat.backend.graph.ControlFlowGraph.get_or_create_node">get_or_create_node() (ControlFlowGraph method)</a>, <a href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.ControlFlowGraph.get_or_create_node">[1]</a>
 </li>
       <li><a href="qat.purr.backends.live_devices.html#qat.purr.backends.live_devices.LivePhysicalBaseband.get_output_state">get_output_state() (LivePhysicalBaseband method)</a>
+</li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.get_passive_reset">get_passive_reset() (ResetsToDelays method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_physical_baseband">get_physical_baseband() (QuantumHardwareModel method)</a>
 </li>
@@ -3664,6 +3678,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.run.params.ir">(qat.middleend.passes.transform.ResetsToDelays.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.run.params.ir">(qat.middleend.passes.transform.ResetTransformation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ReturnSanitisation.run.params.ir">(qat.middleend.passes.transform.ReturnSanitisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ScopeSanitisation.run.params.ir">(qat.middleend.passes.transform.ScopeSanitisation.run parameter)</a>
@@ -3711,6 +3727,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.engines.native.html#qat.engines.native.ConnectionMixin.is_connected">is_connected (ConnectionMixin property)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.DDropResetQubitPulseChannel.is_ddrop_calibrated">is_ddrop_calibrated (DDropResetQubitPulseChannel attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.DDropResetResonatorPulseChannel.is_ddrop_calibrated">(DDropResetResonatorPulseChannel attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.graph.html#qat.backend.graph.BasicBlock.is_empty">is_empty() (BasicBlock method)</a>, <a href="qat.purr.backends.qblox.graph.html#qat.purr.backends.qblox.graph.BasicBlock.is_empty">[1]</a>
 
       <ul>
@@ -4338,6 +4360,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.frontend.qir.html#qat.frontend.qir.QIRFrontend.emit.params.met_mgr">(qat.frontend.qir.QIRFrontend.emit parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run.params.met_mgr">(qat.middleend.passes.analysis.ActivePulseChannelAnalysis.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PhaseOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.PhaseOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.SquashDelaysOptimisation.run.params.met_mgr">(qat.middleend.passes.transform.SquashDelaysOptimisation.run parameter)</a>
@@ -4464,6 +4488,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.params.model">(qat.middleend.passes.transform.ResetsToDelays parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.params.model">(qat.middleend.passes.transform.ResetTransformation parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.DynamicFrequencyValidation.params.model">(qat.middleend.passes.validation.DynamicFrequencyValidation parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.FrequencySetupValidation.params.model">(qat.middleend.passes.validation.FrequencySetupValidation parameter)</a>
@@ -4555,6 +4581,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CRy.model_config">(CRy attribute)</a>
 </li>
         <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.CRz.model_config">(CRz attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DDropResetQubitPulseChannel.model_config">(DDropResetQubitPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DDropResetResonatorPulseChannel.model_config">(DDropResetResonatorPulseChannel attribute)</a>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Delay.model_config">(Delay attribute)</a>
 </li>
@@ -5942,12 +5972,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.pp_map">pp_map (TriageResult attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenPass">PreCodegenPass (class in qat.purr.backends.qblox.codegen)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.PreCodegenResult">PreCodegenResult (class in qat.purr.backends.qblox.codegen)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.predict_pulse_amplitude">predict_pulse_amplitude() (in module qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.prefix">prefix (qat.purr.utils.logger.LogFolder parameter)</a>
@@ -6088,9 +6118,13 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.pulse">pulse (DrivePulseChannel attribute)</a>
+      <li><a href="qat.model.device.html#qat.model.device.DDropResetQubitPulseChannel.pulse">pulse (DDropResetQubitPulseChannel attribute)</a>
 
       <ul>
+        <li><a href="qat.model.device.html#qat.model.device.DDropResetResonatorPulseChannel.pulse">(DDropResetResonatorPulseChannel attribute)</a>
+</li>
+        <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.pulse">(DrivePulseChannel attribute)</a>
+</li>
         <li><a href="qat.model.device.html#qat.model.device.MeasurePulseChannel.pulse">(MeasurePulseChannel attribute)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.DrivePulseChannel.params.pulse">(qat.model.device.DrivePulseChannel parameter)</a>
@@ -6239,6 +6273,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydRepeatTranslation">PydRepeatTranslation (in module qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydResetsToDelays">PydResetsToDelays (in module qat.middleend.passes.transform)</a>
+</li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydResetTransformation">PydResetTransformation (in module qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.PydReturnSanitisation">PydReturnSanitisation (in module qat.middleend.passes.transform)</a>
 </li>
@@ -7960,6 +7996,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.run.params.res_mgr">(qat.middleend.passes.transform.ResetsToDelays.run parameter)</a>
 </li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.run.params.res_mgr">(qat.middleend.passes.transform.ResetTransformation.run parameter)</a>
+</li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.SquashDelaysOptimisation.run.params.res_mgr">(qat.middleend.passes.transform.SquashDelaysOptimisation.run parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.SynchronizeTask.run.params.res_mgr">(qat.middleend.passes.transform.SynchronizeTask.run parameter)</a>
@@ -8005,6 +8043,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.ControlType.RESET">RESET (ControlType attribute)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.QubitPulseChannels.reset">reset (QubitPulseChannels attribute)</a>
+
+      <ul>
+        <li><a href="qat.model.device.html#qat.model.device.ResonatorPulseChannels.reset">(ResonatorPulseChannels attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.frontend.circuit_builder.html#qat.frontend.circuit_builder.CircuitBuilder.reset">reset() (CircuitBuilder method)</a>
 
       <ul>
@@ -8029,7 +8073,11 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.reset_phase">reset_phase() (QbloxContext method)</a>
 </li>
+      <li><a href="qat.model.device.html#qat.model.device.Qubit.reset_pulse_channels">reset_pulse_channels (Qubit property)</a>
+</li>
       <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays">ResetsToDelays (class in qat.middleend.passes.transform)</a>
+</li>
+      <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation">ResetTransformation (class in qat.middleend.passes.transform)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.resolve_qb_pulse_channel">resolve_qb_pulse_channel() (QuantumHardwareModel method)</a>
 </li>
@@ -8103,12 +8151,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.pipelines.legacy.base.html#qat.pipelines.legacy.base.results_pipeline">results_pipeline() (in module qat.pipelines.legacy.base)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing.results_processing">results_processing (ResultsProcessing attribute)</a>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.results_processing">results_processing() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.results_processing">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.ResultsProcessing">ResultsProcessing (class in qat.ir.instructions)</a>
 
       <ul>
@@ -8349,6 +8397,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatTranslationHandler.run">(RepeatTranslationHandler method)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.run">(ResetsToDelays method)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.run">(ResetTransformation method)</a>
 </li>
         <li><a href="qat.runtime.passes.transform.html#qat.runtime.passes.transform.ResultTransform.run">(ResultTransform method)</a>
 </li>
@@ -9129,6 +9179,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.RepeatSanitisation.params.target_data">(qat.middleend.passes.transform.RepeatSanitisation parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetsToDelays.params.target_data">(qat.middleend.passes.transform.ResetsToDelays parameter)</a>
+</li>
+        <li><a href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.ResetTransformation.params.target_data">(qat.middleend.passes.transform.ResetTransformation parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.validation.html#qat.middleend.passes.validation.DynamicFrequencyValidation.params.target_data">(qat.middleend.passes.validation.DynamicFrequencyValidation parameter)</a>
 </li>
