@@ -52,6 +52,7 @@ from qat.middleend.passes.transform import (
     RepeatSanitisation,
     RepeatTranslation,
     ResetsToDelays,
+    ResetTransformation,
     ReturnSanitisation,
     ScopeSanitisation,
     SquashDelaysOptimisation,
@@ -61,6 +62,7 @@ from qat.middleend.passes.validation import (
     RepeatSanitisationValidation,
     ReturnSanitisationValidation,
 )
+from qat.model.device import PulseChannel, Qubit
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.target_data import (
     AbstractTargetData,
@@ -1371,15 +1373,38 @@ class TestPydBatchedShots:
         assert ir.compiled_shots == shots_per_batch
 
 
-class TestResetsToDelays:
+class TestResetTransformation:
     @pytest.fixture(scope="class")
     def model(self):
-        return LucyModelLoader().load()
+        hw = LucyModelLoader().load()
+        for qubit in hw.qubits.values():
+            qubit_reset_ch, res_reset_ch = qubit.reset_pulse_channels
+            qubit_reset_ch.is_ddrop_calibrated = True
+            res_reset_ch.is_ddrop_calibrated = True
+        return hw
+
+    @pytest.fixture(scope="class", params=[ResetTransformation, ResetsToDelays])
+    def passive_reset_pass(self, request):
+        return request.param
+
+    @staticmethod
+    def _get_active_results_managers(channel_to_qubit: dict[PulseChannel, Qubit]):
+        res = ActivePulseChannelResults()
+        for ch, qubit in channel_to_qubit.items():
+            res.add_target(ch, qubit)
+        res_mgr = ResultManager()
+        res_mgr.add(res)
+        return res_mgr
 
     @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     @pytest.mark.parametrize("add_reset", [True, False])
-    def test_qubit_reset(
-        self, passive_reset_time: float, add_reset: bool, model, function_seed
+    def test_qubit_passive_reset(
+        self,
+        passive_reset_time: float,
+        add_reset: bool,
+        model,
+        function_seed,
+        passive_reset_pass,
     ):
         qubit_data = QubitDescription.random(seed=function_seed).model_copy(
             update={"passive_reset_time": passive_reset_time}
@@ -1398,13 +1423,10 @@ class TestResetsToDelays:
         if add_reset:
             builder.reset(qubit)
 
-        res = ActivePulseChannelResults()
-        res.add_target(qubit.drive_pulse_channel, qubit)
-        res_mgr = ResultManager()
-        res_mgr.add(res)
+        res_mgr = self._get_active_results_managers({qubit.drive_pulse_channel: qubit})
 
         before = builder.number_of_instructions
-        builder = ResetsToDelays(model, target_data).run(builder, res_mgr)
+        builder = passive_reset_pass(model, target_data).run(builder, res_mgr)
         assert before == builder.number_of_instructions
 
         delays = []
@@ -1428,7 +1450,7 @@ class TestResetsToDelays:
             (1e-3, 2.0, 5.0, 2.0),
         ],
     )
-    def test_qubit_reset_with_compiler_config_reset_times(
+    def test_qubit_passive_reset_with_compiler_config_reset_times(
         self,
         cc_repetition_period,
         cc_reset_time,
@@ -1436,6 +1458,7 @@ class TestResetsToDelays:
         expected_delay,
         model,
         function_seed,
+        passive_reset_pass,
     ):
         qubit_data = QubitDescription.random(seed=function_seed).model_copy(
             update={"passive_reset_time": td_reset_time}
@@ -1458,13 +1481,10 @@ class TestResetsToDelays:
         builder.had(qubit)
         builder.reset(qubit)
 
-        res = ActivePulseChannelResults()
-        res.add_target(qubit.drive_pulse_channel, qubit)
-        res_mgr = ResultManager()
-        res_mgr.add(res)
+        res_mgr = self._get_active_results_managers({qubit.drive_pulse_channel: qubit})
 
         before = builder.number_of_instructions
-        builder = ResetsToDelays(model, target_data).run(
+        builder = passive_reset_pass(model, target_data).run(
             builder, res_mgr, compiler_config=compiler_config
         )
         assert before == builder.number_of_instructions
@@ -1481,7 +1501,9 @@ class TestResetsToDelays:
         assert delays[0].duration == expected_delay
 
     @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
-    def test_pulse_channel_reset(self, passive_reset_time: float, model, function_seed):
+    def test_pulse_channel_passive_reset(
+        self, passive_reset_time: float, model, function_seed, passive_reset_pass
+    ):
         qubit_data = QubitDescription.random(seed=function_seed).model_copy(
             update={"passive_reset_time": passive_reset_time}
         )
@@ -1497,12 +1519,9 @@ class TestResetsToDelays:
         builder = QuantumInstructionBuilder(hardware_model=model)
         builder.reset(qubit)
 
-        res = ActivePulseChannelResults()
-        res.add_target(qubit.drive_pulse_channel, qubit)
-        res_mgr = ResultManager()
-        res_mgr.add(res)
+        res_mgr = self._get_active_results_managers({qubit.drive_pulse_channel: qubit})
 
-        builder = ResetsToDelays(model, target_data).run(builder, res_mgr)
+        builder = passive_reset_pass(model, target_data).run(builder, res_mgr)
 
         delays = []
         for instr in builder:
@@ -1519,8 +1538,8 @@ class TestResetsToDelays:
 
     @pytest.mark.parametrize("passive_reset_time", [3.2e-06, 1e-03, 5.0])
     @pytest.mark.parametrize("reset_chan", ["acquire", "measure"])
-    def test_reset_with_no_drive_channel(
-        self, passive_reset_time, reset_chan, model, function_seed
+    def test_passive_reset_with_no_drive_channel(
+        self, passive_reset_time, reset_chan, model, function_seed, passive_reset_pass
     ):
         qubit_data = QubitDescription.random(seed=function_seed).model_copy(
             update={"passive_reset_time": passive_reset_time}
@@ -1545,16 +1564,13 @@ class TestResetsToDelays:
             target=qubit.measure_pulse_channel.uuid, waveform=SquareWaveform(width=80e-9)
         )
         builder.acquire(qubit, duration=80e-9, delay=0.0, output_variable="test")
-        builder.add(Reset(qubit_target=qubit_idx))
+        builder.add(Reset(qubit_targets={qubit_idx}))
 
-        res = ActivePulseChannelResults()
-        res.add_target(qubit.acquire_pulse_channel, qubit)
-        res.add_target(qubit.measure_pulse_channel, qubit)
+        res_mgr = self._get_active_results_managers(
+            {qubit.acquire_pulse_channel: qubit, qubit.measure_pulse_channel: qubit}
+        )
 
-        res_mgr = ResultManager()
-        res_mgr.add(res)
-
-        builder = ResetsToDelays(model, target_data).run(builder, res_mgr)
+        builder = passive_reset_pass(model, target_data).run(builder, res_mgr)
         reset_instrs = [instr for instr in builder if isinstance(instr, Reset)]
         assert len(reset_instrs) == 0
         delay_instrs = [instr for instr in builder if isinstance(instr, Delay)]
@@ -1564,6 +1580,77 @@ class TestResetsToDelays:
             qubit.measure_pulse_channel.uuid,
             qubit.acquire_pulse_channel.uuid,
         }
+
+    def test_ddrop_reset_instructions(self, model):
+        """DDrop reset should emit one Pulse on the qubit reset channel and one on the
+        resonator reset channel."""
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        qubit = model.qubit_with_index(0)
+        builder.reset(qubit)
+
+        res_mgr = self._get_active_results_managers(
+            {qubit.pulse_channels.reset: qubit, qubit.resonator.pulse_channels.reset: qubit}
+        )
+        compiler_config = CompilerConfig(driven_reset=True)
+        builder = ResetTransformation(model, TargetData()).run(
+            builder, res_mgr, compiler_config=compiler_config
+        )
+
+        assert len([i for i in builder.instructions if isinstance(i, Reset)]) == 0, (
+            "Check all resets have been removed."
+        )
+
+        pulses = [i for i in builder.instructions if isinstance(i, Pulse)]
+        assert len(pulses) == 2, "Should 2 pulses in total"
+        assert len({pulse.target for pulse in pulses}) == 2, "Should have 2 unique targets"
+
+        delays = [i for i in builder.instructions if isinstance(i, Delay)]
+        assert len(delays) == 2, "Should have 2 delays on each reset channels"
+        assert len({delay.target for delay in delays}) == 2, "Should have 2 unique targets"
+
+    def test_ddrop_params(self, model):
+        """Test if ddrop parameters are updated and added to the pulses."""
+        delay, width, q_drive_rate, ro_amp = 1e-6, 12.2e-6, 0.23e6, 0.12
+        model.qubit_with_index(0).pulse_channels.reset.delay = delay
+        model.qubit_with_index(0).pulse_channels.reset.pulse.width = width
+        model.qubit_with_index(0).pulse_channels.reset.pulse.amp = q_drive_rate
+        model.qubit_with_index(0).resonator.pulse_channels.reset.pulse.width = width
+        model.qubit_with_index(0).resonator.pulse_channels.reset.pulse.amp = ro_amp
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        qubit = model.qubit_with_index(0)
+        builder.reset(qubit)
+
+        res_mgr = self._get_active_results_managers(
+            {qubit.pulse_channels.reset: qubit, qubit.resonator.pulse_channels.reset: qubit}
+        )
+        compiler_config = CompilerConfig(driven_reset=True)
+        builder = ResetTransformation(model, TargetData()).run(
+            builder, res_mgr, compiler_config=compiler_config
+        )
+
+        qubit_pulse = [
+            instr
+            for instr in builder
+            if isinstance(instr, Pulse) and qubit.pulse_channels.reset.uuid == instr.target
+        ][0]
+        assert qubit_pulse.waveform.width == width
+        assert qubit_pulse.waveform.amp == q_drive_rate
+        resonator_pulse = [
+            instr
+            for instr in builder
+            if isinstance(instr, Pulse)
+            and qubit.resonator.pulse_channels.reset.uuid == instr.target
+        ][0]
+        assert resonator_pulse.waveform.width == width
+        assert resonator_pulse.waveform.amp == ro_amp
+        delay_pulses = [
+            instr
+            for instr in builder
+            if isinstance(instr, Delay) and qubit.pulse_channels.reset.uuid == instr.target
+        ]
+        for delay_pulse in delay_pulses:
+            assert delay_pulse.duration == 1e-6
 
 
 class TestSquashDelaysOptimisation:

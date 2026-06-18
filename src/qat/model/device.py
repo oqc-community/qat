@@ -8,7 +8,7 @@ from typing import Any
 import numpy as np
 from pydantic import Field, field_validator, model_validator
 
-from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform
+from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform, SquareWaveform
 from qat.model.post_processing import PostProcessMethod
 from qat.utils.pydantic import (
     CalibratablePositiveFloat,
@@ -270,6 +270,31 @@ class CrossResonanceCancellationPulseChannel(QubitPulseChannel):
         return f"{self.__class__.__name__}(@Q{self.auxiliary_qubit})"
 
 
+class DDropResetQubitPulseChannel(QubitPulseChannel):
+    """A channel to perform DDrop reset on a qubit."""
+
+    delay: CalibratablePositiveFloat = 2e-6
+    pulse: CalibratablePulse = Field(
+        frozen=True,
+        default_factory=lambda: CalibratablePulse(
+            width=48e-6, amp=1.5e6, waveform_type=SquareWaveform
+        ),
+    )
+    is_ddrop_calibrated: bool = False
+
+
+class DDropResetResonatorPulseChannel(ResonatorPulseChannel):
+    """A channel to perform DDrop reset on a resonator."""
+
+    pulse: CalibratablePulse = Field(
+        frozen=True,
+        default_factory=lambda: CalibratablePulse(
+            width=48e-6, amp=0.03, waveform_type=SquareWaveform
+        ),
+    )
+    is_ddrop_calibrated: bool = False
+
+
 class PulseChannelSet(NoExtraFieldsModel):
     """Encapsulates a set of pulse channels."""
 
@@ -324,10 +349,13 @@ class ResonatorPulseChannels(PulseChannelSet):
 
     measure: MeasurePulseChannel = Field(default=MeasurePulseChannel())
     acquire: AcquirePulseChannel = Field(default=AcquirePulseChannel())
+    reset: DDropResetResonatorPulseChannel = Field(
+        frozen=True, default_factory=DDropResetResonatorPulseChannel
+    )
 
     @property
     def all_pulse_channels(self):
-        return [self.measure, self.acquire]
+        return [self.measure, self.acquire, self.reset]
 
 
 class Resonator(Component):
@@ -377,6 +405,10 @@ class QubitPulseChannels(PulseChannelSet):
         QubitId, CrossResonanceCancellationPulseChannel
     ] = Field(frozen=True, default=FrozenDict({}))
 
+    reset: DDropResetQubitPulseChannel = Field(
+        frozen=True, default_factory=DDropResetQubitPulseChannel
+    )
+
     @field_validator("cross_resonance_channels", "cross_resonance_cancellation_channels")
     def validate_channels_qubit_mapping(cls, channels):
         for aux_qubit_id, pulse_channel in channels.items():
@@ -393,6 +425,7 @@ class QubitPulseChannels(PulseChannelSet):
             self.freq_shift,
             *self.cross_resonance_channels.values(),
             *self.cross_resonance_cancellation_channels.values(),
+            self.reset,
         ]
 
     def pulse_channel_with_id(self, id_: str):
@@ -506,3 +539,9 @@ class Qubit(Component):
     @property
     def acquire_pulse_channel(self):
         return self.resonator.pulse_channels.acquire
+
+    @property
+    def reset_pulse_channels(
+        self,
+    ) -> tuple[DDropResetQubitPulseChannel, DDropResetResonatorPulseChannel]:
+        return self.pulse_channels.reset, self.resonator.pulse_channels.reset

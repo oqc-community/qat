@@ -9,8 +9,16 @@ from compiler_config.config import CompilerConfig
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import AnalysisPass, PassManager, TransformPass, ValidationPass
 from qat.core.result_base import ResultInfoMixin, ResultManager
-from qat.middleend import CustomMiddleend, DefaultMiddleend, FallthroughMiddleend
+from qat.ir.instruction_builder import QuantumInstructionBuilder
+from qat.ir.waveforms import SquareWaveform
+from qat.middleend import (
+    CustomMiddleend,
+    DefaultMiddleend,
+    FallthroughMiddleend,
+    PydDefaultMiddleend,
+)
 from qat.middleend.passes.purr.analysis import ActiveChannelResults
+from qat.model.loaders.lucy import LucyModelLoader
 from qat.model.loaders.purr import EchoModelLoader
 from qat.model.target_data import TargetData
 from qat.purr.compiler.builders import InstructionBuilder
@@ -328,3 +336,67 @@ class TestFallthroughMiddleend:
         assert met_mgr.optimized_circuit is None
         assert met_mgr.optimized_instruction_count is None
         assert res_mgr.results == set()
+
+
+class TestResetTransformation:
+    @pytest.fixture(scope="class")
+    def model(self):
+        hw = LucyModelLoader().load()
+        for qubit in hw.qubits.values():
+            qubit_reset_ch, res_reset_ch = qubit.reset_pulse_channels
+            qubit_reset_ch.is_ddrop_calibrated = True
+            res_reset_ch.is_ddrop_calibrated = True
+        return hw
+
+    def test_ddrop_end_to_end_sync(self, model):
+        """Test if all pulse channels duration are the same to meet timing requirements."""
+        widths = [4e-6, 5.4e-6]
+        delays = [100e-6, 1e-6]
+
+        for qubit_index in [0, 1]:
+            for reset_ch in model.qubit_with_index(qubit_index).reset_pulse_channels:
+                reset_ch.pulse.width = widths[qubit_index]
+            model.qubit_with_index(qubit_index).pulse_channels.reset.delay = delays[
+                qubit_index
+            ]
+
+        pipeline = PydDefaultMiddleend(model)
+
+        builder = QuantumInstructionBuilder(hardware_model=model)
+        builder.X(model.qubit_with_index(0))
+        builder.X(model.qubit_with_index(1))
+        builder.pulse(
+            target=model.qubit_with_index(0).measure_pulse_channel.uuid,
+            waveform=SquareWaveform(width=500e-9),
+        )
+        builder.acquire(
+            model.qubit_with_index(0), duration=500e-9, delay=0.0, output_variable="test_0"
+        )
+        builder.pulse(
+            target=model.qubit_with_index(1).measure_pulse_channel.uuid,
+            waveform=SquareWaveform(width=500e-9),
+        )
+        builder.acquire(
+            model.qubit_with_index(1), duration=500e-9, delay=0.0, output_variable="test_1"
+        )
+
+        compiler_config = CompilerConfig(driven_reset=True)
+        result_mgr = ResultManager()
+        builder = pipeline.emit(
+            builder, res_mgr=result_mgr, compiler_config=compiler_config
+        )
+
+        target_duration_map = {}
+        for instruction in builder.instructions:
+            if hasattr(instruction, "targets"):
+                for target in instruction.targets:
+                    target = model.pulse_channel_with_id(target)
+                    duration = target_duration_map.get(target, 0)
+                    target_duration_map[target] = duration + instruction.duration
+
+        durations = list(target_duration_map.values())
+        assert all(d != 0 for d in durations), "Assert durations aren't all 0"
+        for duration in durations[1:]:
+            assert durations[0] == pytest.approx(duration), (
+                "Assert all durations are equal."
+            )

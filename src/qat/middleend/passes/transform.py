@@ -861,10 +861,21 @@ class ResetsToDelays(TransformPass):
         :param res_mgr: The result manager to store the analysis results.
         :param compiler_config: The compiler configuration.
         """
+        return self.get_passive_reset(ir, res_mgr, compiler_config)
+
+    def get_passive_reset(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        compiler_config: CompilerConfig | None,
+    ) -> InstructionBuilder:
+        """Transforms all :class:`Reset` instructions into :class`Delay`:.
+
+        Turns all individual resets into delays, resting the qubit via passive decay.
+        """
         active_pulse_channels = res_mgr.lookup_by_type(ActivePulseChannelResults)
 
-        reset_time = self._get_reset_time(compiler_config)
-
+        reset_time = self._get_passive_reset_time(compiler_config)
         new_instructions = []
         for instr in ir:
             if isinstance(instr, Reset):
@@ -876,24 +887,30 @@ class ResetsToDelays(TransformPass):
                             duration=reset_time,
                         )
                     )
-
             else:
                 new_instructions.append(instr)
-
         ir.instructions = new_instructions
         return ir
 
-    def _get_reset_time(
+    def _get_passive_reset_time(
         self,
-        compiler_config: CompilerConfig,
+        compiler_config: CompilerConfig | None,
     ) -> float:
         """Gets the reset time for a qubit from the compiler configuration, or falls back to
         the passive reset time from the target data."""
 
-        if getattr(compiler_config, "passive_reset_time", None) is not None:
+        if (
+            compiler_config
+            and hasattr(compiler_config, "passive_reset_time")
+            and compiler_config.passive_reset_time
+        ):
             return compiler_config.passive_reset_time
 
-        if getattr(compiler_config, "repetition_period", None) is not None:
+        if (
+            compiler_config
+            and hasattr(compiler_config, "repetition_period")
+            and compiler_config.repetition_period
+        ):
             log.warning(
                 "The `repetition_period` in `CompilerConfig` is deprecated. "
                 "Please use `passive_reset_time` instead. "
@@ -901,6 +918,122 @@ class ResetsToDelays(TransformPass):
             )
 
         return self.passive_reset_time
+
+
+class ResetTransformation(ResetsToDelays):
+    """Transforms :class:`Reset` operations to pulsed definitions of reset.
+
+    A general reset pass, which transforms resets into pulses/delays depending on the reset type.
+    Reset type is controlled via the compiler configuration, the reset will be transformed into
+    a pulsed readout (DDrop) or a set of delays (Passive reset). This is an extended version of
+    `ResetsToDelays`.
+
+    Note that the delays do not necessarily agree with the granularity of the underlying target machine.
+    This can be enforced using the :class:`InstructionGranularitySanitisation` pass. This pass assumes
+    :class:`SynchronizeTask` comes after this pass to ensure reset is synchronized.
+    """
+
+    def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
+        """
+        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param target_data: Target-related information.
+        """
+        self.model = model
+        self.passive_reset_time = target_data.QUBIT_DATA.passive_reset_time
+
+    def run(
+        self,
+        ir: InstructionBuilder,
+        res_mgr: ResultManager,
+        *args,
+        compiler_config: CompilerConfig = None,
+        **kwargs,
+    ) -> InstructionBuilder:
+        """
+        :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
+        :param res_mgr: The result manager to store the analysis results.
+        :param compiler_config: The compiler configuration.
+        """
+        if (
+            compiler_config
+            and hasattr(compiler_config, "driven_reset")
+            and compiler_config.driven_reset
+        ):
+            ir = self.get_ddrop_reset(ir, res_mgr)
+        else:
+            ir = self.get_passive_reset(ir, res_mgr, compiler_config)
+        return ir
+
+    def get_ddrop_reset(
+        self, ir: InstructionBuilder, res_mgr: ResultManager
+    ) -> InstructionBuilder:
+        """Transforms all :class:`Reset` instructions into ddrop resets.
+
+        Turns all individual resets into a set of pulsed instructions which make up a
+        ddrop reset, based of calibration setup in the :class:`Qubit` device. Assumes
+        a synchronization is added after these resets, as resets are no longer
+        guaranteed to last for the same duration.
+        """
+        new_instructions = []
+        for instr in ir:
+            if isinstance(instr, Reset):
+                qubit = self.model.qubits[instr.qubit_target]
+
+                active_pulse_channels = res_mgr.lookup_by_type(ActivePulseChannelResults)
+                ch_id_targets = [ch.uuid for ch in active_pulse_channels.from_qubit(qubit)]
+
+                new_instructions.append(Synchronize(targets=ch_id_targets))
+
+                qubit_reset_ch, res_reset_ch = qubit.reset_pulse_channels
+                if (
+                    qubit_reset_ch.uuid not in ch_id_targets
+                    or res_reset_ch.uuid not in ch_id_targets
+                ):
+                    raise ValueError(
+                        f"Reset channels from qubit {qubit.uuid} not in active channel list, "
+                        "cannot correctly synchronize channels."
+                    )
+                if (
+                    not qubit_reset_ch.is_ddrop_calibrated
+                    or not res_reset_ch.is_ddrop_calibrated
+                ):
+                    raise ValueError(
+                        "Qubit ddrop not calibrated, please use passive reset. "
+                    )
+                qubit_waveform = deepcopy(qubit_reset_ch.pulse)
+                qubit_waveform_data = qubit_waveform.model_dump()
+                qubit_waveform_data["scale_factor"] = qubit_reset_ch.scale
+                res_waveform = deepcopy(res_reset_ch.pulse)
+                res_waveform_data = res_waveform.model_dump()
+                res_waveform_data["scale_factor"] = res_reset_ch.scale
+
+                new_instructions.extend(
+                    [
+                        Pulse(
+                            target=qubit_reset_ch.uuid,
+                            waveform=qubit_waveform.waveform_type(**qubit_waveform_data),
+                        ),
+                        Pulse(
+                            target=res_reset_ch.uuid,
+                            waveform=res_waveform.waveform_type(**res_waveform_data),
+                        ),
+                        Delay(
+                            target=qubit_reset_ch.uuid,
+                            duration=qubit_reset_ch.delay,
+                        ),
+                        Delay(
+                            target=res_reset_ch.uuid,
+                            duration=qubit_reset_ch.delay,
+                        ),
+                    ]
+                )
+
+                new_instructions.append(Synchronize(targets=ch_id_targets))
+                continue
+
+            new_instructions.append(instr)
+        ir.instructions = new_instructions
+        return ir
 
 
 class SquashDelaysOptimisation(TransformPass):
@@ -1815,6 +1948,7 @@ PydReturnSanitisation = ReturnSanitisation
 PydRepeatSanitisation = RepeatSanitisation
 PydBatchedShots = BatchedShots
 PydResetsToDelays = ResetsToDelays
+PydResetTransformation = ResetTransformation
 PydSquashDelaysOptimisation = SquashDelaysOptimisation
 PydRepeatTranslation = RepeatTranslation
 PydMeasurePhaseResetSanitisation = MeasurePhaseResetSanitisation

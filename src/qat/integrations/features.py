@@ -78,7 +78,7 @@ class OpenPulseFeatures(FeatureMetadata):
                 pulse_ch_name = pulse_channel.__class__.__name__
                 ignored = any(
                     ignored_pc in pulse_ch_name.lower()
-                    for ignored_pc in ["freqshift", "secondstate"]
+                    for ignored_pc in ["freqshift", "secondstate", "reset"]
                 )
 
                 if not ignored:

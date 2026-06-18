@@ -51,8 +51,8 @@ class TestOpenPulseFeatures:
                 len(qubit.all_qubit_and_resonator_pulse_channels)
                 for qubit in self.hw_pyd.qubits.values()
             )
-            - 2 * self.hw_pyd.number_of_qubits
-        )  # Freq shift and second state pulse channels are ignored for OpenPulse features.
+            - 4 * self.hw_pyd.number_of_qubits
+        )  # Freq shift, second state, and reset pulse channels are ignored for OpenPulse features.
         assert len(features["frames"]) == number_of_pulse_channels
 
         assert "waveforms" in features

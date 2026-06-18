@@ -240,4 +240,7 @@ class LucyModelLoader(BasePhysicalModelLoader):
             qubit.measure_pulse_channel.frequency = self.measure_frequency
             qubit.acquire_pulse_channel.frequency = self.measure_frequency
 
+            qubit.pulse_channels.reset.frequency = self.drive_frequency
+            qubit.resonator.pulse_channels.reset.frequency = self.measure_frequency
+
         return model

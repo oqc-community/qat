@@ -171,7 +171,9 @@ class TestDevicesValidation:
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
 
         qubit_pulse_channels = QubitPulseChannels()
-        for i, pulse_channel_name in enumerate(["drive", "second_state", "freq_shift"]):
+        for i, pulse_channel_name in enumerate(
+            ["drive", "second_state", "freq_shift", "reset"]
+        ):
             pulse_channel = getattr(qubit_pulse_channels, pulse_channel_name)
             pulse_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
         assert qubit_pulse_channels.is_calibrated
@@ -184,7 +186,9 @@ class TestDevicesValidation:
         )
         assert qubit.is_calibrated
 
-        for i, pulse_channel_name in enumerate(["drive", "second_state", "freq_shift"]):
+        for i, pulse_channel_name in enumerate(
+            ["drive", "second_state", "freq_shift", "reset"]
+        ):
             pulse_channel = getattr(qubit.pulse_channels, pulse_channel_name)
             with pytest.raises(ValidationError, match=r"must be >=0"):
                 pulse_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
@@ -261,6 +265,11 @@ class TestDevicesValidation:
                 crc_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
                 with pytest.raises(ValidationError, match=r"must be >=0"):
                     crc_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
+
+            for i, reset_channel in enumerate(qubit.reset_pulse_channels):
+                reset_channel.frequency = random.Random(seed + i).uniform(1e08, 1e10)
+                with pytest.raises(ValidationError, match=r"must be >=0"):
+                    reset_channel.frequency = random.Random(seed + i).uniform(-1e08, -1e10)
 
             assert qubit.is_calibrated
 

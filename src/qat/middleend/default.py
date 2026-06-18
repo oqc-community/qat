@@ -21,7 +21,7 @@ from qat.middleend.passes.transform import (
     PopulateWaveformSampleTime,
     RepeatSanitisation,
     RepeatTranslation,
-    ResetsToDelays,
+    ResetTransformation,
     ReturnSanitisation,
     ScopeSanitisation,
     SquashDelaysOptimisation,
@@ -91,19 +91,19 @@ class DefaultMiddleend(CustomMiddleend):
             | DynamicFrequencyValidation(model, target_data)
             # Sanitising input IR to make it complete
             | ReturnSanitisation()
-            | SynchronizeTask()
             | ReadoutValidation()
             | MeasurePhaseResetSanitisation(model)
             | InstructionValidation(model, target_data)
             | InstructionGranularitySanitisation(target_data)
             # Preparing for codegen
             | EvaluateWaveforms(model, target_data)
+            | EndOfTaskResetSanitisation(model)
+            | SynchronizeTask()
+            | ResetTransformation(model, target_data)
             | LowerSyncsToDelays()
             | FreqShiftSanitisation(model)
             | InitialPhaseResetSanitisation()
             | PhaseOptimisation()
-            | EndOfTaskResetSanitisation(model)
-            | ResetsToDelays(model, target_data)
             | SquashDelaysOptimisation()
             | InstructionLengthSanitisation(model, target_data)
             | BatchedShots(target_data)

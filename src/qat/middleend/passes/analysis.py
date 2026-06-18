@@ -3,6 +3,8 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 
+from compiler_config.config import CompilerConfig
+
 from qat.core.metrics_base import MetricsManager, MetricsType
 from qat.core.pass_base import AnalysisPass, ResultManager
 from qat.core.result_base import ResultInfoMixin
@@ -72,11 +74,14 @@ class ActivePulseChannelAnalysis(AnalysisPass):
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         *args,
+        compiler_config: CompilerConfig = None,
         **kwargs,
     ) -> QuantumInstructionBuilder:
         """
         :param ir: The list of instructions stored in an :class:`InstructionBuilder`.
         :param res_mgr: The result manager to store the analysis results.
+        :param met_mgr: The metric manager to store metrics.
+        :param compiler_config: The Compiler config which turns compiler time flags.
         """
 
         targets: set[str] = set()
@@ -103,6 +108,12 @@ class ActivePulseChannelAnalysis(AnalysisPass):
         )
         log.info(f"Physical qubits used in this circuit: {phys_q_indices}")
         met_mgr.record_metric(MetricsType.PhysicalQubitIndices, phys_q_indices)
+
+        # Add reset channels for driven reset
+        if hasattr(compiler_config, "driven_reset") and compiler_config.driven_reset:
+            for qubit in result.qubits:
+                for reset_ch in qubit.reset_pulse_channels:
+                    result.add_target(reset_ch, qubit)
 
         res_mgr.add(result)
         return ir

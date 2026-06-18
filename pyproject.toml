@@ -336,7 +336,7 @@ filterwarnings = [
   # TODO - `qblox-instruments` to fix deprecation warnings regarding QCodes
   'default:.*:RuntimeWarning:qcodes\\.utils\\.deprecate',
   # TODO - remove when OpenTelemetry/QCoDeS dependency chain is updated
-  'ignore:SelectableGroups dict interface is deprecated\\. Use select\\.:DeprecationWarning',
+  'default:SelectableGroups dict interface is deprecated\\. Use select\\.:DeprecationWarning',
   # TODO - remove when purr is dropped COMPILER-844
   'default:DOWN_CONVERT PostProcessing is deprecated:DeprecationWarning',
   'default:WaveformV1 support is deprecated:DeprecationWarning:qat.*.purr',

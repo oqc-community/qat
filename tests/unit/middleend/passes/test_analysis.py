@@ -2,6 +2,7 @@
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
 import pytest
+from compiler_config.config import CompilerConfig
 
 from qat.core.metrics_base import MetricsManager, MetricsType
 from qat.core.result_base import ResultManager
@@ -152,3 +153,28 @@ class TestActivePulseChannelAnalysis:
 
         physical_qubit_indices = met_mgr.get_metric(MetricsType.PhysicalQubitIndices)
         assert physical_qubit_indices == [0]
+
+    @pytest.mark.parametrize("driven_reset", [False, True])
+    def test_driven_reset_channels_are_active(self, driven_reset):
+        """Checks if driven reset channels are preemptively added to the active channels
+        analysis if used."""
+        builder = QuantumInstructionBuilder(self.model)
+        qubit = self.model.qubit_with_index(0)
+        builder.X(self.model.qubit_with_index(0))
+
+        res_mgr = ResultManager()
+        met_mgr = MetricsManager()
+        config = CompilerConfig(driven_reset=driven_reset)
+        ActivePulseChannelAnalysis(self.model).run(
+            builder, res_mgr, met_mgr, compiler_config=config
+        )
+
+        active_results = res_mgr.lookup_by_type(ActivePulseChannelResults)
+        if driven_reset:
+            assert all(
+                ch.uuid in active_results.targets for ch in qubit.reset_pulse_channels
+            )
+        else:
+            assert all(
+                ch.uuid not in active_results.targets for ch in qubit.reset_pulse_channels
+            )
