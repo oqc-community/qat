@@ -43,7 +43,7 @@ jobs:
       report: ${{ steps.formatting.outputs.markdown-summary }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
 
@@ -135,7 +135,7 @@ jobs:
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -160,7 +160,7 @@ jobs:
     env:
       COVERAGE_FILE: reports/.coverage.stable.${{ matrix.python }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -176,7 +176,7 @@ jobs:
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -192,7 +192,7 @@ jobs:
     outputs:
       result: ${{ steps.pytest.outputs.result }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
       - uses: ./.github/actions/testing-action
@@ -213,7 +213,7 @@ jobs:
       - formatting-tests
       - notebook-validation-tests
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
 
@@ -272,7 +272,7 @@ jobs:
     needs:
       - unit-tests
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           repository: ${{ inputs.repository }}
 
