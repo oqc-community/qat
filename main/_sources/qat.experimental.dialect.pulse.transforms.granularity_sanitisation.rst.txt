@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.granularity\_sanitisation module
+==========================================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.granularity_sanitisation
+   :members:
+   :undoc-members:
+   :show-inheritance:
