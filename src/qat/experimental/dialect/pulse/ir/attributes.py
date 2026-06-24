@@ -112,6 +112,23 @@ class TimeAttr(PulseNumericTypedAttr[TimeType]):
         """Returns the associated dialect type."""
         return TimeType
 
+    @classmethod
+    def from_literal_value(
+        cls, value: float | int, unit: TimeUnits = TimeUnits.SECOND
+    ) -> "TimeAttr":
+        """Creates a time attribute from a canonical value in seconds.
+
+        :param value: The time value in seconds.
+        :param unit: The unit used to store the value.
+        :returns: A time attribute storing ``value`` in the requested unit.
+        """
+
+        value_in_unit = value / 10 ** TIME_UNIT_EXPONENTS[unit]
+        if value_in_unit.is_integer():
+            value_in_unit = int(value_in_unit)
+
+        return cls(value_in_unit, unit)
+
 
 @irdl_attr_definition
 class FrequencyUnitsData(Data[FrequencyUnits]):
@@ -168,6 +185,23 @@ class FrequencyAttr(PulseNumericTypedAttr[FrequencyType]):
     def associated_type(self) -> type[FrequencyType]:
         """Returns the associated dialect type."""
         return FrequencyType
+
+    @classmethod
+    def from_literal_value(
+        cls, value: float | int, unit: FrequencyUnits = FrequencyUnits.HERTZ
+    ) -> "FrequencyAttr":
+        """Creates a frequency attribute from a canonical value in Hertz.
+
+        :param value: The frequency value in Hertz.
+        :param unit: The unit used to store the value.
+        :returns: A frequency attribute storing ``value`` in the requested unit.
+        """
+
+        value_in_unit = value / 10 ** FREQUENCY_UNIT_EXPONENTS[unit]
+        if value_in_unit.is_integer():
+            value_in_unit = int(value_in_unit)
+
+        return cls(value_in_unit, unit)
 
 
 @irdl_attr_definition

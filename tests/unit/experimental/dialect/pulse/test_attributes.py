@@ -111,6 +111,23 @@ class TestTimeAttr:
         attr2 = TimeAttr(80, TimeUnits.SECOND)
         assert attr1 != attr2
 
+    @pytest.mark.parametrize(
+        "value, units, stored_value, type_",
+        [
+            (8e-9, TimeUnits.NANOSECOND, 8, int),
+            (0.5e-9, TimeUnits.NANOSECOND, 0.5, float),
+        ],
+    )
+    def test_from_literal_value_preserves_integer_values(
+        self, value, units, stored_value, type_
+    ):
+        attr = TimeAttr.from_literal_value(value, units)
+
+        assert attr.value.data == stored_value
+        assert isinstance(attr.value.data, type_)
+        assert attr.unit.data == units
+        assert np.isclose(attr.literal_value, value)
+
 
 class TestFrequencyAttr:
     @pytest.mark.parametrize(
@@ -188,6 +205,23 @@ class TestFrequencyAttr:
         attr1 = FrequencyAttr(5e9, FrequencyUnits.HERTZ)
         attr2 = FrequencyAttr(5e9, FrequencyUnits.KILOHERTZ)
         assert attr1 != attr2
+
+    @pytest.mark.parametrize(
+        "value, units, stored_value, type_",
+        [
+            (5e6, FrequencyUnits.MEGAHERTZ, 5, int),
+            (5.5e6, FrequencyUnits.MEGAHERTZ, 5.5, float),
+        ],
+    )
+    def test_from_literal_value_preserves_integer_values(
+        self, value, units, stored_value, type_
+    ):
+        attr = FrequencyAttr.from_literal_value(value, units)
+
+        assert attr.value.data == stored_value
+        assert isinstance(attr.value.data, type_)
+        assert attr.unit.data == units
+        assert np.isclose(attr.literal_value, value)
 
 
 class TestPhaseAttr:
