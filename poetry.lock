@@ -265,7 +265,7 @@ version = "6.4.0"
 description = "An easy safelist-based HTML-sanitizing tool."
 optional = false
 python-versions = ">=3.10"
-groups = ["dev", "notebook"]
+groups = ["notebook"]
 files = [
     {file = "bleach-6.4.0-py3-none-any.whl", hash = "sha256:4b6b6a54fff2e69a3dde9d21cc6301220bee3c3cb792187d11403fd795031081"},
     {file = "bleach-6.4.0.tar.gz", hash = "sha256:4202482733d85cedd04e59fcb2f89f4e4c7c385a78d3c3c23c30446843a37452"},
@@ -3782,14 +3782,14 @@ files = [
 
 [[package]]
 name = "numpydantic"
-version = "1.9.1"
+version = "1.10.0"
 description = "Type and shape validation and serialization for arbitrary array types in pydantic models"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "numpydantic-1.9.1-py3-none-any.whl", hash = "sha256:3811c2843508bded722207b5603be0d78fdb01a668cde1716df314b7b2a91016"},
-    {file = "numpydantic-1.9.1.tar.gz", hash = "sha256:d1f50f0e291bc1d4a93751bfedc95fcd0df0608667d44c0ae33434668c1a91cd"},
+    {file = "numpydantic-1.10.0-py3-none-any.whl", hash = "sha256:1c62a445d305da69a5fa4510f7e7e1c25218f58fe462e5d59548042f1f769e66"},
+    {file = "numpydantic-1.10.0.tar.gz", hash = "sha256:a17d5ccc3b893c4a2e539c81c2f18960d70884ad7fcaa09c9eb56a95e8daf4a3"},
 ]
 
 [package.dependencies]
@@ -3804,7 +3804,7 @@ dev = ["black (>=24.1.1)", "numpydantic[docs,tests]", "ruff (>=0.2.0,<1.0.0)", "
 docs = ["autodoc-pydantic (>=2.0.1)", "erbsland-sphinx-ansi (>=1.2.0)", "furo (>=2024.1.29)", "myst-nb (>=1.1.1)", "myst-parser (>=2.0.0)", "numpydantic[arrays,mypy]", "rich (>=13.8.1)", "sphinx (>=8.0.0) ; python_version >= \"3.11\"", "sphinx-design (>=0.5.0)", "sphinxcontrib-mermaid (>=0.9.2)", "sphinxcontrib-programoutput (>=0.19)"]
 hdf5 = ["h5py (>=3.10.0)"]
 mypy = ["mypy (>=1.17.1)", "tomli (>=2.4.1) ; python_version < \"3.11\""]
-tests = ["coverage (>=6.1.1)", "coveralls (>=3.3.1,<4.0.0)", "numpydantic[arrays,mypy]", "pyright (>=1.1.408)", "pytest (>=7.4.0)", "pytest-cov (>=4.1.0)", "pytest-depends (>=1.0.1,<2.0.0)", "pytest-xdist (>=3.8.0)"]
+tests = ["coverage (>=6.1.1)", "coveralls (>=3.3.1)", "numpydantic[arrays,mypy]", "pyright (>=1.1.408)", "pytest (>=7.4.0)", "pytest-cov (>=4.1.0)", "pytest-depends (>=1.0.1,<2.0.0)", "pytest-xdist (>=3.8.0)"]
 video = ["opencv-python (>=4.9.0.80)"]
 zarr = ["zarr (>=2.17.2,<3.0.0)"]
 
@@ -7763,7 +7763,7 @@ version = "0.5.1"
 description = "Character encoding aliases for legacy web content"
 optional = false
 python-versions = "*"
-groups = ["dev", "notebook"]
+groups = ["notebook"]
 files = [
     {file = "webencodings-0.5.1-py2.py3-none-any.whl", hash = "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78"},
     {file = "webencodings-0.5.1.tar.gz", hash = "sha256:b36a1c245f2d304965eb4e0a82848379241dc04b865afcc4aab16748587e1923"},
