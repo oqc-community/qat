@@ -27,7 +27,11 @@ from qat.model.device import (
     ResonatorPulseChannels,
     SecondStatePulseChannel,
 )
-from qat.model.post_processing import LinearMapToRealMethod, MaxLikelihoodMethod, MLStateMap
+from qat.model.post_processing import (
+    LinearMapToRealMethod,
+    MaxLikelihoodMethod,
+    MLDiscriminateParams,
+)
 from qat.utils.hardware_model import generate_hw_model
 
 
@@ -408,10 +412,10 @@ class TestQubitMapperDiscriminator:
         :raises AssertionError: If method discriminator, noise estimate, or state mapping
             fails.
         """
-        states = [
-            MLStateMap(label="0", output_value=0.0, location=0.0),
-            MLStateMap(label="1", output_value=1.0, location=1.0),
-        ]
+        states = {
+            0: MLDiscriminateParams(location=0.0),
+            1: MLDiscriminateParams(location=1.0),
+        }
         post_process_method = MaxLikelihoodMethod(states=states)
         q = self._dummy_qubit(mean_z_map_args=None, post_process_method=post_process_method)
         s = q.model_dump_json()
@@ -468,7 +472,7 @@ class TestQubitMapperDiscriminator:
         post_process_method = LinearMapToRealMethod(mean_z_map_args=[1.0, 0.0])
         with pytest.raises(
             ValueError,
-            match="Exactly one of 'mean_z_map_args' or 'post_process_method' must be provided",
+            match="Provide exactly one of 'mean_z_map_args' or 'post_process_method'",
         ):
             self._dummy_qubit(
                 mean_z_map_args=[1.0, 0.0], post_process_method=post_process_method
@@ -482,6 +486,6 @@ class TestQubitMapperDiscriminator:
         """
         with pytest.raises(
             ValueError,
-            match="Exactly one of 'mean_z_map_args' or 'post_process_method' must be provided",
+            match="Provide exactly one of 'mean_z_map_args' or 'post_process_method'",
         ):
             self._dummy_qubit(mean_z_map_args=None, post_process_method=None)

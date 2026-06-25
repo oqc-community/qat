@@ -205,13 +205,17 @@ class Equalise(Instruction):
 
 
 class Discriminate(Instruction):
-    """Discriminate equalised values to string state labels.
+    """Discriminate equalised values to integer state keys.
 
     For the linear-map path a sign-based threshold comparison is used:
-    values above ``threshold`` → label ``"0"``, values at or below → label
-    ``"1"``. For the maximum-likelihood path the nearest centroid in the
-    complex plane determines the state's configured string label
-    (``MLStateMap.label``).
+    values above ``threshold`` → ``0``, values at or below → ``1``.
+
+    For the maximum-likelihood path the nearest centroid in the complex plane
+    determines the state's dict key from :attr:`MaxLikelihoodMethod.states`.
+    Non-negative keys are allowed states written to the classical register;
+    negative keys are disallowed and subsequently filtered by
+    :class:`PostSelect`.  When ``p_min > 0``, low-confidence shots are
+    assigned :data:`~qat.model.post_processing.BG_KEY`.
 
     Exactly one of ``threshold`` or ``method`` must be provided.
 
@@ -241,53 +245,38 @@ class Discriminate(Instruction):
 
 
 class PostSelect(Instruction):
-    """Mark shots for filtering based on discriminated state labels.
+    """Mark shots for filtering based on discriminated integer state keys.
 
     ``PostSelect`` follows :class:`Discriminate` in the readout pipeline.
     It does **not** remove shots inline — instead it records a per-output
-    boolean validity mask.  Shots whose state label appears in
-    ``disallowed_states`` are marked invalid; the runtime ANDs all masks
-    together and filters once at the end.
+    boolean validity mask.  Shots are marked invalid when:
 
-    Emitting this instruction with an empty ``disallowed_states`` set is a
-    no-op (all shots are considered valid) but is safe to emit
-    unconditionally so that the pipeline structure is uniform.
+    - Their integer state key is **negative** (disallowed states or the
+      ``p_min`` background key), **or**
+    - Their integer state key is in ``additional_disallowed``.
+
+    The runtime ANDs all masks together and filters once at the end.
+
+    ``additional_disallowed`` allows the pre-selection pass to specify extra
+    state indices to reject.
 
     Runtime implementation: :func:`qat.runtime.post_processing.apply_post_select`.
 
     .. seealso:: :ref:`shot_selection` for full pre/post-selection docs.
 
-    :param output_variable: Variable name whose state labels should be
+    :param output_variable: Variable name whose integer state keys should be
         screened.
-    :param disallowed_states: String state labels that should be marked
-        invalid. Shots mapped to these labels will have their validity mask
-        entry set to ``False``. Order is not significant.
+    :param additional_disallowed: Extra non-negative state indices to treat as
+        disallowed, in addition to any keys already negative in the
+        discriminated output.  Defaults to the empty set.
     """
 
     output_variable: str
-    disallowed_states: set[str] = Field(default_factory=set)
-
-
-class Demap(Instruction):
-    """De-map string state labels to final integer output values.
-
-    This is the final stage of the granular post-processing pipeline. Each
-    shot is mapped from a string state label (produced by :class:`Discriminate`)
-    to the configured integer output value written to the classical register.
-
-    Runtime implementation: :func:`qat.runtime.post_processing.apply_demap_instruction`.
-
-    :param output_variable: Variable name whose state labels should be mapped.
-    :param state_map: Mapping from string state label to integer output value, e.g.
-        ``{"0": 0, "1": 1}`` for the standard binary convention.
-    """
-
-    output_variable: str
-    state_map: dict[str, int]
+    additional_disallowed: set[int] = Field(default_factory=set)
 
 
 # Union type for all granular post-processing instructions
-GranularPostProcessInstruction = Equalise | Discriminate | PostSelect | Demap
+GranularPostProcessInstruction = Equalise | Discriminate | PostSelect
 
 VALID_MEASURE_INSTR = Synchronize | Acquire | Pulse | Delay
 

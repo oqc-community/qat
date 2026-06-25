@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Tests validating results_format semantics with the granular post-processing pipeline.
 
-The granular pipeline (Equalise → Discriminate → PostSelect → Demap) stores each
+The granular pipeline (Equalise → Discriminate → PostSelect) stores each
 intermediate stage as side-data in the ResultManager:
 
   - EqualiseResult  — complex IQ arrays after affine transform
@@ -11,7 +11,7 @@ intermediate stage as side-data in the ResultManager:
 ResultTransform routes to the correct intermediate based on results_format:
 
   - raw()          → EqualiseResult  (complex IQ, post-mask)
-  - binary()       → Demap output      (per-shot floats, post-mask)
+  - binary()       → Discriminate output (per-shot ints, post-mask)
   - binary_count() → DiscriminateResult label counts ({label: count})
 
 Post-selection applies the global mask to all intermediates, so counts and
@@ -28,9 +28,9 @@ from qat.core.result_base import ResultManager
 from qat.executables import AcquireData, Executable
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instructions import Assign
-from qat.ir.measure import Demap, Discriminate, Equalise, PostSelect
+from qat.ir.measure import Discriminate, Equalise, PostSelect
 from qat.model.loaders.lucy import LucyModelLoader
-from qat.model.post_processing import MaxLikelihoodMethod, MLStateMap
+from qat.model.post_processing import MaxLikelihoodMethod, MLDiscriminateParams
 from qat.pipelines.waveform import EchoPipeline, PipelineConfig
 from qat.runtime.passes.analysis import (
     DiscriminateResult,
@@ -49,11 +49,19 @@ from qat.runtime.results_processing import label_count
 # ---------------------------------------------------------------------------
 
 _3STATE_METHOD = MaxLikelihoodMethod(
-    states=[
-        MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-        MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-        MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-    ],
+    states={
+        0: MLDiscriminateParams(location=1 + 0j),
+        1: MLDiscriminateParams(location=-1 + 0j),
+        -2: MLDiscriminateParams(location=0 + 1j),
+    },
+)
+
+# All-allowed 2-state method for register-assembly tests (no negative keys).
+_2STATE_METHOD = MaxLikelihoodMethod(
+    states={
+        0: MLDiscriminateParams(location=1 + 0j),
+        1: MLDiscriminateParams(location=-1 + 0j),
+    },
 )
 
 # IQ: 4 near |0>, 3 near |1>, 3 near |2>  (total 10 shots)
@@ -75,19 +83,13 @@ _IQ_10 = np.array(
 
 
 def _make_granular_acquire(with_post_select: bool) -> AcquireData:
-    disallowed = ["2"] if with_post_select else []
     pp = [
         Equalise(output_variable="q0", transform=np.eye(2), offset=np.zeros(2)),
         Discriminate(output_variable="q0", method=_3STATE_METHOD),
     ]
     if with_post_select:
-        pp.append(PostSelect(output_variable="q0", disallowed_states=disallowed))
-    pp.append(
-        Demap(
-            output_variable="q0",
-            state_map={s.label: s.output_value for s in _3STATE_METHOD.states},
-        )
-    )
+        # PostSelect filters all negative keys (disallowed states have negative keys).
+        pp.append(PostSelect(output_variable="q0"))
     return AcquireData(
         mode=AcquireMode.INTEGRATOR,
         shape=(10,),
@@ -144,11 +146,12 @@ class TestIntermediatesStoredInResManager:
         assert np.iscomplexobj(eq)
         assert eq.shape == (10,)
 
-    def test_discriminate_output_is_string_labels(self):
+    def test_discriminate_output_is_integer_keys(self):
         _, res_mgr = _run_acq_pp(_IQ_10, with_post_select=False)
-        labels = res_mgr.lookup_by_type(DiscriminateResult).outputs["q0"]
-        assert labels.dtype.kind in ("U", "O")  # unicode or object string
-        assert set(labels).issubset({"0", "1", "2"})
+        keys = res_mgr.lookup_by_type(DiscriminateResult).outputs["q0"]
+        assert keys.dtype.kind in ("i", "u")  # integer dtype
+        # Allowed keys: 0, 1; disallowed key: -2
+        assert set(keys.tolist()).issubset({0, 1, -2})
 
     def test_post_selection_masks_intermediates(self):
         """After post-selection, EqualiseResult and DiscriminateResult are filtered."""
@@ -161,7 +164,7 @@ class TestIntermediatesStoredInResManager:
 
         labels = res_mgr.lookup_by_type(DiscriminateResult).outputs["q0"]
         assert labels.shape == (7,)
-        assert "2" not in labels  # disallowed state filtered out
+        assert -2 not in labels  # disallowed key (-2) filtered out
 
 
 # ---------------------------------------------------------------------------
@@ -191,11 +194,11 @@ class TestBinaryCountFormat:
         assert all(isinstance(k, str) for k in result)
         assert all(isinstance(v, int) for v in result.values())
 
-    def test_counts_use_state_labels_not_float_converted(self):
-        """Multi-state: labels "0", "1", "2" appear directly as dict keys."""
+    def test_counts_use_state_keys_not_float_converted(self):
+        """Multi-state: integer dict keys (0, 1, -2) appear as string keys in count dict."""
         result = self._run_result_transform(with_post_select=False)
-        # 4×"0", 3×"1", 3×"2"
-        assert result == {"0": 4, "1": 3, "2": 3}
+        # 4 classified as key 0, 3 as key 1, 3 as key -2
+        assert result == {"0": 4, "1": 3, "-2": 3}
 
     def test_post_selection_filters_disallowed_state(self):
         """With post-selection the disallowed state "2" is absent from counts."""
@@ -213,16 +216,43 @@ class TestBinaryCountFormat:
         acquire variables are routed through _label_count_register, not binary_count.
 
         Two single-qubit acquires (q0, q1_0) are assembled into a 2-bit register key "c" via
-        an Assign.  binary_count on string labels would accidentally produce the correct
-        result by coincidence; _label_count_register does it explicitly and correctly from
-        disc_labels.
+        an Assign.  Discriminate now emits integer keys directly; _label_count_register
+        builds the count dict from the per-shot integer arrays explicitly.
         """
-        # Build acquire + res_mgr for q0 (ML 3-state: 4"0", 3"1", 3"2").
-        acq_q0, res_mgr_q0 = _run_acq_pp(_IQ_10, with_post_select=False)
+        # Build acquire for 2-state (no disallowed): 5"0" (key 0), 5"1" (key 1).
+        _IQ_10_2STATE = np.concatenate(
+            [
+                np.full(5, 0.9 + 0j),  # → key 0
+                np.full(5, -0.9 + 0j),  # → key 1
+            ]
+        )
+
+        def _make_2state_acq(with_post_select):
+            pp = [
+                Equalise(output_variable="q0", transform=np.eye(2), offset=np.zeros(2)),
+                Discriminate(output_variable="q0", method=_2STATE_METHOD),
+            ]
+            return AcquireData(
+                mode=AcquireMode.INTEGRATOR,
+                shape=(10,),
+                post_processing=pp,
+                physical_channel="ch0",
+            )
+
+        def _run_2state_acq_pp():
+            acquire = _make_2state_acq(False)
+            package = Executable(programs=[], acquires={"q0": acquire})
+            acquisitions_raw = {"q0": _IQ_10_2STATE}
+            res_mgr = ResultManager()
+            result = AcquisitionPostprocessing().run(
+                acquisitions_raw, res_mgr, package=package
+            )
+            return result, res_mgr
+
+        acq_q0, res_mgr_q0 = _run_2state_acq_pp()
         q0_labels = res_mgr_q0.lookup_by_type(DiscriminateResult).outputs["q0"]
 
-        # Build a second acquire + res_mgr for q1_0 with identical labels.
-        acq_q1, res_mgr_q1 = _run_acq_pp(_IQ_10, with_post_select=False)
+        acq_q1, res_mgr_q1 = _run_2state_acq_pp()
         q1_labels = res_mgr_q1.lookup_by_type(DiscriminateResult).outputs["q0"]
 
         # Combine into one res_mgr with two discriminate outputs.
@@ -285,15 +315,15 @@ class TestBinaryFormat:
         assert isinstance(result, np.ndarray)
         assert result.shape == (10,)
 
-    def test_values_are_mapped_output_values(self):
-        """Values are from Demap (0, 1, 2) not binary-averaged to a single int."""
+    def test_values_are_integer_state_keys(self):
+        """Values are integer dict keys from Discriminate (0, 1, -2) not binary-averaged."""
         result = self._run_result_transform(with_post_select=False)
-        assert set(result).issubset({0, 1, 2})
+        assert set(result).issubset({0, 1, -2})
 
     def test_post_selection_reduces_array_length(self):
         result = self._run_result_transform(with_post_select=True)
         assert result.shape == (7,)
-        assert set(result).issubset({0, 1})
+        assert set(result).issubset({0, 1})  # negative keys filtered out
 
 
 # ---------------------------------------------------------------------------
@@ -325,7 +355,7 @@ class TestRawFormat:
         assert len(result) == 10
 
     def test_values_are_equalised_iq_not_map_output(self):
-        """Raw() returns IQ (complex), not the Demap output values (ints)."""
+        """Raw() returns IQ (complex), not the discriminated integer output values."""
         result = self._run_result_transform(with_post_select=False)
         # Values are IQ-domain complexes — real parts are not restricted to {0, 1, 2}
         assert not set(result.real).issubset({0.0, 1.0, 2.0})
@@ -403,12 +433,12 @@ def test_e2e_binary_count_uses_state_labels(post_selection):
     assert isinstance(result, dict)
     counts = result.get("c", result)  # unwrap if present
     assert isinstance(counts, dict)
-    # All keys must be string state labels ("0", "1", "2").
+    # All keys must be string state labels/keys ("0", "1", "-2").
     assert all(isinstance(k, str) for k in counts)
     assert all(isinstance(v, int) for v in counts.values())
     if post_selection:
-        # Disallowed state "2" must be absent after post-selection.
-        assert "2" not in counts
+        # Disallowed state (key "-2") must be absent after post-selection.
+        assert "-2" not in counts
     # Counts must sum to retained shots.
     expected_total = 7 if post_selection else 10
     assert sum(counts.values()) == expected_total
@@ -416,7 +446,8 @@ def test_e2e_binary_count_uses_state_labels(post_selection):
 
 @pytest.mark.parametrize("post_selection", [False, True])
 def test_e2e_binary_returns_per_shot_vals(post_selection):
-    """Binary() e2e: returns per-shot int array from Demap, not a majority-vote int."""
+    """Binary() e2e: returns per-shot int array from Discriminate, not a majority-vote
+    int."""
 
     pipeline, compiler_config = _make_pipeline_and_config(
         QuantumResultsFormat().binary(), post_selection
@@ -439,15 +470,15 @@ def test_e2e_binary_returns_per_shot_vals(post_selection):
         arr = arr[0]  # remove outer register-bit dimension
     expected_len = 7 if post_selection else 10
     assert arr.shape == (expected_len,)
-    # All values must be int output values from Demap, not arbitrary ints from majority voting.
+    # All values must be integer state keys from Discriminate, not arbitrary ints.
     assert arr.dtype.kind == "i"
-    expected_values = {0, 1} if post_selection else {0, 1, 2}
+    expected_values = {0, 1} if post_selection else {0, 1, -2}
     assert set(arr).issubset(expected_values)
 
 
 @pytest.mark.parametrize("post_selection", [False, True])
 def test_e2e_raw_returns_complex_iq(post_selection):
-    """Raw() e2e: returns equalised complex IQ, not float Demap values."""
+    """Raw() e2e: returns equalised complex IQ, not discriminated int values."""
 
     pipeline, compiler_config = _make_pipeline_and_config(
         QuantumResultsFormat().raw(), post_selection

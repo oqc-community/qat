@@ -439,24 +439,28 @@ class QubitPulseChannels(PulseChannelSet):
 class Qubit(Component):
     """Model for a superconducting qubit on a chip.
 
-    .. note::
-        ``post_process_method`` replaces ``mean_z_map_args`` by providing a future-proof mechanism to define arbitrary
-        post-process methods. ``mean_z_map_args`` is still supported but may be removed in future.
+    Exactly one of ``mean_z_map_args`` or ``post_process_method`` must be set;
+    ``mean_z_map_args`` is the legacy form and may be removed in a future release.
 
-    :param physical_channel: The physical channel carrying pulses to the qubit.
+    :param physical_channel: Physical channel carrying pulses to the qubit.
     :param pulse_channels: Channels for controlling the qubit.
-    :param resonator: Measurement device for the qubit.
-    :param mean_z_map_args: (deprecated) Arguments for linear mapping (mutually exclusive with ``post_process_method``).
+    :param resonator: Measurement resonator for the qubit.
+    :param mean_z_map_args: (deprecated) ``[A, B]`` arguments for the linear IQ→real
+        mapping ``z = Re(A·iq + B)``. Mutually exclusive with ``post_process_method``.
     :param discriminator: Discriminator value for measurement.
-    :param post_process_method: Post-processing method used to map complex IQ values to states.
-    :param preselect_disallowed_states: State labels that cause the shot
-        to be discarded during pre-selection (e.g. ``{"1"}`` for a standard
-        qubit). When non-empty, pre-selection is enabled for this qubit
-        provided the compiler's ``pre_selection`` flag is also enabled.
-        Defaults to the empty set (no pre-selection).
-    :param direct_x_pi: Whether direct X(pi) pulse is used.
+    :param post_process_method: Post-processing method mapping complex IQ values to
+        states. Mutually exclusive with ``mean_z_map_args``.
+    :param preselect_disallowed_states: State indices that cause a shot to be discarded
+        during pre-selection. Indices match the non-negative keys of
+        ``post_process_method.states`` (for
+        :class:`~qat.model.post_processing.MaxLikelihoodMethod`) or the implicit 0/1
+        index for :class:`~qat.model.post_processing.LinearMapToRealMethod` and legacy
+        ``mean_z_map_args`` qubits. Defaults to ``{1}``; set to ``set()`` to disable
+        pre-selection for a qubit.
+    :param direct_x_pi: Whether a direct X(π) pulse is used.
 
-    :raises ValueError: If neither or both of ``mean_z_map_args`` and ``post_process_method`` are provided.
+    :raises ValueError: If neither or both of ``mean_z_map_args`` and
+        ``post_process_method`` are set.
     """
 
     physical_channel: QubitPhysicalChannel
@@ -469,13 +473,7 @@ class Qubit(Component):
     post_process_method: PostProcessMethod | None = Field(
         discriminator="method", default=None
     )
-    preselect_disallowed_states: set[str] = Field(
-        default_factory=set,
-        description="State labels that cause the shot to be discarded "
-        "during pre-selection. The background state (BG_LABEL) is always "
-        "implicitly added at the pass level. Empty set means pre-selection "
-        "is disabled for this qubit.",
-    )
+    preselect_disallowed_states: set[int] = Field(default_factory=lambda: {1})
     direct_x_pi: bool = False
 
     @model_validator(mode="after")
@@ -484,23 +482,7 @@ class Qubit(Component):
         has_state_post_process = self.post_process_method is not None
         if has_mean_z_map_args == has_state_post_process:
             raise ValueError(
-                "Exactly one of 'mean_z_map_args' or 'post_process_method' must be provided, but not both or neither."
-            )
-        return self
-
-    @model_validator(mode="after")
-    def _validate_preselect_disallowed_labels(self):
-        """Check that pre-selection labels match known states."""
-        if not self.preselect_disallowed_states or self.post_process_method is None:
-            return self
-        unknown = (
-            self.preselect_disallowed_states - self.post_process_method.declared_states
-        )
-        if unknown:
-            raise ValueError(
-                f"preselect_disallowed_states contains labels "
-                f"not recognised by post_process_method: "
-                f"{sorted(unknown)}"
+                "Provide exactly one of 'mean_z_map_args' or 'post_process_method'."
             )
         return self
 

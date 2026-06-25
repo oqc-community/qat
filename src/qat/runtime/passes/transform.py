@@ -24,7 +24,7 @@ from qat.core.result_base import ResultManager
 from qat.executables import Executable
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instructions import Variable
-from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing, PostSelect
+from qat.ir.measure import Discriminate, Equalise, PostProcessing, PostSelect
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.target_data import TargetData
 from qat.purr.compiler.error_mitigation.readout_mitigation import get_readout_mitigation
@@ -36,7 +36,6 @@ from qat.runtime.passes.analysis import (
 )
 from qat.runtime.passes.purr.analysis import IndexMappingResult
 from qat.runtime.post_processing import (
-    apply_demap_instruction,
     apply_discriminate_instruction,
     apply_equalise,
     apply_post_processing,
@@ -238,8 +237,7 @@ class AcquisitionPostprocessing(TransformPass):
 
             # Determine whether this acquire uses the granular pipeline at all.
             is_granular = any(
-                isinstance(pp, Equalise | Discriminate | Demap)
-                for pp in acquire.post_processing
+                isinstance(pp, Equalise | Discriminate) for pp in acquire.post_processing
             )
 
             for pp in acquire.post_processing:
@@ -263,10 +261,6 @@ class AcquisitionPostprocessing(TransformPass):
                             response, pp, response_axes
                         )
                         per_output_masks[output_variable] = validity_mask
-                    case Demap():
-                        response, response_axes = apply_demap_instruction(
-                            response, pp, response_axes
-                        )
                     case _:
                         response, response_axes = apply_post_processing(
                             response, pp, response_axes
@@ -363,7 +357,7 @@ class QBloxAcquisitionPostProcessing(TransformPass):
 
                 post_procs = acquire_data.post_processing
                 is_granular = any(
-                    isinstance(pp, Equalise | Discriminate | Demap) for pp in post_procs
+                    isinstance(pp, Equalise | Discriminate) for pp in post_procs
                 )
                 # QBlox post-processing operates on a single sweep-point at a time so the
                 # axis map starts empty — axes are not tracked across sweep iterations here.
@@ -386,7 +380,7 @@ class QBloxAcquisitionPostProcessing(TransformPass):
                         # rather than the current IQ response.
                         # f : {0, 1} ----> {-1, 1}  via  1 - 2x
                         response = 1 - 2 * thrld_data
-                    elif isinstance(pp, Equalise | PostSelect | Demap):
+                    elif isinstance(pp, Equalise | PostSelect):
                         # Granular instructions in the QBlox path use the software helpers
                         if isinstance(pp, Equalise):
                             response, response_axes = apply_equalise(
@@ -398,10 +392,6 @@ class QBloxAcquisitionPostProcessing(TransformPass):
                                 response, pp, response_axes
                             )
                             per_output_masks[name] = validity_mask
-                        elif isinstance(pp, Demap):
-                            response, response_axes = apply_demap_instruction(
-                                response, pp, response_axes
-                            )
                     else:
                         response, response_axes = apply_post_processing(
                             response, pp, response_axes
@@ -456,12 +446,13 @@ class InlineResultsProcessingTransform(TransformPass):
     **Legacy vs granular acquires**
 
     All acquires that go through :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing`
-    now produce granular ``Equalise`` → ``Discriminate`` → ``Demap`` instructions and
-    appear in :class:`~qat.runtime.passes.analysis.DiscriminateResult`.  This includes
+    now produce granular ``Equalise`` → ``Discriminate`` instructions and
+    appear in :class:`~qat.runtime.passes.analysis.DiscriminateResult`.
+    :class:`~qat.ir.measure.Discriminate` emits integer state keys directly. This includes
     qubits with :class:`~qat.model.post_processing.LinearMapToRealMethod`,
     :class:`~qat.model.post_processing.MaxLikelihoodMethod`, and legacy
     ``mean_z_map_args`` qubits.  Pre-selection acquires (``presel_*``) use a shorter
-    chain (``Equalise`` → ``Discriminate`` → ``PostSelect``, no ``Demap``) and are
+    chain (``Equalise`` → ``Discriminate`` → ``PostSelect``) and are
     for internal runtime use only — they drive the validity mask but are never returned
     to the user.
 
@@ -477,7 +468,7 @@ class InlineResultsProcessingTransform(TransformPass):
     **``binary_average``** (triggered by ``InlineResultsProcessing.Binary``/``Program``)
     is suppressed for granular variables when a top-level ``QuantumResultsFormat``
     (``binary()`` or ``raw()``) is active — ``ResultTransform`` owns routing in that
-    case and needs the raw per-shot int array from ``Demap``.  For all other cases
+    case and needs the raw per-shot int array from ``Discriminate``.  For all other cases
     (no top-level format, or ``binary_count()``, or legacy acquires) ``binary_average``
     runs as before.
     """
@@ -512,7 +503,7 @@ class InlineResultsProcessingTransform(TransformPass):
 
         # For binary_average suppression: we only skip reduction for ML granular acquires
         # (multi-state, where majority-vote is meaningless).  LinearMapToRealMethod and
-        # legacy granular acquires produce binary {0, 1} Demap outputs where
+        # legacy granular acquires produce binary {0, 1} Discriminate outputs where
         # binary_average correctly majority-votes to a single 0/1 scalar.
         # Note: pre-selection acquires (presel_*) have results_processing=Raw so
         # binary_average is never triggered for them regardless.
@@ -532,10 +523,10 @@ class InlineResultsProcessingTransform(TransformPass):
         # When a top-level QuantumResultsFormat (binary() / raw()) is active and there
         # are MaxLikelihood granular acquires, ResultTransform handles the per-shot
         # routing.  In that case binary_average must be suppressed for those variables
-        # so the per-shot int array from Demap reaches ResultTransform intact.
-        # LinearMapToRealMethod / legacy granular acquires produce binary {0, 1} Demap
+        # so the per-shot int array from Discriminate reaches ResultTransform intact.
+        # LinearMapToRealMethod / legacy granular acquires produce binary {0, 1}
         # outputs where binary_average correctly majority-votes to a single scalar.
-        # BinaryCount is not suppressed — it counts string labels directly.
+        # BinaryCount is not suppressed — it counts int keys directly.
         fmt = compiler_config.results_format if compiler_config is not None else None
         suppress_binary_avg_for_granular = (
             fmt is not None
@@ -570,7 +561,7 @@ class InlineResultsProcessingTransform(TransformPass):
             # majority-vote reduction of the per-shot array to a single 0/1 value.
             # Skip it only for MaxLikelihood granular acquires when a top-level
             # QuantumResultsFormat (binary() / raw()) is active — ResultTransform owns
-            # routing in those cases and needs the per-shot int array from Demap.
+            # routing in those cases and needs the per-shot int array from Discriminate.
             # LinearMapToRealMethod granular acquires produce {0, 1} where binary_average
             # correctly majority-votes to a single scalar.
             if InlineResultsProcessing.Binary in rp and not (
@@ -641,7 +632,7 @@ class ResultTransform(TransformPass):
     **Granular pipeline routing**
 
     When the granular post-processing pipeline (``Equalise`` → ``Discriminate`` →
-    ``PostSelect`` → ``Demap``) has been used for end-of-circuit measurements,
+    ``PostSelect``) has been used for end-of-circuit measurements,
     intermediate outputs are stored as
     :class:`~qat.runtime.passes.analysis.EqualiseResult` and
     :class:`~qat.runtime.passes.analysis.DiscriminateResult` in ``res_mgr``.
@@ -650,11 +641,10 @@ class ResultTransform(TransformPass):
     - **``raw()``**: Returns the complex IQ arrays from
       :class:`~qat.runtime.passes.analysis.EqualiseResult` (post-mask). For legacy
       acquires without an ``Equalise`` step, falls back to the mapped float arrays.
-    - **``binary()``**: Returns the per-shot int output-value arrays from ``Demap``
-      (i.e. ``acquisitions`` as-is — one int per retained shot).
-    - **``binary_count()``**: Calls :func:`~qat.runtime.results_processing.label_count`
-      on the string labels from
-      :class:`~qat.runtime.passes.analysis.DiscriminateResult`, giving a
+    - **``binary()``**: Returns the per-shot integer state-key arrays from
+      ``Discriminate`` (i.e. ``acquisitions`` as-is — one int per retained shot).
+    - **``binary_count()``**: Uses integer keys from
+      :class:`~qat.runtime.passes.analysis.DiscriminateResult` to build a
       ``{label: count}`` dict that correctly handles multi-state classifiers.
 
     For legacy acquires (no ``DiscriminateResult`` present) all three modes fall back to
@@ -703,10 +693,10 @@ class ResultTransform(TransformPass):
                 # All shots were filtered by post-selection — return empty counts.
                 acquisitions = {key: {} for key in acquisitions}
             elif disc_labels:
-                # ML granular acquires: count string state labels directly — works for any
+                # ML granular acquires: count integer state keys directly — works for any
                 # number of states without float conversion.
                 # LinearMapToRealMethod / legacy granular acquires produce binary
-                # {0, 1} int Demap outputs; use binary_count on those ints so that
+                # {0, 1} int Discriminate outputs; use binary_count on those ints so that
                 # multi-qubit register keys ("00", "01", "10", "11") are assembled
                 # correctly by AssignResultsTransform.
                 ml_label_vars = {
@@ -777,8 +767,8 @@ class ResultTransform(TransformPass):
                     acquisitions[assign.name] = self._resolve_from_equalise(
                         assign.value, eq_outputs
                     )
-        # binary() with granular pipeline: acquisitions hold the per-shot int/float
-        # output values from Demap — convert to lists for JSON serialisability.
+        # binary() with granular pipeline: acquisitions hold the per-shot integer state
+        # keys from Discriminate — convert to lists for JSON serialisability.
         # Legacy binary() is handled by InlineResultsProcessingTransform upstream.
         elif disc_labels and not _results_format_is_raw(compiler_config):
             # Convert any remaining numpy arrays to plain lists.

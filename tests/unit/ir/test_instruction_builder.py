@@ -17,7 +17,6 @@ from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import Delay, PhaseShift, Synchronize
 from qat.ir.measure import (
     Acquire,
-    Demap,
     Discriminate,
     Equalise,
     MeasureBlock,
@@ -36,7 +35,11 @@ from qat.model.device import (
 )
 from qat.model.hardware_model import PhysicalHardwareModel
 from qat.model.loaders.lucy import LucyModelLoader
-from qat.model.post_processing import LinearMapToRealMethod, MaxLikelihoodMethod, MLStateMap
+from qat.model.post_processing import (
+    LinearMapToRealMethod,
+    MaxLikelihoodMethod,
+    MLDiscriminateParams,
+)
 from qat.utils.hardware_model import generate_hw_model
 from qat.utils.pydantic import QubitId, ValidatedSet
 
@@ -697,9 +700,9 @@ class TestMeasure:
     def test_state_map_legacy_post_processing(self):
         """When a qubit has no post_process_method (legacy mean_z_map_args path),
         measure_with_granular_post_processing should emit the granular Equalise →
-        Discriminate → Demap chain derived from mean_z_map_args, with Demap convention {"0":
+        Discriminate chain derived from mean_z_map_args.
 
-        0, "1": 1}.
+        Discriminate outputs integer keys directly.
         """
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
@@ -712,18 +715,17 @@ class TestMeasure:
         eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
         pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
         disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
-        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
 
         assert len(pp_instructions) == 0
         assert len(eq_instructions) == 1
         assert len(disc_instructions) == 1
-        assert len(map_instructions) == 1
-        assert map_instructions[0].state_map == {"0": 0, "1": 1}
 
     def test_state_map_post_processing(self):
         """When a qubit has LinearMapToRealMethod, measure_with_granular_post_processing
-        emits Equalise → Discriminate → Demap({"0": 0, "1": 1}) matching the legacy sign
-        convention."""
+        emits Equalise → Discriminate (threshold=0.0).
+
+        Discriminate outputs integer keys directly.
+        """
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         qubit: Qubit = hw_model.qubit_with_index(0)
@@ -734,12 +736,9 @@ class TestMeasure:
         builder.measure_with_granular_post_processing(target=qubit, output_variable="0")
         eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
         disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
-        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
         assert len(eq_instructions) == 1
         assert len(disc_instructions) == 1
         assert disc_instructions[0].threshold == 0.0
-        assert len(map_instructions) == 1
-        assert map_instructions[0].state_map == {"0": 0, "1": 1}
 
     def test_legacy_post_processing_inferred_from_target(self):
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
@@ -759,8 +758,8 @@ class TestMeasure:
         assert pp.args == [1 + 0j, 0j]
 
     def test_measure_post_selected_linear_map(self):
-        """measure_with_granular_post_processing with LinearMapToRealMethod emits a
-        MeasureBlock then Equalise → Discriminate → Demap({"0": 0, "1": 1}).
+        """measure_with_granular_post_processing with LinearMapToRealMethod emits
+        MeasureBlock then Equalise → Discriminate.
 
         No PostProcessing(LINEAR_MAP) is emitted.
         """
@@ -775,19 +774,15 @@ class TestMeasure:
         pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
         eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
         disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
-        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
 
         assert len(pp_instructions) == 0
         assert len(eq_instructions) == 1
         assert len(disc_instructions) == 1
         assert disc_instructions[0].threshold == 0.0
-        assert len(map_instructions) == 1
-        assert map_instructions[0].state_map == {"0": 0, "1": 1}
 
     def test_measure_post_selected_legacy_qubit(self):
         """measure_with_granular_post_processing for a legacy qubit (no post_process_method)
-        emits the granular Equalise → Discriminate → Demap chain derived from
-        mean_z_map_args, with Demap convention {"0": 0, "1": 1}."""
+        emits the granular Equalise → Discriminate chain derived from mean_z_map_args."""
 
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
         qubit: Qubit = copy.deepcopy(hw_model.qubit_with_index(0))
@@ -799,13 +794,10 @@ class TestMeasure:
         pp_instructions = [i for i in builder.instructions if isinstance(i, PostProcessing)]
         eq_instructions = [i for i in builder.instructions if isinstance(i, Equalise)]
         disc_instructions = [i for i in builder.instructions if isinstance(i, Discriminate)]
-        map_instructions = [i for i in builder.instructions if isinstance(i, Demap)]
 
         assert len(pp_instructions) == 0
         assert len(eq_instructions) == 1
         assert len(disc_instructions) == 1
-        assert len(map_instructions) == 1
-        assert map_instructions[0].state_map == {"0": 0, "1": 1}
 
     @pytest.mark.parametrize("axis", list(ProcessAxis))
     @pytest.mark.parametrize(
@@ -992,25 +984,16 @@ class TestPostSelectionConfig:
 
     @pytest.fixture
     def ml_qubit_with_disallowed(self):
-        """Returns a qubit configured with MaxLikelihoodMethod where |1> is disallowed."""
+        """Returns a qubit configured with MaxLikelihoodMethod where state 1 is
+        disallowed."""
         qubit = copy.deepcopy(hw_model.qubit_with_index(0))
         qubit.__dict__["mean_z_map_args"] = None
         qubit.__dict__["post_process_method"] = MaxLikelihoodMethod(
-            states=[
-                MLStateMap(label="0", output_value=0.0, location=1 + 0j, disallowed=False),
-                MLStateMap(label="1", output_value=1.0, location=-1 + 0j, disallowed=True),
-            ],
+            states={
+                0: MLDiscriminateParams(location=1 + 0j),
+                -1: MLDiscriminateParams(location=-1 + 0j),  # negative key = disallowed
+            },
         )
-        return qubit
-
-    @pytest.fixture
-    def linear_map_qubit_with_disallowed(self):
-        """Returns a qubit with LinearMapToRealMethod that has a disallowed state."""
-        qubit = copy.deepcopy(hw_model.qubit_with_index(0))
-        qubit.__dict__["mean_z_map_args"] = None
-        method = LinearMapToRealMethod()
-        method.__dict__["disallowed_states"] = ["1"]
-        qubit.__dict__["post_process_method"] = method
         return qubit
 
     def test_ml_post_select_emitted_only_when_explicitly_added(
@@ -1021,29 +1004,29 @@ class TestPostSelectionConfig:
         builder.emit_granular_post_processing(
             target=ml_qubit_with_disallowed, output_variable="v"
         )
-        assert [type(i) for i in builder.instructions] == [Discriminate, Demap]
+        assert [type(i) for i in builder.instructions] == [Discriminate]
 
-        disallowed = ml_qubit_with_disallowed.post_process_method.disallowed_states
-        builder.emit_post_select("v", disallowed)
-        assert [type(i) for i in builder.instructions] == [Discriminate, PostSelect, Demap]
+        builder.emit_post_select("v")
+        assert [type(i) for i in builder.instructions] == [Discriminate, PostSelect]
 
-    def test_linear_map_post_select_emitted_only_when_explicitly_added(
-        self, linear_map_qubit_with_disallowed
-    ):
-        """Linear-map granular chain excludes PostSelect unless emitted explicitly."""
+    def test_linear_map_post_select_is_noop_at_runtime(self):
+        """LinearMapToRealMethod always produces non-negative keys so PostSelect is a noop.
+
+        emit_post_select unconditionally emits a PostSelect instruction; at runtime
+        apply_post_select produces an all-True mask when all keys are non-negative.
+        """
         builder = QuantumInstructionBuilder(hardware_model=hw_model)
-        builder.emit_granular_post_processing(
-            target=linear_map_qubit_with_disallowed, output_variable="v"
-        )
-        assert [type(i) for i in builder.instructions] == [Equalise, Discriminate, Demap]
+        qubit = copy.deepcopy(hw_model.qubit_with_index(0))
+        qubit.__dict__["mean_z_map_args"] = None
+        qubit.__dict__["post_process_method"] = LinearMapToRealMethod()
+        builder.emit_granular_post_processing(target=qubit, output_variable="v")
+        assert [type(i) for i in builder.instructions] == [Equalise, Discriminate]
 
-        disallowed = linear_map_qubit_with_disallowed.post_process_method.disallowed_states
-        builder.emit_post_select("v", disallowed)
+        builder.emit_post_select("v")
         assert [type(i) for i in builder.instructions] == [
             Equalise,
             Discriminate,
             PostSelect,
-            Demap,
         ]
 
     def test_measure_post_selected_does_not_emit_post_select(
@@ -1057,11 +1040,9 @@ class TestPostSelectionConfig:
         ps = [i for i in builder.instructions if isinstance(i, PostSelect)]
         assert len(ps) == 0
 
-    def test_emit_post_select_with_empty_disallowed_is_noop(self):
-        """emit_post_select should be a no-op when disallowed state list is empty."""
+    def test_emit_post_select_always_emits(self):
+        """emit_post_select unconditionally emits a PostSelect instruction."""
         b1 = QuantumInstructionBuilder(hardware_model=hw_model)
-        b2 = QuantumInstructionBuilder(hardware_model=hw_model)
-        b1 += b2
         before = b1.number_of_instructions
-        b1.emit_post_select("v", [])
-        assert b1.number_of_instructions == before
+        b1.emit_post_select("v")
+        assert b1.number_of_instructions == before + 1

@@ -473,10 +473,7 @@ class TketToQatIRConverter:
                         output_variable=output_var,
                     )
                     if post_selection:
-                        qubit = qat_builder.get_logical_qubit(args[0])
-                        method = qubit.post_process_method
-                        disallowed = method.disallowed_states if method is not None else []
-                        qat_builder.emit_post_select(output_var, disallowed)
+                        qat_builder.emit_post_select(output_var)
                 case "Barrier":
                     qat_builder.synchronize(
                         [qat_builder.get_logical_qubit(arg) for arg in args]

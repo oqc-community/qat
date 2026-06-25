@@ -32,7 +32,6 @@ def count_active_instructions(
             "Equalise",
             "Discriminate",
             "PostSelect",
-            "Demap",
         ):
             n_instr_no_sync += 1
 

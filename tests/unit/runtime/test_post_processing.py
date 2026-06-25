@@ -3,8 +3,13 @@
 """Tests for runtime post-processing utilities.
 
 These cover mean, linear mapping, discrimination and the granular post-processing pipeline
-(Equalise, Discriminate, PostSelect, Demap) used by the runtime to convert acquired IQ data
+(Equalise, Discriminate, PostSelect) used by the runtime to convert acquired IQ data
 into final classical outputs.
+
+Discriminate now emits integer state keys directly instead of string labels:
+- Threshold path: above threshold → 0, at/below → 1.
+- ML path: dict key from MaxLikelihoodMethod.states (negative = disallowed).
+PostSelect filters shots with negative integer keys.
 """
 
 import numpy as np
@@ -12,10 +17,9 @@ import pytest
 from pydantic import ValidationError
 
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
-from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing, PostSelect
-from qat.model.post_processing import BG_LABEL, MaxLikelihoodMethod, MLStateMap
+from qat.ir.measure import Discriminate, Equalise, PostProcessing, PostSelect
+from qat.model.post_processing import BG_KEY, MaxLikelihoodMethod, MLDiscriminateParams
 from qat.runtime.post_processing import (
-    apply_demap_instruction,
     apply_discriminate_instruction,
     apply_equalise,
     apply_post_processing,
@@ -28,7 +32,7 @@ from qat.runtime.post_processing import (
 
 
 class TestGranularPipeline:
-    """Tests for the new granular post-processing instruction functions."""
+    """Tests for the granular post-processing instruction functions."""
 
     _axes = {ProcessAxis.SEQUENCE: -1}
 
@@ -40,8 +44,7 @@ class TestGranularPipeline:
         assert np.allclose(result, response)
 
     def test_apply_equalise_complex_multiplier_as_2x2_matrix(self):
-        """A complex multiplier m = a+jb encoded as [[a,-b],[b,a]] should give Re(m*z) as
-        I'."""
+        """A complex multiplier m=a+jb encoded as [[a,-b],[b,a]] gives Re(m*z) as I'."""
         response = np.array([1.0 + 0.5j, -0.5 + 1.0j, 0.25 - 0.75j])
         m = 2.0 + 0.5j
         a, b = m.real, m.imag
@@ -50,152 +53,160 @@ class TestGranularPipeline:
         result, _ = apply_equalise(response, instr, self._axes)
         assert np.allclose(result.real, np.real(m * response))
 
-    def test_apply_equalise_rejects_complex_multiplier(self):
-        """Supplying a complex-valued matrix should raise an error."""
-        import numpy as np_mod
-
-        with pytest.raises(
-            np_mod.exceptions.ComplexWarning,
-            match="Casting complex values to real discards",
-        ):
-            Equalise(
-                output_variable="v",
-                transform=np.array([[1.0 + 0.5j, 0j], [0j, 1.0 + 0.5j]]),
-            )
-
-    def test_apply_discriminate_threshold(self):
-        """Values above threshold → label "0"; at/below → label "1"."""
+    def test_apply_discriminate_threshold_emits_integers(self):
+        """Threshold discriminator: values above threshold → 0, at/below → 1."""
         response = np.array([1.0, -1.0, 0.5, -0.5])
         instr = Discriminate(output_variable="v", threshold=0.0)
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
-        assert list(state_ids) == ["0", "1", "0", "1"]
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
+        assert list(state_keys) == [0, 1, 0, 1]
 
-    def test_apply_post_select_empty_is_noop(self):
-        """PostSelect with no disallowed states marks all shots valid."""
-        state_ids = np.array(["0", "1", "0", "1"])
-        instr = PostSelect(output_variable="v", disallowed_states=[])
-        _, mask = apply_post_select(state_ids, instr, self._axes)
+    def test_apply_post_select_filters_negative_keys(self):
+        """PostSelect masks shots with negative integer state keys."""
+        state_keys = np.array([0, 1, -2, 0, -1])
+        instr = PostSelect(output_variable="v")
+        _, mask = apply_post_select(state_keys, instr, self._axes)
+        assert list(mask) == [True, True, False, True, False]
+
+    def test_apply_post_select_all_allowed_is_noop(self):
+        """PostSelect with all non-negative keys marks all shots valid."""
+        state_keys = np.array([0, 1, 2, 0])
+        instr = PostSelect(output_variable="v")
+        _, mask = apply_post_select(state_keys, instr, self._axes)
         assert all(mask)
 
-    def test_apply_post_select_with_disallowed(self):
-        state_ids = np.array(["0", "1", "0", "1"])
-        instr = PostSelect(output_variable="v", disallowed_states=["1"])
-        _, mask = apply_post_select(state_ids, instr, self._axes)
+    def test_apply_post_select_additional_disallowed_masks_matching_keys(self):
+        """additional_disallowed masks non-negative keys that appear in the set."""
+        state_keys = np.array([0, 1, 2, 0, 1])
+        instr = PostSelect(output_variable="v", additional_disallowed={1})
+        _, mask = apply_post_select(state_keys, instr, self._axes)
+        assert list(mask) == [True, False, True, True, False]
+
+    def test_apply_post_select_additional_disallowed_combined_with_negative_keys(self):
+        """additional_disallowed and negative-key masking are both applied (AND logic)."""
+        state_keys = np.array([0, 1, -2, 2, 1])
+        instr = PostSelect(output_variable="v", additional_disallowed={2})
+        _, mask = apply_post_select(state_keys, instr, self._axes)
+        # key 1 → allowed, key -2 → negative → masked, key 2 → additional_disallowed → masked
+        assert list(mask) == [True, True, False, False, True]
+
+    def test_apply_post_select_empty_additional_disallowed_is_noop(self):
+        """An empty additional_disallowed set behaves identically to omitting it."""
+        state_keys = np.array([0, 1, -1])
+        instr_no_extra = PostSelect(output_variable="v")
+        instr_empty_extra = PostSelect(output_variable="v", additional_disallowed=set())
+        _, mask_no_extra = apply_post_select(state_keys, instr_no_extra, self._axes)
+        _, mask_empty_extra = apply_post_select(state_keys, instr_empty_extra, self._axes)
+        assert list(mask_no_extra) == list(mask_empty_extra)
+
+    def test_apply_post_select_additional_disallowed_multiple_keys(self):
+        """Multiple keys in additional_disallowed are all masked."""
+        state_keys = np.array([0, 1, 2, 3])
+        instr = PostSelect(output_variable="v", additional_disallowed={1, 3})
+        _, mask = apply_post_select(state_keys, instr, self._axes)
         assert list(mask) == [True, False, True, False]
 
-    def test_apply_discriminate_ml_returns_state_labels_not_indices(self):
-        """ML discrimination emits configured state labels (MLStateMap.label)."""
-        states = [
-            MLStateMap(label="ten", output_value=0, location=1.0 + 0j),
-            MLStateMap(label="thirty", output_value=1, location=-1.0 + 0j),
-            MLStateMap(label="twenty", output_value=2, location=0.0 + 1.0j),
-        ]
-        method = MaxLikelihoodMethod(states=states)
+    def test_apply_discriminate_ml_returns_int_dict_keys(self):
+        """ML discrimination emits the integer dict keys from MaxLikelihoodMethod.states."""
+        method = MaxLikelihoodMethod(
+            states={
+                10: MLDiscriminateParams(location=1.0 + 0j),
+                30: MLDiscriminateParams(location=-1.0 + 0j),
+                20: MLDiscriminateParams(location=0.0 + 1.0j),
+            }
+        )
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([0.9 + 0.0j, -0.8 + 0.0j, 0.1 + 0.8j])
 
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
 
-        assert list(state_ids) == ["ten", "thirty", "twenty"]
+        assert list(state_keys) == [10, 30, 20]
 
     def test_apply_discriminate_ml_single_state(self):
-        """With a single state, every shot is assigned to it regardless of location."""
-        states = [MLStateMap(label="only", output_value=0, location=0.0 + 0j)]
-        method = MaxLikelihoodMethod(states=states)
+        """With a single state, every shot is assigned its key regardless of location."""
+        method = MaxLikelihoodMethod(states={0: MLDiscriminateParams(location=0.0 + 0j)})
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([999.0 + 0j, -42.0 + 1j])
 
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
 
-        assert list(state_ids) == ["only", "only"]
+        assert list(state_keys) == [0, 0]
 
-    def test_apply_discriminate_ml_background_state_absorbs_outlier(self):
-        """A disallowed state (erasure/pre-selection use-case) filters specific labels."""
-        states = [
-            MLStateMap(label="0", output_value=0, location=1.0 + 0j),
-            MLStateMap(label="1", output_value=1, location=-1.0 + 0j),
-            MLStateMap(label="2", output_value=2, location=0.0 + 1j, disallowed=True),
-        ]
-        method = MaxLikelihoodMethod(states=states)
+    def test_apply_discriminate_ml_disallowed_negative_key(self):
+        """A state with a negative key is classified as disallowed; PostSelect filters
+        it."""
+        method = MaxLikelihoodMethod(
+            states={
+                0: MLDiscriminateParams(location=1.0 + 0j),
+                1: MLDiscriminateParams(location=-1.0 + 0j),
+                -2: MLDiscriminateParams(location=0.0 + 1j),
+            }
+        )
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([1.0 + 0j, -1.0 + 0j, 0.0 + 1j])
 
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
+        assert list(state_keys) == [0, 1, -2]
 
-        assert list(state_ids) == ["0", "1", "2"]
+        ps_instr = PostSelect(output_variable="v")
+        _, mask = apply_post_select(state_keys, ps_instr, self._axes)
+        assert list(mask) == [True, True, False]
 
     def test_apply_discriminate_ml_p_min_zero_no_rejection(self):
-        """p_min=0.0 (default) never emits BG_LABEL — even extreme outliers are
-        classified."""
-        states = [
-            MLStateMap(label="0", output_value=0, location=1.0 + 0j),
-            MLStateMap(label="1", output_value=1, location=-1.0 + 0j),
-        ]
-        method = MaxLikelihoodMethod(states=states, p_min=0.0)
+        """p_min=0.0 (default) never emits BG_KEY."""
+        method = MaxLikelihoodMethod(
+            states={
+                0: MLDiscriminateParams(location=1.0 + 0j),
+                1: MLDiscriminateParams(location=-1.0 + 0j),
+            },
+            p_min=0.0,
+        )
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([1.0 + 0j, -1.0 + 0j, 500.0 + 0j])
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
-        assert BG_LABEL not in list(state_ids)
-        assert list(state_ids) == ["0", "1", "0"]
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
+        assert BG_KEY not in list(state_keys)
+        assert list(state_keys) == [0, 1, 0]
 
     def test_apply_discriminate_ml_p_min_rejects_low_confidence_shot(self):
-        """Shots with normalised likelihood below p_min are labelled BG_LABEL.
-
-        ``noise_est=0.1`` is used so shots exactly at their centroid have normalised
-        likelihood ≈ 1.0 (well above p_min=0.99).  The midpoint 0+0j is equidistant
-        from ±1+0j, so each state has normalised likelihood ≈ 0.5, which is below the
-        threshold and is therefore labelled BG_LABEL.
-        """
-        states = [
-            MLStateMap(label="0", output_value=0, location=1.0 + 0j),
-            MLStateMap(label="1", output_value=1, location=-1.0 + 0j),
-        ]
-        # noise_est=0.1: shots at their centroid get normalised likelihood ≈ 1.0;
-        # the midpoint 0+0j (sq_dist=1 to both states) gets ≈ 0.5, below p_min=0.99.
-        method = MaxLikelihoodMethod(states=states, p_min=0.99, noise_est=0.1)
+        """Shots with normalised likelihood below p_min are assigned BG_KEY."""
+        method = MaxLikelihoodMethod(
+            states={
+                0: MLDiscriminateParams(location=1.0 + 0j),
+                1: MLDiscriminateParams(location=-1.0 + 0j),
+            },
+            p_min=0.99,
+            noise_est=0.1,
+        )
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([1.0 + 0j, -1.0 + 0j, 0.0 + 0j])
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
-        assert state_ids[0] == "0"
-        assert state_ids[1] == "1"
-        assert state_ids[2] == BG_LABEL
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
+        assert state_keys[0] == 0
+        assert state_keys[1] == 1
+        assert state_keys[2] == BG_KEY
 
     def test_apply_discriminate_ml_p_min_one_rejects_all_multistate(self):
-        """p_min=1.0 rejects every shot when K >= 2 since normalised likelihood < 1."""
-        states = [
-            MLStateMap(label="0", output_value=0, location=1.0 + 0j),
-            MLStateMap(label="1", output_value=1, location=-1.0 + 0j),
-        ]
-        method = MaxLikelihoodMethod(states=states, p_min=1.0)
+        """p_min=1.0 assigns BG_KEY to every shot when K >= 2."""
+        method = MaxLikelihoodMethod(
+            states={
+                0: MLDiscriminateParams(location=1.0 + 0j),
+                1: MLDiscriminateParams(location=-1.0 + 0j),
+            },
+            p_min=1.0,
+        )
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([1.0 + 0j, -1.0 + 0j, 0.5 + 0j])
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
-        assert all(s == BG_LABEL for s in state_ids)
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
+        assert all(k == BG_KEY for k in state_keys)
 
     def test_apply_discriminate_ml_p_min_single_state_never_bg(self):
-        """With one state normalised likelihood is always 1.0 so p_min < 1 never rejects."""
-        states = [MLStateMap(label="only", output_value=0, location=0.0 + 0j)]
-        method = MaxLikelihoodMethod(states=states, p_min=0.99)
+        """With one state normalised likelihood is always 1.0 so p_min<1 never rejects."""
+        method = MaxLikelihoodMethod(
+            states={0: MLDiscriminateParams(location=0.0 + 0j)},
+            p_min=0.99,
+        )
         instr = Discriminate(output_variable="v", method=method)
         response = np.array([999.0 + 0j, -42.0 + 1j])
-        state_ids, _ = apply_discriminate_instruction(response, instr, self._axes)
-        assert list(state_ids) == ["only", "only"]
-
-    def test_apply_demap_instruction(self):
-        state_ids = np.array(["0", "1", "0", "1"])
-        instr = Demap(output_variable="v", state_map={"0": 0, "1": 1})
-        result, _ = apply_demap_instruction(state_ids, instr, self._axes)
-        np.testing.assert_array_equal(result, [0, 1, 0, 1])
-        assert result.dtype == int
-
-    def test_apply_demap_instruction_unknown_label_gives_sentinel(self):
-        """Labels not present in state_map produce -1 sentinel."""
-        state_ids = np.array(["0", "unknown", "1"])
-        instr = Demap(output_variable="v", state_map={"0": 0, "1": 1})
-        result, _ = apply_demap_instruction(state_ids, instr, self._axes)
-        assert result[0] == 0
-        assert result[1] == -1
-        assert result[2] == 1
+        state_keys, _ = apply_discriminate_instruction(response, instr, self._axes)
+        assert list(state_keys) == [0, 0]
 
 
 class TestApplyPostProcessing:
@@ -219,7 +230,6 @@ class TestMean:
         ],
     )
     def test_mean_with_RAW_acquisition(self, dims, axes):
-        # create some mock data
         dims = [10 * (i + 1) for i in range(dims)]  # sweeping data
         dims.append(254)  # shots data
         dims.append(52)  # time-series data
@@ -239,7 +249,6 @@ class TestMean:
 
     @pytest.mark.parametrize("dims", [0, 1, 2])
     def test_mean_with_SCOPE_acquisition(self, dims):
-        # create some mock data
         dims = [10 * (i + 1) for i in range(dims)]  # sweeping data
         dims.append(52)  # time-series data
         response = np.reshape(np.tile(1.0, (np.prod(dims))), dims)
@@ -253,7 +262,6 @@ class TestMean:
 
     @pytest.mark.parametrize("dims", [0, 1, 2])
     def test_mean_with_INTEGRATOR_acquisition(self, dims):
-        # create some mock data
         dims = [10 * (i + 1) for i in range(dims)]  # sweeping data
         dims.append(254)  # shot data
         response = np.reshape(np.tile(1.0, (np.prod(dims))), dims)
@@ -268,7 +276,6 @@ class TestMean:
 
 @pytest.mark.parametrize("dims", [0, 1, 2])
 def test_linear_map_complex_to_real(dims):
-    # create some mock data
     dims = [10 * (i + 1) for i in range(dims)]  # sweeping data
     dims.append(254)  # shot data
     response = np.reshape(np.tile(1.0, (np.prod(dims))), dims)
@@ -295,7 +302,7 @@ def test_discriminate(dims):
 class TestMaxLikelihoodMethodValidation:
     """Pydantic model-validation tests for MaxLikelihoodMethod."""
 
-    _base_states = [MLStateMap(label="0", output_value=0, location=1.0 + 0j)]
+    _base_states = {0: MLDiscriminateParams(location=1.0 + 0j)}
 
     def test_p_min_below_zero_raises(self):
         """p_min < 0 must be rejected by Pydantic."""
@@ -312,11 +319,3 @@ class TestMaxLikelihoodMethodValidation:
         """p_min values 0.0, 0.5, and 1.0 are all valid boundary values."""
         method = MaxLikelihoodMethod(states=self._base_states, p_min=p_min)
         assert method.p_min == p_min
-
-    def test_reserved_bg_label_raises(self):
-        """Using BG_LABEL as an MLStateMap label must be rejected."""
-        with pytest.raises(ValidationError, match="reserved"):
-            MaxLikelihoodMethod(
-                states=[MLStateMap(label=BG_LABEL, output_value=0, location=0.0 + 0j)],
-                p_min=0.5,
-            )

@@ -38,7 +38,6 @@ from qat.ir.instructions import (
 )
 from qat.ir.measure import (
     Acquire,
-    Demap,
     Discriminate,
     Equalise,
     MeasureBlock,
@@ -209,7 +208,7 @@ class InstructionBuilder(ABC):
         assignment into IR. The granular discrimination chain is emitted for
         both qubits with ``post_process_method`` configured and legacy qubits.
         For configured qubits, the chain (for example ``Equalise`` →
-        ``Discriminate`` → ``Demap``) is derived from the configured
+        ``Discriminate``) is derived from the configured
         post-processing method; for legacy qubits, the equivalent granular
         chain is derived from legacy ``mean_z_map_args`` data.
 
@@ -939,7 +938,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
             not emit the granular :class:`~qat.ir.measure.Discriminate` instruction
             used by the post-selection pipeline.  It is not equivalent to
             :meth:`measure_with_granular_post_processing` (which uses
-            ``Discriminate``/``PostSelect``/``Demap``) and should not be substituted
+            ``Discriminate``/``PostSelect``) and should not be substituted
             for it.
 
         :param target: The qubit to be measured.
@@ -1005,7 +1004,7 @@ class QuantumInstructionBuilder(InstructionBuilder):
         return None
 
     @staticmethod
-    def _build_legacy_equalise_args(
+    def build_legacy_equalise_args(
         mean_z_map_args: list,
     ) -> tuple[np.ndarray, np.ndarray, float]:
         """Compute ``Equalise`` parameters and discrimination threshold from
@@ -1037,73 +1036,136 @@ class QuantumInstructionBuilder(InstructionBuilder):
         offset = np.array([B.real, B.imag], dtype=float)
         return transform, offset, 0.0
 
+    @staticmethod
+    def build_equalise_discriminate_instrs(
+        qubit: Qubit,
+        output_variable: str,
+    ) -> list[Equalise | Discriminate]:
+        """Build the ``Equalise → Discriminate`` instruction pair for *any* qubit type.
+
+        This is the single authoritative implementation of the three-way dispatch used
+        by both :meth:`emit_granular_post_processing` and
+        :class:`~qat.middleend.passes.transform.InsertPreSelectionMeasurement`.  Both
+        pre-selection and circuit-measurement paths produce **identical** pairs for the
+        same qubit, differing only in the ``PostSelect.additional_disallowed`` that
+        follows.
+
+        Dispatch:
+
+        * :class:`~qat.model.post_processing.MaxLikelihoodMethod` — optional
+          :class:`~qat.ir.measure.Equalise` (when ``transform`` and ``offset`` are set)
+          + :class:`~qat.ir.measure.Discriminate` with the full ML method.
+        * :class:`~qat.model.post_processing.LinearMapToRealMethod` or legacy
+          ``mean_z_map_args`` — :class:`~qat.ir.measure.Equalise` (rotation/offset
+          from :meth:`build_legacy_equalise_args`) + threshold
+          :class:`~qat.ir.measure.Discriminate`.
+
+        :param qubit: Qubit whose post-processing configuration drives dispatch.
+        :param output_variable: Variable name to attach to each instruction.
+        :returns: List of ``[Equalise, Discriminate]`` (or ``[Discriminate]`` for ML
+            without a pre-rotation).
+        """
+        method = qubit.post_process_method
+        instructions: list[Equalise | Discriminate] = []
+
+        if isinstance(method, MaxLikelihoodMethod):
+            if method.transform is not None and method.offset is not None:
+                instructions.append(
+                    Equalise(
+                        output_variable=output_variable,
+                        transform=np.asarray(method.transform, dtype=float),
+                        offset=np.asarray(method.offset, dtype=float),
+                    )
+                )
+            instructions.append(
+                Discriminate(output_variable=output_variable, method=method)
+            )
+        else:
+            # LinearMapToRealMethod or legacy mean_z_map_args (post_process_method=None).
+            args = (
+                method.mean_z_map_args
+                if isinstance(method, LinearMapToRealMethod)
+                else qubit.mean_z_map_args
+            )
+            transform, offset, threshold = (
+                QuantumInstructionBuilder.build_legacy_equalise_args(args)
+            )
+            instructions.append(
+                Equalise(
+                    output_variable=output_variable, transform=transform, offset=offset
+                )
+            )
+            instructions.append(
+                Discriminate(output_variable=output_variable, threshold=threshold)
+            )
+
+        return instructions
+
     def emit_granular_post_processing(
         self, target: Qubit, output_variable: str
     ) -> QuantumInstructionBuilder:
         """Emit the granular post-processing instruction chain (without PostSelect).
 
-        Emits ``Equalise`` → ``Discriminate`` → ``Demap`` based on the qubit's
-        configuration. Does NOT emit ``PostSelect`` instructions; use
-        :meth:`emit_post_select` separately if needed.
+        Emits ``Equalise`` → ``Discriminate`` based on the qubit's configuration.
+        :class:`~qat.ir.measure.Discriminate` outputs **integer state keys** directly.
+        Use :meth:`emit_post_select` separately to append a
+        :class:`~qat.ir.measure.PostSelect` when disallowed states are configured.
 
         Dispatches as follows:
 
         * :class:`~qat.model.post_processing.LinearMapToRealMethod` →
           :class:`~qat.ir.measure.Equalise` + :class:`~qat.ir.measure.Discriminate`
-          + :class:`~qat.ir.measure.Demap` (``{"0": 0, "1": 1}``).
+          (threshold path; above-threshold → key ``0``, below → key ``1``).
         * :class:`~qat.model.post_processing.MaxLikelihoodMethod` →
           optional :class:`~qat.ir.measure.Equalise`
-          + :class:`~qat.ir.measure.Discriminate` (ML path)
-          + :class:`~qat.ir.measure.Demap` (derived from ``MLStateMap.label`` →
-          ``MLStateMap.output_value``).
+          + :class:`~qat.ir.measure.Discriminate` (ML path; emits dict keys directly).
         * Legacy (``post_process_method is None``, ``mean_z_map_args`` set) →
           :class:`~qat.ir.measure.Equalise` (rotation derived from
-          ``mean_z_map_args``) + :class:`~qat.ir.measure.Discriminate`
-          + :class:`~qat.ir.measure.Demap` (``{"0": 0, "1": 1}``).
+          ``mean_z_map_args``) + :class:`~qat.ir.measure.Discriminate`.
 
-        **Demap value convention**
+        **Integer key convention**
 
-        The ``Demap`` instruction for the ``LinearMapToRealMethod`` and legacy paths
-        emits ``{"0": 0, "1": 1}`` — the standard qubit convention (ground state → 0,
-        excited state → 1).  This aligns with the ML pipeline and the ``binary()``
-        output format, eliminating the need for sign-based conversion in the runtime.
+        ``Discriminate`` emits the integer dict key from
+        :attr:`~qat.model.post_processing.MaxLikelihoodMethod.states` for ML paths,
+        or ``0``/``1`` for threshold/legacy paths.  Non-negative keys are allowed
+        states written to the classical register; negative keys are disallowed and
+        subsequently filtered by :class:`~qat.ir.measure.PostSelect`.
 
         **Results Format Semantics with Compiler Config**
 
-        The emitted ``Demap`` instruction decodes discriminated string state labels to
-        numeric output values. These values then flow through the runtime pipeline where
-        ``results_format`` flags determine final encoding:
+        Integer output values from ``Discriminate`` flow through the runtime pipeline
+        where ``results_format`` flags determine final encoding:
 
         - **``raw()``**: Complex IQ arrays from
           :class:`~qat.runtime.passes.analysis.EqualiseResult` (post-mask applied).
           For legacy acquires without an ``Equalise`` step, falls back to the mapped
           arrays.
 
-        - **``binary()``**: Per-shot int output-value array from ``Demap`` (one value
-          per retained shot, e.g. ``[0, 1, 0, ...]``). With post-selection,
+        - **``binary()``**: Per-shot int output-value array from ``Discriminate`` (one
+          value per retained shot, e.g. ``[0, 1, 0, ...]``). With post-selection,
           only retained shots are included.
 
         - **``binary_count()``**: Dictionary of state string → count using
-          :func:`~qat.runtime.results_processing.label_count` on the string labels
+          :func:`~qat.runtime.results_processing.label_count` on the integer keys
           from :class:`~qat.runtime.passes.analysis.DiscriminateResult`.
           **Key difference**: when post-selection is active,
           the repeat count passed to ``binary_count()`` is ``shots_retained`` (not
           ``shots_requested``), so counts reflect only the passing shots.
 
-        **Example: 3-state ML with state "2" disallowed**
+        **Example: 3-state ML with state keyed as -2 (disallowed)**
 
         Setup::
 
-            states = [
-                MLStateMap(label="0", output_value=0, location=1+0j, disallowed=False),
-                MLStateMap(label="1", output_value=1, location=-1+0j, disallowed=False),
-                MLStateMap(label="2", output_value=2, location=0+1j, disallowed=True),
-            ]
-            # 10 shots: 4 → state 0, 3 → state 1, 3 → state 2 (filtered by post-select)
+            states = {
+                0: MLDiscriminateParams(location=1+0j),
+                1: MLDiscriminateParams(location=-1+0j),
+                -2: MLDiscriminateParams(location=0+1j),  # negative key = disallowed
+            }
+            # 10 shots: 4 → key 0, 3 → key 1, 3 → key -2 (filtered by post-select)
 
-        After ``Demap``::
+        After ``Discriminate``::
 
-            [0, 0, 0, 0, 1, 1, 1, 2, 2, 2]
+            [0, 0, 0, 0, 1, 1, 1, -2, -2, -2]
 
         After ``PostSelect`` + global mask (7 retained)::
 
@@ -1111,8 +1173,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         Format outcomes::
 
-            raw():        <complex IQ from EqualiseResult, 7 retained shots>
-            binary():     [0, 0, 0, 0, 1, 1, 1]
+            raw():          <complex IQ from EqualiseResult, 7 retained shots>
+            binary():       [0, 0, 0, 0, 1, 1, 1]
             binary_count(): {"0": 4, "1": 3}  (from 7 retained, not 10 requested)
 
         **Default Behavior**
@@ -1125,91 +1187,26 @@ class QuantumInstructionBuilder(InstructionBuilder):
         :param output_variable: The variable name to attach to the instructions.
         :returns: The builder instance.
         """
-        match target.post_process_method:
-            case LinearMapToRealMethod() as method:
-                m, c = (
-                    complex(method.mean_z_map_args[0]),
-                    complex(method.mean_z_map_args[1]),
-                )
-                a, b = m.real, m.imag
-                self.add(
-                    Equalise(
-                        output_variable=output_variable,
-                        transform=np.array([[a, -b], [b, a]], dtype=float),
-                        offset=np.array([c.real, c.imag], dtype=float),
-                    )
-                )
-                self.add(Discriminate(output_variable=output_variable, threshold=0.0))
-                # Demap convention: {"0": 0, "1": 1} uses the standard qubit convention
-                # (|0⟩ → 0, |1⟩ → 1) matching the ML pipeline and binary() output format.
-                self.add(Demap(output_variable=output_variable, state_map={"0": 0, "1": 1}))
-            case MaxLikelihoodMethod() as method:
-                if method.transform is not None and method.offset is not None:
-                    self.add(
-                        Equalise(
-                            output_variable=output_variable,
-                            transform=np.asarray(method.transform, dtype=float),
-                            offset=np.asarray(method.offset, dtype=float),
-                        )
-                    )
-                self.add(Discriminate(output_variable=output_variable, method=method))
-                self.add(
-                    Demap(
-                        output_variable=output_variable,
-                        state_map={s.label: s.output_value for s in method.states},
-                    )
-                )
-            case _:
-                # Legacy mean_z_map_args path: derive Equalise parameters from
-                # mean_z_map_args and emit the same granular chain so all measurement
-                # paths use one pipeline.
-                transform, offset, threshold = self._build_legacy_equalise_args(
-                    target.mean_z_map_args
-                )
-                self.add(
-                    Equalise(
-                        output_variable=output_variable,
-                        transform=transform,
-                        offset=offset,
-                    )
-                )
-                self.add(Discriminate(output_variable=output_variable, threshold=threshold))
-                self.add(Demap(output_variable=output_variable, state_map={"0": 0, "1": 1}))
+        for instr in self.build_equalise_discriminate_instrs(target, output_variable):
+            self.add(instr)
         return self
 
     def emit_post_select(
         self,
         output_variable: str,
-        disallowed_states: set[str],
     ) -> QuantumInstructionBuilder:
-        """Emit a PostSelect instruction with given disallowed states.
+        """Emit a PostSelect instruction after the Discriminate for the given variable.
+
+        :class:`~qat.ir.measure.PostSelect` filters shots whose integer state key is
+        negative.  When all keys are non-negative (e.g. :class:`LinearMapToRealMethod`
+        always produces ``0`` or ``1``) the instruction becomes a no-op at runtime
+        (the validity mask is all ``True``).  Callers do not need to guard on whether
+        the method has disallowed states.
 
         :param output_variable: The variable name to attach to the instruction.
-        :param disallowed_states: Set of state labels to filter out (e.g., ``{"1"}``).
         :returns: The builder instance.
         """
-        if not disallowed_states:
-            return self
-
-        post_select = PostSelect(
-            output_variable=output_variable,
-            disallowed_states=disallowed_states,
-        )
-
-        # Keep post-selection before state mapping so disallowed labels are matched
-        # against discriminated states rather than mapped numeric outputs.
-        for index in range(len(self._ir.instructions) - 1, -1, -1):
-            instruction = self._ir.instructions[index]
-            if (
-                isinstance(instruction, Demap)
-                and instruction.output_variable == output_variable
-            ):
-                instructions = list(self._ir.instructions)
-                instructions.insert(index, post_select)
-                self._ir.instructions = instructions
-                return self
-
-        self.add(post_select)
+        self.add(PostSelect(output_variable=output_variable))
         return self
 
     def measure_with_granular_post_processing(
@@ -1231,15 +1228,14 @@ class QuantumInstructionBuilder(InstructionBuilder):
         * Optional ``PostProcessing(MEAN, TIME)`` via :meth:`_take_time_mean`
           (only for SCOPE / TIME axis).
         * The granular chain from :meth:`emit_granular_post_processing`:
-          :class:`~qat.ir.measure.Equalise` → :class:`~qat.ir.measure.Discriminate`
-          → :class:`~qat.ir.measure.Demap`.
+          :class:`~qat.ir.measure.Equalise` → :class:`~qat.ir.measure.Discriminate`.
 
         Frontends that need post-selection should append
         :meth:`emit_post_select` explicitly based on compiler configuration.
 
         For legacy qubits (``post_process_method is None``, ``mean_z_map_args`` set),
         :meth:`emit_granular_post_processing` derives the ``Equalise`` rotation from
-        ``mean_z_map_args`` and emits the same ``Equalise`` → ``Discriminate`` → ``Demap``
+        ``mean_z_map_args`` and emits the same ``Equalise`` → ``Discriminate``
         chain so that all measurement paths use one unified pipeline.
 
         :param target: The qubit to be measured.

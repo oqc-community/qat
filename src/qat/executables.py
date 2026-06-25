@@ -9,7 +9,7 @@ from pydantic_core import from_json
 
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instructions import Assign
-from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing, PostSelect
+from qat.ir.measure import Discriminate, Equalise, PostProcessing, PostSelect
 from qat.utils.pydantic import RehydratableModel
 
 
@@ -32,8 +32,8 @@ class AcquireData(BaseModel):
     mode: AcquireMode
     shape: tuple[int, ...]
     physical_channel: str
-    post_processing: list[PostProcessing | Equalise | Discriminate | PostSelect | Demap] = (
-        Field(default_factory=list)
+    post_processing: list[PostProcessing | Equalise | Discriminate | PostSelect] = Field(
+        default_factory=list
     )
     results_processing: InlineResultsProcessing | None = None
 

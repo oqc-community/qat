@@ -1,31 +1,36 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 """Post-processing method models for qubit measurement results.
 
-This module defines the post-processing methods available for qubit measurement discrimination. The main interface is the
-:class:`PostProcessMethod` union, which is a discriminated union over all supported post-processing method models.
+This module defines the post-processing methods available for qubit measurement
+discrimination. The main interface is the :class:`PostProcessMethod` union, which is a
+discriminated union over all supported post-processing method models.
 
-The discriminator field is ``method``, which is present in the base class :class:`MethodBase` and is used by Pydantic
-to determine which concrete model to use when parsing or serializing data. Each post-processing method (such as
-:class:`LinearMapToRealMethod` or :class:`MaxLikelihoodMethod`) inherits from :class:`MethodBase` and sets a unique value
-for the ``method`` field, as defined in the :class:`MethodIndicator` enum.
-
-Usage in the Qubit model (see ``device.py``)::
-
-    class Qubit(Component):
-        ...
-        post_process_method: PostProcessMethod | None = Field(
-            discriminator="method", default=None
-        )
-        ...
-
-Here, the ``discriminator='method'`` argument is required for Pydantic to correctly (de)serialize the union type.
+The discriminator field is ``method``, which is present in the base class
+:class:`MethodBase` and is used by Pydantic to determine which concrete model to use
+when parsing or serializing data.
 
 Supported methods:
 
 - ``linear_map_complex_to_real``: See :class:`LinearMapToRealMethod`
 - ``max_likelihood``: See :class:`MaxLikelihoodMethod`
+
+Key encoding convention for :class:`MaxLikelihoodMethod`
+---------------------------------------------------------
+The ``states`` dict maps an **integer output key** to an :class:`MLDiscriminateParams`.
+Non-negative keys (``≥ 0``) represent **allowed** states whose value will be written
+to the classical register.  Negative keys (``< 0``) represent **disallowed** states;
+shots classified to those states are filtered out by
+:class:`~qat.ir.measure.PostSelect`.
+
+The reserved sentinel :data:`BG_KEY` is used by the runtime when ``p_min > 0``
+rejects a shot.
+
+Post-selection is only supported for :class:`MaxLikelihoodMethod`.
+:class:`LinearMapToRealMethod` always emits states ``0`` and ``1`` via a threshold
+discriminator and does not support post-selection.
 """
 
-from collections import Counter
 from enum import Enum
 from typing import Literal
 
@@ -33,11 +38,14 @@ from pydantic import Field, model_validator
 
 from qat.utils.pydantic import FloatNDArray, NoExtraFieldsModel
 
-BG_LABEL = "|?>"
-"""Reserved state label emitted by the ML discriminator for shots whose normalised
-likelihood for the winning state falls below :attr:`MaxLikelihoodMethod.p_min`.
+BG_KEY = -99
+"""Reserved integer key used by the runtime when ``p_min > 0`` rejects a shot.
 
-Users must not use this string as an :attr:`MLStateMap.label` (to prevent collision).
+The runtime stores this value in the integer state array produced by
+:func:`~qat.runtime.post_processing.apply_discriminate_instruction` for any shot
+whose normalised likelihood falls below :attr:`MaxLikelihoodMethod.p_min`.
+The subsequent :class:`~qat.ir.measure.PostSelect` step filters all negative keys
+(including this one) from the results.
 """
 
 
@@ -69,12 +77,12 @@ class LinearMapToRealMethod(MethodBase):
 
         v = \\mathrm{Re}(a \\cdot \\mathrm{IQ} + b)
 
-    where ``a`` and ``b`` are the two entries of ``mean_z_map_args``.  The
-    result is sign-classified: positive → state ``"0"``, non-positive →
-    state ``"1"``.
+    where ``a`` and ``b`` are the two entries of ``mean_z_map_args``.  The result is
+    threshold-classified: above threshold → state ``0``, at-or-below → state ``1``.
 
-    Set ``disallowed_states`` to filter out shots by their classified state
-    label (e.g. ``{"1"}`` to discard shots **not** in the ground state).
+    Post-selection is not supported for this method; state outputs are always the
+    non-negative integers ``0`` and ``1``.  Use :class:`MaxLikelihoodMethod` with
+    negative keys to configure post-selection on measurement outcomes.
     """
 
     method: Literal[MethodIndicator.LINEAR_MAP_COMPLEX_TO_REAL] = Field(
@@ -87,61 +95,45 @@ class LinearMapToRealMethod(MethodBase):
         default_factory=lambda: [1 + 0j, 0j],
         description="Arguments for the linear map.",
     )
-    disallowed_states: set[str] = Field(
-        default_factory=set,
-        description="Set of disallowed state labels (matching the string labels used by "
-        "the granular pipeline). If a measurement is classified to a state whose label "
-        "appears in this set, the shot should be discarded.",
-    )
-
-    @property
-    def declared_states(self) -> set[str]:
-        """All state labels known to this method.
-
-        :returns: ``{"0", "1"}`` for a standard threshold discriminator.
-        """
-        return {"0", "1"}
 
 
-class MLStateMap(NoExtraFieldsModel):
-    """Demapping from a quantum state to its IQ-plane location and C-register output value.
+class MLDiscriminateParams(NoExtraFieldsModel):
+    """IQ-plane centroid for a single measurement outcome.
 
-    Each :class:`MLStateMap` entry represents one possible measurement outcome.  The
-    ``label`` is string routing key that threads through the discrimination pipeline
-    (``Discriminate`` → ``PostSelect`` → ``Demap``). The ``output_value`` is the final
-    integer written to the classical register after ``Demap`` has been applied.
+    Each :class:`MLDiscriminateParams` entry represents one possible measurement outcome.
+    The integer output value and disallowed flag are encoded by the **dict key**
+    in the parent :class:`MaxLikelihoodMethod`'s ``states`` mapping:
 
-    The ``disallowed`` field marks a state as invalid for use-cases such as erasure
-    checks and pre-selection.  Shots assigned to a ``disallowed=True`` state are
-    subsequently removed by :class:`~qat.ir.measure.PostSelect`.
+    - Non-negative key (``≥ 0``) → allowed state; the key is the integer written to
+      the classical register.
+    - Negative key (``< 0``) → disallowed state; shots assigned here are filtered by
+      :class:`~qat.ir.measure.PostSelect`.
+
+    The optional ``label`` field carries a human-readable name for the state (e.g.
+    ``"|0⟩"`` or ``"|10⟩"``).  It is purely informational — the runtime uses the dict
+    key for discrimination and the ``location`` for distance calculations.
 
     Example — a standard qubit with states |0⟩ and |1⟩::
 
-        MLStateMap(label="0", output_value=0, location=1+0j)
-        MLStateMap(label="1", output_value=1, location=-1+0j)
+        MaxLikelihoodMethod(states={
+            0: MLDiscriminateParams(location=1+0j, label="|0⟩"),
+            1: MLDiscriminateParams(location=-1+0j, label="|1⟩"),
+        })
 
-    Example — qutrit classifier that rejects the leakage state |2⟩::
+    Example — qutrit classifier that rejects the leakage state (key -2)::
 
-        MLStateMap(label="0", output_value=0, location=1+0j)
-        MLStateMap(label="1", output_value=1, location=-1+0j)
-        MLStateMap(label="2", output_value=2, location=0+1j, disallowed=True)
+        MaxLikelihoodMethod(states={
+            0: MLDiscriminateParams(location=1+0j, label="|0⟩"),
+            1: MLDiscriminateParams(location=-1+0j, label="|1⟩"),
+            -2: MLDiscriminateParams(location=0+1j, label="|2⟩ (leakage)"),
+        })
     """
 
-    label: str = Field(
-        ...,
-        description="String label that identifies this state through the discrimination "
-        "pipeline (Discriminate → PostSelect → Demap). Used as the key in Demap.state_map.",
-    )
-    output_value: int = Field(
-        ...,
-        description="Final integer value written to the classical register for this state, "
-        "e.g. 0 for |0⟩ and 1 for |1⟩.",
-    )
-    location: complex = Field(..., description="Complex location in the measurement space.")
-    disallowed: bool = Field(
-        False,
-        description="Whether the state is allowed or not. If a measurement is classified "
-        "to a state with disallowed=True, then the shot should be discarded.",
+    location: complex = Field(..., description="Complex IQ-plane centroid for this state.")
+    label: str | None = Field(
+        default=None,
+        description="Optional human-readable label for this state, e.g. '|0⟩' or '|10⟩'. "
+        "Purely informational; not used by the runtime discriminator.",
     )
 
 
@@ -161,18 +153,23 @@ class MaxLikelihoodMethod(MethodBase):
     underflow on extreme outliers.
 
     **Outlier rejection** — set ``p_min > 0`` to automatically reject shots whose
-    winning normalised likelihood falls below the threshold. Those shots are labelled
-    :data:`BG_LABEL` and discarded by :class:`~qat.ir.measure.PostSelect`.
+    winning normalised likelihood falls below the threshold. Those shots are assigned
+    :data:`BG_KEY` and discarded by :class:`~qat.ir.measure.PostSelect`.
     Default ``p_min=0.0`` disables the check entirely (zero overhead).
 
-    **Disallowed states** — individual states can be marked ``disallowed=True`` on
-    :class:`MLStateMap` for erasure checks and pre-selection; these are independent of
-    ``p_min`` and handled by separate :class:`~qat.ir.measure.PostSelect` instructions.
+    **Key encoding convention** — the ``states`` dict maps an integer output key to an
+    :class:`MLDiscriminateParams`:
+
+    - Non-negative key (``≥ 0``) → allowed state; the key value is written to the
+      classical register.
+    - Negative key (``< 0``) → disallowed state; shots assigned to these states are
+      removed by :class:`~qat.ir.measure.PostSelect`.
 
     Runtime implementation:
     :func:`qat.runtime.post_processing.apply_discriminate_instruction`.
 
-    :param states: Per-state IQ-plane centroids, labels and output values.
+    :param states: Per-state IQ-plane centroids, keyed by integer output value
+        (non-negative) or disallowed sentinel (negative).
     :param noise_est: Global Gaussian noise power (variance, :math:`\\sigma^2`). Must be
         strictly positive. Default ``1.0``.
     :param p_min: Minimum normalised likelihood for acceptance. Must be in ``[0, 1]``.
@@ -186,8 +183,11 @@ class MaxLikelihoodMethod(MethodBase):
         MethodIndicator.MAX_LIKELIHOOD,
         description="Discriminator for maximum likelihood method.",
     )
-    states: list[MLStateMap] = Field(
-        ..., description="List of MLStateMap objects representing possible states."
+    states: dict[int, MLDiscriminateParams] = Field(
+        ...,
+        description="Mapping from integer output key to MLDiscriminateParams. Non-negative keys "
+        "are allowed states (key = classical register value). Negative keys are "
+        "disallowed states filtered by PostSelect.",
     )
     noise_est: float = Field(
         1.0,
@@ -201,8 +201,8 @@ class MaxLikelihoodMethod(MethodBase):
         ge=0.0,
         le=1.0,
         description="Minimum normalised likelihood for the winning state. Shots whose "
-        "best-state normalised likelihood is below this threshold are labelled "
-        f'"{BG_LABEL}" and discarded by post-selection. Must be in [0, 1]. '
+        "best-state normalised likelihood is below this threshold are assigned "
+        "BG_KEY and discarded by post-selection. Must be in [0, 1]. "
         "Default 0.0 disables the check entirely.",
     )
     transform: FloatNDArray | None = Field(
@@ -224,27 +224,12 @@ class MaxLikelihoodMethod(MethodBase):
         return self
 
     @model_validator(mode="after")
-    def _validate_no_reserved_bg_label(self):
-        """Ensure no MLStateMap uses the reserved BG_LABEL ('|?>')."""
-        if any(s.label == BG_LABEL for s in self.states):
+    def _validate_states_do_not_use_bg_key(self):
+        """Ensure user-defined states do not collide with the reserved BG_KEY."""
+        if BG_KEY in self.states:
             raise ValueError(
-                f"The label {BG_LABEL!r} is reserved for the p_min background state "
-                "and cannot be used as an MLStateMap label."
-            )
-        return self
-
-    @model_validator(mode="after")
-    def _validate_no_duplicate_labels(self):
-        """Ensure all MLStateMap labels are unique.
-
-        Duplicate labels would cause ``emit_granular_post_processing`` to silently
-        overwrite states in the ``Demap.state_map`` dict comprehension.
-        """
-        counts = Counter(s.label for s in self.states)
-        duplicates = sorted(lbl for lbl, n in counts.items() if n > 1)
-        if duplicates:
-            raise ValueError(
-                f"MLStateMap labels must be unique; duplicates found: {duplicates}"
+                "MaxLikelihoodMethod 'states' must not contain BG_KEY; "
+                "BG_KEY is reserved for p_min rejections."
             )
         return self
 
@@ -276,31 +261,6 @@ class MaxLikelihoodMethod(MethodBase):
                 f"got shape {self.offset.shape}."
             )
         return self
-
-    @property
-    def declared_states(self) -> set[str]:
-        """All state labels known to this method.
-
-        Includes labels from :attr:`states` and :data:`BG_LABEL` when
-        ``p_min > 0``.
-
-        :returns: Set of all recognised state label strings.
-        """
-        labels = {s.label for s in self.states}
-        if self.p_min > 0.0:
-            labels.add(BG_LABEL)
-        return labels
-
-    @property
-    def disallowed_states(self) -> set[str]:
-        """State labels marked ``disallowed=True``, plus ``BG_LABEL`` if ``p_min > 0``.
-
-        :returns: Set of disallowed state label strings.
-        """
-        labels = {s.label for s in self.states if s.disallowed}
-        if self.p_min > 0.0:
-            labels.add(BG_LABEL)
-        return labels
 
 
 # Union type for use in Qubit model

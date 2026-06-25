@@ -20,14 +20,7 @@ from qat.integrations.tket import (
 )
 from qat.ir.instruction_builder import QuantumInstructionBuilder
 from qat.ir.instructions import PhaseSet, PhaseShift, ResultsProcessing
-from qat.ir.measure import (
-    Acquire,
-    Demap,
-    Discriminate,
-    Equalise,
-    PostProcessing,
-    PostSelect,
-)
+from qat.ir.measure import Acquire, Discriminate, Equalise, PostProcessing, PostSelect
 from qat.model.loaders.converted import JaggedEchoModelLoader, PydEchoModelLoader
 from qat.model.loaders.lucy import LucyModelLoader
 from qat.utils.hardware_model import generate_hw_model, random_error_mitigation
@@ -273,9 +266,7 @@ class TestTketToQatIRConverter:
                 assert inst.target == qat_inst.target
                 assert inst.mode == qat_inst.mode
                 assert inst.duration == qat_inst.duration
-            elif isinstance(
-                inst, PostProcessing | Equalise | Discriminate | PostSelect | Demap
-            ):
+            elif isinstance(inst, PostProcessing | Equalise | Discriminate | PostSelect):
                 # Post-processing instructions may have differing output_variable values;
                 # just verify the instruction type and pipeline-structure matches.
                 assert type(inst) is type(qat_inst)

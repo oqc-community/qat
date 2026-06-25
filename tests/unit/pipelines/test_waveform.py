@@ -19,7 +19,7 @@ from qat.executables import Executable
 from qat.frontend import AutoFrontend
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.ir.instructions import Variable as PydVariable
-from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing
+from qat.ir.measure import Discriminate, Equalise, PostProcessing
 from qat.middleend import PydDefaultMiddleend
 from qat.model.convert_purr import convert_purr_echo_hw_to_pydantic
 from qat.model.loaders.lucy import LucyModelLoader
@@ -312,12 +312,11 @@ class TestEchoPipelineWithCircuits:
             assert isinstance(output_variable, str)
             pps = acquire.post_processing
             # All paths now emit the granular pipeline:
-            #   Equalise → Discriminate → Demap
+            #   Equalise → Discriminate
             # (legacy mean_z_map_args path included).
-            assert len(pps) >= 3
+            assert len(pps) >= 2
             assert isinstance(pps[0], Equalise)
             assert isinstance(pps[1], Discriminate)
-            assert isinstance(pps[2], Demap)
 
     def test_executable_has_correct_results_processing(
         self,
@@ -754,7 +753,7 @@ class TestEchoPipelineParity:
             pyd_non_granular = [
                 pp
                 for pp in pyd_pps
-                if not isinstance(pp, Equalise | Discriminate | Demap)
+                if not isinstance(pp, Equalise | Discriminate)
                 and not (
                     isinstance(pp, PostProcessing)
                     and pp.process_type.name == "LINEAR_MAP_COMPLEX_TO_REAL"

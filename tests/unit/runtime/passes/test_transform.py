@@ -22,7 +22,7 @@ from qat.executables import AcquireData, Executable
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
 from qat.ir.instructions import Assign as PydAssign, Variable as PydVariable
 from qat.ir.measure import Discriminate, Equalise, PostProcessing, PostSelect
-from qat.model.post_processing import MaxLikelihoodMethod, MLStateMap
+from qat.model.post_processing import MaxLikelihoodMethod, MLDiscriminateParams
 from qat.model.target_data import TargetData
 from qat.runtime.passes.analysis import PostSelectionResult
 from qat.runtime.passes.transform import (
@@ -352,20 +352,39 @@ class TestQBloxAcquisitionPostProcessingPostSelection:
         )
         return Executable(programs=[], acquires={name: acquire})
 
-    def _linear_pp(self, name: str, disallowed_states: list) -> list:
-        """Equalise(identity) → Discriminate(threshold=0) → PostSelect."""
-        instructions = [
-            Equalise(
-                output_variable=name,
-                transform=np.eye(2, dtype=float),
-                offset=np.zeros(2),
-            ),
-            Discriminate(output_variable=name, threshold=0.0),
-        ]
-        if disallowed_states:
-            instructions.append(
-                PostSelect(output_variable=name, disallowed_states=disallowed_states)
+    def _linear_pp(self, name: str, disallowed_indices: list) -> list:
+        """Equalise(identity) → Discriminate → PostSelect.
+
+        Disallowed state indices get negative keys in a synthetic MaxLikelihood method so
+        PostSelect filters them by key < 0.
+        """
+        if disallowed_indices:
+            key_0 = -3 if 0 in disallowed_indices else 0
+            key_1 = -2 if 1 in disallowed_indices else 1
+            synth_method = MaxLikelihoodMethod(
+                states={
+                    key_0: MLDiscriminateParams(location=1.0 + 0j),
+                    key_1: MLDiscriminateParams(location=-1.0 + 0j),
+                }
             )
+            instructions = [
+                Equalise(
+                    output_variable=name,
+                    transform=np.eye(2, dtype=float),
+                    offset=np.zeros(2),
+                ),
+                Discriminate(output_variable=name, method=synth_method),
+                PostSelect(output_variable=name),
+            ]
+        else:
+            instructions = [
+                Equalise(
+                    output_variable=name,
+                    transform=np.eye(2, dtype=float),
+                    offset=np.zeros(2),
+                ),
+                Discriminate(output_variable=name, threshold=0.0),
+            ]
         return instructions
 
     def test_post_select_filters_shots_and_records_metadata(self):
@@ -373,7 +392,7 @@ class TestQBloxAcquisitionPostProcessingPostSelection:
         stored in res_mgr."""
         # positive (label "0", valid), negative (label "1", invalid), alternating
         iq = np.array([1.0, -1.0, 0.5, -0.5, 0.8, -0.2], dtype=complex)
-        pp = self._linear_pp("v", disallowed_states=["1"])
+        pp = self._linear_pp("v", disallowed_indices=[1])
         playback = {"ch0": {"v": self._make_integrator_acquisition(iq)}}
         package = self._make_package("v", pp, self._n_shots)
         res_mgr = ResultManager()
@@ -388,7 +407,7 @@ class TestQBloxAcquisitionPostProcessingPostSelection:
     def test_all_shots_filtered_returns_empty_array(self):
         """When every shot is disallowed the output array is empty."""
         iq = np.array([1.0, -1.0, 0.5, -0.5], dtype=complex)
-        pp = self._linear_pp("v", disallowed_states=["0", "1"])
+        pp = self._linear_pp("v", disallowed_indices=[0, 1])
         playback = {"ch0": {"v": self._make_integrator_acquisition(iq)}}
         package = self._make_package("v", pp, 4)
         res_mgr = ResultManager()
@@ -418,8 +437,8 @@ class TestQBloxAcquisitionPostProcessingPostSelection:
         # global:  valid, invalid, invalid, valid → 2 retained
         iq0 = np.array([1.0, -1.0, 0.5, 0.8], dtype=complex)
         iq1 = np.array([0.5, 0.9, -1.0, 0.3], dtype=complex)
-        pp0 = self._linear_pp("q0", disallowed_states=["1"])
-        pp1 = self._linear_pp("q1", disallowed_states=["1"])
+        pp0 = self._linear_pp("q0", disallowed_indices=[1])
+        pp1 = self._linear_pp("q1", disallowed_indices=[1])
         acquire0 = AcquireData(
             mode=AcquireMode.INTEGRATOR,
             shape=(4,),
@@ -465,9 +484,31 @@ class TestAcquisitionPostprocessingPostSelection:
 
     _n_shots = 6
 
-    def _make_linear_chain(self, output_variable, disallowed_states):
-        """Emit Equalise(identity) → Discriminate(threshold=0) → PostSelect(disallowed)."""
-        instructions = [
+    def _make_linear_chain(self, output_variable, disallowed_indices):
+        """Build a linear-map post-processing chain.
+
+        Disallowed state indices get negative keys in a synthetic MaxLikelihoodMethod so
+        PostSelect filters them via key < 0.
+        """
+        if disallowed_indices:
+            key_0 = -3 if 0 in disallowed_indices else 0
+            key_1 = -2 if 1 in disallowed_indices else 1
+            synth_method = MaxLikelihoodMethod(
+                states={
+                    key_0: MLDiscriminateParams(location=1.0 + 0j),
+                    key_1: MLDiscriminateParams(location=-1.0 + 0j),
+                }
+            )
+            return [
+                Equalise(
+                    output_variable=output_variable,
+                    transform=np.eye(2, dtype=float),
+                    offset=np.zeros(2),
+                ),
+                Discriminate(output_variable=output_variable, method=synth_method),
+                PostSelect(output_variable=output_variable),
+            ]
+        return [
             Equalise(
                 output_variable=output_variable,
                 transform=np.eye(2, dtype=float),
@@ -475,26 +516,18 @@ class TestAcquisitionPostprocessingPostSelection:
             ),
             Discriminate(output_variable=output_variable, threshold=0.0),
         ]
-        if disallowed_states:
-            instructions.append(
-                PostSelect(
-                    output_variable=output_variable, disallowed_states=disallowed_states
-                )
-            )
-        return instructions
 
     def _make_ml_chain(self, output_variable, states):
-        """Build a Discriminate(MaxLikelihood) → PostSelect chain for the given states.
+        """Build a Discriminate(MaxLikelihood) → PostSelect chain.
 
-        PostSelect is only appended when at least one state is marked disallowed.
+        ``states`` must be a ``dict[int, MLDiscriminateParams]``.  PostSelect is appended
+        when any key is negative (i.e. the state is disallowed).
         """
         method = MaxLikelihoodMethod(states=states)
-        disallowed = [s.label for s in states if s.disallowed]
+        has_disallowed = any(k < 0 for k in states)
         instructions = [Discriminate(output_variable=output_variable, method=method)]
-        if disallowed:
-            instructions.append(
-                PostSelect(output_variable=output_variable, disallowed_states=disallowed)
-            )
+        if has_disallowed:
+            instructions.append(PostSelect(output_variable=output_variable))
         return instructions
 
     def _package_and_acquisitions(self, pp, response):
@@ -512,7 +545,7 @@ class TestAcquisitionPostprocessingPostSelection:
 
     def test_linear_disallowed_state_1_reduces_shots(self):
         """Shots classified to label "1" (negative projection) are removed."""
-        pp = self._make_linear_chain("q0", disallowed_states=["1"])
+        pp = self._make_linear_chain("q0", disallowed_indices=[1])
         # positive(valid), negative(invalid), positive, negative, positive, negative
         response = [1.0, -1.0, 0.5, -0.5, 0.8, -0.2]
         package, acquisitions = self._package_and_acquisitions(pp, response)
@@ -524,14 +557,12 @@ class TestAcquisitionPostprocessingPostSelection:
         assert post_sel.shots_retained == 3
 
     def test_ml_three_states_one_disallowed_reduces_shots(self):
-        """Shots classified to a disallowed ML state are removed."""
-        states = [
-            MLStateMap(label="ten", output_value=0, location=1.0 + 0j, disallowed=False),
-            MLStateMap(
-                label="thirty", output_value=1, location=-1.0 + 0j, disallowed=False
-            ),
-            MLStateMap(label="twenty", output_value=2, location=0.0 + 1j, disallowed=True),
-        ]
+        """Shots classified to a disallowed ML state (negative key) are removed."""
+        states = {
+            10: MLDiscriminateParams(location=1.0 + 0j),
+            30: MLDiscriminateParams(location=-1.0 + 0j),
+            -20: MLDiscriminateParams(location=0.0 + 1j),  # negative = disallowed
+        }
         pp = self._make_ml_chain("q0", states)
         # near state0, near state1, near state2 (disallowed), state0, state0, state1
         response = np.array(
@@ -554,8 +585,8 @@ class TestAcquisitionPostprocessingPostSelection:
 
     def test_global_mask_applied_across_two_acquires(self):
         """When two acquires both post-select, the global mask is ANDed."""
-        pp0 = self._make_linear_chain("q0", disallowed_states=["1"])
-        pp1 = self._make_linear_chain("q1", disallowed_states=["1"])
+        pp0 = self._make_linear_chain("q0", disallowed_indices=[1])
+        pp1 = self._make_linear_chain("q1", disallowed_indices=[1])
         n = 4
         # q0: valid, invalid, valid, valid
         # q1: valid, valid, invalid, valid
@@ -587,7 +618,7 @@ class TestAcquisitionPostprocessingPostSelection:
 
     def test_all_shots_filtered_returns_empty_arrays(self):
         """When every shot is disallowed, all output arrays are empty."""
-        pp = self._make_linear_chain("q0", disallowed_states=["0", "1"])
+        pp = self._make_linear_chain("q0", disallowed_indices=[0, 1])
         response = [1.0, -1.0, 0.5, -0.5]
         package, acquisitions = self._package_and_acquisitions(pp, response)
         res_mgr = ResultManager()
@@ -634,8 +665,15 @@ class TestAcquisitionPostprocessingPostSelection:
             process_type=PostProcessType.MEAN,
             axes=[ProcessAxis.TIME],
         )
-        pp_disc = Discriminate(output_variable="q0", threshold=0.0)
-        pp_select = PostSelect(output_variable="q0", disallowed_states=["1"])
+        # Use synthetic ML method: "1" (negative real → key -2, disallowed), "0" (positive → 0)
+        synth_method = MaxLikelihoodMethod(
+            states={
+                0: MLDiscriminateParams(location=1.0 + 0j),
+                -2: MLDiscriminateParams(location=-1.0 + 0j),
+            }
+        )
+        pp_disc = Discriminate(output_variable="q0", method=synth_method)
+        pp_select = PostSelect(output_variable="q0")
         acquire = AcquireData(
             mode=AcquireMode.RAW,
             shape=(n_shots, n_time),
@@ -643,7 +681,7 @@ class TestAcquisitionPostprocessingPostSelection:
             physical_channel="ch0",
         )
         package = Executable(programs=[], acquires={"q0": acquire})
-        # shots 0,2 → mean > 0 → state 0 (allowed); shots 1,3 → mean < 0 → state 1 (disallowed)
+        # shots 0,2 → mean > 0 → key 0 (allowed); shots 1,3 → mean < 0 → key -2 (disallowed)
         row_pos = np.ones(n_time, dtype=float)
         row_neg = -np.ones(n_time, dtype=float)
         raw = np.array([row_pos, row_neg, row_pos, row_neg])  # shape (4, 8)
@@ -663,9 +701,16 @@ class TestAcquisitionPostprocessingPostSelection:
         sequence axis; even if its trailing dimension equals n_shots, it must not be masked.
         """
         n_shots = 4
+        # Use synthetic ML method for q0 so state "1" (-2, negative) is filtered.
+        synth_method = MaxLikelihoodMethod(
+            states={
+                0: MLDiscriminateParams(location=1.0 + 0j),
+                -2: MLDiscriminateParams(location=-1.0 + 0j),
+            }
+        )
         pp_q0 = [
-            Discriminate(output_variable="q0", threshold=0.0),
-            PostSelect(output_variable="q0", disallowed_states=["1"]),
+            Discriminate(output_variable="q0", method=synth_method),
+            PostSelect(output_variable="q0"),
         ]
         acquire_q0 = AcquireData(
             mode=AcquireMode.INTEGRATOR,

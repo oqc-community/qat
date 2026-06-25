@@ -198,9 +198,7 @@ class QIRParser:
                     args[0], output_variable=args[1]
                 )
                 if self._post_selection:
-                    method = args[0].post_process_method
-                    disallowed = method.disallowed_states if method is not None else set()
-                    builder.emit_post_select(args[1], disallowed)
+                    builder.emit_post_select(args[1])
                 builder.results_processing(args[1], self._results_format)
             case "__quantum__qis__reset__body":
                 self._throw_on_invalid_args(intrinsic_name, num_args, 1)

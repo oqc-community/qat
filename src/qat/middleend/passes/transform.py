@@ -42,7 +42,7 @@ from qat.ir.instructions import (
     Synchronize,
     Variable,
 )
-from qat.ir.measure import Acquire, Discriminate, Equalise, MeasureBlock, PostSelect
+from qat.ir.measure import Acquire, MeasureBlock, PostSelect
 from qat.ir.waveforms import (
     Pulse,
     SampledWaveform,
@@ -53,7 +53,6 @@ from qat.ir.waveforms import (
 from qat.middleend.passes.analysis import ActivePulseChannelResults
 from qat.model.device import FreqShiftPulseChannel, PulseChannel, Qubit
 from qat.model.hardware_model import PhysicalHardwareModel
-from qat.model.post_processing import BG_LABEL, LinearMapToRealMethod, MaxLikelihoodMethod
 from qat.model.target_data import TargetData
 from qat.purr.utils.logger import get_default_logger
 
@@ -1590,106 +1589,33 @@ class AcquireSanitisation(TransformPass):
 class InsertPreSelectionMeasurement(TransformPass):
     """Insert a pre-selection measurement inside the shot loop.
 
-    Pre-selection is a technique to improve circuit fidelity by verifying
-    that every qubit starts in its ground state before the algorithm
-    begins.  For each qubit where pre-selection is enabled, this pass
-    injects a full measurement-and-discriminate sequence immediately after
-    the first :class:`Repeat` instruction. Shots in which a qubit is found
-    in a disallowed state are flagged via a
-    :class:`~qat.ir.measure.PostSelect` instruction so that the runtime can
-    discard them.
+    For each active qubit with ``preselect_disallowed_states`` set, this pass
+    injects ``Pulse → Delay → Acquire → Delay(relaxation) → Equalise →
+    Discriminate → PostSelect`` immediately after the first :class:`Repeat`
+    instruction, bracketed by global :class:`~qat.ir.instructions.Synchronize`
+    instructions.  Shots where any qubit lands in a disallowed state are
+    filtered at runtime by ANDing all per-qubit masks.
 
-    After all per-qubit preselection blocks have been emitted, a global
-    :class:`~qat.ir.instructions.Synchronize` covering all qubit channels
-    ensures every channel is time-aligned before the actual circuit begins.
-    A :class:`~qat.ir.instructions.Delay` equal to the resonator
-    relaxation delay is also appended to the acquire channel after each
-    readout, giving the resonator time to ring down before the next
-    operation.
+    **Activation** (all required per qubit):
+
+    1. ``compiler_config.pre_selection`` is ``True``.
+    2. Qubit is active in the circuit.
+    3. ``qubit.preselect_disallowed_states`` is non-empty.
+    4. Either ``qubit.post_process_method`` is set, **or** ``qubit.mean_z_map_args``
+       is set (legacy path — the same ``Equalise → Discriminate`` chain is derived
+       as for :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing`).
+
+    The background state (:data:`~qat.model.post_processing.BG_KEY`)
+    is negative and is therefore always discarded.
 
     .. note::
 
-        This pass requires results from
-        :class:`ActivePulseChannelAnalysis
-        <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
-        to be stored in the results manager. It must therefore run
-        **after** ``ActivePulseChannelAnalysis`` and **before**
-        ``InactivePulseChannelSanitisation`` in the pipeline. It also assumes
-        ``RepeatSanitisation`` has already ensured a ``Repeat`` exists.
+        Must run **after** ``ActivePulseChannelAnalysis`` and **before**
+        ``InactivePulseChannelSanitisation``.  After injection, the pass
+        updates :class:`~qat.middleend.passes.analysis.ActivePulseChannelResults`
+        so that newly-active measure/acquire channels are not stripped.
 
-        After injecting instructions this pass updates the
-        :class:`~qat.middleend.passes.analysis.ActivePulseChannelResults`
-        stored in the result manager to include the newly-active measure and
-        acquire channels.  This ensures that ``InactivePulseChannelSanitisation``
-        (which runs afterwards) does not strip the injected instructions.
-
-    **Activation conditions** (all must be true for a given qubit):
-
-    1. ``compiler_config.pre_selection`` is ``True``.
-    2. The qubit is **active** in the current circuit (present in
-       :class:`~qat.middleend.passes.analysis.ActivePulseChannelResults`).
-    3. ``qubit.preselect_disallowed_states`` is non-empty.
-    4. ``qubit.post_process_method`` is not ``None`` (legacy qubits with
-       only ``mean_z_map_args`` are not supported for pre-selection;
-       a ``ValueError`` is raised).
-
-    **Disallowed-state derivation**
-
-    The disallowed states are taken directly from
-    ``qubit.preselect_disallowed_states``.  For a standard qubit with
-    states ``"0"`` and ``"1"`` and ``preselect_disallowed_states={"1"}``,
-    only ``"1"`` is disallowed.  For a four-state qubit
-    with states ``"|01>"``, ``"|10>"``, ``"|00>"``, ``"|11>"`` and
-    ``preselect_disallowed_states={"|10>", "|00>", "|11>"}``, all three
-    are disallowed.
-
-    The background state (:data:`~qat.model.post_processing.BG_LABEL`) is
-    **always** included in the disallowed set regardless of the qubit's
-    ``preselect_disallowed_states`` configuration.  This ensures that
-    outlier shots (those failing the ``p_min`` likelihood threshold) are
-    unconditionally discarded during pre-selection.
-
-    **Injected instructions** (per qubit, output variable
-    ``"presel_{qubit_index}"``):
-
-    A single ``Synchronize(all_qubit_channels)`` is emitted **before** all
-    qubit blocks and again **after** them.  In between, each qubit's block
-    contains:
-
-    * measure :class:`~qat.ir.waveforms.Pulse`
-    * :class:`~qat.ir.instructions.Delay` (``acquire.delay``) — ring-up offset
-    * :class:`~qat.ir.measure.Acquire` with ``purpose=PRE_SELECTION``
-    * :class:`~qat.ir.instructions.Delay`
-      (``qubit.resonator.relaxation_delay``) — ring-down settle
-    * :class:`~qat.ir.measure.Equalise` (when calibrated)
-    * :class:`~qat.ir.measure.Discriminate`
-    * :class:`~qat.ir.measure.PostSelect` with the configured disallowed states
-
-    The trailing global :class:`~qat.ir.instructions.Synchronize` advances
-    drive and other channels (which received no instructions during the
-    readout window) to match the acquire channel's endpoint, so everything
-    is aligned before the circuit begins.
-
-    **Channel timeline for a two-qubit circuit** — see
-    :ref:`shot_selection` for a rendered Mermaid sequence diagram.  In
-    brief: a global ``Synchronize`` fires before all qubit blocks; each
-    qubit emits ``Pulse → Delay(ring-up) → Acquire → Delay(relaxation_delay) →
-    Equalise → Discriminate → PostSelect``; a second global
-    ``Synchronize`` realigns all channels before the circuit body begins.
-    The ``presel_*`` output variable holds string state labels after
-    :class:`~qat.ir.measure.Discriminate` and is for internal runtime use
-    only — it drives the validity mask but is never returned to the user.
-    For debug access to per-shot pre-selection labels, inspect the
-    :class:`~qat.runtime.passes.analysis.DiscriminateResult` stored in the
-    :class:`~qat.core.result_base.ResultManager` after execution.
-
-    **Interaction with post-selection**
-
-    Pre-selection and end-of-circuit post-selection can be combined.
-    Each produces its own validity mask keyed by ``output_variable``.
-    The runtime ANDs all masks together in
-    :func:`~qat.runtime.passes.transform._build_and_apply_global_mask`
-    so that a shot is retained only if it passes both checks.
+    See :ref:`shot_selection` for a channel-timeline diagram.
 
     :param model: The hardware model.
     """
@@ -1736,43 +1662,15 @@ class InsertPreSelectionMeasurement(TransformPass):
         if not candidates:
             return ir
 
-        # Validate that every candidate qubit has a supported post_process_method.
-        # Without one, _build_pp_instrs would silently emit no Discriminate/PostSelect,
-        # making pre-selection ineffective.
-        missing_pp = sorted(
-            qid
-            for qid, qubit in candidates.items()
-            if not isinstance(
-                qubit.post_process_method, MaxLikelihoodMethod | LinearMapToRealMethod
-            )
-        )
-        if missing_pp:
-            raise ValueError(
-                f"Pre-selection is enabled but the following qubits have "
-                f"preselect_disallowed_states set without a supported "
-                f"post_process_method (MaxLikelihoodMethod or LinearMapToRealMethod): "
-                f"{missing_pp}. Set a post_process_method on each qubit."
-            )
-
         repeat_index = next(
             i
             for i, instruction in enumerate(ir.instructions)
             if isinstance(instruction, Repeat)
         )
 
-        # Build the sync target set from the hardware model rather than from
-        # active_pulse_channels.targets.  The active-channel analysis only
-        # records channels that already have Pulse/Acquire instructions in the
-        # IR at analysis time; preselection is injected afterwards, so the
-        # measure/acquire channels won't be listed yet.  More importantly, the
-        # circuit may issue gates on drive/cross-resonance channels that are
-        # not yet represented in the IR at this point.  Using the full set of
-        # non-NaN-frequency channels for each candidate qubit ensures the sync
-        # covers every channel the circuit will subsequently touch.
-        # Custom frames (e.g. from QASM3 custom gate definitions) are stored
-        # in the active channel results but are not part of any qubit's
-        # all_qubit_and_resonator_pulse_channels.  Include them here so the
-        # global Synchronize also advances those channels.
+        # Union hardware model channels with active_pulse_channels so the global
+        # Synchronize covers all channels the circuit will touch, including custom
+        # frames not yet in the IR at analysis time.
         all_sync_uuids = sorted(
             {
                 pc.uuid
@@ -1790,8 +1688,7 @@ class InsertPreSelectionMeasurement(TransformPass):
         ]
 
         if len(all_sync_uuids) > 1:
-            # Wrap preselection in global syncs. Requires at least
-            # 2 targets, so skip in the degenerate single-channel case.
+            # Requires at least 2 targets; skip for degenerate single-channel case.
             presel_instructions = (
                 [Synchronize(targets=all_sync_uuids)]
                 + presel_instructions
@@ -1804,12 +1701,7 @@ class InsertPreSelectionMeasurement(TransformPass):
             + ir.instructions[repeat_index + 1 :]
         )
 
-        # Update ActivePulseChannelResults to include the measure and acquire
-        # channels we just injected.  InactivePulseChannelSanitisation runs
-        # after this pass and uses the cached results to decide which
-        # instructions to keep; without this update it would strip the freshly
-        # injected Pulse/Acquire instructions because those channels were not
-        # present in the IR when ActivePulseChannelAnalysis executed.
+        # Register injected channels so InactivePulseChannelSanitisation does not strip them.
         for qubit in candidates.values():
             active_pulse_channels.add_target(qubit.measure_pulse_channel, qubit)
             active_pulse_channels.add_target(qubit.resonator.acquire_pulse_channel, qubit)
@@ -1877,68 +1769,23 @@ class InsertPreSelectionMeasurement(TransformPass):
     ) -> list[Instruction]:
         """Build Equalise → Discriminate → PostSelect for pre-selection.
 
-        No :class:`~qat.ir.measure.Demap` is emitted: pre-selection only needs
-        to determine shot validity via :class:`~qat.ir.measure.PostSelect`; the
-        string state labels are never used as a numeric result.
-
-        The background state (:data:`~qat.model.post_processing.BG_LABEL`) is
-        always added to the disallowed set so that outlier shots are
-        unconditionally discarded during pre-selection.
+        ``preselect_disallowed_states`` is passed directly to
+        :class:`~qat.ir.measure.PostSelect` as ``additional_disallowed``.
+        The runtime then rejects shots whose key is negative **or** whose key
+        is in ``additional_disallowed``, so no re-keying of the method's
+        states dict is required.
         """
-        method = qubit.post_process_method
-        instructions: list[Instruction] = []
-
-        if isinstance(method, MaxLikelihoodMethod):
-            # Equalise (optional).
-            if method.transform is not None and method.offset is not None:
-                instructions.append(
-                    Equalise(
-                        output_variable=output_variable,
-                        transform=np.asarray(method.transform, dtype=float),
-                        offset=np.asarray(method.offset, dtype=float),
-                    )
-                )
-            # Discriminate (ML path).
-            instructions.append(
-                Discriminate(
-                    output_variable=output_variable,
-                    method=method,
-                )
+        instructions: list[Instruction] = list(
+            QuantumInstructionBuilder.build_equalise_discriminate_instrs(
+                qubit, output_variable
             )
-            # PostSelect — always include BG_LABEL so outlier shots are
-            # unconditionally discarded during pre-selection.
-            instructions.append(
-                PostSelect(
-                    output_variable=output_variable,
-                    disallowed_states=qubit.preselect_disallowed_states | {BG_LABEL},
-                )
+        )
+        instructions.append(
+            PostSelect(
+                output_variable=output_variable,
+                additional_disallowed=qubit.preselect_disallowed_states,
             )
-
-        elif isinstance(method, LinearMapToRealMethod):
-            # Equalise.
-            m = complex(method.mean_z_map_args[0])
-            c = complex(method.mean_z_map_args[1])
-            a, b = m.real, m.imag
-            instructions.append(
-                Equalise(
-                    output_variable=output_variable,
-                    transform=np.array([[a, -b], [b, a]], dtype=float),
-                    offset=np.array([c.real, c.imag], dtype=float),
-                )
-            )
-            # Discriminate (threshold path).
-            instructions.append(
-                Discriminate(output_variable=output_variable, threshold=0.0)
-            )
-            # PostSelect — always include BG_LABEL so outlier shots are
-            # unconditionally discarded during pre-selection.
-            instructions.append(
-                PostSelect(
-                    output_variable=output_variable,
-                    disallowed_states=qubit.preselect_disallowed_states | {BG_LABEL},
-                )
-            )
-
+        )
         return instructions
 
 

@@ -8,9 +8,13 @@ from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 from qat import QAT
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
-from qat.ir.measure import Demap, Discriminate, Equalise, PostSelect
+from qat.ir.measure import Discriminate, Equalise, PostSelect
 from qat.model.loaders.lucy import LucyModelLoader
-from qat.model.post_processing import LinearMapToRealMethod, MaxLikelihoodMethod, MLStateMap
+from qat.model.post_processing import (
+    LinearMapToRealMethod,
+    MaxLikelihoodMethod,
+    MLDiscriminateParams,
+)
 from qat.pipelines.waveform import EchoPipeline, PipelineConfig
 from qat.runtime.passes.analysis import PostSelectionResult
 
@@ -45,16 +49,14 @@ def test_post_selection_happy_path_qasm3_end_to_end():
 
     executable, _ = QAT().compile(qasm, compiler_config, pipeline=pipeline)
 
-    # Verify compile-time wiring emits Equalise → Discriminate → Demap for LinearMapToRealMethod
+    # Verify compile-time wiring emits Equalise → Discriminate for LinearMapToRealMethod
     # (no PostProcessing(LINEAR_MAP) since the qubit has a configured post_process_method).
     assert len(executable.acquires) == 1
     acquire = next(iter(executable.acquires.values()))
-    assert len(acquire.post_processing) == 3
+    assert len(acquire.post_processing) == 2
     assert isinstance(acquire.post_processing[0], Equalise)
     assert isinstance(acquire.post_processing[1], Discriminate)
     assert acquire.post_processing[1].threshold == 0.0
-    assert isinstance(acquire.post_processing[2], Demap)
-    assert acquire.post_processing[2].state_map == {"0": 0, "1": 1}
 
     # Execute via runtime directly so post-selection metadata is available in ResultManager.
     res_mgr = ResultManager()
@@ -101,11 +103,11 @@ def test_post_selection_max_likelihood_three_states_noise_injected(function_seed
     shots = n_near_zero + n_near_one + n_near_two  # 10 total
 
     method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            -2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
     model = LucyModelLoader(qubit_count=1).load()
@@ -211,11 +213,11 @@ def test_post_selection_max_likelihood_two_qubits_and_mask(function_seed):
     shots_retained_expected = shots - len({7, 8, 9})
 
     method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            -2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
     model = LucyModelLoader(qubit_count=2).load()
@@ -301,13 +303,13 @@ def test_post_selection_max_likelihood_two_qubits_and_mask(function_seed):
 
 
 def test_post_selection_ml_and_linear_map_two_qubits_and_mask(function_seed):
-    """Mixed post-selection: qubit0 uses ML, qubit1 uses linear-map.
+    """Mixed post-selection: qubit0 uses 3-state ML, qubit1 uses 2-state ML.
 
     This verifies that the global AND-mask behavior works when different qubits
     use different post-processing methods. We construct controlled IQ arrays so
-    q0 disallows shots {8,9} (via ML) and q1 disallows shots {7,8,9} (via
-    linear map with disallowed_states=[1]). The global mask should therefore
-    filter {7,8,9} and retain 7 shots.
+    q0 disallows shots {8,9} (via ML leakage state) and q1 disallows shots {7,8,9}
+    (via ML with state 1 as disallowed). The global mask should therefore filter
+    {7,8,9} and retain 7 shots.
     """
     qasm = """
     OPENQASM 3.0;
@@ -324,22 +326,24 @@ def test_post_selection_ml_and_linear_map_two_qubits_and_mask(function_seed):
 
     # q0 (ML): disallows indices {8,9}
     q0_near_zero, q0_near_one, q0_near_two = 5, 3, 2
-    # q1 (linear): we'll mark indices 7,8,9 as negative (state 1) so they are
-    # disallowed by the linear map's disallowed_states=[1]. Other shots are
-    # positive so valid.
+    # q1 (ML with state 1 disallowed): shots 7,8,9 map to negative key.
 
     shots_retained_expected = shots - len({7, 8, 9})
 
     ml_method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            -2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
-    linear_method = LinearMapToRealMethod(
-        mean_z_map_args=[1 + 0j, 0j], disallowed_states=["1"]
+    # q1: 2-state ML where state 1 is disallowed (negative key)
+    linear_method = MaxLikelihoodMethod(
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            -2: MLDiscriminateParams(location=-1 + 0j),  # negative key = disallowed
+        }
     )
 
     model = LucyModelLoader(qubit_count=2).load()
@@ -426,7 +430,8 @@ def test_post_selection_ml_and_linear_map_two_qubits_and_mask(function_seed):
 
 
 def test_post_selection_disabled_via_compiler_config():
-    """With post_selection=False, no PostSelect is emitted despite disallowed_states.
+    """With post_selection=False, no PostSelect is emitted even if the method has disallowed
+    states.
 
     This test verifies that setting CompilerConfig(post_selection=False) completely
     suppresses PostSelect instruction emission, even when the qubit model has disallowed
@@ -442,11 +447,11 @@ def test_post_selection_disabled_via_compiler_config():
     """
 
     method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            -2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
     model = LucyModelLoader(qubit_count=1).load()
@@ -473,10 +478,9 @@ def test_post_selection_disabled_via_compiler_config():
     acquire = next(iter(executable.acquires.values()))
     post_processing = acquire.post_processing
     assert (
-        len(post_processing) == 2
-    )  # Only Discriminate, Demap (no Equalise since transform/offset are None)
+        len(post_processing) == 1
+    )  # Only Discriminate (no Equalise since transform/offset are None; no Demap; no PostSelect)
     assert isinstance(post_processing[0], Discriminate)
-    assert isinstance(post_processing[1], Demap)
     # No PostSelect in the chain.
     assert not any(isinstance(pp, PostSelect) for pp in post_processing)
 
@@ -495,7 +499,8 @@ def test_post_selection_disabled_via_compiler_config():
 
 
 def test_post_selection_enabled_via_compiler_config():
-    """With post_selection=True, PostSelect is emitted when disallowed_states exist.
+    """With post_selection=True, PostSelect is emitted when the method has disallowed
+    states.
 
     This test verifies that setting CompilerConfig(post_selection=True) enables PostSelect
     instruction emission whenever the qubit model has disallowed states.
@@ -510,11 +515,11 @@ def test_post_selection_enabled_via_compiler_config():
     """
 
     method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            -2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
     model = LucyModelLoader(qubit_count=1).load()
@@ -541,12 +546,10 @@ def test_post_selection_enabled_via_compiler_config():
     acquire = next(iter(executable.acquires.values()))
     post_processing = acquire.post_processing
     assert (
-        len(post_processing) == 3
-    )  # Discriminate, PostSelect, Demap (no Equalise since transform/offset are None)
+        len(post_processing) == 2
+    )  # Discriminate, PostSelect (no Equalise since transform/offset are None; no Demap)
     assert isinstance(post_processing[0], Discriminate)
     assert isinstance(post_processing[1], PostSelect)
-    assert post_processing[1].disallowed_states == {"2"}
-    assert isinstance(post_processing[2], Demap)
 
 
 @pytest.mark.parametrize("post_selection", [False, True])
@@ -567,7 +570,6 @@ def test_post_selection_flag_controls_instruction_emission(post_selection):
 
     method = LinearMapToRealMethod(
         mean_z_map_args=[1 + 0j, 0j],
-        disallowed_states=["1"],
     )
 
     model = LucyModelLoader(qubit_count=1).load()
@@ -606,7 +608,7 @@ def test_results_format_raw_with_post_selection_e2e():
     """End-to-end compilation test: raw format with ML post-processing, no post-selection.
 
     Verifies that when results_format=raw() and post-selection is disabled,
-    the compiled executable contains a Demap instruction with the expected state_map.
+    the compiled executable contains Discriminate (no Demap, since it no longer exists).
     """
     qasm = """
     OPENQASM 3.0;
@@ -622,10 +624,10 @@ def test_results_format_raw_with_post_selection_e2e():
     qubit = model.qubits[0]
     qubit.mean_z_map_args = None
     qubit.post_process_method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+        },
     )
 
     pipeline = EchoPipeline(config=PipelineConfig(name="raw-e2e"), model=model)
@@ -638,11 +640,9 @@ def test_results_format_raw_with_post_selection_e2e():
 
     executable, _ = QAT().compile(qasm, compiler_config, pipeline=pipeline)
 
-    # Verify Demap instruction is present with correct state_map
+    # Verify Discriminate is present; no Demap since it no longer exists.
     acquire = next(iter(executable.acquires.values()))
-    map_instrs = [pp for pp in acquire.post_processing if isinstance(pp, Demap)]
-    assert len(map_instrs) == 1
-    assert map_instrs[0].state_map == {"0": 0.0, "1": 1.0}
+    assert any(isinstance(pp, Discriminate) for pp in acquire.post_processing)
 
 
 def test_results_format_binary_count_with_post_selection_e2e():
@@ -665,11 +665,11 @@ def test_results_format_binary_count_with_post_selection_e2e():
     qubit = model.qubits[0]
     qubit.mean_z_map_args = None
     qubit.post_process_method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=True),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            -2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
     pipeline = EchoPipeline(config=PipelineConfig(name="binary-count-e2e"), model=model)
@@ -687,11 +687,11 @@ def test_results_format_binary_count_with_post_selection_e2e():
     post_processing = acquire.post_processing
     assert any(isinstance(pp, Discriminate) for pp in post_processing)
     assert any(isinstance(pp, PostSelect) for pp in post_processing)
-    assert any(isinstance(pp, Demap) for pp in post_processing)
 
-    # Verify disallowed state is in PostSelect's disallowed_states
+    # PostSelect no longer carries disallowed_states — negativity of int key encodes it.
+    # Just verify PostSelect is emitted.
     post_select = [pp for pp in post_processing if isinstance(pp, PostSelect)][0]
-    assert "2" in post_select.disallowed_states
+    assert post_select.output_variable is not None
 
 
 def test_results_format_multistate_binary_warning_e2e():
@@ -715,11 +715,11 @@ def test_results_format_multistate_binary_warning_e2e():
     qubit = model.qubits[0]
     qubit.mean_z_map_args = None
     qubit.post_process_method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="0", output_value=0, location=1 + 0j, disallowed=False),
-            MLStateMap(label="1", output_value=1, location=-1 + 0j, disallowed=False),
-            MLStateMap(label="2", output_value=2, location=0 + 1j, disallowed=False),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1 + 0j),
+            1: MLDiscriminateParams(location=-1 + 0j),
+            2: MLDiscriminateParams(location=0 + 1j),
+        },
     )
 
     pipeline = EchoPipeline(

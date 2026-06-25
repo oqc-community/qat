@@ -6,8 +6,8 @@ This module provides helpers to map raw IQ readout arrays into processed
 forms expected by higher-level code.  It implements the supported legacy
 ``PostProcessType`` operations (mean, linear map, discriminate), plus the
 granular post-processing pipeline functions (:func:`apply_equalise`,
-:func:`apply_discriminate_instruction`, :func:`apply_post_select`,
-:func:`apply_demap_instruction`) and small helpers for axis bookkeeping.
+:func:`apply_discriminate_instruction`, :func:`apply_post_select`) and small helpers
+for axis bookkeeping.
 
 For a full description of the granular pipeline and how each step fits together,
 see the :ref:`post_processing_pipeline` guide.
@@ -21,8 +21,8 @@ from numbers import Number
 import numpy as np
 
 from qat.ir.instruction_basetypes import AcquireMode, PostProcessType, ProcessAxis
-from qat.ir.measure import Demap, Discriminate, Equalise, PostProcessing, PostSelect
-from qat.model.post_processing import BG_LABEL, MaxLikelihoodMethod
+from qat.ir.measure import Discriminate, Equalise, PostProcessing, PostSelect
+from qat.model.post_processing import BG_KEY, MaxLikelihoodMethod
 
 # TODO: move to QAT config?
 UPCONVERT_SIGN = 1.0
@@ -183,44 +183,47 @@ def apply_discriminate_instruction(
 ) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
     """Runtime implementation of :class:`qat.ir.measure.Discriminate`.
 
-    Discriminate equalised values to string state labels using a
+    Discriminate equalised values to **integer state keys** using a
     :class:`Discriminate` instruction.
 
     For the threshold path (``instr.threshold is not None``) values above the
-    threshold map to ``"0"`` and values at or below map to ``"1"``.
+    threshold map to ``0`` and values at or below map to ``1``.
 
     For the ML path (``instr.method`` is set) normalised Gaussian likelihoods
     are computed using a single global ``noise_est``; the state with the highest
-    likelihood wins and its ``label`` string is returned.  Likelihoods are
+    likelihood wins and its **dict key** (the integer from
+    :attr:`MaxLikelihoodMethod.states`) is returned directly.  Likelihoods are
     computed in log-domain with log-sum-exp stabilisation to avoid underflow.
-    When ``p_min > 0``, shots below the minimum confidence threshold are
-    labelled :data:`~qat.model.post_processing.BG_LABEL`.
+    When ``p_min > 0``, shots below the minimum confidence threshold are assigned
+    :data:`~qat.model.post_processing.BG_KEY`.
 
     :param response: Equalised (real or complex) readout array.
     :param instr: The :class:`Discriminate` instruction.
     :param axes: Current axis map.
-    :returns: String state-label array and unchanged axis map.
+    :returns: Integer state-key array and unchanged axis map.
     """
     if instr.threshold is not None:
-        state_labels = np.where(np.real(response) > instr.threshold, "0", "1")
-        return state_labels, axes
+        state_keys = np.where(np.real(response) > instr.threshold, 0, 1).astype(int)
+        return state_keys, axes
 
     # ML path — compute normalised likelihoods via log-sum-exp stabilisation.
     method: MaxLikelihoodMethod = instr.method  # type: ignore[assignment]
     if len(method.states) == 0:
         raise ValueError("MaxLikelihoodMethod must define at least one state.")
 
-    locations = np.array([s.location for s in method.states], dtype=np.complex128)
+    # Build parallel arrays: state keys (dict keys) and IQ locations (dict values).
+    state_keys_arr = np.array(list(method.states.keys()), dtype=int)
+    locations = np.array([s.location for s in method.states.values()], dtype=np.complex128)
     orig_shape = response.shape
     flat = response.flatten()  # shape (N,)
 
-    # log_p[n, k] = -|z_n - loc_k|^2 / (2 * noise_est)  where noise_est is the noise power (variance σ²)
+    # log_p[n, k] = -|z_n - loc_k|^2 / (2 * noise_est)
+    #   where noise_est is the noise power (variance σ²)
     sq_dist = np.abs(flat[:, np.newaxis] - locations[np.newaxis, :]) ** 2  # (N, K)
     log_p = -sq_dist / (2.0 * method.noise_est)  # (N, K)
 
     best_idx = np.argmax(log_p, axis=1)  # (N,)
-    state_label_arr = np.array([s.label for s in method.states])
-    classified = state_label_arr[best_idx]
+    classified = state_keys_arr[best_idx]  # integer keys
 
     # p_min check: compute normalised likelihoods and reject low-confidence shots.
     if method.p_min > 0.0:
@@ -230,13 +233,13 @@ def apply_discriminate_instruction(
         likelihoods = np.exp(log_p_stable)  # (N, K)
         norm_likelihoods = likelihoods / likelihoods.sum(axis=1, keepdims=True)  # (N, K)
         best_p = norm_likelihoods[np.arange(len(flat)), best_idx]  # (N,)
-        classified = np.where(best_p >= method.p_min, classified, BG_LABEL)
+        classified = np.where(best_p >= method.p_min, classified, BG_KEY)
 
     return classified.reshape(orig_shape), axes
 
 
 def apply_post_select(
-    state_ids: np.ndarray,
+    state_keys: np.ndarray,
     instr: PostSelect,
     axes: dict[ProcessAxis, int],
 ) -> tuple[np.ndarray, np.ndarray]:
@@ -244,48 +247,28 @@ def apply_post_select(
 
     Build a per-shot validity mask from a :class:`PostSelect` instruction.
 
-    Shots whose state label appears in ``instr.disallowed_states`` are marked
-    ``False`` in the returned validity mask. When ``disallowed_states`` is empty
-    every shot is valid.
+    A shot is marked ``False`` (invalid) when **either**:
 
-    :param state_ids: String state-label array produced by a :class:`Discriminate` step.
+    - Its integer state key is **negative** — negative keys encode disallowed
+      states and the ``p_min`` background sentinel
+      (:data:`~qat.model.post_processing.BG_KEY`), **or**
+    - Its integer state key appears in
+      :attr:`~qat.ir.measure.PostSelect.additional_disallowed` — used by the
+      pre-selection pass to reject specific non-negative states without
+      re-keying the :class:`~qat.ir.measure.Discriminate` method.
+
+    :param state_keys: Integer state-key array produced by a :class:`Discriminate` step.
     :param instr: The :class:`PostSelect` instruction.
     :param axes: Current axis map (not used; present for interface consistency).
-    :returns: A tuple of ``(state_ids, validity_mask)`` where ``validity_mask``
-        is a boolean ndarray with the same shape as ``state_ids``.
+    :returns: A tuple of ``(state_keys, validity_mask)`` where ``validity_mask``
+        is a boolean ndarray with the same shape as ``state_keys``.
     """
-    disallowed = list(instr.disallowed_states)
-    validity_mask = ~np.isin(state_ids, disallowed)
-    return state_ids, validity_mask
-
-
-def apply_demap_instruction(
-    state_ids: np.ndarray,
-    instr: Demap,
-    axes: dict[ProcessAxis, int],
-) -> tuple[np.ndarray, dict[ProcessAxis, int]]:
-    """Runtime implementation of :class:`qat.ir.measure.Demap`.
-
-    Demap string state labels to integer output values using a :class:`Demap` instruction.
-
-    Labels that do not appear in ``instr.state_map`` (including the background label
-    :data:`~qat.model.post_processing.BG_LABEL` emitted by a ``p_min`` threshold) are
-    mapped to the sentinel value ``-1``.  When a :class:`~qat.ir.measure.PostSelect`
-    instruction precedes ``Demap`` in the post-processing chain, the subsequent
-    :func:`~qat.runtime.passes.transform._build_and_apply_global_mask` step will remove
-    these sentinel shots from the final results.
-
-    :param state_ids: String state-label array produced by a :class:`Discriminate` step.
-    :param instr: The :class:`Demap` instruction carrying the ``state_map`` dict.
-    :param axes: Current axis map.
-    :returns: Demapped int values and unchanged axis map.
-    """
-    state_ids = np.asarray(state_ids)
-    lookup = instr.state_map
-    if state_ids.size == 0:
-        return np.empty(0, dtype=int), axes
-    mapped = np.vectorize(lambda k: lookup.get(k, -1))(state_ids).astype(int)
-    return mapped, axes
+    validity_mask = np.asarray(state_keys) >= 0
+    if instr.additional_disallowed:
+        # np.isin does not iterate Python sets element-wise — pass as a list
+        # so NumPy performs correct dtype-matched membership testing.
+        validity_mask &= ~np.isin(state_keys, list(instr.additional_disallowed))
+    return state_keys, validity_mask
 
 
 def _remove_axes(original_dims, removed_axis_indices, axis_locations):
