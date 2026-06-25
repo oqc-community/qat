@@ -4,12 +4,12 @@ Readout Post-Processing
 =======================
 
 This page explains how QAT's granular readout pipeline transforms raw IQ
-acquisition data into state labels and numeric values.  For shot-level
+acquisition data into integer state keys and numeric values.  For shot-level
 filtering (pre-selection and post-selection), see :ref:`shot_selection`.
 
 Pipeline order:
 
-``Equalise`` → ``Discriminate`` → ``PostSelect`` → ``Demap``
+``Equalise`` → ``Discriminate`` → ``PostSelect``
 
 .. contents::
    :local:
@@ -39,16 +39,15 @@ The data flow spans three layers:
     measure_with_granular_post_processing()       ← frontend parsers call this
       ├─ MeasureBlock
       ├─ emit_granular_post_processing()
-      │    └─ Equalise → Discriminate → Demap
-      └─ emit_post_select()  (if disallowed states configured)
-           └─ PostSelect (inserted before Demap)  → see shot_selection
+      │    └─ Equalise → Discriminate
+      └─ emit_post_select()  (when post_selection=True; always emits PostSelect)
+           └─ PostSelect → see shot_selection
                │
                ▼
     AcquisitionPostprocessing pass (runtime)
       ├─ apply_equalise()
       ├─ apply_discriminate_instruction()
       ├─ apply_post_select() → validity_mask      → see shot_selection
-      └─ apply_demap_instruction()
       │
       ├─ global_mask = AND of all per-output masks
       ├─ filter all result arrays by global_mask
@@ -104,7 +103,7 @@ Configuration lives on :class:`~qat.model.device.Qubit` via
    :undoc-members:
    :show-inheritance:
 
-.. autoclass:: qat.model.post_processing.MLStateMap
+.. autoclass:: qat.model.post_processing.MLDiscriminateParams
    :members:
    :undoc-members:
 
@@ -118,29 +117,20 @@ Configuration lives on :class:`~qat.model.device.Qubit` via
     qubit = Qubit(
         ...,
         mean_z_map_args=None,
-        post_process_method=LinearMapToRealMethod(disallowed_states=["1"]),
+        post_process_method=LinearMapToRealMethod(),
     )
 
 
 Step 3 — PostSelect
 ^^^^^^^^^^^^^^^^^^^^
 
-``PostSelect`` sits between ``Discriminate`` and ``Demap`` and marks shots
-for filtering based on discriminated state labels.  For full details on
+``PostSelect`` follows ``Discriminate`` and marks shots for filtering based on
+discriminated integer state keys.  Shots with a negative key, or a key in
+``PostSelect.additional_disallowed``, are marked invalid.  For full details on
 post-selection and pre-selection, see :ref:`shot_selection`.
 
 
-Step 4 — Demap
-^^^^^^^^^^^^^^
-
-.. autoclass:: qat.ir.measure.Demap
-   :members:
-   :show-inheritance:
-
-Runtime implementation: :func:`~qat.runtime.post_processing.apply_demap_instruction`.
-
-
-Step 5 — Results format
+Step 4 — Results format
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 .. _results_format_semantics:
@@ -155,7 +145,7 @@ Step 5 — Results format
     Per-shot mapped int values.
 
 ``binary_count()``
-    ``{label: count}`` from discriminated string labels (retained shots only).
+    ``{label: count}`` from discriminated integer state keys (retained shots only).
 
 **Semantic matrix**
 
@@ -200,7 +190,7 @@ Runtime execution
 -----------------
 
 :class:`~qat.runtime.passes.transform.AcquisitionPostprocessing` applies
-the full ``Equalise``/``Discriminate``/``PostSelect``/``Demap`` chain.
+the full ``Equalise``/``Discriminate``/``PostSelect`` chain.
 See :ref:`shot_selection` for details on mask construction and filtering.
 
 

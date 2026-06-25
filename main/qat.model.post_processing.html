@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.post_processing module &mdash; qat-compiler 3.0.0.post264.dev20260625083459 documentation</title>
+  <title>qat.model.post_processing module &mdash; qat-compiler 3.0.0.post265.dev20260625101122 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -554,33 +554,39 @@
   <section id="module-qat.model.post_processing">
 <span id="qat-model-post-processing-module"></span><h1>qat.model.post_processing module<a class="headerlink" href="#module-qat.model.post_processing" title="Link to this heading"></a></h1>
 <p>Post-processing method models for qubit measurement results.</p>
-<p>This module defines the post-processing methods available for qubit measurement discrimination. The main interface is the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessMethod</span></code> union, which is a discriminated union over all supported post-processing method models.</p>
-<p>The discriminator field is <code class="docutils literal notranslate"><span class="pre">method</span></code>, which is present in the base class <a class="reference internal" href="#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a> and is used by Pydantic
-to determine which concrete model to use when parsing or serializing data. Each post-processing method (such as
-<a class="reference internal" href="#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a> or <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>) inherits from <a class="reference internal" href="#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a> and sets a unique value
-for the <code class="docutils literal notranslate"><span class="pre">method</span></code> field, as defined in the <a class="reference internal" href="#qat.model.post_processing.MethodIndicator" title="qat.model.post_processing.MethodIndicator"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodIndicator</span></code></a> enum.</p>
-<p>Usage in the Qubit model (see <code class="docutils literal notranslate"><span class="pre">device.py</span></code>):</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Qubit</span><span class="p">(</span><span class="n">Component</span><span class="p">):</span>
-    <span class="o">...</span>
-    <span class="n">post_process_method</span><span class="p">:</span> <span class="n">PostProcessMethod</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
-        <span class="n">discriminator</span><span class="o">=</span><span class="s2">&quot;method&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">)</span>
-    <span class="o">...</span>
-</pre></div>
-</div>
-<p>Here, the <code class="docutils literal notranslate"><span class="pre">discriminator='method'</span></code> argument is required for Pydantic to correctly (de)serialize the union type.</p>
+<p>This module defines the post-processing methods available for qubit measurement
+discrimination. The main interface is the <code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessMethod</span></code> union, which is a
+discriminated union over all supported post-processing method models.</p>
+<p>The discriminator field is <code class="docutils literal notranslate"><span class="pre">method</span></code>, which is present in the base class
+<a class="reference internal" href="#qat.model.post_processing.MethodBase" title="qat.model.post_processing.MethodBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">MethodBase</span></code></a> and is used by Pydantic to determine which concrete model to use
+when parsing or serializing data.</p>
 <p>Supported methods:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">linear_map_complex_to_real</span></code>: See <a class="reference internal" href="#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">max_likelihood</span></code>: See <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a></p></li>
 </ul>
+<section id="key-encoding-convention-for-maxlikelihoodmethod">
+<h2>Key encoding convention for <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a><a class="headerlink" href="#key-encoding-convention-for-maxlikelihoodmethod" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">states</span></code> dict maps an <strong>integer output key</strong> to an <a class="reference internal" href="#qat.model.post_processing.MLDiscriminateParams" title="qat.model.post_processing.MLDiscriminateParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLDiscriminateParams</span></code></a>.
+Non-negative keys (<code class="docutils literal notranslate"><span class="pre">≥</span> <span class="pre">0</span></code>) represent <strong>allowed</strong> states whose value will be written
+to the classical register.  Negative keys (<code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">0</span></code>) represent <strong>disallowed</strong> states;
+shots classified to those states are filtered out by
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p>
+<p>The reserved sentinel <a class="reference internal" href="#qat.model.post_processing.BG_KEY" title="qat.model.post_processing.BG_KEY"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_KEY</span></code></a> is used by the runtime when <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>
+rejects a shot.</p>
+<p>Post-selection is only supported for <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>.
+<a class="reference internal" href="#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a> always emits states <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code> via a threshold
+discriminator and does not support post-selection.</p>
+</section>
 <dl class="py data">
-<dt class="sig sig-object py" id="qat.model.post_processing.BG_LABEL">
-<span class="sig-name descname"><span class="pre">BG_LABEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'|?&gt;'</span></em><a class="headerlink" href="#qat.model.post_processing.BG_LABEL" title="Link to this definition"></a></dt>
-<dd><p>Reserved state label emitted by the ML discriminator for shots whose normalised
-likelihood for the winning state falls below <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.p_min" title="qat.model.post_processing.MaxLikelihoodMethod.p_min"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MaxLikelihoodMethod.p_min</span></code></a>.</p>
-<p>Users must not use this string as an <a class="reference internal" href="#qat.model.post_processing.MLStateMap.label" title="qat.model.post_processing.MLStateMap.label"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MLStateMap.label</span></code></a> (to prevent collision).</p>
+<dt class="sig sig-object py" id="qat.model.post_processing.BG_KEY">
+<span class="sig-name descname"><span class="pre">BG_KEY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-99</span></em><a class="headerlink" href="#qat.model.post_processing.BG_KEY" title="Link to this definition"></a></dt>
+<dd><p>Reserved integer key used by the runtime when <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> rejects a shot.</p>
+<p>The runtime stores this value in the integer state array produced by
+<a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">apply_discriminate_instruction()</span></code></a> for any shot
+whose normalised likelihood falls below <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.p_min" title="qat.model.post_processing.MaxLikelihoodMethod.p_min"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MaxLikelihoodMethod.p_min</span></code></a>.
+The subsequent <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> step filters all negative keys
+(including this one) from the results.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -591,31 +597,15 @@ likelihood for the winning state falls below <a class="reference internal" href=
 <p>Projects each complex IQ readout onto a real value via:</p>
 <div class="math notranslate nohighlight">
 \[v = \mathrm{Re}(a \cdot \mathrm{IQ} + b)\]</div>
-<p>where <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> are the two entries of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>.  The
-result is sign-classified: positive → state <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code>, non-positive →
-state <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code>.</p>
-<p>Set <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> to filter out shots by their classified state
-label (e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;1&quot;}</span></code> to discard shots <strong>not</strong> in the ground state).</p>
+<p>where <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> are the two entries of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>.  The result is
+threshold-classified: above threshold → state <code class="docutils literal notranslate"><span class="pre">0</span></code>, at-or-below → state <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>Post-selection is not supported for this method; state outputs are always the
+non-negative integers <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code>.  Use <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a> with
+negative keys to configure post-selection on measurement outcomes.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.declared_states">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">declared_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.declared_states" title="Link to this definition"></a></dt>
-<dd><p>All state labels known to this method.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;,</span> <span class="pre">&quot;1&quot;}</span></code> for a standard threshold discriminator.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.disallowed_states">
-<span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.disallowed_states" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args">
 <span class="sig-name descname"><span class="pre">mean_z_map_args</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args" title="Link to this definition"></a></dt>
@@ -635,26 +625,35 @@ validated to form a valid model.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MLStateMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MLStateMap" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.post_processing.MLDiscriminateParams">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MLDiscriminateParams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.post_processing.MLDiscriminateParams" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel" title="qat.utils.pydantic.NoExtraFieldsModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoExtraFieldsModel</span></code></a></p>
-<p>Demapping from a quantum state to its IQ-plane location and C-register output value.</p>
-<p>Each <a class="reference internal" href="#qat.model.post_processing.MLStateMap" title="qat.model.post_processing.MLStateMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLStateMap</span></code></a> entry represents one possible measurement outcome.  The
-<code class="docutils literal notranslate"><span class="pre">label</span></code> is string routing key that threads through the discrimination pipeline
-(<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>). The <code class="docutils literal notranslate"><span class="pre">output_value</span></code> is the final
-integer written to the classical register after <code class="docutils literal notranslate"><span class="pre">Demap</span></code> has been applied.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">disallowed</span></code> field marks a state as invalid for use-cases such as erasure
-checks and pre-selection.  Shots assigned to a <code class="docutils literal notranslate"><span class="pre">disallowed=True</span></code> state are
-subsequently removed by <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p>
+<p>IQ-plane centroid for a single measurement outcome.</p>
+<p>Each <a class="reference internal" href="#qat.model.post_processing.MLDiscriminateParams" title="qat.model.post_processing.MLDiscriminateParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLDiscriminateParams</span></code></a> entry represents one possible measurement outcome.
+The integer output value and disallowed flag are encoded by the <strong>dict key</strong>
+in the parent <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">states</span></code> mapping:</p>
+<ul class="simple">
+<li><p>Non-negative key (<code class="docutils literal notranslate"><span class="pre">≥</span> <span class="pre">0</span></code>) → allowed state; the key is the integer written to
+the classical register.</p></li>
+<li><p>Negative key (<code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">0</span></code>) → disallowed state; shots assigned here are filtered by
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p></li>
+</ul>
+<p>The optional <code class="docutils literal notranslate"><span class="pre">label</span></code> field carries a human-readable name for the state (e.g.
+<code class="docutils literal notranslate"><span class="pre">&quot;|0⟩&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;|10⟩&quot;</span></code>).  It is purely informational — the runtime uses the dict
+key for discrimination and the <code class="docutils literal notranslate"><span class="pre">location</span></code> for distance calculations.</p>
 <p>Example — a standard qubit with states <a href="#id1"><span class="problematic" id="id2">|</span></a>0⟩ and <a href="#id3"><span class="problematic" id="id4">|</span></a>1⟩:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
-<span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MaxLikelihoodMethod</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|0⟩&quot;</span><span class="p">),</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|1⟩&quot;</span><span class="p">),</span>
+<span class="p">})</span>
 </pre></div>
 </div>
-<p>Example — qutrit classifier that rejects the leakage state <a href="#id5"><span class="problematic" id="id6">|</span></a>2⟩:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
-<span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">)</span>
-<span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<p>Example — qutrit classifier that rejects the leakage state (key -2):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MaxLikelihoodMethod</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|0⟩&quot;</span><span class="p">),</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|1⟩&quot;</span><span class="p">),</span>
+    <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|2⟩ (leakage)&quot;</span><span class="p">),</span>
+<span class="p">})</span>
 </pre></div>
 </div>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -662,30 +661,20 @@ subsequently removed by <a class="reference internal" href="qat.ir.measure.html#
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.disallowed">
-<span class="sig-name descname"><span class="pre">disallowed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.disallowed" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.post_processing.MLDiscriminateParams.label">
+<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLDiscriminateParams.label" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.label">
-<span class="sig-name descname"><span class="pre">label</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.label" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.post_processing.MLDiscriminateParams.location">
+<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLDiscriminateParams.location" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.location">
-<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.location" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.model_config">
-<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.model_config" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.model.post_processing.MLDiscriminateParams.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[ConfigDict]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'extra':</span> <span class="pre">'forbid',</span> <span class="pre">'ser_json_inf_nan':</span> <span class="pre">'constants',</span> <span class="pre">'use_enum_values':</span> <span class="pre">False,</span> <span class="pre">'validate_assignment':</span> <span class="pre">True}</span></em><a class="headerlink" href="#qat.model.post_processing.MLDiscriminateParams.model_config" title="Link to this definition"></a></dt>
 <dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
 </dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.model.post_processing.MLStateMap.output_value">
-<span class="sig-name descname"><span class="pre">output_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.model.post_processing.MLStateMap.output_value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -702,18 +691,24 @@ validated to form a valid model.</p>
 <p>Likelihoods are computed in log-domain with log-sum-exp stabilisation to avoid
 underflow on extreme outliers.</p>
 <p><strong>Outlier rejection</strong> — set <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> to automatically reject shots whose
-winning normalised likelihood falls below the threshold. Those shots are labelled
-<a class="reference internal" href="#qat.model.post_processing.BG_LABEL" title="qat.model.post_processing.BG_LABEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_LABEL</span></code></a> and discarded by <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.
+winning normalised likelihood falls below the threshold. Those shots are assigned
+<a class="reference internal" href="#qat.model.post_processing.BG_KEY" title="qat.model.post_processing.BG_KEY"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_KEY</span></code></a> and discarded by <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.
 Default <code class="docutils literal notranslate"><span class="pre">p_min=0.0</span></code> disables the check entirely (zero overhead).</p>
-<p><strong>Disallowed states</strong> — individual states can be marked <code class="docutils literal notranslate"><span class="pre">disallowed=True</span></code> on
-<a class="reference internal" href="#qat.model.post_processing.MLStateMap" title="qat.model.post_processing.MLStateMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLStateMap</span></code></a> for erasure checks and pre-selection; these are independent of
-<code class="docutils literal notranslate"><span class="pre">p_min</span></code> and handled by separate <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> instructions.</p>
+<p><strong>Key encoding convention</strong> — the <code class="docutils literal notranslate"><span class="pre">states</span></code> dict maps an integer output key to an
+<a class="reference internal" href="#qat.model.post_processing.MLDiscriminateParams" title="qat.model.post_processing.MLDiscriminateParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLDiscriminateParams</span></code></a>:</p>
+<ul class="simple">
+<li><p>Non-negative key (<code class="docutils literal notranslate"><span class="pre">≥</span> <span class="pre">0</span></code>) → allowed state; the key value is written to the
+classical register.</p></li>
+<li><p>Negative key (<code class="docutils literal notranslate"><span class="pre">&lt;</span> <span class="pre">0</span></code>) → disallowed state; shots assigned to these states are
+removed by <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p></li>
+</ul>
 <p>Runtime implementation:
 <a class="reference internal" href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction" title="qat.runtime.post_processing.apply_discriminate_instruction"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_discriminate_instruction()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.states"></span><strong>states</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.states">¶</a> – Per-state IQ-plane centroids, labels and output values.</p></li>
+<li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.states"></span><strong>states</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.states">¶</a> – Per-state IQ-plane centroids, keyed by integer output value
+(non-negative) or disallowed sentinel (negative).</p></li>
 <li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.noise_est"></span><strong>noise_est</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.noise_est">¶</a> – Global Gaussian noise power (variance, <span class="math notranslate nohighlight">\(\sigma^2\)</span>). Must be
 strictly positive. Default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
 <li><p><span class="target" id="qat.model.post_processing.MaxLikelihoodMethod.params.p_min"></span><strong>p_min</strong><a class="paramlink headerlink reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.params.p_min">¶</a> – Minimum normalised likelihood for acceptance. Must be in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>.</p></li>
@@ -728,30 +723,6 @@ If <code class="docutils literal notranslate"><span class="pre">None</span></cod
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.declared_states">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">declared_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.declared_states" title="Link to this definition"></a></dt>
-<dd><p>All state labels known to this method.</p>
-<p>Includes labels from <a class="reference internal" href="#qat.model.post_processing.MaxLikelihoodMethod.states" title="qat.model.post_processing.MaxLikelihoodMethod.states"><code class="xref py py-attr docutils literal notranslate"><span class="pre">states</span></code></a> and <a class="reference internal" href="#qat.model.post_processing.BG_LABEL" title="qat.model.post_processing.BG_LABEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_LABEL</span></code></a> when
-<code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Set of all recognised state label strings.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.disallowed_states">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.disallowed_states" title="Link to this definition"></a></dt>
-<dd><p>State labels marked <code class="docutils literal notranslate"><span class="pre">disallowed=True</span></code>, plus <code class="docutils literal notranslate"><span class="pre">BG_LABEL</span></code> if <code class="docutils literal notranslate"><span class="pre">p_min</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Set of disallowed state label strings.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.method">
 <span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">&lt;MethodIndicator.MAX_LIKELIHOOD:</span> <span class="pre">'max_likelihood'&gt;</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.method" title="Link to this definition"></a></dt>
@@ -780,7 +751,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.post_processing.MaxLikelihoodMethod.states">
-<span class="sig-name descname"><span class="pre">states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code><span class="pre">[</span><a class="reference internal" href="#qat.model.post_processing.MLStateMap" title="qat.model.post_processing.MLStateMap"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLStateMap</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.states" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.model.post_processing.MLDiscriminateParams" title="qat.model.post_processing.MLDiscriminateParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">MLDiscriminateParams</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.model.post_processing.MaxLikelihoodMethod.states" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

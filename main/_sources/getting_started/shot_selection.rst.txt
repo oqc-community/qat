@@ -4,7 +4,7 @@
 Shot Selection (Pre & Post)
 ===========================
 
-Shot selection discards individual shots whose discriminated state labels
+Shot selection discards individual shots whose discriminated integer state keys
 indicate the qubit was in an undesirable state.  QAT supports two flavours:
 
 * **Post-selection** — filters shots based on the *end-of-circuit*
@@ -34,41 +34,27 @@ system).
 Configuring disallowed states
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Disallowed states are declared on the classification method attached to
-each qubit.  For :class:`~qat.model.post_processing.MaxLikelihoodMethod`,
-set :attr:`~qat.model.post_processing.MLStateMap.disallowed` on individual
-state maps:
+Disallowed states are declared on :class:`~qat.model.post_processing.MaxLikelihoodMethod`
+using **negative integer keys** in the ``states`` dict.  Shots classified to a state with
+a negative key are filtered by :class:`~qat.ir.measure.PostSelect`.
 
 .. code-block:: python
 
-    from qat.model.post_processing import MaxLikelihoodMethod, MLStateMap
+    from qat.model.post_processing import MaxLikelihoodMethod, MLDiscriminateParams
 
+    # Qutrit: states 0 and 1 are allowed; state at key -2 is disallowed (leakage).
     method = MaxLikelihoodMethod(
-        states=[
-            MLStateMap(label="|01>", output_value=0.0, location=1+0j),
-            MLStateMap(label="|10>", output_value=1.0, location=-1+0j),
-            MLStateMap(
-                label="|00>", output_value=2.0, location=0+1j,
-                disallowed=True,
-            ),
-            MLStateMap(
-                label="|11>", output_value=3.0, location=0-1j,
-                disallowed=True,
-            ),
-        ],
+        states={
+            0: MLDiscriminateParams(location=1+0j),
+            1: MLDiscriminateParams(location=-1+0j),
+            -2: MLDiscriminateParams(location=0+1j),
+        },
     )
 
-For :class:`~qat.model.post_processing.LinearMapToRealMethod`, use the
-``disallowed_states`` parameter:
-
-.. code-block:: python
-
-    from qat.model.post_processing import LinearMapToRealMethod
-
-    # Discards shots where the qubit is measured in the excited state (|1>).
-    # This is commonly used in single-qubit transmon systems to reject leakage
-    # or incorrectly prepared initial states.
-    method = LinearMapToRealMethod(disallowed_states={"1"})
+:class:`~qat.model.post_processing.LinearMapToRealMethod` always outputs the non-negative
+integers ``0`` and ``1`` and does **not** support post-selection on shot outcomes.
+Use :class:`~qat.model.post_processing.MaxLikelihoodMethod` with negative keys to
+configure post-selection.
 
 
 The PostSelect instruction
@@ -119,9 +105,9 @@ Pre-selection is controlled by two settings:
    :class:`~compiler_config.config.CompilerConfig`.
 2. **Per-qubit field** — set
    :attr:`~qat.model.device.Qubit.preselect_disallowed_states` to a set
-   of state labels that should cause the shot to be discarded.  When this
-   field is empty (the default), pre-selection is not active for that
-   qubit.
+   of state **indices** that should cause the shot to be discarded.  The
+   default is ``{1}`` (discard the excited state); set ``set()`` to disable
+   pre-selection for an individual qubit.
 
 Only qubits where *both* settings are active receive pre-selection
 measurements.
@@ -137,16 +123,36 @@ Example:
 
     # Configure qubit 0 for pre-selection.
     qubit = model.qubits[0]
-    qubit.preselect_disallowed_states = {"1"}  # discard excited state
+    qubit.preselect_disallowed_states = {1}  # discard excited state (index 1)
 
     config = CompilerConfig(pre_selection=True, repeats=1000)
 
 For multi-state hardware (e.g. transmon with four explicit states), specify all
-states that are not the ground state:
+state indices that are not the ground state:
 
 .. code-block:: python
 
-    qubit.preselect_disallowed_states = {"|10>", "|00>", "|11>"}
+    qubit.preselect_disallowed_states = {1, 2, 3}  # discard all non-ground states
+
+The integers in ``preselect_disallowed_states`` are **integer state keys** — they
+correspond directly to the dict keys in the qubit's
+:attr:`~qat.model.post_processing.MaxLikelihoodMethod.states` mapping.  For example,
+if a transmon is calibrated with four states::
+
+    MaxLikelihoodMethod(states={
+        0: MLDiscriminateParams(location=1+0j,   label="|0⟩"),          # ground
+        1: MLDiscriminateParams(location=-1+0j,  label="|1⟩"),          # first excited
+        2: MLDiscriminateParams(location=0+1j,   label="|2⟩"),          # second excited
+        3: MLDiscriminateParams(location=0-1j,   label="|3⟩"),          # third excited
+    })
+
+then ``preselect_disallowed_states = {1, 2, 3}`` discards any shot where the
+pre-selection measurement returns key ``1``, ``2``, or ``3`` — i.e. any shot not in
+the ground state.
+
+For :class:`~qat.model.post_processing.LinearMapToRealMethod` the two states are
+always the implicit pair ``{0: above-threshold, 1: at-or-below-threshold}``; labels
+are not configurable.
 
 
 How it works
@@ -173,7 +179,8 @@ instruction, before the circuit body:
 * :class:`~qat.ir.measure.Equalise` (when calibrated; omitted if equalisation
   calibration data is unavailable).
 * :class:`~qat.ir.measure.Discriminate`.
-* :class:`~qat.ir.measure.PostSelect` with the configured disallowed states.
+* :class:`~qat.ir.measure.PostSelect` with ``additional_disallowed`` set to
+  the qubit's ``preselect_disallowed_states``.
 
 **Global synchronisation:** a single
 :class:`~qat.ir.instructions.Synchronize` covering all qubit channels is
@@ -182,7 +189,7 @@ trailing sync simultaneously realigns drive/measure/acquire channels (which
 diverge during the readout window) and provides the cross-qubit alignment
 barrier before the circuit begins.
 
-The ``presel_*`` output variable holds string state labels after
+The ``presel_*`` output variable holds integer state keys after
 ``Discriminate`` and is for internal runtime use only — it drives the
 validity mask but is never returned to the user. For per-shot debug
 access, inspect the
@@ -243,12 +250,10 @@ a shot is retained only if it passes **both** checks.
    **Two separate disallowed-states settings** exist and serve different
    purposes:
 
-   * ``disallowed_states`` on the **post-processing method**
-     (e.g. :attr:`MLStateMap.disallowed <qat.model.post_processing.MLStateMap.disallowed>`,
-     :attr:`LinearMapToRealMethod.disallowed_states <qat.model.post_processing.LinearMapToRealMethod.disallowed_states>`)
-     — controls **post-selection** on end-of-circuit measurements.
-     Frontends read these when emitting ``PostSelect`` instructions for
-     normal ``measure`` operations.
+   * **Negative keys** in :class:`~qat.model.post_processing.MaxLikelihoodMethod`
+     ``states`` — controls **post-selection** on end-of-circuit measurements.
+     Frontends emit ``PostSelect`` when ``CompilerConfig.post_selection=True``;
+     the runtime then filters shots whose discriminated key is negative.
 
    * ``preselect_disallowed_states`` on
      :class:`~qat.model.device.Qubit` — controls **pre-selection**.
@@ -286,16 +291,16 @@ API reference
 * :attr:`~qat.model.device.Qubit.preselect_disallowed_states` — per-qubit
   pre-selection configuration.
 * :class:`~qat.runtime.passes.analysis.PostSelectionResult` — runtime
-  metadata for filtered shots. Note: post-selection disallowed states are
-  configured per-qubit on the post-processing method; pre-selection uses
-  the per-qubit ``preselect_disallowed_states`` attribute.
+  metadata for filtered shots. Post-selection is configured via negative
+  keys in :class:`~qat.model.post_processing.MaxLikelihoodMethod`; pre-selection
+  uses the per-qubit ``preselect_disallowed_states`` attribute.
 
 
 See also
 --------
 
 * :ref:`post_processing_pipeline` — readout signal processing
-  (Equalise → Discriminate → Demap for end-of-circuit measurements).
+  (Equalise → Discriminate for end-of-circuit measurements).
 * :mod:`qat.ir.measure` — instruction model docs.
 * :mod:`qat.runtime.post_processing` — runtime helper docs.
 * :ref:`execution`

@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_a90a0205700d049c_attributes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-25 08:44 +0000
+            created at 2026-06-25 10:20 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -93,7 +93,7 @@
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">ir</span><span class="op">.</span><span class="nam">instruction_basetypes</span> <span class="key">import</span> <span class="nam">AcquireMode</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">ir</span><span class="op">.</span><span class="nam">instructions</span> <span class="key">import</span> <span class="nam">Assign</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">ir</span><span class="op">.</span><span class="nam">measure</span> <span class="key">import</span> <span class="nam">Demap</span><span class="op">,</span> <span class="nam">Discriminate</span><span class="op">,</span> <span class="nam">Equalise</span><span class="op">,</span> <span class="nam">PostProcessing</span><span class="op">,</span> <span class="nam">PostSelect</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">ir</span><span class="op">.</span><span class="nam">measure</span> <span class="key">import</span> <span class="nam">Discriminate</span><span class="op">,</span> <span class="nam">Equalise</span><span class="op">,</span> <span class="nam">PostProcessing</span><span class="op">,</span> <span class="nam">PostSelect</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">utils</span><span class="op">.</span><span class="nam">pydantic</span> <span class="key">import</span> <span class="nam">RehydratableModel</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -116,8 +116,8 @@
     <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">    <span class="nam">mode</span><span class="op">:</span> <span class="nam">AcquireMode</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">    <span class="nam">shape</span><span class="op">:</span> <span class="nam">tuple</span><span class="op">[</span><span class="nam">int</span><span class="op">,</span> <span class="op">...</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">    <span class="nam">physical_channel</span><span class="op">:</span> <span class="nam">str</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="nam">post_processing</span><span class="op">:</span> <span class="nam">list</span><span class="op">[</span><span class="nam">PostProcessing</span> <span class="op">|</span> <span class="nam">Equalise</span> <span class="op">|</span> <span class="nam">Discriminate</span> <span class="op">|</span> <span class="nam">PostSelect</span> <span class="op">|</span> <span class="nam">Demap</span><span class="op">]</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">        <span class="nam">Field</span><span class="op">(</span><span class="nam">default_factory</span><span class="op">=</span><span class="nam">list</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="nam">post_processing</span><span class="op">:</span> <span class="nam">list</span><span class="op">[</span><span class="nam">PostProcessing</span> <span class="op">|</span> <span class="nam">Equalise</span> <span class="op">|</span> <span class="nam">Discriminate</span> <span class="op">|</span> <span class="nam">PostSelect</span><span class="op">]</span> <span class="op">=</span> <span class="nam">Field</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">        <span class="nam">default_factory</span><span class="op">=</span><span class="nam">list</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="nam">results_processing</span><span class="op">:</span> <span class="nam">InlineResultsProcessing</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -201,7 +201,7 @@
             <a class="nav" href="z_a90a0205700d049c_attributes_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-06-25 08:44 +0000
+            created at 2026-06-25 10:20 +0000
         </p>
     </div>
 </footer>

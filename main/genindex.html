@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post264.dev20260625083459 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post265.dev20260625101122 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1436,6 +1436,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.add_weight">add_weight() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.add_weight">[1]</a>
 </li>
+      <li><a href="qat.ir.measure.html#qat.ir.measure.PostSelect.additional_disallowed">additional_disallowed (PostSelect attribute)</a>
+
+      <ul>
+        <li><a href="getting_started/shot_selection.html#qat.ir.measure.PostSelect.params.additional_disallowed">(qat.ir.measure.PostSelect parameter)</a>, <a href="qat.ir.measure.html#qat.ir.measure.PostSelect.params.additional_disallowed">[1]</a>
+</li>
+      </ul></li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AddOp">AddOp (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
@@ -1747,8 +1753,6 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.apply_correction_qubit">apply_correction_qubit() (ApplyLinearReadoutMitigation method)</a>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.apply_default_transforms">apply_default_transforms() (in module qat.purr.integrations.tket)</a>
-</li>
-      <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction">apply_demap_instruction() (in module qat.runtime.post_processing)</a>
 </li>
       <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction">apply_discriminate_instruction() (in module qat.runtime.post_processing)</a>
 </li>
@@ -2115,8 +2119,6 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.axes">(qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing parameter)</a>
 </li>
-        <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction.params.axes">(qat.runtime.post_processing.apply_demap_instruction parameter)</a>
-</li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction.params.axes">(qat.runtime.post_processing.apply_discriminate_instruction parameter)</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_equalise.params.axes">(qat.runtime.post_processing.apply_equalise parameter)</a>
@@ -2302,7 +2304,7 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.beta">(Waveform attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.post_processing.html#qat.model.post_processing.BG_LABEL">BG_LABEL (in module qat.model.post_processing)</a>
+      <li><a href="qat.model.post_processing.html#qat.model.post_processing.BG_KEY">BG_KEY (in module qat.model.post_processing)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.IQBias.bias">bias (IQBias attribute)</a>
 
@@ -2336,10 +2338,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary">binary() (in module qat.runtime.results_processing)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_average">binary_average() (in module qat.runtime.results_processing)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.binary_count">binary_count() (in module qat.runtime.results_processing)</a>
 </li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression">BinaryExpression (class in qat.runtime.expressions)</a>
@@ -2462,7 +2464,11 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.build_baseband_frequencies">build_baseband_frequencies() (LiveDeviceEngine method)</a>
 </li>
+      <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs">build_equalise_discriminate_instrs() (QuantumInstructionBuilder static method)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.build_generated_name">build_generated_name() (in module qat.purr.compiler.instructions)</a>
+</li>
+      <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args">build_legacy_equalise_args() (QuantumInstructionBuilder static method)</a>
 </li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.build_lucy_hardware">build_lucy_hardware() (in module qat.purr.backends.live)</a>
 </li>
@@ -3926,12 +3932,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.debug">debug() (CompositeLogger method)</a>
 </li>
-      <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.LinearMapToRealMethod.declared_states">declared_states (LinearMapToRealMethod property)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.declared_states">[1]</a>
-
-      <ul>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MaxLikelihoodMethod.declared_states">(MaxLikelihoodMethod property)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.declared_states">[1]</a>
-</li>
-      </ul></li>
       <li><a href="qat.middleend.decompositions.base.html#qat.middleend.decompositions.base.DecompositionBase.decompose">decompose() (DecompositionBase method)</a>
 </li>
       <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.Decompose2QToCNOTs">Decompose2QToCNOTs (class in qat.middleend.passes.gates.transform)</a>
@@ -4072,8 +4072,6 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.purr.compiler.caches.html#qat.purr.compiler.caches.QatCache.delete_cache_folders">delete_cache_folders() (QatCache method)</a>
 </li>
-      <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Demap">Demap (class in qat.ir.measure)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Demap">[1]</a>
-</li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.SequencerConfig.params.demod_en_acq">demod_en_acq (qat.backend.qblox.config.specification.SequencerConfig parameter)</a>
 
       <ul>
@@ -4170,34 +4168,20 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.UpdThresIRIOp.dio_thres_idx">(UpdThresIRIOp property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.params.direct_x_pi">direct_x_pi (qat.model.device.Qubit parameter)</a>
 
       <ul>
         <li><a href="qat.model.device.html#qat.model.device.Qubit.direct_x_pi">(Qubit attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulsePort.direction">direction (OpenPulsePort attribute)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.disable">disable() (InstructionValidationConfig method)</a>
 </li>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.InstructionValidationConfig.DISABLED">DISABLED (InstructionValidationConfig property)</a>
 </li>
-      <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap.disallowed">disallowed (MLStateMap attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.disallowed">[1]</a>
-</li>
-      <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.LinearMapToRealMethod.disallowed_states">disallowed_states (LinearMapToRealMethod attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.disallowed_states">[1]</a>
-
-      <ul>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MaxLikelihoodMethod.disallowed_states">(MaxLikelihoodMethod property)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.disallowed_states">[1]</a>
-</li>
-        <li><a href="qat.ir.measure.html#qat.ir.measure.PostSelect.disallowed_states">(PostSelect attribute)</a>
-</li>
-        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states">(qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select parameter)</a>
-</li>
-        <li><a href="getting_started/shot_selection.html#qat.ir.measure.PostSelect.params.disallowed_states">(qat.ir.measure.PostSelect parameter)</a>, <a href="qat.ir.measure.html#qat.ir.measure.PostSelect.params.disallowed_states">[1]</a>
-</li>
-      </ul></li>
       <li><a href="qat.core.result_base.html#qat.core.result_base.PreservedResults.discard">discard() (PreservedResults static method)</a>, <a href="qat.purr.core.result_base.html#qat.purr.core.result_base.PreservedResults.discard">[1]</a>
 
       <ul>
@@ -7000,10 +6984,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.infinite_register_prefix">infinite_register_prefix() (IntRegisterType class method)</a>
 </li>
-      <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.INFO">INFO (LoggerLevel attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.INFO">INFO (LoggerLevel attribute)</a>
+</li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.info">info() (CompositeLogger method)</a>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.initialize">initialize() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.initialize">[1]</a>
@@ -7070,11 +7054,9 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.ZX_pi_4.inst">(ZX_pi_4 attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction.params.instr">instr (qat.runtime.post_processing.apply_demap_instruction parameter)</a>
+      <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction.params.instr">instr (qat.runtime.post_processing.apply_discriminate_instruction parameter)</a>
 
       <ul>
-        <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_discriminate_instruction.params.instr">(qat.runtime.post_processing.apply_discriminate_instruction parameter)</a>
-</li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_equalise.params.instr">(qat.runtime.post_processing.apply_equalise parameter)</a>
 </li>
         <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select.params.instr">(qat.runtime.post_processing.apply_post_select parameter)</a>
@@ -7729,7 +7711,7 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.label">label (Jump attribute)</a>
 
       <ul>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap.label">(MLStateMap attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.label">[1]</a>
+        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLDiscriminateParams.label">(MLDiscriminateParams attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLDiscriminateParams.label">[1]</a>
 </li>
         <li><a href="qat.purr.backends.qblox.model_base.html#qat.purr.backends.qblox.model_base.QRPairModel.label">(QRPairModel attribute)</a>
 </li>
@@ -8221,7 +8203,7 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.MaxTimeOp.location">(MaxTimeOp attribute)</a>
 </li>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap.location">(MLStateMap attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.location">[1]</a>
+        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLDiscriminateParams.location">(MLDiscriminateParams attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLDiscriminateParams.location">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ModulateOp.location">(ModulateOp attribute)</a>
 </li>
@@ -8743,6 +8725,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args">mean_z_map_args (LinearMapToRealMethod attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.mean_z_map_args">[1]</a>
 
       <ul>
+        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args.params.mean_z_map_args">(qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args parameter)</a>
+</li>
         <li><a href="qat.model.device.html#qat.model.device.Qubit.params.mean_z_map_args">(qat.model.device.Qubit parameter)</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.Qubit.mean_z_map_args">(Qubit attribute)</a>
@@ -9094,7 +9078,7 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.MixerConfig">(class in qat.purr.backends.qblox.config)</a>
 </li>
       </ul></li>
-      <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap">MLStateMap (class in qat.model.post_processing)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap">[1]</a>
+      <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLDiscriminateParams">MLDiscriminateParams (class in qat.model.post_processing)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLDiscriminateParams">[1]</a>
 </li>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqTbMockIIIIOp.mock_data">mock_data (FbAcqTbMockIIIIOp property)</a>
 </li>
@@ -9471,8 +9455,6 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Delay.model_config">(Delay attribute)</a>
 </li>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Demap.model_config">(Demap attribute)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Demap.model_config">[1]</a>
-</li>
         <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.model_config">(DeviceDescription attribute)</a>
 </li>
         <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Discriminate.model_config">(Discriminate attribute)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Discriminate.model_config">[1]</a>
@@ -9607,7 +9589,7 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.MixerConfig.model_config">(MixerConfig attribute)</a>
 </li>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap.model_config">(MLStateMap attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.model_config">[1]</a>
+        <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLDiscriminateParams.model_config">(MLDiscriminateParams attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLDiscriminateParams.model_config">[1]</a>
 </li>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ModuleConfig.model_config">(ModuleConfig attribute)</a>
 </li>
@@ -11641,6 +11623,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.OffsetConfig.params.out1_path1">(qat.backend.qblox.config.specification.OffsetConfig parameter)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.AttConfig.out2">out2 (AttConfig attribute)</a>
 
       <ul>
@@ -11675,8 +11659,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.OffsetConfig.params.out2">(qat.backend.qblox.config.specification.OffsetConfig parameter)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.LoConfig.out2_freq">out2_freq (LoConfig attribute)</a>
 
       <ul>
@@ -11831,13 +11813,9 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QrmRfDescription.output_connections">(QrmRfDescription attribute)</a>
 </li>
       </ul></li>
-      <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLStateMap.output_value">output_value (MLStateMap attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLStateMap.output_value">[1]</a>
-</li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.output_variable">output_variable (Acquire attribute)</a>
 
       <ul>
-        <li><a href="qat.ir.measure.html#qat.ir.measure.Demap.output_variable">(Demap attribute)</a>
-</li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Discriminate.output_variable">(Discriminate attribute)</a>
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Equalise.output_variable">(Equalise attribute)</a>
@@ -11847,6 +11825,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.output_variable">(PostProcessing attribute)</a>
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.PostSelect.output_variable">(PostSelect attribute)</a>
+</li>
+        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs.params.output_variable">(qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs parameter)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing.params.output_variable">(qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing parameter)</a>
 </li>
@@ -11869,8 +11849,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing.params.output_variable">(qat.ir.instruction_builder.QuantumInstructionBuilder.post_processing parameter)</a>
 </li>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.params.output_variable">(qat.ir.measure.Acquire parameter)</a>
-</li>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Demap.params.output_variable">(qat.ir.measure.Demap parameter)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Demap.params.output_variable">[1]</a>
 </li>
         <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Discriminate.params.output_variable">(qat.ir.measure.Discriminate parameter)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Discriminate.params.output_variable">[1]</a>
 </li>
@@ -15843,6 +15821,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.Z_phase.params.qubit">(qat.ir.gates.native.Z_phase parameter)</a>
 </li>
+        <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs.params.qubit">(qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs parameter)</a>
+</li>
         <li><a href="qat.ir.gates.operation.html#qat.ir.gates.operation.Reset.qubit">(Reset attribute)</a>
 </li>
       </ul></li>
@@ -18088,6 +18068,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.runtime.simple.html#qat.runtime.simple.SimpleRuntime">SimpleRuntime (class in qat.runtime.simple)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.BinaryExpression.simplify">simplify() (BinaryExpression method)</a>
 
       <ul>
@@ -18098,8 +18080,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.Variable.simplify">(Variable method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.qatconfig.html#qat.purr.qatconfig.QatConfig.SIMULATION">SIMULATION (QatConfig attribute)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.simulation_time">simulation_time (Section attribute)</a>
@@ -18360,18 +18340,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.startup">(LiveDeviceEngine method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_demap_instruction.params.state_ids">state_ids (qat.runtime.post_processing.apply_demap_instruction parameter)</a>
-
-      <ul>
-        <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select.params.state_ids">(qat.runtime.post_processing.apply_post_select parameter)</a>
+      <li><a href="qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select.params.state_keys">state_keys (qat.runtime.post_processing.apply_post_select parameter)</a>
 </li>
-      </ul></li>
-      <li><a href="qat.ir.measure.html#qat.ir.measure.Demap.state_map">state_map (Demap attribute)</a>
-
-      <ul>
-        <li><a href="getting_started/post_processing_pipeline.html#qat.ir.measure.Demap.params.state_map">(qat.ir.measure.Demap parameter)</a>, <a href="qat.ir.measure.html#qat.ir.measure.Demap.params.state_map">[1]</a>
-</li>
-      </ul></li>
       <li><a href="qat.utils.state_tensors.html#qat.utils.state_tensors.StateOperator">StateOperator (class in qat.utils.state_tensors)</a>
 </li>
       <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MaxLikelihoodMethod.states">states (MaxLikelihoodMethod attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.states">[1]</a>

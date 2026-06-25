@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.model.device module &mdash; qat-compiler 3.0.0.post264.dev20260625083459 documentation</title>
+  <title>qat.model.device module &mdash; qat-compiler 3.0.0.post265.dev20260625101122 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1136,30 +1136,32 @@ validated to form a valid model.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Qubit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.model.device.Qubit" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.model.device.Component" title="qat.model.device.Component"><code class="xref py py-class docutils literal notranslate"><span class="pre">Component</span></code></a></p>
 <p>Model for a superconducting qubit on a chip.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> replaces <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> by providing a future-proof mechanism to define arbitrary
-post-process methods. <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> is still supported but may be removed in future.</p>
-</div>
+<p>Exactly one of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> or <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> must be set;
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> is the legacy form and may be removed in a future release.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.device.Qubit.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.physical_channel">¶</a> – The physical channel carrying pulses to the qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.physical_channel"></span><strong>physical_channel</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.physical_channel">¶</a> – Physical channel carrying pulses to the qubit.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.pulse_channels"></span><strong>pulse_channels</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.pulse_channels">¶</a> – Channels for controlling the qubit.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.resonator"></span><strong>resonator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.resonator">¶</a> – Measurement device for the qubit.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.mean_z_map_args"></span><strong>mean_z_map_args</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.mean_z_map_args">¶</a> – (deprecated) Arguments for linear mapping (mutually exclusive with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code>).</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.resonator"></span><strong>resonator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.resonator">¶</a> – Measurement resonator for the qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.mean_z_map_args"></span><strong>mean_z_map_args</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.mean_z_map_args">¶</a> – (deprecated) <code class="docutils literal notranslate"><span class="pre">[A,</span> <span class="pre">B]</span></code> arguments for the linear IQ→real
+mapping <code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">=</span> <span class="pre">Re(A·iq</span> <span class="pre">+</span> <span class="pre">B)</span></code>. Mutually exclusive with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code>.</p></li>
 <li><p><span class="target" id="qat.model.device.Qubit.params.discriminator"></span><strong>discriminator</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.discriminator">¶</a> – Discriminator value for measurement.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.post_process_method"></span><strong>post_process_method</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.post_process_method">¶</a> – Post-processing method used to map complex IQ values to states.</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.preselect_disallowed_states"></span><strong>preselect_disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.preselect_disallowed_states">¶</a> – State labels that cause the shot
-to be discarded during pre-selection (e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;1&quot;}</span></code> for a standard
-qubit). When non-empty, pre-selection is enabled for this qubit
-provided the compiler’s <code class="docutils literal notranslate"><span class="pre">pre_selection</span></code> flag is also enabled.
-Defaults to the empty set (no pre-selection).</p></li>
-<li><p><span class="target" id="qat.model.device.Qubit.params.direct_x_pi"></span><strong>direct_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.direct_x_pi">¶</a> – Whether direct X(pi) pulse is used.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.post_process_method"></span><strong>post_process_method</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.post_process_method">¶</a> – Post-processing method mapping complex IQ values to
+states. Mutually exclusive with <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.preselect_disallowed_states"></span><strong>preselect_disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.preselect_disallowed_states">¶</a> – State indices that cause a shot to be discarded
+during pre-selection. Indices match the non-negative keys of
+<code class="docutils literal notranslate"><span class="pre">post_process_method.states</span></code> (for
+<a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>) or the implicit 0/1
+index for <a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a> and legacy
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> qubits. Defaults to <code class="docutils literal notranslate"><span class="pre">{1}</span></code>; set to <code class="docutils literal notranslate"><span class="pre">set()</span></code> to disable
+pre-selection for a qubit.</p></li>
+<li><p><span class="target" id="qat.model.device.Qubit.params.direct_x_pi"></span><strong>direct_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.model.device.Qubit.params.direct_x_pi">¶</a> – Whether a direct X(π) pulse is used.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If neither or both of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> and <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> are provided.</p>
+<dd class="field-even"><p><strong>ValueError</strong> – If neither or both of <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> and
+<code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> are set.</p>
 </dd>
 </dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
@@ -1239,7 +1241,7 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.model.device.Qubit.preselect_disallowed_states">
-<span class="sig-name descname"><span class="pre">preselect_disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set[str]</span></em><a class="headerlink" href="#qat.model.device.Qubit.preselect_disallowed_states" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">preselect_disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set[int]</span></em><a class="headerlink" href="#qat.model.device.Qubit.preselect_disallowed_states" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

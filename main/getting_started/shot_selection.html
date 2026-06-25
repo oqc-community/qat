@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shot Selection (Pre &amp; Post) &mdash; qat-compiler 3.0.0.post264.dev20260625083459 documentation</title>
+  <title>Shot Selection (Pre &amp; Post) &mdash; qat-compiler 3.0.0.post265.dev20260625101122 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -986,7 +986,7 @@ window.runMermaid = runMermaid;</script>
 
   <section id="shot-selection-pre-post">
 <span id="post-selection"></span><span id="shot-selection"></span><h1>Shot Selection (Pre &amp; Post)<a class="headerlink" href="#shot-selection-pre-post" title="Link to this heading"></a></h1>
-<p>Shot selection discards individual shots whose discriminated state labels
+<p>Shot selection discards individual shots whose discriminated integer state keys
 indicate the qubit was in an undesirable state.  QAT supports two flavours:</p>
 <ul class="simple">
 <li><p><strong>Post-selection</strong> — filters shots based on the <em>end-of-circuit</em>
@@ -1027,38 +1027,25 @@ lands in a disallowed state (e.g. a leakage state in a multi-level
 system).</p>
 <section id="configuring-disallowed-states">
 <h3><a class="toc-backref" href="#id3" role="doc-backlink">Configuring disallowed states</a><a class="headerlink" href="#configuring-disallowed-states" title="Link to this heading"></a></h3>
-<p>Disallowed states are declared on the classification method attached to
-each qubit.  For <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>,
-set <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MLStateMap.disallowed" title="qat.model.post_processing.MLStateMap.disallowed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">disallowed</span></code></a> on individual
-state maps:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.post_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLikelihoodMethod</span><span class="p">,</span> <span class="n">MLStateMap</span>
+<p>Disallowed states are declared on <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>
+using <strong>negative integer keys</strong> in the <code class="docutils literal notranslate"><span class="pre">states</span></code> dict.  Shots classified to a state with
+a negative key are filtered by <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.post_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">MaxLikelihoodMethod</span><span class="p">,</span> <span class="n">MLDiscriminateParams</span>
 
+<span class="c1"># Qutrit: states 0 and 1 are allowed; state at key -2 is disallowed (leakage).</span>
 <span class="n">method</span> <span class="o">=</span> <span class="n">MaxLikelihoodMethod</span><span class="p">(</span>
-    <span class="n">states</span><span class="o">=</span><span class="p">[</span>
-        <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;|01&gt;&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">),</span>
-        <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;|10&gt;&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">),</span>
-        <span class="n">MLStateMap</span><span class="p">(</span>
-            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|00&gt;&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span>
-            <span class="n">disallowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">),</span>
-        <span class="n">MLStateMap</span><span class="p">(</span>
-            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|11&gt;&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span>
-            <span class="n">disallowed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">],</span>
+    <span class="n">states</span><span class="o">=</span><span class="p">{</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">),</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">),</span>
+        <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">),</span>
+    <span class="p">},</span>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>For <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a>, use the
-<code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> parameter:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.model.post_processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearMapToRealMethod</span>
-
-<span class="c1"># Discards shots where the qubit is measured in the excited state (|1&gt;).</span>
-<span class="c1"># This is commonly used in single-qubit transmon systems to reject leakage</span>
-<span class="c1"># or incorrectly prepared initial states.</span>
-<span class="n">method</span> <span class="o">=</span> <span class="n">LinearMapToRealMethod</span><span class="p">(</span><span class="n">disallowed_states</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">})</span>
-</pre></div>
-</div>
+<p><a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a> always outputs the non-negative
+integers <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">1</span></code> and does <strong>not</strong> support post-selection on shot outcomes.
+Use <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a> with negative keys to
+configure post-selection.</p>
 </section>
 <section id="the-postselect-instruction">
 <h3><a class="toc-backref" href="#id4" role="doc-backlink">The PostSelect instruction</a><a class="headerlink" href="#the-postselect-instruction" title="Link to this heading"></a></h3>
@@ -1066,15 +1053,18 @@ state maps:</p>
 <dt class="sig sig-object py" id="qat.ir.measure.PostSelect">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.measure.PostSelect" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Instruction" title="qat.ir.instructions.Instruction"><code class="xref py py-class docutils literal notranslate"><span class="pre">Instruction</span></code></a></p>
-<p>Mark shots for filtering based on discriminated state labels.</p>
+<p>Mark shots for filtering based on discriminated integer state keys.</p>
 <p><code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> follows <a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> in the readout pipeline.
 It does <strong>not</strong> remove shots inline — instead it records a per-output
-boolean validity mask.  Shots whose state label appears in
-<code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> are marked invalid; the runtime ANDs all masks
-together and filters once at the end.</p>
-<p>Emitting this instruction with an empty <code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> set is a
-no-op (all shots are considered valid) but is safe to emit
-unconditionally so that the pipeline structure is uniform.</p>
+boolean validity mask.  Shots are marked invalid when:</p>
+<ul class="simple">
+<li><p>Their integer state key is <strong>negative</strong> (disallowed states or the
+<code class="docutils literal notranslate"><span class="pre">p_min</span></code> background key), <strong>or</strong></p></li>
+<li><p>Their integer state key is in <code class="docutils literal notranslate"><span class="pre">additional_disallowed</span></code>.</p></li>
+</ul>
+<p>The runtime ANDs all masks together and filters once at the end.</p>
+<p><code class="docutils literal notranslate"><span class="pre">additional_disallowed</span></code> allows the pre-selection pass to specify extra
+state indices to reject.</p>
 <p>Runtime implementation: <a class="reference internal" href="../qat.runtime.post_processing.html#qat.runtime.post_processing.apply_post_select" title="qat.runtime.post_processing.apply_post_select"><code class="xref py py-func docutils literal notranslate"><span class="pre">qat.runtime.post_processing.apply_post_select()</span></code></a>.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -1083,11 +1073,11 @@ unconditionally so that the pipeline structure is uniform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.ir.measure.PostSelect.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.output_variable">¶</a> – Variable name whose state labels should be
+<li><p><span class="target" id="qat.ir.measure.PostSelect.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.output_variable">¶</a> – Variable name whose integer state keys should be
 screened.</p></li>
-<li><p><span class="target" id="qat.ir.measure.PostSelect.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.disallowed_states">¶</a> – String state labels that should be marked
-invalid. Shots mapped to these labels will have their validity mask
-entry set to <code class="docutils literal notranslate"><span class="pre">False</span></code>. Order is not significant.</p></li>
+<li><p><span class="target" id="qat.ir.measure.PostSelect.params.additional_disallowed"></span><strong>additional_disallowed</strong><a class="paramlink headerlink reference internal" href="#qat.ir.measure.PostSelect.params.additional_disallowed">¶</a> – Extra non-negative state indices to treat as
+disallowed, in addition to any keys already negative in the
+discriminated output.  Defaults to the empty set.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1149,9 +1139,9 @@ which a qubit is found in a disallowed state are discarded at runtime.</p>
 <code class="xref py py-class docutils literal notranslate"><span class="pre">CompilerConfig</span></code>.</p></li>
 <li><p><strong>Per-qubit field</strong> — set
 <a class="reference internal" href="../qat.model.device.html#qat.model.device.Qubit.preselect_disallowed_states" title="qat.model.device.Qubit.preselect_disallowed_states"><code class="xref py py-attr docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code></a> to a set
-of state labels that should cause the shot to be discarded.  When this
-field is empty (the default), pre-selection is not active for that
-qubit.</p></li>
+of state <strong>indices</strong> that should cause the shot to be discarded.  The
+default is <code class="docutils literal notranslate"><span class="pre">{1}</span></code> (discard the excited state); set <code class="docutils literal notranslate"><span class="pre">set()</span></code> to disable
+pre-selection for an individual qubit.</p></li>
 </ol>
 <p>Only qubits where <em>both</em> settings are active receive pre-selection
 measurements.</p>
@@ -1163,16 +1153,34 @@ measurements.</p>
 
 <span class="c1"># Configure qubit 0 for pre-selection.</span>
 <span class="n">qubit</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">qubits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">qubit</span><span class="o">.</span><span class="n">preselect_disallowed_states</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">}</span>  <span class="c1"># discard excited state</span>
+<span class="n">qubit</span><span class="o">.</span><span class="n">preselect_disallowed_states</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">}</span>  <span class="c1"># discard excited state (index 1)</span>
 
 <span class="n">config</span> <span class="o">=</span> <span class="n">CompilerConfig</span><span class="p">(</span><span class="n">pre_selection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">repeats</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For multi-state hardware (e.g. transmon with four explicit states), specify all
-states that are not the ground state:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qubit</span><span class="o">.</span><span class="n">preselect_disallowed_states</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;|10&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;|00&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;|11&gt;&quot;</span><span class="p">}</span>
+state indices that are not the ground state:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">qubit</span><span class="o">.</span><span class="n">preselect_disallowed_states</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>  <span class="c1"># discard all non-ground states</span>
 </pre></div>
 </div>
+<p>The integers in <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> are <strong>integer state keys</strong> — they
+correspond directly to the dict keys in the qubit’s
+<a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod.states" title="qat.model.post_processing.MaxLikelihoodMethod.states"><code class="xref py py-attr docutils literal notranslate"><span class="pre">states</span></code></a> mapping.  For example,
+if a transmon is calibrated with four states:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MaxLikelihoodMethod</span><span class="p">(</span><span class="n">states</span><span class="o">=</span><span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span>   <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|0⟩&quot;</span><span class="p">),</span>          <span class="c1"># ground</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span>  <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|1⟩&quot;</span><span class="p">),</span>          <span class="c1"># first excited</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span>   <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|2⟩&quot;</span><span class="p">),</span>          <span class="c1"># second excited</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">-</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span>   <span class="n">label</span><span class="o">=</span><span class="s2">&quot;|3⟩&quot;</span><span class="p">),</span>          <span class="c1"># third excited</span>
+<span class="p">})</span>
+</pre></div>
+</div>
+<p>then <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span> <span class="pre">=</span> <span class="pre">{1,</span> <span class="pre">2,</span> <span class="pre">3}</span></code> discards any shot where the
+pre-selection measurement returns key <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">2</span></code>, or <code class="docutils literal notranslate"><span class="pre">3</span></code> — i.e. any shot not in
+the ground state.</p>
+<p>For <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod" title="qat.model.post_processing.LinearMapToRealMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code></a> the two states are
+always the implicit pair <code class="docutils literal notranslate"><span class="pre">{0:</span> <span class="pre">above-threshold,</span> <span class="pre">1:</span> <span class="pre">at-or-below-threshold}</span></code>; labels
+are not configurable.</p>
 </section>
 <section id="how-it-works">
 <h3><a class="toc-backref" href="#id9" role="doc-backlink">How it works</a><a class="headerlink" href="#how-it-works" title="Link to this heading"></a></h3>
@@ -1196,7 +1204,8 @@ resonator to return to its equilibrium state.</p></li>
 <li><p><a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> (when calibrated; omitted if equalisation
 calibration data is unavailable).</p></li>
 <li><p><a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>.</p></li>
-<li><p><a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> with the configured disallowed states.</p></li>
+<li><p><a class="reference internal" href="../qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> with <code class="docutils literal notranslate"><span class="pre">additional_disallowed</span></code> set to
+the qubit’s <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code>.</p></li>
 </ul>
 <p><strong>Global synchronisation:</strong> a single
 <a class="reference internal" href="../qat.ir.instructions.html#qat.ir.instructions.Synchronize" title="qat.ir.instructions.Synchronize"><code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code></a> covering all qubit channels is
@@ -1204,7 +1213,7 @@ emitted <em>before</em> the first qubit block and again <em>after</em> the last.
 trailing sync simultaneously realigns drive/measure/acquire channels (which
 diverge during the readout window) and provides the cross-qubit alignment
 barrier before the circuit begins.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">presel_*</span></code> output variable holds string state labels after
+<p>The <code class="docutils literal notranslate"><span class="pre">presel_*</span></code> output variable holds integer state keys after
 <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> and is for internal runtime use only — it drives the
 validity mask but is never returned to the user. For per-shot debug
 access, inspect the
@@ -1259,12 +1268,10 @@ a shot is retained only if it passes <strong>both</strong> checks.</p>
 <p><strong>Two separate disallowed-states settings</strong> exist and serve different
 purposes:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">disallowed_states</span></code> on the <strong>post-processing method</strong>
-(e.g. <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MLStateMap.disallowed" title="qat.model.post_processing.MLStateMap.disallowed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MLStateMap.disallowed</span></code></a>,
-<a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.LinearMapToRealMethod.disallowed_states" title="qat.model.post_processing.LinearMapToRealMethod.disallowed_states"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LinearMapToRealMethod.disallowed_states</span></code></a>)
-— controls <strong>post-selection</strong> on end-of-circuit measurements.
-Frontends read these when emitting <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> instructions for
-normal <code class="docutils literal notranslate"><span class="pre">measure</span></code> operations.</p></li>
+<li><p><strong>Negative keys</strong> in <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">states</span></code> — controls <strong>post-selection</strong> on end-of-circuit measurements.
+Frontends emit <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> when <code class="docutils literal notranslate"><span class="pre">CompilerConfig.post_selection=True</span></code>;
+the runtime then filters shots whose discriminated key is negative.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> on
 <a class="reference internal" href="../qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a> — controls <strong>pre-selection</strong>.
 The middleend pass uses these for the measurement injected before
@@ -1299,16 +1306,16 @@ performs the acquisition (scope, integrator, etc.).</p></li>
 <li><p><a class="reference internal" href="../qat.model.device.html#qat.model.device.Qubit.preselect_disallowed_states" title="qat.model.device.Qubit.preselect_disallowed_states"><code class="xref py py-attr docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code></a> — per-qubit
 pre-selection configuration.</p></li>
 <li><p><a class="reference internal" href="../qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.PostSelectionResult" title="qat.runtime.passes.analysis.PostSelectionResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectionResult</span></code></a> — runtime
-metadata for filtered shots. Note: post-selection disallowed states are
-configured per-qubit on the post-processing method; pre-selection uses
-the per-qubit <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> attribute.</p></li>
+metadata for filtered shots. Post-selection is configured via negative
+keys in <a class="reference internal" href="../qat.model.post_processing.html#qat.model.post_processing.MaxLikelihoodMethod" title="qat.model.post_processing.MaxLikelihoodMethod"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code></a>; pre-selection
+uses the per-qubit <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> attribute.</p></li>
 </ul>
 </section>
 <section id="see-also">
 <h2><a class="toc-backref" href="#id12" role="doc-backlink">See also</a><a class="headerlink" href="#see-also" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="post_processing_pipeline.html#post-processing-pipeline"><span class="std std-ref">Readout Post-Processing</span></a> — readout signal processing
-(Equalise → Discriminate → Demap for end-of-circuit measurements).</p></li>
+(Equalise → Discriminate for end-of-circuit measurements).</p></li>
 <li><p><a class="reference internal" href="../qat.ir.measure.html#module-qat.ir.measure" title="qat.ir.measure"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.ir.measure</span></code></a> — instruction model docs.</p></li>
 <li><p><a class="reference internal" href="../qat.runtime.post_processing.html#module-qat.runtime.post_processing" title="qat.runtime.post_processing"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.runtime.post_processing</span></code></a> — runtime helper docs.</p></li>
 <li><p><a class="reference internal" href="execution.html#execution"><span class="std std-ref">Execution</span></a></p></li>

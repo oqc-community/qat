@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.middleend.passes.transform module &mdash; qat-compiler 3.0.0.post264.dev20260625083459 documentation</title>
+  <title>qat.middleend.passes.transform module &mdash; qat-compiler 3.0.0.post265.dev20260625101122 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -842,95 +842,31 @@ to be stored in the results manager.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InsertPreSelectionMeasurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Insert a pre-selection measurement inside the shot loop.</p>
-<p>Pre-selection is a technique to improve circuit fidelity by verifying
-that every qubit starts in its ground state before the algorithm
-begins.  For each qubit where pre-selection is enabled, this pass
-injects a full measurement-and-discriminate sequence immediately after
-the first <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code> instruction. Shots in which a qubit is found
-in a disallowed state are flagged via a
-<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> instruction so that the runtime can
-discard them.</p>
-<p>After all per-qubit preselection blocks have been emitted, a global
-<a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize" title="qat.ir.instructions.Synchronize"><code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code></a> covering all qubit channels
-ensures every channel is time-aligned before the actual circuit begins.
-A <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Delay" title="qat.ir.instructions.Delay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code></a> equal to the resonator
-relaxation delay is also appended to the acquire channel after each
-readout, giving the resonator time to ring down before the next
-operation.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This pass requires results from
-<a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelAnalysis" title="qat.middleend.passes.analysis.ActivePulseChannelAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code></a>
-to be stored in the results manager. It must therefore run
-<strong>after</strong> <code class="docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code> and <strong>before</strong>
-<code class="docutils literal notranslate"><span class="pre">InactivePulseChannelSanitisation</span></code> in the pipeline. It also assumes
-<code class="docutils literal notranslate"><span class="pre">RepeatSanitisation</span></code> has already ensured a <code class="docutils literal notranslate"><span class="pre">Repeat</span></code> exists.</p>
-<p>After injecting instructions this pass updates the
-<a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults" title="qat.middleend.passes.analysis.ActivePulseChannelResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelResults</span></code></a>
-stored in the result manager to include the newly-active measure and
-acquire channels.  This ensures that <code class="docutils literal notranslate"><span class="pre">InactivePulseChannelSanitisation</span></code>
-(which runs afterwards) does not strip the injected instructions.</p>
-</div>
-<p><strong>Activation conditions</strong> (all must be true for a given qubit):</p>
+<p>For each active qubit with <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> set, this pass
+injects <code class="docutils literal notranslate"><span class="pre">Pulse</span> <span class="pre">→</span> <span class="pre">Delay</span> <span class="pre">→</span> <span class="pre">Acquire</span> <span class="pre">→</span> <span class="pre">Delay(relaxation)</span> <span class="pre">→</span> <span class="pre">Equalise</span> <span class="pre">→</span>
+<span class="pre">Discriminate</span> <span class="pre">→</span> <span class="pre">PostSelect</span></code> immediately after the first <code class="xref py py-class docutils literal notranslate"><span class="pre">Repeat</span></code>
+instruction, bracketed by global <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize" title="qat.ir.instructions.Synchronize"><code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code></a>
+instructions.  Shots where any qubit lands in a disallowed state are
+filtered at runtime by ANDing all per-qubit masks.</p>
+<p><strong>Activation</strong> (all required per qubit):</p>
 <ol class="arabic simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">compiler_config.pre_selection</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
-<li><p>The qubit is <strong>active</strong> in the current circuit (present in
-<a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults" title="qat.middleend.passes.analysis.ActivePulseChannelResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelResults</span></code></a>).</p></li>
+<li><p>Qubit is active in the circuit.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">qubit.preselect_disallowed_states</span></code> is non-empty.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">qubit.post_process_method</span></code> is not <code class="docutils literal notranslate"><span class="pre">None</span></code> (legacy qubits with
-only <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> are not supported for pre-selection;
-a <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> is raised).</p></li>
+<li><p>Either <code class="docutils literal notranslate"><span class="pre">qubit.post_process_method</span></code> is set, <strong>or</strong> <code class="docutils literal notranslate"><span class="pre">qubit.mean_z_map_args</span></code>
+is set (legacy path — the same <code class="docutils literal notranslate"><span class="pre">Equalise</span> <span class="pre">→</span> <span class="pre">Discriminate</span></code> chain is derived
+as for <a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a>).</p></li>
 </ol>
-<p><strong>Disallowed-state derivation</strong></p>
-<p>The disallowed states are taken directly from
-<code class="docutils literal notranslate"><span class="pre">qubit.preselect_disallowed_states</span></code>.  For a standard qubit with
-states <code class="docutils literal notranslate"><span class="pre">&quot;0&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states={&quot;1&quot;}</span></code>,
-only <code class="docutils literal notranslate"><span class="pre">&quot;1&quot;</span></code> is disallowed.  For a four-state qubit
-with states <code class="docutils literal notranslate"><span class="pre">&quot;|01&gt;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;|10&gt;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;|00&gt;&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;|11&gt;&quot;</span></code> and
-<code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states={&quot;|10&gt;&quot;,</span> <span class="pre">&quot;|00&gt;&quot;,</span> <span class="pre">&quot;|11&gt;&quot;}</span></code>, all three
-are disallowed.</p>
-<p>The background state (<a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.BG_LABEL" title="qat.model.post_processing.BG_LABEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_LABEL</span></code></a>) is
-<strong>always</strong> included in the disallowed set regardless of the qubit’s
-<code class="docutils literal notranslate"><span class="pre">preselect_disallowed_states</span></code> configuration.  This ensures that
-outlier shots (those failing the <code class="docutils literal notranslate"><span class="pre">p_min</span></code> likelihood threshold) are
-unconditionally discarded during pre-selection.</p>
-<p><strong>Injected instructions</strong> (per qubit, output variable
-<code class="docutils literal notranslate"><span class="pre">&quot;presel_{qubit_index}&quot;</span></code>):</p>
-<p>A single <code class="docutils literal notranslate"><span class="pre">Synchronize(all_qubit_channels)</span></code> is emitted <strong>before</strong> all
-qubit blocks and again <strong>after</strong> them.  In between, each qubit’s block
-contains:</p>
-<ul class="simple">
-<li><p>measure <a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse" title="qat.ir.waveforms.Pulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pulse</span></code></a></p></li>
-<li><p><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Delay" title="qat.ir.instructions.Delay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code></a> (<code class="docutils literal notranslate"><span class="pre">acquire.delay</span></code>) — ring-up offset</p></li>
-<li><p><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Acquire" title="qat.ir.measure.Acquire"><code class="xref py py-class docutils literal notranslate"><span class="pre">Acquire</span></code></a> with <code class="docutils literal notranslate"><span class="pre">purpose=PRE_SELECTION</span></code></p></li>
-<li><p><a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Delay" title="qat.ir.instructions.Delay"><code class="xref py py-class docutils literal notranslate"><span class="pre">Delay</span></code></a>
-(<code class="docutils literal notranslate"><span class="pre">qubit.resonator.relaxation_delay</span></code>) — ring-down settle</p></li>
-<li><p><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> (when calibrated)</p></li>
-<li><p><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a></p></li>
-<li><p><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> with the configured disallowed states</p></li>
-</ul>
-<p>The trailing global <a class="reference internal" href="qat.ir.instructions.html#qat.ir.instructions.Synchronize" title="qat.ir.instructions.Synchronize"><code class="xref py py-class docutils literal notranslate"><span class="pre">Synchronize</span></code></a> advances
-drive and other channels (which received no instructions during the
-readout window) to match the acquire channel’s endpoint, so everything
-is aligned before the circuit begins.</p>
-<p><strong>Channel timeline for a two-qubit circuit</strong> — see
-<a class="reference internal" href="getting_started/shot_selection.html#shot-selection"><span class="std std-ref">Shot Selection (Pre &amp; Post)</span></a> for a rendered Mermaid sequence diagram.  In
-brief: a global <code class="docutils literal notranslate"><span class="pre">Synchronize</span></code> fires before all qubit blocks; each
-qubit emits <code class="docutils literal notranslate"><span class="pre">Pulse</span> <span class="pre">→</span> <span class="pre">Delay(ring-up)</span> <span class="pre">→</span> <span class="pre">Acquire</span> <span class="pre">→</span> <span class="pre">Delay(relaxation_delay)</span> <span class="pre">→</span>
-<span class="pre">Equalise</span> <span class="pre">→</span> <span class="pre">Discriminate</span> <span class="pre">→</span> <span class="pre">PostSelect</span></code>; a second global
-<code class="docutils literal notranslate"><span class="pre">Synchronize</span></code> realigns all channels before the circuit body begins.
-The <code class="docutils literal notranslate"><span class="pre">presel_*</span></code> output variable holds string state labels after
-<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> and is for internal runtime use
-only — it drives the validity mask but is never returned to the user.
-For debug access to per-shot pre-selection labels, inspect the
-<a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.DiscriminateResult" title="qat.runtime.passes.analysis.DiscriminateResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateResult</span></code></a> stored in the
-<a class="reference internal" href="qat.core.result_base.html#qat.core.result_base.ResultManager" title="qat.core.result_base.ResultManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultManager</span></code></a> after execution.</p>
-<p><strong>Interaction with post-selection</strong></p>
-<p>Pre-selection and end-of-circuit post-selection can be combined.
-Each produces its own validity mask keyed by <code class="docutils literal notranslate"><span class="pre">output_variable</span></code>.
-The runtime ANDs all masks together in
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_build_and_apply_global_mask()</span></code>
-so that a shot is retained only if it passes both checks.</p>
+<p>The background state (<a class="reference internal" href="qat.model.post_processing.html#qat.model.post_processing.BG_KEY" title="qat.model.post_processing.BG_KEY"><code class="xref py py-data docutils literal notranslate"><span class="pre">BG_KEY</span></code></a>)
+is negative and is therefore always discarded.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Must run <strong>after</strong> <code class="docutils literal notranslate"><span class="pre">ActivePulseChannelAnalysis</span></code> and <strong>before</strong>
+<code class="docutils literal notranslate"><span class="pre">InactivePulseChannelSanitisation</span></code>.  After injection, the pass
+updates <a class="reference internal" href="qat.middleend.passes.analysis.html#qat.middleend.passes.analysis.ActivePulseChannelResults" title="qat.middleend.passes.analysis.ActivePulseChannelResults"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActivePulseChannelResults</span></code></a>
+so that newly-active measure/acquire channels are not stripped.</p>
+</div>
+<p>See <a class="reference internal" href="getting_started/shot_selection.html#shot-selection"><span class="std std-ref">Shot Selection (Pre &amp; Post)</span></a> for a channel-timeline diagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.middleend.passes.transform.InsertPreSelectionMeasurement.params.model"></span><strong>model</strong><a class="paramlink headerlink reference internal" href="#qat.middleend.passes.transform.InsertPreSelectionMeasurement.params.model">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel" title="qat.model.hardware_model.PhysicalHardwareModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhysicalHardwareModel</span></code></a></span>) – The hardware model.</p>

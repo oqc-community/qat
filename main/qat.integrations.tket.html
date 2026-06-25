@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post264.dev20260625083459 documentation</title>
+  <title>qat.integrations.tket module &mdash; qat-compiler 3.0.0.post265.dev20260625101122 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -655,7 +655,7 @@ is identical to get_physical_qubit.</p>
 assignment into IR. The granular discrimination chain is emitted for
 both qubits with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> configured and legacy qubits.
 For configured qubits, the chain (for example <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> →
-<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) is derived from the configured
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>) is derived from the configured
 post-processing method; for legacy qubits, the equivalent granular
 chain is derived from legacy <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> data.</p>
 <p>See <code class="xref py py-meth docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_with_granular_post_processing()</span></code> for

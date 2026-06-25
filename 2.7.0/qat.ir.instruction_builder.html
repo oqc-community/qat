@@ -640,7 +640,7 @@ InstructionBlocks.</p>
 assignment into IR. The granular discrimination chain is emitted for
 both qubits with <code class="docutils literal notranslate"><span class="pre">post_process_method</span></code> configured and legacy qubits.
 For configured qubits, the chain (for example <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> →
-<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>) is derived from the configured
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>) is derived from the configured
 post-processing method; for legacy qubits, the equivalent granular
 chain is derived from legacy <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> data.</p>
 <p>See <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QuantumInstructionBuilder.measure_with_granular_post_processing()</span></code></a> for
@@ -792,6 +792,74 @@ to the builder (see <a class="reference external" href="https://doi.org/10.48550
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_equalise_discriminate_instrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs" title="Link to this definition"></a></dt>
+<dd><p>Build the <code class="docutils literal notranslate"><span class="pre">Equalise</span> <span class="pre">→</span> <span class="pre">Discriminate</span></code> instruction pair for <em>any</em> qubit type.</p>
+<p>This is the single authoritative implementation of the three-way dispatch used
+by both <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a> and
+<a class="reference internal" href="qat.middleend.passes.transform.html#qat.middleend.passes.transform.InsertPreSelectionMeasurement" title="qat.middleend.passes.transform.InsertPreSelectionMeasurement"><code class="xref py py-class docutils literal notranslate"><span class="pre">InsertPreSelectionMeasurement</span></code></a>.  Both
+pre-selection and circuit-measurement paths produce <strong>identical</strong> pairs for the
+same qubit, differing only in the <code class="docutils literal notranslate"><span class="pre">PostSelect.additional_disallowed</span></code> that
+follows.</p>
+<p>Dispatch:</p>
+<ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code> — optional
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> (when <code class="docutils literal notranslate"><span class="pre">transform</span></code> and <code class="docutils literal notranslate"><span class="pre">offset</span></code> are set)
++ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> with the full ML method.</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code> or legacy
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> — <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> (rotation/offset
+from <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args" title="qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args"><code class="xref py py-meth docutils literal notranslate"><span class="pre">build_legacy_equalise_args()</span></code></a>) + threshold
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs.params.qubit"></span><strong>qubit</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs.params.qubit">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.model.device.html#qat.model.device.Qubit" title="qat.model.device.Qubit"><code class="xref py py-class docutils literal notranslate"><span class="pre">Qubit</span></code></a></span>) – Qubit whose post-processing configuration drives dispatch.</p></li>
+<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.build_equalise_discriminate_instrs.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Variable name to attach to each instruction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> | <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of <code class="docutils literal notranslate"><span class="pre">[Equalise,</span> <span class="pre">Discriminate]</span></code> (or <code class="docutils literal notranslate"><span class="pre">[Discriminate]</span></code> for ML
+without a pre-rotation).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">build_legacy_equalise_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean_z_map_args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args" title="Link to this definition"></a></dt>
+<dd><p>Compute <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> parameters and discrimination threshold from
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>.</p>
+<p>Given <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span> <span class="pre">=</span> <span class="pre">[A,</span> <span class="pre">B]</span></code> where the legacy linear map is
+<code class="docutils literal notranslate"><span class="pre">z</span> <span class="pre">=</span> <span class="pre">Re(A</span> <span class="pre">*</span> <span class="pre">iq</span> <span class="pre">+</span> <span class="pre">B)</span></code>, the affine transform applied to the IQ vector
+<code class="docutils literal notranslate"><span class="pre">[I,</span> <span class="pre">Q]</span></code> is:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[I&#39;, Q&#39;] = [[a, -b], [b, a]] @ [I, Q] + [c_I, c_Q]
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">+</span> <span class="pre">jb</span> <span class="pre">=</span> <span class="pre">A</span></code> and <code class="docutils literal notranslate"><span class="pre">c_I</span> <span class="pre">+</span> <span class="pre">jc_Q</span> <span class="pre">=</span> <span class="pre">B</span></code>.  This is identical to
+the transform used by the <code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code>
+branch of <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a>.</p>
+<p>The discrimination threshold is <code class="docutils literal notranslate"><span class="pre">0.0</span></code> — the midpoint on the real
+axis between the rotated state centroids — matching the convention of
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> (<code class="docutils literal notranslate"><span class="pre">&gt;</span> <span class="pre">0</span> <span class="pre">→</span> <span class="pre">&quot;0&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">≤</span> <span class="pre">0</span> <span class="pre">→</span> <span class="pre">&quot;1&quot;</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args.params.mean_z_map_args"></span><strong>mean_z_map_args</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.build_legacy_equalise_args.params.mean_z_map_args">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></span>) – Two-element list <code class="docutils literal notranslate"><span class="pre">[A,</span> <span class="pre">B]</span></code> as stored on the
+legacy qubit.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">(transform,</span> <span class="pre">offset,</span> <span class="pre">threshold)</span></code> tuple.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.ccnot">
 <span class="sig-name descname"><span class="pre">ccnot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">controllers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.ccnot" title="Link to this definition"></a></dt>
 <dd><dl class="field-list simple">
@@ -848,60 +916,58 @@ linked too, or use the physical channel of a provided pulse channel.</p>
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing">
 <span class="sig-name descname"><span class="pre">emit_granular_post_processing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="Link to this definition"></a></dt>
 <dd><p>Emit the granular post-processing instruction chain (without PostSelect).</p>
-<p>Emits <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code> based on the qubit’s
-configuration. Does NOT emit <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> instructions; use
-<a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a> separately if needed.</p>
+<p>Emits <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> based on the qubit’s configuration.
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> outputs <strong>integer state keys</strong> directly.
+Use <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a> separately to append a
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> when disallowed states are configured.</p>
 <p>Dispatches as follows:</p>
 <ul class="simple">
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code> →
 <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> + <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>
-+ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a> (<code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code>).</p></li>
+(threshold path; above-threshold → key <code class="docutils literal notranslate"><span class="pre">0</span></code>, below → key <code class="docutils literal notranslate"><span class="pre">1</span></code>).</p></li>
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">MaxLikelihoodMethod</span></code> →
 optional <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a>
-+ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> (ML path)
-+ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a> (derived from <code class="docutils literal notranslate"><span class="pre">MLStateMap.label</span></code> →
-<code class="docutils literal notranslate"><span class="pre">MLStateMap.output_value</span></code>).</p></li>
++ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> (ML path; emits dict keys directly).</p></li>
 <li><p>Legacy (<code class="docutils literal notranslate"><span class="pre">post_process_method</span> <span class="pre">is</span> <span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> set) →
 <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> (rotation derived from
-<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>) + <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>
-+ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a> (<code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code>).</p></li>
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code>) + <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>.</p></li>
 </ul>
-<p><strong>Demap value convention</strong></p>
-<p>The <code class="docutils literal notranslate"><span class="pre">Demap</span></code> instruction for the <code class="docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code> and legacy paths
-emits <code class="docutils literal notranslate"><span class="pre">{&quot;0&quot;:</span> <span class="pre">0,</span> <span class="pre">&quot;1&quot;:</span> <span class="pre">1}</span></code> — the standard qubit convention (ground state → 0,
-excited state → 1).  This aligns with the ML pipeline and the <code class="docutils literal notranslate"><span class="pre">binary()</span></code>
-output format, eliminating the need for sign-based conversion in the runtime.</p>
+<p><strong>Integer key convention</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> emits the integer dict key from
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">states</span></code> for ML paths,
+or <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">1</span></code> for threshold/legacy paths.  Non-negative keys are allowed
+states written to the classical register; negative keys are disallowed and
+subsequently filtered by <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a>.</p>
 <p><strong>Results Format Semantics with Compiler Config</strong></p>
-<p>The emitted <code class="docutils literal notranslate"><span class="pre">Demap</span></code> instruction decodes discriminated string state labels to
-numeric output values. These values then flow through the runtime pipeline where
-<code class="docutils literal notranslate"><span class="pre">results_format</span></code> flags determine final encoding:</p>
+<p>Integer output values from <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> flow through the runtime pipeline
+where <code class="docutils literal notranslate"><span class="pre">results_format</span></code> flags determine final encoding:</p>
 <ul class="simple">
 <li><p><strong>``raw()``</strong>: Complex IQ arrays from
 <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.EqualiseResult" title="qat.runtime.passes.analysis.EqualiseResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseResult</span></code></a> (post-mask applied).
 For legacy acquires without an <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> step, falls back to the mapped
 arrays.</p></li>
-<li><p><strong>``binary()``</strong>: Per-shot int output-value array from <code class="docutils literal notranslate"><span class="pre">Demap</span></code> (one value
-per retained shot, e.g. <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">...]</span></code>). With post-selection,
+<li><p><strong>``binary()``</strong>: Per-shot int output-value array from <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> (one
+value per retained shot, e.g. <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0,</span> <span class="pre">...]</span></code>). With post-selection,
 only retained shots are included.</p></li>
 <li><p><strong>``binary_count()``</strong>: Dictionary of state string → count using
-<a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.label_count" title="qat.runtime.results_processing.label_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">label_count()</span></code></a> on the string labels
+<a class="reference internal" href="qat.runtime.results_processing.html#qat.runtime.results_processing.label_count" title="qat.runtime.results_processing.label_count"><code class="xref py py-func docutils literal notranslate"><span class="pre">label_count()</span></code></a> on the integer keys
 from <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.DiscriminateResult" title="qat.runtime.passes.analysis.DiscriminateResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateResult</span></code></a>.
 <strong>Key difference</strong>: when post-selection is active,
 the repeat count passed to <code class="docutils literal notranslate"><span class="pre">binary_count()</span></code> is <code class="docutils literal notranslate"><span class="pre">shots_retained</span></code> (not
 <code class="docutils literal notranslate"><span class="pre">shots_requested</span></code>), so counts reflect only the passing shots.</p></li>
 </ul>
-<p><strong>Example: 3-state ML with state “2” disallowed</strong></p>
+<p><strong>Example: 3-state ML with state keyed as -2 (disallowed)</strong></p>
 <p>Setup:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">states</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-    <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
-    <span class="n">MLStateMap</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="n">output_value</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">,</span> <span class="n">disallowed</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
-<span class="p">]</span>
-<span class="c1"># 10 shots: 4 → state 0, 3 → state 1, 3 → state 2 (filtered by post-select)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">states</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">),</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=-</span><span class="mi">1</span><span class="o">+</span><span class="mi">0</span><span class="n">j</span><span class="p">),</span>
+    <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="n">MLDiscriminateParams</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="mi">0</span><span class="o">+</span><span class="mi">1</span><span class="n">j</span><span class="p">),</span>  <span class="c1"># negative key = disallowed</span>
+<span class="p">}</span>
+<span class="c1"># 10 shots: 4 → key 0, 3 → key 1, 3 → key -2 (filtered by post-select)</span>
 </pre></div>
 </div>
-<p>After <code class="docutils literal notranslate"><span class="pre">Demap</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<p>After <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>After <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code> + global mask (7 retained):</p>
@@ -909,8 +975,8 @@ the repeat count passed to <code class="docutils literal notranslate"><span clas
 </pre></div>
 </div>
 <p>Format outcomes:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="p">():</span>        <span class="o">&lt;</span><span class="nb">complex</span> <span class="n">IQ</span> <span class="kn">from</span><span class="w"> </span><span class="nn">EqualiseResult</span><span class="p">,</span> <span class="mi">7</span> <span class="n">retained</span> <span class="n">shots</span><span class="o">&gt;</span>
-<span class="n">binary</span><span class="p">():</span>     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="p">():</span>          <span class="o">&lt;</span><span class="nb">complex</span> <span class="n">IQ</span> <span class="kn">from</span><span class="w"> </span><span class="nn">EqualiseResult</span><span class="p">,</span> <span class="mi">7</span> <span class="n">retained</span> <span class="n">shots</span><span class="o">&gt;</span>
+<span class="n">binary</span><span class="p">():</span>       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 <span class="n">binary_count</span><span class="p">():</span> <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>  <span class="p">(</span><span class="kn">from</span><span class="w"> </span><span class="mi">7</span> <span class="n">retained</span><span class="p">,</span> <span class="ow">not</span> <span class="mi">10</span> <span class="n">requested</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -936,14 +1002,16 @@ the repeat count passed to <code class="docutils literal notranslate"><span clas
 
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select">
-<span class="sig-name descname"><span class="pre">emit_post_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_states</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="Link to this definition"></a></dt>
-<dd><p>Emit a PostSelect instruction with given disallowed states.</p>
+<span class="sig-name descname"><span class="pre">emit_post_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_variable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="Link to this definition"></a></dt>
+<dd><p>Emit a PostSelect instruction after the Discriminate for the given variable.</p>
+<p><a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.PostSelect" title="qat.ir.measure.PostSelect"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelect</span></code></a> filters shots whose integer state key is
+negative.  When all keys are non-negative (e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">LinearMapToRealMethod</span></code>
+always produces <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code>) the instruction becomes a no-op at runtime
+(the validity mask is all <code class="docutils literal notranslate"><span class="pre">True</span></code>).  Callers do not need to guard on whether
+the method has disallowed states.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The variable name to attach to the instruction.</p></li>
-<li><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states"></span><strong>disallowed_states</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.disallowed_states">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Set of state labels to filter out (e.g., <code class="docutils literal notranslate"><span class="pre">{&quot;1&quot;}</span></code>).</p></li>
-</ul>
+<dd class="field-odd"><p><span class="target" id="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable"></span><strong>output_variable</strong><a class="paramlink headerlink reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select.params.output_variable">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The variable name to attach to the instruction.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder" title="qat.ir.instruction_builder.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span></p>
@@ -1084,7 +1152,7 @@ z-projection value to +1 (above threshold) or −1 (at or below threshold).</p>
 not emit the granular <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> instruction
 used by the post-selection pipeline.  It is not equivalent to
 <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a> (which uses
-<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>/<code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>/<code class="docutils literal notranslate"><span class="pre">Demap</span></code>) and should not be substituted
+<code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>/<code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>) and should not be substituted
 for it.</p>
 </div>
 <dl class="field-list simple">
@@ -1178,14 +1246,13 @@ should call <a class="reference internal" href="#qat.ir.instruction_builder.Quan
 <li><p>Optional <code class="docutils literal notranslate"><span class="pre">PostProcessing(MEAN,</span> <span class="pre">TIME)</span></code> via <code class="xref py py-meth docutils literal notranslate"><span class="pre">_take_time_mean()</span></code>
 (only for SCOPE / TIME axis).</p></li>
 <li><p>The granular chain from <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a>:
-<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> → <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>
-→ <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Demap" title="qat.ir.measure.Demap"><code class="xref py py-class docutils literal notranslate"><span class="pre">Demap</span></code></a>.</p></li>
+<a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Equalise" title="qat.ir.measure.Equalise"><code class="xref py py-class docutils literal notranslate"><span class="pre">Equalise</span></code></a> → <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a>.</p></li>
 </ul>
 <p>Frontends that need post-selection should append
 <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_post_select"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_post_select()</span></code></a> explicitly based on compiler configuration.</p>
 <p>For legacy qubits (<code class="docutils literal notranslate"><span class="pre">post_process_method</span> <span class="pre">is</span> <span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> set),
 <a class="reference internal" href="#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">emit_granular_post_processing()</span></code></a> derives the <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> rotation from
-<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> and emits the same <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> → <code class="docutils literal notranslate"><span class="pre">Demap</span></code>
+<code class="docutils literal notranslate"><span class="pre">mean_z_map_args</span></code> and emits the same <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code>
 chain so that all measurement paths use one unified pipeline.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
