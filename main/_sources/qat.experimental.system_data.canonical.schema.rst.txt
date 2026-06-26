@@ -1,0 +1,7 @@
+qat.experimental.system\_data.canonical.schema module
+=====================================================
+
+.. automodule:: qat.experimental.system_data.canonical.schema
+   :members:
+   :undoc-members:
+   :show-inheritance:
