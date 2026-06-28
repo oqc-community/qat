@@ -5,10 +5,12 @@
 These helpers are shared across unit tests.
 """
 
+from xdsl.builder import Builder
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.dialects.func import FuncOp
-from xdsl.ir import Block, Dialect, Operation, Region
+from xdsl.ir import Attribute, Block, BlockArgument, Dialect, Operation, Region
+from xdsl.rewriter import InsertPoint
 
 
 def create_context(*dialects: Dialect) -> Context:
@@ -37,6 +39,28 @@ def build_module_from_ops(ops: list[Operation]) -> ModuleOp:
     func = FuncOp("main", ([], []), region)
     module = ModuleOp([func])
     return module
+
+
+def build_module_with_arguments(
+    *args: Attribute,
+) -> tuple[ModuleOp, tuple[BlockArgument, ...], Builder]:
+    """Helper function to build a module with a main function with the given arguments.
+
+    The arguments are added to the main function, which is added to a module, and the module
+    and the list of arguments are returned.
+
+    :param args: The argument types to add to the main function.
+    :return: A tuple of the module, the list of arguments, and a builder with an insertion
+        point at the start of the main function's block.
+    """
+
+    func = FuncOp("main", (args, []))
+    module = ModuleOp([func])
+    return (
+        module,
+        tuple(func.regions[0].blocks[0].args),
+        Builder(InsertPoint(func.regions[0].blocks[0])),
+    )
 
 
 def get_operations_with_type(op: Operation, op_type: type[Operation]) -> list[Operation]:

@@ -112,9 +112,7 @@ _ops = [
     WaitOp,
 ]
 
-_interfaces = [
-    IsAnalyticalWaveformInterface,
-]
+_interfaces = [IsAnalyticalWaveformInterface]
 
 _traits = [
     AdvancesTimeTrait,
@@ -122,28 +120,11 @@ _traits = [
     PulseTypesCanonicalizationPatternsTrait,
 ]
 
-_types = [
-    AmplitudeType,
-    FrequencyType,
-    FrameType,
-    PhaseType,
-    TimeType,
-    WaveformType,
-]
+_types = [AmplitudeType, FrequencyType, FrameType, PhaseType, TimeType, WaveformType]
 
-_data_attributes = [
-    WaveformData,
-    TimeUnitsData,
-    FrequencyUnitsData,
-]
+_data_attributes = [WaveformData, TimeUnitsData, FrequencyUnitsData]
 
-_attributes = [
-    AmplitudeAttr,
-    FrequencyAttr,
-    PhaseAttr,
-    TimeAttr,
-    SampledWaveformAttr,
-]
+_attributes = [AmplitudeAttr, FrequencyAttr, PhaseAttr, TimeAttr, SampledWaveformAttr]
 
 Pulse = Dialect(
     "pulse",
