@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post267.dev20260626113320 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post268.dev20260628153055 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1601,8 +1601,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Quantity.amount">amount (Quantity attribute)</a>, <a href="qat.utils.units.html#qat.utils.units.Quantity.amount">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.amp">amp (CalibratablePulse attribute)</a>
 
       <ul>
@@ -1615,6 +1613,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.WaveformData.amp">(WaveformData attribute)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.QbloxLegalisationPass.amp_as_steps">amp_as_steps() (QbloxLegalisationPass method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.amp_as_steps">[1]</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.amp_setup">amp_setup (CalibratablePulse attribute)</a>
@@ -1775,6 +1775,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations.apply">(ApplySquashContiguousOptimizations method)</a>
 </li>
         <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.DeviceAssignSet.apply">(DeviceAssignSet method)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.timeline_normalization.html#qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization.apply">(TimelineNormalization method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyLinearReadoutMitigation.apply_correction_qubit">apply_correction_qubit() (ApplyLinearReadoutMitigation method)</a>
@@ -10237,6 +10239,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#module-qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions">qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.timeline_normalization.html#module-qat.experimental.dialect.pulse.transforms.timeline_normalization">qat.experimental.dialect.pulse.transforms.timeline_normalization</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.units.html#module-qat.experimental.dialect.pulse.units">qat.experimental.dialect.pulse.units</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#module-qat.experimental.dialect.q1">qat.experimental.dialect.q1</a>
@@ -11202,6 +11206,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SynchronizeOp.name">(SynchronizeOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SynchronizeOp.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.name">(TimeAttr attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.TimeAttr.name">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.timeline_normalization.html#qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization.name">(TimelineNormalization attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.TimeType.name">(TimeType attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.TimeType.name">[1]</a>
 </li>
@@ -13921,6 +13927,13 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#module-qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.pulse.transforms.timeline_normalization
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.timeline_normalization.html#module-qat.experimental.dialect.pulse.transforms.timeline_normalization">module</a>
 </li>
       </ul></li>
       <li>
@@ -19244,6 +19257,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.TimelineAnalysisResult">(class in qat.backend.passes.purr.analysis)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.timeline_normalization.html#qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization">TimelineNormalization (class in qat.experimental.dialect.pulse.transforms.timeline_normalization)</a>
+</li>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.TimelineSegment">TimelineSegment (class in qat.purr.compiler.emitter)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.MaxTimeOp.times">times (MaxTimeOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.MaxTimeOp.times">[1]</a>
@@ -19316,6 +19331,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CreateFrameOp.params.track_phase">(qat.experimental.dialect.pulse.ir.ops.CreateFrameOp parameter)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireDigitalIIIOp.traits">traits (AcquireDigitalIIIOp attribute)</a>
 
       <ul>
@@ -19620,8 +19637,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.XorRRROp.traits">(XorRRROp attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.measure.html#qat.ir.measure.Equalise.transform">transform (Equalise attribute)</a>
 
       <ul>

@@ -16,3 +16,4 @@ Submodules
    qat.experimental.dialect.pulse.transforms.frame_no_op_elimination
    qat.experimental.dialect.pulse.transforms.granularity_sanitisation
    qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions
+   qat.experimental.dialect.pulse.transforms.timeline_normalization

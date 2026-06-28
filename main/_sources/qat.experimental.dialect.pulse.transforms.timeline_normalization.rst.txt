@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.timeline\_normalization module
+========================================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.timeline_normalization
+   :members:
+   :undoc-members:
+   :show-inheritance:
