@@ -19,6 +19,7 @@
       <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -374,6 +375,30 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.BlackmanWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BlackmanWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.BlackmanWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A Blackman-window shaped pulse.</p>
+<p>The envelope is:</p>
+<div class="math notranslate nohighlight">
+\[f(t) = a_0 - a_1\cos\!\bigl(2\pi(t/w + 0.5)\bigr)
+     + a_2\cos\!\bigl(4\pi(t/w + 0.5)\bigr)\]</div>
+<p>with <span class="math notranslate nohighlight">\(a_0 = 7938/18608\)</span>, <span class="math notranslate nohighlight">\(a_1 = 9240/18608\)</span>,
+<span class="math notranslate nohighlight">\(a_2 = 1430/18608\)</span>, and <span class="math notranslate nohighlight">\(w\)</span> = <code class="docutils literal notranslate"><span class="pre">width</span></code>.
+These are the <em>exact Blackman</em> coefficients that minimise
+the sidelobe level.</p>
+<p>The Blackman window offers excellent spectral leakage
+suppression. Only <code class="docutils literal notranslate"><span class="pre">width</span></code> (inherited) controls the shape.
+See original paper <a class="reference external" href="https://doi.org/10.1002/j.1538-7305.1958.tb03874.x">Blackman &amp; Tukey (1958)</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.BlackmanWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.BlackmanWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.BlackmanWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.BlackmanWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.BlackmanWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.BlackmanWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.BlackmanWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.BlackmanWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.BlackmanWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.BlackmanWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -395,6 +420,27 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.CosWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CosWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.CosWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A cosine-oscillating envelope.</p>
+<div class="math notranslate nohighlight">
+\[f(t) = \cos(2\pi\,f\,t + \varphi)\]</div>
+<p>where <span class="math notranslate nohighlight">\(f\)</span> = <code class="docutils literal notranslate"><span class="pre">frequency</span></code> and <span class="math notranslate nohighlight">\(\varphi\)</span> =
+<code class="docutils literal notranslate"><span class="pre">internal_phase</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.frequency"></span><strong>frequency</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.frequency">¶</a> – Oscillation frequency in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.internal_phase"></span><strong>internal_phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.internal_phase">¶</a> – Phase offset applied inside the cosine
+argument in radians. Shifts the cosine in phase without
+rotating the full IQ vector.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.CosWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.CosWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -416,6 +462,42 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.DragGaussianWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DragGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.DragGaussianWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A complex Gaussian envelope with an in-built first-order DRAG correction.</p>
+<p>The envelope is (when <code class="docutils literal notranslate"><span class="pre">zero_at_edges</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>):</p>
+<div class="math notranslate nohighlight">
+\[f(t) = \bigl(1 - i\,\beta\,t / \sigma^{2}\bigr)
+       \;e^{-t^{2}/(8\sigma^{2})}\]</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">zero_at_edges</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> the Gaussian is offset
+and rescaled so it approaches zero at the pulse boundaries.
+See <a class="reference external" href="https://arxiv.org/abs/0901.0534">https://arxiv.org/abs/0901.0534</a> for background on
+the DRAG technique.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.std_dev">¶</a> – Standard deviation controlling the width of
+the Gaussian in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.beta"></span><strong>beta</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.beta">¶</a> – DRAG in-pulse correction coefficient. Controls
+the magnitude of the quadrature (Q) component;
+<code class="docutils literal notranslate"><span class="pre">beta</span> <span class="pre">=</span> <span class="pre">0</span></code> gives a real-valued Gaussian.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.zero_at_edges"></span><strong>zero_at_edges</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.zero_at_edges">¶</a> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, subtracts a constant to
+make the envelope approach zero at the pulse edges.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.DragGaussianWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.DragGaussianWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This class implements the DRAG correction inside the
+shape function itself (via the complex envelope). The
+top-level <code class="docutils literal notranslate"><span class="pre">drag</span></code> parameter on <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a> applies
+an additional derivative-based correction; normally only
+one of the two mechanisms is activated at a time.</p>
+</div>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -437,6 +519,30 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.ExtraSoftSquareWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtraSoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.ExtraSoftSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A heavily softened normalised square pulse with a <code class="docutils literal notranslate"><span class="pre">2×rise</span></code> inset.</p>
+<p>The raw envelope is:</p>
+<div class="math notranslate nohighlight">
+\[g(t) = \tanh\!\bigl(\tfrac{t + \sigma/2 - 2r}{r}\bigr)
+     - \tanh\!\bigl(\tfrac{t - \sigma/2 + 2r}{r}\bigr)\]</div>
+<p>which is then min/max normalised to <span class="math notranslate nohighlight">\([0, 1]\)</span>.
+Identical to <a class="reference internal" href="#qat.ir.waveforms.SofterSquareWaveform" title="qat.ir.waveforms.SofterSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SofterSquareWaveform</span></code></a> but with a
+<code class="docutils literal notranslate"><span class="pre">2×rise</span></code> inset instead of <code class="docutils literal notranslate"><span class="pre">1×rise</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.std_dev">¶</a> – Width of the flat-top region in seconds. The
+<code class="docutils literal notranslate"><span class="pre">tanh</span></code> transitions are placed at <code class="docutils literal notranslate"><span class="pre">±std_dev</span> <span class="pre">/</span> <span class="pre">2</span></code>.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.rise">¶</a> – Edge rise/fall scale in seconds. A larger value
+relative to <code class="docutils literal notranslate"><span class="pre">std_dev</span></code> causes the flat-top to shrink.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.ExtraSoftSquareWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.ExtraSoftSquareWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -458,6 +564,38 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.GaussianSquareWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A flat-top pulse with Gaussian-shaped rise and fall flanks.</p>
+<p>The envelope is:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}f(t) = \begin{cases}
+e^{-(t + s/2)^{2}/(2\sigma^{2})} &amp; t &lt; -s/2 \\
+1 &amp; |t| \le s/2 \\
+e^{-(t - s/2)^{2}/(2\sigma^{2})} &amp; t &gt; s/2
+\end{cases}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(s\)</span> = <code class="docutils literal notranslate"><span class="pre">square_width</span></code> and <span class="math notranslate nohighlight">\(\sigma\)</span> =
+<code class="docutils literal notranslate"><span class="pre">std_dev</span></code>. When <code class="docutils literal notranslate"><span class="pre">zero_at_edges</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> the envelope
+is offset and rescaled to be zero at the outermost samples.
+See <a class="reference external" href="https://doi.org/10.1103/PhysRevA.93.060302">Sheldon et al. (2016)</a> for use in
+cross-resonance gates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.square_width"></span><strong>square_width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.square_width">¶</a> – Duration of the central flat-top section
+in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.std_dev">¶</a> – Standard deviation of the Gaussian flanks in
+seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.zero_at_edges"></span><strong>zero_at_edges</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.zero_at_edges">¶</a> – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the envelope is offset and
+rescaled to be exactly zero at the outermost sample
+points.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianSquareWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianSquareWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -479,6 +617,25 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.GaussianWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A standard Gaussian envelope pulse.</p>
+<p>The envelope is:</p>
+<div class="math notranslate nohighlight">
+\[f(t) = e^{-(t / k)^{2}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(k = \text{width} \times \text{rise}\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.GaussianWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianWaveform.params.rise">¶</a> – Dimensionless shape parameter. A larger <code class="docutils literal notranslate"><span class="pre">rise</span></code>
+spreads the Gaussian; a smaller <code class="docutils literal notranslate"><span class="pre">rise</span></code> narrows it.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -500,6 +657,31 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.GaussianZeroEdgeWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GaussianZeroEdgeWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A Gaussian pulse optionally normalised to be exactly zero at its edges.</p>
+<p>The envelope is:</p>
+<div class="math notranslate nohighlight">
+\[g(t) = e^{-t^{2} / (2\sigma^{2})}\]</div>
+<p>When <code class="docutils literal notranslate"><span class="pre">zero_at_edges</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>:</p>
+<div class="math notranslate nohighlight">
+\[f(t) = \frac{g(t) - g(w/2)}{1 - g(w/2)}\]</div>
+<p>ensuring <span class="math notranslate nohighlight">\(f(\pm w/2) = 0\)</span> and <span class="math notranslate nohighlight">\(f(0) = 1\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.std_dev">¶</a> – Standard deviation of the Gaussian in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.zero_at_edges"></span><strong>zero_at_edges</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.zero_at_edges">¶</a> – When <code class="docutils literal notranslate"><span class="pre">True</span></code>, the Gaussian is offset
+and rescaled so that it is exactly zero at
+<code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">±width/2</span></code> and peaks at 1. When <code class="docutils literal notranslate"><span class="pre">False</span></code>, a
+standard Gaussian is returned.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.GaussianZeroEdgeWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.GaussianZeroEdgeWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -570,6 +752,34 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.RoundedSquareWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RoundedSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.RoundedSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A square pulse with <code class="docutils literal notranslate"><span class="pre">erf</span></code>-shaped (S-curve) rise and fall.</p>
+<p>The envelope uses a pair of error-function steps:</p>
+<div class="math notranslate nohighlight">
+\[S(v) = \tfrac{1}{2}\bigl[\operatorname{erf}(v) + 1\bigr]\]</div>
+<div class="math notranslate nohighlight">
+\[f(t) = c\,\bigl[S\!\bigl(\tfrac{t - x_1}{r}\bigr)
+     + S\!\bigl(\tfrac{-(t - x_2)}{r}\bigr) - 1\bigr]\]</div>
+<p>where <span class="math notranslate nohighlight">\(x_1 = (w - \sigma)/2\)</span>,
+<span class="math notranslate nohighlight">\(x_2 = (w + \sigma)/2\)</span>, <span class="math notranslate nohighlight">\(r\)</span> = <code class="docutils literal notranslate"><span class="pre">rise</span></code>,
+<span class="math notranslate nohighlight">\(w\)</span> = <code class="docutils literal notranslate"><span class="pre">width</span></code>, and <span class="math notranslate nohighlight">\(c\)</span> is a normalisation
+constant.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.rise">¶</a> – Steepness of the <code class="docutils literal notranslate"><span class="pre">erf</span></code> transition in seconds.
+Smaller values give a sharper step; larger values give a
+more gradual transition.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.std_dev">¶</a> – Controls the flat-top width relative to the
+total <code class="docutils literal notranslate"><span class="pre">width</span></code>, in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.RoundedSquareWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.RoundedSquareWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -591,7 +801,20 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SampledWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SampledWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SampledWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
-<p>Provide a list of amplitudes to define a sampled waveform.</p>
+<p>A waveform defined by an arbitrary complex array rather than an analytic function.</p>
+<p>Use this class when the pulse envelope is provided as pre-computed
+samples, e.g. from an optimisation routine or when the compiler
+lowers an analytical <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a> into discrete samples for
+hardware that does not support analytic descriptions natively.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SampledWaveform.params.samples"></span><strong>samples</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SampledWaveform.params.samples">¶</a> – Complex amplitude values, one per time step.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SampledWaveform.params.sample_time"></span><strong>sample_time</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SampledWaveform.params.sample_time">¶</a> – Time between consecutive samples in seconds.
+Required to compute <a class="reference internal" href="#qat.ir.waveforms.SampledWaveform.duration" title="qat.ir.waveforms.SampledWaveform.duration"><code class="xref py py-attr docutils literal notranslate"><span class="pre">duration</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -623,6 +846,33 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SechWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SechWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SechWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A hyperbolic-secant (sech) pulse envelope.</p>
+<p>The envelope is:</p>
+<div class="math notranslate nohighlight">
+\[f(t) = \operatorname{sech}(t / \sigma)
+     = \frac{1}{\cosh(t / \sigma)}\]</div>
+<p>The sech pulse has the desirable property of being its own
+Fourier transform (up to scaling), making it self-similar in
+time and frequency. See <a class="reference external" href="https://doi.org/10.1103/PhysRev.40.502">Rosen &amp; Zener (1932)</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SechWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SechWaveform.params.std_dev">¶</a> – Width parameter <span class="math notranslate nohighlight">\(\sigma\)</span> of the sech
+pulse in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SechWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SechWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SechWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SechWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SechWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SechWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SechWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SechWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SechWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SechWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The sech pulse does not reach zero at finite times; it
+decays exponentially.</p>
+</div>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -644,6 +894,26 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SetupHoldWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SetupHoldWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SetupHoldWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A two-level rectangular pulse: a high-amplitude <em>setup</em> portion
+followed by a lower-amplitude <em>hold</em> portion.</p>
+<p>The setup section occupies the first <code class="docutils literal notranslate"><span class="pre">rise</span></code> seconds of the pulse;
+the hold section occupies the remainder (<code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">-</span> <span class="pre">rise</span></code> seconds).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.rise">¶</a> – Duration of the high-amplitude setup section in
+seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.amp_setup"></span><strong>amp_setup</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.amp_setup">¶</a> – Amplitude of the setup section, dimensionless
+(same scale as <code class="docutils literal notranslate"><span class="pre">amp</span></code>). The hold section uses <code class="docutils literal notranslate"><span class="pre">amp</span></code> directly.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SetupHoldWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SetupHoldWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -665,6 +935,30 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SinWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SinWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SinWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A sine-oscillating envelope.</p>
+<div class="math notranslate nohighlight">
+\[f(t) = \sin(2\pi\,f\,t + \varphi)\]</div>
+<p>where <span class="math notranslate nohighlight">\(f\)</span> = <code class="docutils literal notranslate"><span class="pre">frequency</span></code> and <span class="math notranslate nohighlight">\(\varphi\)</span> =
+<code class="docutils literal notranslate"><span class="pre">internal_phase</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.frequency"></span><strong>frequency</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.frequency">¶</a> – Oscillation frequency in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.internal_phase"></span><strong>internal_phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.internal_phase">¶</a> – Internal phase offset in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SinWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SinWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#qat.ir.waveforms.SinWaveform" title="qat.ir.waveforms.SinWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SinWaveform</span></code></a> and <a class="reference internal" href="#qat.ir.waveforms.CosWaveform" title="qat.ir.waveforms.CosWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">CosWaveform</span></code></a> are related
+by a 90° phase shift.</p>
+</div>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -686,6 +980,31 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SoftSquareWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SoftSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SoftSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A square pulse with <code class="docutils literal notranslate"><span class="pre">tanh</span></code>-shaped rise and fall edges.</p>
+<p>The envelope is:</p>
+<div class="math notranslate nohighlight">
+\[f(t) = \tfrac{1}{2}\bigl[
+\tanh\!\bigl(\tfrac{t + (w-r)/2}{r}\bigr)
+- \tanh\!\bigl(\tfrac{t - (w-r)/2}{r}\bigr)
+\bigr]\]</div>
+<p>where <span class="math notranslate nohighlight">\(w\)</span> = <code class="docutils literal notranslate"><span class="pre">width</span></code> and <span class="math notranslate nohighlight">\(r\)</span> = <code class="docutils literal notranslate"><span class="pre">rise</span></code>.</p>
+<p>Edge sharpness depends on <code class="docutils literal notranslate"><span class="pre">rise</span></code>; very small values can
+introduce discontinuities at the truncation boundary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SoftSquareWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SoftSquareWaveform.params.rise">¶</a> – Scale of the <code class="docutils literal notranslate"><span class="pre">tanh</span></code> transition in seconds.
+Larger values produce a more gradual edge; smaller values
+approach a sharp step.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SoftSquareWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SoftSquareWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SoftSquareWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SoftSquareWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SoftSquareWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SoftSquareWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SoftSquareWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SoftSquareWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SoftSquareWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SoftSquareWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -707,6 +1026,26 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SofterGaussianWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterGaussianWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterGaussianWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A Gaussian envelope normalised so the minimum is zero and peak is one.</p>
+<p>Uses the same underlying
+<a class="reference internal" href="qat.utils.waveform.html#qat.utils.waveform.GaussianFunction" title="qat.utils.waveform.GaussianFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianFunction</span></code></a> as
+<a class="reference internal" href="#qat.ir.waveforms.GaussianWaveform" title="qat.ir.waveforms.GaussianWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">GaussianWaveform</span></code></a> (with
+<span class="math notranslate nohighlight">\(k = \text{width} \times \text{rise}\)</span>) but subtracts the
+edge value and rescales, ensuring the pulse is exactly zero at
+the edges and peaks at 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SofterGaussianWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform.params.rise">¶</a> – Dimensionless shape parameter.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterGaussianWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterGaussianWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterGaussianWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterGaussianWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterGaussianWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterGaussianWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -728,6 +1067,30 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SofterSquareWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SofterSquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SofterSquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A normalised double-<code class="docutils literal notranslate"><span class="pre">tanh</span></code> square pulse with extra edge softening.</p>
+<p>The raw envelope is:</p>
+<div class="math notranslate nohighlight">
+\[g(t) = \tanh\!\bigl(\tfrac{t + \sigma/2 - r}{r}\bigr)
+     - \tanh\!\bigl(\tfrac{t - \sigma/2 + r}{r}\bigr)\]</div>
+<p>which is then min/max normalised to <span class="math notranslate nohighlight">\([0, 1]\)</span>.
+Here <span class="math notranslate nohighlight">\(\sigma\)</span> = <code class="docutils literal notranslate"><span class="pre">std_dev</span></code> and <span class="math notranslate nohighlight">\(r\)</span> = <code class="docutils literal notranslate"><span class="pre">rise</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.std_dev"></span><strong>std_dev</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.std_dev">¶</a> – Width of the flat-top region in seconds. The
+<code class="docutils literal notranslate"><span class="pre">tanh</span></code> transitions are placed at <code class="docutils literal notranslate"><span class="pre">±std_dev</span> <span class="pre">/</span> <span class="pre">2</span></code>.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.rise"></span><strong>rise</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.rise">¶</a> – Edge rise/fall scale in seconds. The <code class="docutils literal notranslate"><span class="pre">tanh</span></code>
+transitions are shifted inward by one <code class="docutils literal notranslate"><span class="pre">rise</span></code> step on
+each side.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SofterSquareWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SofterSquareWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -749,6 +1112,20 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.SquareWaveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SquareWaveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.SquareWaveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
+<p>A flat (rectangular) pulse.</p>
+<p>The envelope is uniform across the entire <code class="docutils literal notranslate"><span class="pre">width</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.SquareWaveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SquareWaveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SquareWaveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SquareWaveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SquareWaveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SquareWaveform.params.phase">¶</a> – Phase rotation in radians.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SquareWaveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SquareWaveform.params.drag">¶</a> – DRAG derivative scaling coefficient.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.SquareWaveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.SquareWaveform.params.scale_factor">¶</a> – Additional multiplicative scaling,
+defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -770,7 +1147,38 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Waveform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.AbstractWaveform" title="qat.ir.waveforms.AbstractWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractWaveform</span></code></a></p>
-<p>Stores the attributes which define a waveform.</p>
+<p>A time-dependent complex signal with a specific shape.</p>
+<p>The envelope shape of the waveform will be calibrated to
+implement desired operations on the qubit such as gates or
+readout. The <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a> class stores the attributes
+which define the envelope shape. Calling <a class="reference internal" href="#qat.ir.waveforms.Waveform.sample" title="qat.ir.waveforms.Waveform.sample"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample()</span></code></a>
+(or the convenience wrapper <a class="reference internal" href="#qat.ir.waveforms.sample_waveform" title="qat.ir.waveforms.sample_waveform"><code class="xref py py-func docutils literal notranslate"><span class="pre">sample_waveform()</span></code></a>)
+converts the waveform into discrete in-phase (I) and
+quadrature (Q) samples — see <a class="reference internal" href="#qat.ir.waveforms.Waveform.sample" title="qat.ir.waveforms.Waveform.sample"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample()</span></code></a> for the
+mathematical formula.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.params.width">¶</a> – Duration of the waveform in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.params.amp"></span><strong>amp</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.params.amp">¶</a> – Amplitude pre-factor to the envelope in Hz.
+When the hardware channel is correctly calibrated
+(via <code class="docutils literal notranslate"><span class="pre">PulseChannel.scale</span></code>), constant <code class="docutils literal notranslate"><span class="pre">amp</span></code> drives Rabi
+oscillations at <code class="docutils literal notranslate"><span class="pre">amp</span></code> Hz.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.params.phase"></span><strong>phase</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.params.phase">¶</a> – Phase rotation applied to the waveform in
+radians. Combined with the external <code class="docutils literal notranslate"><span class="pre">phase_offset</span></code>
+to rotate the IQ vector in the complex plane.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.params.drag"></span><strong>drag</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.params.drag">¶</a> – <p>A coefficient which scales a quadrature
+component to the waveform envelope consisting of the
+time derivative of the in-phase component of the
+waveform envelope, see for example
+<a class="reference external" href="https://arxiv.org/abs/0901.0534">https://arxiv.org/abs/0901.0534</a>.</p>
+</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.params.scale_factor"></span><strong>scale_factor</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.params.scale_factor">¶</a> – Additional multiplicative scaling
+applied independently of <code class="docutils literal notranslate"><span class="pre">amp</span></code>, defaults to <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>See <a class="reference internal" href="#qat.ir.waveforms.Waveform.sample" title="qat.ir.waveforms.Waveform.sample"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample()</span></code></a> for the full mathematical formula.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -829,7 +1237,46 @@ validated to form a valid model.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.sample">
 <span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.ir.waveforms.Waveform.sample" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Evaluate the waveform at discrete times <em>t</em> and return a
+<a class="reference internal" href="#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a>.</p>
+<p>The output samples are computed as:</p>
+<div class="math notranslate nohighlight">
+\[s(t) = \text{scale\_factor} \cdot \text{amp}
+\cdot e^{\,i\,(\text{phase} + \text{phase\_offset})}
+\cdot \bigl[\,f(t)
++ i \cdot \text{drag} \cdot f'(t)\,\bigr]\]</div>
+<p>where <span class="math notranslate nohighlight">\(f(t)\)</span> is the shape function determined by the
+subclass (via <code class="docutils literal notranslate"><span class="pre">shape_function_type</span></code>).</p>
+<p>Correct calibration of the hardware channel
+(<code class="docutils literal notranslate"><span class="pre">PulseChannel.scale</span></code>) means that using constant amplitude
+<a class="reference internal" href="#qat.ir.waveforms.Waveform.amp" title="qat.ir.waveforms.Waveform.amp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">amp</span></code></a> will drive the qubit in Rabi oscillations
+of <code class="docutils literal notranslate"><span class="pre">amp</span></code> Hz.  For example setting only <code class="docutils literal notranslate"><span class="pre">amp=10e6</span></code>
+and <code class="docutils literal notranslate"><span class="pre">PulseChannel.scale=1e-8</span></code> means
+<code class="docutils literal notranslate"><span class="pre">10e6</span> <span class="pre">*</span> <span class="pre">1e-8</span> <span class="pre">=</span> <span class="pre">0.1</span></code> peak amplitude of the waveform
+sent to the control hardware.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.sample.params.t"></span><strong>t</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.sample.params.t">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code></span>) – 1-D array of discrete sample times in seconds.</p></li>
+<li><p><span class="target" id="qat.ir.waveforms.Waveform.sample.params.phase_offset"></span><strong>phase_offset</strong><a class="paramlink headerlink reference internal" href="#qat.ir.waveforms.Waveform.sample.params.phase_offset">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Accumulated channel phase in radians,
+passed by the compiler at sample time. Added to
+<a class="reference internal" href="#qat.ir.waveforms.Waveform.phase" title="qat.ir.waveforms.Waveform.phase"><code class="xref py py-attr docutils literal notranslate"><span class="pre">phase</span></code></a> before computing the complex exponential.
+Defaults to <code class="docutils literal notranslate"><span class="pre">0.0</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference internal" href="#qat.ir.waveforms.SampledWaveform" title="qat.ir.waveforms.SampledWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveform</span></code></a> containing one complex
+sample per element of <em>t</em>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AttributeError</strong> – If <a class="reference internal" href="#qat.ir.waveforms.Waveform.shape_function_type" title="qat.ir.waveforms.Waveform.shape_function_type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shape_function_type</span></code></a> is
+<code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.waveforms.Waveform.scale_factor">
