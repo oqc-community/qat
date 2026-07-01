@@ -5,7 +5,6 @@ import pytest
 from xdsl.dialects.builtin import (
     DenseIntOrFPElementsAttr,
     Float64Type,
-    IntegerAttr,
     IntegerType,
     Signedness,
     StringAttr,
@@ -13,13 +12,20 @@ from xdsl.dialects.builtin import (
 )
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.q1_sequence.attrs import (
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    AcquisitionAttr,
     WaveformAttr,
     WeightAttr,
     f32,
+    make_acquisition,
     make_waveform,
     make_weight,
-    ui32,
+)
+from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
+    AcqTableIndex,
+    BinCountImm,
+    WaveformTableIndex,
+    WeightTableIndex,
 )
 
 
@@ -42,9 +48,9 @@ class TestWaveformAttr:
         data = DenseIntOrFPElementsAttr.from_list(vec, values)
         if should_fail:
             with pytest.raises(VerifyException):
-                WaveformAttr(StringAttr("wf"), IntegerAttr(0, ui32), data)
+                WaveformAttr(StringAttr("wf"), WaveformTableIndex(0), data)
         else:
-            wf = WaveformAttr(StringAttr("wf"), IntegerAttr(0, ui32), data)
+            wf = WaveformAttr(StringAttr("wf"), WaveformTableIndex(0), data)
             wf.verify()
 
     @pytest.mark.parametrize(
@@ -84,9 +90,9 @@ class TestWeightAttr:
         data = DenseIntOrFPElementsAttr.from_list(vec, values)
         if should_fail:
             with pytest.raises(VerifyException):
-                WeightAttr(StringAttr("w"), IntegerAttr(0, ui32), data)
+                WeightAttr(StringAttr("w"), WeightTableIndex(0), data)
         else:
-            w = WeightAttr(StringAttr("w"), IntegerAttr(0, ui32), data)
+            w = WeightAttr(StringAttr("w"), WeightTableIndex(0), data)
             w.verify()
 
     @pytest.mark.parametrize(
@@ -105,3 +111,16 @@ class TestWeightAttr:
         else:
             w = make_weight("w", 0, values)
             w.verify()
+
+
+class TestAcquisitionAttr:
+    def test_construction(self):
+        a = AcquisitionAttr(StringAttr("a"), AcqTableIndex(5), BinCountImm(100))
+        assert a.index.data == 5
+        assert a.num_bins.data == 100
+
+    def test_construction_via_helper(self):
+        a = make_acquisition("acq", 3, 42)
+        assert a.acquisition_name.data == "acq"
+        assert a.index.data == 3
+        assert a.num_bins.data == 42

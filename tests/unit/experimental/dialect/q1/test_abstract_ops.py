@@ -6,27 +6,31 @@ from __future__ import annotations
 from io import StringIO
 
 import pytest
-from xdsl.dialects.builtin import IntegerAttr, IntegerType, StringAttr
+from xdsl.dialects.builtin import IntegerType, StringAttr
 from xdsl.irdl import irdl_op_definition
 from xdsl.parser import Parser
 from xdsl.printer import Printer
 from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1.ir.abstract_ops import (
-    IIIIIOperation,
-    IIIOperation,
-    IIOperation,
-    IRsIIOperation,
-    IRsIOperation,
-    IRsIRsIOperation,
-    IRsRsRsIOperation,
+    ImmImmImmImmImmOperation,
+    ImmImmImmOperation,
+    ImmImmOperation,
+    ImmRsImmImmOperation,
+    ImmRsImmOperation,
+    ImmRsOperation,
+    ImmRsRdOperation,
+    ImmRsRdRdOperation,
+    ImmRsRsRsImmOperation,
     Q1Instruction,
-    RdIOperation,
-    RsRsIOperation,
+    RdImmOperation,
+    RsImmRdRdOperation,
+    RsRsImmOperation,
     RsRsRdOperation,
+    RsRsRdRdOperation,
     _assembly_arg_str,
 )
-from qat.experimental.dialect.q1.ir.imm_desc import ui32
+from qat.experimental.dialect.q1.ir.imm_desc import UI32Imm
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType, Registers
 
 
@@ -36,12 +40,12 @@ class BadOp(Q1Instruction):
 
 
 @irdl_op_definition
-class DummyIIOp(IIOperation):
+class DummyIIOp(ImmImmOperation[UI32Imm, UI32Imm]):
     name = "q1.ii.dummy"
 
 
 @irdl_op_definition
-class DummyRdIOp(RdIOperation[IntRegisterType]):
+class DummyRdIOp(RdImmOperation[IntRegisterType, UI32Imm]):
     name = "q1.ri.dummy"
 
 
@@ -51,44 +55,64 @@ class DummyRsRsRdOp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class DummyIIIOp(IIIOperation):
+class DummyIIIOp(ImmImmImmOperation[UI32Imm, UI32Imm, UI32Imm]):
     name = "q1.iii.dummy"
 
 
 @irdl_op_definition
-class DummyIRsIIOp(IRsIIOperation[IntRegisterType]):
+class DummyIRsIIOp(ImmRsImmImmOperation[IntRegisterType, UI32Imm, UI32Imm, UI32Imm]):
     name = "q1.irii.dummy"
 
 
 @irdl_op_definition
-class DummyRsRsIOp(RsRsIOperation[IntRegisterType]):
+class DummyRsRsIOp(RsRsImmOperation[IntRegisterType, UI32Imm]):
     name = "q1.rri.dummy"
 
 
 @irdl_op_definition
-class DummyIRsRsRsIOp(IRsRsRsIOperation[IntRegisterType]):
+class DummyIRsRsRsIOp(ImmRsRsRsImmOperation[IntRegisterType, UI32Imm, UI32Imm]):
     name = "q1.irrri.dummy"
 
 
 @irdl_op_definition
-class DummyIIIIIOp(IIIIIOperation):
+class DummyIIIIIOp(ImmImmImmImmImmOperation[UI32Imm, UI32Imm, UI32Imm, UI32Imm, UI32Imm]):
     name = "q1.iiiii.dummy"
 
 
 @irdl_op_definition
-class DummyIRsIRsIOp(IRsIRsIOperation[IntRegisterType]):
-    name = "q1.iriri.dummy"
+class DummyIRsIOp(ImmRsImmOperation[IntRegisterType, UI32Imm, UI32Imm]):
+    name = "q1.iri.dummy"
 
 
 @irdl_op_definition
-class DummyIRsIOp(IRsIOperation[IntRegisterType]):
-    name = "q1.iri.dummy"
+class DummyIRsOp(ImmRsOperation[IntRegisterType, UI32Imm]):
+    name = "q1.ir.dummy"
+
+
+@irdl_op_definition
+class DummyIRsRdOp(ImmRsRdOperation[IntRegisterType, UI32Imm]):
+    name = "q1.irr.dummy"
+
+
+@irdl_op_definition
+class DummyRsRsRdRdOp(RsRsRdRdOperation[IntRegisterType]):
+    name = "q1.rrrr.dummy"
+
+
+@irdl_op_definition
+class DummyRsIRdRdOp(RsImmRdRdOperation[IntRegisterType, UI32Imm]):
+    name = "q1.rirr.dummy"
+
+
+@irdl_op_definition
+class DummyIRsRdRdOp(ImmRsRdRdOperation[IntRegisterType, UI32Imm]):
+    name = "q1.irrr.dummy"
 
 
 def test_assembly_arg_str():
     assert _assembly_arg_str("plain") == "plain"
     assert _assembly_arg_str(Registers.R4) == "R4"
-    assert _assembly_arg_str(IntegerAttr(11, ui32)) == "11"
+    assert _assembly_arg_str(UI32Imm(11)) == "11"
     assert _assembly_arg_str(create_ssa_value(Registers.R5)) == "R5"
     assert _assembly_arg_str(StringAttr("text")) == "text"
 
@@ -107,120 +131,140 @@ def test_assembly_mnemonic_raises():
         BadOp().assembly_mnemonic()
 
 
-def test_ii_operation_assembly_line_args():
-    op = DummyIIOp(11, 22)
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "11",
-        "22",
-    )
+@pytest.mark.parametrize(
+    "op_factory,expected_args",
+    [
+        pytest.param(
+            lambda: DummyIIOp(UI32Imm(11), UI32Imm(22)),
+            ("11", "22"),
+            id="ii",
+        ),
+        pytest.param(
+            lambda: DummyRdIOp(Registers.R3, UI32Imm(7)),
+            ("R3", "7"),
+            id="rd_i",
+        ),
+        pytest.param(
+            lambda: DummyRsRsRdOp(
+                create_ssa_value(Registers.R1),
+                create_ssa_value(Registers.R2),
+                Registers.R4,
+                comment="hello",
+            ),
+            ("R1", "R2", "R4"),
+            id="rs_rs_rd",
+        ),
+        pytest.param(
+            lambda: DummyIIIOp(UI32Imm(1), UI32Imm(2), UI32Imm(3), comment="hello"),
+            ("1", "2", "3"),
+            id="iii",
+        ),
+        pytest.param(
+            lambda: DummyIIIIIOp(
+                UI32Imm(1),
+                UI32Imm(2),
+                UI32Imm(3),
+                UI32Imm(4),
+                UI32Imm(5),
+                comment="hello",
+            ),
+            ("1", "2", "3", "4", "5"),
+            id="iiiii",
+        ),
+        pytest.param(
+            lambda: DummyRsRsIOp(
+                create_ssa_value(Registers.R1),
+                create_ssa_value(Registers.R2),
+                UI32Imm(3),
+                comment="hello",
+            ),
+            ("R1", "R2", "3"),
+            id="rs_rs_i",
+        ),
+        pytest.param(
+            lambda: DummyIRsIIOp(
+                UI32Imm(1),
+                create_ssa_value(Registers.R2),
+                UI32Imm(3),
+                UI32Imm(4),
+                comment="hello",
+            ),
+            ("1", "R2", "3", "4"),
+            id="i_rs_i_i",
+        ),
+        pytest.param(
+            lambda: DummyIRsRsRsIOp(
+                UI32Imm(1),
+                create_ssa_value(Registers.R2),
+                create_ssa_value(Registers.R3),
+                create_ssa_value(Registers.R4),
+                UI32Imm(5),
+                comment="hello",
+            ),
+            ("1", "R2", "R3", "R4", "5"),
+            id="i_rs_rs_rs_i",
+        ),
+        pytest.param(
+            lambda: DummyIRsIOp(UI32Imm(1), create_ssa_value(Registers.R2), UI32Imm(3)),
+            ("1", "R2", "3"),
+            id="i_rs_i",
+        ),
+        pytest.param(
+            lambda: DummyIRsOp(UI32Imm(1), create_ssa_value(Registers.R2), comment="hello"),
+            ("1", "R2"),
+            id="i_rs",
+        ),
+        pytest.param(
+            lambda: DummyIRsRdOp(
+                UI32Imm(1),
+                create_ssa_value(Registers.R2),
+                Registers.R3,
+                comment="hello",
+            ),
+            ("1", "R2", "R3"),
+            id="i_rs_rd",
+        ),
+        pytest.param(
+            lambda: DummyRsRsRdRdOp(
+                create_ssa_value(Registers.R1),
+                create_ssa_value(Registers.R2),
+                Registers.R3,
+                Registers.R4,
+                comment="hello",
+            ),
+            ("R1", "R2", "R3", "R4"),
+            id="rs_rs_rd_rd",
+        ),
+        pytest.param(
+            lambda: DummyRsIRdRdOp(
+                create_ssa_value(Registers.R1),
+                UI32Imm(2),
+                Registers.R3,
+                Registers.R4,
+                comment="hello",
+            ),
+            ("R1", "2", "R3", "R4"),
+            id="rs_i_rd_rd",
+        ),
+        pytest.param(
+            lambda: DummyIRsRdRdOp(
+                UI32Imm(1),
+                create_ssa_value(Registers.R2),
+                Registers.R3,
+                Registers.R4,
+                comment="hello",
+            ),
+            ("1", "R2", "R3", "R4"),
+            id="i_rs_rd_rd",
+        ),
+    ],
+)
+def test_shape_assembly_line_args(op_factory, expected_args) -> None:
+    """``assembly_line_args()`` stringifies each shape's args via ``_assembly_arg_str``."""
 
-
-def test_rdi_operation_with_integer_attr_imm():
-    op = DummyRdIOp(Registers.R3, IntegerAttr(7, ui32))
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "R3",
-        "7",
-    )
-
-
-def test_rrd_operation_comment_branch():
-    op = DummyRsRsRdOp(
-        create_ssa_value(Registers.R1),
-        create_ssa_value(Registers.R2),
-        Registers.R4,
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "R1",
-        "R2",
-        "R4",
-    )
-
-
-def test_iii_operation_init_and_assembly_line_args():
-    op = DummyIIIOp(1, 2, 3, comment="hello")
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "1",
-        "2",
-        "3",
-    )
-
-
-def test_iiiii_operation_init_and_assembly_line_args():
-    op = DummyIIIIIOp(1, 2, 3, 4, 5, comment="hello")
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-    )
-
-
-def test_iriri_operation_init_and_assembly_line_args():
-    op = DummyIRsIRsIOp(
-        1,
-        create_ssa_value(Registers.R2),
-        3,
-        create_ssa_value(Registers.R4),
-        5,
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "1",
-        "R2",
-        "3",
-        "R4",
-        "5",
-    )
-
-
-def test_rri_operation_init_and_assembly_line_args():
-    op = DummyRsRsIOp(
-        create_ssa_value(Registers.R1),
-        create_ssa_value(Registers.R2),
-        3,
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "R1",
-        "R2",
-        "3",
-    )
-
-
-def test_irii_operation_init_and_assembly_line_args():
-    op = DummyIRsIIOp(
-        1,
-        create_ssa_value(Registers.R2),
-        3,
-        4,
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "1",
-        "R2",
-        "3",
-        "4",
-    )
-
-
-def test_irrri_operation_init_and_assembly_line_args():
-    op = DummyIRsRsRsIOp(
-        1,
-        create_ssa_value(Registers.R2),
-        create_ssa_value(Registers.R3),
-        create_ssa_value(Registers.R4),
-        5,
-        comment="hello",
-    )
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "1",
-        "R2",
-        "R3",
-        "R4",
-        "5",
-    )
+    op = op_factory()
+    actual = tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args())
+    assert actual == expected_args
 
 
 def test_parse_with_multiple_operands():
@@ -239,12 +283,3 @@ def test_print_emits_attributes_when_present_in_memory():
     output = StringIO()
     op.print(Printer(output))
     assert '{tag = "x"}' in output.getvalue()
-
-
-def test_irsi_operation_converts_integer_immediates():
-    op = DummyIRsIOp(1, create_ssa_value(Registers.R2), 3)
-    assert tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args()) == (
-        "1",
-        "R2",
-        "3",
-    )

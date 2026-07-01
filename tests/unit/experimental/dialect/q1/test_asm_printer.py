@@ -9,372 +9,437 @@ from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1 import (
     Q1,
-    AddRIROp,
-    AddRRROp,
-    AndRIROp,
-    AndRRROp,
-    AslRIROp,
-    AslRRROp,
-    AsrRIROp,
-    AsrRRROp,
-    FbAcqIqIdIIOp,
-    FbAcqIqIdRIOp,
-    FbAcqTbIdRIOp,
-    FbAcqTbValidRIOp,
-    FbPopDataIROp,
+    AddRsImmRdOp,
+    AddRsRsRdOp,
+    AndRsImmRdOp,
+    AndRsRsRdOp,
+    AslRsImmRdOp,
+    AslRsRsRdOp,
+    AsrRsImmRdOp,
+    AsrRsRsRdOp,
+    FbAcqIqIdImmImmOp,
+    FbAcqIqIdRsImmOp,
+    FbAcqTbIdRsImmOp,
+    FbAcqTbValidRsImmOp,
+    FbPopDataImmRdOp,
     IllegalOp,
-    JgeRIIOp,
-    JgeRIROp,
-    JltRIIOp,
-    JltRIROp,
-    JmpIOp,
-    JmpROp,
-    JnzIOp,
-    JnzROp,
-    JoIOp,
-    JoROp,
-    JzIOp,
-    JzROp,
-    MoveIROp,
-    MoveRROp,
+    JgeRsImmImmOp,
+    JgeRsImmRsOp,
+    JltRsImmImmOp,
+    JltRsImmRsOp,
+    JmpImmOp,
+    JmpRsOp,
+    JnzImmOp,
+    JnzRsOp,
+    JoImmOp,
+    JoRsOp,
+    JzImmOp,
+    JzRsOp,
+    MoveImmRdOp,
+    MoveRsRdOp,
     NopOp,
-    NotIROp,
-    NotRROp,
-    OrRIROp,
-    OrRRROp,
+    NotImmRdOp,
+    NotRsRdOp,
+    OrRsImmRdOp,
+    OrRsRsRdOp,
     ResetPhOp,
-    SetAwgGainIIOp,
-    SetAwgGainRROp,
-    SetAwgOffsIIOp,
-    SetAwgOffsRROp,
-    SetCondIIIIOp,
-    SetCondRRRIOp,
-    SetFreqIOp,
-    SetFreqROp,
-    SetMrkIOp,
-    SetMrkROp,
-    SetPhDeltaIOp,
-    SetPhIOp,
-    SetPhROp,
-    StopIOp,
+    SetAwgGainImmImmOp,
+    SetAwgGainRsRsOp,
+    SetAwgOffsImmImmOp,
+    SetAwgOffsRsRsOp,
+    SetCondImmImmImmImmOp,
+    SetCondRsRsRsImmOp,
+    SetFreqImmOp,
+    SetFreqRsOp,
+    SetMrkImmOp,
+    SetMrkRsOp,
+    SetPhDeltaImmOp,
+    SetPhImmOp,
+    SetPhRsOp,
+    StopImmOp,
     StopOp,
-    StopROp,
-    SubRIROp,
-    SubRRROp,
-    XorRIROp,
-    XorRRROp,
+    StopRsOp,
+    SubRsImmRdOp,
+    SubRsRsRdOp,
+    XorRsImmRdOp,
+    XorRsRsRdOp,
     emit_program,
 )
 from qat.experimental.dialect.q1.ir import ops as q1_ops
+from qat.experimental.dialect.q1.ir.imm_desc import (
+    AddressImm,
+    BoolImm,
+    DurationImm,
+    NcoPhaseImm,
+    SI16Imm,
+    SI32Imm,
+    SU32Imm,
+    UI2Imm,
+    UI3Imm,
+    UI4Imm,
+    UI5Imm,
+    UI6Imm,
+    UI7Imm,
+    UI8Imm,
+    UI10Imm,
+    UI16Imm,
+    UI24Imm,
+    UI32Imm,
+)
 from qat.experimental.dialect.q1.ir.reg_desc import Registers
 
-
-@pytest.mark.parametrize("comment", [None, "test comment"])
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic",
-    [
-        (IllegalOp, "illegal"),
-        (NopOp, "nop"),
-        (StopOp, "stop"),
-        (ResetPhOp, "reset_ph"),
+_PRINT_TABLE = [
+    # Nullary
+    pytest.param(lambda: IllegalOp(), "illegal", (), None, id="illegal"),
+    pytest.param(
+        lambda: IllegalOp(comment="halt"), "illegal", (), "halt", id="illegal+comment"
+    ),
+    pytest.param(lambda: NopOp(), "nop", (), None, id="nop"),
+    pytest.param(lambda: NopOp(comment="pad"), "nop", (), "pad", id="nop+comment"),
+    pytest.param(lambda: StopOp(), "stop", (), None, id="stop_nullary"),
+    pytest.param(
+        lambda: StopOp(comment="end"), "stop", (), "end", id="stop_nullary+comment"
+    ),
+    pytest.param(lambda: ResetPhOp(), "reset_ph", (), None, id="reset_ph"),
+    pytest.param(
+        lambda: ResetPhOp(comment="zero"), "reset_ph", (), "zero", id="reset_ph+comment"
+    ),
+    # I-format
+    pytest.param(lambda: StopImmOp(SI32Imm(42)), "stop", ("42",), None, id="stop_imm"),
+    pytest.param(lambda: JmpImmOp(AddressImm(100)), "jmp", ("100",), None, id="jmp_imm"),
+    pytest.param(lambda: JzImmOp(AddressImm(200)), "jz", ("200",), None, id="jz_imm"),
+    pytest.param(lambda: JnzImmOp(AddressImm(300)), "jnz", ("300",), None, id="jnz_imm"),
+    pytest.param(lambda: JoImmOp(AddressImm(400)), "jo", ("400",), None, id="jo_imm"),
+    pytest.param(
+        lambda: SetMrkImmOp(UI4Imm(15)), "set_mrk", ("15",), None, id="set_mrk_imm"
+    ),
+    pytest.param(
+        lambda: SetFreqImmOp(SI32Imm(0x12345678)),
+        "set_freq",
+        (str(0x12345678),),
+        None,
+        id="set_freq_imm",
+    ),
+    pytest.param(
+        lambda: SetPhImmOp(NcoPhaseImm(1000000000)),
+        "set_ph",
+        ("1000000000",),
+        None,
+        id="set_ph_imm",
+    ),
+    pytest.param(
+        lambda: SetPhDeltaImmOp(NcoPhaseImm(0)),
+        "set_ph_delta",
+        ("0",),
+        None,
+        id="set_ph_delta_imm",
+    ),
+    pytest.param(
+        lambda: SetMrkImmOp(UI4Imm(15), comment="marker at position 1000"),
+        "set_mrk",
+        ("15",),
+        "marker at position 1000",
+        id="set_mrk_imm+comment",
+    ),
+    # Rs-format
+    pytest.param(
+        lambda: StopRsOp(create_ssa_value(Registers.R0)),
+        "stop",
+        ("R0",),
+        None,
+        id="stop_rs",
+    ),
+    pytest.param(
+        lambda: JmpRsOp(create_ssa_value(Registers.R1)), "jmp", ("R1",), None, id="jmp_rs"
+    ),
+    pytest.param(
+        lambda: JzRsOp(create_ssa_value(Registers.R5)), "jz", ("R5",), None, id="jz_rs"
+    ),
+    pytest.param(
+        lambda: JnzRsOp(create_ssa_value(Registers.R10)), "jnz", ("R10",), None, id="jnz_rs"
+    ),
+    pytest.param(
+        lambda: JoRsOp(create_ssa_value(Registers.R31)), "jo", ("R31",), None, id="jo_rs"
+    ),
+    pytest.param(
+        lambda: SetMrkRsOp(create_ssa_value(Registers.R32)),
+        "set_mrk",
+        ("R32",),
+        None,
+        id="set_mrk_rs",
+    ),
+    pytest.param(
+        lambda: SetFreqRsOp(create_ssa_value(Registers.R48)),
+        "set_freq",
+        ("R48",),
+        None,
+        id="set_freq_rs",
+    ),
+    pytest.param(
+        lambda: SetPhRsOp(create_ssa_value(Registers.R63)),
+        "set_ph",
+        ("R63",),
+        None,
+        id="set_ph_rs",
+    ),
+    # I+Rd (imm, rd)
+    pytest.param(
+        lambda: MoveImmRdOp(SU32Imm(42), Registers.R0),
+        "move",
+        ("42", "R0"),
+        None,
+        id="move_42_R0",
+    ),
+    pytest.param(
+        lambda: MoveImmRdOp(SU32Imm(1000), Registers.R15),
+        "move",
+        ("1000", "R15"),
+        None,
+        id="move_1000_R15",
+    ),
+    pytest.param(
+        lambda: NotImmRdOp(SU32Imm(0xFFFFFFFF), Registers.R31),
+        "not",
+        (str(0xFFFFFFFF), "R31"),
+        None,
+        id="not_ff_R31",
+    ),
+    pytest.param(
+        lambda: FbPopDataImmRdOp(UI16Imm(5), Registers.R10),
+        "fb_pop_data",
+        ("5", "R10"),
+        None,
+        id="fb_pop_data",
+    ),
+    # Rs+Rd (rs, rd)
+    pytest.param(
+        lambda: MoveRsRdOp(create_ssa_value(Registers.R0), Registers.R1),
+        "move",
+        ("R0", "R1"),
+        None,
+        id="move_R0_R1",
+    ),
+    pytest.param(
+        lambda: MoveRsRdOp(create_ssa_value(Registers.R10), Registers.R20),
+        "move",
+        ("R10", "R20"),
+        None,
+        id="move_R10_R20",
+    ),
+    pytest.param(
+        lambda: NotRsRdOp(create_ssa_value(Registers.R32), Registers.R48),
+        "not",
+        ("R32", "R48"),
+        None,
+        id="not_R32_R48",
+    ),
+    pytest.param(
+        lambda: NotRsRdOp(create_ssa_value(Registers.R50), Registers.R63),
+        "not",
+        ("R50", "R63"),
+        None,
+        id="not_R50_R63",
+    ),
+    # Rs+I (feedback)
+    pytest.param(
+        lambda: FbAcqTbIdRsImmOp(
+            create_ssa_value(Registers.R1), DurationImm(100), comment="test feedback"
+        ),
+        "fb_acq_tb_id",
+        ("R1", "100"),
+        "test feedback",
+        id="fb_acq_tb_id_ri",
+    ),
+    pytest.param(
+        lambda: FbAcqTbValidRsImmOp(
+            create_ssa_value(Registers.R1), DurationImm(100), comment="test feedback"
+        ),
+        "fb_acq_tb_valid",
+        ("R1", "100"),
+        "test feedback",
+        id="fb_acq_tb_valid_ri",
+    ),
+    pytest.param(
+        lambda: FbAcqIqIdRsImmOp(
+            create_ssa_value(Registers.R1), DurationImm(100), comment="test feedback"
+        ),
+        "fb_acq_iq_id",
+        ("R1", "100"),
+        "test feedback",
+        id="fb_acq_iq_id_ri",
+    ),
+    # Rs+I+I (legacy compare-and-jump)
+    pytest.param(
+        lambda: JgeRsImmImmOp(
+            create_ssa_value(Registers.R0), UI32Imm(100), AddressImm(500)
+        ),
+        "jge",
+        ("R0", "100", "500"),
+        None,
+        id="jge_rii",
+    ),
+    pytest.param(
+        lambda: JltRsImmImmOp(create_ssa_value(Registers.R5), UI32Imm(50), AddressImm(200)),
+        "jlt",
+        ("R5", "50", "200"),
+        None,
+        id="jlt_rii",
+    ),
+    # Rs+I+Rs
+    pytest.param(
+        lambda: JgeRsImmRsOp(
+            create_ssa_value(Registers.R0), UI32Imm(100), create_ssa_value(Registers.R5)
+        ),
+        "jge",
+        ("R0", "100", "R5"),
+        None,
+        id="jge_rir",
+    ),
+    pytest.param(
+        lambda: JltRsImmRsOp(
+            create_ssa_value(Registers.R0), UI32Imm(100), create_ssa_value(Registers.R5)
+        ),
+        "jlt",
+        ("R0", "100", "R5"),
+        None,
+        id="jlt_rir",
+    ),
+    # Rs+I→Rd (RIR arithmetic)
+    *[
+        pytest.param(
+            lambda op=op, imm_t=imm_t, imm=imm: op(
+                create_ssa_value(Registers.R1), imm_t(imm), Registers.R2
+            ),
+            mnemonic,
+            ("R1", str(imm), "R2"),
+            None,
+            id=f"{mnemonic}_rir",
+        )
+        for op, mnemonic, imm_t, imm in [
+            (AddRsImmRdOp, "add", SU32Imm, 100),
+            (SubRsImmRdOp, "sub", SU32Imm, 50),
+            (AndRsImmRdOp, "and", SU32Imm, 0xFF),
+            (OrRsImmRdOp, "or", SU32Imm, 0xAA),
+            (XorRsImmRdOp, "xor", SU32Imm, 0x55),
+            (AslRsImmRdOp, "asl", UI32Imm, 5),
+            (AsrRsImmRdOp, "asr", UI32Imm, 3),
+        ]
     ],
-)
-def test_nullary_format_print(op_type, expected_mnemonic, comment):
-    op = op_type(comment=comment)
+    # Rs+Rs→Rd (RRR arithmetic)
+    *[
+        pytest.param(
+            lambda op=op: op(
+                create_ssa_value(Registers.R1),
+                create_ssa_value(Registers.R2),
+                Registers.R3,
+            ),
+            mnemonic,
+            ("R1", "R2", "R3"),
+            None,
+            id=f"{mnemonic}_rrr",
+        )
+        for op, mnemonic in [
+            (AddRsRsRdOp, "add"),
+            (SubRsRsRdOp, "sub"),
+            (AndRsRsRdOp, "and"),
+            (OrRsRsRdOp, "or"),
+            (XorRsRsRdOp, "xor"),
+            (AslRsRsRdOp, "asl"),
+            (AsrRsRsRdOp, "asr"),
+        ]
+    ],
+    # I+I latched
+    pytest.param(
+        lambda: SetAwgGainImmImmOp(SI16Imm(0x1000), SI16Imm(0x2000)),
+        "set_awg_gain",
+        (str(0x1000), str(0x2000)),
+        None,
+        id="set_awg_gain_ii",
+    ),
+    pytest.param(
+        lambda: SetAwgOffsImmImmOp(SI16Imm(0x0100), SI16Imm(0x0200)),
+        "set_awg_offs",
+        (str(0x0100), str(0x0200)),
+        None,
+        id="set_awg_offs_ii",
+    ),
+    # Rs+Rs latched
+    pytest.param(
+        lambda: SetAwgGainRsRsOp(
+            create_ssa_value(Registers.R0), create_ssa_value(Registers.R1)
+        ),
+        "set_awg_gain",
+        ("R0", "R1"),
+        None,
+        id="set_awg_gain_rr",
+    ),
+    pytest.param(
+        lambda: SetAwgOffsRsRsOp(
+            create_ssa_value(Registers.R0), create_ssa_value(Registers.R1)
+        ),
+        "set_awg_offs",
+        ("R0", "R1"),
+        None,
+        id="set_awg_offs_rr",
+    ),
+    # I+I feedback
+    pytest.param(
+        lambda: FbAcqIqIdImmImmOp(UI8Imm(1), DurationImm(4)),
+        "fb_acq_iq_id",
+        ("1", "4"),
+        None,
+        id="fb_acq_iq_id_ii_small",
+    ),
+    pytest.param(
+        lambda: FbAcqIqIdImmImmOp(UI8Imm(100), DurationImm(200)),
+        "fb_acq_iq_id",
+        ("100", "200"),
+        None,
+        id="fb_acq_iq_id_ii_large",
+    ),
+    # I+I+I+I (set_cond)
+    pytest.param(
+        lambda: SetCondImmImmImmImmOp(BoolImm(0), UI4Imm(1), UI3Imm(2), UI16Imm(3)),
+        "set_cond",
+        ("0", "1", "2", "3"),
+        None,
+        id="set_cond_iiii_small",
+    ),
+    pytest.param(
+        lambda: SetCondImmImmImmImmOp(BoolImm(1), UI4Imm(8), UI3Imm(4), UI16Imm(400)),
+        "set_cond",
+        ("1", "8", "4", "400"),
+        None,
+        id="set_cond_iiii_large",
+    ),
+    # Rs+Rs+Rs+I (set_cond register)
+    pytest.param(
+        lambda: SetCondRsRsRsImmOp(
+            create_ssa_value(Registers.R0),
+            create_ssa_value(Registers.R1),
+            create_ssa_value(Registers.R2),
+            UI16Imm(42),
+        ),
+        "set_cond",
+        ("R0", "R1", "R2", "42"),
+        None,
+        id="set_cond_rrri",
+    ),
+]
+
+
+@pytest.mark.parametrize("factory,mnemonic,substrings,comment", _PRINT_TABLE)
+def test_assembly_line_print(factory, mnemonic, substrings, comment):
+    op = factory()
     assembly = op.assembly_line()
     assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
+    assert assembly.startswith(mnemonic)
+    for s in substrings:
+        assert s in assembly
     if comment:
         assert f"# {comment}" in assembly
     else:
         assert not assembly.rstrip().endswith("#")
-
-
-@pytest.mark.parametrize("comment", [None, "marker at position 1000"])
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,imm_value",
-    [
-        (StopIOp, "stop", 42),
-        (JmpIOp, "jmp", 100),
-        (JzIOp, "jz", 200),
-        (JnzIOp, "jnz", 300),
-        (JoIOp, "jo", 400),
-        (SetMrkIOp, "set_mrk", 0xDEADBEEF),
-        (SetFreqIOp, "set_freq", 0x12345678),
-        (SetPhIOp, "set_ph", 0xFFFFFFFF),
-        (SetPhDeltaIOp, "set_ph_delta", 0x80000000),
-    ],
-)
-def test_imm_format_print(op_type, expected_mnemonic, imm_value, comment):
-    op = op_type(imm_value, comment=comment)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert str(imm_value) in assembly
-    if comment:
-        assert f"# {comment}" in assembly
-    else:
-        assert not assembly.rstrip().endswith("#")
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,register",
-    [
-        (StopROp, "stop", Registers.R0),
-        (JmpROp, "jmp", Registers.R1),
-        (JzROp, "jz", Registers.R5),
-        (JnzROp, "jnz", Registers.R10),
-        (JoROp, "jo", Registers.R31),
-        (SetMrkROp, "set_mrk", Registers.R32),
-        (SetFreqROp, "set_freq", Registers.R48),
-        (SetPhROp, "set_ph", Registers.R63),
-    ],
-)
-def test_rs_format_print(op_type, expected_mnemonic, register):
-    rs_val = create_ssa_value(register)
-    op = op_type(rs_val)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert register.register_name.data in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,imm_value,register",
-    [
-        (MoveIROp, "move", 42, Registers.R0),
-        (MoveIROp, "move", 1000, Registers.R15),
-        (NotIROp, "not", 0xFFFFFFFF, Registers.R31),
-        (FbPopDataIROp, "fb_pop_data", 5, Registers.R10),
-    ],
-)
-def test_imm_rd_format_print(op_type, expected_mnemonic, imm_value, register):
-    op = op_type(imm_value, register)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert str(imm_value) in assembly
-    assert register.register_name.data in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,src_register,dst_register",
-    [
-        (MoveRROp, "move", Registers.R0, Registers.R1),
-        (MoveRROp, "move", Registers.R10, Registers.R20),
-        (NotRROp, "not", Registers.R32, Registers.R48),
-        (NotRROp, "not", Registers.R50, Registers.R63),
-    ],
-)
-def test_rs_rd_format_print(op_type, expected_mnemonic, src_register, dst_register):
-    src_val = create_ssa_value(src_register)
-    op = op_type(src_val, dst_register)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert src_register.register_name.data in assembly
-    assert dst_register.register_name.data in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic",
-    [
-        (FbAcqTbIdRIOp, "fb_acq_tb_id"),
-        (FbAcqTbValidRIOp, "fb_acq_tb_valid"),
-        (FbAcqIqIdRIOp, "fb_acq_iq_id"),
-    ],
-)
-def test_rs_imm_format_print(op_type, expected_mnemonic):
-    rs_val = create_ssa_value(Registers.R1)
-    op = op_type(rs_val, 100, comment="test feedback")
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert "R1" in assembly
-    assert "100" in assembly
-    assert "test feedback" in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,register,imm1,imm2",
-    [
-        (JgeRIIOp, "jge", Registers.R0, 100, 500),
-        (JltRIIOp, "jlt", Registers.R5, 50, 200),
-    ],
-)
-def test_rs_imm_imm_format_print(op_type, expected_mnemonic, register, imm1, imm2):
-    rs_val = create_ssa_value(register)
-    op = op_type(rs_val, imm1, imm2)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert register.register_name.data in assembly
-    assert str(imm1) in assembly
-    assert str(imm2) in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic",
-    [
-        (JgeRIROp, "jge"),
-        (JltRIROp, "jlt"),
-    ],
-)
-def test_rs_imm_rs_format_print(op_type, expected_mnemonic):
-    rs1_val = create_ssa_value(Registers.R0)
-    rs2_val = create_ssa_value(Registers.R5)
-    op = op_type(rs1_val, 100, rs2_val)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert "R0" in assembly
-    assert "100" in assembly
-    assert "R5" in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,imm_value",
-    [
-        (AddRIROp, "add", 100),
-        (SubRIROp, "sub", 50),
-        (AndRIROp, "and", 0xFF),
-        (OrRIROp, "or", 0xAA),
-        (XorRIROp, "xor", 0x55),
-        (AslRIROp, "asl", 5),
-        (AsrRIROp, "asr", 3),
-    ],
-)
-def test_rs_imm_rd_arithmetic_format_print(op_type, expected_mnemonic, imm_value):
-    rs_val = create_ssa_value(Registers.R1)
-    op = op_type(rs_val, imm_value, Registers.R2)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert "R1" in assembly
-    assert str(imm_value) in assembly
-    assert "R2" in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic",
-    [
-        (AddRRROp, "add"),
-        (SubRRROp, "sub"),
-        (AndRRROp, "and"),
-        (OrRRROp, "or"),
-        (XorRRROp, "xor"),
-        (AslRRROp, "asl"),
-        (AsrRRROp, "asr"),
-    ],
-)
-def test_rs_rs_rd_arithmetic_format_print(op_type, expected_mnemonic):
-    rs1_val = create_ssa_value(Registers.R1)
-    rs2_val = create_ssa_value(Registers.R2)
-    op = op_type(rs1_val, rs2_val, Registers.R3)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert "R1" in assembly
-    assert "R2" in assembly
-    assert "R3" in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,imm1,imm2",
-    [
-        (SetAwgGainIIOp, "set_awg_gain", 0x1000, 0x2000),
-        (SetAwgOffsIIOp, "set_awg_offs", 0x0100, 0x0200),
-    ],
-)
-def test_imm_imm_latched_format_print(op_type, expected_mnemonic, imm1, imm2):
-    op = op_type(imm1, imm2)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert str(imm1) in assembly
-    assert str(imm2) in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic",
-    [
-        (SetAwgGainRROp, "set_awg_gain"),
-        (SetAwgOffsRROp, "set_awg_offs"),
-    ],
-)
-def test_rs_rs_latched_format_print(op_type, expected_mnemonic):
-    rs1_val = create_ssa_value(Registers.R0)
-    rs2_val = create_ssa_value(Registers.R1)
-    op = op_type(rs1_val, rs2_val)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert "R0" in assembly
-    assert "R1" in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,imm1,imm2",
-    [
-        (FbAcqIqIdIIOp, "fb_acq_iq_id", 1, 2),
-        (FbAcqIqIdIIOp, "fb_acq_iq_id", 100, 200),
-    ],
-)
-def test_imm_imm_feedback_format_print(op_type, expected_mnemonic, imm1, imm2):
-    op = op_type(imm1, imm2)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert str(imm1) in assembly
-    assert str(imm2) in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic,imm1,imm2,imm3,imm4",
-    [
-        (SetCondIIIIOp, "set_cond", 0, 1, 2, 3),
-        (SetCondIIIIOp, "set_cond", 100, 200, 300, 400),
-    ],
-)
-def test_imm_imm_imm_imm_format_print(
-    op_type,
-    expected_mnemonic,
-    imm1,
-    imm2,
-    imm3,
-    imm4,
-):
-    op = op_type(imm1, imm2, imm3, imm4)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert str(imm1) in assembly
-    assert str(imm2) in assembly
-    assert str(imm3) in assembly
-    assert str(imm4) in assembly
-
-
-@pytest.mark.parametrize(
-    "op_type,expected_mnemonic",
-    [
-        (SetCondRRRIOp, "set_cond"),
-    ],
-)
-def test_rs_rs_rs_imm_format_print(op_type, expected_mnemonic):
-    rs1_val = create_ssa_value(Registers.R0)
-    rs2_val = create_ssa_value(Registers.R1)
-    rs3_val = create_ssa_value(Registers.R2)
-    op = op_type(rs1_val, rs2_val, rs3_val, 42)
-    assembly = op.assembly_line()
-    assert assembly is not None
-    assert assembly.startswith(expected_mnemonic)
-    assert "R0" in assembly
-    assert "R1" in assembly
-    assert "R2" in assembly
-    assert "42" in assembly
-
-
-# region End-to-end module assembly printing
 
 
 def _all_concrete_q1_ops():
@@ -400,125 +465,168 @@ def _all_concrete_q1_ops():
         q1_ops.LabelOp("entry", comment="entry"),
         q1_ops.DefDirectiveOp("CONST", "7", comment="const"),
         q1_ops.IllegalOp(),
-        q1_ops.StopIOp(1),
+        q1_ops.StopImmOp(SI32Imm(1)),
         q1_ops.StopOp(),
-        q1_ops.StopROp(r0),
+        q1_ops.StopRsOp(r0),
         q1_ops.NopOp(),
         # Jump Instructions
-        q1_ops.JmpIOp(100),
-        q1_ops.JmpROp(r1),
-        q1_ops.JzIOp(101),
-        q1_ops.JzROp(r2),
-        q1_ops.JnzIOp(102),
-        q1_ops.JnzROp(r3),
-        q1_ops.JoIOp(103),
-        q1_ops.JoROp(r4),
-        q1_ops.JnoIOp(104),
-        q1_ops.JnoROp(r5),
-        q1_ops.JsIOp(105),
-        q1_ops.JsROp(r6),
-        q1_ops.JnsIOp(106),
-        q1_ops.JnsROp(r7),
-        q1_ops.JgIOp(107),
-        q1_ops.JgROp(r8),
-        q1_ops.JlIOp(108),
-        q1_ops.JlROp(r9),
-        q1_ops.JleIOp(109),
-        q1_ops.JleROp(r10),
-        q1_ops.JaIOp(110),
-        q1_ops.JaROp(r11),
-        q1_ops.JaeIOp(111),
-        q1_ops.JaeROp(r12),
-        q1_ops.JbIOp(112),
-        q1_ops.JbROp(r13),
-        q1_ops.JbeIOp(113),
-        q1_ops.JbeROp(r14),
-        q1_ops.JgeRIIOp(r0, 10, 120),
-        q1_ops.JgeRIROp(r1, 11, r2),
-        q1_ops.JltRIIOp(r3, 12, 121),
-        q1_ops.JltRIROp(r4, 13, r5),
-        q1_ops.LoopRIOp(Registers.R16, 122),
-        q1_ops.LoopRROp(Registers.R17, r6),
+        q1_ops.JmpImmOp(AddressImm(100)),
+        q1_ops.JmpRsOp(r1),
+        q1_ops.JzImmOp(AddressImm(101)),
+        q1_ops.JzRsOp(r2),
+        q1_ops.JnzImmOp(AddressImm(102)),
+        q1_ops.JnzRsOp(r3),
+        q1_ops.JoImmOp(AddressImm(103)),
+        q1_ops.JoRsOp(r4),
+        q1_ops.JnoImmOp(AddressImm(104)),
+        q1_ops.JnoRsOp(r5),
+        q1_ops.JsImmOp(AddressImm(105)),
+        q1_ops.JsRsOp(r6),
+        q1_ops.JnsImmOp(AddressImm(106)),
+        q1_ops.JnsRsOp(r7),
+        q1_ops.JgImmOp(AddressImm(107)),
+        q1_ops.JgRsOp(r8),
+        q1_ops.JlImmOp(AddressImm(108)),
+        q1_ops.JlRsOp(r9),
+        q1_ops.JleImmOp(AddressImm(109)),
+        q1_ops.JleRsOp(r10),
+        q1_ops.JaImmOp(AddressImm(110)),
+        q1_ops.JaRsOp(r11),
+        q1_ops.JaeImmOp(AddressImm(111)),
+        q1_ops.JaeRsOp(r12),
+        q1_ops.JbImmOp(AddressImm(112)),
+        q1_ops.JbRsOp(r13),
+        q1_ops.JbeImmOp(AddressImm(113)),
+        q1_ops.JbeRsOp(r14),
+        q1_ops.JgeImmOp(AddressImm(115)),
+        q1_ops.JgeRsOp(r15),
+        q1_ops.JgeRsImmImmOp(r0, UI32Imm(10), AddressImm(120)),
+        q1_ops.JgeRsImmRsOp(r1, UI32Imm(11), r2),
+        q1_ops.JltRsImmImmOp(r3, UI32Imm(12), AddressImm(121)),
+        q1_ops.JltRsImmRsOp(r4, UI32Imm(13), r5),
+        q1_ops.LoopRdImmOp(Registers.R16, AddressImm(122)),
+        q1_ops.LoopRdRsOp(Registers.R17, r6),
         # Arithmetic Instructions
-        q1_ops.MoveIROp(14, Registers.R18),
-        q1_ops.MoveRROp(r7, Registers.R19),
-        q1_ops.NotIROp(15, Registers.R20),
-        q1_ops.NotRROp(r8, Registers.R21),
-        q1_ops.AddRIROp(r9, 16, Registers.R22),
-        q1_ops.AddRRROp(r10, r11, Registers.R23),
-        q1_ops.SubRIROp(r12, 17, Registers.R24),
-        q1_ops.SubRRROp(r13, r14, Registers.R25),
-        q1_ops.AndRIROp(r15, 18, Registers.R26),
-        q1_ops.AndRRROp(r0, r1, Registers.R27),
-        q1_ops.OrRIROp(r2, 19, Registers.R28),
-        q1_ops.OrRRROp(r3, r4, Registers.R29),
-        q1_ops.XorRIROp(r5, 20, Registers.R30),
-        q1_ops.XorRRROp(r6, r7, Registers.R31),
-        q1_ops.AslRIROp(r8, 21, Registers.R32),
-        q1_ops.AslRRROp(r9, r10, Registers.R33),
-        q1_ops.AsrRIROp(r11, 22, Registers.R34),
-        q1_ops.AsrRRROp(r12, r13, Registers.R35),
+        q1_ops.MoveImmRdOp(SU32Imm(14), Registers.R18),
+        q1_ops.MoveRsRdOp(r7, Registers.R19),
+        q1_ops.NotImmRdOp(SU32Imm(15), Registers.R20),
+        q1_ops.NotRsRdOp(r8, Registers.R21),
+        q1_ops.AddRsImmRdOp(r9, SU32Imm(16), Registers.R22),
+        q1_ops.AddRsRsRdOp(r10, r11, Registers.R23),
+        q1_ops.SubRsImmRdOp(r12, SU32Imm(17), Registers.R24),
+        q1_ops.SubRsRsRdOp(r13, r14, Registers.R25),
+        q1_ops.AndRsImmRdOp(r15, SU32Imm(18), Registers.R26),
+        q1_ops.AndRsRsRdOp(r0, r1, Registers.R27),
+        q1_ops.OrRsImmRdOp(r2, SU32Imm(19), Registers.R28),
+        q1_ops.OrRsRsRdOp(r3, r4, Registers.R29),
+        q1_ops.XorRsImmRdOp(r5, SU32Imm(20), Registers.R30),
+        q1_ops.XorRsRsRdOp(r6, r7, Registers.R31),
+        q1_ops.AslRsImmRdOp(r8, UI32Imm(21), Registers.R32),
+        q1_ops.AslRsRsRdOp(r9, r10, Registers.R33),
+        q1_ops.AsrRsImmRdOp(r11, UI32Imm(22), Registers.R34),
+        q1_ops.AsrRsRsRdOp(r12, r13, Registers.R35),
+        # Comparison
+        q1_ops.CmpRsRsOp(r0, r1),
+        q1_ops.CmpRsImmOp(r2, SU32Imm(30)),
+        q1_ops.CmpImmRsOp(SU32Imm(31), r3),
+        q1_ops.TestRsRsOp(r4, r5),
+        q1_ops.TestRsImmOp(r6, SU32Imm(32)),
+        q1_ops.TestImmRsOp(SU32Imm(33), r7),
+        # Logical shifts
+        q1_ops.LsrRsImmRdOp(r8, UI32Imm(34), Registers.R39),
+        q1_ops.LsrRsRsRdOp(r9, r10, Registers.R40),
+        q1_ops.LsrImmRsRdOp(UI32Imm(35), r11, Registers.R41),
+        q1_ops.LslRsImmRdOp(r12, UI32Imm(36), Registers.R42),
+        q1_ops.LslRsRsRdOp(r13, r14, Registers.R43),
+        q1_ops.LslImmRsRdOp(UI32Imm(37), r15, Registers.R44),
+        # 16-bit multiplications
+        q1_ops.Mulu16RsImmRdOp(r0, UI16Imm(40), Registers.R45),
+        q1_ops.Mulu16RsRsRdOp(r1, r2, Registers.R46),
+        q1_ops.Mulu16ImmRsRdOp(UI16Imm(41), r3, Registers.R47),
+        q1_ops.Muls16RsImmRdOp(r4, SI16Imm(42), Registers.R48),
+        q1_ops.Muls16RsRsRdOp(r5, r6, Registers.R49),
+        q1_ops.Muls16ImmRsRdOp(SI16Imm(43), r7, Registers.R50),
+        # 32-bit multiplications low/high
+        q1_ops.Mulu32lRsImmRdOp(r8, UI32Imm(44), Registers.R51),
+        q1_ops.Mulu32lRsRsRdOp(r9, r10, Registers.R52),
+        q1_ops.Mulu32lImmRsRdOp(UI32Imm(45), r11, Registers.R53),
+        q1_ops.Mulu32hRsImmRdOp(r12, UI32Imm(46), Registers.R54),
+        q1_ops.Mulu32hRsRsRdOp(r13, r14, Registers.R55),
+        q1_ops.Mulu32hImmRsRdOp(UI32Imm(47), r15, Registers.R56),
+        q1_ops.Muls32lRsImmRdOp(r0, SI32Imm(48), Registers.R57),
+        q1_ops.Muls32lRsRsRdOp(r1, r2, Registers.R58),
+        q1_ops.Muls32lImmRsRdOp(SI32Imm(49), r3, Registers.R59),
+        q1_ops.Muls32hRsImmRdOp(r4, SI32Imm(50), Registers.R60),
+        q1_ops.Muls32hRsRsRdOp(r5, r6, Registers.R61),
+        q1_ops.Muls32hImmRsRdOp(SI32Imm(51), r7, Registers.R62),
+        # 32-bit multiplications with full 64-bit result
+        q1_ops.Mulu32RsImmRdRdOp(r8, UI32Imm(60), Registers.R0, Registers.R1),
+        q1_ops.Mulu32RsRsRdRdOp(r9, r10, Registers.R2, Registers.R3),
+        q1_ops.Mulu32ImmRsRdRdOp(UI32Imm(61), r11, Registers.R4, Registers.R5),
+        q1_ops.Muls32RsImmRdRdOp(r12, SI32Imm(62), Registers.R6, Registers.R7),
+        q1_ops.Muls32RsRsRdRdOp(r13, r14, Registers.R8, Registers.R9),
+        q1_ops.Muls32ImmRsRdRdOp(SI32Imm(63), r15, Registers.R10, Registers.R11),
         # Latched Instructions
-        q1_ops.SetCondIIIIOp(1, 2, 3, 4),
-        q1_ops.SetCondRRRIOp(r0, r1, r2, 23),
-        q1_ops.SetMrkIOp(24),
-        q1_ops.SetMrkROp(r3),
-        q1_ops.SetFreqIOp(25),
-        q1_ops.SetFreqROp(r4),
+        q1_ops.SetCondImmImmImmImmOp(BoolImm(1), UI4Imm(2), UI3Imm(3), UI16Imm(4)),
+        q1_ops.SetCondRsRsRsImmOp(r0, r1, r2, UI16Imm(23)),
+        q1_ops.SetMrkImmOp(UI4Imm(8)),
+        q1_ops.SetMrkRsOp(r3),
+        q1_ops.SetFreqImmOp(SI32Imm(25)),
+        q1_ops.SetFreqRsOp(r4),
         q1_ops.ResetPhOp(),
-        q1_ops.SetPhIOp(26),
-        q1_ops.SetPhROp(r5),
-        q1_ops.SetPhDeltaIOp(27),
-        q1_ops.SetPhDeltaROp(r6),
-        q1_ops.SetAwgGainIIOp(28, 29),
-        q1_ops.SetAwgGainRROp(r7, r8),
-        q1_ops.SetAwgOffsIIOp(30, 31),
-        q1_ops.SetAwgOffsRROp(r9, r10),
+        q1_ops.SetPhImmOp(NcoPhaseImm(26)),
+        q1_ops.SetPhRsOp(r5),
+        q1_ops.SetPhDeltaImmOp(NcoPhaseImm(27)),
+        q1_ops.SetPhDeltaRsOp(r6),
+        q1_ops.SetAwgGainImmImmOp(SI16Imm(28), SI16Imm(29)),
+        q1_ops.SetAwgGainRsRsOp(r7, r8),
+        q1_ops.SetAwgOffsImmImmOp(SI16Imm(30), SI16Imm(31)),
+        q1_ops.SetAwgOffsRsRsOp(r9, r10),
         # LINQ Feedback Instructions
-        q1_ops.FbAcqIqIdIIOp(32, 33),
-        q1_ops.FbAcqIqIdRIOp(r11, 34),
-        q1_ops.FbAcqIqShiftIIOp(35, 36),
-        q1_ops.FbAcqTbCfgIIIIOp(37, 38, 39, 40),
-        q1_ops.FbAcqTbExtraIIIOp(41, 42, 43),
-        q1_ops.FbAcqTbIdIIOp(44, 45),
-        q1_ops.FbAcqTbIdRIOp(r12, 46),
-        q1_ops.FbAcqTbMockIIIIOp(47, 48, 49, 50),
-        q1_ops.FbAcqTbValidIIOp(51, 52),
-        q1_ops.FbAcqTbValidRIOp(r13, 53),
-        q1_ops.FbComCfgIIIIOp(54, 55, 56, 57),
-        q1_ops.FbComDataIIIOp(58, 59, 60),
-        q1_ops.FbComDataIRIOp(61, r14, 62),
-        q1_ops.FbComExtraIIIOp(63, 64, 65),
-        q1_ops.FbCmdIIIOp(66, 67, 68),
-        q1_ops.FbCmdIRIOp(69, r15, 70),
-        q1_ops.FbPopDataIROp(71, Registers.R36),
-        q1_ops.FbPullDataRROp(Registers.R37, Registers.R38),
+        q1_ops.FbAcqIqIdImmImmOp(UI8Imm(32), DurationImm(33)),
+        q1_ops.FbAcqIqIdRsImmOp(r11, DurationImm(34)),
+        q1_ops.FbAcqIqShiftImmImmOp(UI6Imm(35), DurationImm(36)),
+        q1_ops.FbAcqTbCfgImmImmImmImmOp(
+            UI2Imm(1), UI10Imm(38), UI7Imm(39), DurationImm(40)
+        ),
+        q1_ops.FbAcqTbExtraImmImmImmOp(BoolImm(1), UI16Imm(42), DurationImm(43)),
+        q1_ops.FbAcqTbIdImmImmOp(UI8Imm(44), DurationImm(45)),
+        q1_ops.FbAcqTbIdRsImmOp(r12, DurationImm(46)),
+        q1_ops.FbAcqTbMockImmImmImmImmOp(
+            BoolImm(1), BoolImm(1), BoolImm(1), DurationImm(50)
+        ),
+        q1_ops.FbAcqTbValidImmImmOp(BoolImm(1), DurationImm(52)),
+        q1_ops.FbAcqTbValidRsImmOp(r13, DurationImm(53)),
+        q1_ops.FbComCfgImmImmImmImmOp(UI2Imm(2), UI10Imm(55), UI7Imm(56), DurationImm(57)),
+        q1_ops.FbComDataImmImmImmOp(UI8Imm(58), UI32Imm(59), DurationImm(60)),
+        q1_ops.FbComDataImmRsImmOp(UI8Imm(61), r14, DurationImm(62)),
+        q1_ops.FbComExtraImmImmImmOp(BoolImm(1), UI16Imm(64), DurationImm(65)),
+        q1_ops.FbPopDataImmRdOp(UI16Imm(71), Registers.R36),
+        q1_ops.FbPullDataRdRdOp(Registers.R37, Registers.R38),
         # Real-time Instructions
-        q1_ops.WaitIOp(100),
-        q1_ops.WaitROp(r0),
-        q1_ops.WaitSyncIOp(200),
-        q1_ops.WaitSyncROp(r1),
-        q1_ops.WaitTriggerIIOp(1, 50),
-        q1_ops.WaitTriggerRROp(r2, r3),
-        q1_ops.PlayIIIOp(1, 2, 100),
-        q1_ops.PlayRRIOp(r4, r5, 100),
-        q1_ops.AcquireIIIOp(0, 1, 100),
-        q1_ops.AcquireIRIOp(0, r6, 100),
-        q1_ops.AcquireWeighedIIIIIOp(0, 1, 0, 1, 100),
-        q1_ops.AcquireWeighedIRRRIOp(0, r7, r8, r9, 100),
-        q1_ops.AcquireTtlIIIIOp(0, 0, 1, 100),
-        q1_ops.AcquireTtlIRIIOp(0, r10, 1, 100),
-        q1_ops.AcquireTimetagsIIIIIOp(0, 0, 1, 0, 100),
-        q1_ops.AcquireTimetagsIRIRIOp(0, r11, 1, r12, 100),
-        q1_ops.AcquireDigitalIIIOp(0, 0, 100),
-        q1_ops.AcquireDigitalIRIOp(0, r13, 100),
-        q1_ops.UpdThresIIIOp(0, 1, 100),
-        q1_ops.UpdThresIRIOp(0, r14, 100),
-        q1_ops.UpdParamIOp(100),
-        q1_ops.LatchRstIOp(100),
-        q1_ops.LatchRstROp(r15),
-        q1_ops.SetLatchEnIIOp(1, 100),
-        q1_ops.SetLatchEnRIOp(r0, 100),
+        q1_ops.WaitImmOp(DurationImm(100)),
+        q1_ops.WaitRsOp(r0),
+        q1_ops.WaitSyncImmOp(DurationImm(200)),
+        q1_ops.WaitSyncRsOp(r1),
+        q1_ops.WaitTriggerImmImmOp(UI4Imm(1), DurationImm(50)),
+        q1_ops.WaitTriggerRsRsOp(r2, r3),
+        q1_ops.PlayImmImmImmOp(UI10Imm(1), UI10Imm(2), DurationImm(100)),
+        q1_ops.PlayRsRsImmOp(r4, r5, DurationImm(100)),
+        q1_ops.AcquireImmImmImmOp(UI5Imm(0), UI24Imm(1), DurationImm(100)),
+        q1_ops.AcquireImmRsImmOp(UI5Imm(0), r6, DurationImm(100)),
+        q1_ops.AcquireWeightedImmImmImmImmImmOp(
+            UI5Imm(0), UI24Imm(1), UI6Imm(0), UI6Imm(1), DurationImm(100)
+        ),
+        q1_ops.AcquireWeightedImmRsRsRsImmOp(UI5Imm(0), r7, r8, r9, DurationImm(100)),
+        q1_ops.AcquireTtlImmImmImmImmOp(
+            UI5Imm(0), UI24Imm(0), BoolImm(1), DurationImm(100)
+        ),
+        q1_ops.AcquireTtlImmRsImmImmOp(UI5Imm(0), r10, BoolImm(1), DurationImm(100)),
+        q1_ops.UpdParamImmOp(DurationImm(100)),
+        q1_ops.LatchRstImmOp(DurationImm(100)),
+        q1_ops.LatchRstRsOp(r11),
+        q1_ops.SetLatchEnImmImmOp(BoolImm(1), DurationImm(100)),
+        q1_ops.SetLatchEnRsImmOp(r0, DurationImm(100)),
     ]
 
 
@@ -533,6 +641,3 @@ def test_all_ops_assembly_output_matches_q1_code():
 
     assert asm_lines == expected_lines
     assert {op.name for op in ops} == {op.name for op in Q1.operations}
-
-
-# endregion

@@ -6,12 +6,12 @@ from xdsl.dialects.builtin import ArrayAttr, StringAttr
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1.ir.ops import NopOp, StopOp
-from qat.experimental.dialect.q1_sequence.attrs import (
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
     make_waveform,
     make_weight,
 )
-from qat.experimental.dialect.q1_sequence.ops import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 
 
 class TestSequenceOpConstruction:
@@ -47,7 +47,7 @@ class TestSequenceOpConstruction:
         acq = make_acquisition("acq0", 0, 1)
         seq = SequenceOp("ch0", [StopOp()], acquisitions=ArrayAttr([acq]))
         assert len(seq.acquisitions) == 1
-        assert seq.acquisitions.data[0].num_bins.value.data == 1
+        assert seq.acquisitions.data[0].num_bins.data == 1
 
     def test_with_all_tables(self):
         wf = make_waveform("wf0", 0, [0.5])

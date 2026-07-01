@@ -11,30 +11,30 @@ from xdsl.dialects.builtin import ModuleOp
 from xdsl.utils.target import Target
 
 from qat.experimental.dialect.q1 import emit_program
-from qat.experimental.dialect.q1_sequence.attrs import (
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
     AcquisitionAttr,
     WaveformAttr,
     WeightAttr,
 )
-from qat.experimental.dialect.q1_sequence.ops import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 
 
 def _waveform_to_dict(attr: WaveformAttr) -> dict[str, Any]:
     data = list(attr.data.iter_values())
-    return {"data": data, "index": attr.index.value.data}
+    return {"data": data, "index": attr.index.data}
 
 
 def _weight_to_dict(attr: WeightAttr) -> dict[str, Any]:
     data = list(attr.data.iter_values())
-    return {"data": data, "index": attr.index.value.data}
+    return {"data": data, "index": attr.index.data}
 
 
 def _acquisition_to_dict(
     attr: AcquisitionAttr,
 ) -> dict[str, Any]:
     return {
-        "num_bins": attr.num_bins.value.data,
-        "index": attr.index.value.data,
+        "num_bins": attr.num_bins.data,
+        "index": attr.index.data,
     }
 
 

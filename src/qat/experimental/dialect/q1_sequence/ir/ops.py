@@ -16,7 +16,7 @@ from xdsl.irdl import (
 from xdsl.traits import IsolatedFromAbove, IsTerminator, SymbolOpInterface
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.q1_sequence.attrs import (
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
     AcquisitionAttr,
     WaveformAttr,
     WeightAttr,
@@ -113,7 +113,7 @@ class SequenceOp(IRDLOperation):
             indices: set[int] = set()
             names: set[str] = set()
             for entry in table:
-                idx = entry.index.value.data
+                idx = entry.index.data
                 if idx in indices:
                     raise VerifyException(
                         f"Duplicate index {idx} in {table_name}"

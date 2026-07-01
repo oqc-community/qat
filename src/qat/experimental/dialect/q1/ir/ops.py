@@ -19,41 +19,63 @@ Flag mnemonic glossary used in op docstrings:
 """
 
 from xdsl.backend.assembly_printer import AssemblyPrinter
-from xdsl.dialects.builtin import IntegerAttr, StringAttr
-from xdsl.ir import Operation, SSAValue
+from xdsl.dialects.builtin import StringAttr
 from xdsl.irdl import irdl_op_definition, prop_def, traits_def
 from xdsl.traits import Commutative, IsTerminator, Pure
 
 from qat.experimental.dialect.q1.ir.abstract_ops import (
     AssemblyInstructionArg,
-    IIIIIOperation,
-    IIIIOperation,
-    IIIOperation,
-    IIOperation,
-    IOperation,
-    IRdOperation,
-    IRsIIOperation,
-    IRsIOperation,
-    IRsIRsIOperation,
-    IRsRsRsIOperation,
+    ImmImmImmImmImmOperation,
+    ImmImmImmImmOperation,
+    ImmImmImmOperation,
+    ImmImmOperation,
+    ImmOperation,
+    ImmRdOperation,
+    ImmRsImmImmOperation,
+    ImmRsImmOperation,
+    ImmRsOperation,
+    ImmRsRdOperation,
+    ImmRsRdRdOperation,
+    ImmRsRsRsImmOperation,
     NullaryOperation,
     Q1AsmOperation,
-    RdIOperation,
+    RdImmOperation,
     RdRdOperation,
     RdRsOperation,
-    RsIIOperation,
-    RsIOperation,
-    RsIRdOperation,
-    RsIRsOperation,
+    RsImmImmOperation,
+    RsImmOperation,
+    RsImmRdOperation,
+    RsImmRdRdOperation,
+    RsImmRsOperation,
     RsOperation,
     RsRdOperation,
-    RsRsIOperation,
+    RsRsImmOperation,
     RsRsOperation,
     RsRsRdOperation,
-    RsRsRsIOperation,
+    RsRsRdRdOperation,
+    RsRsRsImmOperation,
 )
 from qat.experimental.dialect.q1.ir.attrs import LabelAttr
-from qat.experimental.dialect.q1.ir.imm_desc import UI32
+from qat.experimental.dialect.q1.ir.imm_desc import (
+    AddressImm,
+    BoolImm,
+    DurationImm,
+    NcoPhaseImm,
+    SI16Imm,
+    SI32Imm,
+    SU32Imm,
+    UI2Imm,
+    UI3Imm,
+    UI4Imm,
+    UI5Imm,
+    UI6Imm,
+    UI7Imm,
+    UI8Imm,
+    UI10Imm,
+    UI16Imm,
+    UI24Imm,
+    UI32Imm,
+)
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 
 # region Core Instructions
@@ -160,19 +182,12 @@ class IllegalOp(NullaryOperation):
 
 
 @irdl_op_definition
-class StopIOp(IOperation):
+class StopImmOp(ImmOperation[SI32Imm]):
     """Stop the sequencer using an immediate stop code."""
 
     name = "q1.i.stop"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(
-        self,
-        status: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(status, comment=comment)
 
     @property
     def status(self):
@@ -182,19 +197,12 @@ class StopIOp(IOperation):
 
 
 @irdl_op_definition
-class StopROp(RsOperation[IntRegisterType]):
+class StopRsOp(RsOperation[IntRegisterType]):
     """Stop the sequencer using a stop code read from a register."""
 
     name = "q1.r.stop"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(
-        self,
-        status: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(status, comment=comment)
 
     @property
     def status(self):
@@ -210,9 +218,6 @@ class StopOp(NullaryOperation):
     name = "q1..stop"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(self, comment: str | StringAttr | None = None):
-        super().__init__(comment=comment)
 
 
 @irdl_op_definition
@@ -230,20 +235,13 @@ class NopOp(NullaryOperation):
 
 
 @irdl_op_definition
-class JmpIOp(IOperation):
+class JmpImmOp(ImmOperation[AddressImm]):
     """Unconditional jump to an immediate address."""
 
     name = "q1.i.jmp"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -252,20 +250,13 @@ class JmpIOp(IOperation):
 
 
 @irdl_op_definition
-class JmpROp(RsOperation[IntRegisterType]):
+class JmpRsOp(RsOperation[IntRegisterType]):
     """Unconditional jump to an address stored in a register."""
 
     name = "q1.r.jmp"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -274,20 +265,13 @@ class JmpROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JzIOp(IOperation):
+class JzImmOp(ImmOperation[AddressImm]):
     """Jump if `ZF == 1` to an immediate address."""
 
     name = "q1.i.jz"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -296,20 +280,13 @@ class JzIOp(IOperation):
 
 
 @irdl_op_definition
-class JzROp(RsOperation[IntRegisterType]):
+class JzRsOp(RsOperation[IntRegisterType]):
     """Jump if `ZF == 1` to a register address."""
 
     name = "q1.r.jz"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -318,20 +295,13 @@ class JzROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JnzIOp(IOperation):
+class JnzImmOp(ImmOperation[AddressImm]):
     """Jump if `ZF == 0` to an immediate address."""
 
     name = "q1.i.jnz"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -340,20 +310,13 @@ class JnzIOp(IOperation):
 
 
 @irdl_op_definition
-class JnzROp(RsOperation[IntRegisterType]):
+class JnzRsOp(RsOperation[IntRegisterType]):
     """Jump if `ZF == 0` to a register address."""
 
     name = "q1.r.jnz"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -362,20 +325,13 @@ class JnzROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JoIOp(IOperation):
+class JoImmOp(ImmOperation[AddressImm]):
     """Jump if `OF == 1` to an immediate address."""
 
     name = "q1.i.jo"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -384,20 +340,13 @@ class JoIOp(IOperation):
 
 
 @irdl_op_definition
-class JoROp(RsOperation[IntRegisterType]):
+class JoRsOp(RsOperation[IntRegisterType]):
     """Jump if `OF == 1` to a register address."""
 
     name = "q1.r.jo"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -406,20 +355,13 @@ class JoROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JnoIOp(IOperation):
+class JnoImmOp(ImmOperation[AddressImm]):
     """Jump if `OF == 0` to an immediate address."""
 
     name = "q1.i.jno"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -428,20 +370,13 @@ class JnoIOp(IOperation):
 
 
 @irdl_op_definition
-class JnoROp(RsOperation[IntRegisterType]):
+class JnoRsOp(RsOperation[IntRegisterType]):
     """Jump if `OF == 0` to a register address."""
 
     name = "q1.r.jno"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -450,20 +385,13 @@ class JnoROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JsIOp(IOperation):
+class JsImmOp(ImmOperation[AddressImm]):
     """Jump if `NF == 1` to an immediate address."""
 
     name = "q1.i.js"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -472,20 +400,13 @@ class JsIOp(IOperation):
 
 
 @irdl_op_definition
-class JsROp(RsOperation[IntRegisterType]):
+class JsRsOp(RsOperation[IntRegisterType]):
     """Jump if `NF == 1` to a register address."""
 
     name = "q1.r.js"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -494,20 +415,13 @@ class JsROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JnsIOp(IOperation):
+class JnsImmOp(ImmOperation[AddressImm]):
     """Jump if `NF == 0` to an immediate address."""
 
     name = "q1.i.jns"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -516,20 +430,13 @@ class JnsIOp(IOperation):
 
 
 @irdl_op_definition
-class JnsROp(RsOperation[IntRegisterType]):
+class JnsRsOp(RsOperation[IntRegisterType]):
     """Jump if `NF == 0` to a register address."""
 
     name = "q1.r.jns"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -538,20 +445,13 @@ class JnsROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JgIOp(IOperation):
+class JgImmOp(ImmOperation[AddressImm]):
     """Jump if signed `a > b` condition holds (`ZF == 0` and `NF == OF`)."""
 
     name = "q1.i.jg"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -560,20 +460,13 @@ class JgIOp(IOperation):
 
 
 @irdl_op_definition
-class JgROp(RsOperation[IntRegisterType]):
+class JgRsOp(RsOperation[IntRegisterType]):
     """Jump if signed `a > b` condition holds (`ZF == 0` and `NF == OF`)."""
 
     name = "q1.r.jg"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -582,20 +475,13 @@ class JgROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JlIOp(IOperation):
+class JlImmOp(ImmOperation[AddressImm]):
     """Jump if signed `a < b` condition holds (`NF != OF`)."""
 
     name = "q1.i.jl"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -604,20 +490,13 @@ class JlIOp(IOperation):
 
 
 @irdl_op_definition
-class JlROp(RsOperation[IntRegisterType]):
+class JlRsOp(RsOperation[IntRegisterType]):
     """Jump if signed `a < b` condition holds (`NF != OF`)."""
 
     name = "q1.r.jl"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -626,20 +505,13 @@ class JlROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JleIOp(IOperation):
+class JleImmOp(ImmOperation[AddressImm]):
     """Jump if signed `a <= b` condition holds (`ZF == 1` or `NF != OF`)."""
 
     name = "q1.i.jle"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -648,20 +520,13 @@ class JleIOp(IOperation):
 
 
 @irdl_op_definition
-class JleROp(RsOperation[IntRegisterType]):
+class JleRsOp(RsOperation[IntRegisterType]):
     """Jump if signed `a <= b` condition holds (`ZF == 1` or `NF != OF`)."""
 
     name = "q1.r.jle"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -670,20 +535,13 @@ class JleROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JaIOp(IOperation):
+class JaImmOp(ImmOperation[AddressImm]):
     """Jump if unsigned `a > b` condition holds (`ZF == 0` and `CF == 0`)."""
 
     name = "q1.i.ja"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -692,20 +550,13 @@ class JaIOp(IOperation):
 
 
 @irdl_op_definition
-class JaROp(RsOperation[IntRegisterType]):
+class JaRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a > b` condition holds (`ZF == 0` and `CF == 0`)."""
 
     name = "q1.r.ja"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -714,20 +565,13 @@ class JaROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JaeIOp(IOperation):
+class JaeImmOp(ImmOperation[AddressImm]):
     """Jump if unsigned `a >= b` condition holds (`CF == 0`)."""
 
     name = "q1.i.jae"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -736,20 +580,13 @@ class JaeIOp(IOperation):
 
 
 @irdl_op_definition
-class JaeROp(RsOperation[IntRegisterType]):
+class JaeRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a >= b` condition holds (`CF == 0`)."""
 
     name = "q1.r.jae"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -758,20 +595,13 @@ class JaeROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JbIOp(IOperation):
+class JbImmOp(ImmOperation[AddressImm]):
     """Jump if unsigned `a < b` condition holds (`CF == 1`)."""
 
     name = "q1.i.jb"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -780,20 +610,13 @@ class JbIOp(IOperation):
 
 
 @irdl_op_definition
-class JbROp(RsOperation[IntRegisterType]):
+class JbRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a < b` condition holds (`CF == 1`)."""
 
     name = "q1.r.jb"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -802,20 +625,13 @@ class JbROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JbeIOp(IOperation):
+class JbeImmOp(ImmOperation[AddressImm]):
     """Jump if unsigned `a <= b` condition holds (`ZF == 1` or `CF == 1`)."""
 
     name = "q1.i.jbe"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -824,19 +640,42 @@ class JbeIOp(IOperation):
 
 
 @irdl_op_definition
-class JbeROp(RsOperation[IntRegisterType]):
+class JbeRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a <= b` condition holds (`ZF == 1` or `CF == 1`)."""
 
     name = "q1.r.jbe"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(address, comment=comment)
+    @property
+    def address(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+
+@irdl_op_definition
+class JgeImmOp(ImmOperation[AddressImm]):
+    """Jump if signed `a >= b` condition holds (`ZF == 0` and `NF == OF`)."""
+
+    name = "q1.i.jge"
+
+    traits = traits_def(IsTerminator())
+
+    @property
+    def address(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class JgeRsOp(RsOperation[IntRegisterType]):
+    """Jump if signed `a >= b` condition holds (`ZF == 0` and `NF == OF`)."""
+
+    name = "q1.r.jge"
+
+    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -846,22 +685,13 @@ class JbeROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JgeRIIOp(RsIIOperation[IntRegisterType]):
+class JgeRsImmImmOp(RsImmImmOperation[IntRegisterType, UI32Imm, AddressImm]):
     """Deprecated legacy jump variant for unsigned `a >= b` with immediate address."""
 
     name = "q1.rii.jge"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, address, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -882,22 +712,13 @@ class JgeRIIOp(RsIIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JgeRIROp(RsIRsOperation[IntRegisterType]):
+class JgeRsImmRsOp(RsImmRsOperation[IntRegisterType, UI32Imm]):
     """Deprecated legacy jump variant for unsigned `a >= b` with register address."""
 
     name = "q1.rir.jge"
 
     traits = traits_def(IsTerminator())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, address, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -918,21 +739,12 @@ class JgeRIROp(RsIRsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JltRIIOp(RsIIOperation[IntRegisterType]):
+class JltRsImmImmOp(RsImmImmOperation[IntRegisterType, UI32Imm, AddressImm]):
     """Deprecated legacy jump variant for unsigned `a < b` with immediate address."""
 
     name = "q1.rii.jlt"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, address, comment=comment)
 
     @property
     def a(self):
@@ -954,21 +766,12 @@ class JltRIIOp(RsIIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JltRIROp(RsIRsOperation[IntRegisterType]):
+class JltRsImmRsOp(RsImmRsOperation[IntRegisterType, UI32Imm]):
     """Deprecated legacy jump variant for unsigned `a < b` with register address."""
 
     name = "q1.rir.jlt"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, address, comment=comment)
 
     @property
     def a(self):
@@ -990,20 +793,12 @@ class JltRIROp(RsIRsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class LoopRIOp(RdIOperation[IntRegisterType]):
+class LoopRdImmOp(RdImmOperation[IntRegisterType, AddressImm]):
     """Deprecated legacy loop: decrement source and jump while the result is non-zero."""
 
     name = "q1.ri.loop"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(
-        self,
-        source: IntRegisterType,
-        address: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(source, address, comment=comment)
 
     @property
     def source(self):
@@ -1019,20 +814,12 @@ class LoopRIOp(RdIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class LoopRROp(RdRsOperation[IntRegisterType]):
+class LoopRdRsOp(RdRsOperation[IntRegisterType]):
     """Deprecated legacy loop: decrement source and jump while the result is non-zero."""
 
     name = "q1.rr.loop"
 
     traits = traits_def(IsTerminator())
-
-    def __init__(
-        self,
-        source: IntRegisterType,
-        address: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(source, address, comment=comment)
 
     @property
     def source(self):
@@ -1053,21 +840,13 @@ class LoopRROp(RdRsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class MoveIROp(IRdOperation[IntRegisterType]):
+class MoveImmRdOp(ImmRdOperation[IntRegisterType, SU32Imm]):
     """Copy an immediate source value into a destination register."""
 
     name = "q1.ir.move"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        source: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(source, rd, comment=comment)
-
     @property
     def source(self):
         """Semantic alias for the generic imm field."""
@@ -1076,21 +855,13 @@ class MoveIROp(IRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class MoveRROp(RsRdOperation[IntRegisterType]):
+class MoveRsRdOp(RsRdOperation[IntRegisterType]):
     """Copy a register source value into a destination register."""
 
     name = "q1.rr.move"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        source: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(source, rd, comment=comment)
-
     @property
     def source(self):
         """Semantic alias for the generic rs field."""
@@ -1099,21 +870,13 @@ class MoveRROp(RsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class NotIROp(IRdOperation[IntRegisterType]):
+class NotImmRdOp(ImmRdOperation[IntRegisterType, SU32Imm]):
     """Bitwise invert an immediate source value and write the result to destination."""
 
     name = "q1.ir.not"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        source: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(source, rd, comment=comment)
-
     @property
     def source(self):
         """Semantic alias for the generic imm field."""
@@ -1122,21 +885,13 @@ class NotIROp(IRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class NotRROp(RsRdOperation[IntRegisterType]):
+class NotRsRdOp(RsRdOperation[IntRegisterType]):
     """Bitwise invert a register source value and write the result to destination."""
 
     name = "q1.rr.not"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        source: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(source, rd, comment=comment)
-
     @property
     def source(self):
         """Semantic alias for the generic rs field."""
@@ -1145,22 +900,13 @@ class NotRROp(RsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AddRIROp(RsIRdOperation[IntRegisterType]):
+class AddRsImmRdOp(RsImmRdOperation[IntRegisterType, SU32Imm]):
     """Add a register and immediate operand and store the result in destination."""
 
     name = "q1.rir.add"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -1175,22 +921,13 @@ class AddRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AddRRROp(RsRsRdOperation[IntRegisterType]):
+class AddRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Add two register operands and store the result in destination."""
 
     name = "q1.rrr.add"
 
     traits = traits_def(Pure(), Commutative())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -1205,22 +942,13 @@ class AddRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SubRIROp(RsIRdOperation[IntRegisterType]):
+class SubRsImmRdOp(RsImmRdOperation[IntRegisterType, SU32Imm]):
     """Subtract an immediate operand from a register operand into destination."""
 
     name = "q1.rir.sub"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -1235,22 +963,13 @@ class SubRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SubRRROp(RsRsRdOperation[IntRegisterType]):
+class SubRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Subtract a register operand from another register operand into destination."""
 
     name = "q1.rrr.sub"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -1265,22 +984,13 @@ class SubRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AndRIROp(RsIRdOperation[IntRegisterType]):
+class AndRsImmRdOp(RsImmRdOperation[IntRegisterType, SU32Imm]):
     """Bitwise AND between register and immediate operands into destination."""
 
     name = "q1.rir.and"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -1295,22 +1005,13 @@ class AndRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AndRRROp(RsRsRdOperation[IntRegisterType]):
+class AndRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Bitwise AND between two register operands into destination."""
 
     name = "q1.rrr.and"
 
     traits = traits_def(Pure(), Commutative())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -1325,22 +1026,13 @@ class AndRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class OrRIROp(RsIRdOperation[IntRegisterType]):
+class OrRsImmRdOp(RsImmRdOperation[IntRegisterType, SU32Imm]):
     """Bitwise OR between register and immediate operands into destination."""
 
     name = "q1.rir.or"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -1355,22 +1047,13 @@ class OrRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class OrRRROp(RsRsRdOperation[IntRegisterType]):
+class OrRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Bitwise OR between two register operands into destination."""
 
     name = "q1.rrr.or"
 
     traits = traits_def(Pure(), Commutative())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -1385,22 +1068,13 @@ class OrRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class XorRIROp(RsIRdOperation[IntRegisterType]):
+class XorRsImmRdOp(RsImmRdOperation[IntRegisterType, SU32Imm]):
     """Bitwise XOR between register and immediate operands into destination."""
 
     name = "q1.rir.xor"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -1415,22 +1089,13 @@ class XorRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class XorRRROp(RsRsRdOperation[IntRegisterType]):
+class XorRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Bitwise XOR between two register operands into destination."""
 
     name = "q1.rrr.xor"
 
     traits = traits_def(Pure(), Commutative())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -1445,22 +1110,13 @@ class XorRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AslRIROp(RsIRdOperation[IntRegisterType]):
+class AslRsImmRdOp(RsImmRdOperation[IntRegisterType, UI32Imm]):
     """Arithmetic left shift by immediate bit-count into destination."""
 
     name = "q1.rir.asl"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the generic rs field."""
@@ -1475,22 +1131,13 @@ class AslRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AslRRROp(RsRsRdOperation[IntRegisterType]):
+class AslRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Arithmetic left shift by register bit-count into destination."""
 
     name = "q1.rrr.asl"
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -1505,21 +1152,12 @@ class AslRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AsrRIROp(RsIRdOperation[IntRegisterType]):
+class AsrRsImmRdOp(RsImmRdOperation[IntRegisterType, UI32Imm]):
     """Arithmetic right shift by immediate bit-count into destination."""
 
     name = "q1.rir.asr"
 
     traits = traits_def(Pure())
-
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: int | IntegerAttr[UI32],
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
 
     @property
     def a(self):
@@ -1535,21 +1173,12 @@ class AsrRIROp(RsIRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AsrRRROp(RsRsRdOperation[IntRegisterType]):
+class AsrRsRsRdOp(RsRsRdOperation[IntRegisterType]):
     """Arithmetic right shift by register bit-count into destination."""
 
     name = "q1.rrr.asr"
 
     traits = traits_def(Pure())
-
-    def __init__(
-        self,
-        a: Operation | SSAValue,
-        b: Operation | SSAValue,
-        rd: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(a, b, rd, comment=comment)
 
     @property
     def a(self):
@@ -1562,6 +1191,1033 @@ class AsrRRROp(RsRsRdOperation[IntRegisterType]):
         """Semantic alias for the second generic rs field."""
 
         return self.rs2
+
+
+@irdl_op_definition
+class CmpRsRsOp(RsRsOperation[IntRegisterType]):
+    """Compare two register operands by computing `a - b` to update the ALU flags."""
+
+    name = "q1.rr.cmp"
+
+    traits = traits_def()
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+
+@irdl_op_definition
+class CmpRsImmOp(RsImmOperation[IntRegisterType, SU32Imm]):
+    """Compare a register operand against an immediate by computing `a - b` to update the
+    ALU flags."""
+
+    name = "q1.ri.cmp"
+
+    traits = traits_def()
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class CmpImmRsOp(ImmRsOperation[IntRegisterType, SU32Imm]):
+    """Compare an immediate against a register operand by computing `b - a` to update the
+    ALU flags."""
+
+    name = "q1.ir.cmp"
+
+    traits = traits_def()
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class TestRsRsOp(RsRsOperation[IntRegisterType]):
+    """Test two register operands by computing `a & b` to update the ALU flags.
+
+    .. note::
+       Opts out of pytest collection (``__test__ = False``) because the ``Test`` prefix
+       is reserved as the default pytest test-class pattern, but this is an ISA op class.
+    """
+
+    __test__ = False
+
+    name = "q1.rr.test"
+
+    traits = traits_def()
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+
+@irdl_op_definition
+class TestRsImmOp(RsImmOperation[IntRegisterType, SU32Imm]):
+    """Test a register operand against an immediate by computing `a & b` to update the ALU
+    flags.
+
+    .. note::
+       Opts out of pytest collection (``__test__ = False``) because the ``Test`` prefix
+       is reserved as the default pytest test-class pattern, but this is an ISA op class.
+    """
+
+    __test__ = False
+
+    name = "q1.ri.test"
+
+    traits = traits_def()
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class TestImmRsOp(ImmRsOperation[IntRegisterType, SU32Imm]):
+    """Test an immediate against a register operand by computing `b & a` to update the ALU
+    flags.
+
+    .. note::
+       Opts out of pytest collection (``__test__ = False``) because the ``Test`` prefix
+       is reserved as the default pytest test-class pattern, but this is an ISA op class.
+    """
+
+    __test__ = False
+
+    name = "q1.ir.test"
+
+    traits = traits_def()
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+
+@irdl_op_definition
+class LsrRsImmRdOp(RsImmRdOperation[IntRegisterType, UI32Imm]):
+    """Logical right shift register operand `a` by an immediate bit-count `b` into
+    destination."""
+
+    name = "q1.rir.lsr"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class LsrRsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Logical right shift register operand `a` by a register bit-count `b` into
+    destination."""
+
+    name = "q1.rrr.lsr"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class LsrImmRsRdOp(ImmRsRdOperation[IntRegisterType, UI32Imm]):
+    """Logical right shift an immediate operand `b` by a register bit-count `a` into
+    destination."""
+
+    name = "q1.irr.lsr"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class LslRsImmRdOp(RsImmRdOperation[IntRegisterType, UI32Imm]):
+    """Logical left shift register operand `a` by an immediate bit-count `b` into
+    destination."""
+
+    name = "q1.rir.lsl"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class LslRsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Logical left shift register operand `a` by a register bit-count `b` into
+    destination."""
+
+    name = "q1.rrr.lsl"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class LslImmRsRdOp(ImmRsRdOperation[IntRegisterType, UI32Imm]):
+    """Logical left shift an immediate operand `b` by a register bit-count `a` into
+    destination."""
+
+    name = "q1.irr.lsl"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu16RsImmRdOp(RsImmRdOperation[IntRegisterType, UI16Imm]):
+    """Unsigned 16-bit multiplication of register `a` by immediate `b` into the low 32 bits
+    of destination."""
+
+    name = "q1.rir.mulu16"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu16RsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Unsigned 16-bit multiplication of two register operands into the low 32 bits of
+    destination."""
+
+    name = "q1.rrr.mulu16"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu16ImmRsRdOp(ImmRsRdOperation[IntRegisterType, UI16Imm]):
+    """Unsigned 16-bit multiplication of immediate `b` by register `a` into the low 32 bits
+    of destination."""
+
+    name = "q1.irr.mulu16"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls16RsImmRdOp(RsImmRdOperation[IntRegisterType, SI16Imm]):
+    """Signed 16-bit multiplication of register `a` by immediate `b` into the low 32 bits of
+    destination."""
+
+    name = "q1.rir.muls16"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls16RsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Signed 16-bit multiplication of two register operands into the low 32 bits of
+    destination."""
+
+    name = "q1.rrr.muls16"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls16ImmRsRdOp(ImmRsRdOperation[IntRegisterType, SI16Imm]):
+    """Signed 16-bit multiplication of immediate `b` by register `a` into the low 32 bits of
+    destination."""
+
+    name = "q1.irr.muls16"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32lRsImmRdOp(RsImmRdOperation[IntRegisterType, UI32Imm]):
+    """Unsigned 32-bit multiplication of register `a` by immediate `b`, storing the low 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.rir.mulu32l"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32lRsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Unsigned 32-bit multiplication of two register operands, storing the low 32 bits of
+    the 64-bit result into destination."""
+
+    name = "q1.rrr.mulu32l"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32lImmRsRdOp(ImmRsRdOperation[IntRegisterType, UI32Imm]):
+    """Unsigned 32-bit multiplication of immediate `b` by register `a`, storing the low 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.irr.mulu32l"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32hRsImmRdOp(RsImmRdOperation[IntRegisterType, UI32Imm]):
+    """Unsigned 32-bit multiplication of register `a` by immediate `b`, storing the high 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.rir.mulu32h"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32hRsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Unsigned 32-bit multiplication of two register operands, storing the high 32 bits of
+    the 64-bit result into destination."""
+
+    name = "q1.rrr.mulu32h"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32hImmRsRdOp(ImmRsRdOperation[IntRegisterType, UI32Imm]):
+    """Unsigned 32-bit multiplication of immediate `b` by register `a`, storing the high 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.irr.mulu32h"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls32lRsImmRdOp(RsImmRdOperation[IntRegisterType, SI32Imm]):
+    """Signed 32-bit multiplication of register `a` by immediate `b`, storing the low 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.rir.muls32l"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls32lRsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Signed 32-bit multiplication of two register operands, storing the low 32 bits of the
+    64-bit result into destination."""
+
+    name = "q1.rrr.muls32l"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls32lImmRsRdOp(ImmRsRdOperation[IntRegisterType, SI32Imm]):
+    """Signed 32-bit multiplication of immediate `b` by register `a`, storing the low 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.irr.muls32l"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls32hRsImmRdOp(RsImmRdOperation[IntRegisterType, SI32Imm]):
+    """Signed 32-bit multiplication of register `a` by immediate `b`, storing the high 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.rir.muls32h"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls32hRsRsRdOp(RsRsRdOperation[IntRegisterType]):
+    """Signed 32-bit multiplication of two register operands, storing the high 32 bits of
+    the 64-bit result into destination."""
+
+    name = "q1.rrr.muls32h"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Muls32hImmRsRdOp(ImmRsRdOperation[IntRegisterType, SI32Imm]):
+    """Signed 32-bit multiplication of immediate `b` by register `a`, storing the high 32
+    bits of the 64-bit result into destination."""
+
+    name = "q1.irr.muls32h"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the generic rd field."""
+
+        return self.rd
+
+
+@irdl_op_definition
+class Mulu32RsImmRdRdOp(RsImmRdRdOperation[IntRegisterType, UI32Imm]):
+    """Unsigned 32-bit multiplication of register `a` by immediate `b`, storing the low 32
+    bits of the 64-bit result into `dst_low` and the high 32 bits into `dst_high`."""
+
+    name = "q1.rirr.mulu32"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
+
+
+@irdl_op_definition
+class Mulu32RsRsRdRdOp(RsRsRdRdOperation[IntRegisterType]):
+    """Unsigned 32-bit multiplication of two register operands, storing the low 32 bits of
+    the 64-bit result into `dst_low` and the high 32 bits into `dst_high`."""
+
+    name = "q1.rrrr.mulu32"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
+
+
+@irdl_op_definition
+class Mulu32ImmRsRdRdOp(ImmRsRdRdOperation[IntRegisterType, UI32Imm]):
+    """Unsigned 32-bit multiplication of immediate `b` by register `a`, storing the low 32
+    bits of the 64-bit result into `dst_low` and the high 32 bits into `dst_high`."""
+
+    name = "q1.irrr.mulu32"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
+
+
+@irdl_op_definition
+class Muls32RsImmRdRdOp(RsImmRdRdOperation[IntRegisterType, SI32Imm]):
+    """Signed 32-bit multiplication of register `a` by immediate `b`, storing the low 32
+    bits of the 64-bit result into `dst_low` and the high 32 bits into `dst_high`."""
+
+    name = "q1.rirr.muls32"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
+
+
+@irdl_op_definition
+class Muls32RsRsRdRdOp(RsRsRdRdOperation[IntRegisterType]):
+    """Signed 32-bit multiplication of two register operands, storing the low 32 bits of the
+    64-bit result into `dst_low` and the high 32 bits into `dst_high`."""
+
+    name = "q1.rrrr.muls32"
+
+    traits = traits_def(Pure(), Commutative())
+
+    @property
+    def a(self):
+        """Semantic alias for the first generic rs field."""
+
+        return self.rs1
+
+    @property
+    def b(self):
+        """Semantic alias for the second generic rs field."""
+
+        return self.rs2
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
+
+
+@irdl_op_definition
+class Muls32ImmRsRdRdOp(ImmRsRdRdOperation[IntRegisterType, SI32Imm]):
+    """Signed 32-bit multiplication of immediate `b` by register `a`, storing the low 32
+    bits of the 64-bit result into `dst_low` and the high 32 bits into `dst_high`."""
+
+    name = "q1.irrr.muls32"
+
+    traits = traits_def(Pure())
+
+    @property
+    def a(self):
+        """Semantic alias for the generic rs field."""
+
+        return self.rs
+
+    @property
+    def b(self):
+        """Semantic alias for the generic imm field."""
+
+        return self.imm
+
+    @property
+    def dst_low(self):
+        """Semantic alias for the first generic rd field."""
+
+        return self.rd1
+
+    @property
+    def dst_high(self):
+        """Semantic alias for the second generic rd field."""
+
+        return self.rd2
 
 
 # endregion
@@ -1570,22 +2226,12 @@ class AsrRRROp(RsRsRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SetCondIIIIOp(IIIIOperation):
+class SetCondImmImmImmImmOp(ImmImmImmImmOperation[BoolImm, UI4Imm, UI3Imm, UI16Imm]):
     """Configure conditional execution from trigger-network condition parameters."""
 
     name = "q1.iiii.set_cond"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        cond_en: int | IntegerAttr[UI32],
-        mask: int | IntegerAttr[UI32],
-        op: int | IntegerAttr[UI32],
-        else_cnt: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(cond_en, mask, op, else_cnt, comment=comment)
 
     @property
     def cond_en(self):
@@ -1613,22 +2259,12 @@ class SetCondIIIIOp(IIIIOperation):
 
 
 @irdl_op_definition
-class SetCondRRRIOp(RsRsRsIOperation[IntRegisterType]):
+class SetCondRsRsRsImmOp(RsRsRsImmOperation[IntRegisterType, UI16Imm]):
     """Configure conditional execution from register-based condition parameters."""
 
     name = "q1.rrri.set_cond"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        cond_en: Operation | SSAValue,
-        mask: Operation | SSAValue,
-        op: Operation | SSAValue,
-        else_cnt: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(cond_en, mask, op, else_cnt, comment=comment)
 
     @property
     def cond_en(self):
@@ -1656,19 +2292,12 @@ class SetCondRRRIOp(RsRsRsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SetMrkIOp(IOperation):
+class SetMrkImmOp(ImmOperation[UI4Imm]):
     """Set marker output mask from an immediate source."""
 
     name = "q1.i.set_mrk"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        mrk: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(mrk, comment=comment)
 
     @property
     def mrk(self):
@@ -1678,19 +2307,12 @@ class SetMrkIOp(IOperation):
 
 
 @irdl_op_definition
-class SetMrkROp(RsOperation[IntRegisterType]):
+class SetMrkRsOp(RsOperation[IntRegisterType]):
     """Set marker output mask from a register source."""
 
     name = "q1.r.set_mrk"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        mrk: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(mrk, comment=comment)
 
     @property
     def mrk(self):
@@ -1700,19 +2322,12 @@ class SetMrkROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SetFreqIOp(IOperation):
+class SetFreqImmOp(ImmOperation[SI32Imm]):
     """Set the latched NCO frequency from an immediate source."""
 
     name = "q1.i.set_freq"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        nco_freq: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(nco_freq, comment=comment)
 
     @property
     def nco_freq(self):
@@ -1722,19 +2337,12 @@ class SetFreqIOp(IOperation):
 
 
 @irdl_op_definition
-class SetFreqROp(RsOperation[IntRegisterType]):
+class SetFreqRsOp(RsOperation[IntRegisterType]):
     """Set the latched NCO frequency from a register source."""
 
     name = "q1.r.set_freq"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        nco_freq: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(nco_freq, comment=comment)
 
     @property
     def nco_freq(self):
@@ -1753,20 +2361,13 @@ class ResetPhOp(NullaryOperation):
 
 
 @irdl_op_definition
-class SetPhIOp(IOperation):
+class SetPhImmOp(ImmOperation[NcoPhaseImm]):
     """Set the latched NCO phase-offset source from an immediate."""
 
     name = "q1.i.set_ph"
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        nco_po: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(nco_po, comment=comment)
-
     @property
     def nco_po(self):
         """Semantic alias for the generic imm field."""
@@ -1775,20 +2376,13 @@ class SetPhIOp(IOperation):
 
 
 @irdl_op_definition
-class SetPhROp(RsOperation[IntRegisterType]):
+class SetPhRsOp(RsOperation[IntRegisterType]):
     """Set the latched NCO phase-offset source from a register."""
 
     name = "q1.r.set_ph"
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        nco_po: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(nco_po, comment=comment)
-
     @property
     def nco_po(self):
         """Semantic alias for the generic rs field."""
@@ -1797,19 +2391,12 @@ class SetPhROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SetPhDeltaIOp(IOperation):
+class SetPhDeltaImmOp(ImmOperation[NcoPhaseImm]):
     """Set the latched instantaneous phase-kick source from an immediate."""
 
     name = "q1.i.set_ph_delta"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        nco_delta_po: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(nco_delta_po, comment=comment)
 
     @property
     def nco_delta_po(self):
@@ -1819,19 +2406,12 @@ class SetPhDeltaIOp(IOperation):
 
 
 @irdl_op_definition
-class SetPhDeltaROp(RsOperation[IntRegisterType]):
+class SetPhDeltaRsOp(RsOperation[IntRegisterType]):
     """Set the latched instantaneous phase-kick source from a register."""
 
     name = "q1.r.set_ph_delta"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        nco_delta_po: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(nco_delta_po, comment=comment)
 
     @property
     def nco_delta_po(self):
@@ -1841,20 +2421,12 @@ class SetPhDeltaROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SetAwgGainIIOp(IIOperation):
+class SetAwgGainImmImmOp(ImmImmOperation[SI16Imm, SI16Imm]):
     """Set latched AWG gains for both output paths from immediate values."""
 
     name = "q1.ii.set_awg_gain"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        gain0: int | IntegerAttr[UI32],
-        gain1: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(gain0, gain1, comment=comment)
 
     @property
     def gain0(self):
@@ -1870,20 +2442,12 @@ class SetAwgGainIIOp(IIOperation):
 
 
 @irdl_op_definition
-class SetAwgGainRROp(RsRsOperation[IntRegisterType]):
+class SetAwgGainRsRsOp(RsRsOperation[IntRegisterType]):
     """Set latched AWG gains for both output paths from register values."""
 
     name = "q1.rr.set_awg_gain"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        gain0: Operation | SSAValue,
-        gain1: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(gain0, gain1, comment=comment)
 
     @property
     def gain0(self):
@@ -1899,20 +2463,12 @@ class SetAwgGainRROp(RsRsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class SetAwgOffsIIOp(IIOperation):
+class SetAwgOffsImmImmOp(ImmImmOperation[SI16Imm, SI16Imm]):
     """Set latched AWG offsets for both output paths from immediate values."""
 
     name = "q1.ii.set_awg_offs"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        offs0: int | IntegerAttr[UI32],
-        offs1: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(offs0, offs1, comment=comment)
 
     @property
     def offs0(self):
@@ -1928,20 +2484,12 @@ class SetAwgOffsIIOp(IIOperation):
 
 
 @irdl_op_definition
-class SetAwgOffsRROp(RsRsOperation[IntRegisterType]):
+class SetAwgOffsRsRsOp(RsRsOperation[IntRegisterType]):
     """Set latched AWG offsets for both output paths from register values."""
 
     name = "q1.rr.set_awg_offs"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        offs0: Operation | SSAValue,
-        offs1: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(offs0, offs1, comment=comment)
 
     @property
     def offs0(self):
@@ -1964,21 +2512,13 @@ class SetAwgOffsRROp(RsRsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbPopDataIROp(IRdOperation[IntRegisterType]):
+class FbPopDataImmRdOp(ImmRdOperation[IntRegisterType, UI16Imm]):
     """Pop the next entry whose id matches the immediate from the feedback queue and write
     the associated data value into the destination register."""
 
     name = "q1.ir.fb_pop_data"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        destination: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, destination, comment=comment)
 
     @property
     def id(self):
@@ -1994,7 +2534,7 @@ class FbPopDataIROp(IRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbPullDataRROp(RdRdOperation[IntRegisterType]):
+class FbPullDataRdRdOp(RdRdOperation[IntRegisterType]):
     """Pull the first available entry from the feedback queue regardless of id, writing the
     entry's id into :attr:`destination_id` and the associated data into
     :attr:`destination`."""
@@ -2002,14 +2542,6 @@ class FbPullDataRROp(RdRdOperation[IntRegisterType]):
     name = "q1.rr.fb_pull_data"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        id: IntRegisterType,
-        destination: IntRegisterType,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, destination, comment=comment)
 
     @property
     def destination_id(self):
@@ -2030,22 +2562,13 @@ class FbPullDataRROp(RdRdOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbComDataIIIOp(IIIOperation):
+class FbComDataImmImmImmOp(ImmImmImmOperation[UI8Imm, UI32Imm, DurationImm]):
     """Send an immediate value over LINQ tagged with the given id and wait duration ns."""
 
     name = "q1.iii.fb_com_data"
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        value: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, value, duration, comment=comment)
-
     @property
     def id(self):
         """Semantic alias for the first generic imm field."""
@@ -2066,22 +2589,13 @@ class FbComDataIIIOp(IIIOperation):
 
 
 @irdl_op_definition
-class FbComDataIRIOp(IRsIOperation[IntRegisterType]):
+class FbComDataImmRsImmOp(ImmRsImmOperation[IntRegisterType, UI8Imm, DurationImm]):
     """Send a register value over LINQ tagged with the given id and wait duration ns."""
 
     name = "q1.iri.fb_com_data"
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        value: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, value, duration, comment=comment)
-
     @property
     def id(self):
         """Semantic alias for the first generic imm field."""
@@ -2102,97 +2616,13 @@ class FbComDataIRIOp(IRsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbCmdIIIOp(IIIOperation):
-    """Send an immediate command value over LINQ tagged with the given id and wait duration
-    ns."""
-
-    name = "q1.iii.fb_cmd"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        value: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, value, duration, comment=comment)
-
-    @property
-    def id(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def value(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-    @property
-    def duration(self):
-        """Semantic alias for the third generic imm field."""
-
-        return self.imm3
-
-
-@irdl_op_definition
-class FbCmdIRIOp(IRsIOperation[IntRegisterType]):
-    """Send a register command value over LINQ tagged with the given id and wait duration
-    ns."""
-
-    name = "q1.iri.fb_cmd"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        value: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, value, duration, comment=comment)
-
-    @property
-    def id(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def value(self):
-        """Semantic alias for the generic rs field."""
-
-        return self.rs
-
-    @property
-    def duration(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-
-@irdl_op_definition
-class FbComCfgIIIIOp(IIIIOperation):
+class FbComCfgImmImmImmImmOp(ImmImmImmImmOperation[UI2Imm, UI10Imm, UI7Imm, DurationImm]):
     """Configure write-combine mode, bit position, payload length, and wait duration for
     subsequent fb_com_data transmissions."""
 
     name = "q1.iiii.fb_com_cfg"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        wc: int | IntegerAttr[UI32],
-        shift: int | IntegerAttr[UI32],
-        length: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(wc, shift, length, duration, comment=comment)
 
     @property
     def wc(self):
@@ -2220,7 +2650,7 @@ class FbComCfgIIIIOp(IIIIOperation):
 
 
 @irdl_op_definition
-class FbComExtraIIIOp(IIIOperation):
+class FbComExtraImmImmImmOp(ImmImmImmOperation[BoolImm, UI16Imm, DurationImm]):
     """Enable or disable inclusion of extra bytes in the LINQ data payload and wait duration
     ns.
 
@@ -2230,15 +2660,6 @@ class FbComExtraIIIOp(IIIOperation):
     name = "q1.iii.fb_com_extra"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        extra_vld: int | IntegerAttr[UI32],
-        extra: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(extra_vld, extra, duration, comment=comment)
 
     @property
     def extra_vld(self):
@@ -2265,7 +2686,7 @@ class FbComExtraIIIOp(IIIOperation):
 
 
 @irdl_op_definition
-class FbAcqTbIdIIOp(IIOperation):
+class FbAcqTbIdImmImmOp(ImmImmOperation[UI8Imm, DurationImm]):
     """Configure the id tag attached to thresholded bits (TB) sent over LINQ (immediate
     variant) and wait duration ns.
 
@@ -2275,14 +2696,6 @@ class FbAcqTbIdIIOp(IIOperation):
     name = "q1.ii.fb_acq_tb_id"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, duration, comment=comment)
 
     @property
     def id(self):
@@ -2298,7 +2711,7 @@ class FbAcqTbIdIIOp(IIOperation):
 
 
 @irdl_op_definition
-class FbAcqTbIdRIOp(RsIOperation[IntRegisterType]):
+class FbAcqTbIdRsImmOp(RsImmOperation[IntRegisterType, DurationImm]):
     """Configure the id tag attached to thresholded bits (TB) sent over LINQ (register
     variant) and wait duration ns.
 
@@ -2308,14 +2721,6 @@ class FbAcqTbIdRIOp(RsIOperation[IntRegisterType]):
     name = "q1.ri.fb_acq_tb_id"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        id: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, duration, comment=comment)
 
     @property
     def id(self):
@@ -2331,23 +2736,13 @@ class FbAcqTbIdRIOp(RsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbAcqTbCfgIIIIOp(IIIIOperation):
+class FbAcqTbCfgImmImmImmImmOp(ImmImmImmImmOperation[UI2Imm, UI10Imm, UI7Imm, DurationImm]):
     """Configure write-combine mode, bit position, payload length, and wait duration for
     thresholded-bit transmissions."""
 
     name = "q1.iiii.fb_acq_tb_cfg"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        wc: int | IntegerAttr[UI32],
-        shift: int | IntegerAttr[UI32],
-        length: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(wc, shift, length, duration, comment=comment)
 
     @property
     def wc(self):
@@ -2375,21 +2770,13 @@ class FbAcqTbCfgIIIIOp(IIIIOperation):
 
 
 @irdl_op_definition
-class FbAcqTbValidIIOp(IIOperation):
+class FbAcqTbValidImmImmOp(ImmImmOperation[BoolImm, DurationImm]):
     """Configure the valid bit for thresholded bits (TB) sent over LINQ (immediate variant)
     and wait duration ns."""
 
     name = "q1.ii.fb_acq_tb_valid"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        tb_valid: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(tb_valid, duration, comment=comment)
 
     @property
     def tb_valid(self):
@@ -2405,21 +2792,13 @@ class FbAcqTbValidIIOp(IIOperation):
 
 
 @irdl_op_definition
-class FbAcqTbValidRIOp(RsIOperation[IntRegisterType]):
+class FbAcqTbValidRsImmOp(RsImmOperation[IntRegisterType, DurationImm]):
     """Configure the valid bit for thresholded bits (TB) sent over LINQ (register variant)
     and wait duration ns."""
 
     name = "q1.ri.fb_acq_tb_valid"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        tb_valid: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(tb_valid, duration, comment=comment)
 
     @property
     def tb_valid(self):
@@ -2435,21 +2814,12 @@ class FbAcqTbValidRIOp(RsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbAcqTbExtraIIIOp(IIIOperation):
+class FbAcqTbExtraImmImmImmOp(ImmImmImmOperation[BoolImm, UI16Imm, DurationImm]):
     """Enable or disable inclusion of extra bytes in the TB payload and wait duration ns."""
 
     name = "q1.iii.fb_acq_tb_extra"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        extra_vld: int | IntegerAttr[UI32],
-        extra: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(extra_vld, extra, duration, comment=comment)
 
     @property
     def extra_vld(self):
@@ -2471,22 +2841,14 @@ class FbAcqTbExtraIIIOp(IIIOperation):
 
 
 @irdl_op_definition
-class FbAcqTbMockIIIIOp(IIIIOperation):
+class FbAcqTbMockImmImmImmImmOp(
+    ImmImmImmImmOperation[BoolImm, BoolImm, BoolImm, DurationImm]
+):
     """Transmit mock thresholded bits instead of real TB data when enable = 1."""
 
     name = "q1.iiii.fb_acq_tb_mock"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        mock_en: int | IntegerAttr[UI32],
-        mock_vld: int | IntegerAttr[UI32],
-        mock_data: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(mock_en, mock_vld, mock_data, duration, comment=comment)
 
     @property
     def mock_en(self):
@@ -2514,7 +2876,7 @@ class FbAcqTbMockIIIIOp(IIIIOperation):
 
 
 @irdl_op_definition
-class FbAcqIqIdIIOp(IIOperation):
+class FbAcqIqIdImmImmOp(ImmImmOperation[UI8Imm, DurationImm]):
     """Configure the id tag attached to IQ data sent over LINQ (immediate variant) and wait
     duration ns.
 
@@ -2524,14 +2886,6 @@ class FbAcqIqIdIIOp(IIOperation):
     name = "q1.ii.fb_acq_iq_id"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        id: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, duration, comment=comment)
 
     @property
     def id(self):
@@ -2547,7 +2901,7 @@ class FbAcqIqIdIIOp(IIOperation):
 
 
 @irdl_op_definition
-class FbAcqIqIdRIOp(RsIOperation[IntRegisterType]):
+class FbAcqIqIdRsImmOp(RsImmOperation[IntRegisterType, DurationImm]):
     """Configure the id tag attached to IQ data sent over LINQ (register variant) and wait
     duration ns.
 
@@ -2557,14 +2911,6 @@ class FbAcqIqIdRIOp(RsIOperation[IntRegisterType]):
     name = "q1.ri.fb_acq_iq_id"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        id: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(id, duration, comment=comment)
 
     @property
     def id(self):
@@ -2580,21 +2926,13 @@ class FbAcqIqIdRIOp(RsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class FbAcqIqShiftIIOp(IIOperation):
+class FbAcqIqShiftImmImmOp(ImmImmOperation[UI6Imm, DurationImm]):
     """Right-shift IQ values by shift bits before LINQ transmission to reduce resolution,
     then wait duration ns."""
 
     name = "q1.ii.fb_acq_iq_shift"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        shift: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(shift, duration, comment=comment)
 
     @property
     def shift(self):
@@ -2617,7 +2955,7 @@ class FbAcqIqShiftIIOp(IIOperation):
 
 
 @irdl_op_definition
-class SetLatchEnIIOp(IIOperation):
+class SetLatchEnImmImmOp(ImmImmOperation[BoolImm, DurationImm]):
     """Enable/Disable all trigger network address counters from an immediate value. When
     enabled counters will count all triggers on the trigger network. When disabled the
     counters hold their previous values.
@@ -2628,14 +2966,6 @@ class SetLatchEnIIOp(IIOperation):
     name = "q1.ii.set_latch_en"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        latch_en: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(latch_en, duration, comment=comment)
 
     @property
     def latch_en(self):
@@ -2651,7 +2981,7 @@ class SetLatchEnIIOp(IIOperation):
 
 
 @irdl_op_definition
-class SetLatchEnRIOp(RsIOperation[IntRegisterType]):
+class SetLatchEnRsImmOp(RsImmOperation[IntRegisterType, DurationImm]):
     """Enable/Disable all trigger network address counters. When enabled counters will count
     all triggers on the trigger network. When disabled the counters hold their previous
     values.
@@ -2662,14 +2992,6 @@ class SetLatchEnRIOp(RsIOperation[IntRegisterType]):
     name = "q1.ri.set_latch_en"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        latch_en: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(latch_en, duration, comment=comment)
 
     @property
     def latch_en(self):
@@ -2685,7 +3007,7 @@ class SetLatchEnRIOp(RsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class LatchRstIOp(IOperation):
+class LatchRstImmOp(ImmOperation[DurationImm]):
     """Resets all trigger network address counters to 0.
 
     Duration specifies the amount of time spent at the beginning of the instruction in ns
@@ -2695,13 +3017,6 @@ class LatchRstIOp(IOperation):
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
-
     @property
     def duration(self):
         """Semantic alias for the generic imm field."""
@@ -2710,7 +3025,7 @@ class LatchRstIOp(IOperation):
 
 
 @irdl_op_definition
-class LatchRstROp(RsOperation[IntRegisterType]):
+class LatchRstRsOp(RsOperation[IntRegisterType]):
     """Resets all trigger network address counters to 0.
 
     Duration specifies the amount of time spent at the beginning of the instruction in ns
@@ -2720,13 +3035,6 @@ class LatchRstROp(RsOperation[IntRegisterType]):
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        duration: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
-
     @property
     def duration(self):
         """Semantic alias for the generic rs field."""
@@ -2735,19 +3043,12 @@ class LatchRstROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class WaitIOp(IOperation):
+class WaitImmOp(ImmOperation[DurationImm]):
     """Waits for the specified duration in ns."""
 
     name = "q1.i.wait"
 
     traits = traits_def(Pure())
-
-    def __init__(
-        self,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
 
     @property
     def duration(self):
@@ -2757,19 +3058,12 @@ class WaitIOp(IOperation):
 
 
 @irdl_op_definition
-class WaitROp(RsOperation[IntRegisterType]):
+class WaitRsOp(RsOperation[IntRegisterType]):
     """Waits for the specified duration in ns."""
 
     name = "q1.r.wait"
 
     traits = traits_def(Pure())
-
-    def __init__(
-        self,
-        duration: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
 
     @property
     def duration(self):
@@ -2779,7 +3073,7 @@ class WaitROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class WaitTriggerIIOp(IIOperation):
+class WaitTriggerImmImmOp(ImmImmOperation[UI4Imm, DurationImm]):
     """Wait for a hardware trigger. Duration specifies the timeout in ns.
 
     Warning: Minimum time between wait_trigger and set_cond is 8ns.
@@ -2788,14 +3082,6 @@ class WaitTriggerIIOp(IIOperation):
     name = "q1.ii.wait_trigger"
 
     traits = traits_def(Pure())
-
-    def __init__(
-        self,
-        trig_addr: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(trig_addr, duration, comment=comment)
 
     @property
     def trig_addr(self):
@@ -2811,7 +3097,7 @@ class WaitTriggerIIOp(IIOperation):
 
 
 @irdl_op_definition
-class WaitTriggerRROp(RsRsOperation[IntRegisterType]):
+class WaitTriggerRsRsOp(RsRsOperation[IntRegisterType]):
     """Wait for a hardware trigger.
 
     Duration specifies the timeout in ns.
@@ -2820,14 +3106,6 @@ class WaitTriggerRROp(RsRsOperation[IntRegisterType]):
     name = "q1.rr.wait_trigger"
 
     traits = traits_def(Pure())
-
-    def __init__(
-        self,
-        trig_addr: Operation | SSAValue,
-        duration: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(trig_addr, duration, comment=comment)
 
     @property
     def trig_addr(self):
@@ -2843,7 +3121,7 @@ class WaitTriggerRROp(RsRsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class WaitSyncIOp(IOperation):
+class WaitSyncImmOp(ImmOperation[DurationImm]):
     """Wait for SYNQ to complete all previous tasks of all the sequencers.
 
     Duration specifies the amount of time spent at the beginning of the instruction in ns
@@ -2853,13 +3131,6 @@ class WaitSyncIOp(IOperation):
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
-
     @property
     def duration(self):
         """Semantic alias for the generic imm field."""
@@ -2868,7 +3139,7 @@ class WaitSyncIOp(IOperation):
 
 
 @irdl_op_definition
-class WaitSyncROp(RsOperation[IntRegisterType]):
+class WaitSyncRsOp(RsOperation[IntRegisterType]):
     """Wait for SYNQ to complete all previous tasks of all the sequencers.
 
     Duration specifies the amount of time spent at the beginning of the instruction in ns
@@ -2878,13 +3149,6 @@ class WaitSyncROp(RsOperation[IntRegisterType]):
 
     traits = traits_def(Pure())
 
-    def __init__(
-        self,
-        duration: Operation | SSAValue,
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
-
     @property
     def duration(self):
         """Semantic alias for the generic rs field."""
@@ -2893,20 +3157,13 @@ class WaitSyncROp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class UpdParamIOp(IOperation):
+class UpdParamImmOp(ImmOperation[DurationImm]):
     """Update the latched parameters and then wait for number of ns specified by
     duration."""
 
     name = "q1.i.upd_param"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(duration, comment=comment)
 
     @property
     def duration(self):
@@ -2916,7 +3173,7 @@ class UpdParamIOp(IOperation):
 
 
 @irdl_op_definition
-class PlayIIIOp(IIIOperation):
+class PlayImmImmImmOp(ImmImmImmOperation[UI10Imm, UI10Imm, DurationImm]):
     """Update the latched parameters, interrupt waves being played and start playing AWG
     waveforms stored at indexes wave_0 on path 0 and wave_1 on path 1.
 
@@ -2926,15 +3183,6 @@ class PlayIIIOp(IIIOperation):
     name = "q1.iii.play"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        wave0: int | IntegerAttr[UI32],
-        wave1: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(wave0, wave1, duration, comment=comment)
 
     @property
     def wave0(self):
@@ -2956,7 +3204,7 @@ class PlayIIIOp(IIIOperation):
 
 
 @irdl_op_definition
-class PlayRRIOp(RsRsIOperation[IntRegisterType]):
+class PlayRsRsImmOp(RsRsImmOperation[IntRegisterType, DurationImm]):
     """Update the latched parameters, interrupt waves being played and start playing AWG
     waveforms stored at indexes wave_0 on path 0 and wave_1 on path 1.
 
@@ -2966,15 +3214,6 @@ class PlayRRIOp(RsRsIOperation[IntRegisterType]):
     name = "q1.rri.play"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        wave0: Operation | SSAValue,
-        wave1: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(wave0, wave1, duration, comment=comment)
 
     @property
     def wave0(self):
@@ -2996,7 +3235,7 @@ class PlayRRIOp(RsRsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AcquireIIIOp(IIIOperation):
+class AcquireImmImmImmOp(ImmImmImmOperation[UI5Imm, UI24Imm, DurationImm]):
     """Update the latched parameters, interrupt currently active acquisitions and start the
     acquisition specified and store data in index provided by bin.
 
@@ -3010,15 +3249,6 @@ class AcquireIIIOp(IIIOperation):
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(acq_idx, bin_idx, duration, comment=comment)
-
     @property
     def acq_idx(self):
         """Semantic alias for the first generic imm field."""
@@ -3039,7 +3269,7 @@ class AcquireIIIOp(IIIOperation):
 
 
 @irdl_op_definition
-class AcquireIRIOp(IRsIOperation[IntRegisterType]):
+class AcquireImmRsImmOp(ImmRsImmOperation[IntRegisterType, UI5Imm, DurationImm]):
     """Update the latched parameters, interrupt currently active acquisitions and start the
     acquisition specified and store data in index provided by bin.
 
@@ -3052,15 +3282,6 @@ class AcquireIRIOp(IRsIOperation[IntRegisterType]):
     name = "q1.iri.acquire"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(acq_idx, bin_idx, duration, comment=comment)
 
     @property
     def acq_idx(self):
@@ -3082,7 +3303,9 @@ class AcquireIRIOp(IRsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AcquireWeighedIIIIIOp(IIIIIOperation):
+class AcquireWeightedImmImmImmImmImmOp(
+    ImmImmImmImmImmOperation[UI5Imm, UI24Imm, UI6Imm, UI6Imm, DurationImm]
+):
     """Update the latched parameters, interrupt currently active acquisitions and start the
     acquisition specified and store data in index provided by bin.
 
@@ -3092,22 +3315,9 @@ class AcquireWeighedIIIIIOp(IIIIIOperation):
     Duration specifies the amount of time spent at the beginning of the instruction in ns
     """
 
-    name = "q1.iiiii.acquire_weighed"
+    name = "q1.iiiii.acquire_weighted"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: int | IntegerAttr[UI32],
-        weight_idx0: int | IntegerAttr[UI32],
-        weight_idx1: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(
-            acq_idx, bin_idx, weight_idx0, weight_idx1, duration, comment=comment
-        )
 
     @property
     def acq_idx(self):
@@ -3141,7 +3351,9 @@ class AcquireWeighedIIIIIOp(IIIIIOperation):
 
 
 @irdl_op_definition
-class AcquireWeighedIRRRIOp(IRsRsRsIOperation[IntRegisterType]):
+class AcquireWeightedImmRsRsRsImmOp(
+    ImmRsRsRsImmOperation[IntRegisterType, UI5Imm, DurationImm]
+):
     """Update the latched parameters, interrupt currently active acquisitions and start the
     acquisition specified and store data in index provided by bin. Integration is executed
     using weights stored at indices weight_0 for path 0 and weight_1 for path 1.
@@ -3149,22 +3361,9 @@ class AcquireWeighedIRRRIOp(IRsRsRsIOperation[IntRegisterType]):
     Duration specifies the amount of time spent at the beginning of the instruction in ns
     """
 
-    name = "q1.irrri.acquire_weighed"
+    name = "q1.irrri.acquire_weighted"
 
     traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: Operation | SSAValue,
-        weight_idx0: Operation | SSAValue,
-        weight_idx1: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(
-            acq_idx, bin_idx, weight_idx0, weight_idx1, duration, comment=comment
-        )
 
     @property
     def acq_idx(self):
@@ -3198,7 +3397,9 @@ class AcquireWeighedIRRRIOp(IRsRsRsIOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class AcquireTtlIIIIOp(IIIIOperation):
+class AcquireTtlImmImmImmImmOp(
+    ImmImmImmImmOperation[UI5Imm, UI24Imm, BoolImm, DurationImm]
+):
     """Update the latched parameters, start the TTL trigger acquisition provided by the
     index in acquisition, store data in index provided by bin.
 
@@ -3211,16 +3412,6 @@ class AcquireTtlIIIIOp(IIIIOperation):
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: int | IntegerAttr[UI32],
-        ttl_en: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(acq_idx, bin_idx, ttl_en, duration, comment=comment)
-
     @property
     def acq_idx(self):
         """Semantic alias for the first generic imm field."""
@@ -3247,7 +3438,9 @@ class AcquireTtlIIIIOp(IIIIOperation):
 
 
 @irdl_op_definition
-class AcquireTtlIRIIOp(IRsIIOperation[IntRegisterType]):
+class AcquireTtlImmRsImmImmOp(
+    ImmRsImmImmOperation[IntRegisterType, UI5Imm, BoolImm, DurationImm]
+):
     """Update the latched parameters, start the TTL trigger acquisition provided by the
     index in acquisition, store data in index provided by bin.
 
@@ -3260,16 +3453,6 @@ class AcquireTtlIRIIOp(IRsIIOperation[IntRegisterType]):
 
     traits = traits_def()
 
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: Operation | SSAValue,
-        ttl_en: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(acq_idx, bin_idx, ttl_en, duration, comment=comment)
-
     @property
     def acq_idx(self):
         """Semantic alias for the first generic imm field."""
@@ -3293,290 +3476,6 @@ class AcquireTtlIRIIOp(IRsIIOperation[IntRegisterType]):
         """Semantic alias for the third generic imm field."""
 
         return self.imm3
-
-
-@irdl_op_definition
-class AcquireTimetagsIIIIIOp(IIIIIOperation):
-    """Depending on enable, open or close the time tag counting acquisition window.
-
-    fine_delay adjusts the start of the acquisition window relative to current sequencer
-    time.
-
-    acq_idx and bin_idx are defined by a closing acquire_timetags instruction.
-
-    Duration specifies the amount of time spent at the beginning of the instruction in ns
-    """
-
-    name = "q1.iiiii.acquire_timetags"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: int | IntegerAttr[UI32],
-        window_en: int | IntegerAttr[UI32],
-        fine_acq_delay: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(
-            acq_idx, bin_idx, window_en, fine_acq_delay, duration, comment=comment
-        )
-
-    @property
-    def acq_idx(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def bin_idx(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-    @property
-    def window_en(self):
-        """Semantic alias for the third generic imm field."""
-
-        return self.imm3
-
-    @property
-    def fine_acq_delay(self):
-        """Semantic alias for the fourth generic imm field."""
-
-        return self.imm4
-
-    @property
-    def duration(self):
-        """Semantic alias for the fifth generic imm field."""
-
-        return self.imm5
-
-
-@irdl_op_definition
-class AcquireTimetagsIRIRIOp(IRsIRsIOperation[IntRegisterType]):
-    """Depending on enable, open or close the time tag counting acquisition window.
-
-    fine_delay adjusts the start of the acquisition window relative to current sequencer
-    time.
-
-    acq_idx and bin_idx are defined by a closing acquire_timetags instruction.
-
-    Duration specifies the amount of time spent at the beginning of the instruction in ns
-    """
-
-    name = "q1.iriri.acquire_timetags"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: Operation | SSAValue,
-        window_en: int | IntegerAttr[UI32],
-        fine_acq_delay: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(
-            acq_idx, bin_idx, window_en, fine_acq_delay, duration, comment=comment
-        )
-
-    @property
-    def acq_idx(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def bin_idx(self):
-        """Semantic alias for the first generic rs field."""
-
-        return self.rs1
-
-    @property
-    def window_en(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-    @property
-    def fine_acq_delay(self):
-        """Semantic alias for the second generic rs field."""
-
-        return self.rs2
-
-    @property
-    def duration(self):
-        """Semantic alias for the third generic imm field."""
-
-        return self.imm3
-
-
-@irdl_op_definition
-class AcquireDigitalIIIOp(IIIOperation):
-    """Updates latched parameters, samples and records the inputs mapped to the sequencer.
-
-    Duration specifies the amount of time spent at the beginning of the instruction in ns
-    """
-
-    name = "q1.iii.acquire_digital"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(acq_idx, bin_idx, duration, comment=comment)
-
-    @property
-    def acq_idx(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def bin_idx(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-    @property
-    def duration(self):
-        """Semantic alias for the third generic imm field."""
-
-        return self.imm3
-
-
-@irdl_op_definition
-class AcquireDigitalIRIOp(IRsIOperation[IntRegisterType]):
-    """Updates latched parameters, samples and records the inputs mapped to the sequencer.
-
-    Duration specifies the amount of time spent at the beginning of the instruction in ns
-    """
-
-    name = "q1.iri.acquire_digital"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        acq_idx: int | IntegerAttr[UI32],
-        bin_idx: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(acq_idx, bin_idx, duration, comment=comment)
-
-    @property
-    def acq_idx(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def bin_idx(self):
-        """Semantic alias for the generic rs field."""
-
-        return self.rs
-
-    @property
-    def duration(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-
-@irdl_op_definition
-class UpdThresIIIOp(IIIOperation):
-    """Updates latched parameters and sets the event count threshold at the index given.
-    Threshold determines how the number of detected edge events in acquire_timetags window
-    maps to measurement outcome.
-
-    Duration must be >= 4 ns.
-
-    Duration specifies the amount of time spent at the beginning of the instruction in ns
-    """
-
-    name = "q1.iii.upd_thres"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        dio_thres_idx: int | IntegerAttr[UI32],
-        value: int | IntegerAttr[UI32],
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(dio_thres_idx, value, duration, comment=comment)
-
-    @property
-    def dio_thres_idx(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def value(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
-
-    @property
-    def duration(self):
-        """Semantic alias for the third generic imm field."""
-
-        return self.imm3
-
-
-@irdl_op_definition
-class UpdThresIRIOp(IRsIOperation[IntRegisterType]):
-    """Updates latched parameters and sets the event count threshold at the index given.
-    Threshold determines how the number of detected edge events in acquire_timetags window
-    maps to measurement outcome.
-
-    Duration must be >= 4 ns.
-
-    Duration specifies the amount of time spent at the beginning of the instruction in ns
-    """
-
-    name = "q1.iri.upd_thres"
-
-    traits = traits_def()
-
-    def __init__(
-        self,
-        dio_thres_idx: int | IntegerAttr[UI32],
-        value: Operation | SSAValue,
-        duration: int | IntegerAttr[UI32],
-        comment: str | StringAttr | None = None,
-    ):
-        super().__init__(dio_thres_idx, value, duration, comment=comment)
-
-    @property
-    def dio_thres_idx(self):
-        """Semantic alias for the first generic imm field."""
-
-        return self.imm1
-
-    @property
-    def value(self):
-        """Semantic alias for the generic rs field."""
-
-        return self.rs
-
-    @property
-    def duration(self):
-        """Semantic alias for the second generic imm field."""
-
-        return self.imm2
 
 
 # endregion

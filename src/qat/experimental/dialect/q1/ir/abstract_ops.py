@@ -18,23 +18,31 @@ from typing import Generic, TypeAlias
 from xdsl.backend.assembly_printer import AssemblyPrinter, OneLineAssemblyPrintable
 from xdsl.backend.register_allocatable import HasRegisterConstraints, RegisterConstraints
 from xdsl.backend.register_type import RegisterType
-from xdsl.dialects.builtin import IntegerAttr, StringAttr
+from xdsl.dialects.builtin import StringAttr
 from xdsl.ir import Attribute, Operation, OpResult, SSAValue
 from xdsl.irdl import IRDLOperation, operand_def, opt_prop_def, prop_def, result_def
 from xdsl.parser import Parser
 from xdsl.printer import Printer
 
-from qat.experimental.dialect.q1.ir.imm_desc import UI32, ui32
+from qat.experimental.dialect.q1.ir.imm_desc import (
+    ImmT,
+    ImmT1,
+    ImmT2,
+    ImmT3,
+    ImmT4,
+    ImmT5,
+    Q1Imm,
+)
 from qat.experimental.dialect.q1.ir.reg_desc import RInvT
 
 _Q1_OP_NAME_PATTERN = compile("^q1\\.([^.]*)\\.([^.]*)$")
 
-AssemblyInstructionArg: TypeAlias = IntegerAttr | SSAValue | RegisterType | StringAttr | str
+AssemblyInstructionArg: TypeAlias = Q1Imm | SSAValue | RegisterType | StringAttr | str
 
 
 def _assembly_arg_str(arg: AssemblyInstructionArg) -> str:
-    if isinstance(arg, IntegerAttr):
-        return f"{arg.value.data}"
+    if isinstance(arg, Q1Imm):
+        return str(arg.data)
     elif isinstance(arg, SSAValue):
         if not isinstance(t := arg.type, RegisterType):
             raise ValueError(f"Unexpected register type {t}")
@@ -200,19 +208,16 @@ class NullaryOperation(Q1Instruction, ABC):
 # region Unary formats
 
 
-class IOperation(Q1Instruction, ABC):
+class ImmOperation(Q1Instruction, ABC, Generic[ImmT]):
     """A base class for QBlox Q1 operations that have one immediate operand."""
 
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
 
     def __init__(
         self,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -254,24 +259,18 @@ class RsOperation(Q1Instruction, ABC, Generic[RInvT]):
 # region Binary formats
 
 
-class IIOperation(Q1Instruction, ABC):
+class ImmImmOperation(Q1Instruction, ABC, Generic[ImmT1, ImmT2]):
     """A base class for QBlox Q1 operations that have two immediate operands."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
-    imm2 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
+    imm2 = prop_def(ImmT2)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
-        imm2: int | IntegerAttr[UI32],
+        imm1: ImmT1,
+        imm2: ImmT2,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -287,22 +286,19 @@ class IIOperation(Q1Instruction, ABC):
         return self.imm1, self.imm2
 
 
-class IRdOperation(Q1Instruction, ABC, Generic[RInvT]):
+class ImmRdOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have one immediate operand followed by one
     destination register."""
 
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
     rd: OpResult[RInvT] = result_def(RInvT)
 
     def __init__(
         self,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         rd: RInvT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -344,22 +340,19 @@ class RsRdOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs, self.rd
 
 
-class RdIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RdImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have one destination register followed by
     one immediate operand."""
 
     rd: OpResult[RInvT] = result_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
 
     def __init__(
         self,
         rd: RInvT,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -425,22 +418,19 @@ class RsRsOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs1, self.rs2
 
 
-class RsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RsImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have one source register followed by one
     immediate operand."""
 
     rs = operand_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
 
     def __init__(
         self,
         rs: RInvT,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -454,6 +444,34 @@ class RsIOperation(Q1Instruction, ABC, Generic[RInvT]):
 
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
         return self.rs, self.imm
+
+
+class ImmRsOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
+    """A base class for QBlox Q1 operations that have one immediate operand followed by one
+    source register."""
+
+    imm = prop_def(ImmT)
+    rs = operand_def(RInvT)
+
+    def __init__(
+        self,
+        imm: ImmT,
+        rs: Operation | SSAValue,
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs],
+            properties={
+                "imm": imm,
+                "comment": comment,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm, self.rs
 
 
 class RdRdOperation(Q1Instruction, ABC, Generic[RInvT]):
@@ -485,27 +503,21 @@ class RdRdOperation(Q1Instruction, ABC, Generic[RInvT]):
 # region Ternary formats
 
 
-class RsIIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RsImmImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT1, ImmT2]):
     """A base class for QBlox Q1 operations that have one source register followed by two
     immediate operands."""
 
     rs = operand_def(RInvT)
-    imm1 = prop_def(IntegerAttr[UI32])
-    imm2 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
+    imm2 = prop_def(ImmT2)
 
     def __init__(
         self,
         rs: Operation | SSAValue,
-        imm1: int | IntegerAttr[UI32],
-        imm2: int | IntegerAttr[UI32],
+        imm1: ImmT1,
+        imm2: ImmT2,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -522,24 +534,21 @@ class RsIIOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs, self.imm1, self.imm2
 
 
-class RsIRsOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RsImmRsOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have one immediate operand surrounded by
     two source registers."""
 
     rs1 = operand_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
     rs2 = operand_def(RInvT)
 
     def __init__(
         self,
         rs1: Operation | SSAValue,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         rs2: Operation | SSAValue,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -555,24 +564,21 @@ class RsIRsOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs1, self.imm, self.rs2
 
 
-class RsIRdOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RsImmRdOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have one immediate operand surrounded by a
     source register on the left and a destination register on the right."""
 
     rs = operand_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
     rd: OpResult[RInvT] = result_def(RInvT)
 
     def __init__(
         self,
         rs: Operation | SSAValue,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         rd: RInvT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -589,24 +595,21 @@ class RsIRdOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs, self.imm, self.rd
 
 
-class RsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RsRsImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have two source registers followed by one
     immediate operand."""
 
     rs1 = operand_def(RInvT)
     rs2 = operand_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
 
     def __init__(
         self,
         rs1: Operation | SSAValue,
         rs2: Operation | SSAValue,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -650,29 +653,51 @@ class RsRsRdOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.rs1, self.rs2, self.rd
 
 
-class IIIOperation(Q1Instruction, ABC):
-    """A base class for QBlox Q1 operations that have three immediate operands."""
+class ImmRsRdOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
+    """A base class for QBlox Q1 operations that have one immediate operand followed by one
+    source register and then one destination register."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
-    imm2 = prop_def(IntegerAttr[UI32])
-    imm3 = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
+    rs = operand_def(RInvT)
+    rd: OpResult[RInvT] = result_def(RInvT)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
-        imm2: int | IntegerAttr[UI32],
-        imm3: int | IntegerAttr[UI32],
+        imm: ImmT,
+        rs: Operation | SSAValue,
+        rd: RInvT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
 
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
+        super().__init__(
+            operands=[rs],
+            properties={
+                "imm": imm,
+                "comment": comment,
+            },
+            result_types=[rd],
+        )
 
-        if isinstance(imm3, int):
-            imm3 = IntegerAttr(imm3, ui32)
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm, self.rs, self.rd
 
+
+class ImmImmImmOperation(Q1Instruction, ABC, Generic[ImmT1, ImmT2, ImmT3]):
+    """A base class for QBlox Q1 operations that have three immediate operands."""
+
+    imm1 = prop_def(ImmT1)
+    imm2 = prop_def(ImmT2)
+    imm3 = prop_def(ImmT3)
+
+    def __init__(
+        self,
+        imm1: ImmT1,
+        imm2: ImmT2,
+        imm3: ImmT3,
+        comment: str | StringAttr | None = None,
+    ):
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -689,27 +714,21 @@ class IIIOperation(Q1Instruction, ABC):
         return self.imm1, self.imm2, self.imm3
 
 
-class IRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class ImmRsImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT1, ImmT2]):
     """A base class for QBlox Q1 operations that have an immediate, a source register, and
     then another immediate."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
     rs = operand_def(RInvT)
-    imm2 = prop_def(IntegerAttr[UI32])
+    imm2 = prop_def(ImmT2)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
+        imm1: ImmT1,
         rs: RInvT,
-        imm2: int | IntegerAttr[UI32],
+        imm2: ImmT2,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -731,34 +750,22 @@ class IRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
 # region Quaternary formats
 
 
-class IIIIOperation(Q1Instruction, ABC):
+class ImmImmImmImmOperation(Q1Instruction, ABC, Generic[ImmT1, ImmT2, ImmT3, ImmT4]):
     """A base class for QBlox Q1 operations that have four immediate operands."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
-    imm2 = prop_def(IntegerAttr[UI32])
-    imm3 = prop_def(IntegerAttr[UI32])
-    imm4 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
+    imm2 = prop_def(ImmT2)
+    imm3 = prop_def(ImmT3)
+    imm4 = prop_def(ImmT4)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
-        imm2: int | IntegerAttr[UI32],
-        imm3: int | IntegerAttr[UI32],
-        imm4: int | IntegerAttr[UI32],
+        imm1: ImmT1,
+        imm2: ImmT2,
+        imm3: ImmT3,
+        imm4: ImmT4,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
-        if isinstance(imm3, int):
-            imm3 = IntegerAttr(imm3, ui32)
-
-        if isinstance(imm4, int):
-            imm4 = IntegerAttr(imm4, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -776,32 +783,23 @@ class IIIIOperation(Q1Instruction, ABC):
         return self.imm1, self.imm2, self.imm3, self.imm4
 
 
-class IRsIIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class ImmRsImmImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT1, ImmT2, ImmT3]):
     """A base class for QBlox Q1 operations that have one immediate operand followed by one
     source register followed by two immediate operands."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
     rs = operand_def(RInvT)
-    imm2 = prop_def(IntegerAttr[UI32])
-    imm3 = prop_def(IntegerAttr[UI32])
+    imm2 = prop_def(ImmT2)
+    imm3 = prop_def(ImmT3)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
+        imm1: ImmT1,
         rs: Operation | SSAValue,
-        imm2: int | IntegerAttr[UI32],
-        imm3: int | IntegerAttr[UI32],
+        imm2: ImmT2,
+        imm3: ImmT3,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
-        if isinstance(imm3, int):
-            imm3 = IntegerAttr(imm3, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -819,26 +817,23 @@ class IRsIIOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.imm1, self.rs, self.imm2, self.imm3
 
 
-class RsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class RsRsRsImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
     """A base class for QBlox Q1 operations that have three source registers followed by one
     immediate operand."""
 
     rs1 = operand_def(RInvT)
     rs2 = operand_def(RInvT)
     rs3 = operand_def(RInvT)
-    imm = prop_def(IntegerAttr[UI32])
+    imm = prop_def(ImmT)
 
     def __init__(
         self,
         rs1: Operation | SSAValue,
         rs2: Operation | SSAValue,
         rs3: Operation | SSAValue,
-        imm: int | IntegerAttr[UI32],
+        imm: ImmT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm, int):
-            imm = IntegerAttr(imm, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -859,39 +854,26 @@ class RsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
 # region Quinary formats
 
 
-class IIIIIOperation(Q1Instruction, ABC):
+class ImmImmImmImmImmOperation(
+    Q1Instruction, ABC, Generic[ImmT1, ImmT2, ImmT3, ImmT4, ImmT5]
+):
     """A base class for QBlox Q1 operations that have five immediate operands."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
-    imm2 = prop_def(IntegerAttr[UI32])
-    imm3 = prop_def(IntegerAttr[UI32])
-    imm4 = prop_def(IntegerAttr[UI32])
-    imm5 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
+    imm2 = prop_def(ImmT2)
+    imm3 = prop_def(ImmT3)
+    imm4 = prop_def(ImmT4)
+    imm5 = prop_def(ImmT5)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
-        imm2: int | IntegerAttr[UI32],
-        imm3: int | IntegerAttr[UI32],
-        imm4: int | IntegerAttr[UI32],
-        imm5: int | IntegerAttr[UI32],
+        imm1: ImmT1,
+        imm2: ImmT2,
+        imm3: ImmT3,
+        imm4: ImmT4,
+        imm5: ImmT5,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
-        if isinstance(imm3, int):
-            imm3 = IntegerAttr(imm3, ui32)
-
-        if isinstance(imm4, int):
-            imm4 = IntegerAttr(imm4, ui32)
-
-        if isinstance(imm5, int):
-            imm5 = IntegerAttr(imm5, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -910,31 +892,25 @@ class IIIIIOperation(Q1Instruction, ABC):
         return self.imm1, self.imm2, self.imm3, self.imm4, self.imm5
 
 
-class IRsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
+class ImmRsRsRsImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT1, ImmT2]):
     """A base class for QBlox Q1 operations that have three source registers surrounded by
     two immediate operands."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
+    imm1 = prop_def(ImmT1)
     rs1 = operand_def(RInvT)
     rs2 = operand_def(RInvT)
     rs3 = operand_def(RInvT)
-    imm2 = prop_def(IntegerAttr[UI32])
+    imm2 = prop_def(ImmT2)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
+        imm1: ImmT1,
         rs1: Operation | SSAValue,
         rs2: Operation | SSAValue,
         rs3: Operation | SSAValue,
-        imm2: int | IntegerAttr[UI32],
+        imm2: ImmT2,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
@@ -951,49 +927,100 @@ class IRsRsRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
         return self.imm1, self.rs1, self.rs2, self.rs3, self.imm2
 
 
-class IRsIRsIOperation(Q1Instruction, ABC, Generic[RInvT]):
-    """A base class for QBlox Q1 operations that have an immediate operand surrounded by two
-    source registers, surrounded by two immediate operands."""
+class RsRsRdRdOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for QBlox Q1 operations that have two source registers followed by two
+    destination registers."""
 
-    imm1 = prop_def(IntegerAttr[UI32])
     rs1 = operand_def(RInvT)
-    imm2 = prop_def(IntegerAttr[UI32])
     rs2 = operand_def(RInvT)
-    imm3 = prop_def(IntegerAttr[UI32])
+    rd1: OpResult[RInvT] = result_def(RInvT)
+    rd2: OpResult[RInvT] = result_def(RInvT)
 
     def __init__(
         self,
-        imm1: int | IntegerAttr[UI32],
         rs1: Operation | SSAValue,
-        imm2: int | IntegerAttr[UI32],
         rs2: Operation | SSAValue,
-        imm3: int | IntegerAttr[UI32],
+        rd1: RInvT,
+        rd2: RInvT,
         comment: str | StringAttr | None = None,
     ):
-        if isinstance(imm1, int):
-            imm1 = IntegerAttr(imm1, ui32)
-
-        if isinstance(imm2, int):
-            imm2 = IntegerAttr(imm2, ui32)
-
-        if isinstance(imm3, int):
-            imm3 = IntegerAttr(imm3, ui32)
-
         if isinstance(comment, str):
             comment = StringAttr(comment)
 
         super().__init__(
             operands=[rs1, rs2],
-            properties={
-                "comment": comment,
-                "imm1": imm1,
-                "imm2": imm2,
-                "imm3": imm3,
-            },
+            properties={"comment": comment},
+            result_types=[rd1, rd2],
         )
 
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
-        return self.imm1, self.rs1, self.imm2, self.rs2, self.imm3
+        return self.rs1, self.rs2, self.rd1, self.rd2
+
+
+class RsImmRdRdOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
+    """A base class for QBlox Q1 operations that have one source register followed by one
+    immediate operand and then two destination registers."""
+
+    rs = operand_def(RInvT)
+    imm = prop_def(ImmT)
+    rd1: OpResult[RInvT] = result_def(RInvT)
+    rd2: OpResult[RInvT] = result_def(RInvT)
+
+    def __init__(
+        self,
+        rs: Operation | SSAValue,
+        imm: ImmT,
+        rd1: RInvT,
+        rd2: RInvT,
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs],
+            properties={
+                "imm": imm,
+                "comment": comment,
+            },
+            result_types=[rd1, rd2],
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.rs, self.imm, self.rd1, self.rd2
+
+
+class ImmRsRdRdOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
+    """A base class for QBlox Q1 operations that have one immediate operand followed by one
+    source register and then two destination registers."""
+
+    imm = prop_def(ImmT)
+    rs = operand_def(RInvT)
+    rd1: OpResult[RInvT] = result_def(RInvT)
+    rd2: OpResult[RInvT] = result_def(RInvT)
+
+    def __init__(
+        self,
+        imm: ImmT,
+        rs: Operation | SSAValue,
+        rd1: RInvT,
+        rd2: RInvT,
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            operands=[rs],
+            properties={
+                "imm": imm,
+                "comment": comment,
+            },
+            result_types=[rd1, rd2],
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return self.imm, self.rs, self.rd1, self.rd2
 
 
 # endregion

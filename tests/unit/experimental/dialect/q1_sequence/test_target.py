@@ -10,12 +10,12 @@ from xdsl.dialects.builtin import ArrayAttr, ModuleOp
 
 from qat.experimental.dialect.q1.ir.ops import NopOp, StopOp
 from qat.experimental.dialect.q1.target import emit_program
-from qat.experimental.dialect.q1_sequence.attrs import (
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
     make_waveform,
     make_weight,
 )
-from qat.experimental.dialect.q1_sequence.ops import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.dialect.q1_sequence.target import (
     Q1SequenceTarget,
     emit_module,

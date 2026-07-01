@@ -18,6 +18,10 @@ class TestDialectRegistration:
             "q1_sequence.waveform",
             "q1_sequence.weight",
             "q1_sequence.acquisition",
+            "q1_sequence.waveform_table_index",
+            "q1_sequence.weight_table_index",
+            "q1_sequence.acq_table_index",
+            "q1_sequence.bin_count_imm",
         }
 
     def test_sequence_in_module(self):

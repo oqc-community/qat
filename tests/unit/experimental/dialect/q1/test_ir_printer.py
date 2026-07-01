@@ -9,72 +9,110 @@ from xdsl.printer import Printer
 from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1 import (
-    AcquireDigitalIIIOp,
-    AcquireDigitalIRIOp,
-    AcquireIIIOp,
-    AcquireIRIOp,
-    AcquireTimetagsIIIIIOp,
-    AcquireTimetagsIRIRIOp,
-    AcquireTtlIIIIOp,
-    AcquireTtlIRIIOp,
-    AcquireWeighedIIIIIOp,
-    AcquireWeighedIRRRIOp,
-    AddRIROp,
-    AddRRROp,
+    AcquireImmImmImmOp,
+    AcquireImmRsImmOp,
+    AcquireTtlImmImmImmImmOp,
+    AcquireTtlImmRsImmImmOp,
+    AcquireWeightedImmImmImmImmImmOp,
+    AcquireWeightedImmRsRsRsImmOp,
+    AddRsImmRdOp,
+    AddRsRsRdOp,
+    CmpImmRsOp,
+    CmpRsImmOp,
+    CmpRsRsOp,
     DefDirectiveOp,
-    FbAcqIqIdIIOp,
-    FbAcqTbValidIIOp,
-    FbCmdIIIOp,
-    FbCmdIRIOp,
-    FbComDataIIIOp,
-    FbComDataIRIOp,
-    FbPopDataIROp,
-    FbPullDataRROp,
+    FbAcqIqIdImmImmOp,
+    FbAcqTbValidImmImmOp,
+    FbComDataImmImmImmOp,
+    FbComDataImmRsImmOp,
+    FbPopDataImmRdOp,
+    FbPullDataRdRdOp,
     IllegalOp,
-    JaIOp,
-    JaROp,
-    JmpIOp,
-    JmpROp,
+    JaImmOp,
+    JaRsOp,
+    JgeImmOp,
+    JgeRsImmImmOp,
+    JgeRsImmRsOp,
+    JgeRsOp,
+    JmpImmOp,
+    JmpRsOp,
     LabelOp,
-    LatchRstIOp,
-    LatchRstROp,
-    LoopRIOp,
-    LoopRROp,
-    MoveIROp,
-    MoveRROp,
+    LatchRstImmOp,
+    LatchRstRsOp,
+    LoopRdImmOp,
+    LoopRdRsOp,
+    LslImmRsRdOp,
+    LslRsImmRdOp,
+    LslRsRsRdOp,
+    LsrImmRsRdOp,
+    LsrRsImmRdOp,
+    LsrRsRsRdOp,
+    MoveImmRdOp,
+    MoveRsRdOp,
+    Muls16ImmRsRdOp,
+    Muls16RsImmRdOp,
+    Muls16RsRsRdOp,
+    Muls32ImmRsRdRdOp,
+    Muls32RsImmRdRdOp,
+    Muls32RsRsRdRdOp,
+    Mulu16ImmRsRdOp,
+    Mulu16RsImmRdOp,
+    Mulu16RsRsRdOp,
+    Mulu32ImmRsRdRdOp,
+    Mulu32RsImmRdRdOp,
+    Mulu32RsRsRdRdOp,
     NopOp,
-    PlayIIIOp,
-    PlayRRIOp,
+    PlayImmImmImmOp,
+    PlayRsRsImmOp,
     ResetPhOp,
-    SetAwgGainIIOp,
-    SetAwgGainRROp,
-    SetAwgOffsIIOp,
-    SetAwgOffsRROp,
-    SetCondIIIIOp,
-    SetCondRRRIOp,
-    SetFreqIOp,
-    SetFreqROp,
-    SetLatchEnIIOp,
-    SetLatchEnRIOp,
-    SetMrkIOp,
-    SetMrkROp,
-    SetPhDeltaIOp,
-    SetPhDeltaROp,
-    SetPhIOp,
-    SetPhROp,
-    StopIOp,
+    SetAwgGainImmImmOp,
+    SetAwgGainRsRsOp,
+    SetAwgOffsImmImmOp,
+    SetAwgOffsRsRsOp,
+    SetCondImmImmImmImmOp,
+    SetCondRsRsRsImmOp,
+    SetFreqImmOp,
+    SetFreqRsOp,
+    SetLatchEnImmImmOp,
+    SetLatchEnRsImmOp,
+    SetMrkImmOp,
+    SetMrkRsOp,
+    SetPhDeltaImmOp,
+    SetPhDeltaRsOp,
+    SetPhImmOp,
+    SetPhRsOp,
+    StopImmOp,
     StopOp,
-    UpdParamIOp,
-    UpdThresIIIOp,
-    UpdThresIRIOp,
-    WaitIOp,
-    WaitROp,
-    WaitSyncIOp,
-    WaitSyncROp,
-    WaitTriggerIIOp,
-    WaitTriggerRROp,
+    TestImmRsOp,
+    TestRsImmOp,
+    TestRsRsOp,
+    UpdParamImmOp,
+    WaitImmOp,
+    WaitRsOp,
+    WaitSyncImmOp,
+    WaitSyncRsOp,
+    WaitTriggerImmImmOp,
+    WaitTriggerRsRsOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import LabelAttr
+from qat.experimental.dialect.q1.ir.imm_desc import (
+    AddressImm,
+    BoolImm,
+    DurationImm,
+    NcoPhaseImm,
+    SI16Imm,
+    SI32Imm,
+    SU32Imm,
+    UI3Imm,
+    UI4Imm,
+    UI5Imm,
+    UI6Imm,
+    UI8Imm,
+    UI10Imm,
+    UI16Imm,
+    UI24Imm,
+    UI32Imm,
+)
 from qat.experimental.dialect.q1.ir.reg_desc import Registers
 
 
@@ -87,260 +125,427 @@ def _print_ir(op) -> str:
 @pytest.mark.parametrize(
     "op,operands,properties,attributes",
     [
-        # --- Nullary ops (no operands, no properties) ---
+        # Nullary ops (no operands, no properties)
         (IllegalOp(), None, None, None),
         (NopOp(), None, None, None),
         (StopOp(), None, None, None),
         (ResetPhOp(), None, None, None),
-        # --- Immediate ops: no SSA operands, one or more properties ---
-        (StopIOp(42), None, "<{imm = 42 : ui32}>", None),
-        (JaIOp(100), None, "<{imm = 100 : ui32}>", None),
-        (JmpIOp(50), None, "<{imm = 50 : ui32}>", None),
-        (MoveIROp(source=999, rd=Registers.R0), None, "<{imm = 999 : ui32}>", None),
-        (SetMrkIOp(0x1234), None, "<{imm = 4660 : ui32}>", None),
-        (SetFreqIOp(5000000), None, "<{imm = 5000000 : ui32}>", None),
-        (SetPhIOp(1000), None, "<{imm = 1000 : ui32}>", None),
-        (SetPhDeltaIOp(500), None, "<{imm = 500 : ui32}>", None),
+        # Immediate ops
+        (StopImmOp(SI32Imm(42)), None, "<{imm = #q1.si32_imm<42>}>", None),
+        (JaImmOp(AddressImm(100)), None, "<{imm = #q1.ui14_imm<100>}>", None),
+        (JmpImmOp(AddressImm(50)), None, "<{imm = #q1.ui14_imm<50>}>", None),
         (
-            SetAwgGainIIOp(gain0=100, gain1=150),
+            MoveImmRdOp(SU32Imm(999), Registers.R0),
             None,
-            "<{imm1 = 100 : ui32, imm2 = 150 : ui32}>",
+            "<{imm = #q1.su32_imm<999>}>",
+            None,
+        ),
+        (SetMrkImmOp(UI4Imm(0x4)), None, "<{imm = #q1.ui4_imm<4>}>", None),
+        (SetFreqImmOp(SI32Imm(5000000)), None, "<{imm = #q1.si32_imm<5000000>}>", None),
+        (SetPhImmOp(NcoPhaseImm(1000)), None, "<{imm = #q1.nco_phase_imm<1000>}>", None),
+        (SetPhDeltaImmOp(NcoPhaseImm(500)), None, "<{imm = #q1.nco_phase_imm<500>}>", None),
+        (
+            SetAwgGainImmImmOp(SI16Imm(100), SI16Imm(150)),
+            None,
+            "<{imm1 = #q1.si16_imm<100>, imm2 = #q1.si16_imm<150>}>",
             None,
         ),
         (
-            SetAwgOffsIIOp(offs0=200, offs1=250),
+            SetAwgOffsImmImmOp(SI16Imm(200), SI16Imm(250)),
             None,
-            "<{imm1 = 200 : ui32, imm2 = 250 : ui32}>",
-            None,
-        ),
-        (
-            SetCondIIIIOp(cond_en=1, mask=2, op=3, else_cnt=4),
-            None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32, imm4 = 4 : ui32}>",
-            None,
-        ),
-        (LoopRIOp(Registers.R19, 500), None, "<{imm = 500 : ui32}>", None),
-        (FbPopDataIROp(1, destination=Registers.R0), None, "<{imm = 1 : ui32}>", None),
-        (
-            FbComDataIIIOp(1, 2, 100),
-            None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 100 : ui32}>",
+            "<{imm1 = #q1.si16_imm<200>, imm2 = #q1.si16_imm<250>}>",
             None,
         ),
         (
-            FbCmdIIIOp(1, 2, 100),
+            SetCondImmImmImmImmOp(BoolImm(1), UI4Imm(2), UI3Imm(3), UI16Imm(4)),
             None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 100 : ui32}>",
-            None,
-        ),
-        (
-            FbAcqIqIdIIOp(1, 2),
-            None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32}>",
+            "<{imm1 = #q1.bool_imm<1>, imm2 = #q1.ui4_imm<2>, imm3 = #q1.ui3_imm<3>, imm4 = #q1.ui16_imm<4>}>",
             None,
         ),
         (
-            FbAcqTbValidIIOp(1, 2),
+            LoopRdImmOp(Registers.R19, AddressImm(500)),
             None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32}>",
-            None,
-        ),
-        (WaitIOp(10), None, "<{imm = 10 : ui32}>", None),
-        (WaitSyncIOp(20), None, "<{imm = 20 : ui32}>", None),
-        (WaitTriggerIIOp(1, 50), None, "<{imm1 = 1 : ui32, imm2 = 50 : ui32}>", None),
-        (
-            PlayIIIOp(1, 2, 3),
-            None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32}>",
+            "<{imm = #q1.ui14_imm<500>}>",
             None,
         ),
         (
-            AcquireIIIOp(1, 2, 3),
+            FbPopDataImmRdOp(UI16Imm(1), Registers.R0),
             None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32}>",
-            None,
-        ),
-        (
-            AcquireWeighedIIIIIOp(1, 2, 3, 4, 5),
-            None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32, imm4 = 4 : ui32, imm5 = 5 : ui32}>",
+            "<{imm = #q1.ui16_imm<1>}>",
             None,
         ),
         (
-            AcquireTtlIIIIOp(1, 2, 3, 4),
+            FbComDataImmImmImmOp(UI8Imm(1), UI32Imm(2), DurationImm(100)),
             None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32, imm4 = 4 : ui32}>",
-            None,
-        ),
-        (
-            AcquireTimetagsIIIIIOp(1, 2, 3, 4, 5),
-            None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32, imm4 = 4 : ui32, imm5 = 5 : ui32}>",
+            "<{imm1 = #q1.ui8_imm<1>, imm2 = #q1.ui32_imm<2>, imm3 = #q1.duration_imm<100>}>",
             None,
         ),
         (
-            AcquireDigitalIIIOp(1, 2, 3),
+            FbAcqIqIdImmImmOp(UI8Imm(1), DurationImm(4)),
             None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32}>",
+            "<{imm1 = #q1.ui8_imm<1>, imm2 = #q1.duration_imm<4>}>",
             None,
         ),
         (
-            UpdThresIIIOp(1, 2, 3),
+            FbAcqTbValidImmImmOp(BoolImm(1), DurationImm(4)),
             None,
-            "<{imm1 = 1 : ui32, imm2 = 2 : ui32, imm3 = 3 : ui32}>",
+            "<{imm1 = #q1.bool_imm<1>, imm2 = #q1.duration_imm<4>}>",
             None,
         ),
-        (UpdParamIOp(10), None, "<{imm = 10 : ui32}>", None),
-        (LatchRstIOp(10), None, "<{imm = 10 : ui32}>", None),
-        (SetLatchEnIIOp(1, 2), None, "<{imm1 = 1 : ui32, imm2 = 2 : ui32}>", None),
-        # --- Register ops: SSA operands, no properties ---
-        (JaROp(create_ssa_value(Registers.R0)), "(%0)", None, None),
-        (JmpROp(create_ssa_value(Registers.R0)), "(%0)", None, None),
-        # Result (%0) is R5; the source SSA value is printed as %1.
+        (WaitImmOp(DurationImm(10)), None, "<{imm = #q1.duration_imm<10>}>", None),
+        (WaitSyncImmOp(DurationImm(20)), None, "<{imm = #q1.duration_imm<20>}>", None),
         (
-            MoveRROp(source=create_ssa_value(Registers.R4), rd=Registers.R5),
+            WaitTriggerImmImmOp(UI4Imm(1), DurationImm(50)),
+            None,
+            "<{imm1 = #q1.ui4_imm<1>, imm2 = #q1.duration_imm<50>}>",
+            None,
+        ),
+        (
+            PlayImmImmImmOp(UI10Imm(1), UI10Imm(2), DurationImm(4)),
+            None,
+            "<{imm1 = #q1.ui10_imm<1>, imm2 = #q1.ui10_imm<2>, imm3 = #q1.duration_imm<4>}>",
+            None,
+        ),
+        (
+            AcquireImmImmImmOp(UI5Imm(1), UI24Imm(2), DurationImm(4)),
+            None,
+            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.duration_imm<4>}>",
+            None,
+        ),
+        (
+            AcquireWeightedImmImmImmImmImmOp(
+                UI5Imm(1), UI24Imm(2), UI6Imm(3), UI6Imm(4), DurationImm(5)
+            ),
+            None,
+            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.ui6_imm<3>, imm4 = #q1.ui6_imm<4>, imm5 = #q1.duration_imm<5>}>",
+            None,
+        ),
+        (
+            AcquireTtlImmImmImmImmOp(UI5Imm(1), UI24Imm(2), BoolImm(1), DurationImm(4)),
+            None,
+            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.bool_imm<1>, imm4 = #q1.duration_imm<4>}>",
+            None,
+        ),
+        (
+            UpdParamImmOp(DurationImm(10)),
+            None,
+            "<{imm = #q1.duration_imm<10>}>",
+            None,
+        ),
+        (LatchRstImmOp(DurationImm(10)), None, "<{imm = #q1.duration_imm<10>}>", None),
+        (
+            SetLatchEnImmImmOp(BoolImm(1), DurationImm(4)),
+            None,
+            "<{imm1 = #q1.bool_imm<1>, imm2 = #q1.duration_imm<4>}>",
+            None,
+        ),
+        # Register ops
+        (JaRsOp(create_ssa_value(Registers.R0)), "(%0)", None, None),
+        (JmpRsOp(create_ssa_value(Registers.R0)), "(%0)", None, None),
+        (
+            MoveRsRdOp(create_ssa_value(Registers.R4), Registers.R5),
             "(%1)",
             None,
             None,
         ),
-        (SetMrkROp(create_ssa_value(Registers.R8)), "(%0)", None, None),
-        (SetFreqROp(create_ssa_value(Registers.R9)), "(%0)", None, None),
-        (SetPhROp(create_ssa_value(Registers.R10)), "(%0)", None, None),
-        (SetPhDeltaROp(create_ssa_value(Registers.R11)), "(%0)", None, None),
+        (SetMrkRsOp(create_ssa_value(Registers.R8)), "(%0)", None, None),
+        (SetFreqRsOp(create_ssa_value(Registers.R9)), "(%0)", None, None),
+        (SetPhRsOp(create_ssa_value(Registers.R10)), "(%0)", None, None),
+        (SetPhDeltaRsOp(create_ssa_value(Registers.R11)), "(%0)", None, None),
         (
-            SetAwgGainRROp(
-                gain0=create_ssa_value(Registers.R12),
-                gain1=create_ssa_value(Registers.R13),
+            SetAwgGainRsRsOp(
+                create_ssa_value(Registers.R12), create_ssa_value(Registers.R13)
             ),
             "(%0, %1)",
             None,
             None,
         ),
         (
-            SetAwgOffsRROp(
-                offs0=create_ssa_value(Registers.R14),
-                offs1=create_ssa_value(Registers.R15),
+            SetAwgOffsRsRsOp(
+                create_ssa_value(Registers.R14), create_ssa_value(Registers.R15)
             ),
             "(%0, %1)",
             None,
             None,
         ),
-        # Result (%0) is R20; the address SSA value is printed as %1.
-        (LoopRROp(Registers.R20, create_ssa_value(Registers.R21)), "(%1)", None, None),
-        # FbPullDataRROp has two destination results and no SSA operands
-        (FbPullDataRROp(id=Registers.R0, destination=Registers.R1), None, None, None),
+        (LoopRdRsOp(Registers.R20, create_ssa_value(Registers.R21)), "(%1)", None, None),
+        (FbPullDataRdRdOp(Registers.R0, Registers.R1), None, None, None),
         (
-            # Result (%0) is R3; the two source SSA values are printed as %1, %2.
-            AddRRROp(
-                create_ssa_value(Registers.R1),
-                create_ssa_value(Registers.R2),
-                Registers.R3,
+            AddRsRsRdOp(
+                create_ssa_value(Registers.R1), create_ssa_value(Registers.R2), Registers.R3
             ),
             "(%1, %2)",
             None,
             None,
         ),
-        (WaitROp(create_ssa_value(Registers.R1)), "(%0)", None, None),
-        (WaitSyncROp(create_ssa_value(Registers.R2)), "(%0)", None, None),
+        (WaitRsOp(create_ssa_value(Registers.R1)), "(%0)", None, None),
+        (WaitSyncRsOp(create_ssa_value(Registers.R2)), "(%0)", None, None),
         (
-            WaitTriggerRROp(create_ssa_value(Registers.R1), create_ssa_value(Registers.R2)),
+            WaitTriggerRsRsOp(
+                create_ssa_value(Registers.R1), create_ssa_value(Registers.R2)
+            ),
             "(%0, %1)",
             None,
             None,
         ),
-        (LatchRstROp(create_ssa_value(Registers.R1)), "(%0)", None, None),
-        # --- Mixed: SSA operands + properties ---
+        (LatchRstRsOp(create_ssa_value(Registers.R1)), "(%0)", None, None),
+        # Mixed
         (
-            # Result (%0) is R3; the source SSA value is printed as %1.
-            AddRIROp(create_ssa_value(Registers.R1), 5, rd=Registers.R3),
+            AddRsImmRdOp(create_ssa_value(Registers.R1), SU32Imm(5), Registers.R3),
             "(%1)",
-            "<{imm = 5 : ui32}>",
+            "<{imm = #q1.su32_imm<5>}>",
             None,
         ),
         (
-            SetCondRRRIOp(
-                cond_en=create_ssa_value(Registers.R16),
-                mask=create_ssa_value(Registers.R17),
-                op=create_ssa_value(Registers.R18),
-                else_cnt=100,
+            JgeRsImmImmOp(create_ssa_value(Registers.R1), UI32Imm(5), AddressImm(100)),
+            "(%0)",
+            "<{imm1 = #q1.ui32_imm<5>, imm2 = #q1.ui14_imm<100>}>",
+            None,
+        ),
+        (
+            JgeRsImmRsOp(
+                create_ssa_value(Registers.R1), UI32Imm(5), create_ssa_value(Registers.R2)
+            ),
+            "(%0, %1)",
+            "<{imm = #q1.ui32_imm<5>}>",
+            None,
+        ),
+        (
+            SetCondRsRsRsImmOp(
+                create_ssa_value(Registers.R16),
+                create_ssa_value(Registers.R17),
+                create_ssa_value(Registers.R18),
+                UI16Imm(100),
             ),
             "(%0, %1, %2)",
-            "<{imm = 100 : ui32}>",
+            "<{imm = #q1.ui16_imm<100>}>",
             None,
         ),
         (
-            FbComDataIRIOp(1, create_ssa_value(Registers.R1), 100),
+            FbComDataImmRsImmOp(
+                UI8Imm(1), create_ssa_value(Registers.R1), DurationImm(100)
+            ),
             "(%0)",
-            "<{imm1 = 1 : ui32, imm2 = 100 : ui32}>",
+            "<{imm1 = #q1.ui8_imm<1>, imm2 = #q1.duration_imm<100>}>",
             None,
         ),
         (
-            FbCmdIRIOp(1, create_ssa_value(Registers.R1), 100),
-            "(%0)",
-            "<{imm1 = 1 : ui32, imm2 = 100 : ui32}>",
-            None,
-        ),
-        (
-            PlayRRIOp(create_ssa_value(Registers.R1), create_ssa_value(Registers.R2), 3),
+            PlayRsRsImmOp(
+                create_ssa_value(Registers.R1),
+                create_ssa_value(Registers.R2),
+                DurationImm(4),
+            ),
             "(%0, %1)",
-            "<{imm = 3 : ui32}>",
+            "<{imm = #q1.duration_imm<4>}>",
             None,
         ),
         (
-            AcquireIRIOp(1, create_ssa_value(Registers.R1), 3),
+            AcquireImmRsImmOp(UI5Imm(1), create_ssa_value(Registers.R1), DurationImm(4)),
             "(%0)",
-            "<{imm1 = 1 : ui32, imm2 = 3 : ui32}>",
+            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.duration_imm<4>}>",
             None,
         ),
         (
-            AcquireWeighedIRRRIOp(
-                1,
+            AcquireWeightedImmRsRsRsImmOp(
+                UI5Imm(1),
                 create_ssa_value(Registers.R1),
                 create_ssa_value(Registers.R2),
                 create_ssa_value(Registers.R3),
-                5,
+                DurationImm(5),
             ),
             "(%0, %1, %2)",
-            "<{imm1 = 1 : ui32, imm2 = 5 : ui32}>",
+            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.duration_imm<5>}>",
             None,
         ),
         (
-            AcquireTtlIRIIOp(1, create_ssa_value(Registers.R1), 3, 4),
-            "(%0)",
-            "<{imm1 = 1 : ui32, imm2 = 3 : ui32, imm3 = 4 : ui32}>",
-            None,
-        ),
-        (
-            AcquireTimetagsIRIRIOp(
-                1,
-                create_ssa_value(Registers.R1),
-                3,
-                create_ssa_value(Registers.R2),
-                5,
+            AcquireTtlImmRsImmImmOp(
+                UI5Imm(1), create_ssa_value(Registers.R1), BoolImm(1), DurationImm(4)
             ),
+            "(%0)",
+            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.bool_imm<1>, imm3 = #q1.duration_imm<4>}>",
+            None,
+        ),
+        (
+            SetLatchEnRsImmOp(create_ssa_value(Registers.R1), DurationImm(4)),
+            "(%0)",
+            "<{imm = #q1.duration_imm<4>}>",
+            None,
+        ),
+        (JgeImmOp(AddressImm(115)), None, "<{imm = #q1.ui14_imm<115>}>", None),
+        (JgeRsOp(create_ssa_value(Registers.R5)), "(%0)", None, None),
+        (
+            CmpRsRsOp(create_ssa_value(Registers.R1), create_ssa_value(Registers.R2)),
             "(%0, %1)",
-            "<{imm1 = 1 : ui32, imm2 = 3 : ui32, imm3 = 5 : ui32}>",
+            None,
             None,
         ),
         (
-            AcquireDigitalIRIOp(1, create_ssa_value(Registers.R1), 3),
+            CmpRsImmOp(create_ssa_value(Registers.R3), SU32Imm(30)),
             "(%0)",
-            "<{imm1 = 1 : ui32, imm2 = 3 : ui32}>",
+            "<{imm = #q1.su32_imm<30>}>",
             None,
         ),
         (
-            UpdThresIRIOp(1, create_ssa_value(Registers.R1), 3),
+            CmpImmRsOp(SU32Imm(31), create_ssa_value(Registers.R4)),
             "(%0)",
-            "<{imm1 = 1 : ui32, imm2 = 3 : ui32}>",
+            "<{imm = #q1.su32_imm<31>}>",
             None,
         ),
         (
-            SetLatchEnRIOp(create_ssa_value(Registers.R1), 2),
-            "(%0)",
-            "<{imm = 2 : ui32}>",
+            TestRsRsOp(create_ssa_value(Registers.R5), create_ssa_value(Registers.R6)),
+            "(%0, %1)",
+            None,
             None,
         ),
-        # --- String-typed properties (directive and label ops) ---
+        (
+            TestRsImmOp(create_ssa_value(Registers.R7), SU32Imm(32)),
+            "(%0)",
+            "<{imm = #q1.su32_imm<32>}>",
+            None,
+        ),
+        (
+            TestImmRsOp(SU32Imm(33), create_ssa_value(Registers.R8)),
+            "(%0)",
+            "<{imm = #q1.su32_imm<33>}>",
+            None,
+        ),
+        (
+            LsrRsImmRdOp(create_ssa_value(Registers.R1), UI32Imm(34), Registers.R0),
+            "(%1)",
+            "<{imm = #q1.ui32_imm<34>}>",
+            None,
+        ),
+        (
+            LsrRsRsRdOp(
+                create_ssa_value(Registers.R2), create_ssa_value(Registers.R3), Registers.R4
+            ),
+            "(%1, %2)",
+            None,
+            None,
+        ),
+        (
+            LsrImmRsRdOp(UI32Imm(35), create_ssa_value(Registers.R5), Registers.R6),
+            "(%1)",
+            "<{imm = #q1.ui32_imm<35>}>",
+            None,
+        ),
+        (
+            LslRsImmRdOp(create_ssa_value(Registers.R7), UI32Imm(36), Registers.R8),
+            "(%1)",
+            "<{imm = #q1.ui32_imm<36>}>",
+            None,
+        ),
+        (
+            LslRsRsRdOp(
+                create_ssa_value(Registers.R9),
+                create_ssa_value(Registers.R10),
+                Registers.R11,
+            ),
+            "(%1, %2)",
+            None,
+            None,
+        ),
+        (
+            LslImmRsRdOp(UI32Imm(37), create_ssa_value(Registers.R12), Registers.R13),
+            "(%1)",
+            "<{imm = #q1.ui32_imm<37>}>",
+            None,
+        ),
+        (
+            Mulu16RsImmRdOp(create_ssa_value(Registers.R1), UI16Imm(40), Registers.R0),
+            "(%1)",
+            "<{imm = #q1.ui16_imm<40>}>",
+            None,
+        ),
+        (
+            Mulu16RsRsRdOp(
+                create_ssa_value(Registers.R2), create_ssa_value(Registers.R3), Registers.R4
+            ),
+            "(%1, %2)",
+            None,
+            None,
+        ),
+        (
+            Mulu16ImmRsRdOp(UI16Imm(41), create_ssa_value(Registers.R5), Registers.R6),
+            "(%1)",
+            "<{imm = #q1.ui16_imm<41>}>",
+            None,
+        ),
+        (
+            Muls16RsImmRdOp(create_ssa_value(Registers.R1), SI16Imm(42), Registers.R0),
+            "(%1)",
+            "<{imm = #q1.si16_imm<42>}>",
+            None,
+        ),
+        (
+            Muls16RsRsRdOp(
+                create_ssa_value(Registers.R2), create_ssa_value(Registers.R3), Registers.R4
+            ),
+            "(%1, %2)",
+            None,
+            None,
+        ),
+        (
+            Muls16ImmRsRdOp(SI16Imm(43), create_ssa_value(Registers.R5), Registers.R6),
+            "(%1)",
+            "<{imm = #q1.si16_imm<43>}>",
+            None,
+        ),
+        (
+            Mulu32RsImmRdRdOp(
+                create_ssa_value(Registers.R1), UI32Imm(60), Registers.R0, Registers.R2
+            ),
+            "(%2)",
+            "<{imm = #q1.ui32_imm<60>}>",
+            None,
+        ),
+        (
+            Mulu32RsRsRdRdOp(
+                create_ssa_value(Registers.R3),
+                create_ssa_value(Registers.R4),
+                Registers.R5,
+                Registers.R6,
+            ),
+            "(%2, %3)",
+            None,
+            None,
+        ),
+        (
+            Mulu32ImmRsRdRdOp(
+                UI32Imm(61), create_ssa_value(Registers.R7), Registers.R8, Registers.R9
+            ),
+            "(%2)",
+            "<{imm = #q1.ui32_imm<61>}>",
+            None,
+        ),
+        (
+            Muls32RsImmRdRdOp(
+                create_ssa_value(Registers.R10), SI32Imm(62), Registers.R11, Registers.R12
+            ),
+            "(%2)",
+            "<{imm = #q1.si32_imm<62>}>",
+            None,
+        ),
+        (
+            Muls32RsRsRdRdOp(
+                create_ssa_value(Registers.R13),
+                create_ssa_value(Registers.R14),
+                Registers.R15,
+                Registers.R16,
+            ),
+            "(%2, %3)",
+            None,
+            None,
+        ),
+        (
+            Muls32ImmRsRdRdOp(
+                SI32Imm(63), create_ssa_value(Registers.R17), Registers.R18, Registers.R19
+            ),
+            "(%2)",
+            "<{imm = #q1.si32_imm<63>}>",
+            None,
+        ),
+        # String-typed properties (directive and label ops)
         (
             DefDirectiveOp("CONST", "7", comment="const"),
             None,
@@ -348,14 +553,14 @@ def _print_ir(op) -> str:
             None,
         ),
         (LabelOp("entry", comment="entry label"), None, "reference =", None),
-        # --- Attributes only ---
+        # Attributes only
         (
             LabelOp.create(attributes={"tag": StringAttr("x")}),
             None,
             None,
             '{tag = "x"}',
         ),
-        # --- Both properties and attributes: verifies properties before attributes ---
+        # Both properties and attributes
         (
             LabelOp.create(
                 properties={"reference": LabelAttr("entry")},
@@ -375,8 +580,6 @@ def test_ir_printer_emits_generic_operation_syntax(op, operands, properties, att
     """
 
     text = _print_ir(op)
-    # text.rindex(" : ") finds the type-signature delimiter even when " : " also
-    # appears inside property value strings such as "<{imm = 1 : ui32}>".
     type_index = text.rindex(" : ")
 
     assert op.name in text
@@ -393,7 +596,6 @@ def test_ir_printer_emits_generic_operation_syntax(op, operands, properties, att
         assert attributes in text
         assert text.index(attributes) < type_index
 
-    # Relative ordering: operands < properties < attributes < type
     if operands is not None and properties is not None:
         assert text.index(operands) < text.index(properties)
     if operands is not None and attributes is not None:
