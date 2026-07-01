@@ -260,6 +260,23 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
+name = "bidict"
+version = "0.22.1"
+description = "The bidirectional mapping library for Python."
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "bidict-0.22.1-py3-none-any.whl", hash = "sha256:6ef212238eb884b664f28da76f33f1d28b260f665fc737b413b287d5487d1e7b"},
+    {file = "bidict-0.22.1.tar.gz", hash = "sha256:1e0f7f74e4860e6d0943a05d4134c63a2fad86f3d4732fb265bd79e4e856d81d"},
+]
+
+[package.extras]
+docs = ["furo", "sphinx", "sphinx-copybutton"]
+lint = ["pre-commit"]
+test = ["hypothesis", "pytest", "pytest-benchmark[histogram]", "pytest-cov", "pytest-xdist", "sortedcollections", "sortedcontainers", "sphinx"]
+
+[[package]]
 name = "bleach"
 version = "6.4.0"
 description = "An easy safelist-based HTML-sanitizing tool."
@@ -507,7 +524,7 @@ files = [
     {file = "cffi-2.0.0-cp39-cp39-win_amd64.whl", hash = "sha256:b882b3df248017dba09d6b16defe9b5c407fe32fc7c65a9c69798e6175601be9"},
     {file = "cffi-2.0.0.tar.gz", hash = "sha256:44d1b5909021139fe36001ae048dbdde8214afa20200eda0f64c068cac5d5529"},
 ]
-markers = {main = "implementation_name == \"pypy\" or platform_python_implementation != \"PyPy\"", dev = "implementation_name == \"pypy\"", docs = "implementation_name == \"pypy\"", release = "sys_platform == \"linux\" and platform_python_implementation != \"PyPy\" and platform_machine != \"ppc64le\" and platform_machine != \"s390x\""}
+markers = {main = "platform_python_implementation != \"PyPy\" or implementation_name == \"pypy\"", dev = "implementation_name == \"pypy\"", docs = "implementation_name == \"pypy\"", release = "sys_platform == \"linux\" and platform_python_implementation != \"PyPy\" and platform_machine != \"ppc64le\" and platform_machine != \"s390x\""}
 
 [package.dependencies]
 pycparser = {version = "*", markers = "implementation_name != \"PyPy\""}
@@ -3782,14 +3799,14 @@ files = [
 
 [[package]]
 name = "numpydantic"
-version = "1.10.0"
+version = "1.9.1"
 description = "Type and shape validation and serialization for arbitrary array types in pydantic models"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "numpydantic-1.10.0-py3-none-any.whl", hash = "sha256:1c62a445d305da69a5fa4510f7e7e1c25218f58fe462e5d59548042f1f769e66"},
-    {file = "numpydantic-1.10.0.tar.gz", hash = "sha256:a17d5ccc3b893c4a2e539c81c2f18960d70884ad7fcaa09c9eb56a95e8daf4a3"},
+    {file = "numpydantic-1.9.1-py3-none-any.whl", hash = "sha256:3811c2843508bded722207b5603be0d78fdb01a668cde1716df314b7b2a91016"},
+    {file = "numpydantic-1.9.1.tar.gz", hash = "sha256:d1f50f0e291bc1d4a93751bfedc95fcd0df0608667d44c0ae33434668c1a91cd"},
 ]
 
 [package.dependencies]
@@ -3804,7 +3821,7 @@ dev = ["black (>=24.1.1)", "numpydantic[docs,tests]", "ruff (>=0.2.0,<1.0.0)", "
 docs = ["autodoc-pydantic (>=2.0.1)", "erbsland-sphinx-ansi (>=1.2.0)", "furo (>=2024.1.29)", "myst-nb (>=1.1.1)", "myst-parser (>=2.0.0)", "numpydantic[arrays,mypy]", "rich (>=13.8.1)", "sphinx (>=8.0.0) ; python_version >= \"3.11\"", "sphinx-design (>=0.5.0)", "sphinxcontrib-mermaid (>=0.9.2)", "sphinxcontrib-programoutput (>=0.19)"]
 hdf5 = ["h5py (>=3.10.0)"]
 mypy = ["mypy (>=1.17.1)", "tomli (>=2.4.1) ; python_version < \"3.11\""]
-tests = ["coverage (>=6.1.1)", "coveralls (>=3.3.1)", "numpydantic[arrays,mypy]", "pyright (>=1.1.408)", "pytest (>=7.4.0)", "pytest-cov (>=4.1.0)", "pytest-depends (>=1.0.1,<2.0.0)", "pytest-xdist (>=3.8.0)"]
+tests = ["coverage (>=6.1.1)", "coveralls (>=3.3.1,<4.0.0)", "numpydantic[arrays,mypy]", "pyright (>=1.1.408)", "pytest (>=7.4.0)", "pytest-cov (>=4.1.0)", "pytest-depends (>=1.0.1,<2.0.0)", "pytest-xdist (>=3.8.0)"]
 video = ["opencv-python (>=4.9.0.80)"]
 zarr = ["zarr (>=2.17.2,<3.0.0)"]
 
@@ -4945,7 +4962,7 @@ files = [
     {file = "pycparser-3.0-py3-none-any.whl", hash = "sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"},
     {file = "pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"},
 ]
-markers = {main = "implementation_name != \"PyPy\" and (platform_python_implementation != \"PyPy\" or implementation_name == \"pypy\")", dev = "implementation_name == \"pypy\"", docs = "implementation_name == \"pypy\"", notebook = "implementation_name != \"PyPy\"", release = "sys_platform == \"linux\" and platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\" and platform_machine != \"ppc64le\" and platform_machine != \"s390x\""}
+markers = {main = "(platform_python_implementation != \"PyPy\" or implementation_name == \"pypy\") and implementation_name != \"PyPy\"", dev = "implementation_name == \"pypy\"", docs = "implementation_name == \"pypy\"", notebook = "implementation_name != \"PyPy\"", release = "sys_platform == \"linux\" and platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\" and platform_machine != \"ppc64le\" and platform_machine != \"s390x\""}
 
 [[package]]
 name = "pydantic"
@@ -8073,4 +8090,4 @@ type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "5c0a76787970586dfe38591e35f47ba422dbe969efb61a84d7413b72fc466bcc"
+content-hash = "8de47a1d9945e5d95f07975e40badbf89ccd1dee55ede9fa6abc08970be4995b"
