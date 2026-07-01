@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1\_sequence.ir.imm\_desc module
+=========================================================
+
+.. automodule:: qat.experimental.dialect.q1_sequence.ir.imm_desc
+   :members:
+   :undoc-members:
+   :show-inheritance:

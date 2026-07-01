@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.imm_desc module &mdash; qat-compiler 3.0.0.post270.dev20260629141503 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.imm_desc module &mdash; qat-compiler 3.0.0.post271.dev20260701004612 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -177,8 +177,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.attrs.html">qat.experimental.dialect.q1_sequence.attrs module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.ops.html">qat.experimental.dialect.q1_sequence.ops module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.html">qat.experimental.dialect.q1_sequence.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.target.html">qat.experimental.dialect.q1_sequence.target module</a></li>
 </ul>
 </li>
@@ -562,21 +561,301 @@
 
   <section id="module-qat.experimental.dialect.q1.ir.imm_desc">
 <span id="qat-experimental-dialect-q1-ir-imm-desc-module"></span><h1>qat.experimental.dialect.q1.ir.imm_desc module<a class="headerlink" href="#module-qat.experimental.dialect.q1.ir.imm_desc" title="Link to this heading"></a></h1>
-<section id="imm-desc-py">
-<h2>imm_desc.py<a class="headerlink" href="#imm-desc-py" title="Link to this heading"></a></h2>
-<p>This module defines the set of immediate types for the QBlox ISA. QBlox used
-to support only <em>unsigned</em> 32-bit integers (see <code class="xref py py-class docutils literal notranslate"><span class="pre">UI32</span></code>) and the programmer had
-to legalize negative values by 2’s complement. QBlox nowadays are increasingly
-supporting more types to improve the programmer’s experience. While not fully
-specified/documented, we’re anticipating such improvements to the Q1 ISA here by
-specifying the following:</p>
-<ul class="simple">
-<li><p>UI32: Unsigned 32-bit IntegerType alias</p></li>
-<li><p>SI32: Signed 32-bit IntegerType alias</p></li>
-<li><p>UI16: Unsigned 16-bit IntegerType alias</p></li>
-<li><p>SI16: Signed 16-bit IntegerType alias</p></li>
-</ul>
-</section>
+<p>Semantic immediate attribute types for the QBlox Q1 ISA dialect.</p>
+<p>Each subclass of <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a> is a <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code> <code class="docutils literal notranslate"><span class="pre">[int]</span></code> attribute that
+enforces hardware-specific value constraints at construction time. Invalid values
+raise <code class="xref py py-class docutils literal notranslate"><span class="pre">VerifyException</span></code> immediately and cannot exist
+in the IR.</p>
+<p>The types cover all distinct operand semantics in the Q1 instruction set: boolean
+flags, small unsigned fields, durations, gains/offsets, NCO phase, waveform /
+acquisition indices, jump addresses, and generic 32-bit values.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.AddressImm">
+<span class="sig-name descname"><span class="pre">AddressImm</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.AddressImm" title="Link to this definition"></a></dt>
+<dd><p>alias of <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.UI14Imm" title="qat.experimental.dialect.q1.ir.imm_desc.UI14Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">UI14Imm</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.BoolImm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BoolImm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.BoolImm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>Boolean immediate: <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">1}</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.BoolImm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.bool_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.BoolImm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.DurationImm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DurationImm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.DurationImm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>RT-instruction duration in ns: <code class="docutils literal notranslate"><span class="pre">[4,</span> <span class="pre">65535]</span></code>.</p>
+<p>The minimum value of 4 ns matches the Q1 Real-Time core clock cycle.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.DurationImm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.duration_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.DurationImm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.NcoPhaseImm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NcoPhaseImm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.NcoPhaseImm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>NCO phase / phase-offset immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1_000_000_000]</span></code> (inclusive).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.NcoPhaseImm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.nco_phase_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.NcoPhaseImm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+<p>Base class for all Q1 immediate value attributes.</p>
+<p>Subclasses set <code class="xref py py-attr docutils literal notranslate"><span class="pre">_MIN</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">_MAX</span></code> (inclusive) and inherit the
+construction-time and IR-level validation. They may also override
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate()</span></code> to add extra constraints (e.g. alignment, enum membership).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.parse_parameter">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.parse_parameter" title="Link to this definition"></a></dt>
+<dd><p>Parse the attribute parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.print_parameter">
+<span class="sig-name descname"><span class="pre">print_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.print_parameter" title="Link to this definition"></a></dt>
+<dd><p>Print the attribute parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.verify" title="Link to this definition"></a></dt>
+<dd><p>Check that the attribute parameters satisfy the expected invariants.
+Raise a VerifyException otherwise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.SI16Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SI16Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.SI16Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>16-bit signed immediate: <code class="docutils literal notranslate"><span class="pre">[-32768,</span> <span class="pre">32767]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.SI16Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.si16_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.SI16Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.SI32Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SI32Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.SI32Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>32-bit signed immediate: <code class="docutils literal notranslate"><span class="pre">[-2^31,</span> <span class="pre">2^31</span> <span class="pre">-</span> <span class="pre">1]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.SI32Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.si32_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.SI32Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.SU32Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SU32Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.SU32Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>32-bit signed-or-unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[-2^31,</span> <span class="pre">2^32</span> <span class="pre">-</span> <span class="pre">1]</span></code>.</p>
+<p>Used by Q1 instructions whose immediate operand accepts either signed
+or unsigned 32-bit representation (e.g. <code class="docutils literal notranslate"><span class="pre">move</span></code>, <code class="docutils literal notranslate"><span class="pre">not</span></code>, generic ALU).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.SU32Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.su32_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.SU32Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI10Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI10Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI10Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>10-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1023]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI10Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui10_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI10Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI14Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI14Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI14Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>14-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">16383]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI14Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui14_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI14Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI16Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI16Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI16Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>16-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">65535]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI16Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui16_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI16Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI24Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI24Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI24Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>24-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">16_777_215]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI24Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui24_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI24Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI2Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI2Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI2Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>2-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">3]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI2Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui2_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI2Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI32Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI32Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI32Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>32-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2^32</span> <span class="pre">-</span> <span class="pre">1]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI32Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui32_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI32Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI3Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI3Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI3Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>3-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">7]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI3Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui3_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI3Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI4Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI4Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI4Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>4-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">15]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI4Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui4_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI4Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI5Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI5Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI5Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>5-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">31]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI5Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui5_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI5Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI6Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI6Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI6Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>6-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">63]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI6Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui6_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI6Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI7Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI7Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI7Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>7-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">127]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI7Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui7_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI7Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI8Imm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">UI8Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI8Imm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>8-bit unsigned immediate: <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">255]</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI8Imm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui8_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI8Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
