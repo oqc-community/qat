@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post271.dev20260701004612 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post272.dev20260701151207 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -612,6 +612,14 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.html">qat.experimental.dialect.q1_sequence.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.target.html">qat.experimental.dialect.q1_sequence.target module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.frontend.html">qat.experimental.frontend package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.frontend.importer.html">qat.experimental.frontend.importer package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.base.html">qat.experimental.frontend.importer.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.purr.html">qat.experimental.frontend.importer.purr module</a></li>
 </ul>
 </li>
 </ul>
@@ -2474,6 +2482,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.model.loaders.purr.base.html#qat.model.loaders.purr.base.BaseLegacyModelLoader">BaseLegacyModelLoader (class in qat.model.loaders.purr.base)</a>
 </li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter">BaseLinearImporter (class in qat.experimental.frontend.importer.base)</a>
+</li>
       <li><a href="qat.model.loaders.base.html#qat.model.loaders.base.BaseLogicalModelLoader">BaseLogicalModelLoader (class in qat.model.loaders.base)</a>
 </li>
       <li><a href="qat.middleend.base.html#qat.middleend.base.BaseMiddleend">BaseMiddleend (class in qat.middleend.base)</a>
@@ -2672,12 +2682,16 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.waveform.codegen.html#qat.backend.waveform.codegen.WaveformContext.buffer">(WaveformContext property)</a>, <a href="qat.backend.waveform_v1.purr.codegen.html#qat.backend.waveform_v1.purr.codegen.WaveformContext.buffer">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.instrument.base.html#qat.instrument.base.ConfigInstrumentBuilder.build">build() (ConfigInstrumentBuilder method)</a>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.build">build() (BaseLinearImporter method)</a>
 
       <ul>
+        <li><a href="qat.instrument.base.html#qat.instrument.base.ConfigInstrumentBuilder.build">(ConfigInstrumentBuilder method)</a>
+</li>
         <li><a href="qat.instrument.base.html#qat.instrument.base.CsvInstrumentBuilder.build">(CsvInstrumentBuilder method)</a>
 </li>
         <li><a href="qat.instrument.base.html#qat.instrument.base.InstrumentBuilder.build">(InstrumentBuilder method)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.build">(PurrImporter method)</a>
 </li>
         <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.build">(SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.build">[1]</a>
 </li>
@@ -3458,10 +3472,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.COMPLEX">COMPLEX (VariableType attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.complex_declaration_statement">complex_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.complex_declaration_statement">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.complex_to_binary">complex_to_binary() (in module qat.runtime.results_processing)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.ComplexFunction">ComplexFunction (class in qat.purr.backends.utilities)</a>
@@ -4016,6 +4030,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.SweepFlattener.create_flattened_builders">create_flattened_builders() (SweepFlattener method)</a>
 </li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.create_frame">create_frame() (BaseLinearImporter method)</a>
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.create_frame">(PurrImporter method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PhysicalChannel.create_freq_shift_pulse_channel">create_freq_shift_pulse_channel() (PhysicalChannel method)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.FileLoggerHandler.create_initial_file">create_initial_file() (FileLoggerHandler method)</a>
@@ -5208,6 +5228,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxCFGWalker.enter">(QbloxCFGWalker method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker.enter">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop">enter_for_loop() (BaseLinearImporter method)</a>
+</li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.enter_repeat">enter_repeat() (QbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.enter_repeat">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.enter_sweep">enter_sweep() (QbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.enter_sweep">[1]</a>
@@ -5410,6 +5432,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxCFGWalker.exit">(QbloxCFGWalker method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxCFGWalker.exit">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.exit_for_loop">exit_for_loop() (BaseLinearImporter method)</a>
+</li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.exit_repeat">exit_repeat() (QbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.exit_repeat">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.exit_sweep">exit_sweep() (QbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.exit_sweep">[1]</a>
@@ -5772,6 +5796,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.backend.qblox.passes.analysis.html#qat.backend.qblox.passes.analysis.QbloxLegalisationPass.freq_as_steps">freq_as_steps() (QbloxLegalisationPass static method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.QbloxLegalisationPass.freq_as_steps">[1]</a>
 </li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.create_frame.params.freq_op">freq_op (qat.experimental.frontend.importer.base.BaseLinearImporter.create_frame parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.create_frame.params.freq_op">(qat.experimental.frontend.importer.purr.PurrImporter.create_frame parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.ChannelType.freq_shift">freq_shift (ChannelType attribute)</a>
 
       <ul>
@@ -6224,10 +6254,18 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.PipelineManager.get_execute_pipeline">get_execute_pipeline() (PipelineManager method)</a>
 </li>
+      <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.get_frame_key">get_frame_key() (PurrImporter static method)</a>
+</li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.get_frame_mappings">get_frame_mappings() (in module qat.frontend.parsers.qasm.qasm3)</a>
 
       <ul>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.get_frame_mappings">(in module qat.purr.integrations.qasm)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.get_frames">get_frames() (BaseLinearImporter method)</a>
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.get_frames">(PurrImporter method)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.Qubit.get_freq_shift_channel">get_freq_shift_channel() (Qubit method)</a>
@@ -7605,6 +7643,10 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData.instruction">instruction (PositionData attribute)</a>
 
       <ul>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.translate.params.instruction">(qat.experimental.frontend.importer.base.BaseLinearImporter.translate parameter)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.translate.params.instruction">(qat.experimental.frontend.importer.purr.PurrImporter.translate parameter)</a>
+</li>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.instruction">(SimpleAcquire attribute)</a>
 </li>
       </ul></li>
@@ -7828,6 +7870,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.waveform_v1.purr.codegen.html#qat.backend.waveform_v1.purr.codegen.WaveformV1Backend.create_physical_channel_buffers.params.ir">(qat.backend.waveform_v1.purr.codegen.WaveformV1Backend.create_physical_channel_buffers parameter)</a>
 </li>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run.params.ir">(qat.core.pass_base.PassModel.run parameter)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.build.params.ir">(qat.experimental.frontend.importer.base.BaseLinearImporter.build parameter)</a>
 </li>
         <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.frontend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
@@ -10700,6 +10744,14 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1_sequence.target.html#module-qat.experimental.dialect.q1_sequence.target">qat.experimental.dialect.q1_sequence.target</a>
 </li>
+        <li><a href="qat.experimental.frontend.html#module-qat.experimental.frontend">qat.experimental.frontend</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.html#module-qat.experimental.frontend.importer">qat.experimental.frontend.importer</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.base.html#module-qat.experimental.frontend.importer.base">qat.experimental.frontend.importer.base</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.purr.html#module-qat.experimental.frontend.importer.purr">qat.experimental.frontend.importer.purr</a>
+</li>
         <li><a href="qat.experimental.system_data.html#module-qat.experimental.system_data">qat.experimental.system_data</a>
 </li>
         <li><a href="qat.experimental.system_data.canonical.html#module-qat.experimental.system_data.canonical">qat.experimental.system_data.canonical</a>
@@ -11177,9 +11229,11 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.waveform.html#module-qat.utils.waveform">qat.utils.waveform</a>
 </li>
       </ul></li>
-      <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.calibrate_mixer.params.module">module (qat.backend.qblox.config.helpers.QbloxConfigHelper.calibrate_mixer parameter)</a>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.module">module (BaseLinearImporter attribute)</a>
 
       <ul>
+        <li><a href="qat.backend.qblox.config.helpers.html#qat.backend.qblox.config.helpers.QbloxConfigHelper.calibrate_mixer.params.module">(qat.backend.qblox.config.helpers.QbloxConfigHelper.calibrate_mixer parameter)</a>
+</li>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.QbloxConfig.params.module">(qat.backend.qblox.config.specification.QbloxConfig parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit.params.module">(qat.experimental.dialect.q1.target.Q1asmTarget.emit parameter)</a>
@@ -12198,6 +12252,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.operator_info">operator_info (qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics parameter)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo">OperatorInfo (class in qat.purr.backends.realtime_chip_simulator)</a>
+</li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops.params.ops">ops (qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops parameter)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.optimize">optimize() (AbstractQbloxLiveEngine method)</a>
 
@@ -13291,8 +13347,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PostProcessing">(class in qat.purr.compiler.instructions)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation">PostProcessingSanitisation (class in qat.frontend.passes.transform)</a>
 
       <ul>
@@ -13303,6 +13357,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.transform_passes.html#qat.purr.compiler.transform_passes.PostProcessingSanitisation">(class in qat.purr.compiler.transform_passes)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.instruction_basetypes.html#qat.ir.instruction_basetypes.PostProcessType">PostProcessType (class in qat.ir.instruction_basetypes)</a>
 </li>
       <li><a href="getting_started/shot_selection.html#qat.ir.measure.PostSelect">PostSelect (class in qat.ir.measure)</a>, <a href="qat.ir.measure.html#qat.ir.measure.PostSelect">[1]</a>
@@ -13811,6 +13867,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.params.purpose">(qat.ir.measure.Acquire parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.build.params.purr_ir">purr_ir (qat.experimental.frontend.importer.purr.PurrImporter.build parameter)</a>
+</li>
       <li><a href="qat.frontend.converters.purr.html#qat.frontend.converters.purr.PurrConverter">PurrConverter (class in qat.frontend.converters.purr)</a>
 </li>
       <li><a href="qat.frontend.purr.html#qat.frontend.purr.PurrFrontend">PurrFrontend (class in qat.frontend.purr)</a>
@@ -13819,6 +13877,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.frontend.purr.purr.html#qat.frontend.purr.purr.PurrFrontend">(class in qat.frontend.purr.purr)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter">PurrImporter (class in qat.experimental.frontend.importer.purr)</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AddOp.py_operation">py_operation() (AddOp static method)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AddOp.py_operation">[1]</a>
 
       <ul>
@@ -14679,6 +14739,34 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.frontend
+
+      <ul>
+        <li><a href="qat.experimental.frontend.html#module-qat.experimental.frontend">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.frontend.importer
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.html#module-qat.experimental.frontend.importer">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.frontend.importer.base
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.base.html#module-qat.experimental.frontend.importer.base">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.frontend.importer.purr
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.purr.html#module-qat.experimental.frontend.importer.purr">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.system_data
 
       <ul>
@@ -15462,6 +15550,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.echo.full.html#module-qat.pipelines.legacy.echo.full">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.qblox
 
@@ -15476,8 +15566,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.qblox.compile.html#module-qat.pipelines.legacy.qblox.compile">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.qblox.full
 
@@ -16626,10 +16714,16 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.quantum_reset">quantum_reset() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.quantum_reset">[1]</a>
 </li>
+      <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.get_frame_key.params.quantum_target">quantum_target (qat.experimental.frontend.importer.purr.PurrImporter.get_frame_key parameter)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.MeasureBlock.quantum_targets">quantum_targets (MeasureBlock property)</a>
 
       <ul>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.PhaseReset.quantum_targets">(PhaseReset attribute)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.get_frames.params.quantum_targets">(qat.experimental.frontend.importer.base.BaseLinearImporter.get_frames parameter)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.get_frames.params.quantum_targets">(qat.experimental.frontend.importer.purr.PurrImporter.get_frames parameter)</a>
 </li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.QuantumInstructionBlock.quantum_targets">(QuantumInstructionBlock attribute)</a>
 </li>
@@ -19206,10 +19300,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI16Imm">SI16Imm (class in qat.experimental.dialect.q1.ir.imm_desc)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI32Imm">SI32Imm (class in qat.experimental.dialect.q1.ir.imm_desc)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire">SimpleAcquire (class in qat.purr.backends.utilities)</a>
@@ -19457,6 +19551,8 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.PositionData.start">(PositionData attribute)</a>
 </li>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop.params.start">(qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop parameter)</a>
+</li>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire.start">(SimpleAcquire attribute)</a>
 </li>
       </ul></li>
@@ -19587,12 +19683,16 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.IterBound.step">step (IterBound attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.step">[1]</a>
 
       <ul>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop.params.step">(qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop parameter)</a>
+</li>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics.params.step">(qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_dynamics parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.RoundedSquareFunction.step">step() (RoundedSquareFunction method)</a>, <a href="qat.utils.waveform.html#qat.utils.waveform.RoundedSquareFunction.step">[1]</a>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode.STOP">STOP (Opcode attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.STOP">[1]</a>
+</li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop.params.stop">stop (qat.experimental.frontend.importer.base.BaseLinearImporter.enter_for_loop parameter)</a>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.stop">stop() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.stop">[1]</a>
 </li>
@@ -19780,6 +19880,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.instructions.html#qat.ir.instructions.Jump.target">(Jump property)</a>
 </li>
         <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.target">(Pulse property)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.create_frame.params.target">(qat.experimental.frontend.importer.base.BaseLinearImporter.create_frame parameter)</a>
+</li>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.create_frame.params.target">(qat.experimental.frontend.importer.purr.PurrImporter.create_frame parameter)</a>
 </li>
         <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing.params.target">(qat.ir.instruction_builder.QuantumInstructionBuilder.emit_granular_post_processing parameter)</a>
 </li>
@@ -20624,6 +20728,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.core.pass_base.html#qat.purr.core.pass_base.TransformPass">(class in qat.purr.core.pass_base)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.translate">translate() (BaseLinearImporter method)</a>
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.purr.html#qat.experimental.frontend.importer.purr.PurrImporter.translate">(PurrImporter method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.TriagePass">TriagePass (class in qat.backend.passes.purr.analysis)</a>
 
       <ul>
@@ -20885,6 +20995,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Pulse.update_duration">update_duration() (Pulse method)</a>
+</li>
+      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops">update_frames_from_ops() (BaseLinearImporter method)</a>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.Opcode.UPDATE_PARAMETERS">UPDATE_PARAMETERS (Opcode attribute)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.Opcode.UPDATE_PARAMETERS">[1]</a>
 </li>
