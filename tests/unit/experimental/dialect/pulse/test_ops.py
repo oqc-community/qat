@@ -60,7 +60,6 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
     WaveformType,
 )
-from qat.ir.waveforms import Waveform
 
 
 class TestConstantOp:
@@ -460,7 +459,6 @@ class TestSoftSquareWaveformOp:
         rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
         op = SoftSquareWaveformOp(width, amplitude, rise)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.rise == rise.results[0]
@@ -476,7 +474,6 @@ class TestSofterSquareWaveformOp:
         rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
         op = SofterSquareWaveformOp(width, amplitude, std_dev, rise)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.std_dev == std_dev.results[0]
@@ -493,7 +490,6 @@ class TestExtraSoftSquareWaveformOp:
         rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
         op = ExtraSoftSquareWaveformOp(width, amplitude, std_dev, rise)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.std_dev == std_dev.results[0]
@@ -508,7 +504,6 @@ class TestSquareWaveformOp:
         width = ConstantOp(TimeAttr(800e-9))
 
         op = SquareWaveformOp(width, amplitude)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.result.type == WaveformType()
@@ -526,7 +521,6 @@ class TestGaussianSquareWaveformOp:
         op = GaussianSquareWaveformOp(
             width, amplitude, std_dev, square_width, zero_at_edges
         )
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.std_dev == std_dev.results[0]
@@ -543,7 +537,6 @@ class TestGaussianWaveformOp:
         rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
         op = GaussianWaveformOp(width, amplitude, rise)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.rise == rise.results[0]
@@ -557,7 +550,6 @@ class TestSofterGaussianWaveformOp:
         width = ConstantOp(TimeAttr(800e-9))
         rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
         op = SofterGaussianWaveformOp(width, amplitude, rise)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.rise == rise.results[0]
@@ -571,7 +563,6 @@ class TestBlackmanWaveformOp:
         width = ConstantOp(TimeAttr(800e-9))
 
         op = BlackmanWaveformOp(width, amplitude)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.result.type == WaveformType()
@@ -586,7 +577,6 @@ class TestSetupHoldWaveformOp:
         rise = ConstantOp(TimeAttr(200e-9))
 
         op = SetupHoldWaveformOp(width, amplitude, amp_setup, rise)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.amp_setup == amp_setup.results[0]
@@ -604,7 +594,6 @@ class TestRoundedSquareWaveformOp:
 
         op = RoundedSquareWaveformOp(width, amplitude, rise, std_dev)
 
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.rise == rise.results[0]
@@ -625,7 +614,6 @@ class TestDragGaussianWaveformOp:
 
         op = DragGaussianWaveformOp(width, amplitude, std_dev, beta, zero_at_edges)
 
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.std_dev == std_dev.results[0]
@@ -647,7 +635,6 @@ class TestGaussianZeroEdgeWaveformOp:
 
         op = GaussianZeroEdgeWaveformOp(width, amplitude, std_dev, zero_at_edges)
 
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.std_dev == std_dev.results[0]
@@ -667,7 +654,6 @@ class TestCosWaveformOp:
         internal_phase = ConstantOp(PhaseAttr(1.57))
 
         op = CosWaveformOp(width, amplitude, frequency, internal_phase)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.frequency == frequency.results[0]
@@ -686,7 +672,6 @@ class TestSinWaveformOp:
         internal_phase = ConstantOp(PhaseAttr(1.57))
 
         op = SinWaveformOp(width, amplitude, frequency, internal_phase)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.frequency == frequency.results[0]
@@ -702,7 +687,6 @@ class TestSechWaveformOp:
         std_dev = ConstantOp(TimeAttr(200e-9))
 
         op = SechWaveformOp(width, amplitude, std_dev)
-        assert issubclass(op.waveform_type, Waveform)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
         assert op.std_dev == std_dev.results[0]

@@ -62,7 +62,7 @@ from .attributes import (
     SampledWaveformAttr,
     TimeAttr,
 )
-from .interfaces import IsAnalyticalWaveformInterface
+from .interfaces import IsAnalyticalWaveformInterface, extract_constant_scalar
 from .traits import (
     AdvancesTimeTrait,
     FrameCanonicalizationPatternsTrait,
@@ -497,11 +497,12 @@ class SquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
         """
         return super().__init__(operands=[width, amplitude], result_types=[WaveformType()])
 
-    @property
-    def waveform_type(self) -> type[SquareWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return SquareWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        if width is None or amp is None:
+            return None
+        return SquareWaveform(width=width, amp=amp)
 
 
 @irdl_op_definition
@@ -554,11 +555,13 @@ class SoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, rise], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[SoftSquareWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return SoftSquareWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        rise = extract_constant_scalar(self.rise)
+        if width is None or amp is None or rise is None:
+            return None
+        return SoftSquareWaveform(width=width, amp=amp, rise=rise)
 
 
 @irdl_op_definition
@@ -619,11 +622,14 @@ class SofterSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, std_dev, rise], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[SofterSquareWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the
-        envelope."""
-        return SofterSquareWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        std_dev = extract_constant_scalar(self.std_dev)
+        rise = extract_constant_scalar(self.rise)
+        if width is None or amp is None or std_dev is None or rise is None:
+            return None
+        return SofterSquareWaveform(width=width, amp=amp, std_dev=std_dev, rise=rise)
 
 
 @irdl_op_definition
@@ -681,11 +687,14 @@ class ExtraSoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, std_dev, rise], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[ExtraSoftSquareWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the
-        envelope."""
-        return ExtraSoftSquareWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        std_dev = extract_constant_scalar(self.std_dev)
+        rise = extract_constant_scalar(self.rise)
+        if width is None or amp is None or std_dev is None or rise is None:
+            return None
+        return ExtraSoftSquareWaveform(width=width, amp=amp, std_dev=std_dev, rise=rise)
 
 
 @irdl_op_definition
@@ -742,9 +751,21 @@ class GaussianSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             result_types=[WaveformType()],
         )
 
-    @property
-    def waveform_type(self) -> type[GaussianSquareWaveform]:
-        return GaussianSquareWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        std_dev = extract_constant_scalar(self.std_dev)
+        square_width = extract_constant_scalar(self.square_width)
+        if width is None or amp is None or std_dev is None or square_width is None:
+            return None
+        zero_at_edges = bool(self.zero_at_edges.value.data)
+        return GaussianSquareWaveform(
+            width=width,
+            amp=amp,
+            std_dev=std_dev,
+            square_width=square_width,
+            zero_at_edges=zero_at_edges,
+        )
 
 
 @irdl_op_definition
@@ -796,11 +817,13 @@ class GaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, rise], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[GaussianWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return GaussianWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        rise = extract_constant_scalar(self.rise)
+        if width is None or amp is None or rise is None:
+            return None
+        return GaussianWaveform(width=width, amp=amp, rise=rise)
 
 
 @irdl_op_definition
@@ -854,11 +877,13 @@ class SofterGaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, rise], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[SofterGaussianWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return SofterGaussianWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        rise = extract_constant_scalar(self.rise)
+        if width is None or amp is None or rise is None:
+            return None
+        return SofterGaussianWaveform(width=width, amp=amp, rise=rise)
 
 
 @irdl_op_definition
@@ -895,11 +920,12 @@ class BlackmanWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
         """
         return super().__init__(operands=[width, amplitude], result_types=[WaveformType()])
 
-    @property
-    def waveform_type(self) -> type[BlackmanWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return BlackmanWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        if width is None or amp is None:
+            return None
+        return BlackmanWaveform(width=width, amp=amp)
 
 
 @irdl_op_definition
@@ -959,11 +985,14 @@ class SetupHoldWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, amp_setup, rise], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[SetupHoldWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return SetupHoldWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        amp_setup = extract_constant_scalar(self.amp_setup)
+        rise = extract_constant_scalar(self.rise)
+        if width is None or amp is None or amp_setup is None or rise is None:
+            return None
+        return SetupHoldWaveform(width=width, amp=amp, amp_setup=amp_setup, rise=rise)
 
 
 @irdl_op_definition
@@ -1026,11 +1055,14 @@ class RoundedSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, rise, std_dev], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[RoundedSquareWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return RoundedSquareWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        rise = extract_constant_scalar(self.rise)
+        std_dev = extract_constant_scalar(self.std_dev)
+        if width is None or amp is None or rise is None or std_dev is None:
+            return None
+        return RoundedSquareWaveform(width=width, amp=amp, rise=rise, std_dev=std_dev)
 
 
 @irdl_op_definition
@@ -1097,11 +1129,17 @@ class DragGaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             result_types=[WaveformType()],
         )
 
-    @property
-    def waveform_type(self) -> type[DragGaussianWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return DragGaussianWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        std_dev = extract_constant_scalar(self.std_dev)
+        beta = extract_constant_scalar(self.beta)
+        if width is None or amp is None or std_dev is None or beta is None:
+            return None
+        zero_at_edges = bool(self.zero_at_edges.value.data)
+        return DragGaussianWaveform(
+            width=width, amp=amp, std_dev=std_dev, beta=beta, zero_at_edges=zero_at_edges
+        )
 
 
 @irdl_op_definition
@@ -1161,11 +1199,16 @@ class GaussianZeroEdgeWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             result_types=[WaveformType()],
         )
 
-    @property
-    def waveform_type(self) -> type[GaussianZeroEdgeWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return GaussianZeroEdgeWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        std_dev = extract_constant_scalar(self.std_dev)
+        if width is None or amp is None or std_dev is None:
+            return None
+        zero_at_edges = bool(self.zero_at_edges.value.data)
+        return GaussianZeroEdgeWaveform(
+            width=width, amp=amp, std_dev=std_dev, zero_at_edges=zero_at_edges
+        )
 
 
 @irdl_op_definition
@@ -1224,11 +1267,16 @@ class CosWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             result_types=[WaveformType()],
         )
 
-    @property
-    def waveform_type(self) -> type[CosWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return CosWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        frequency = extract_constant_scalar(self.frequency)
+        internal_phase = extract_constant_scalar(self.internal_phase)
+        if width is None or amp is None or frequency is None or internal_phase is None:
+            return None
+        return CosWaveform(
+            width=width, amp=amp, frequency=frequency, internal_phase=internal_phase
+        )
 
 
 @irdl_op_definition
@@ -1287,11 +1335,16 @@ class SinWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             result_types=[WaveformType()],
         )
 
-    @property
-    def waveform_type(self) -> type[SinWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return SinWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        frequency = extract_constant_scalar(self.frequency)
+        internal_phase = extract_constant_scalar(self.internal_phase)
+        if width is None or amp is None or frequency is None or internal_phase is None:
+            return None
+        return SinWaveform(
+            width=width, amp=amp, frequency=frequency, internal_phase=internal_phase
+        )
 
 
 @irdl_op_definition
@@ -1346,11 +1399,13 @@ class SechWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
             operands=[width, amplitude, std_dev], result_types=[WaveformType()]
         )
 
-    @property
-    def waveform_type(self) -> type[SechWaveform]:
-        """Returns the associated QAT waveform type, which can be used to evaluate the shape
-        of the waveform."""
-        return SechWaveform
+    def build_waveform(self):
+        width = extract_constant_scalar(self.width)
+        amp = extract_constant_scalar(self.amplitude)
+        std_dev = extract_constant_scalar(self.std_dev)
+        if width is None or amp is None or std_dev is None:
+            return None
+        return SechWaveform(width=width, amp=amp, std_dev=std_dev)
 
 
 @irdl_op_definition

@@ -3,24 +3,55 @@
 
 from abc import ABC, abstractmethod
 
+from xdsl.dialects.builtin import FloatAttr
 from xdsl.irdl import Operation, SSAValue
+from xdsl.traits import ConstantLike
 
+from qat.experimental.dialect.pulse.ir.attributes import PulseNumericTypedAttr
 from qat.ir.waveforms import Waveform
 
 
-class IsAnalyticalWaveformInterface(Operation, ABC):
-    """Marks operations that produce waveforms as an analytical definition.
+def extract_constant_scalar(ssa: SSAValue) -> float | complex | None:
+    """Return the Python scalar behind ``ssa`` if it is a compile-time constant.
 
-    Operations with this interface need to implement a method that returns the waveform type
-    that can be used to evaluate the shape of the waveform.
+    Handles both pulse-dialect ``ConstantOp`` values (which fold to a
+    :class:`PulseNumericTypedAttr`) and standard ``arith.constant`` values (which
+    fold to a :class:`FloatAttr`). Returns ``None`` otherwise.
+
+    Complex values whose imaginary part is exactly zero are narrowed to ``float``,
+    so waveform fields typed strictly as ``float`` accept scalars extracted from an
+    :class:`AmplitudeAttr`, which always stores its literal value as ``complex``.
     """
 
-    @property
-    @abstractmethod
-    def waveform_type(self) -> type[Waveform]:
-        """The type of the waveform shape that this operation produces.
+    attr = ConstantLike.get_constant_value(ssa)
+    if isinstance(attr, PulseNumericTypedAttr):
+        value = attr.literal_value
+    elif isinstance(attr, FloatAttr):
+        value = attr.value.data
+    else:
+        return None
+    if isinstance(value, complex) and value.imag == 0:
+        return value.real
+    return value
 
-        This is used to determine how to evaluate the shape of the waveform.
+
+class IsAnalyticalWaveformInterface(Operation, ABC):
+    """Marks operations that produce waveforms via an analytical definition.
+
+    Operations implementing this interface know how to construct the pydantic
+    :class:`Waveform` they represent from their own operands and properties by
+    extracting compile-time-constant scalars from their SSA operands.
+    """
+
+    @abstractmethod
+    def build_waveform(self) -> Waveform | None:
+        """Build the pydantic :class:`Waveform` this op represents.
+
+        Returns ``None`` if at least one of the op's SSA operands is not a
+        compile-time constant, in which case the waveform must be left for runtime
+        evaluation.
+
+        :returns: The pydantic waveform instance, or ``None`` if it cannot be built.
         """
         ...
 
