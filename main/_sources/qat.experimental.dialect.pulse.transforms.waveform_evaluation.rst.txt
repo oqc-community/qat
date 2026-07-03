@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.waveform\_evaluation module
+=====================================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.waveform_evaluation
+   :members:
+   :undoc-members:
+   :show-inheritance:

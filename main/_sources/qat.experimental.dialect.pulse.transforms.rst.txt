@@ -17,3 +17,4 @@ Submodules
    qat.experimental.dialect.pulse.transforms.granularity_sanitisation
    qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions
    qat.experimental.dialect.pulse.transforms.timeline_normalization
+   qat.experimental.dialect.pulse.transforms.waveform_evaluation
