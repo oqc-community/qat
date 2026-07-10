@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 from xdsl.dialects.builtin import FloatAttr
 from xdsl.irdl import Operation, SSAValue
@@ -42,6 +43,11 @@ class IsAnalyticalWaveformInterface(Operation, ABC):
     :class:`Waveform` they represent from their own operands and properties by
     extracting compile-time-constant scalars from their SSA operands.
     """
+
+    # By convention and xDSL enforcement, this class variable name has to be capitalised
+    WAVEFORM_NAME: ClassVar[str]
+    """The string representation of the waveform which acts as a hook for waveform
+    information that lives outside the IR."""
 
     @abstractmethod
     def build_waveform(self) -> Waveform | None:

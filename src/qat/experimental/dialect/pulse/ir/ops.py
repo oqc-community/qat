@@ -483,6 +483,7 @@ class SquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.square_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "square"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -532,6 +533,7 @@ class SoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.soft_square_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "soft_square"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -596,6 +598,7 @@ class SofterSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.softer_square_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "softer_square"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -660,6 +663,7 @@ class ExtraSoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.extra_soft_square_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "extra_soft_square"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -729,6 +733,7 @@ class GaussianSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.gaussian_square_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "gaussian_square"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -794,6 +799,7 @@ class GaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.gaussian_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "gaussian"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -854,6 +860,7 @@ class SofterGaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.softer_gaussian_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "softer_gaussian"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -906,6 +913,7 @@ class BlackmanWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.blackman_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "blackman"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -957,6 +965,7 @@ class SetupHoldWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.setup_hold_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "setup_hold"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1028,6 +1037,7 @@ class RoundedSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.rounded_square_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "rounded_square"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1095,6 +1105,7 @@ class DragGaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.drag_gaussian_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "drag_gaussian"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1169,6 +1180,7 @@ class GaussianZeroEdgeWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.gaussian_zero_edge_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "gaussian_zero_edge"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1238,6 +1250,7 @@ class CosWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.cos_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "cos"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1306,6 +1319,7 @@ class SinWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.sin_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "sin"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1375,6 +1389,7 @@ class SechWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     """
 
     name = "pulse.sech_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "sech"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)

@@ -88,6 +88,8 @@ class PortData:
         or ``-1`` to indicate no maximum.
     :ivar acquire_allowed: Whether acquisition is allowed on this port.
     :ivar external_resource_id: Optional linked external resource identifier.
+    :ivar native_waveform_shapes: Tuple of waveform shape names that are natively supported
+        on this port.
     """
 
     id: str
@@ -97,6 +99,7 @@ class PortData:
     max_blocks: int = -1
     acquire_allowed: bool = False
     external_resource_id: str | None = None
+    native_waveform_shapes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

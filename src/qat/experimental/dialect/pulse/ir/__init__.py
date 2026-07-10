@@ -135,7 +135,10 @@ Pulse = Dialect(
 
 _all_classes = _ops + _interfaces + _traits + _types + _data_attributes + _attributes
 
+ANALYTICAL_WAVEFORM_OPS = tuple(IsAnalyticalWaveformInterface.__subclasses__())
+
 __all__ = [
+    "ANALYTICAL_WAVEFORM_OPS",
     "BinaryOp",
     "InternalBinaryOp",
     "PhaseOp",
