@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post276.dev20260713093356 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post278.dev20260713093410 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -710,6 +710,14 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html">qat.experimental.system_data.canonical.schema module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.derived.html">qat.experimental.system_data.derived package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.derived.interface.html">qat.experimental.system_data.derived.interface module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.pulse.html">qat.experimental.system_data.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1314,6 +1322,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.CreateFrameOp.acquire_allowed">acquire_allowed (CreateFrameOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CreateFrameOp.acquire_allowed">[1]</a>
 
       <ul>
+        <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.acquire_allowed">(PortConstraints attribute)</a>
+</li>
         <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.PortData.acquire_allowed">(PortData attribute)</a>
 </li>
         <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.acquire_allowed">(PulseChannel property)</a>
@@ -2244,6 +2254,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.InternalBinaryOp.attributes">(InternalBinaryOp attribute)</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.attributes">(IsAnalyticalWaveformInterface attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.MaxTimeOp.attributes">(MaxTimeOp attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ModulateOp.attributes">(ModulateOp attribute)</a>
@@ -2971,6 +2983,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.can_parse">(Qasm3Parser method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.derived.interface.html#qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical.params.canonical_data">canonical_data (qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.from_canonical.params.canonical_data">(qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.from_canonical parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData">CanonicalSystemData (class in qat.experimental.system_data.canonical.schema)</a>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.ccnot">ccnot() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.ccnot">[1]</a>
@@ -3593,10 +3611,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.VariableType.COMPLEX">COMPLEX (VariableType attribute)</a>
 </li>
-      <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.complex_declaration_statement">complex_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.complex_declaration_statement">[1]</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.complex_declaration_statement">complex_declaration_statement() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.complex_declaration_statement">[1]</a>
+</li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.complex_to_binary">complex_to_binary() (in module qat.runtime.results_processing)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.ComplexFunction">ComplexFunction (class in qat.purr.backends.utilities)</a>
@@ -4567,6 +4585,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SquareFunction.derivative">(SquareFunction method)</a>, <a href="qat.utils.waveform.html#qat.utils.waveform.SquareFunction.derivative">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.derived.interface.html#qat.experimental.system_data.derived.interface.DerivedViewInterface">DerivedViewInterface (class in qat.experimental.system_data.derived.interface)</a>
+</li>
       <li><a href="qat.integrations.features.html#qat.integrations.features.FeatureMetadata.description">description (FeatureMetadata attribute)</a>
 
       <ul>
@@ -5885,10 +5905,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.WaitOp.frame">(WaitOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.WaitOp.frame">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.frame_attribute_assignment">frame_attribute_assignment() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.frame_attribute_assignment">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.frame_definition">frame_definition() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.frame_definition">[1]</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.frame_result">frame_result (AcquireOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.frame_result">[1]</a>
@@ -6051,6 +6071,12 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData">(class in qat.experimental.dialect.pulse.ir.attributes)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.system_data.derived.interface.html#qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical">from_canonical() (DerivedViewInterface class method)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.from_canonical">(PulseLevelConstraints class method)</a>
 </li>
       </ul></li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.EngineSet.from_descriptions">from_descriptions() (EngineSet class method)</a>
@@ -6959,6 +6985,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.html#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation.params.granularity">(qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.granularity_ps">granularity_ps (PulseLevelConstraints attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.granularity_s">granularity_s (PulseLevelConstraints property)</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.html#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation">GranularitySanitisation (class in qat.experimental.dialect.pulse.transforms.granularity_sanitisation)</a>
 </li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.GreaterOrEqualThan">GreaterOrEqualThan (class in qat.ir.instructions)</a>
@@ -8761,8 +8791,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.frontend.qir.html#qat.frontend.qir.load_qir_file">load_qir_file() (in module qat.frontend.qir)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.CompilePipelineDescription.construct.params.loader">loader (qat.core.config.descriptions.CompilePipelineDescription.construct parameter)</a>
 
       <ul>
@@ -8885,6 +8913,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.waveform.html#qat.pipelines.waveform.WaveformCompilePipeline.params.loader">(qat.pipelines.waveform.WaveformCompilePipeline parameter)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.location">location (AcquireOp attribute)</a>
 
       <ul>
@@ -8909,6 +8939,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.location">(GaussianZeroEdgeWaveformOp attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.InternalBinaryOp.location">(InternalBinaryOp attribute)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.location">(IsAnalyticalWaveformInterface attribute)</a>
 </li>
         <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.MaxLikelihoodDiscriminateParams.location">(MaxLikelihoodDiscriminateParams attribute)</a>
 </li>
@@ -9287,6 +9319,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.verification.html#qat.purr.backends.verification.LucyVerificationEngine.max_circuit_duration">max_circuit_duration (LucyVerificationEngine attribute)</a>
 </li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.max_duration_ps">max_duration_ps (PortConstraints attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.max_frequency">max_frequency (PulseChannel property)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_GAIN">MAX_GAIN (Constants attribute)</a>
@@ -9351,6 +9385,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseConstraints.max_pulse_duration">(OpenPulseConstraints attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.max_pulse_duration_s">max_pulse_duration_s (PortConstraints property)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MAX_QCM_OFFSET_V">MAX_QCM_OFFSET_V (Constants attribute)</a>
 </li>
       <li><a href="qat.backend.qblox.target_data.html#qat.backend.qblox.target_data.QcmDescription.params.max_qcm_offset_v">max_qcm_offset_v (qat.backend.qblox.target_data.QcmDescription parameter)</a>
@@ -9711,6 +9747,8 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.PortData.min_blocks">min_blocks (PortData attribute)</a>
 </li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.min_duration_ps">min_duration_ps (PortConstraints attribute)</a>
+</li>
       <li><a href="qat.purr.compiler.devices.html#qat.purr.compiler.devices.PulseChannel.min_frequency">min_frequency (PulseChannel property)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.MIN_GAIN">MIN_GAIN (Constants attribute)</a>
@@ -9759,6 +9797,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseConstraints.min_pulse_duration">(OpenPulseConstraints attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.min_pulse_duration_s">min_pulse_duration_s (PortConstraints property)</a>
+</li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.Constraints.min_pulse_time">min_pulse_time (Constraints attribute)</a>
 
       <ul>
@@ -10893,6 +10933,14 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.system_data.canonical.schema.html#module-qat.experimental.system_data.canonical.schema">qat.experimental.system_data.canonical.schema</a>
 </li>
+        <li><a href="qat.experimental.system_data.derived.html#module-qat.experimental.system_data.derived">qat.experimental.system_data.derived</a>
+</li>
+        <li><a href="qat.experimental.system_data.derived.interface.html#module-qat.experimental.system_data.derived.interface">qat.experimental.system_data.derived.interface</a>
+</li>
+        <li><a href="qat.experimental.system_data.pulse.html#module-qat.experimental.system_data.pulse">qat.experimental.system_data.pulse</a>
+</li>
+        <li><a href="qat.experimental.system_data.pulse.constraints.html#module-qat.experimental.system_data.pulse.constraints">qat.experimental.system_data.pulse.constraints</a>
+</li>
         <li><a href="qat.extensions.html#module-qat.extensions">qat.extensions</a>
 </li>
         <li><a href="qat.frontend.html#module-qat.frontend">qat.frontend</a>
@@ -11657,6 +11705,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.name">(IntRegisterType attribute)</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.name">(IsAnalyticalWaveformInterface attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.JaeImmOp.name">(JaeImmOp attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.JaeRsOp.name">(JaeRsOp attribute)</a>
@@ -12050,6 +12100,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.middleend.passes.gates.transform.html#qat.middleend.passes.gates.transform.DecomposeToNativeGates.params.native_gates">native_gates (qat.middleend.passes.gates.transform.DecomposeToNativeGates parameter)</a>
 </li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.native_waveform_shapes">native_waveform_shapes (PortConstraints attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.PortData.native_waveform_shapes">(PortData attribute)</a>
+</li>
+      </ul></li>
       <li><a href="qat.engines.native.html#qat.engines.native.NativeEngine">NativeEngine (class in qat.engines.native)</a>
 </li>
       <li><a href="qat.ir.gates.native.html#qat.ir.gates.native.NativeGate">NativeGate (class in qat.ir.gates.native)</a>
@@ -13442,12 +13498,16 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.port_sample_times">port_sample_times (EvaluateWaveformsAsSamples attribute)</a>
 </li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints">PortConstraints (class in qat.experimental.system_data.pulse.constraints)</a>
+</li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.PortData">PortData (class in qat.experimental.system_data.canonical.schema)</a>
 </li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData.ports">ports (CanonicalSystemData attribute)</a>
 
       <ul>
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseFeatures.ports">(OpenPulseFeatures attribute)</a>
+</li>
+        <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.ports">(PulseLevelConstraints attribute)</a>
 </li>
       </ul></li>
       <li><a href="qat.backend.waveform.executable.html#qat.backend.waveform.executable.PositionalAcquireData.position">position (PositionalAcquireData attribute)</a>
@@ -13775,6 +13835,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.InternalBinaryOp.properties">(InternalBinaryOp attribute)</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.properties">(IsAnalyticalWaveformInterface attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.MaxTimeOp.properties">(MaxTimeOp attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ModulateOp.properties">(ModulateOp attribute)</a>
@@ -13977,6 +14039,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter">PulseConstantFoldAdapter (class in qat.experimental.dialect.pulse.transforms.constants)</a>
 </li>
       <li><a href="qat.middleend.decompositions.pulses.html#qat.middleend.decompositions.pulses.PulseDecompositionBase">PulseDecompositionBase (class in qat.middleend.decompositions.pulses)</a>
+</li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints">PulseLevelConstraints (class in qat.experimental.system_data.pulse.constraints)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseNumericTypedAttr">PulseNumericTypedAttr (class in qat.experimental.dialect.pulse.ir)</a>
 
@@ -14943,6 +15007,34 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.system_data.derived
+
+      <ul>
+        <li><a href="qat.experimental.system_data.derived.html#module-qat.experimental.system_data.derived">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.system_data.derived.interface
+
+      <ul>
+        <li><a href="qat.experimental.system_data.derived.interface.html#module-qat.experimental.system_data.derived.interface">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.system_data.pulse
+
+      <ul>
+        <li><a href="qat.experimental.system_data.pulse.html#module-qat.experimental.system_data.pulse">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.system_data.pulse.constraints
+
+      <ul>
+        <li><a href="qat.experimental.system_data.pulse.constraints.html#module-qat.experimental.system_data.pulse.constraints">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.extensions
 
       <ul>
@@ -15684,6 +15776,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.echo.html#module-qat.pipelines.legacy.echo">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.echo.compile
 
@@ -15698,8 +15792,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.legacy.echo.execute.html#module-qat.pipelines.legacy.echo.execute">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.pipelines.legacy.echo.full
 
@@ -18969,6 +19061,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.sample_time">(SampledWaveformAttr attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SampledWaveformAttr.sample_time">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.sample_time_ps">sample_time_ps (PortConstraints attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.sample_time_s">sample_time_s (PortConstraints property)</a>
+</li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.sample_waveform">sample_waveform() (in module qat.ir.waveforms)</a>
 </li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.SampledWaveform">SampledWaveform (class in qat.ir.waveforms)</a>
@@ -19455,10 +19551,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI16Imm">SI16Imm (class in qat.experimental.dialect.q1.ir.imm_desc)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI16Imm">SI16Imm (class in qat.experimental.dialect.q1.ir.imm_desc)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI32Imm">SI32Imm (class in qat.experimental.dialect.q1.ir.imm_desc)</a>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire">SimpleAcquire (class in qat.purr.backends.utilities)</a>
@@ -19890,6 +19986,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LogFolder.params.suffix">suffix (qat.purr.utils.logger.LogFolder parameter)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.suffix_incrementor">suffix_incrementor (Acquire attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints.supports_waveform_shape">supports_waveform_shape() (PortConstraints method)</a>
 </li>
       <li><a href="qat.ir.gates.gates_2q.html#qat.ir.gates.gates_2q.SWAP">SWAP (class in qat.ir.gates.gates_2q)</a>
 </li>
@@ -20589,6 +20687,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.IllegalOp.traits">(IllegalOp attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.InternalBinaryOp.traits">(InternalBinaryOp attribute)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.traits">(IsAnalyticalWaveformInterface attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.JaeImmOp.traits">(JaeImmOp attribute)</a>
 </li>
@@ -21957,14 +22057,50 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.model.target_data.html#qat.model.target_data.DeviceDescription.params.waveform_memory_size">(qat.model.target_data.DeviceDescription parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.BlackmanWaveformOp.WAVEFORM_NAME">WAVEFORM_NAME (BlackmanWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.BlackmanWaveformOp.WAVEFORM_NAME">[1]</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.CosWaveformOp.WAVEFORM_NAME">(CosWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.DragGaussianWaveformOp.WAVEFORM_NAME">(DragGaussianWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.ExtraSoftSquareWaveformOp.WAVEFORM_NAME">(ExtraSoftSquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ExtraSoftSquareWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.GaussianSquareWaveformOp.WAVEFORM_NAME">(GaussianSquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianSquareWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.GaussianWaveformOp.WAVEFORM_NAME">(GaussianWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.WAVEFORM_NAME">(GaussianZeroEdgeWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.WAVEFORM_NAME">(IsAnalyticalWaveformInterface attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.WAVEFORM_NAME">[1]</a>
+</li>
+      </ul></li>
       <li><a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr.params.waveform_name">waveform_name (qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr parameter)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WaveformAttr.params.waveform_name">(qat.experimental.dialect.q1_sequence.WaveformAttr parameter)</a>
 </li>
-        <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WaveformAttr.waveform_name">(WaveformAttr attribute)</a>, <a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr.waveform_name">[1]</a>
+      </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.WAVEFORM_NAME">WAVEFORM_NAME (RoundedSquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp.WAVEFORM_NAME">[1]</a>
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SechWaveformOp.WAVEFORM_NAME">(SechWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SechWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SetupHoldWaveformOp.WAVEFORM_NAME">(SetupHoldWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SetupHoldWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SinWaveformOp.WAVEFORM_NAME">(SinWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SinWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SofterGaussianWaveformOp.WAVEFORM_NAME">(SofterGaussianWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterGaussianWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SofterSquareWaveformOp.WAVEFORM_NAME">(SofterSquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterSquareWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SoftSquareWaveformOp.WAVEFORM_NAME">(SoftSquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SoftSquareWaveformOp.WAVEFORM_NAME">[1]</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.SquareWaveformOp.WAVEFORM_NAME">(SquareWaveformOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp.WAVEFORM_NAME">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WaveformAttr.waveform_name">waveform_name (WaveformAttr attribute)</a>, <a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr.waveform_name">[1]</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.waveform_result">waveform_result (AcquireOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.waveform_result">[1]</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.CalibratablePulse.waveform_type">waveform_type (CalibratablePulse attribute)</a>
@@ -22047,6 +22183,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComCfgImmImmImmImmOp.wc">(FbComCfgImmImmImmImmOp property)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AcquireWeightedImmImmImmImmImmOp.weight_idx0">weight_idx0 (AcquireWeightedImmImmImmImmImmOp property)</a>
 
       <ul>
@@ -22067,8 +22205,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WeightAttr.weight_name">(WeightAttr attribute)</a>, <a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr.weight_name">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WeightAttr">WeightAttr (class in qat.experimental.dialect.q1_sequence)</a>
 
       <ul>
