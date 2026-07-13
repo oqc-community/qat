@@ -11,6 +11,7 @@ from xdsl.dialects.builtin import Builtin
 from xdsl.dialects.complex import Complex
 from xdsl.parser import Parser
 from xdsl.printer import Printer
+from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
@@ -275,7 +276,7 @@ class TestSampledWaveformAttr:
         "waveform, time, sample_time",
         [
             ([0.0, 1.0, 0.5], 3e9, 1e9),
-            ([1.0 + 1.0j, 0.5 - 0.5j], 2e-6, 1e6),
+            ([1.0 + 1.0j, 0.5 - 0.5j], 2e6, 1e6),
         ],
     )
     def test_properties(self, waveform, time, sample_time):
@@ -307,12 +308,16 @@ class TestSampledWaveformAttr:
 
     def test_inequality_with_different_time(self):
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
-        attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(4e9), TimeAttr(1e9))
+        attr2 = SampledWaveformAttr(
+            [0.0, 1.0, 0.5],
+            TimeAttr(3e18, TimeUnits.NANOSECOND),
+            TimeAttr(1e9),
+        )
         assert attr1 != attr2
 
     def test_inequality_with_different_sample_time(self):
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
-        attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(2e9))
+        attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(6e9), TimeAttr(2e9))
         assert attr1 != attr2
 
     def test_print_and_parse_roundtrip(self, io_stream):
@@ -379,10 +384,20 @@ class TestSampledWaveformAttr:
         with pytest.raises(ValueError, match="samples to be builtin complex attributes."):
             parser.parse_attribute()
 
+    def test_verify_fails_for_mismatched_width(self):
+        with pytest.raises(
+            VerifyException,
+            match=(
+                "Sampled waveform width must equal number of samples multiplied "
+                "by sample_time."
+            ),
+        ):
+            SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(4e9), TimeAttr(1e9))
+
     def test_hash_equality(self):
         waveform = [0.0, 1.0, 0.5, -1 / 3]
-        attr1 = SampledWaveformAttr(waveform, TimeAttr(3e9), TimeAttr(1e9))
-        attr2 = SampledWaveformAttr(deepcopy(waveform), TimeAttr(3e9), TimeAttr(1e9))
+        attr1 = SampledWaveformAttr(waveform, TimeAttr(4e9), TimeAttr(1e9))
+        attr2 = SampledWaveformAttr(deepcopy(waveform), TimeAttr(4e9), TimeAttr(1e9))
         assert hash(attr1) == hash(attr2)
 
     def test_hash_inequality_with_different_waveform(self):
@@ -392,10 +407,14 @@ class TestSampledWaveformAttr:
 
     def test_hash_inequality_with_different_time(self):
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
-        attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(4e9), TimeAttr(1e9))
+        attr2 = SampledWaveformAttr(
+            [0.0, 1.0, 0.5],
+            TimeAttr(3e18, TimeUnits.NANOSECOND),
+            TimeAttr(1e9),
+        )
         assert hash(attr1) != hash(attr2)
 
     def test_hash_inequality_with_different_sample_time(self):
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
-        attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(2e9))
+        attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(6e9), TimeAttr(2e9))
         assert hash(attr1) != hash(attr2)

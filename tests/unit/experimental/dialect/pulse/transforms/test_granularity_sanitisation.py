@@ -242,47 +242,6 @@ class TestGranularitySanitisation:
         assert np.isclose(sanitised_waveform.sample_time.literal_value, 1e-9)
         assert len(sanitised_waveform.literal_value) == 24
 
-    def test_waveform_constant_sanitisation_skips_non_integral_sample_count(
-        self,
-    ) -> None:
-        granularity = TimeAttr(8, TimeUnits.NANOSECOND)
-        sampled_time = TimeAttr(2, TimeUnits.NANOSECOND)
-        time_width = TimeAttr(17, TimeUnits.NANOSECOND)
-        waveform_array = np.ones(17, dtype=complex)
-
-        const_waveform = ConstantOp(
-            SampledWaveformAttr(
-                waveform_array,
-                time_width,
-                sampled_time,
-            ),
-            WaveformType(),
-        )
-
-        frame, pulse = create_drive_pulse(const_waveform)
-        module = build_module_from_ops([const_waveform, frame, pulse])
-
-        pass_instance = ApplyGranularitySanitisation(granularity)
-        pass_instance.apply(Context(), module)
-
-        constant_ops = [
-            node
-            for node in module.walk()
-            if isinstance(node, ConstantOp) and node.result.type == WaveformType()
-        ]
-
-        assert len(constant_ops) == 1
-
-        sanitised_waveform = constant_ops[0].fold()[0]
-
-        assert sanitised_waveform.width.unit.data == TimeUnits.NANOSECOND
-        assert sanitised_waveform.width.value.data == 17
-        assert np.isclose(sanitised_waveform.width.literal_value, 17e-9)
-        assert sanitised_waveform.sample_time.unit.data == TimeUnits.NANOSECOND
-        assert sanitised_waveform.sample_time.value.data == 2
-        assert np.isclose(sanitised_waveform.sample_time.literal_value, 2e-9)
-        np.testing.assert_array_equal(sanitised_waveform.literal_value, waveform_array)
-
     def test_time_constant_sanitisation_in_nested_region(self) -> None:
         granularity = TimeAttr(2, TimeUnits.NANOSECOND)
         condition = ArithConstantOp(BoolAttr(False, value_type=1), i1)

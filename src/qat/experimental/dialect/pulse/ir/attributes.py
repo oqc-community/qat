@@ -12,6 +12,7 @@ from xdsl.ir import Data
 from xdsl.irdl import ParametrizedAttribute, irdl_attr_definition
 from xdsl.parser import AttrParser
 from xdsl.printer import Printer
+from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.pulse.units import (
     FREQUENCY_UNIT_EXPONENTS,
@@ -354,3 +355,12 @@ class SampledWaveformAttr(PulseNumericTypedAttr[WaveformType]):
     def associated_type(self) -> type[WaveformType]:
         """Returns the associated dialect type."""
         return WaveformType
+
+    def verify(self) -> None:
+        expected_width = len(self.samples.data) * self.sample_time.literal_value
+        actual_width = self.width.literal_value
+        if not np.isclose(actual_width, expected_width):
+            raise VerifyException(
+                "Sampled waveform width must equal number of samples multiplied by "
+                "sample_time."
+            )

@@ -75,7 +75,7 @@ class TestConstantOp:
             (AmplitudeAttr(0.5 - 0.5j), AmplitudeType()),
             (
                 SampledWaveformAttr(
-                    np.array([0.0, 0.5, 1.0, 0.5, 0.0]), TimeAttr(800e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.5, 1.0, 0.5, 0.0]), TimeAttr(5e-9), TimeAttr(1e-9)
                 ),
                 WaveformType(),
             ),
