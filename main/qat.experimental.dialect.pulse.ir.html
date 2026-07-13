@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir package &mdash; qat-compiler 3.0.0.post275.dev20260703094854 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir package &mdash; qat-compiler 3.0.0.post277.dev20260713093400 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -194,6 +194,14 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.canonical.html">qat.experimental.system_data.canonical package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html">qat.experimental.system_data.canonical.schema module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.derived.html">qat.experimental.system_data.derived package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.derived.interface.html">qat.experimental.system_data.derived.interface module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.pulse.html">qat.experimental.system_data.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
 </ul>
 </li>
 </ul>
@@ -892,6 +900,13 @@ pulse.amplitude.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.BlackmanWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'blackman'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.BlackmanWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.BlackmanWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.BlackmanWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -1067,6 +1082,13 @@ SSA value of type pulse.phase.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.CosWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'cos'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.CosWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.CosWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.CosWaveformOp.amplitude" title="Link to this definition"></a></dt>
@@ -1327,6 +1349,13 @@ envelope to zero at its edges.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.DragGaussianWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'drag_gaussian'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.DragGaussianWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.DragGaussianWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.DragGaussianWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -1444,6 +1473,13 @@ governing the flat-top duration.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ExtraSoftSquareWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'extra_soft_square'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ExtraSoftSquareWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ExtraSoftSquareWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ExtraSoftSquareWaveformOp.amplitude" title="Link to this definition"></a></dt>
@@ -1741,6 +1777,13 @@ can be used as an operand in later operations.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.GaussianSquareWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gaussian_square'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.GaussianSquareWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.GaussianSquareWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.GaussianSquareWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -1855,6 +1898,13 @@ pulse.amplitude.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.GaussianWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gaussian'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.GaussianWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.GaussianWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.GaussianWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -1960,6 +2010,13 @@ envelope to zero at its edges.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'gaussian_zero_edge'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.GaussianZeroEdgeWaveformOp.amplitude" title="Link to this definition"></a></dt>
@@ -2080,6 +2137,13 @@ types of the operands.</p></li>
 <p>Operations implementing this interface know how to construct the pydantic
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code> they represent from their own operands and properties by
 extracting compile-time-constant scalars from their SSA operands.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.amplitude">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">amplitude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SSAValue</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.IsAnalyticalWaveformInterface.amplitude" title="Link to this definition"></a></dt>
@@ -2765,6 +2829,13 @@ governing the flat-top duration.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rounded_square'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.RoundedSquareWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -3026,6 +3097,13 @@ sech pulse.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SechWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sech'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SechWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SechWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SechWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -3133,6 +3211,13 @@ value of type pulse.time.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SetupHoldWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'setup_hold'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SetupHoldWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SetupHoldWaveformOp.amp_setup">
 <span class="sig-name descname"><span class="pre">amp_setup</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SetupHoldWaveformOp.amp_setup" title="Link to this definition"></a></dt>
@@ -3246,6 +3331,13 @@ SSA value of type pulse.phase.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SinWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'sin'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SinWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SinWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SinWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -3354,6 +3446,13 @@ pulse.amplitude.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SoftSquareWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'soft_square'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SoftSquareWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SoftSquareWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SoftSquareWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -3456,6 +3555,13 @@ pulse.amplitude.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SofterGaussianWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'softer_gaussian'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SofterGaussianWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SofterGaussianWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SofterGaussianWaveformOp.amplitude" title="Link to this definition"></a></dt>
@@ -3565,6 +3671,13 @@ of type pulse.amplitude.</p></li>
 </dd>
 </dl>
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SofterSquareWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'softer_square'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SofterSquareWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SofterSquareWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SofterSquareWaveformOp.amplitude" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
@@ -3666,6 +3779,13 @@ of type pulse.amplitude.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SquareWaveformOp.WAVEFORM_NAME">
+<span class="sig-name descname"><span class="pre">WAVEFORM_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'square'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SquareWaveformOp.WAVEFORM_NAME" title="Link to this definition"></a></dt>
+<dd><p>The string representation of the waveform which acts as a hook for waveform
+information that lives outside the IR.</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.SquareWaveformOp.amplitude">
 <span class="sig-name descname"><span class="pre">amplitude</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.SquareWaveformOp.amplitude" title="Link to this definition"></a></dt>
@@ -4384,8 +4504,14 @@ in a list.</p>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html">qat.experimental.dialect.pulse.ir.interfaces module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.amplitude"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.amplitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.attributes"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.build_waveform"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.build_waveform()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.location"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.name"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.properties"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.traits"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.traits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface.width"><code class="docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface.width</span></code></a></li>
 </ul>
 </li>
@@ -4429,6 +4555,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.BlackmanWaveformOp"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.BlackmanWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.BlackmanWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.BlackmanWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.BlackmanWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">BlackmanWaveformOp.build_waveform()</span></code></a></li>
@@ -4457,6 +4584,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp"><code class="docutils literal notranslate"><span class="pre">CosWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">CosWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">CosWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">CosWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CosWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">CosWaveformOp.build_waveform()</span></code></a></li>
@@ -4492,6 +4620,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp"><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp.beta"><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveformOp.beta</span></code></a></li>
@@ -4509,6 +4638,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ExtraSoftSquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ExtraSoftSquareWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ExtraSoftSquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ExtraSoftSquareWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ExtraSoftSquareWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">ExtraSoftSquareWaveformOp.build_waveform()</span></code></a></li>
@@ -4525,6 +4655,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianSquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">GaussianSquareWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianSquareWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">GaussianSquareWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianSquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">GaussianSquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianSquareWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">GaussianSquareWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianSquareWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">GaussianSquareWaveformOp.build_waveform()</span></code></a></li>
@@ -4542,6 +4673,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianWaveformOp"><code class="docutils literal notranslate"><span class="pre">GaussianWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">GaussianWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">GaussianWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">GaussianWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">GaussianWaveformOp.build_waveform()</span></code></a></li>
@@ -4557,6 +4689,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.GaussianZeroEdgeWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveformOp.build_waveform()</span></code></a></li>
@@ -4674,6 +4807,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">RoundedSquareWaveformOp.build_waveform()</span></code></a></li>
@@ -4705,6 +4839,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SechWaveformOp"><code class="docutils literal notranslate"><span class="pre">SechWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SechWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SechWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SechWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SechWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SechWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SechWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SechWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">SechWaveformOp.build_waveform()</span></code></a></li>
@@ -4720,6 +4855,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SetupHoldWaveformOp"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SetupHoldWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SetupHoldWaveformOp.amp_setup"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveformOp.amp_setup</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SetupHoldWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SetupHoldWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SetupHoldWaveformOp.attributes</span></code></a></li>
@@ -4736,6 +4872,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SinWaveformOp"><code class="docutils literal notranslate"><span class="pre">SinWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SinWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SinWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SinWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SinWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SinWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SinWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SinWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">SinWaveformOp.build_waveform()</span></code></a></li>
@@ -4752,6 +4889,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SoftSquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SoftSquareWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SoftSquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SoftSquareWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SoftSquareWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">SoftSquareWaveformOp.build_waveform()</span></code></a></li>
@@ -4767,6 +4905,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterGaussianWaveformOp"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterGaussianWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterGaussianWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterGaussianWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterGaussianWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveformOp.build_waveform()</span></code></a></li>
@@ -4782,6 +4921,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterSquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterSquareWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterSquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterSquareWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SofterSquareWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">SofterSquareWaveformOp.build_waveform()</span></code></a></li>
@@ -4798,6 +4938,7 @@ in a list.</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp"><code class="docutils literal notranslate"><span class="pre">SquareWaveformOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp.WAVEFORM_NAME"><code class="docutils literal notranslate"><span class="pre">SquareWaveformOp.WAVEFORM_NAME</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp.amplitude"><code class="docutils literal notranslate"><span class="pre">SquareWaveformOp.amplitude</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp.attributes"><code class="docutils literal notranslate"><span class="pre">SquareWaveformOp.attributes</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SquareWaveformOp.build_waveform"><code class="docutils literal notranslate"><span class="pre">SquareWaveformOp.build_waveform()</span></code></a></li>
