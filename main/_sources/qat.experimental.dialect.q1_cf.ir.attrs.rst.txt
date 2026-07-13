@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1\_cf.ir.attrs module
+===============================================
+
+.. automodule:: qat.experimental.dialect.q1_cf.ir.attrs
+   :members:
+   :undoc-members:
+   :show-inheritance:

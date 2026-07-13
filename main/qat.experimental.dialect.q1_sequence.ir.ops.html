@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_sequence.ir.ops module &mdash; qat-compiler 3.0.0.post282.dev20260713150954 documentation</title>
+  <title>qat.experimental.dialect.q1_sequence.ir.ops module &mdash; qat-compiler 3.0.0.post283.dev20260713154822 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -174,6 +174,10 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_cf.html">qat.experimental.dialect.q1_cf package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.ir.html">qat.experimental.dialect.q1_cf.ir package</a></li>
 </ul>
 </li>
 <li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul class="current">
@@ -582,14 +586,18 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequenceOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp" title="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A sequence op represents the payload for a single Sequencer/PPU in a Qblox
-instrument. The body region holds Q1 assembly ops and must be terminated by a Stop* op.
-Data table attributes (waveforms, weights, acquisitions) are static lookup tables
-referenced by instruction indices.</p>
+instrument. The body region holds Q1 assembly ops across one or more blocks, each
+terminated by an <code class="docutils literal notranslate"><span class="pre">IsTerminator</span></code> op: <code class="docutils literal notranslate"><span class="pre">q1_cf</span></code> branches wire the control-flow graph and
+<code class="docutils literal notranslate"><span class="pre">Stop*</span></code> ops end terminating paths. In multi-block (CFG) form the region must be
+linearised to a single block before emission, since <code class="docutils literal notranslate"><span class="pre">emit_sequence</span></code> lowers via
+<code class="docutils literal notranslate"><span class="pre">q1.emit_program</span></code> which requires all ops to be <code class="docutils literal notranslate"><span class="pre">AssemblyPrintable</span></code> (<code class="docutils literal notranslate"><span class="pre">q1_cf</span></code>
+terminators are not). Data table attributes (waveforms, weights, acquisitions) are
+static lookup tables referenced by instruction indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.sym_name"></span><strong>sym_name</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.sym_name">¶</a> – Channel/sequencer identifier (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Q0_drive&quot;</span></code>).</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.body"></span><strong>body</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.body">¶</a> – Single-block region of Q1 instruction ops.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.body"></span><strong>body</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.body">¶</a> – Region of Q1 instruction ops, one or more blocks.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.waveforms"></span><strong>waveforms</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.waveforms">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformAttr</span></code></a>]]</span>) – Waveform data table entries.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.weights"></span><strong>weights</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.weights">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">WeightAttr</span></code></a>]]</span>) – Weight data table entries.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.AcquisitionAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.AcquisitionAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquisitionAttr</span></code></a>]]</span>) – Acquisition data table entries.</p></li>
@@ -666,7 +674,8 @@ by the operation definition.</p>
 <dd><p>Verifies SequenceOp invariants.</p>
 <ul class="simple">
 <li><p>channel_id must be non-empty.</p></li>
-<li><p>Program body must be terminated by an IsTerminator op.</p></li>
+<li><p>Body must contain at least one block.</p></li>
+<li><p>Each block in the body must end with an IsTerminator op.</p></li>
 <li><p>Indices must be unique within each data table.</p></li>
 <li><p>Names must be unique within each data table.</p></li>
 </ul>
