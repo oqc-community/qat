@@ -5,7 +5,7 @@ import pytest
 from xdsl.dialects.builtin import StringAttr
 from xdsl.parser import Parser
 
-from qat.experimental.dialect.q1.ir.ops import (
+from qat.experimental.dialect.q1 import (
     AcquireImmImmImmOp,
     AcquireImmRsImmOp,
     AcquireTtlImmImmImmImmOp,
@@ -355,7 +355,7 @@ def _bound_imm_types(op_type) -> list[type]:
     """Return the Q1Imm subclasses bound to ``op_type``'s shape, in slot order."""
     import typing
 
-    from qat.experimental.dialect.q1.ir.imm_desc import Q1Imm
+    from qat.experimental.dialect.q1 import Q1Imm
 
     orig_bases = getattr(op_type, "__orig_bases__", ())
     if not orig_bases:

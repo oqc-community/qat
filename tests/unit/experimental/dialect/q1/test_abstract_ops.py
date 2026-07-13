@@ -12,6 +12,7 @@ from xdsl.parser import Parser
 from xdsl.printer import Printer
 from xdsl.utils.test_value import create_ssa_value
 
+from qat.experimental.dialect.q1 import IntRegisterType, Registers, UI32Imm
 from qat.experimental.dialect.q1.ir.abstract_ops import (
     ImmImmImmImmImmOperation,
     ImmImmImmOperation,
@@ -30,8 +31,6 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     RsRsRdRdOperation,
     _assembly_arg_str,
 )
-from qat.experimental.dialect.q1.ir.imm_desc import UI32Imm
-from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType, Registers
 
 
 @irdl_op_definition

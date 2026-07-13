@@ -26,12 +26,16 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
 @irdl_op_definition
 class SequenceOp(IRDLOperation):
     """A sequence op represents the payload for a single Sequencer/PPU in a Qblox
-    instrument. The body region holds Q1 assembly ops and must be terminated by a Stop* op.
-    Data table attributes (waveforms, weights, acquisitions) are static lookup tables
-    referenced by instruction indices.
+    instrument. The body region holds Q1 assembly ops across one or more blocks, each
+    terminated by an ``IsTerminator`` op: ``q1_cf`` branches wire the control-flow graph and
+    ``Stop*`` ops end terminating paths. In multi-block (CFG) form the region must be
+    linearised to a single block before emission, since ``emit_sequence`` lowers via
+    ``q1.emit_program`` which requires all ops to be ``AssemblyPrintable`` (``q1_cf``
+    terminators are not). Data table attributes (waveforms, weights, acquisitions) are
+    static lookup tables referenced by instruction indices.
 
     :param sym_name: Channel/sequencer identifier (e.g. ``"Q0_drive"``).
-    :param body: Single-block region of Q1 instruction ops.
+    :param body: Region of Q1 instruction ops, one or more blocks.
     :param waveforms: Waveform data table entries.
     :param weights: Weight data table entries.
     :param acquisitions: Acquisition data table entries.
@@ -40,7 +44,7 @@ class SequenceOp(IRDLOperation):
     name = "q1_sequence.sequence"
 
     sym_name = attr_def(SymbolNameConstraint())
-    body = region_def("single_block")
+    body = region_def()
 
     waveforms = prop_def(ArrayAttr[WaveformAttr])
     weights = prop_def(ArrayAttr[WeightAttr])
@@ -90,7 +94,8 @@ class SequenceOp(IRDLOperation):
         """Verifies SequenceOp invariants.
 
         - channel_id must be non-empty.
-        - Program body must be terminated by an IsTerminator op.
+        - Body must contain at least one block.
+        - Each block in the body must end with an IsTerminator op.
         - Indices must be unique within each data table.
         - Names must be unique within each data table.
         """
@@ -98,12 +103,18 @@ class SequenceOp(IRDLOperation):
         if not self.channel_id.data:
             raise VerifyException("SequenceOp channel_id must be non-empty")
 
-        last_op = self.body.block.last_op
-        if last_op is None or not last_op.has_trait(IsTerminator):
+        if not self.body.blocks:
             raise VerifyException(
-                f"Sequence '{self.channel_id.data}' body must end"
-                f" with a terminator op (e.g. stop)"
+                f"Sequence '{self.channel_id.data}' body must contain at least one block"
             )
+
+        for block in self.body.blocks:
+            last_op = block.last_op
+            if last_op is None or not last_op.has_trait(IsTerminator):
+                raise VerifyException(
+                    f"Sequence '{self.channel_id.data}': each block must end"
+                    f" with a terminator op (e.g. stop)"
+                )
 
         for table_name, table, name_key in (
             ("waveforms", self.waveforms, "waveform_name"),

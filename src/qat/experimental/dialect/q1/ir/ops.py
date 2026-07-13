@@ -240,8 +240,6 @@ class JmpImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jmp"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -254,8 +252,6 @@ class JmpRsOp(RsOperation[IntRegisterType]):
     """Unconditional jump to an address stored in a register."""
 
     name = "q1.r.jmp"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -270,8 +266,6 @@ class JzImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jz"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -284,8 +278,6 @@ class JzRsOp(RsOperation[IntRegisterType]):
     """Jump if `ZF == 1` to a register address."""
 
     name = "q1.r.jz"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -300,8 +292,6 @@ class JnzImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jnz"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -314,8 +304,6 @@ class JnzRsOp(RsOperation[IntRegisterType]):
     """Jump if `ZF == 0` to a register address."""
 
     name = "q1.r.jnz"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -330,8 +318,6 @@ class JoImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jo"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -344,8 +330,6 @@ class JoRsOp(RsOperation[IntRegisterType]):
     """Jump if `OF == 1` to a register address."""
 
     name = "q1.r.jo"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -360,8 +344,6 @@ class JnoImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jno"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -374,8 +356,6 @@ class JnoRsOp(RsOperation[IntRegisterType]):
     """Jump if `OF == 0` to a register address."""
 
     name = "q1.r.jno"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -390,8 +370,6 @@ class JsImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.js"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -404,8 +382,6 @@ class JsRsOp(RsOperation[IntRegisterType]):
     """Jump if `NF == 1` to a register address."""
 
     name = "q1.r.js"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -420,8 +396,6 @@ class JnsImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jns"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -434,8 +408,6 @@ class JnsRsOp(RsOperation[IntRegisterType]):
     """Jump if `NF == 0` to a register address."""
 
     name = "q1.r.jns"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -450,8 +422,6 @@ class JgImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jg"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -464,8 +434,6 @@ class JgRsOp(RsOperation[IntRegisterType]):
     """Jump if signed `a > b` condition holds (`ZF == 0` and `NF == OF`)."""
 
     name = "q1.r.jg"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -480,8 +448,6 @@ class JlImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jl"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -494,8 +460,6 @@ class JlRsOp(RsOperation[IntRegisterType]):
     """Jump if signed `a < b` condition holds (`NF != OF`)."""
 
     name = "q1.r.jl"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -510,8 +474,6 @@ class JleImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jle"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -524,8 +486,6 @@ class JleRsOp(RsOperation[IntRegisterType]):
     """Jump if signed `a <= b` condition holds (`ZF == 1` or `NF != OF`)."""
 
     name = "q1.r.jle"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -540,8 +500,6 @@ class JaImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.ja"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -554,8 +512,6 @@ class JaRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a > b` condition holds (`ZF == 0` and `CF == 0`)."""
 
     name = "q1.r.ja"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -570,8 +526,6 @@ class JaeImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jae"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -584,8 +538,6 @@ class JaeRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a >= b` condition holds (`CF == 0`)."""
 
     name = "q1.r.jae"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -600,8 +552,6 @@ class JbImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jb"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -614,8 +564,6 @@ class JbRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a < b` condition holds (`CF == 1`)."""
 
     name = "q1.r.jb"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -630,8 +578,6 @@ class JbeImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jbe"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -644,8 +590,6 @@ class JbeRsOp(RsOperation[IntRegisterType]):
     """Jump if unsigned `a <= b` condition holds (`ZF == 1` or `CF == 1`)."""
 
     name = "q1.r.jbe"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def address(self):
@@ -660,8 +604,6 @@ class JgeImmOp(ImmOperation[AddressImm]):
 
     name = "q1.i.jge"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic imm field."""
@@ -675,8 +617,6 @@ class JgeRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.jge"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def address(self):
         """Semantic alias for the generic rs field."""
@@ -689,8 +629,6 @@ class JgeRsImmImmOp(RsImmImmOperation[IntRegisterType, UI32Imm, AddressImm]):
     """Deprecated legacy jump variant for unsigned `a >= b` with immediate address."""
 
     name = "q1.rii.jge"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def a(self):
@@ -717,8 +655,6 @@ class JgeRsImmRsOp(RsImmRsOperation[IntRegisterType, UI32Imm]):
 
     name = "q1.rir.jge"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -743,8 +679,6 @@ class JltRsImmImmOp(RsImmImmOperation[IntRegisterType, UI32Imm, AddressImm]):
     """Deprecated legacy jump variant for unsigned `a < b` with immediate address."""
 
     name = "q1.rii.jlt"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def a(self):
@@ -771,8 +705,6 @@ class JltRsImmRsOp(RsImmRsOperation[IntRegisterType, UI32Imm]):
 
     name = "q1.rir.jlt"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def a(self):
         """Semantic alias for the first generic rs field."""
@@ -798,8 +730,6 @@ class LoopRdImmOp(RdImmOperation[IntRegisterType, AddressImm]):
 
     name = "q1.ri.loop"
 
-    traits = traits_def(IsTerminator())
-
     @property
     def source(self):
         """Semantic alias for the generic rd field."""
@@ -818,8 +748,6 @@ class LoopRdRsOp(RdRsOperation[IntRegisterType]):
     """Deprecated legacy loop: decrement source and jump while the result is non-zero."""
 
     name = "q1.rr.loop"
-
-    traits = traits_def(IsTerminator())
 
     @property
     def source(self):

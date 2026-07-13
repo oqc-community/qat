@@ -8,8 +8,7 @@ from xdsl.dialects.builtin import Builtin
 from xdsl.parser import Parser
 from xdsl.printer import Printer
 
-from qat.experimental.dialect.q1 import Q1
-from qat.experimental.dialect.q1.ir.attrs import LabelAttr
+from qat.experimental.dialect.q1 import Q1, LabelAttr
 
 
 def test_label_attr_name_and_data():

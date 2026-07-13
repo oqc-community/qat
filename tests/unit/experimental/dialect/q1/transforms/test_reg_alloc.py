@@ -7,7 +7,7 @@ import pytest
 from xdsl.backend.block_naive_allocator import BlockNaiveAllocator
 from xdsl.backend.register_stack import OutOfRegisters
 
-from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType, Registers
+from qat.experimental.dialect.q1 import IntRegisterType, Registers
 from qat.experimental.dialect.q1.transforms.reg_alloc import Q1RegisterStack
 
 

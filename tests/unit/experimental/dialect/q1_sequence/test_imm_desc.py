@@ -12,10 +12,10 @@ from xdsl.printer import Printer
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1 import Q1
-from qat.experimental.dialect.q1_sequence import Q1Sequence
-from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
+from qat.experimental.dialect.q1_sequence import (
     AcqTableIndex,
     BinCountImm,
+    Q1_sequence,
     WaveformTableIndex,
     WeightTableIndex,
 )
@@ -64,6 +64,6 @@ def test_print_parse_roundtrip(attr_cls, value):
     ctx = Context()
     ctx.load_dialect(Builtin)
     ctx.load_dialect(Q1)
-    ctx.load_dialect(Q1Sequence)
+    ctx.load_dialect(Q1_sequence)
     parsed = Parser(ctx, encoded).parse_attribute()
     assert parsed == attr

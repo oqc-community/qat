@@ -11,8 +11,8 @@ from xdsl.parser import Parser
 from xdsl.printer import Printer
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.q1 import Q1
-from qat.experimental.dialect.q1.ir.imm_desc import (
+from qat.experimental.dialect.q1 import (
+    Q1,
     AddressImm,
     BoolImm,
     DurationImm,

@@ -3,15 +3,17 @@
 
 import pytest
 from xdsl.dialects.builtin import ArrayAttr, StringAttr
+from xdsl.ir import Block, Region
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.q1.ir.ops import NopOp, StopOp
+from qat.experimental.dialect.q1 import NopOp, Registers, StopOp
+from qat.experimental.dialect.q1_cf import FlagBranchOp, FlagPredicate, JmpBranchOp
+from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
     make_waveform,
     make_weight,
 )
-from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 
 
 class TestSequenceOpConstruction:
@@ -110,6 +112,11 @@ class TestSequenceOpVerify:
         with pytest.raises(VerifyException, match="must end with a terminator"):
             seq.verify_()
 
+    def test_empty_body_fails(self):
+        seq = SequenceOp("ch0", Region([]))
+        with pytest.raises(VerifyException, match="must contain at least one block"):
+            seq.verify_()
+
     def test_duplicate_waveform_names_fail(self):
         wf0 = make_waveform("same", 0, [0.1])
         wf1 = make_waveform("same", 1, [0.2])
@@ -132,4 +139,45 @@ class TestSequenceOpVerify:
             VerifyException,
             match="Duplicate name 'acq' in acquisitions",
         ):
+            seq.verify_()
+
+
+class TestSequenceOpMultiBlock:
+    """Verify that SequenceOp accepts multi-block regions (q1_cf CFG form)."""
+
+    def test_two_block_with_jmp_terminator(self):
+        """A two-block SequenceOp where the entry block ends with q1_cf.jmp_branch."""
+
+        exit_block = Block([StopOp()])
+        entry_block = Block([NopOp(), JmpBranchOp([], exit_block)])
+        region = Region([entry_block, exit_block])
+        seq = SequenceOp("ch0", region)
+        seq.verify_()  # must not raise
+
+    def test_two_block_cond_branch(self):
+        """A two-block SequenceOp with q1_cf.flag_branch (else is fall-through)."""
+
+        else_block = Block([StopOp()])
+        then_block = Block([StopOp()])
+        # rs must be a block argument to satisfy IsolatedFromAbove
+        entry_block = Block(arg_types=[Registers.R0])
+        rs = entry_block.args[0]
+        entry_block.add_op(
+            FlagBranchOp(FlagPredicate.eqz, rs, [], [], then_block, else_block)
+        )
+        # entry -> else -> then (else must immediately follow the branch's block
+        # to satisfy the q1_cf fall-through invariant)
+        region = Region([entry_block, else_block, then_block])
+        seq = SequenceOp("ch0", region)
+        seq.verify()  # must not raise (verifies nested q1_cf ops too)
+
+    def test_block_without_terminator_fails(self):
+        """A block ending in a non-terminator op must be rejected."""
+
+        exit_block = Block([StopOp()])
+        entry_block = Block([NopOp()])  # missing terminator
+        region = Region([entry_block, exit_block])
+        seq = SequenceOp("ch0", region)
+
+        with pytest.raises(VerifyException, match="must end with a terminator"):
             seq.verify_()

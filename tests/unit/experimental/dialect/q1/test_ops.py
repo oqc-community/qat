@@ -31,6 +31,7 @@ from qat.experimental.dialect.q1 import (
     AcquireTtlImmRsImmImmOp,
     AcquireWeightedImmImmImmImmImmOp,
     AcquireWeightedImmRsRsRsImmOp,
+    AddressImm,
     AddRsImmRdOp,
     AddRsRsRdOp,
     AndRsImmRdOp,
@@ -95,6 +96,7 @@ from qat.experimental.dialect.q1 import (
     JsRsOp,
     JzImmOp,
     JzRsOp,
+    LabelAttr,
     LabelOp,
     LatchRstImmOp,
     LatchRstRsOp,
@@ -139,6 +141,8 @@ from qat.experimental.dialect.q1 import (
     OrRsRsRdOp,
     PlayImmImmImmOp,
     PlayRsRsImmOp,
+    Q1Imm,
+    Registers,
     ResetPhOp,
     SetAwgGainImmImmOp,
     SetAwgGainRsRsOp,
@@ -174,9 +178,6 @@ from qat.experimental.dialect.q1 import (
     XorRsImmRdOp,
     XorRsRsRdOp,
 )
-from qat.experimental.dialect.q1.ir.attrs import LabelAttr
-from qat.experimental.dialect.q1.ir.imm_desc import AddressImm, Q1Imm
-from qat.experimental.dialect.q1.ir.reg_desc import Registers
 
 COMMENT_INPUTS = ["test-comment", StringAttr("test-comment")]
 
@@ -304,26 +305,27 @@ class TestNullaryFormat:
 
 
 class TestIFormat:
-    _JUMP_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
+    _STOP_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
+    _BRANCH_TRAITS = (HasRegisterConstraintsTrait,)
     _PARAM_TRAITS = (HasRegisterConstraintsTrait,)
     _PURE_RT_TRAITS = (Pure(), HasRegisterConstraintsTrait)
     _OPS_TABLE = [
-        (StopImmOp, "stop", _JUMP_TRAITS, {"status": "imm"}),
-        (JmpImmOp, "jmp", _JUMP_TRAITS, {"address": "imm"}),
-        (JzImmOp, "jz", _JUMP_TRAITS, {"address": "imm"}),
-        (JnzImmOp, "jnz", _JUMP_TRAITS, {"address": "imm"}),
-        (JoImmOp, "jo", _JUMP_TRAITS, {"address": "imm"}),
-        (JnoImmOp, "jno", _JUMP_TRAITS, {"address": "imm"}),
-        (JsImmOp, "js", _JUMP_TRAITS, {"address": "imm"}),
-        (JnsImmOp, "jns", _JUMP_TRAITS, {"address": "imm"}),
-        (JgImmOp, "jg", _JUMP_TRAITS, {"address": "imm"}),
-        (JlImmOp, "jl", _JUMP_TRAITS, {"address": "imm"}),
-        (JleImmOp, "jle", _JUMP_TRAITS, {"address": "imm"}),
-        (JaImmOp, "ja", _JUMP_TRAITS, {"address": "imm"}),
-        (JaeImmOp, "jae", _JUMP_TRAITS, {"address": "imm"}),
-        (JbImmOp, "jb", _JUMP_TRAITS, {"address": "imm"}),
-        (JbeImmOp, "jbe", _JUMP_TRAITS, {"address": "imm"}),
-        (JgeImmOp, "jge", _JUMP_TRAITS, {"address": "imm"}),
+        (StopImmOp, "stop", _STOP_TRAITS, {"status": "imm"}),
+        (JmpImmOp, "jmp", _BRANCH_TRAITS, {"address": "imm"}),
+        (JzImmOp, "jz", _BRANCH_TRAITS, {"address": "imm"}),
+        (JnzImmOp, "jnz", _BRANCH_TRAITS, {"address": "imm"}),
+        (JoImmOp, "jo", _BRANCH_TRAITS, {"address": "imm"}),
+        (JnoImmOp, "jno", _BRANCH_TRAITS, {"address": "imm"}),
+        (JsImmOp, "js", _BRANCH_TRAITS, {"address": "imm"}),
+        (JnsImmOp, "jns", _BRANCH_TRAITS, {"address": "imm"}),
+        (JgImmOp, "jg", _BRANCH_TRAITS, {"address": "imm"}),
+        (JlImmOp, "jl", _BRANCH_TRAITS, {"address": "imm"}),
+        (JleImmOp, "jle", _BRANCH_TRAITS, {"address": "imm"}),
+        (JaImmOp, "ja", _BRANCH_TRAITS, {"address": "imm"}),
+        (JaeImmOp, "jae", _BRANCH_TRAITS, {"address": "imm"}),
+        (JbImmOp, "jb", _BRANCH_TRAITS, {"address": "imm"}),
+        (JbeImmOp, "jbe", _BRANCH_TRAITS, {"address": "imm"}),
+        (JgeImmOp, "jge", _BRANCH_TRAITS, {"address": "imm"}),
         (SetMrkImmOp, "set_mrk", _PARAM_TRAITS, {"mrk": "imm"}),
         (SetFreqImmOp, "set_freq", _PARAM_TRAITS, {"nco_freq": "imm"}),
         (SetPhImmOp, "set_ph", _PARAM_TRAITS, {"nco_po": "imm"}),
@@ -351,26 +353,27 @@ class TestIFormat:
 
 
 class TestRsFormat:
-    _JUMP_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
+    _STOP_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
+    _BRANCH_TRAITS = (HasRegisterConstraintsTrait,)
     _PARAM_TRAITS = (HasRegisterConstraintsTrait,)
     _PURE_RT_TRAITS = (Pure(), HasRegisterConstraintsTrait)
     _OPS_TABLE = [
-        (StopRsOp, "stop", _JUMP_TRAITS, {"status": "rs"}),
-        (JmpRsOp, "jmp", _JUMP_TRAITS, {"address": "rs"}),
-        (JzRsOp, "jz", _JUMP_TRAITS, {"address": "rs"}),
-        (JnzRsOp, "jnz", _JUMP_TRAITS, {"address": "rs"}),
-        (JoRsOp, "jo", _JUMP_TRAITS, {"address": "rs"}),
-        (JnoRsOp, "jno", _JUMP_TRAITS, {"address": "rs"}),
-        (JsRsOp, "js", _JUMP_TRAITS, {"address": "rs"}),
-        (JnsRsOp, "jns", _JUMP_TRAITS, {"address": "rs"}),
-        (JgRsOp, "jg", _JUMP_TRAITS, {"address": "rs"}),
-        (JlRsOp, "jl", _JUMP_TRAITS, {"address": "rs"}),
-        (JleRsOp, "jle", _JUMP_TRAITS, {"address": "rs"}),
-        (JaRsOp, "ja", _JUMP_TRAITS, {"address": "rs"}),
-        (JaeRsOp, "jae", _JUMP_TRAITS, {"address": "rs"}),
-        (JbRsOp, "jb", _JUMP_TRAITS, {"address": "rs"}),
-        (JbeRsOp, "jbe", _JUMP_TRAITS, {"address": "rs"}),
-        (JgeRsOp, "jge", _JUMP_TRAITS, {"address": "rs"}),
+        (StopRsOp, "stop", _STOP_TRAITS, {"status": "rs"}),
+        (JmpRsOp, "jmp", _BRANCH_TRAITS, {"address": "rs"}),
+        (JzRsOp, "jz", _BRANCH_TRAITS, {"address": "rs"}),
+        (JnzRsOp, "jnz", _BRANCH_TRAITS, {"address": "rs"}),
+        (JoRsOp, "jo", _BRANCH_TRAITS, {"address": "rs"}),
+        (JnoRsOp, "jno", _BRANCH_TRAITS, {"address": "rs"}),
+        (JsRsOp, "js", _BRANCH_TRAITS, {"address": "rs"}),
+        (JnsRsOp, "jns", _BRANCH_TRAITS, {"address": "rs"}),
+        (JgRsOp, "jg", _BRANCH_TRAITS, {"address": "rs"}),
+        (JlRsOp, "jl", _BRANCH_TRAITS, {"address": "rs"}),
+        (JleRsOp, "jle", _BRANCH_TRAITS, {"address": "rs"}),
+        (JaRsOp, "ja", _BRANCH_TRAITS, {"address": "rs"}),
+        (JaeRsOp, "jae", _BRANCH_TRAITS, {"address": "rs"}),
+        (JbRsOp, "jb", _BRANCH_TRAITS, {"address": "rs"}),
+        (JbeRsOp, "jbe", _BRANCH_TRAITS, {"address": "rs"}),
+        (JgeRsOp, "jge", _BRANCH_TRAITS, {"address": "rs"}),
         (SetMrkRsOp, "set_mrk", _PARAM_TRAITS, {"mrk": "rs"}),
         (SetFreqRsOp, "set_freq", _PARAM_TRAITS, {"nco_freq": "rs"}),
         (SetPhRsOp, "set_ph", _PARAM_TRAITS, {"nco_po": "rs"}),
@@ -598,7 +601,7 @@ class TestRdIFormat:
         assert op.rd.type.is_allocated
         assert op.rd.type.index == Registers.R10.index
         assert op.assembly_line_args() == (op.rd, op.imm)
-        _assert_traits(op, (IsTerminator, HasRegisterConstraintsTrait))
+        _assert_traits(op, (HasRegisterConstraintsTrait,))
 
     def test_loop_ri_semantic_aliases(self) -> None:
         op = LoopRdImmOp(Registers.R19, AddressImm(500))
@@ -620,7 +623,7 @@ class TestRdRsFormat:
         assert op.rd.type.is_allocated
         assert op.rd.type.index == Registers.R10.index
         assert op.assembly_line_args() == (op.rd, op.rs)
-        _assert_traits(op, (IsTerminator, HasRegisterConstraintsTrait))
+        _assert_traits(op, (HasRegisterConstraintsTrait,))
 
     def test_loop_rr_semantic_aliases(self) -> None:
         op = LoopRdRsOp(Registers.R20, create_ssa_value(Registers.R21))
@@ -644,7 +647,7 @@ class TestRsIIFormat:
         assert op.properties["imm2"] == imm2
         assert isinstance(op.rs.type, IntRegisterType)
         assert op.assembly_line_args() == (op.rs, op.imm1, op.imm2)
-        _assert_traits(op, (IsTerminator, HasRegisterConstraintsTrait))
+        _assert_traits(op, (HasRegisterConstraintsTrait,))
 
     @pytest.mark.parametrize("op_type,mnemonic,aliases", _OPS_TABLE)
     def test_semantic_aliases(self, op_type, mnemonic, aliases) -> None:
@@ -671,7 +674,7 @@ class TestRsIRsFormat:
         assert isinstance(op.rs1.type, IntRegisterType)
         assert isinstance(op.rs2.type, IntRegisterType)
         assert op.assembly_line_args() == (op.rs1, op.imm, op.rs2)
-        _assert_traits(op, (IsTerminator, HasRegisterConstraintsTrait))
+        _assert_traits(op, (HasRegisterConstraintsTrait,))
 
     @pytest.mark.parametrize("op_type,mnemonic,aliases", _OPS_TABLE)
     def test_semantic_aliases(self, op_type, mnemonic, aliases) -> None:

@@ -12,20 +12,20 @@ from xdsl.dialects.builtin import (
 )
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.q1_sequence.ir.attrs import (
+from qat.experimental.dialect.q1_sequence import (
+    AcqTableIndex,
     AcquisitionAttr,
+    BinCountImm,
     WaveformAttr,
+    WaveformTableIndex,
     WeightAttr,
+    WeightTableIndex,
+)
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
     f32,
     make_acquisition,
     make_waveform,
     make_weight,
-)
-from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
-    AcqTableIndex,
-    BinCountImm,
-    WaveformTableIndex,
-    WeightTableIndex,
 )
 
 

@@ -3,17 +3,17 @@
 
 from xdsl.dialects.builtin import ModuleOp
 
-from qat.experimental.dialect.q1.ir.ops import StopOp
-from qat.experimental.dialect.q1_sequence import Q1Sequence, SequenceOp
+from qat.experimental.dialect.q1 import StopOp
+from qat.experimental.dialect.q1_sequence import Q1_sequence, SequenceOp
 
 
 class TestDialectRegistration:
     def test_dialect_ops(self):
-        op_names = {op.name for op in Q1Sequence.operations}
+        op_names = {op.name for op in Q1_sequence.operations}
         assert op_names == {"q1_sequence.sequence"}
 
     def test_dialect_attrs(self):
-        attr_names = {attr.name for attr in Q1Sequence.attributes}
+        attr_names = {attr.name for attr in Q1_sequence.attributes}
         assert attr_names == {
             "q1_sequence.waveform",
             "q1_sequence.weight",

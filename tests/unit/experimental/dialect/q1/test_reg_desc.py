@@ -5,8 +5,8 @@ import pytest
 from xdsl.dialects.builtin import IntAttr, StringAttr
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.q1 import IntRegisterType
-from qat.experimental.dialect.q1.ir.reg_desc import Q1_REGISTER_INDEX_BY_NAME, Registers
+from qat.experimental.dialect.q1 import IntRegisterType, Registers
+from qat.experimental.dialect.q1.ir.reg_desc import Q1_REGISTER_INDEX_BY_NAME
 
 
 def test_register_factory():

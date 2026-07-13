@@ -9,6 +9,7 @@ from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1 import (
     Q1,
+    AddressImm,
     AddRsImmRdOp,
     AddRsRsRdOp,
     AndRsImmRdOp,
@@ -17,6 +18,8 @@ from qat.experimental.dialect.q1 import (
     AslRsRsRdOp,
     AsrRsImmRdOp,
     AsrRsRsRdOp,
+    BoolImm,
+    DurationImm,
     FbAcqIqIdImmImmOp,
     FbAcqIqIdRsImmOp,
     FbAcqTbIdRsImmOp,
@@ -37,11 +40,13 @@ from qat.experimental.dialect.q1 import (
     JzRsOp,
     MoveImmRdOp,
     MoveRsRdOp,
+    NcoPhaseImm,
     NopOp,
     NotImmRdOp,
     NotRsRdOp,
     OrRsImmRdOp,
     OrRsRsRdOp,
+    Registers,
     ResetPhOp,
     SetAwgGainImmImmOp,
     SetAwgGainRsRsOp,
@@ -56,24 +61,14 @@ from qat.experimental.dialect.q1 import (
     SetPhDeltaImmOp,
     SetPhImmOp,
     SetPhRsOp,
+    SI16Imm,
+    SI32Imm,
     StopImmOp,
     StopOp,
     StopRsOp,
+    SU32Imm,
     SubRsImmRdOp,
     SubRsRsRdOp,
-    XorRsImmRdOp,
-    XorRsRsRdOp,
-    emit_program,
-)
-from qat.experimental.dialect.q1.ir import ops as q1_ops
-from qat.experimental.dialect.q1.ir.imm_desc import (
-    AddressImm,
-    BoolImm,
-    DurationImm,
-    NcoPhaseImm,
-    SI16Imm,
-    SI32Imm,
-    SU32Imm,
     UI2Imm,
     UI3Imm,
     UI4Imm,
@@ -85,8 +80,11 @@ from qat.experimental.dialect.q1.ir.imm_desc import (
     UI16Imm,
     UI24Imm,
     UI32Imm,
+    XorRsImmRdOp,
+    XorRsRsRdOp,
+    emit_program,
 )
-from qat.experimental.dialect.q1.ir.reg_desc import Registers
+from qat.experimental.dialect.q1.ir import ops as q1_ops
 
 _PRINT_TABLE = [
     # Nullary

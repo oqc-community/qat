@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from xdsl.ir import Dialect
 
@@ -17,7 +17,7 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.dialect.q1_sequence.target import Q1SequenceTarget
 
-Q1Sequence = Dialect(
+Q1_sequence = Dialect(
     "q1_sequence",
     [SequenceOp],
     [
@@ -35,7 +35,7 @@ __all__ = [
     "AcqTableIndex",
     "AcquisitionAttr",
     "BinCountImm",
-    "Q1Sequence",
+    "Q1_sequence",
     "Q1SequenceTarget",
     "SequenceOp",
     "WaveformAttr",
