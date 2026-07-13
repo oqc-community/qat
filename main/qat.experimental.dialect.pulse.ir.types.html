@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.types module &mdash; qat-compiler 3.0.0.post279.dev20260713093405 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.types module &mdash; qat-compiler 3.0.0.post281.dev20260713101954 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -578,6 +578,29 @@
   <section id="module-qat.experimental.dialect.pulse.ir.types">
 <span id="qat-experimental-dialect-pulse-ir-types-module"></span><h1>qat.experimental.dialect.pulse.ir.types module<a class="headerlink" href="#module-qat.experimental.dialect.pulse.ir.types" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.AcquisitionType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquisitionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.AcquisitionType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.types.AcquisitionType" title="qat.experimental.dialect.pulse.ir.types.AcquisitionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquisitionType</span></code></a></p>
+<p>Represents an acquisition type.</p>
+<p>Abstractly this represents the acquisition signal result for a given duration from an
+acquire operation, which we can do further processing on, such as integration to map it
+to an IQ value, or addition with other acquisition signals to achieve shot-averaged
+time-series data.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.AcquisitionType.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.AcquisitionType.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.AcquisitionType.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.acquisition'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.AcquisitionType.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.AmplitudeType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AmplitudeType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.AmplitudeType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.types.AmplitudeType" title="qat.experimental.dialect.pulse.ir.types.AmplitudeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AmplitudeType</span></code></a></p>
@@ -650,6 +673,29 @@ channels.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.FrequencyType.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.frequency'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.FrequencyType.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.IQResultType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IQResultType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.IQResultType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.types.IQResultType" title="qat.experimental.dialect.pulse.ir.types.IQResultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">IQResultType</span></code></a></p>
+<p>Represents an IQ result type.</p>
+<p>This type exists instead of using the builtin complex type to allow for a more explicit
+representation of IQ values acquired from a quantum system, and to avoid hardware-
+specific typing details leaking into the IR. In practice, this can be treated as a
+complex number.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.IQResultType.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.IQResultType.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.IQResultType.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.iq_result'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.IQResultType.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
