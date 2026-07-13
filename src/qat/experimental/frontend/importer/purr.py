@@ -29,6 +29,7 @@ from qat.experimental.dialect.pulse.ir import (
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    IntegrateOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
@@ -51,6 +52,7 @@ from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
+    AcquireMode,
     CustomPulse,
     Delay,
     DeviceUpdate,
@@ -413,9 +415,18 @@ class PurrImporter(BaseLinearImporter):
         if value.filter is not None:
             wave_op = self._waveform_to_op(value.filter)
             self._add_ops([wave_op])
-        self._add_ops(
-            [AcquireOp(frame, self._get_const_or_var_ssa(value.duration, TimeAttr))]
-        )
+
+        acquire_op = AcquireOp(frame, self._get_const_or_var_ssa(value.duration, TimeAttr))
+        ops = [acquire_op]
+
+        if value.mode == AcquireMode.INTEGRATOR:
+            ops.append(IntegrateOp(acquire_op.acquisition_result))
+        elif value.mode == AcquireMode.SCOPE:
+            # TODO: COMPILER-1333
+            raise NotImplementedError(
+                "Scope mode is not yet supported by the PurrImporter."
+            )
+        self._add_ops(ops)
 
     @translate.register
     def _(self, value: PostProcessing):

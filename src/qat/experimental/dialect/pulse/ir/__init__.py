@@ -41,6 +41,7 @@ from .ops import (
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    IntegrateOp,
     InternalBinaryOp,
     MaxTimeOp,
     ModulateOp,
@@ -70,9 +71,11 @@ from .traits import (
     PulseTypesCanonicalizationPatternsTrait,
 )
 from .types import (
+    AcquisitionType,
     AmplitudeType,
     FrameType,
     FrequencyType,
+    IQResultType,
     PhaseType,
     TimeType,
     WaveformType,
@@ -90,6 +93,7 @@ _ops = [
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    IntegrateOp,
     MaxTimeOp,
     ModulateOp,
     ModuloOp,
@@ -120,7 +124,16 @@ _traits = [
     PulseTypesCanonicalizationPatternsTrait,
 ]
 
-_types = [AmplitudeType, FrequencyType, FrameType, PhaseType, TimeType, WaveformType]
+_types = [
+    AcquisitionType,
+    AmplitudeType,
+    FrequencyType,
+    FrameType,
+    IQResultType,
+    PhaseType,
+    TimeType,
+    WaveformType,
+]
 
 _data_attributes = [WaveformData, TimeUnitsData, FrequencyUnitsData]
 

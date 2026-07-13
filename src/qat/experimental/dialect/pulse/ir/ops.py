@@ -70,16 +70,25 @@ from .traits import (
 )
 from .types import (
     PULSE_VAR_TYPE,
+    AcquisitionType,
     AmplitudeType,
     FrameType,
     FrequencyType,
+    IQResultType,
     PhaseType,
     TimeType,
     WaveformType,
 )
 
-_PULSE_OP_TYPES = (FrequencyType, PhaseType, TimeType, AmplitudeType, WaveformType)
-_PULSE_OP_ATTRS = (FrequencyAttr, PhaseAttr, TimeAttr, AmplitudeAttr, SampledWaveformAttr)
+_CONSTANT_OP_TYPES = (FrequencyType, PhaseType, TimeType, AmplitudeType, WaveformType)
+_CONSTANT_OP_ATTRS = (
+    FrequencyAttr,
+    PhaseAttr,
+    TimeAttr,
+    AmplitudeAttr,
+    SampledWaveformAttr,
+)
+_ARITH_OP_TYPES = _CONSTANT_OP_TYPES + (AcquisitionType,)
 
 
 @irdl_op_definition
@@ -94,8 +103,8 @@ class ConstantOp(IRDLOperation, HasFolderInterface, Generic[PULSE_VAR_TYPE]):
         %frequency = pulse.constant<5e9> : !pulse.frequency
     """
 
-    _T: ClassVar = VarConstraint("T", AnyOf(_PULSE_OP_TYPES))
-    _A: ClassVar = VarConstraint("A", AnyOf(_PULSE_OP_ATTRS))
+    _T: ClassVar = VarConstraint("T", AnyOf(_CONSTANT_OP_TYPES))
+    _A: ClassVar = VarConstraint("A", AnyOf(_CONSTANT_OP_ATTRS))
 
     name = "pulse.constant"
     traits = traits_def(ConstantLike(), Pure())
@@ -167,9 +176,9 @@ class InternalBinaryOp(BinaryOp, Generic[PULSE_VAR_TYPE], ABC):
     """Abstract base class for operations that take two operands of a type within the pulse
     dialect and return a result of the same type, such as addition and subtraction."""
 
-    lhs = operand_def(AnyOf(_PULSE_OP_TYPES))
-    rhs = operand_def(AnyOf(_PULSE_OP_TYPES))
-    result = result_def(AnyOf(_PULSE_OP_TYPES))
+    lhs = operand_def(AnyOf(_ARITH_OP_TYPES))
+    rhs = operand_def(AnyOf(_ARITH_OP_TYPES))
+    result = result_def(AnyOf(_ARITH_OP_TYPES))
 
     def __init__(
         self,
@@ -345,8 +354,8 @@ class ScaleOp(BinaryOp, Generic[PULSE_VAR_TYPE]):
     traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
 
     lhs = operand_def(AnyOf((IntegerType, AnyFloat, ComplexType)))
-    rhs = operand_def(AnyOf(_PULSE_OP_TYPES))
-    result = result_def(AnyOf(_PULSE_OP_TYPES))
+    rhs = operand_def(AnyOf(_ARITH_OP_TYPES))
+    result = result_def(AnyOf(_ARITH_OP_TYPES))
 
     def __init__(
         self,
@@ -1818,8 +1827,8 @@ class AcquireOp(IRDLOperation):
         %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
             : !pulse.frame<"output">
         %duration = pulse.constant<800e-9> : !pulse.time
-        %frame_result, %waveform_result = pulse.acquire(%frame, %duration)
-            : (!pulse.frame<"output">, !pulse.waveform)
+        %frame_result, %acquire_result = pulse.acquire(%frame, %duration)
+            : (!pulse.frame<"output">, !pulse.acquisition)
 
 
     :ivar frame: The SSA value representing the frame on which to perform the acquisition.
@@ -1827,8 +1836,8 @@ class AcquireOp(IRDLOperation):
         pulse.time.
     :ivar frame_result: The SSA value representing the resulting frame after the
         acquisition, which can be used as an operand in later operations.
-    :ivar waveform_result: The SSA value representing the resulting waveform obtained from
-        the acquisition, which can be used as an operand in later operations.
+    :ivar acquisition_result: The SSA value representing the resulting acquisition obtained
+        from the acquisition, which can be used as an operand in later operations.
     """
 
     name = "pulse.acquire"
@@ -1837,7 +1846,7 @@ class AcquireOp(IRDLOperation):
     frame = operand_def(FrameType)
     duration = operand_def(TimeType)
     frame_result = result_def(FrameType)
-    waveform_result = result_def(WaveformType)
+    acquisition_result = result_def(AcquisitionType)
 
     def __init__(self, frame: SSAValue | Operation, duration: SSAValue | Operation):
         """
@@ -1848,5 +1857,39 @@ class AcquireOp(IRDLOperation):
         """
         frame_ssa = SSAValue.get(frame, type=FrameType)
         return super().__init__(
-            operands=[frame, duration], result_types=[frame_ssa.type, WaveformType()]
+            operands=[frame, duration], result_types=[frame_ssa.type, AcquisitionType()]
         )
+
+
+@irdl_op_definition
+class IntegrateOp(IRDLOperation):
+    """Represents the integration of an acquisition result into a single IQ point.
+
+    Example of how this looks in textual MLIR:
+
+    .. code-block:: mlir
+
+        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
+            : !pulse.frame<"output">
+        %duration = pulse.constant<800e-9> : !pulse.time
+        %frame_result, %acquisition_result = pulse.acquire(%frame, %duration)
+            : (!pulse.frame<"output">, !pulse.acquisition)
+        %integration_result = pulse.integrate(%acquisition_result) : !pulse.iq_result
+
+    :ivar acquisition: The SSA value representing the acquisition result to be integrated.
+    :ivar result: The SSA value representing the resulting IQ result obtained from the
+        integration, which can be used as an operand in later operations.
+    """
+
+    name = "pulse.integrate"
+    traits = traits_def(Pure())
+
+    acquisition = operand_def(AcquisitionType)
+    result = result_def(IQResultType)
+
+    def __init__(self, acquisition: SSAValue):
+        """
+        :param acquisition: The SSA value representing the acquisition result to be
+            integrated.
+        """
+        return super().__init__(operands=[acquisition], result_types=[IQResultType()])

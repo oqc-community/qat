@@ -22,6 +22,7 @@ from qat.experimental.dialect.pulse.ir import (
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    IntegrateOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
@@ -39,6 +40,7 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
 )
 from qat.experimental.frontend.importer.purr import PurrImporter
+from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType
@@ -251,6 +253,29 @@ class TestPurrImporterAcquire:
         imp.build(builder)
         assert len(_ops_of_type(imp, AcquireOp)) == 1
         assert len(_ops_of_type(imp, SquareWaveformOp)) == 1
+
+    def test_acquire_with_integrator_emits_integrate_op(self, builder, hw):
+        """When the INTEGRATOR mode is used, an IntegrateOp is emitted consuming the
+        acquisition result."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
+        imp = PurrImporter()
+        imp.build(builder)
+        acq_ops = _ops_of_type(imp, AcquireOp)
+        assert len(acq_ops) == 1
+        int_ops = _ops_of_type(imp, IntegrateOp)
+        assert len(int_ops) == 1
+        assert int_ops[0].acquisition is acq_ops[0].acquisition_result
+
+    def test_acquire_with_scope_raises_not_implemented_error(self, builder, hw):
+        """When the SCOPE mode is used, a NotImplementedError is raised."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.SCOPE))
+        imp = PurrImporter()
+        with pytest.raises(NotImplementedError, match="Scope mode is not yet supported"):
+            imp.build(builder)
 
 
 class TestPurrImporterUnsupportedInstructions:

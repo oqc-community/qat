@@ -77,7 +77,38 @@ class WaveformType(ParametrizedAttribute, TypeAttribute):
     name = "pulse.waveform"
 
 
+@irdl_attr_definition
+class AcquisitionType(ParametrizedAttribute, TypeAttribute):
+    """Represents an acquisition type.
+
+    Abstractly this represents the acquisition signal result for a given duration from an
+    acquire operation, which we can do further processing on, such as integration to map it
+    to an IQ value, or addition with other acquisition signals to achieve shot-averaged
+    time-series data.
+    """
+
+    name = "pulse.acquisition"
+
+
+@irdl_attr_definition
+class IQResultType(ParametrizedAttribute, TypeAttribute):
+    """Represents an IQ result type.
+
+    This type exists instead of using the builtin complex type to allow for a more explicit
+    representation of IQ values acquired from a quantum system, and to avoid hardware-
+    specific typing details leaking into the IR. In practice, this can be treated as a
+    complex number.
+    """
+
+    name = "pulse.iq_result"
+
+
 PULSE_VAR_TYPE = TypeVar(
     "PULSE_VAR_TYPE",
-    bound=FrequencyType | PhaseType | TimeType | AmplitudeType | FrameType | WaveformType,
+    bound=FrequencyType
+    | PhaseType
+    | TimeType
+    | AmplitudeType
+    | WaveformType
+    | AcquisitionType,
 )

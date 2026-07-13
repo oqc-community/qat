@@ -18,6 +18,7 @@ from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
+    AcquisitionType,
     AddOp,
     AmplitudeAttr,
     AmplitudeType,
@@ -33,6 +34,8 @@ from qat.experimental.dialect.pulse.ir import (
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
+    IntegrateOp,
+    IQResultType,
     MaxTimeOp,
     ModulateOp,
     ModuloOp,
@@ -928,7 +931,7 @@ class TestAcquireOp:
         assert acquire_op.duration is duration.result
         assert len(acquire_op.results) == 2
         assert acquire_op.frame_result.type == FrameType()
-        assert acquire_op.waveform_result.type == WaveformType()
+        assert acquire_op.acquisition_result.type == AcquisitionType()
         acquire_op.verify()
 
     def test_acquire_operation_preserves_parameterized_frame_type(self):
@@ -942,3 +945,18 @@ class TestAcquireOp:
         acquire_op = AcquireOp(frame.result, duration.result)
         assert acquire_op.frame_result.type == FrameType("input")
         acquire_op.verify()
+
+
+class TestIntegrateOp:
+    """Tests the integration operation with initialization and verification."""
+
+    def test_initialization_with_result_does_not_raise_validation_error(self):
+        """Tests when the result is directly passed to the integrate operation."""
+
+        frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
+        duration = ConstantOp(TimeAttr(400e-9))
+        acquire_op = AcquireOp(frame.result, duration.result)
+        integrate_op = IntegrateOp(acquire_op.acquisition_result)
+        assert integrate_op.acquisition == acquire_op.acquisition_result
+        assert integrate_op.result.type == IQResultType()
+        integrate_op.verify()
