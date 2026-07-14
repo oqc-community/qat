@@ -31,7 +31,7 @@ from qat.experimental.dialect.pulse.ir import (
     FrequencyAttr,
     FrequencyType,
     MaxTimeOp,
-    ModulateOp,
+    MixOp,
     ModuloOp,
     PhaseAttr,
     PhaseType,
@@ -306,7 +306,7 @@ class TestConstantFoldingOnOps:
         assert op.value == expected
         assert op.result_types[0] == type_
 
-    def test_constant_folding_on_modulate(self):
+    def test_constant_folding_on_mix(self):
         lhs_waveform = SampledWaveformAttr(
             np.linspace(0.0, 1.0, 160), _WIDTH_ATTR, _SAMPLE_TIME_ATTR
         )
@@ -320,9 +320,9 @@ class TestConstantFoldingOnOps:
         constant1 = ConstantOp(lhs_waveform)
         constant2 = ConstantOp(rhs_waveform)
 
-        modulate_op = ModulateOp(constant1, constant2)
-        dummy_op = _DummyOp(modulate_op.result)
-        module = ModuleOp(ops=[constant1, constant2, modulate_op, dummy_op])
+        mix_op = MixOp(constant1, constant2)
+        dummy_op = _DummyOp(mix_op.result)
+        module = ModuleOp(ops=[constant1, constant2, mix_op, dummy_op])
         assert len(module.body.ops) == 4
 
         CanonicalizePass().apply(Context(), module)

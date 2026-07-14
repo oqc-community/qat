@@ -37,7 +37,7 @@ from qat.experimental.dialect.pulse.ir import (
     IntegrateOp,
     IQResultType,
     MaxTimeOp,
-    ModulateOp,
+    MixOp,
     ModuloOp,
     PhaseAttr,
     PhaseSetOp,
@@ -62,6 +62,7 @@ from qat.experimental.dialect.pulse.ir import (
     TimeType,
     WaitOp,
     WaveformType,
+    WeightsAttr,
 )
 
 
@@ -272,7 +273,7 @@ class TestMaxTimeOp:
             op.verify()
 
 
-class TestModulateOp:
+class TestMixOp:
     def test_initialization(self):
         wf1 = SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9))
         wf2 = SampledWaveformAttr(
@@ -280,14 +281,14 @@ class TestModulateOp:
         )
         constant1 = ConstantOp(wf1)
         constant2 = ConstantOp(wf2)
-        op = ModulateOp(constant1.results[0], constant2.results[0])
+        op = MixOp(constant1.results[0], constant2.results[0])
         assert op.result.type == WaveformType()
         op.verify()
 
     def test_with_non_waveform_type(self):
         constant1 = ConstantOp(PhaseAttr(1.0))
         constant2 = ConstantOp(PhaseAttr(0.5))
-        op = ModulateOp(constant1.results[0], constant2.results[0])
+        op = MixOp(constant1.results[0], constant2.results[0])
         with pytest.raises(VerifyException, match="!pulse.phase"):
             op.verify()
 
@@ -295,7 +296,7 @@ class TestModulateOp:
         wf1 = np.asarray([0.0, 0.5, 1.0])
         wf2 = np.asarray([0.0, 0.25, 0.5])
         result = np.asarray([0.0, 0.125, 0.5])
-        assert np.allclose(ModulateOp.py_operation(wf1, wf2), result)
+        assert np.allclose(MixOp.py_operation(wf1, wf2), result)
 
 
 class TestScaleOp:
@@ -932,6 +933,7 @@ class TestAcquireOp:
         assert len(acquire_op.results) == 2
         assert acquire_op.frame_result.type == FrameType()
         assert acquire_op.acquisition_result.type == AcquisitionType()
+        assert acquire_op.weights is None
         acquire_op.verify()
 
     def test_acquire_operation_preserves_parameterized_frame_type(self):
@@ -944,6 +946,16 @@ class TestAcquireOp:
         duration = ConstantOp(TimeAttr(400e-9))
         acquire_op = AcquireOp(frame.result, duration.result)
         assert acquire_op.frame_result.type == FrameType("input")
+        acquire_op.verify()
+
+    def test_with_weights_is_valid(self):
+        """Tests that an AcquireOp with weights is valid and the weights are accessible."""
+        frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
+        duration = ConstantOp(TimeAttr(400e-9))
+        weights = np.asarray([0.1, 0.2, 0.3])
+        weights_attr = WeightsAttr(weights)
+        acquire_op = AcquireOp(frame.result, duration.result, weights=weights_attr)
+        assert acquire_op.weights == weights_attr
         acquire_op.verify()
 
 

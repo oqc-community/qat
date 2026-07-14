@@ -25,6 +25,7 @@ from qat.experimental.dialect.pulse.ir import (
     TimeAttr,
     TimeType,
     WaveformType,
+    WeightsAttr,
 )
 from qat.experimental.dialect.pulse.units import FrequencyUnits, TimeUnits
 
@@ -330,7 +331,7 @@ class TestSampledWaveformAttr:
         output = io_stream.getvalue()
 
         # Match the full output
-        pattern = r"#pulse\.sampled_waveform<\s*#pulse\.waveform_data\[(.*?)\],\s*#pulse\.time_attr<(.*?)>,\s*#pulse\.time_attr<(.*?)>\s*>"
+        pattern = r"#pulse\.sampled_waveform<\s*#pulse\.numeric_array_data\[(.*?)\],\s*#pulse\.time_attr<(.*?)>,\s*#pulse\.time_attr<(.*?)>\s*>"
         match = re.search(pattern, output)
         assert match is not None
         waveform_contents, time_str, sample_time_str = match.groups()
@@ -372,7 +373,7 @@ class TestSampledWaveformAttr:
 
     def test_parse_with_non_complex_type(self):
         attr_str = (
-            "#pulse.sampled_waveform<#pulse.waveform_data[#builtin.float_data<0.0>, "
+            "#pulse.sampled_waveform<#pulse.numeric_array_data[#builtin.float_data<0.0>, "
             "#builtin.float_data<1.0>, #builtin.float_data<0.5>], "
             '#pulse.time_attr<#builtin.float_data<3.0>, #pulse.time_units"ns">, '
             '#pulse.time_attr<#builtin.float_data<1.0>, #pulse.time_units"ns">>'
@@ -381,7 +382,9 @@ class TestSampledWaveformAttr:
         context.load_dialect(Pulse)
         context.load_dialect(Builtin)
         parser = Parser(context, attr_str)
-        with pytest.raises(ValueError, match="samples to be builtin complex attributes."):
+        with pytest.raises(
+            ValueError, match="numeric array elements to be builtin complex attributes."
+        ):
             parser.parse_attribute()
 
     def test_verify_fails_for_mismatched_width(self):
@@ -418,3 +421,112 @@ class TestSampledWaveformAttr:
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
         attr2 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(6e9), TimeAttr(2e9))
         assert hash(attr1) != hash(attr2)
+
+    def test_verify_fails_for_non_1d_array(self):
+        """Sampled waveform samples can only be a one-dimensional array.
+
+        This test ensures that the verify method raises an exception when a multi-
+        dimensional array is provided.
+        """
+        with pytest.raises(
+            VerifyException,
+            match="Sampled waveform samples must be a one-dimensional array.",
+        ):
+            SampledWaveformAttr(
+                [[0.0, 1.0], [0.5, 0.6]], TimeAttr(3e9), TimeAttr(1e9)
+            ).verify()
+
+
+class TestWeightsAttr:
+    @pytest.mark.parametrize(
+        "weights",
+        [
+            [0.0, 1.0, 0.5],
+            [1.0 + 1.0j, 0.5 - 0.5j, -1 / 3],
+        ],
+    )
+    def test_properties(self, weights):
+        attr = WeightsAttr(weights)
+        assert np.array_equal(attr.weights.data, np.array(weights, dtype=np.complex128))
+
+    @pytest.mark.parametrize(
+        "weights",
+        [
+            [0.0, 1.0, 0.5],
+            [1.0 + 1.0j, 0.5 - 0.5j, -1 / 3],
+            [float("nan"), complex(float("inf"), float("nan")), float("-inf")],
+        ],
+    )
+    def test_equality(self, weights):
+        attr1 = WeightsAttr(weights)
+        attr2 = WeightsAttr(weights)
+        assert attr1 == attr2
+
+    def test_inequality_with_different_weights(self):
+        attr1 = WeightsAttr([0.0, 1.0 + 0.1j, 0.5])
+        attr2 = WeightsAttr([0.0, 1.0 + 0.2j, 0.5])
+        assert attr1 != attr2
+
+    def test_print_and_parse_roundtrip(self, io_stream):
+        weights = [0.0, 1.0 + 1.0j, 0.5 - 0.5j, -1 / 3]
+        attr = WeightsAttr(weights)
+        printer = Printer(stream=io_stream)
+        printer.print_attribute(attr)
+        output = io_stream.getvalue()
+
+        pattern = r"#pulse\.weights<\s*#pulse\.numeric_array_data\[(.*?)\]\s*>"
+        match = re.search(pattern, output)
+        assert match is not None
+        weights_contents = match.group(1)
+
+        element_pattern = r"#complex\.number<:f64 ([^,]+), ([^>]+)> : complex<f64>"
+        elements = re.findall(element_pattern, weights_contents)
+        assert len(elements) == len(weights)
+        for i, (real, imag) in enumerate(elements):
+            assert np.isclose(weights[i], complex(float(real), float(imag)))
+
+        context = Context()
+        context.load_dialect(Pulse)
+        context.load_dialect(Builtin)
+        context.load_dialect(Complex)
+        parser = Parser(context, output)
+        parsed_attr = parser.parse_attribute()
+        assert parsed_attr == attr
+
+    def test_parse_with_non_complex_type(self):
+        attr_str = (
+            "#pulse.weights<#pulse.numeric_array_data[#builtin.float_data<0.0>, "
+            "#builtin.float_data<1.0>, #builtin.float_data<0.5>]>"
+        )
+        context = Context()
+        context.load_dialect(Pulse)
+        context.load_dialect(Builtin)
+        parser = Parser(context, attr_str)
+        with pytest.raises(
+            ValueError,
+            match="Expected numeric array elements to be builtin complex attributes.",
+        ):
+            parser.parse_attribute()
+
+    def test_hash_equality(self):
+        weights = [0.0, 1.0 + 1.0j, 0.5 - 0.5j, -1 / 3]
+        attr1 = WeightsAttr(weights)
+        attr2 = WeightsAttr(deepcopy(weights))
+        assert hash(attr1) == hash(attr2)
+
+    def test_hash_inequality_with_different_weights(self):
+        attr1 = WeightsAttr([0.0, 1.0 + 0.1j, 0.5])
+        attr2 = WeightsAttr([0.0, 1.0 + 0.2j, 0.5])
+        assert hash(attr1) != hash(attr2)
+
+    def test_verify_fails_for_non_1d_array(self):
+        """Weights can only be a one-dimensional array.
+
+        This test ensures that the verify method raises an exception when a multi-
+        dimensional array is provided.
+        """
+        with pytest.raises(
+            VerifyException,
+            match="Weights must be a one-dimensional array.",
+        ):
+            WeightsAttr([[0.0, 1.0], [0.5, 0.6]]).verify()

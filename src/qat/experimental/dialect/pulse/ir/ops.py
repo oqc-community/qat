@@ -61,6 +61,7 @@ from .attributes import (
     PulseNumericTypedAttr,
     SampledWaveformAttr,
     TimeAttr,
+    WeightsAttr,
 )
 from .interfaces import IsAnalyticalWaveformInterface, extract_constant_scalar
 from .traits import (
@@ -277,10 +278,10 @@ class SubOp(InternalBinaryOp[PULSE_VAR_TYPE], Generic[PULSE_VAR_TYPE]):
 
 
 @irdl_op_definition
-class ModulateOp(InternalBinaryOp[WaveformType]):
-    """Represents the modulation of a waveform by another waveform.
+class MixOp(InternalBinaryOp[WaveformType]):
+    """Represents the element-wise mixing of one waveform envelope with another.
 
-    Modulation of two waveforms does a pointwise multiplication of the two waveforms,
+    Mixing two waveforms does a pointwise multiplication of the two waveform envelopes,
     resulting in a new waveform that has the same duration as the input waveforms.
 
     .. code-block:: mlir
@@ -290,15 +291,15 @@ class ModulateOp(InternalBinaryOp[WaveformType]):
         %waveform1 = pulse.square_waveform(%duration, %amplitude1) : !pulse.waveform
         %amplitude2 = pulse.constant<0.25> : !pulse.amplitude
         %waveform2 = pulse.square_waveform(%duration, %amplitude2) : !pulse.waveform
-        %result = pulse.modulate(%waveform1, %waveform2) : !pulse.waveform
+        %result = pulse.mix(%waveform1, %waveform2) : !pulse.waveform
 
-    :ivar lhs: The left-hand side operand of the modulation operation, which is a waveform.
-    :ivar rhs: The right-hand side operand of the modulation operation, which is a waveform.
-    :ivar result: The SSA value representing the result of the modulation operation, which
-        can be used as an operand in later operations.
+    :ivar lhs: The left-hand side operand of the mixing operation, which is a waveform.
+    :ivar rhs: The right-hand side operand of the mixing operation, which is a waveform.
+    :ivar result: The SSA value representing the waveform result of the mixing operation,
+        which can be used as an operand in later operations.
     """
 
-    name = "pulse.modulate"
+    name = "pulse.mix"
     traits = traits_def(Pure(), PulseTypesCanonicalizationPatternsTrait())
 
     lhs = operand_def(WaveformType)
@@ -311,16 +312,16 @@ class ModulateOp(InternalBinaryOp[WaveformType]):
         rhs: SSAValue[WaveformType] | Operation,
     ):
         """
-        :param lhs: The left-hand side operand of the modulation operation, which is a
+        :param lhs: The left-hand side operand of the mixing operation, which is a
             waveform.
-        :param rhs: The right-hand side operand of the modulation operation, which is a
+        :param rhs: The right-hand side operand of the mixing operation, which is a
             waveform.
         """
         return super().__init__(lhs, rhs, WaveformType())
 
     @staticmethod
     def py_operation(lhs, rhs):
-        """Performs the modulation operation on given literals.
+        """Performs the mixing operation on given literals.
 
         This is used for constant folding.
         """
@@ -1818,7 +1819,12 @@ class StopContinuousWaveformOp(IRDLOperation):
 @irdl_op_definition
 class AcquireOp(IRDLOperation):
     """Represents an acquisition operation, which listens to the waveform input to the
-    channel within the reference frame. Used in qubit readout.
+    channel within the reference frame.
+
+    Acquisition is used within qubit readout. Often, the backend can support weighted
+    acquisitions, where a custom array of real or complex numbers is used for demodulation.
+    This can optionally be attached as an attribute to the acquisition.
+    No validation is done to enforce length checks, as weights can be backend-specific.
 
     Example of how this looks in textual MLIR:
 
@@ -1838,6 +1844,7 @@ class AcquireOp(IRDLOperation):
         acquisition, which can be used as an operand in later operations.
     :ivar acquisition_result: The SSA value representing the resulting acquisition obtained
         from the acquisition, which can be used as an operand in later operations.
+    :ivar weights: Optional weights attribute for the acquisition.
     """
 
     name = "pulse.acquire"
@@ -1847,17 +1854,29 @@ class AcquireOp(IRDLOperation):
     duration = operand_def(TimeType)
     frame_result = result_def(FrameType)
     acquisition_result = result_def(AcquisitionType)
+    weights = opt_attr_def(WeightsAttr)
 
-    def __init__(self, frame: SSAValue | Operation, duration: SSAValue | Operation):
+    def __init__(
+        self,
+        frame: SSAValue | Operation,
+        duration: SSAValue | Operation,
+        weights: WeightsAttr | None = None,
+    ):
         """
         :param frame: The SSA value representing the frame on which to perform the
             acquisition.
         :param duration: The SSA value representing the duration of the acquisition, of type
             pulse.time.
+        :param weights: Optional weights attribute for the acquisition.
         """
         frame_ssa = SSAValue.get(frame, type=FrameType)
+
+        attributes = {} if weights is None else {"weights": weights}
+
         return super().__init__(
-            operands=[frame, duration], result_types=[frame_ssa.type, AcquisitionType()]
+            operands=[frame, duration],
+            result_types=[frame_ssa.type, AcquisitionType()],
+            attributes=attributes,
         )
 
 

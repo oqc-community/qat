@@ -245,14 +245,16 @@ class TestPurrImporterAcquire:
         # No waveform constructed when no filter is given.
         assert not any(isinstance(op, SquareWaveformOp) for op in _ops(imp))
 
-    def test_acquire_with_filter_emits_waveform(self, builder, hw):
+    def test_acquire_with_filter_sets_weights(self, builder, hw):
         ch = hw.get_qubit(0).get_acquire_channel()
-        filt = Pulse(ch, PulseShapeType.SQUARE, width=1e-6, amp=0.3)
+        weights_arr = np.array([0.1] * 1000)
+        filt = CustomPulse(ch, weights_arr)
         builder.add(Acquire(ch, time=1e-6, filter=filt))
         imp = PurrImporter()
         imp.build(builder)
-        assert len(_ops_of_type(imp, AcquireOp)) == 1
-        assert len(_ops_of_type(imp, SquareWaveformOp)) == 1
+        acquire_ops = _ops_of_type(imp, AcquireOp)
+        assert len(acquire_ops) == 1
+        assert np.allclose(acquire_ops[0].weights.weights.data, weights_arr)
 
     def test_acquire_with_integrator_emits_integrate_op(self, builder, hw):
         """When the INTEGRATOR mode is used, an IntegrateOp is emitted consuming the
@@ -306,6 +308,14 @@ class TestPurrImporterUnsupportedInstructions:
         builder.add(EndSweep())
         imp = PurrImporter()
         with pytest.raises(ValueError, match="Not yet implemented"):
+            imp.build(builder)
+
+    def test_acquire_with_non_custom_pulse_weights(self, builder, hw):
+        ch = hw.get_qubit(0).get_acquire_channel()
+        filter_ = Pulse(ch, PulseShapeType.SQUARE, width=1e-6, amp=0.5)
+        builder.add(Acquire(ch, time=1e-6, filter=filter_))
+        imp = PurrImporter()
+        with pytest.raises(ValueError, match="Acquire filter must be a CustomPulse"):
             imp.build(builder)
 
 

@@ -46,6 +46,7 @@ from qat.experimental.dialect.pulse.ir import (
     SynchronizeOp,
     TimeAttr,
     WaitOp,
+    WeightsAttr,
 )
 from qat.experimental.frontend.importer.base import BaseLinearImporter
 from qat.purr.compiler.builders import QuantumInstructionBuilder
@@ -403,20 +404,28 @@ class PurrImporter(BaseLinearImporter):
     def _(self, value: Acquire):
         """Emit an ``AcquireOp`` on the target frame.
 
-        When the acquire instruction carries a ``filter`` waveform the
-        corresponding Pulse-dialect waveform op is materialised first
-        (via :meth:`_waveform_to_op`) and inserted into the current
-        block before the :class:`AcquireOp` itself.
+        When the acquire instruction carries a ``filter`` as a :class:`CustomPulse`, the
+        filter's samples are materialised as a ``WeightsAttr`` on the acquire op.
 
         :param value: An acquire instruction specifying the
             measurement duration and optional filter waveform.
         """
         frame = self.get_frames(value.quantum_targets)[0]
-        if value.filter is not None:
-            wave_op = self._waveform_to_op(value.filter)
-            self._add_ops([wave_op])
 
-        acquire_op = AcquireOp(frame, self._get_const_or_var_ssa(value.duration, TimeAttr))
+        weights = None
+        if value.filter is not None:
+            if not isinstance(value.filter, CustomPulse):
+                raise ValueError(
+                    f"Acquire filter must be a CustomPulse, got {type(value.filter).__name__}"
+                )
+            weights = WeightsAttr(value.filter.samples)
+
+        acquire_op = AcquireOp(
+            frame,
+            self._get_const_or_var_ssa(value.duration, TimeAttr),
+            weights=weights,
+        )
+
         ops = [acquire_op]
 
         if value.mode == AcquireMode.INTEGRATOR:

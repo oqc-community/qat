@@ -271,23 +271,23 @@ class AmplitudeAttr(PulseNumericTypedAttr[AmplitudeType]):
 
 
 @irdl_attr_definition
-class WaveformData(Data[np.ndarray[np.complexfloating]]):
-    """Stores waveforms for use in attributes.
+class NumericArrayData(Data[np.ndarray[np.complexfloating]]):
+    """Stores numeric arrays for use in attributes.
 
-    Manipulations of sampled waveforms are processed using numpy due to its performance, and
-    for this reason, we store this data as a numpy array.
+    Manipulations of sampled waveforms and weight vectors are processed using numpy due to
+    its performance, and for this reason, we store this data as a numpy array.
 
     To be future thinking, and compatible with integrations with MLIR in the future, we
     print and parse the data as a list of builtin attributes, with the conversion handled in
     the interface.
     """
 
-    name = "pulse.waveform_data"
+    name = "pulse.numeric_array_data"
 
     @classmethod
     def parse_parameter(cls, parser: AttrParser) -> np.ndarray[np.complex128]:
         """Parses the parameters of the attribute, which are expected to be a list of
-        builtin complex attributes representing the samples of the waveform."""
+        builtin complex attributes representing elements within the array."""
         elements = parser.parse_comma_separated_list(
             parser.Delimiter.SQUARE, parser.parse_attribute
         )
@@ -296,7 +296,7 @@ class WaveformData(Data[np.ndarray[np.complexfloating]]):
         for element in elements:
             if not isinstance(element, ComplexNumberAttr):
                 raise ValueError(
-                    "Expected waveform samples to be builtin complex attributes."
+                    "Expected numeric array elements to be builtin complex attributes."
                 )
             samples.append(np.complex128(complex(element.real.data, element.imag.data)))
         return np.asarray(samples, dtype=np.complex128)
@@ -313,7 +313,7 @@ class WaveformData(Data[np.ndarray[np.complexfloating]]):
             )
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, WaveformData):
+        if not isinstance(other, NumericArrayData):
             return False
         return np.array_equal(self.data, other.data, equal_nan=True)
 
@@ -327,7 +327,7 @@ class SampledWaveformAttr(PulseNumericTypedAttr[WaveformType]):
     complex numpy array."""
 
     name = "pulse.sampled_waveform"
-    samples: WaveformData
+    samples: NumericArrayData
     width: TimeAttr
     sample_time: TimeAttr
 
@@ -344,7 +344,7 @@ class SampledWaveformAttr(PulseNumericTypedAttr[WaveformType]):
         :param sample_time: The time between samples, represented as a TimeAttr.
         """
         samples = np.asarray(samples, dtype=np.complex128)
-        return super().__init__(WaveformData(samples), width, sample_time)
+        return super().__init__(NumericArrayData(samples), width, sample_time)
 
     @property
     def literal_value(self) -> np.ndarray:
@@ -357,6 +357,13 @@ class SampledWaveformAttr(PulseNumericTypedAttr[WaveformType]):
         return WaveformType
 
     def verify(self) -> None:
+        super().verify()
+
+        if self.samples.data.ndim != 1:
+            raise VerifyException(
+                "Sampled waveform samples must be a one-dimensional array."
+            )
+
         expected_width = len(self.samples.data) * self.sample_time.literal_value
         actual_width = self.width.literal_value
         if not np.isclose(actual_width, expected_width):
@@ -364,3 +371,29 @@ class SampledWaveformAttr(PulseNumericTypedAttr[WaveformType]):
                 "Sampled waveform width must equal number of samples multiplied by "
                 "sample_time."
             )
+
+
+@irdl_attr_definition
+class WeightsAttr(ParametrizedAttribute):
+    """An attribute that represents a set of weights that can be used in demodulation.
+
+    This is expected to be optionally attached to acquire operations.
+
+    :ivar weights: The weights, represented as a numpy array of complex values.
+    """
+
+    name = "pulse.weights"
+    weights: NumericArrayData
+
+    def __init__(self, weights: np.ndarray[np.complexfloating] | list[complex | float]):
+        """
+        :param weights: The weights, represented as a numpy array or a list of complex
+            values.
+        """
+        weights = np.asarray(weights, dtype=np.complex128)
+        return super().__init__(NumericArrayData(weights))
+
+    def verify(self) -> None:
+        super().verify()
+        if self.weights.data.ndim != 1:
+            raise VerifyException("Weights must be a one-dimensional array.")

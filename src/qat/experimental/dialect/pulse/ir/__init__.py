@@ -20,12 +20,13 @@ from .attributes import (
     AmplitudeAttr,
     FrequencyAttr,
     FrequencyUnitsData,
+    NumericArrayData,
     PhaseAttr,
     PulseNumericTypedAttr,
     SampledWaveformAttr,
     TimeAttr,
     TimeUnitsData,
-    WaveformData,
+    WeightsAttr,
 )
 from .interfaces import IsAnalyticalWaveformInterface
 from .ops import (
@@ -44,7 +45,7 @@ from .ops import (
     IntegrateOp,
     InternalBinaryOp,
     MaxTimeOp,
-    ModulateOp,
+    MixOp,
     ModuloOp,
     PhaseOp,
     PhaseSetOp,
@@ -95,7 +96,7 @@ _ops = [
     GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     MaxTimeOp,
-    ModulateOp,
+    MixOp,
     ModuloOp,
     PhaseSetOp,
     PhaseShiftOp,
@@ -135,9 +136,16 @@ _types = [
     WaveformType,
 ]
 
-_data_attributes = [WaveformData, TimeUnitsData, FrequencyUnitsData]
+_data_attributes = [NumericArrayData, TimeUnitsData, FrequencyUnitsData]
 
-_attributes = [AmplitudeAttr, FrequencyAttr, PhaseAttr, TimeAttr, SampledWaveformAttr]
+_attributes = [
+    AmplitudeAttr,
+    FrequencyAttr,
+    PhaseAttr,
+    TimeAttr,
+    SampledWaveformAttr,
+    WeightsAttr,
+]
 
 Pulse = Dialect(
     "pulse",
