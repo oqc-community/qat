@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions module &mdash; qat-compiler 3.0.0.post285.dev20260714121352 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions module &mdash; qat-compiler 3.0.0.post286.dev20260714132956 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -615,23 +615,23 @@ reduces the number of quantum instructions.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Commute phase shift operations past wait operations to enable better folding.</p>
 <p><strong>Scenario 1: PhaseShift, Wait -&gt; Wait, PhaseShift</strong></p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %phase = pulse.constant&lt;0.5&gt; : !pulse.phase
 %duration = pulse.constant&lt;1.0e-9&gt; : !pulse.time
-%shift = pulse.phase_shift(%frame, %phase) : !pulse.frame
-%wait = pulse.wait(%shift, %duration) : !pulse.frame
-%acquire = pulse.acquire(%wait, %duration) : !pulse.frame
+%shift = pulse.phase_shift(%frame, %phase) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%wait = pulse.wait(%shift, %duration) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%wait, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>becomes:</p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %phase = pulse.constant&lt;0.5&gt; : !pulse.phase
 %duration = pulse.constant&lt;1.0e-9&gt; : !pulse.time
-%wait = pulse.wait(%frame, %duration) : !pulse.frame
-%shift = pulse.phase_shift(%wait, %phase) : !pulse.frame
-%acquire = pulse.acquire(%shift, %duration) : !pulse.frame
+%wait = pulse.wait(%frame, %duration) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%shift = pulse.phase_shift(%wait, %phase) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%shift, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>This enables subsequent folding of multiple waits or phases that were initially
@@ -656,72 +656,80 @@ waits to one side, after which fold patterns eliminate redundant operations.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Fold contiguous phase shifts on the same frame into a single phase shift or set.</p>
 <p><strong>Scenario 1: PhaseShift + PhaseShift</strong></p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
-%shift1 = pulse.phase_shift(%frame, %p1) : !pulse.frame
-%shift2 = pulse.phase_shift(%shift1, %p2) : !pulse.frame
-%acquire = pulse.acquire(%shift2, %duration) : !pulse.frame
+%shift1 = pulse.phase_shift(%frame, %p1) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%shift2 = pulse.phase_shift(%shift1, %p2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%shift2, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>becomes:</p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
 %total = pulse.add(%p1, %p2) : !pulse.phase
-%merged = pulse.phase_shift(%frame, %total) : !pulse.frame
-%acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+%merged = pulse.phase_shift(%frame, %total) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p><strong>Scenario 2: PhaseShift + PhaseSet</strong></p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
-%shift = pulse.phase_shift(%frame, %p1) : !pulse.frame
-%set = pulse.phase_set(%shift, %p2) : !pulse.frame
-%acquire = pulse.acquire(%set, %duration) : !pulse.frame
+%shift = pulse.phase_shift(%frame, %p1) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%set = pulse.phase_set(%shift, %p2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%set, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>becomes:</p>
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
+%p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
+%merged = pulse.phase_set(%frame, %p2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
+</pre></div>
+</div>
 <p><strong>Scenario 3: PhaseSet + PhaseShift</strong></p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
-%set = pulse.phase_set(%frame, %p1) : !pulse.frame
-%shift = pulse.phase_shift(%set, %p2) : !pulse.frame
-%acquire = pulse.acquire(%shift, %duration) : !pulse.frame
+%set = pulse.phase_set(%frame, %p1) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%shift = pulse.phase_shift(%set, %p2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%shift, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>becomes:</p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
 %total = pulse.add(%p1, %p2) : !pulse.phase
-%merged = pulse.phase_set(%frame, %total) : !pulse.frame
-%acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+%merged = pulse.phase_set(%frame, %total) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p><strong>Scenario 4: PhaseSet + PhaseSet</strong></p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p1 = pulse.constant&lt;0.5&gt; : !pulse.phase
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
-%set1 = pulse.phase_set(%frame, %p1) : !pulse.frame
-%set2 = pulse.phase_set(%set1, %p2) : !pulse.frame
-%acquire = pulse.acquire(%set2, %duration) : !pulse.frame
+%set1 = pulse.phase_set(%frame, %p1) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%set2 = pulse.phase_set(%set1, %p2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%set2, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>becomes:</p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %p2 = pulse.constant&lt;1.0&gt; : !pulse.phase
-%merged = pulse.phase_set(%frame, %p2) : !pulse.frame
-%acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+%merged = pulse.phase_set(%frame, %p2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <dl class="py method">
@@ -743,23 +751,23 @@ waits to one side, after which fold patterns eliminate redundant operations.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Fold contiguous wait operations on the same frame into a single wait.</p>
 <p><strong>Scenario 1: Wait + Wait</strong></p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %duration1 = pulse.constant&lt;1.0e-9&gt; : !pulse.time
 %duration2 = pulse.constant&lt;2.0e-9&gt; : !pulse.time
-%wait1 = pulse.wait(%frame, %duration1) : !pulse.frame
-%wait2 = pulse.wait(%wait1, %duration2) : !pulse.frame
-%acquire = pulse.acquire(%wait2, %duration) : !pulse.frame
+%wait1 = pulse.wait(%frame, %duration1) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%wait2 = pulse.wait(%wait1, %duration2) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%wait2, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <p>becomes:</p>
-<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
-    : !pulse.frame
+<div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
 %duration1 = pulse.constant&lt;1.0e-9&gt; : !pulse.time
 %duration2 = pulse.constant&lt;2.0e-9&gt; : !pulse.time
 %total = pulse.add(%duration1, %duration2) : !pulse.time
-%merged = pulse.wait(%frame, %total) : !pulse.frame
-%acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+%merged = pulse.wait(%frame, %total) : !pulse.frame&lt;&quot;channel_1&quot;&gt;
+%acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+    : (!pulse.frame&lt;&quot;channel_1&quot;&gt;, !pulse.acquisition)
 </pre></div>
 </div>
 <dl class="py method">

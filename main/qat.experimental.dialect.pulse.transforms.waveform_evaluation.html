@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post285.dev20260714121352 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post286.dev20260714132956 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -590,7 +590,7 @@ compile-time-constant operands, replaces it with one or more
 <a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr" title="qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveformAttr</span></code></a>.</p>
 <p>The pass looks at every <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PulseOp" title="qat.experimental.dialect.pulse.ir.ops.PulseOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOp</span></code></a> that
 consumes the analytical waveform and groups them by the sample time associated with
-their frame’s port kind. A single <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code> is emitted per distinct sample
+their frame’s port. A single <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code> is emitted per distinct sample
 time, and each consuming <code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOp</span></code> is rewired to the appropriate one. This makes
 sharing a waveform across multiple ports safe.</p>
 <p>Shapes that hardware supports natively (defaulting to
@@ -615,9 +615,8 @@ sample time across the pulses that consume the waveform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port_sample_times</strong> – Mapping from <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameType</span></code> port-kind token
-(e.g. <code class="docutils literal notranslate"><span class="pre">&quot;control&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;readout&quot;</span></code>) to the sample time in seconds used to
-discretise waveforms on that port class.</p></li>
+<li><p><strong>port_sample_times</strong> – Mapping from <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameType</span></code> port token
+to the sample time in seconds used to discretise waveforms on that port.</p></li>
 <li><p><strong>ignored_shapes</strong> – Waveform shapes whose analytical form is natively supported by
 the hardware and should not be sampled. Defaults to <code class="docutils literal notranslate"><span class="pre">(SquareWaveform,)</span></code>.</p></li>
 </ul>

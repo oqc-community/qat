@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.types module &mdash; qat-compiler 3.0.0.post285.dev20260714121352 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.types module &mdash; qat-compiler 3.0.0.post286.dev20260714132956 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -628,18 +628,16 @@ arbitrary units.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.FrameType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port_kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'output'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.FrameType" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.FrameType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.types.FrameType" title="qat.experimental.dialect.pulse.ir.types.FrameType"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameType</span></code></a></p>
 <p>Represents a reference frame for a quantum system, encoding a frequency, and tracks
 phase and time evolution relative to that frequency.</p>
 <p>Used with the intent of manipulating a quantum component.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>port_kind</strong> – A target-resolved token used to identify the port class for this frame,
-without encoding hardware object details directly in the IR. This name can take any
-string, but is expected to match a meaningful port class in the context of the
-system data. The default is “output”, which for example, is the standard port kind
-for a qubit drive frame.</p>
+<dd class="field-odd"><p><strong>port</strong> – A target-resolved token used to identify the port for this frame, without
+encoding hardware object details directly in the IR. This name can take any string,
+but is expected to match a meaningful port in the context of the system data.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -655,8 +653,8 @@ for a qubit drive frame.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.FrameType.port_kind">
-<span class="sig-name descname"><span class="pre">port_kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.attributes._ParameterDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.FrameType.port_kind" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.types.FrameType.port">
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.attributes._ParameterDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.types.FrameType.port" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
