@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post286.dev20260714132956 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post287.dev20260714142638 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -722,6 +722,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.topology.html">qat.experimental.system_data.topology module</a></li>
 </ul>
 </li>
 </ul>
@@ -1771,6 +1772,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.AddRsRsRdOp">(class in qat.experimental.dialect.q1.ir.ops)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.ScipyTopologyView.adjacency_matrix">adjacency_matrix (ScipyTopologyView attribute)</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AdvancesTimeTrait">AdvancesTimeTrait (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
@@ -2106,6 +2109,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.purr.compiler.error_mitigation.readout_mitigation.html#qat.purr.compiler.error_mitigation.readout_mitigation.ApplyReadoutMitigation">ApplyReadoutMitigation (class in qat.purr.compiler.error_mitigation.readout_mitigation)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations">ApplySquashContiguousOptimizations (class in qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.are_coupled">are_coupled() (TopologyView method)</a>
 </li>
       <li><a href="qat.purr.compiler.metrics.html#qat.purr.compiler.metrics.CompilationMetrics.are_enabled">are_enabled() (CompilationMetrics method)</a>
 
@@ -3385,12 +3390,16 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.can_parse">(Qasm3Parser method)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.from_canonical.params.canonical">canonical (qat.experimental.system_data.topology.TopologyView.from_canonical parameter)</a>
+</li>
       <li><a href="qat.experimental.system_data.derived.interface.html#qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical.params.canonical_data">canonical_data (qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical parameter)</a>
 
       <ul>
         <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.from_canonical.params.canonical_data">(qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.from_canonical parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.ScipyTopologyView.from_derived.params.canonical_graph">canonical_graph (qat.experimental.system_data.topology.ScipyTopologyView.from_derived parameter)</a>
+</li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData">CanonicalSystemData (class in qat.experimental.system_data.canonical.schema)</a>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.ccnot">ccnot() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.ccnot">[1]</a>
@@ -4545,6 +4554,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.dialect.q1_cf.html#qat.experimental.dialect.q1_cf.LoopBranchOp.counter">counter (LoopBranchOp attribute)</a>, <a href="qat.experimental.dialect.q1_cf.ir.ops.html#qat.experimental.dialect.q1_cf.ir.ops.LoopBranchOp.counter">[1]</a>
 </li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.coupled_qubit_indices">coupled_qubit_indices() (TopologyView method)</a>
+</li>
       <li><a href="qat.model.loaders.lucy.html#qat.model.loaders.lucy.LucyModelLoader.params.coupling_direction">coupling_direction (qat.model.loaders.lucy.LucyModelLoader parameter)</a>
 </li>
       <li><a href="qat.model.loaders.lucy.html#qat.model.loaders.lucy.LucyModelLoader.params.coupling_qualities">coupling_qualities (qat.model.loaders.lucy.LucyModelLoader parameter)</a>
@@ -5564,6 +5575,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.frontend.parsers.qasm.qasm2.html#qat.frontend.parsers.qasm.qasm2.Qasm2Parser.ecr_gate">ecr_gate (Qasm2Parser attribute)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm2Parser.ecr_gate">[1]</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.edge_couplings_data">edge_couplings_data (TopologyView attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.edge_metadata">edge_metadata (TopologyView attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.q1_cf.html#qat.experimental.dialect.q1_cf.ComparisonBranchOp.else_arguments">else_arguments (ComparisonBranchOp attribute)</a>, <a href="qat.experimental.dialect.q1_cf.ir.ops.html#qat.experimental.dialect.q1_cf.ir.ops.ComparisonBranchOp.else_arguments">[1]</a>
 
@@ -6682,7 +6697,11 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.from_canonical">(PulseLevelConstraints class method)</a>
 </li>
+        <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.from_canonical">(TopologyView class method)</a>
+</li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.ScipyTopologyView.from_derived">from_derived() (ScipyTopologyView class method)</a>
+</li>
       <li><a href="qat.core.pipeline.html#qat.core.pipeline.EngineSet.from_descriptions">from_descriptions() (EngineSet class method)</a>
 
       <ul>
@@ -6822,6 +6841,12 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.frontend.parsers.qasm.qasm3.html#qat.frontend.parsers.qasm.qasm3.Qasm3Parser.gate_definition">gate_definition() (Qasm3Parser method)</a>, <a href="qat.purr.integrations.qasm.html#qat.purr.integrations.qasm.Qasm3Parser.gate_definition">[1]</a>
 </li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.QubitCouplingData.gate_fidelities">gate_fidelities (QubitCouplingData attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.gate_fidelities_by_type">gate_fidelities_by_type() (TopologyView method)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.ScipyTopologyView.gate_fidelity_matrices">gate_fidelity_matrices (ScipyTopologyView attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.gate_fidelities_by_type.params.gate_names">gate_names (qat.experimental.system_data.topology.TopologyView.gate_fidelities_by_type parameter)</a>
 </li>
       <li><a href="qat.ir.gates.base.html#qat.ir.gates.base.GateBase">GateBase (class in qat.ir.gates.base)</a>
 </li>
@@ -8335,10 +8360,10 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.IntRegisterType.index_by_name">index_by_name() (IntRegisterType class method)</a>, <a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.index_by_name">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.index_of_qubit">index_of_qubit() (PhysicalHardwareModel method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.runtime.passes.purr.transform.html#qat.runtime.passes.purr.transform.QiskitErrorMitigation.index_pattern">index_pattern (QiskitErrorMitigation attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.IndexAccessor">IndexAccessor (class in qat.purr.compiler.instructions)</a>
@@ -8352,6 +8377,12 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.IndexMappingResult">IndexMappingResult (class in qat.runtime.passes.analysis)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.Section.indices">indices (Section attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.indices">(TopologyView attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.indptr">indptr (TopologyView attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.IntRegisterType.infinite_register_prefix">infinite_register_prefix() (IntRegisterType class method)</a>, <a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.infinite_register_prefix">[1]</a>
 </li>
@@ -12119,6 +12150,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.system_data.pulse.constraints.html#module-qat.experimental.system_data.pulse.constraints">qat.experimental.system_data.pulse.constraints</a>
 </li>
+        <li><a href="qat.experimental.system_data.topology.html#module-qat.experimental.system_data.topology">qat.experimental.system_data.topology</a>
+</li>
         <li><a href="qat.extensions.html#module-qat.extensions">qat.extensions</a>
 </li>
         <li><a href="qat.frontend.html#module-qat.frontend">qat.frontend</a>
@@ -13504,11 +13537,15 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.runtime.expressions.html#qat.runtime.expressions.UnaryOp.NEG">NEG (UnaryOp attribute)</a>
 </li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.ScipyTopologyView.networkx_graph">networkx_graph (ScipyTopologyView property)</a>
+</li>
       <li><a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.NewQbloxEmitter">NewQbloxEmitter (class in qat.purr.backends.qblox.codegen)</a>
 </li>
       <li><a href="qat.purr.compiler.runtime.html#qat.purr.compiler.runtime.NewQuantumRuntime">NewQuantumRuntime (class in qat.purr.compiler.runtime)</a>
 </li>
       <li><a href="qat.experimental.dialect.q1_cf.html#qat.experimental.dialect.q1_cf.FlagPredicate.nez">nez (FlagPredicate attribute)</a>, <a href="qat.experimental.dialect.q1_cf.ir.attrs.html#qat.experimental.dialect.q1_cf.ir.attrs.FlagPredicate.nez">[1]</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.nnz">nnz (TopologyView property)</a>
 </li>
       <li><a href="qat.core.config.session.html#qat.core.config.session.QatSessionConfig.no_duplicate_names">no_duplicate_names() (QatSessionConfig class method)</a>
 </li>
@@ -13530,6 +13567,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.passes.validation.html#qat.backend.passes.validation.NoAcquireWeightsValidation">(class in qat.backend.passes.validation)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.node_ids">node_ids (TopologyView attribute)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.node_index">node_index (TopologyView attribute)</a>
+</li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsFrozenModel">NoExtraFieldsFrozenModel (class in qat.utils.pydantic)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.NoExtraFieldsModel">NoExtraFieldsModel (class in qat.utils.pydantic)</a>
@@ -16747,6 +16788,13 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.system_data.topology
+
+      <ul>
+        <li><a href="qat.experimental.system_data.topology.html#module-qat.experimental.system_data.topology">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.extensions
 
       <ul>
@@ -18794,7 +18842,11 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.qubit_for_resonator">qubit_for_resonator() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.qubit_id">qubit_id (OperatorInfo attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.coupled_qubit_indices.params.qubit_id">(qat.experimental.system_data.topology.TopologyView.coupled_qubit_indices parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.model.loaders.converted.html#qat.model.loaders.converted.JaggedEchoModelLoader.params.qubit_indices">qubit_indices (qat.model.loaders.converted.JaggedEchoModelLoader parameter)</a>
 
       <ul>
@@ -20089,6 +20141,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.RoundedSquareWaveformOp">(class in qat.experimental.dialect.pulse.ir.ops)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.row_by_node_id">row_by_node_id (TopologyView property)</a>
+</li>
       <li><a href="qat.ir.lowered.html#qat.ir.lowered.PartitionedIR.rp_map">rp_map (PartitionedIR attribute)</a>
 
       <ul>
@@ -20919,6 +20973,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ScaleOp">(class in qat.experimental.dialect.pulse.ir.ops)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.ScipyTopologyView">ScipyTopologyView (class in qat.experimental.system_data.topology)</a>
+</li>
       <li><a href="qat.ir.instruction_basetypes.html#qat.ir.instruction_basetypes.AcquireMode.SCOPE">SCOPE (AcquireMode attribute)</a>
 </li>
       <li><a href="qat.backend.qblox.acquisition.html#qat.backend.qblox.acquisition.BinnedAndScopeAcqData.scope">scope (BinnedAndScopeAcqData attribute)</a>, <a href="qat.purr.backends.qblox.acquisition.html#qat.purr.backends.qblox.acquisition.BinnedAndScopeAcqData.scope">[1]</a>
@@ -21351,8 +21407,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="getting_started/shot_selection.html#qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained">(qat.runtime.passes.analysis.PostSelectionResult parameter)</a>, <a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.shutdown">shutdown() (AbstractQbloxLiveEngine method)</a>
 
       <ul>
@@ -21361,6 +21415,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.SI16Imm">SI16Imm (class in qat.experimental.dialect.q1)</a>
 
       <ul>
@@ -21495,6 +21551,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.software_post_process_mean">software_post_process_mean() (in module qat.purr.backends.utilities)</a>
 </li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.sorted_gate_fidelities">sorted_gate_fidelities (TopologyView property)</a>
+</li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.sorted_gate_fidelities_by_type">sorted_gate_fidelities_by_type (TopologyView property)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.LoopRdImmOp.source">source (LoopRdImmOp property)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.LoopRdImmOp.source">[1]</a>
 
       <ul>
@@ -21513,8 +21573,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.CompositeLogger.code.params.source">(qat.purr.utils.logger.CompositeLogger.code parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.QubitCouplingData.source_qubit_id">source_qubit_id (QubitCouplingData attribute)</a>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.are_coupled.params.source_qubit_id">source_qubit_id (qat.experimental.system_data.topology.TopologyView.are_coupled parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.QubitCouplingData.source_qubit_id">(QubitCouplingData attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.splice">splice() (InstructionBuilder method)</a>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.spline_time">spline_time() (in module qat.purr.backends.realtime_chip_simulator)</a>
@@ -22205,8 +22269,12 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.TriageResult.target_map">(TriageResult attribute)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.TriageResult.target_map">[1]</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.QubitCouplingData.target_qubit_id">target_qubit_id (QubitCouplingData attribute)</a>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView.are_coupled.params.target_qubit_id">target_qubit_id (qat.experimental.system_data.topology.TopologyView.are_coupled parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.QubitCouplingData.target_qubit_id">(QubitCouplingData attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.model.target_data.html#qat.model.target_data.TargetData">TargetData (class in qat.model.target_data)</a>
 </li>
       <li><a href="qat.middleend.passes.purr.analysis.html#qat.middleend.passes.purr.analysis.ActiveChannelResults.targets">targets (ActiveChannelResults property)</a>
@@ -22449,6 +22517,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseFeatures.to_json_dict">(OpenPulseFeatures method)</a>, <a href="qat.purr.integrations.features.html#qat.purr.integrations.features.OpenPulseFeatures.to_json_dict">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.system_data.topology.html#qat.experimental.system_data.topology.TopologyView">TopologyView (class in qat.experimental.system_data.topology)</a>
+</li>
       <li><a href="qat.backend.waveform.codegen.html#qat.backend.waveform.codegen.WaveformContext.params.total_duration">total_duration (qat.backend.waveform.codegen.WaveformContext parameter)</a>
 
       <ul>
