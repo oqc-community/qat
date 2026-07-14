@@ -54,20 +54,18 @@ class FrameType(ParametrizedAttribute, TypeAttribute):
 
     Used with the intent of manipulating a quantum component.
 
-    :ivar port_kind: A target-resolved token used to identify the port class for this frame,
-        without encoding hardware object details directly in the IR. This name can take any
-        string, but is expected to match a meaningful port class in the context of the
-        system data. The default is "output", which for example, is the standard port kind
-        for a qubit drive frame.
+    :ivar port: A target-resolved token used to identify the port for this frame, without
+        encoding hardware object details directly in the IR. This name can take any string,
+        but is expected to match a meaningful port in the context of the system data.
     """
 
     name = "pulse.frame"
-    port_kind: StringAttr = param_def()
+    port: StringAttr = param_def()
 
-    def __init__(self, port_kind: StringAttr | str = "output"):
-        if isinstance(port_kind, str):
-            port_kind = StringAttr(port_kind)
-        return super().__init__(port_kind)
+    def __init__(self, port: StringAttr | str):
+        if isinstance(port, str):
+            port = StringAttr(port)
+        return super().__init__(port)
 
 
 @irdl_attr_definition

@@ -1438,9 +1438,9 @@ class CreateFrameOp(IRDLOperation):
     """Creates a frame, which is a medium for waveforms to be played at a given frequency,
     and tracks any phase manipulations.
 
-    Frames are associated with a physical channel that the pulses will be played on. They
+    Frames are associated with a port that the pulses will be played on. They
     can have many-to-one association, allowing multiple frames to act concurrently on a
-    single physical channel.
+    single port.
 
     They are defined by a static frequency, and optionally take attributes associated with
     the control hardware calibrated for that frame.
@@ -1449,13 +1449,9 @@ class CreateFrameOp(IRDLOperation):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
 
     :ivar frequency: The frequency of the frame.
-    :ivar physical_channel: A string property containing the physical channel identifier.
-    :ivar port_kind: The class of port associated with this frame, encoded in the
-        parameterization of :class:`FrameType` on the operation result.
     :ivar imbalance: An optional attribute that stores the imbalance between I and Q paths,
         obtained from mixer calibrations.
     :ivar phase_offset: An optional attribute that stores the phase offset between I and Q
@@ -1470,6 +1466,7 @@ class CreateFrameOp(IRDLOperation):
         be tracked when frame swapping on hardware. If False, this highly simplifies
         allocation logic, allowing us to make more efficient use of hardware. This should
         be used carefully. Defaults to True.
+    :ivar port: The string attribute containing the port identifier.
     :ivar result: The SSA value representing the Frame. Can only be consumed by a single
         operation.
     """
@@ -1477,7 +1474,6 @@ class CreateFrameOp(IRDLOperation):
     name = "pulse.create_frame"
 
     frequency = operand_def(FrequencyType)
-    physical_channel = prop_def(StringAttr)
     imbalance = opt_attr_def(FloatAttr)
     phase_offset = opt_attr_def(FloatAttr)
     acquire_allowed = attr_def(BoolAttr, default_value=BoolAttr(True, value_type=1))
@@ -1489,8 +1485,7 @@ class CreateFrameOp(IRDLOperation):
     def __init__(
         self,
         frequency: SSAValue | Operation,
-        physical_channel: StringAttr,
-        port_kind: StringAttr | None = None,
+        port: StringAttr,
         imbalance: FloatAttr | None = None,
         phase_offset: FloatAttr | None = None,
         acquire_allowed: BoolAttr | None = None,
@@ -1499,10 +1494,7 @@ class CreateFrameOp(IRDLOperation):
     ):
         """
         :param frequency: The SSA value representing the frequency of the frame.
-        :param physical_channel: The string attribute containing the physical channel
-            identifier.
-        :param port_kind: The string attribute identifying the class of port
-            associated with this frame. Defaults to "output" when not provided.
+        :param port: The string attribute containing the port identifier.
         :param imbalance: The float attribute representing the imbalance between I
             and Q paths, obtained from mixer calibrations. Optional.
         :param phase_offset: The float attribute representing the phase offset between I
@@ -1526,20 +1518,16 @@ class CreateFrameOp(IRDLOperation):
         if track_phase is not None:
             attributes["track_phase"] = track_phase
 
-        if port_kind is None:
-            port_kind = StringAttr("output")
-
         return super().__init__(
             operands=[frequency],
-            properties={"physical_channel": physical_channel},
             attributes=attributes,
-            result_types=[FrameType(port_kind)],
+            result_types=[FrameType(port)],
         )
 
     @property
-    def port_kind(self) -> StringAttr:
-        """Returns the port-kind token encoded in the parameterized frame result type."""
-        return self.result.type.port_kind
+    def port(self) -> StringAttr:
+        """Returns the port that the frame plays on as a string attribute."""
+        return self.result.type.port
 
 
 class PhaseOp(IRDLOperation, ABC):
@@ -1576,10 +1564,9 @@ class PhaseShiftOp(PhaseOp):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %phase = pulse.constant<1.5708> : !pulse.phase
-        %frame2 = pulse.phase_shift(%frame, %phase) : !pulse.frame<"output">
+        %frame2 = pulse.phase_shift(%frame, %phase) : !pulse.frame<"channel_1">
 
     :ivar frame: The SSA value representing the frame whose phase is being shifted.
     :ivar phase: The SSA value representing the phase operand, which specifies the amount by
@@ -1600,10 +1587,9 @@ class PhaseSetOp(PhaseOp):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %phase = pulse.constant<1.5708> : !pulse.phase
-        %frame2 = pulse.phase_set(%frame, %phase) : !pulse.frame<"output">
+        %frame2 = pulse.phase_set(%frame, %phase) : !pulse.frame<"channel_1">
 
     :ivar frame: The SSA value representing the frame whose phase is being set.
     :ivar phase: The SSA value representing the phase operand, which specifies the value to
@@ -1625,9 +1611,8 @@ class WaitOp(IRDLOperation):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
-        %frame2 = pulse.wait(%frame, %duration) : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
+        %frame2 = pulse.wait(%frame, %duration) : !pulse.frame<"channel_1">
 
     .. note::
 
@@ -1668,12 +1653,10 @@ class SynchronizeOp(IRDLOperation):
 
     .. code-block:: mlir
 
-        %frame1 = pulse.create_frame(%frequency1) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
-        %frame2 = pulse.create_frame(%frequency2) {physical_channel = "channel_2"}
-            : !pulse.frame<"output">
+        %frame1 = pulse.create_frame(%frequency1) : !pulse.frame<"channel_1">
+        %frame2 = pulse.create_frame(%frequency2) : !pulse.frame<"channel_2">
         %frame3, %frame4 = pulse.sync(%frame1, %frame2)
-            : (!pulse.frame<"output">, !pulse.frame<"output">)
+            : (!pulse.frame<"channel_1">, !pulse.frame<"channel_2">)
 
     :ivar frames: A list of SSA values representing the frames to be synchronized.
     :ivar result: A list of SSA values representing the resulting synchronized frames, which
@@ -1716,12 +1699,11 @@ class PulseOp(IRDLOperation):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %duration = arith.constant<128e-9> : !pulse.time
         %amplitude = arith.constant<0.5> : !pulse.amplitude
         %waveform = pulse.square_waveform(%duration, %amplitude) : !pulse.waveform
-        %frame2 = pulse.pulse(%frame, %waveform) : !pulse.frame<"output">
+        %frame2 = pulse.pulse(%frame, %waveform) : !pulse.frame<"channel_1">
 
     :ivar frame: The SSA value representing the frame on which to play the pulse.
     :ivar waveform: The SSA value representing the waveform to be played, of type
@@ -1757,13 +1739,12 @@ class StartContinuousWaveformOp(IRDLOperation):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %frame2 = pulse.start_continuous_waveform(%frame, %amplitude) : !pulse.frame<"output">
+        %frame2 = pulse.start_continuous_waveform(%frame, %amplitude) : !pulse.frame<"channel_1">
         %duration = pulse.constant<800e-9> : !pulse.time
-        %frame3 = pulse.wait(%frame2, %duration) : !pulse.frame<"output">
-        %frame4 = pulse.stop_continuous_waveform(%frame3) : !pulse.frame<"output">
+        %frame3 = pulse.wait(%frame2, %duration) : !pulse.frame<"channel_1">
+        %frame4 = pulse.stop_continuous_waveform(%frame3) : !pulse.frame<"channel_1">
 
     :ivar frame: The SSA value representing the frame on which to start the continuous
         waveform.
@@ -1830,11 +1811,10 @@ class AcquireOp(IRDLOperation):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame<"output">
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %duration = pulse.constant<800e-9> : !pulse.time
         %frame_result, %acquire_result = pulse.acquire(%frame, %duration)
-            : (!pulse.frame<"output">, !pulse.acquisition)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
 
     :ivar frame: The SSA value representing the frame on which to perform the acquisition.

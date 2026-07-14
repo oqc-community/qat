@@ -32,25 +32,25 @@ class CommuteWaitBeforePhaseShift(RewritePattern):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %phase = pulse.constant<0.5> : !pulse.phase
         %duration = pulse.constant<1.0e-9> : !pulse.time
-        %shift = pulse.phase_shift(%frame, %phase) : !pulse.frame
-        %wait = pulse.wait(%shift, %duration) : !pulse.frame
-        %acquire = pulse.acquire(%wait, %duration) : !pulse.frame
+        %shift = pulse.phase_shift(%frame, %phase) : !pulse.frame<"channel_1">
+        %wait = pulse.wait(%shift, %duration) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%wait, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     becomes:
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %phase = pulse.constant<0.5> : !pulse.phase
         %duration = pulse.constant<1.0e-9> : !pulse.time
-        %wait = pulse.wait(%frame, %duration) : !pulse.frame
-        %shift = pulse.phase_shift(%wait, %phase) : !pulse.frame
-        %acquire = pulse.acquire(%shift, %duration) : !pulse.frame
+        %wait = pulse.wait(%frame, %duration) : !pulse.frame<"channel_1">
+        %shift = pulse.phase_shift(%wait, %phase) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%shift, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     This enables subsequent folding of multiple waits or phases that were initially
     interleaved. Repeated application via `GreedyRewritePatternApplier` bubbles all
@@ -83,93 +83,94 @@ class FoldContiguousPhases(RewritePattern):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
-        %shift1 = pulse.phase_shift(%frame, %p1) : !pulse.frame
-        %shift2 = pulse.phase_shift(%shift1, %p2) : !pulse.frame
-        %acquire = pulse.acquire(%shift2, %duration) : !pulse.frame
+        %shift1 = pulse.phase_shift(%frame, %p1) : !pulse.frame<"channel_1">
+        %shift2 = pulse.phase_shift(%shift1, %p2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%shift2, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     becomes:
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
         %total = pulse.add(%p1, %p2) : !pulse.phase
-        %merged = pulse.phase_shift(%frame, %total) : !pulse.frame
-        %acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+        %merged = pulse.phase_shift(%frame, %total) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     **Scenario 2: PhaseShift + PhaseSet**
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
-        %shift = pulse.phase_shift(%frame, %p1) : !pulse.frame
-        %set = pulse.phase_set(%shift, %p2) : !pulse.frame
-        %acquire = pulse.acquire(%set, %duration) : !pulse.frame
+        %shift = pulse.phase_shift(%frame, %p1) : !pulse.frame<"channel_1">
+        %set = pulse.phase_set(%shift, %p2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%set, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     becomes:
 
     .. code-block:: mlir
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
-        %merged = pulse.phase_set(%frame, %p2) : !pulse.frame
-        %acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+        %merged = pulse.phase_set(%frame, %p2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     **Scenario 3: PhaseSet + PhaseShift**
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
-        %set = pulse.phase_set(%frame, %p1) : !pulse.frame
-        %shift = pulse.phase_shift(%set, %p2) : !pulse.frame
-        %acquire = pulse.acquire(%shift, %duration) : !pulse.frame
+        %set = pulse.phase_set(%frame, %p1) : !pulse.frame<"channel_1">
+        %shift = pulse.phase_shift(%set, %p2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%shift, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     becomes:
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
         %total = pulse.add(%p1, %p2) : !pulse.phase
-        %merged = pulse.phase_set(%frame, %total) : !pulse.frame
-        %acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+        %merged = pulse.phase_set(%frame, %total) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     **Scenario 4: PhaseSet + PhaseSet**
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p1 = pulse.constant<0.5> : !pulse.phase
         %p2 = pulse.constant<1.0> : !pulse.phase
-        %set1 = pulse.phase_set(%frame, %p1) : !pulse.frame
-        %set2 = pulse.phase_set(%set1, %p2) : !pulse.frame
-        %acquire = pulse.acquire(%set2, %duration) : !pulse.frame
+        %set1 = pulse.phase_set(%frame, %p1) : !pulse.frame<"channel_1">
+        %set2 = pulse.phase_set(%set1, %p2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%set2, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     becomes:
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %p2 = pulse.constant<1.0> : !pulse.phase
-        %merged = pulse.phase_set(%frame, %p2) : !pulse.frame
-        %acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+        %merged = pulse.phase_set(%frame, %p2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
     """
 
     @op_type_rewrite_pattern
@@ -207,25 +208,25 @@ class FoldContiguousWaits(RewritePattern):
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %duration1 = pulse.constant<1.0e-9> : !pulse.time
         %duration2 = pulse.constant<2.0e-9> : !pulse.time
-        %wait1 = pulse.wait(%frame, %duration1) : !pulse.frame
-        %wait2 = pulse.wait(%wait1, %duration2) : !pulse.frame
-        %acquire = pulse.acquire(%wait2, %duration) : !pulse.frame
+        %wait1 = pulse.wait(%frame, %duration1) : !pulse.frame<"channel_1">
+        %wait2 = pulse.wait(%wait1, %duration2) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%wait2, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
 
     becomes:
 
     .. code-block:: mlir
 
-        %frame = pulse.create_frame(%frequency) {physical_channel = "channel_1"}
-            : !pulse.frame
+        %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %duration1 = pulse.constant<1.0e-9> : !pulse.time
         %duration2 = pulse.constant<2.0e-9> : !pulse.time
         %total = pulse.add(%duration1, %duration2) : !pulse.time
-        %merged = pulse.wait(%frame, %total) : !pulse.frame
-        %acquire = pulse.acquire(%merged, %duration) : !pulse.frame
+        %merged = pulse.wait(%frame, %total) : !pulse.frame<"channel_1">
+        %acquire_frame, %acquire = pulse.acquire(%merged, %duration)
+            : (!pulse.frame<"channel_1">, !pulse.acquisition)
     """
 
     @op_type_rewrite_pattern

@@ -102,8 +102,8 @@ class TestConstantOp:
 
     def test_verification_of_invalid_result_type(self):
         attr = FrequencyAttr(5.5e9)
-        op = ConstantOp(attr, FrameType())
-        assert op.result.type == FrameType()
+        op = ConstantOp(attr, FrameType("default"))
+        assert op.result.type == FrameType("default")
         with pytest.raises(VerifyException, match="result 'result' at position 0"):
             op.verify()
 
@@ -190,7 +190,9 @@ class TestInternalBinaryOps:
     def test_invalid_result_type_raises_validation_error(self, op_type):
         constant1 = ConstantOp(PhaseAttr(0.5))
         constant2 = ConstantOp(PhaseAttr(1.0))
-        op = op_type(constant1.results[0], constant2.results[0], result_type=FrameType())
+        op = op_type(
+            constant1.results[0], constant2.results[0], result_type=FrameType("default")
+        )
         with pytest.raises(VerifyException, match="result 'result' at position 0"):
             op.verify()
 
@@ -362,7 +364,7 @@ class TestScaleOp:
     def test_invalid_rhs_type_raises(self):
         constant1 = ArithConstantOp(FloatAttr(2.0, 64), f64)
         constant2 = ArithConstantOp(FloatAttr(0.5, 64), f64)
-        op = ScaleOp(constant1.results[0], constant2.results[0], FrameType())
+        op = ScaleOp(constant1.results[0], constant2.results[0], FrameType("default"))
         with pytest.raises(VerifyException, match="operand 'rhs'"):
             op.verify()
 
@@ -440,7 +442,7 @@ class TestModuloOp:
     def test_invalid_result_type(self):
         constant1 = ConstantOp(PhaseAttr(0.5))
         constant2 = ConstantOp(PhaseAttr(np.pi))
-        op = ModuloOp(constant1.results[0], constant2.results[0], FrameType())
+        op = ModuloOp(constant1.results[0], constant2.results[0], FrameType("default"))
         with pytest.raises(VerifyException, match="result 'result' at position 0"):
             op.verify()
 
@@ -700,13 +702,12 @@ class TestSechWaveformOp:
 
 class TestCreateFrameOp:
     def test_minimal_initialization(self):
-        """Creating a frame without a port kind should default to output on result type."""
+        """Creating a frame should use port as the identifier."""
         frequency = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(frequency, StringAttr("drive"))
         assert frame.frequency == frequency.results[0]
-        assert frame.physical_channel == StringAttr("drive")
-        assert frame.port_kind == StringAttr("output")
-        assert frame.result.type == FrameType("output")
+        assert frame.port == StringAttr("drive")
+        assert frame.result.type == FrameType("drive")
 
         assert frame.imbalance is None
         assert frame.phase_offset is None
@@ -716,27 +717,26 @@ class TestCreateFrameOp:
         assert frame.track_phase.value.data
         frame.verify()
 
-    def test_create_frame_with_explicit_port_kind_sets_parameterized_result_type(self):
-        """Creating a frame with a port kind should parameterize the frame result type."""
+    def test_create_frame_with_different_port_sets_parameterized_result_type(self):
+        """Creating a frame with a different port should parameterize the frame result
+        type."""
         frequency = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(
             frequency,
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
-        assert frame.port_kind == StringAttr("input")
-        assert frame.result.type == FrameType("input")
+        assert frame.port == StringAttr("measure")
+        assert frame.result.type == FrameType("measure")
         frame.verify()
 
-    def test_read_port_kind_from_create_frame_result_type(self):
-        """The op accessor should read port kind from the parameterized result type."""
+    def test_read_port_from_create_frame_result_type(self):
+        """The frame port should match the result type port parameter."""
         frequency = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(
             frequency,
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
-        assert frame.port_kind == frame.result.type.port_kind
+        assert frame.port == frame.result.type.port
         frame.verify()
 
     def test_with_optionals(self):
@@ -776,7 +776,7 @@ class TestPhaseOps:
         phase_op = op(frame.results[0], phase.results[0])
         assert phase_op.frame == frame.results[0]
         assert phase_op.phase == phase.results[0]
-        assert phase_op.result.type == FrameType()
+        assert phase_op.result.type == FrameType("drive")
         assert "phase" in phase_op.name
         phase_op.verify()
 
@@ -784,12 +784,11 @@ class TestPhaseOps:
         """Applying a phase operation should preserve the input frame parameterization."""
         frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
-            StringAttr("drive"),
-            port_kind=StringAttr("input"),
+            StringAttr("measure"),
         )
         phase = ConstantOp(PhaseAttr(1.57))
         phase_op = op(frame.results[0], phase.results[0])
-        assert phase_op.result.type == FrameType("input")
+        assert phase_op.result.type == FrameType("measure")
         phase_op.verify()
 
 
@@ -800,7 +799,7 @@ class TestWaitOp:
         wait_op = WaitOp(frame.results[0], time.results[0])
         assert wait_op.frame == frame.results[0]
         assert wait_op.duration == time.results[0]
-        assert wait_op.result.type == FrameType()
+        assert wait_op.result.type == FrameType("drive")
         wait_op.verify()
 
     def test_wait_operation_preserves_parameterized_frame_type(self):
@@ -808,11 +807,10 @@ class TestWaitOp:
         frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
         time = ConstantOp(TimeAttr(800e-9))
         wait_op = WaitOp(frame.results[0], time.results[0])
-        assert wait_op.result.type == FrameType("input")
+        assert wait_op.result.type == FrameType("measure")
         wait_op.verify()
 
 
@@ -840,16 +838,14 @@ class TestSynchronizeOp:
         output_frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("drive"),
-            port_kind=StringAttr("output"),
         )
         input_frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(6.8e9)),
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
         sync_op = SynchronizeOp(output_frame.result, input_frame.result)
-        assert sync_op.results[0].type == FrameType("output")
-        assert sync_op.results[1].type == FrameType("input")
+        assert sync_op.results[0].type == FrameType("drive")
+        assert sync_op.results[1].type == FrameType("measure")
         sync_op.verify()
 
 
@@ -862,7 +858,7 @@ class TestPulseOp:
         pulse_op = PulseOp(frame.result, waveform.result)
         assert pulse_op.frame == frame.results[0]
         assert pulse_op.waveform == waveform.result
-        assert pulse_op.result.type == FrameType()
+        assert pulse_op.result.type == FrameType("drive")
         pulse_op.verify()
 
     def test_apply_pulse_preserves_parameterized_frame_type(self):
@@ -870,13 +866,12 @@ class TestPulseOp:
         frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
         width = ConstantOp(TimeAttr(800e-9))
         amp = ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(width, amp)
         pulse_op = PulseOp(frame.result, waveform.result)
-        assert pulse_op.result.type == FrameType("input")
+        assert pulse_op.result.type == FrameType("measure")
         pulse_op.verify()
 
 
@@ -887,7 +882,7 @@ class TestStartContinuousWaveformOp:
         start_op = StartContinuousWaveformOp(frame.result, amplitude.result)
         assert start_op.frame == frame.results[0]
         assert start_op.amplitude == amplitude.result
-        assert start_op.result.type == FrameType()
+        assert start_op.result.type == FrameType("drive")
         start_op.verify()
 
     def test_start_continuous_waveform_preserves_parameterized_frame_type(self):
@@ -895,11 +890,10 @@ class TestStartContinuousWaveformOp:
         frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         start_op = StartContinuousWaveformOp(frame.result, amplitude.result)
-        assert start_op.result.type == FrameType("input")
+        assert start_op.result.type == FrameType("measure")
         start_op.verify()
 
 
@@ -908,7 +902,7 @@ class TestStopContinuousWaveformOp:
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
         stop_op = StopContinuousWaveformOp(frame.result)
         assert stop_op.frame == frame.results[0]
-        assert stop_op.result.type == FrameType()
+        assert stop_op.result.type == FrameType("drive")
         stop_op.verify()
 
     def test_stop_continuous_waveform_preserves_parameterized_frame_type(self):
@@ -916,10 +910,9 @@ class TestStopContinuousWaveformOp:
         frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
         stop_op = StopContinuousWaveformOp(frame.result)
-        assert stop_op.result.type == FrameType("input")
+        assert stop_op.result.type == FrameType("measure")
         stop_op.verify()
 
 
@@ -931,7 +924,7 @@ class TestAcquireOp:
         assert acquire_op.frame == frame.results[0]
         assert acquire_op.duration is duration.result
         assert len(acquire_op.results) == 2
-        assert acquire_op.frame_result.type == FrameType()
+        assert acquire_op.frame_result.type == FrameType("measure")
         assert acquire_op.acquisition_result.type == AcquisitionType()
         assert acquire_op.weights is None
         acquire_op.verify()
@@ -941,11 +934,10 @@ class TestAcquireOp:
         frame = CreateFrameOp(
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
-            port_kind=StringAttr("input"),
         )
         duration = ConstantOp(TimeAttr(400e-9))
         acquire_op = AcquireOp(frame.result, duration.result)
-        assert acquire_op.frame_result.type == FrameType("input")
+        assert acquire_op.frame_result.type == FrameType("measure")
         acquire_op.verify()
 
     def test_with_weights_is_valid(self):

@@ -160,7 +160,7 @@ class TestPurrImporterFrameTracking:
 
         create_frames = _ops_of_type(imp, CreateFrameOp)
         assert len(create_frames) == 1
-        assert create_frames[0].physical_channel.data == ch.physical_channel.full_id()
+        assert create_frames[0].port.data == ch.physical_channel.full_id()
 
     def test_frame_reused_across_instructions(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()

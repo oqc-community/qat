@@ -11,7 +11,7 @@ compile-time-constant operands, replaces it with one or more
 
 The pass looks at every :class:`~qat.experimental.dialect.pulse.ir.ops.PulseOp` that
 consumes the analytical waveform and groups them by the sample time associated with
-their frame's port kind. A single :class:`ConstantOp` is emitted per distinct sample
+their frame's port. A single :class:`ConstantOp` is emitted per distinct sample
 time, and each consuming :class:`PulseOp` is rewired to the appropriate one. This makes
 sharing a waveform across multiple ports safe.
 
@@ -54,16 +54,16 @@ def _resolve_sample_time(
     frame_operand: SSAValue,
     port_sample_times: dict[str, float],
 ) -> float | None:
-    """Return the sample time associated with the port kind carried by ``frame_operand``.
+    """Return the sample time associated with the port carried by ``frame_operand``.
 
-    The port kind is encoded in the parameterised :class:`FrameType` on the frame SSA
+    The port is encoded in the parameterised :class:`FrameType` on the frame SSA
     value, so this never needs to walk the SSA def-use chain.
     """
 
     frame_type = frame_operand.type
     if not isinstance(frame_type, FrameType):
         return None
-    return port_sample_times.get(frame_type.port_kind.data)
+    return port_sample_times.get(frame_type.port.data)
 
 
 def _group_pulse_uses_by_sample_time(
@@ -145,7 +145,7 @@ class _RewriteAnalyticalWaveform(RewritePattern):
         if pulses_by_sample_time is None:
             log.debug(
                 f"waveform-evaluation: skipping {op_type}: at least one consumer is "
-                f"not a PulseOp with a resolvable sample time (known port kinds: "
+                f"not a PulseOp with a resolvable sample time (known ports: "
                 f"{sorted(self._port_sample_times)})."
             )
             return
@@ -174,9 +174,8 @@ class EvaluateWaveformsAsSamples(ModulePass):
     :class:`SampledWaveformAttr` of the pre-computed IQ samples — one per distinct
     sample time across the pulses that consume the waveform.
 
-    :ivar port_sample_times: Mapping from :class:`FrameType` port-kind token
-        (e.g. ``"control"``, ``"readout"``) to the sample time in seconds used to
-        discretise waveforms on that port class.
+    :ivar port_sample_times: Mapping from :class:`FrameType` port token
+        to the sample time in seconds used to discretise waveforms on that port.
     :ivar ignored_shapes: Waveform shapes whose analytical form is natively supported by
         the hardware and should not be sampled. Defaults to ``(SquareWaveform,)``.
     """

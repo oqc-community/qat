@@ -1151,7 +1151,7 @@ class TestTimelineNormalizationWithUnknowns:
         pulse_op = PulseOp(frames[0], square_op.result)
 
         # Create a for loop  which acts on the two frames
-        for_body = Block(arg_types=[i32, FrameType(), FrameType()])
+        for_body = Block(arg_types=[i32, pulse_op.result.type, frames[1].type])
         lb = ArithConstantOp(IntegerAttr(0, i32))
         ub = ArithConstantOp(IntegerAttr(10, i32))
         step = ArithConstantOp(IntegerAttr(1, i32))

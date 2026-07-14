@@ -80,8 +80,8 @@ from tests.unit.utils.ir import (
 
 _CONTEXT = create_context(Pulse)
 
-PORT_KIND_CONTROL = "control"
-PORT_KIND_READOUT = "readout"
+PORT_CONTROL = "channel_1"
+PORT_READOUT = "channel_2"
 
 
 @irdl_op_definition
@@ -289,12 +289,12 @@ def _spec_id(spec: _WaveformSpec) -> str:
 
 def _build_module_with_pulse(
     spec: _WaveformSpec,
-    port_kind: str = PORT_KIND_CONTROL,
+    port: str = PORT_CONTROL,
     operand_overrides: dict[str, IRDLOperation] | None = None,
     bool_prop_overrides: dict[str, bool] | None = None,
 ) -> tuple:
     """Build a minimal module containing one instance of ``spec``'s waveform op feeding a
-    :class:`PulseOp` on a frame with the requested ``port_kind``.
+    :class:`PulseOp` on a frame with the requested ``port``.
 
     :param operand_overrides: Replace the auto-generated :class:`ConstantOp` for the
         named pydantic operand with the supplied op (used to inject e.g. sweep-time
@@ -308,7 +308,7 @@ def _build_module_with_pulse(
     bool_overrides = bool_prop_overrides or {}
 
     freq = ConstantOp(FrequencyAttr(5e9))
-    frame = CreateFrameOp(freq, StringAttr("channel_1"), StringAttr(port_kind))
+    frame = CreateFrameOp(freq, StringAttr(port))
     ops_in_order: list[IRDLOperation] = [freq, frame]
 
     ctor_args: list[Any] = []
@@ -360,7 +360,7 @@ class TestWaveformShapeCoverage:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
             ignored_shapes=(),
         ).apply(_CONTEXT, module)
 
@@ -379,7 +379,7 @@ class TestWaveformShapeCoverage:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
             ignored_shapes=(),
         ).apply(_CONTEXT, module)
 
@@ -395,7 +395,7 @@ class TestWaveformShapeCoverage:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
             ignored_shapes=(),
         ).apply(_CONTEXT, module)
 
@@ -409,22 +409,22 @@ class TestPulseOpRewrite:
     """Shape-independent behaviour of the pulse-op rewrite pattern.
 
     Uses :data:`_GAUSSIAN_SPEC` as a representative analytical waveform; the shape does
-    not matter for these assertions (they are about port kind, missing-port-kind
+    not matter for these assertions (they are about port selection, missing-port
     handling, and non-constant operands).
     """
 
     @pytest.mark.parametrize("readout_sample_time", [2e-9, 4e-9])
     @pytest.mark.parametrize(
-        "port_kind, expected_selector",
+        "port, expected_selector",
         [
-            (PORT_KIND_CONTROL, "control"),
-            (PORT_KIND_READOUT, "readout"),
+            (PORT_CONTROL, "control"),
+            (PORT_READOUT, "readout"),
         ],
     )
-    def test_sample_time_is_selected_by_port_kind(
-        self, control_sample_time, readout_sample_time, port_kind, expected_selector
+    def test_sample_time_is_selected_by_port(
+        self, control_sample_time, readout_sample_time, port, expected_selector
     ):
-        module, _ = _build_module_with_pulse(_GAUSSIAN_SPEC, port_kind=port_kind)
+        module, _ = _build_module_with_pulse(_GAUSSIAN_SPEC, port=port)
         expected_sample_time = (
             control_sample_time if expected_selector == "control" else readout_sample_time
         )
@@ -434,8 +434,8 @@ class TestPulseOpRewrite:
 
         EvaluateWaveformsAsSamples(
             port_sample_times={
-                PORT_KIND_CONTROL: control_sample_time,
-                PORT_KIND_READOUT: readout_sample_time,
+                PORT_CONTROL: control_sample_time,
+                PORT_READOUT: readout_sample_time,
             },
         ).apply(_CONTEXT, module)
 
@@ -443,14 +443,14 @@ class TestPulseOpRewrite:
         assert len(sampled_constants) == 1
         assert sampled_constants[0].value.sample_time.literal_value == expected_sample_time
 
-    def test_unknown_port_kind_leaves_waveform_untouched(self, control_sample_time):
-        module, _ = _build_module_with_pulse(_GAUSSIAN_SPEC, port_kind="unknown")
+    def test_unknown_port_leaves_waveform_untouched(self, control_sample_time):
+        module, _ = _build_module_with_pulse(_GAUSSIAN_SPEC, port="unknown")
 
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
         ).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
@@ -466,7 +466,7 @@ class TestPulseOpRewrite:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
         ).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
@@ -483,7 +483,7 @@ class TestPulseOpRewrite:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
         ).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, spec.op_cls) == []
@@ -503,8 +503,7 @@ class TestPulseOpRewrite:
         freq = ConstantOp(FrequencyAttr(5e9))
         frame = CreateFrameOp(
             freq,
-            StringAttr("channel_1"),
-            StringAttr(PORT_KIND_CONTROL),
+            StringAttr(PORT_CONTROL),
         )
         width_a = ConstantOp(TimeAttr(80e-9))
         amp_a = ConstantOp(AmplitudeAttr(0.5))
@@ -539,22 +538,18 @@ class TestPulseOpRewrite:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
         ).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, GaussianWaveformOp) == []
         assert len(_get_sampled_constants(module)) == 2
 
-    def test_shared_waveform_is_sampled_once_when_all_pulses_share_a_port_kind(
+    def test_shared_waveform_is_sampled_once_when_all_pulses_share_a_port(
         self, control_sample_time
     ):
         freq = ConstantOp(FrequencyAttr(5e9))
-        frame_a = CreateFrameOp(
-            freq, StringAttr("channel_1"), StringAttr(PORT_KIND_CONTROL)
-        )
-        frame_b = CreateFrameOp(
-            freq, StringAttr("channel_2"), StringAttr(PORT_KIND_CONTROL)
-        )
+        frame_a = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
+        frame_b = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
         width = ConstantOp(TimeAttr(80e-9))
         amp = ConstantOp(AmplitudeAttr(0.5))
         rise = ConstantOp(TimeAttr(10e-9))
@@ -567,7 +562,7 @@ class TestPulseOpRewrite:
         )
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
         ).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, GaussianWaveformOp) == []
@@ -577,15 +572,11 @@ class TestPulseOpRewrite:
         assert pulse_ops[0].waveform is sampled_constants[0].result
         assert pulse_ops[1].waveform is sampled_constants[0].result
 
-    def test_shared_waveform_is_sampled_per_port_kind(self, control_sample_time):
+    def test_shared_waveform_is_sampled_per_port(self, control_sample_time):
         readout_sample_time = 4e-9
         freq = ConstantOp(FrequencyAttr(5e9))
-        frame_control = CreateFrameOp(
-            freq, StringAttr("channel_1"), StringAttr(PORT_KIND_CONTROL)
-        )
-        frame_readout = CreateFrameOp(
-            freq, StringAttr("channel_2"), StringAttr(PORT_KIND_READOUT)
-        )
+        frame_control = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
+        frame_readout = CreateFrameOp(freq, StringAttr(PORT_READOUT))
         width = ConstantOp(TimeAttr(80e-9))
         amp = ConstantOp(AmplitudeAttr(0.5))
         rise = ConstantOp(TimeAttr(10e-9))
@@ -609,8 +600,8 @@ class TestPulseOpRewrite:
 
         EvaluateWaveformsAsSamples(
             port_sample_times={
-                PORT_KIND_CONTROL: control_sample_time,
-                PORT_KIND_READOUT: readout_sample_time,
+                PORT_CONTROL: control_sample_time,
+                PORT_READOUT: readout_sample_time,
             },
         ).apply(_CONTEXT, module)
 
@@ -634,7 +625,7 @@ class TestIgnoredShapes:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
         ).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, SquareWaveformOp)) == 1
@@ -648,7 +639,7 @@ class TestIgnoredShapes:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
             ignored_shapes=(spec.pydantic_cls,),
         ).apply(_CONTEXT, module)
 
@@ -662,7 +653,7 @@ class TestIgnoredShapes:
         assert _get_sampled_constants(module) == []
 
         EvaluateWaveformsAsSamples(
-            port_sample_times={PORT_KIND_CONTROL: control_sample_time},
+            port_sample_times={PORT_CONTROL: control_sample_time},
             ignored_shapes=(),
         ).apply(_CONTEXT, module)
 

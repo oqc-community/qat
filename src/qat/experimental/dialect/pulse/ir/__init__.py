@@ -11,7 +11,7 @@ also implicitly track time, as pulse interactions must be played at the right ti
 
 The dialect includes a number of operations to define waveforms and related properties, and
 arithmetic on those types. The waveforms and related types are used to manipulate the state
-of a frame, and play / acquire waveforms on a physical channel in that reference frame.
+of a frame, and play / acquire waveforms on a port in that reference frame.
 """
 
 from xdsl.ir import Dialect
