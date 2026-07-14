@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.ops module &mdash; qat-compiler 3.0.0.post284.dev20260714115307 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.ops module &mdash; qat-compiler 3.0.0.post285.dev20260714121352 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -583,10 +583,14 @@
 <span id="qat-experimental-dialect-pulse-ir-ops-module"></span><h1>qat.experimental.dialect.pulse.ir.ops module<a class="headerlink" href="#module-qat.experimental.dialect.pulse.ir.ops" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.AcquireOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AcquireOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp" title="qat.experimental.dialect.pulse.ir.ops.AcquireOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represents an acquisition operation, which listens to the waveform input to the
-channel within the reference frame. Used in qubit readout.</p>
+channel within the reference frame.</p>
+<p>Acquisition is used within qubit readout. Often, the backend can support weighted
+acquisitions, where a custom array of real or complex numbers is used for demodulation.
+This can optionally be attached as an attribute to the acquisition.
+No validation is done to enforce length checks, as weights can be backend-specific.</p>
 <p>Example of how this looks in textual MLIR:</p>
 <div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%frame = pulse.create_frame(%frequency) {physical_channel = &quot;channel_1&quot;}
     : !pulse.frame&lt;&quot;output&quot;&gt;
@@ -605,6 +609,7 @@ pulse.time.</p></li>
 acquisition, which can be used as an operand in later operations.</p></li>
 <li><p><strong>acquisition_result</strong> – The SSA value representing the resulting acquisition obtained
 from the acquisition, which can be used as an operand in later operations.</p></li>
+<li><p><strong>weights</strong> – Optional weights attribute for the acquisition.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
@@ -613,6 +618,7 @@ from the acquisition, which can be used as an operand in later operations.</p></
 acquisition.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.AcquireOp.params.duration"></span><strong>duration</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp.params.duration">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></span>) – The SSA value representing the duration of the acquisition, of type
 pulse.time.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.AcquireOp.params.weights"></span><strong>weights</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp.params.weights">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.WeightsAttr" title="qat.experimental.dialect.pulse.ir.attributes.WeightsAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">WeightsAttr</span></code></a>]</span>) – Optional weights attribute for the acquisition.</p></li>
 </ul>
 </dd>
 </dl>
@@ -684,6 +690,12 @@ by the operation definition.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.AcquireOp.verify_">
 <span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp.verify_" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.AcquireOp.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.AcquireOp.weights" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an optional operation attribute.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -2269,106 +2281,106 @@ by the operation definition.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModulateOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MixOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.ops.InternalBinaryOp" title="qat.experimental.dialect.pulse.ir.ops.InternalBinaryOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">InternalBinaryOp</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType" title="qat.experimental.dialect.pulse.ir.types.WaveformType"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformType</span></code></a>]</p>
-<p>Represents the modulation of a waveform by another waveform.</p>
-<p>Modulation of two waveforms does a pointwise multiplication of the two waveforms,
+<p>Represents the element-wise mixing of one waveform envelope with another.</p>
+<p>Mixing two waveforms does a pointwise multiplication of the two waveform envelopes,
 resulting in a new waveform that has the same duration as the input waveforms.</p>
 <div class="highlight-mlir notranslate"><div class="highlight"><pre><span></span>%duration = pulse.constant&lt;128e-9&gt; : !pulse.time
 %amplitude1 = pulse.constant&lt;0.5&gt; : !pulse.amplitude
 %waveform1 = pulse.square_waveform(%duration, %amplitude1) : !pulse.waveform
 %amplitude2 = pulse.constant&lt;0.25&gt; : !pulse.amplitude
 %waveform2 = pulse.square_waveform(%duration, %amplitude2) : !pulse.waveform
-%result = pulse.modulate(%waveform1, %waveform2) : !pulse.waveform
+%result = pulse.mix(%waveform1, %waveform2) : !pulse.waveform
 </pre></div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>lhs</strong> – The left-hand side operand of the modulation operation, which is a waveform.</p></li>
-<li><p><strong>rhs</strong> – The right-hand side operand of the modulation operation, which is a waveform.</p></li>
-<li><p><strong>result</strong> – The SSA value representing the result of the modulation operation, which
-can be used as an operand in later operations.</p></li>
+<li><p><strong>lhs</strong> – The left-hand side operand of the mixing operation, which is a waveform.</p></li>
+<li><p><strong>rhs</strong> – The right-hand side operand of the mixing operation, which is a waveform.</p></li>
+<li><p><strong>result</strong> – The SSA value representing the waveform result of the mixing operation,
+which can be used as an operand in later operations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.params.lhs"></span><strong>lhs</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.params.lhs">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType" title="qat.experimental.dialect.pulse.ir.types.WaveformType"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The left-hand side operand of the modulation operation, which is a
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.MixOp.params.lhs"></span><strong>lhs</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.params.lhs">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType" title="qat.experimental.dialect.pulse.ir.types.WaveformType"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The left-hand side operand of the mixing operation, which is a
 waveform.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.params.rhs"></span><strong>rhs</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.params.rhs">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType" title="qat.experimental.dialect.pulse.ir.types.WaveformType"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The right-hand side operand of the modulation operation, which is a
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.MixOp.params.rhs"></span><strong>rhs</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.params.rhs">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.WaveformType" title="qat.experimental.dialect.pulse.ir.types.WaveformType"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The right-hand side operand of the mixing operation, which is a
 waveform.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.attributes">
-<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.attributes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.attributes" title="Link to this definition"></a></dt>
 <dd><p>The attributes attached to the operation.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.lhs">
-<span class="sig-name descname"><span class="pre">lhs</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.lhs" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.lhs">
+<span class="sig-name descname"><span class="pre">lhs</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.lhs" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.location">
-<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LocationAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.location" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.location">
+<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LocationAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.location" title="Link to this definition"></a></dt>
 <dd><p>The source location attached to this operation.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.modulate'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.mix'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.name" title="Link to this definition"></a></dt>
 <dd><p>The operation name. Should be a static member of the class</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.properties">
-<span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.properties" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.properties" title="Link to this definition"></a></dt>
 <dd><p>The properties attached to the operation.
 Properties are inherent to the definition of an operation’s semantics, and
 thus cannot be discarded by transformations.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.py_operation">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">py_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.py_operation" title="Link to this definition"></a></dt>
-<dd><p>Performs the modulation operation on given literals.</p>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.py_operation">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">py_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.py_operation" title="Link to this definition"></a></dt>
+<dd><p>Performs the mixing operation on given literals.</p>
 <p>This is used for constant folding.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.result">
-<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.result" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.result" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.rhs">
-<span class="sig-name descname"><span class="pre">rhs</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.rhs" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.rhs">
+<span class="sig-name descname"><span class="pre">rhs</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.rhs" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.traits">
-<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.traits" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.traits" title="Link to this definition"></a></dt>
 <dd><p>Traits attached to an operation definition.
 This is a static field, and is made empty by default by PyRDL if not set
 by the operation definition.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.ModulateOp.verify_">
-<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.ModulateOp.verify_" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.MixOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.MixOp.verify_" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
