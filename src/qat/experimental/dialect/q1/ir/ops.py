@@ -40,7 +40,6 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     NullaryOperation,
     Q1AsmOperation,
     RdImmOperation,
-    RdRdOperation,
     RdRsOperation,
     RsImmImmOperation,
     RsImmOperation,
@@ -600,7 +599,7 @@ class JbeRsOp(RsOperation[IntRegisterType]):
 
 @irdl_op_definition
 class JgeImmOp(ImmOperation[AddressImm]):
-    """Jump if signed `a >= b` condition holds (`ZF == 0` and `NF == OF`)."""
+    """Jump if signed `a >= b` condition holds (`NF == OF`)."""
 
     name = "q1.i.jge"
 
@@ -613,7 +612,7 @@ class JgeImmOp(ImmOperation[AddressImm]):
 
 @irdl_op_definition
 class JgeRsOp(RsOperation[IntRegisterType]):
-    """Jump if signed `a >= b` condition holds (`ZF == 0` and `NF == OF`)."""
+    """Jump if signed `a >= b` condition holds (`NF == OF`)."""
 
     name = "q1.r.jge"
 
@@ -2462,26 +2461,25 @@ class FbPopDataImmRdOp(ImmRdOperation[IntRegisterType, UI16Imm]):
 
 
 @irdl_op_definition
-class FbPullDataRdRdOp(RdRdOperation[IntRegisterType]):
-    """Pull the first available entry from the feedback queue regardless of id, writing the
-    entry's id into :attr:`destination_id` and the associated data into
-    :attr:`destination`."""
+class FbPullDataRsRdOp(RsRdOperation[IntRegisterType]):
+    """Pull the entry whose id matches the source register from the feedback queue and write
+    the associated data value into the destination register."""
 
     name = "q1.rr.fb_pull_data"
 
     traits = traits_def()
 
     @property
-    def destination_id(self):
-        """Semantic alias for the first generic rd field."""
+    def id(self):
+        """Semantic alias for the generic rs field."""
 
-        return self.rd1
+        return self.rs
 
     @property
     def destination(self):
-        """Semantic alias for the second generic rd field."""
+        """Semantic alias for the generic rd field."""
 
-        return self.rd2
+        return self.rd
 
 
 # endregion

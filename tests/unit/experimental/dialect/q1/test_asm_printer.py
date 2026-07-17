@@ -600,7 +600,7 @@ def _all_concrete_q1_ops():
         q1_ops.FbComDataImmRsImmOp(UI8Imm(61), r14, DurationImm(62)),
         q1_ops.FbComExtraImmImmImmOp(BoolImm(1), UI16Imm(64), DurationImm(65)),
         q1_ops.FbPopDataImmRdOp(UI16Imm(71), Registers.R36),
-        q1_ops.FbPullDataRdRdOp(Registers.R37, Registers.R38),
+        q1_ops.FbPullDataRsRdOp(create_ssa_value(Registers.R37), Registers.R38),
         # Real-time Instructions
         q1_ops.WaitImmOp(DurationImm(100)),
         q1_ops.WaitRsOp(r0),

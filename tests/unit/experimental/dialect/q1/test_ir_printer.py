@@ -29,7 +29,7 @@ from qat.experimental.dialect.q1 import (
     FbComDataImmImmImmOp,
     FbComDataImmRsImmOp,
     FbPopDataImmRdOp,
-    FbPullDataRdRdOp,
+    FbPullDataRsRdOp,
     IllegalOp,
     JaImmOp,
     JaRsOp,
@@ -267,7 +267,12 @@ def _print_ir(op) -> str:
             None,
         ),
         (LoopRdRsOp(Registers.R20, create_ssa_value(Registers.R21)), "(%1)", None, None),
-        (FbPullDataRdRdOp(Registers.R0, Registers.R1), None, None, None),
+        (
+            FbPullDataRsRdOp(create_ssa_value(Registers.R0), Registers.R1),
+            "(%1)",
+            None,
+            None,
+        ),
         (
             AddRsRsRdOp(
                 create_ssa_value(Registers.R1), create_ssa_value(Registers.R2), Registers.R3

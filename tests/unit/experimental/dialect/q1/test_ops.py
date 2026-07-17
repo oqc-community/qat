@@ -59,7 +59,7 @@ from qat.experimental.dialect.q1 import (
     FbComDataImmRsImmOp,
     FbComExtraImmImmImmOp,
     FbPopDataImmRdOp,
-    FbPullDataRdRdOp,
+    FbPullDataRsRdOp,
     IllegalOp,
     IntRegisterType,
     JaeImmOp,
@@ -571,19 +571,18 @@ class TestRsRdFormat:
         rs = create_ssa_value(Registers.R1)
         _assert_aliases(op_type(rs, rd=Registers.R2), aliases)
 
-
-class TestRdRdFormat:
     @pytest.mark.parametrize("comment", COMMENT_INPUTS)
     def test_fb_pull_data(self, comment) -> None:
-        op = FbPullDataRdRdOp(Registers.R0, Registers.R1, comment=comment)
+        rs = create_ssa_value(Registers.R0)
+        op = FbPullDataRsRdOp(rs, Registers.R1, comment=comment)
         assert op.assembly_mnemonic() == "fb_pull_data"
-        assert isinstance(op.rd1.type, IntRegisterType)
-        assert isinstance(op.rd2.type, IntRegisterType)
-        assert op.rd1.type.index == Registers.R0.index
-        assert op.rd2.type.index == Registers.R1.index
-        assert op.assembly_line_args() == (op.rd1, op.rd2)
-        assert op.destination_id == op.rd1
-        assert op.destination == op.rd2
+        assert isinstance(op.rs.type, IntRegisterType)
+        assert isinstance(op.rd.type, IntRegisterType)
+        assert op.rs.type.index == Registers.R0.index
+        assert op.rd.type.index == Registers.R1.index
+        assert op.assembly_line_args() == (op.rs, op.rd)
+        assert op.id == op.rs
+        assert op.destination == op.rd
         _assert_traits(op, (HasRegisterConstraintsTrait,))
 
 

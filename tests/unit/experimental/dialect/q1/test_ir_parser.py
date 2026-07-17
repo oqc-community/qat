@@ -39,7 +39,7 @@ from qat.experimental.dialect.q1 import (
     FbComDataImmRsImmOp,
     FbComExtraImmImmImmOp,
     FbPopDataImmRdOp,
-    FbPullDataRdRdOp,
+    FbPullDataRsRdOp,
     IllegalOp,
     JaeImmOp,
     JaeRsOp,
@@ -217,7 +217,7 @@ II_OPS = (
     SetLatchEnImmImmOp,
 )
 IMM_RD_OPS = (FbPopDataImmRdOp, MoveImmRdOp, NotImmRdOp)
-RS_RD_OPS = (MoveRsRdOp, NotRsRdOp)
+RS_RD_OPS = (MoveRsRdOp, NotRsRdOp, FbPullDataRsRdOp)
 RS_IMM_OPS = (
     CmpRsImmOp,
     FbAcqIqIdRsImmOp,
@@ -302,7 +302,6 @@ RS_IMM_IMM_IMM_OPS = (AcquireTtlImmRsImmImmOp,)
 RS_RS_RS_IMM_IMM_OPS = (AcquireWeightedImmRsRsRsImmOp,)
 RD_IMM_OPS = (LoopRdImmOp,)
 RD_RS_OPS = (LoopRdRsOp,)
-RD_RD_OPS = (FbPullDataRdRdOp,)
 
 
 def _parse_op_type(op_type, signature: str) -> tuple[int, int]:
@@ -410,7 +409,6 @@ _FORMAT_TABLE = [
     (RD_IMM_OPS, "()", "(i32)"),
     (RD_RS_OPS, "(i32)", "(i32)"),
     (RS_RS_OPS, "(i32, i32)", "()"),
-    (RD_RD_OPS, "()", "(i32, i32)"),
 ]
 
 
