@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.materialisers.postprocess module
+=================================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.materialisers.postprocess
+   :members:
+   :undoc-members:
+   :show-inheritance:

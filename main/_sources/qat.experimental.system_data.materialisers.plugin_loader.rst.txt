@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.plugin\_loader module
+=================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.plugin_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:

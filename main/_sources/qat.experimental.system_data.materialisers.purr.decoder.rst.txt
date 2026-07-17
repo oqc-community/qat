@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.decoder module
+===============================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.decoder
+   :members:
+   :undoc-members:
+   :show-inheritance:

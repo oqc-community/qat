@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.materialisers.qubits module
+============================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.materialisers.qubits
+   :members:
+   :undoc-members:
+   :show-inheritance:

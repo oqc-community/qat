@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.validators.couplings module
+============================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.validators.couplings
+   :members:
+   :undoc-members:
+   :show-inheritance:

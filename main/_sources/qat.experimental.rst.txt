@@ -15,3 +15,4 @@ Subpackages
    qat.experimental.dialect
    qat.experimental.frontend
    qat.experimental.system_data
+   qat.experimental.utils

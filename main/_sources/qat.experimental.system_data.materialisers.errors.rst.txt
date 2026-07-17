@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.errors module
+=========================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.errors
+   :members:
+   :undoc-members:
+   :show-inheritance:

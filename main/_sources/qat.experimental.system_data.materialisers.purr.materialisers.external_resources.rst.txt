@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.materialisers.external\_resources module
+=========================================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.materialisers.external_resources
+   :members:
+   :undoc-members:
+   :show-inheritance:

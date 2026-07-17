@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.validators.waveforms module
+============================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.validators.waveforms
+   :members:
+   :undoc-members:
+   :show-inheritance:

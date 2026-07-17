@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.descriptor\_resolution module
+=========================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.descriptor_resolution
+   :members:
+   :undoc-members:
+   :show-inheritance:

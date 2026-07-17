@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.purr.validators.signal\_paths module
+================================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.purr.validators.signal_paths
+   :members:
+   :undoc-members:
+   :show-inheritance:
