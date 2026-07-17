@@ -29,7 +29,6 @@ chain that folds to a constant (e.g. ``arith.mulf`` of two ``arith.constant``\\ 
 collapsed first and then treated as a compile-time-constant operand.
 """
 
-import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 
@@ -45,9 +44,10 @@ from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, Ti
 from qat.experimental.dialect.pulse.ir.interfaces import IsAnalyticalWaveformInterface
 from qat.experimental.dialect.pulse.ir.ops import ConstantOp, PulseOp
 from qat.experimental.dialect.pulse.ir.types import FrameType, WaveformType
+from qat.experimental.utils.logging import get_logger
 from qat.ir.waveforms import SquareWaveform, sample_waveform
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 
 
 def _resolve_sample_time(

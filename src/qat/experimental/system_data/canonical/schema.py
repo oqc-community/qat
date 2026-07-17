@@ -87,9 +87,9 @@ class PortData:
         This is a hardware constraint that may be used to validate operation definitions,
         or ``-1`` to indicate no maximum.
     :ivar acquire_allowed: Whether acquisition is allowed on this port.
-    :ivar external_resource_id: Optional linked external resource identifier.
     :ivar native_waveform_shapes: Tuple of waveform shape names that are natively supported
         on this port.
+    :ivar external_resource_id: Optional linked external resource identifier.
     """
 
     id: str
@@ -98,8 +98,8 @@ class PortData:
     min_blocks: int = 1
     max_blocks: int = -1
     acquire_allowed: bool = False
-    external_resource_id: str | None = None
     native_waveform_shapes: tuple[str, ...] = ()
+    external_resource_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
