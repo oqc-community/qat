@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1\_scf.ir.ops module
+==============================================
+
+.. automodule:: qat.experimental.dialect.q1_scf.ir.ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

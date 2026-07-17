@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1 package &mdash; qat-compiler 3.0.0.post288.dev20260717084041 documentation</title>
+  <title>qat.experimental.dialect.q1 package &mdash; qat-compiler 3.0.0.post289.dev20260717152851 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -178,6 +178,10 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_cf.html">qat.experimental.dialect.q1_cf package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.ir.html">qat.experimental.dialect.q1_cf.ir package</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_scf.html">qat.experimental.dialect.q1_scf package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.ir.html">qat.experimental.dialect.q1_scf.ir package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
@@ -3055,65 +3059,64 @@ by the operation definition.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FbPullDataRdRdOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rd1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation" title="qat.experimental.dialect.q1.ir.abstract_ops.RdRdOperation"><code class="xref py py-class docutils literal notranslate"><span class="pre">RdRdOperation</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType" title="qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntRegisterType</span></code></a>]</p>
-<p>Pull the first available entry from the feedback queue regardless of id, writing the
-entry’s id into <a class="reference internal" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.destination_id" title="qat.experimental.dialect.q1.FbPullDataRdRdOp.destination_id"><code class="xref py py-attr docutils literal notranslate"><span class="pre">destination_id</span></code></a> and the associated data into
-<a class="reference internal" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.destination" title="qat.experimental.dialect.q1.FbPullDataRdRdOp.destination"><code class="xref py py-attr docutils literal notranslate"><span class="pre">destination</span></code></a>.</p>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FbPullDataRsRdOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.RsRdOperation" title="qat.experimental.dialect.q1.ir.abstract_ops.RsRdOperation"><code class="xref py py-class docutils literal notranslate"><span class="pre">RsRdOperation</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType" title="qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntRegisterType</span></code></a>]</p>
+<p>Pull the entry whose id matches the source register from the feedback queue and write
+the associated data value into the destination register.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.comment">
-<span class="sig-name descname"><span class="pre">comment</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.comment" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.comment">
+<span class="sig-name descname"><span class="pre">comment</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.comment" title="Link to this definition"></a></dt>
 <dd><p>Accessor for an optional operation property.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.destination">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">destination</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.destination" title="Link to this definition"></a></dt>
-<dd><p>Semantic alias for the second generic rd field.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.destination_id">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">destination_id</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.destination_id" title="Link to this definition"></a></dt>
-<dd><p>Semantic alias for the first generic rd field.</p>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.destination">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">destination</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.destination" title="Link to this definition"></a></dt>
+<dd><p>Semantic alias for the generic rd field.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.get_irdl_definition">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.get_irdl_definition" title="Link to this definition"></a></dt>
 <dd><p>Get the IRDL operation definition.</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.id">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.id" title="Link to this definition"></a></dt>
+<dd><p>Semantic alias for the generic rs field.</p>
+</dd></dl>
+
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.rr.fb_pull_data'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.name" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.rr.fb_pull_data'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.name" title="Link to this definition"></a></dt>
 <dd><p>The operation name. Should be a static member of the class</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.rd1">
-<span class="sig-name descname"><span class="pre">rd1</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.rd1" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.rd">
+<span class="sig-name descname"><span class="pre">rd</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OpResult[RInvT]</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.rd" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.rd2">
-<span class="sig-name descname"><span class="pre">rd2</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.rd2" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.rs">
+<span class="sig-name descname"><span class="pre">rs</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.rs" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.traits">
-<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.traits" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.traits" title="Link to this definition"></a></dt>
 <dd><p>Traits attached to an operation definition.
 This is a static field, and is made empty by default by PyRDL if not set
 by the operation definition.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRdRdOp.verify_">
-<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRdRdOp.verify_" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.FbPullDataRsRdOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.FbPullDataRsRdOp.verify_" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -3710,7 +3713,7 @@ by the operation definition.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.JgeImmOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JgeImmOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.JgeImmOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.ImmOperation" title="qat.experimental.dialect.q1.ir.abstract_ops.ImmOperation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImmOperation</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.UI14Imm" title="qat.experimental.dialect.q1.ir.imm_desc.UI14Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">UI14Imm</span></code></a>]</p>
-<p>Jump if signed <cite>a &gt;= b</cite> condition holds (<cite>ZF == 0</cite> and <cite>NF == OF</cite>).</p>
+<p>Jump if signed <cite>a &gt;= b</cite> condition holds (<cite>NF == OF</cite>).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.JgeImmOp.address">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.JgeImmOp.address" title="Link to this definition"></a></dt>
@@ -3908,7 +3911,7 @@ by the operation definition.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.JgeRsOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">JgeRsOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.JgeRsOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.RsOperation" title="qat.experimental.dialect.q1.ir.abstract_ops.RsOperation"><code class="xref py py-class docutils literal notranslate"><span class="pre">RsOperation</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType" title="qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntRegisterType</span></code></a>]</p>
-<p>Jump if signed <cite>a &gt;= b</cite> condition holds (<cite>ZF == 0</cite> and <cite>NF == OF</cite>).</p>
+<p>Jump if signed <cite>a &gt;= b</cite> condition holds (<cite>NF == OF</cite>).</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.JgeRsOp.address">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">address</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.JgeRsOp.address" title="Link to this definition"></a></dt>
@@ -10960,7 +10963,7 @@ by the operation definition.</p>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComDataImmRsImmOp"><code class="docutils literal notranslate"><span class="pre">FbComDataImmRsImmOp</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbComExtraImmImmImmOp"><code class="docutils literal notranslate"><span class="pre">FbComExtraImmImmImmOp</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbPopDataImmRdOp"><code class="docutils literal notranslate"><span class="pre">FbPopDataImmRdOp</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbPullDataRdRdOp"><code class="docutils literal notranslate"><span class="pre">FbPullDataRdRdOp</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbPullDataRsRdOp"><code class="docutils literal notranslate"><span class="pre">FbPullDataRsRdOp</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.IllegalOp"><code class="docutils literal notranslate"><span class="pre">IllegalOp</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.JaImmOp"><code class="docutils literal notranslate"><span class="pre">JaImmOp</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.JaRsOp"><code class="docutils literal notranslate"><span class="pre">JaRsOp</span></code></a></li>
