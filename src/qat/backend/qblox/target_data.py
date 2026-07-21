@@ -242,6 +242,7 @@ class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
     :param max_in_att_db: Maximum input attenuation.
     :param output_connections: Sequencer output connection map.
     :param input_connections: Sequencer input connection map.
+    :param max_binned_acquisitions: Each QRC module has a maximum of 7M memory bins.
     """
 
     number_of_sequencers: PositiveInt = 12  # 8 readout + 4 control
@@ -263,6 +264,7 @@ class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
         0: list(range(8)),
         1: list(range(8)),
     }
+    max_binned_acquisitions: PositiveInt = 7_000_000
 
 
 class QbloxTargetData(TargetData):

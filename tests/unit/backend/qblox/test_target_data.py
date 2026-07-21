@@ -172,7 +172,7 @@ class TestSpecifiedTargetDataFields:
         assert default_qrc_description.number_of_control_sequencers == 4
         assert default_qrc_description.min_sample_size_scope_acquisitions == 4
         assert default_qrc_description.max_sample_size_scope_acquisitions == 16384
-        assert default_qrc_description.max_binned_acquisitions == 3_000_000
+        assert default_qrc_description.max_binned_acquisitions == 7_000_000
         assert default_qrc_description.min_out_att_db == 0.0
         assert default_qrc_description.max_out_att_db == 31.5
         assert default_qrc_description.min_in_att_db == 0.0
