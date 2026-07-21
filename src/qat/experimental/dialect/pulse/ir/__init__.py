@@ -18,12 +18,18 @@ from xdsl.ir import Dialect
 
 from .attributes import (
     AmplitudeAttr,
+    ComplexData,
+    DiscriminatorPolicyAttr,
+    EqualiseAttr,
     FrequencyAttr,
     FrequencyUnitsData,
+    MaximumLikelihoodPolicyAttr,
     NumericArrayData,
     PhaseAttr,
     PulseNumericTypedAttr,
+    RealThresholdPolicyAttr,
     SampledWaveformAttr,
+    StateMapDictAttr,
     TimeAttr,
     TimeUnitsData,
     WeightsAttr,
@@ -37,7 +43,9 @@ from .ops import (
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
+    DiscriminateOp,
     DragGaussianWaveformOp,
+    EqualiseOp,
     ExtraSoftSquareWaveformOp,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
@@ -61,6 +69,7 @@ from .ops import (
     SoftSquareWaveformOp,
     SquareWaveformOp,
     StartContinuousWaveformOp,
+    StateMapOp,
     StopContinuousWaveformOp,
     SubOp,
     SynchronizeOp,
@@ -78,6 +87,7 @@ from .types import (
     FrequencyType,
     IQResultType,
     PhaseType,
+    StateKeyType,
     TimeType,
     WaveformType,
 )
@@ -89,7 +99,9 @@ _ops = [
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
+    DiscriminateOp,
     DragGaussianWaveformOp,
+    EqualiseOp,
     ExtraSoftSquareWaveformOp,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
@@ -111,6 +123,7 @@ _ops = [
     SoftSquareWaveformOp,
     SquareWaveformOp,
     StartContinuousWaveformOp,
+    StateMapOp,
     StopContinuousWaveformOp,
     SubOp,
     SynchronizeOp,
@@ -132,16 +145,21 @@ _types = [
     FrameType,
     IQResultType,
     PhaseType,
+    StateKeyType,
     TimeType,
     WaveformType,
 ]
 
-_data_attributes = [NumericArrayData, TimeUnitsData, FrequencyUnitsData]
+_data_attributes = [ComplexData, NumericArrayData, TimeUnitsData, FrequencyUnitsData]
 
 _attributes = [
     AmplitudeAttr,
+    EqualiseAttr,
     FrequencyAttr,
+    MaximumLikelihoodPolicyAttr,
     PhaseAttr,
+    RealThresholdPolicyAttr,
+    StateMapDictAttr,
     TimeAttr,
     SampledWaveformAttr,
     WeightsAttr,
@@ -161,6 +179,7 @@ ANALYTICAL_WAVEFORM_OPS = tuple(IsAnalyticalWaveformInterface.__subclasses__())
 __all__ = [
     "ANALYTICAL_WAVEFORM_OPS",
     "BinaryOp",
+    "DiscriminatorPolicyAttr",
     "InternalBinaryOp",
     "PhaseOp",
     "Pulse",

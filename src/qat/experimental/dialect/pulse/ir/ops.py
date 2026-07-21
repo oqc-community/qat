@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import ClassVar, Generic
 
 from xdsl.dialects.builtin import (
@@ -12,12 +12,14 @@ from xdsl.dialects.builtin import (
     FloatAttr,
     IntegerType,
     StringAttr,
+    i1,
 )
 from xdsl.interfaces import HasFolderInterface
 from xdsl.irdl import (
     AnyOf,
     AtLeast,
     Attribute,
+    BaseAttr,
     IRDLOperation,
     Operation,
     RangeOf,
@@ -56,10 +58,13 @@ from qat.ir.waveforms import (
 
 from .attributes import (
     AmplitudeAttr,
+    DiscriminatorPolicyAttr,
+    EqualiseAttr,
     FrequencyAttr,
     PhaseAttr,
     PulseNumericTypedAttr,
     SampledWaveformAttr,
+    StateMapDictAttr,
     TimeAttr,
     WeightsAttr,
 )
@@ -77,6 +82,7 @@ from .types import (
     FrequencyType,
     IQResultType,
     PhaseType,
+    StateKeyType,
     TimeType,
     WaveformType,
 )
@@ -1892,3 +1898,201 @@ class IntegrateOp(IRDLOperation):
             integrated.
         """
         return super().__init__(operands=[acquisition], result_types=[IQResultType()])
+
+
+@irdl_op_definition
+class EqualiseOp(IRDLOperation):
+    """Apply an affine transformation to an IQ result from a readout.
+
+    This is expected to be the first step in the post-processing pipeline of a result, which
+    is used to transform the IQ results into a standardized form for state discrimination.
+
+    In superconducting qubit readout, the downconverted IQ signals can be distorted by
+    hardware imperfections:
+
+    * **Phase imbalance**: The I and Q channels may not be perfectly orthogonal, leading to
+      a rotation of the IQ plane.
+    * **Gain imbalance**: The I and Q channels may have different gains due to unequal
+      amplifier chains.
+    * **DC offsets**: Mixer leakage and biases in the amplifier chains can introduce DC
+      offsets in the I and Q channels.
+
+    The result is that the ``(I, Q)`` samples cluster on a distorted, offset ellipse rather
+    than a compact point, degrading any downstream discriminator.
+
+    The ``Equalise`` instruction corrects all three imperfections in a single real affine
+    transform with calibrated values:
+
+    .. math::
+
+        \\begin{pmatrix} I' \\\\ Q' \\end{pmatrix}
+        = A \\begin{pmatrix} I \\\\ Q \\end{pmatrix} + \\begin{pmatrix} b_I \\\\ b_Q \\end{pmatrix}
+
+    where ``A`` is a **real** 2×2 matrix (``transform``) and ``[b_I, b_Q]`` is the real
+    offset vector (``offset``).  The output is returned as a complex value ``I' + j Q'``.
+
+
+    The affine transformation is represented by a property and not an operand because it is
+    expected to be a constant value, and not a value that is computed at runtime. This
+    allows for more efficient compilation and optimization of the pulse program.
+
+    :ivar value: The SSA value representing the IQ result to be equalized.
+    :ivar affine_transform: The :class:`EqualiseAttr` property that defines the
+        correction to be applied to the IQ result.
+    :ivar result: The SSA value representing the resulting equalized IQ result, which can be
+        used as an operand in later operations.
+    """
+
+    # TODO: to reach high TRL, we should add canonicalization hooks to this to squash
+    # consecutive equalise operations into a single one, and to remove identity transforms.
+    # In practice, we're not too concerned about seeing multiple, but if it did somehow
+    # happen, our post-processing pipeline would be slowed down, or might fail entirely.
+    # COMPILER-1351
+
+    name = "pulse.equalise"
+    traits = traits_def(Pure())
+
+    value = operand_def(IQResultType)
+    affine_transform = prop_def(EqualiseAttr)
+    result = result_def(IQResultType)
+
+    def __init__(
+        self,
+        value: SSAValue | Operation,
+        affine_transform: EqualiseAttr,
+    ):
+        """
+        :param value: The SSA value representing the IQ result to be equalized.
+        :param affine_transform: The :class:`EqualiseAttr` property that defines the
+            correction to be applied to the IQ result.
+        """
+        return super().__init__(
+            operands=[SSAValue.get(value, type=IQResultType)],
+            properties={"affine_transform": affine_transform},
+            result_types=[IQResultType()],
+        )
+
+
+@irdl_op_definition
+class DiscriminateOp(IRDLOperation):
+    """Discriminate equalised values to integer state keys.
+
+    State discrimination is the mechanism of mapping an IQ value into a discrete state key,
+    which can be used to classify the qubit state. In the most simple situation, this maps
+    to a binary outcome, but in general, can map to many integer keys, with each revealing
+    different information about the qubit state, or uncertainty in the qubit state.
+
+    :ivar value: The SSA value representing the IQ value operand subjected to state
+        discrimination.
+    :ivar policy: The state discrimination policy to apply as an attribute.
+    :ivar result: The discriminated integer state result as an SSA value.
+    """
+
+    name = "pulse.discriminate"
+    traits = traits_def(Pure())
+
+    value = operand_def(IQResultType)
+    policy = prop_def(BaseAttr(DiscriminatorPolicyAttr))
+    result = result_def(StateKeyType)
+
+    def __init__(
+        self, value: SSAValue[IQResultType] | Operation, policy: DiscriminatorPolicyAttr
+    ):
+        """
+        :param value: The IQ value result, or an operation producing the IQ value as a
+            result.
+        :param policy: The state discrimination policy to be used.
+        """
+        # Taking the min and max states from the policy structurally enforces that the
+        # result type is aligned with the policy.
+        min_state, max_state = policy.state_range
+        return super().__init__(
+            operands=[SSAValue.get(value, type=IQResultType)],
+            properties={"policy": policy},
+            result_types=[StateKeyType(min_state, max_state)],
+        )
+
+    def verify_(self):
+        """Verifies that the result state type matches the attached policy."""
+
+        expected_state_range = self.policy.state_range
+        if self.result.type.state_range != expected_state_range:
+            raise VerifyException(
+                "The result state type must match the discrimination policy state range, "
+                f"expected {expected_state_range}, got {self.result.type.state_range}."
+            )
+
+
+@irdl_op_definition
+class StateMapOp(IRDLOperation):
+    """Maps a state key to a binary value.
+
+    The state key is a value determined from state discrimination, which reveals information
+    about the qubit state after a readout, but might not directly tell you the exact state
+    of the qubit. In the circuit model of quantum computing, we work in the language of
+    binary values, which represent the logical states of a given qubit basis. The mapping
+    operator acts as a bridge between an arbitrary state discrimination to a binary value.
+
+    :ivar value: The operand that carries the discriminated state type.
+    :ivar mapping: The attribute that carries the mapping from discriminated state type to a
+        binary value.
+    :ivar result: The mapped binary result.
+    """
+
+    name = "pulse.state_map"
+    traits = traits_def(Pure())
+
+    value = operand_def(StateKeyType)
+    mapping = prop_def(StateMapDictAttr)
+    result = result_def(i1)
+
+    def __init__(
+        self,
+        value: SSAValue[StateKeyType] | Operation,
+        mapping: StateMapDictAttr | Mapping[int, int],
+    ):
+        """
+        :param value: The SSA value representing the state key to be mapped.
+        :param mapping: The state mapping attribute that defines the mapping from state keys
+            to binary values.
+        """
+
+        if not isinstance(mapping, StateMapDictAttr):
+            mapping = StateMapDictAttr(mapping)
+
+        return super().__init__(
+            operands=[SSAValue.get(value, type=StateKeyType)],
+            properties={"mapping": mapping},
+            result_types=[i1],
+        )
+
+    def verify_(self):
+        """Verifies that each state in the state type is represented in the state map."""
+
+        state_type_min, state_type_max = self.value.type.state_range
+        state_map_keys = self.mapping.data.keys()
+
+        if not state_map_keys:
+            raise VerifyException(
+                f"The state map cannot be empty. Expected a map in the range "
+                f"({state_type_min}, {state_type_max})."
+            )
+
+        state_map_min, state_map_max = min(state_map_keys), max(state_map_keys)
+
+        if (
+            state_map_min != state_type_min
+            or state_map_max != state_type_max
+            or (state_map_max - state_map_min + 1) != len(state_map_keys)
+        ):
+            raise VerifyException(
+                f"The state map does not contain a mapping for every allowed state, "
+                f"expected a map in the range ({state_type_min}, {state_type_max}), got "
+                f"mapping keys {tuple(state_map_keys)}."
+            )
+
+        for val in self.mapping.data.values():
+            if val.data not in (0, 1):
+                raise VerifyException(
+                    f"State map values must be binary (i1: 0 or 1), but got {val.data}."
+                )

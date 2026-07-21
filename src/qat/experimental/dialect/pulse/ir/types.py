@@ -2,9 +2,12 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 from typing import TypeVar
 
-from xdsl.dialects.builtin import StringAttr
+from xdsl.dialects.builtin import IntAttr, StringAttr
 from xdsl.ir import TypeAttribute
 from xdsl.irdl import ParametrizedAttribute, irdl_attr_definition, param_def
+from xdsl.parser import AttrParser
+from xdsl.printer import Printer
+from xdsl.utils.exceptions import VerifyException
 
 
 @irdl_attr_definition
@@ -110,3 +113,62 @@ PULSE_VAR_TYPE = TypeVar(
     | WaveformType
     | AcquisitionType,
 )
+
+
+@irdl_attr_definition
+class StateKeyType(ParametrizedAttribute, TypeAttribute):
+    """Represents a discriminated state key type with integer labels between inclusive
+    bounds.
+
+    This type is the result of state discrimination, which maps IQ values from qubit
+    readout to integer state identifiers. The bounds encode the valid range of state labels
+    that can be produced by a discrimination policy. For example:
+
+    - A real-threshold discriminator produces states {0, 1}
+    - A maximum-likelihood discriminator produces states {-1, 0, ..., n-1}, where -1
+      represents an unmapped/ambiguous state
+
+    The parametrized bounds enable compile-time verification that downstream operations
+    (like state mapping) cover all possible state outcomes.
+
+    :ivar min_state: The smallest allowed integer state label (inclusive).
+    :ivar max_state: The largest allowed integer state label (inclusive).
+    """
+
+    name = "pulse.state"
+    min_state: IntAttr = param_def()
+    max_state: IntAttr = param_def()
+
+    def __init__(self, min_state: int, max_state: int):
+        return super().__init__(IntAttr(min_state), IntAttr(max_state))
+
+    @classmethod
+    def parse_parameters(cls, parser: AttrParser) -> list[IntAttr]:
+        with parser.in_angle_brackets():
+            min_state = parser.parse_integer(allow_negative=True)
+            parser.parse_punctuation(",", " between minimum and maximum state bounds")
+            max_state = parser.parse_integer(allow_negative=True)
+
+        return [IntAttr(min_state), IntAttr(max_state)]
+
+    def print_parameters(self, printer: Printer) -> None:
+        with printer.in_angle_brackets():
+            printer.print_string(f"{self.min_state.data}, {self.max_state.data}")
+
+    def verify(self) -> None:
+        if self.min_state.data > self.max_state.data:
+            raise VerifyException(
+                f"StateKeyType bounds invalid: minimum state ({self.min_state.data}) "
+                f"must be less than or equal to maximum state ({self.max_state.data})."
+            )
+
+    @property
+    def state_range(self) -> tuple[int, int]:
+        """Returns the valid range of state labels as a (min, max) tuple.
+
+        All integers in this range (inclusive) are valid state identifiers produced by the
+        associated discrimination policy. Used for verification that state mapping
+        operations cover all possible outcomes.
+        """
+
+        return (self.min_state.data, self.max_state.data)

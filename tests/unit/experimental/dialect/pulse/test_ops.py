@@ -8,12 +8,22 @@ from xdsl.dialects.builtin import (
     BoolAttr,
     ComplexType,
     FloatAttr,
+    IntAttr,
     IntegerAttr,
     StringAttr,
     f64,
     i64,
 )
 from xdsl.dialects.complex import ComplexNumberAttr, ConstantOp as ComplexConstantOp
+from xdsl.ir import Block
+from xdsl.irdl import (
+    AnyAttr,
+    IRDLOperation,
+    irdl_attr_definition,
+    irdl_op_definition,
+    param_def,
+    result_def,
+)
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.pulse.ir import (
@@ -26,7 +36,11 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
+    DiscriminateOp,
+    DiscriminatorPolicyAttr,
     DragGaussianWaveformOp,
+    EqualiseAttr,
+    EqualiseOp,
     ExtraSoftSquareWaveformOp,
     FrameType,
     FrequencyAttr,
@@ -44,6 +58,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseShiftOp,
     PhaseType,
     PulseOp,
+    RealThresholdPolicyAttr,
     RoundedSquareWaveformOp,
     SampledWaveformAttr,
     ScaleOp,
@@ -55,6 +70,8 @@ from qat.experimental.dialect.pulse.ir import (
     SoftSquareWaveformOp,
     SquareWaveformOp,
     StartContinuousWaveformOp,
+    StateKeyType,
+    StateMapOp,
     StopContinuousWaveformOp,
     SubOp,
     SynchronizeOp,
@@ -64,6 +81,7 @@ from qat.experimental.dialect.pulse.ir import (
     WaveformType,
     WeightsAttr,
 )
+from qat.experimental.dialect.pulse.ir.attributes import StateMapDictAttr
 
 
 class TestConstantOp:
@@ -964,3 +982,187 @@ class TestIntegrateOp:
         assert integrate_op.acquisition == acquire_op.acquisition_result
         assert integrate_op.result.type == IQResultType()
         integrate_op.verify()
+
+
+class TestEqualiseOp:
+    """The equalise operation applies an affine transformation to an IQ value with the
+    intention of normalising the distributions to have favourable properties.
+
+    These tests check the initialisation of this operation passes verification.
+    """
+
+    def test_initialisation_passes_verification(self):
+        """Initialises an operation that should be valid, and runs verification to ensure it
+        does not fail."""
+        block = Block(arg_types=[IQResultType()])
+        iq_value = block.args[0]
+        affine = EqualiseAttr(1.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j)
+        op = EqualiseOp(iq_value, affine)
+        assert op.value == iq_value
+        assert op.affine_transform == affine
+        assert op.result.type == IQResultType()
+        op.verify()
+
+    def test_initialisation_from_operation_uses_iq_result_operand(self):
+        """Passing an operation should resolve the matching IQ result operand."""
+
+        block = Block(arg_types=[AcquisitionType()])
+        acquisition = block.args[0]
+        integrate_op = IntegrateOp(acquisition)
+        affine = EqualiseAttr(1.0 + 0.0j, 0.0 + 0.0j, 0.0 + 0.0j)
+
+        op = EqualiseOp(integrate_op, affine)
+
+        assert op.value == integrate_op.result
+        op.verify()
+
+
+class TestDiscriminateOp:
+    """The discriminate operation maps an IQ value to a discriminated integer state
+    according to a given policy.
+
+    These tests test the creation of those operations, ensuring the results type matches the
+    provided policy, and that the operation passes verification.
+    """
+
+    @irdl_attr_definition
+    class _MockDiscriminatorPolicy(DiscriminatorPolicyAttr):
+        """A configurable mock discriminator policy for testing."""
+
+        name = "pulse.discriminate_test_mock_policy"
+        POLICY_NAME = "mock"
+        min_val: IntAttr = param_def()
+        max_val: IntAttr = param_def()
+
+        def __init__(self, min_state: int, max_state: int):
+            return super().__init__(IntAttr(min_state), IntAttr(max_state))
+
+        @property
+        def state_range(self) -> tuple[int, int]:
+            return (self.min_val.data, self.max_val.data)
+
+    @pytest.mark.parametrize(
+        "num_states, invalid_state", [(2, False), (3, False), (3, True)]
+    )
+    def test_initialisation_with_mock_policy_has_desired_results_type(
+        self, num_states, invalid_state
+    ):
+        """Creates a mock policy that allows for a dynamic number of states, optionally
+        allowing for the invalid state map ``-1``, and tests its integration with this
+        operation.
+
+        Tests the results type has the correct range, and that the op passes verification.
+        """
+        min_state = -1 if invalid_state else 0
+        max_state = num_states - 1
+
+        policy = self._MockDiscriminatorPolicy(min_state, max_state)
+        block = Block(arg_types=[IQResultType()])
+        iq_value = block.args[0]
+
+        op = DiscriminateOp(iq_value, policy)
+        assert op.result.type == StateKeyType(min_state, max_state)
+        op.verify()
+
+    def test_policy_that_is_not_state_discrimination_fails_verification(self):
+        """The policy attribute should be a state discrimination policy type.
+
+        If that's not the case, verification should fail. This tests that.
+        """
+        block = Block(arg_types=[IQResultType()])
+        iq_value = block.args[0]
+
+        policy = RealThresholdPolicyAttr(0.5)
+        op = DiscriminateOp(iq_value, policy)
+
+        # Replace the policy property with a non-DiscriminatorPolicyAttr attribute
+        op.properties["policy"] = IntAttr(1)
+
+        with pytest.raises(VerifyException, match="policy"):
+            op.verify()
+
+    def test_non_matching_result_type_and_policy_fails_verification(self):
+        """Verification should reject IR where the result type disagrees with the policy."""
+
+        block = Block(arg_types=[IQResultType()])
+        iq_value = block.args[0]
+        policy = self._MockDiscriminatorPolicy(-1, 2)
+        op = DiscriminateOp(iq_value, policy)
+
+        op.properties["policy"] = self._MockDiscriminatorPolicy(0, 1)
+
+        with pytest.raises(VerifyException, match="result state type must match"):
+            op.verify()
+
+
+class TestStateMapOp:
+    """The state map op maps a StateKeyType onto a binary integer.
+
+    This tests that operation is instantiated correctly with legal values, and verification
+    passes, and that verification fails when the state map does not match the allowed
+    integer state keys.
+
+    To facilitate testing, the test class includes a mock operation that returns a state
+    type with custom minimum and maximum integer state keys.
+    """
+
+    @irdl_op_definition
+    class _MockOp(IRDLOperation):
+        """A minimal mock op that produces a StateKeyType SSA result for testing."""
+
+        name = "pulse.state_map_test_mock_op"
+        res = result_def(AnyAttr())
+
+        def __init__(self, state_type: StateKeyType):
+            return super().__init__(result_types=[state_type])
+
+    def test_initialisation_with_matching_value_and_mapping_passes_verification(self):
+        """Creates a valid operation and runs verification, testing it passes."""
+        state_type = StateKeyType(0, 1)
+        mock_op = self._MockOp(state_type)
+        op = StateMapOp(mock_op.res, {0: 0, 1: 1})
+        assert isinstance(op.mapping, StateMapDictAttr)
+        op.verify()
+
+    def test_initialisation_with_state_map_dict_attr(self):
+        """Tests that the state map can be initialised with a StateMapDictAttr directly."""
+        state_type = StateKeyType(0, 1)
+        mock_op = self._MockOp(state_type)
+        mapping = StateMapDictAttr({0: 0, 1: 1})
+        op = StateMapOp(mock_op.res, mapping)
+        assert op.mapping is mapping
+        op.verify()
+
+    def test_operation_with_non_matching_value_and_mapping_fails_verification(self):
+        """Creates an operation where the state type does not match the values in the state
+        map, and checks for a verify error with the correct error message."""
+        state_type = StateKeyType(0, 1)
+        mock_op = self._MockOp(state_type)
+        # Mapping includes a key (2) not in the state type range (0..1)
+        op = StateMapOp(mock_op.res, {0: 0, 1: 1, 2: 0})
+        with pytest.raises(
+            VerifyException,
+            match="does not contain a mapping for every allowed state",
+        ):
+            op.verify()
+
+    def test_operation_with_empty_mapping_fails_verification(self):
+        """An empty mapping should fail verification with a clear error message."""
+
+        state_type = StateKeyType(0, 1)
+        mock_op = self._MockOp(state_type)
+        op = StateMapOp(mock_op.res, {})
+        with pytest.raises(VerifyException, match="state map cannot be empty"):
+            op.verify()
+
+    def test_state_map_with_non_i1_values_raises_error(self):
+        """The state map must have attributes which are integers with one bitwidth.
+
+        This tests that when this isn't the case, a suitable error is raised.
+        """
+        state_type = StateKeyType(0, 1)
+        mock_op = self._MockOp(state_type)
+        # Value 2 is not a valid i1 (binary) value
+        op = StateMapOp(mock_op.res, {0: 0, 1: 2})
+        with pytest.raises(VerifyException, match="binary"):
+            op.verify()

@@ -16,7 +16,9 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
+    DiscriminateOp,
     DragGaussianWaveformOp,
+    EqualiseOp,
     ExtraSoftSquareWaveformOp,
     FrequencyAttr,
     GaussianSquareWaveformOp,
@@ -39,6 +41,7 @@ from qat.experimental.dialect.pulse.ir import (
     TimeAttr,
     WaitOp,
 )
+from qat.experimental.dialect.pulse.ir.attributes import RealThresholdPolicyAttr
 from qat.experimental.frontend.importer.purr import PurrImporter
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -55,6 +58,7 @@ from qat.purr.compiler.instructions import (
     PhaseSet,
     PhaseShift,
     PostProcessing,
+    PostProcessType,
     Pulse,
     Repeat,
     Sweep,
@@ -279,6 +283,232 @@ class TestPurrImporterAcquire:
         with pytest.raises(NotImplementedError, match="Scope mode is not yet supported"):
             imp.build(builder)
 
+    def test_acquire_with_linear_map_creates_ssa_chain(self, builder, hw):
+        """Creates instructions with an acquisition followed by LINEAR_MAP_COMPLEX_TO_REAL
+        post-processing, checking the processing chain is as expected."""
+
+        a = 0.254 + 0.1j
+        b = 0.454 - 0.2j
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="measurement"
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                args=[a, b],
+            )
+        )
+        imp = PurrImporter()
+        imp.build(builder)
+        acq_ops = _ops_of_type(imp, AcquireOp)
+        assert len(acq_ops) == 1
+        int_ops = _ops_of_type(imp, IntegrateOp)
+        assert len(int_ops) == 1
+        equalise_ops = _ops_of_type(imp, EqualiseOp)
+        assert len(equalise_ops) == 1
+
+        assert acq_ops[0].acquisition_result is int_ops[0].acquisition
+        assert int_ops[0].result is equalise_ops[0].value
+
+        affine = equalise_ops[0].affine_transform
+        assert affine.linear_coefficient.data == 0.5 * a
+        assert affine.conjugate_coefficient.data == 0.5 * np.conj(a)
+        assert affine.translation.data == np.real(b) + 0j
+
+        # The linear matrix should map any complex number onto a real number
+        linear = affine.linear_matrix
+        assert linear[0, 0] == np.real(a)
+        assert linear[0, 1] == -np.imag(a)
+        assert linear[1, 1] == linear[1, 0] == 0.0
+
+        # The translation should be a real translation
+        translation = affine.translation_vector
+        assert translation[0] == np.real(b)
+        assert translation[1] == 0.0
+
+    def test_acquire_with_discriminate_ssa_chain(self, builder, hw):
+        """Creates instructions with an acquisition followed by DISCRIMINATE post-
+        processing, checking the processing chain is as expected."""
+
+        threshold = 0.5
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="measurement"
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.DISCRIMINATE,
+                args=[threshold],
+            )
+        )
+        imp = PurrImporter()
+        imp.build(builder)
+        acq_ops = _ops_of_type(imp, AcquireOp)
+        assert len(acq_ops) == 1
+        int_ops = _ops_of_type(imp, IntegrateOp)
+        assert len(int_ops) == 1
+        discriminate_ops = _ops_of_type(imp, DiscriminateOp)
+        assert len(discriminate_ops) == 1
+
+        assert acq_ops[0].acquisition_result is int_ops[0].acquisition
+        assert int_ops[0].result is discriminate_ops[0].value
+
+        policy = discriminate_ops[0].policy
+        assert isinstance(policy, RealThresholdPolicyAttr)
+        assert policy.threshold.data == threshold
+        assert discriminate_ops[0].result.type.state_range == (0, 1)
+
+    def test_post_processing_without_prior_acquire_raises(self, builder, hw):
+        """Post-processing should fail clearly when no prior acquire result exists."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        acquire = Acquire(ch, time=1e-6, output_variable="measurement")
+        builder.add(
+            PostProcessing(
+                acquire,
+                process=PostProcessType.DISCRIMINATE,
+                args=[0.5],
+            )
+        )
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="no prior acquisition found in the environment",
+        ):
+            imp.build(builder)
+
+    def test_linear_map_complex_to_real_with_missing_args_raises(self, builder, hw):
+        """LINEAR_MAP_COMPLEX_TO_REAL requires exactly two arguments."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="measurement"
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                args=[],
+            )
+        )
+
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="LINEAR_MAP_COMPLEX_TO_REAL post-processing expects exactly 2 arguments",
+        ):
+            imp.build(builder)
+
+    def test_discriminate_with_missing_args_raises(self, builder, hw):
+        """DISCRIMINATE requires exactly one threshold argument."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="measurement"
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.DISCRIMINATE,
+                args=[],
+            )
+        )
+
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="DISCRIMINATE post-processing expects exactly 1 argument",
+        ):
+            imp.build(builder)
+
+    def test_linear_map_complex_to_real_with_too_many_args_raises(self, builder, hw):
+        """LINEAR_MAP_COMPLEX_TO_REAL rejects more than two arguments."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="measurement"
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                args=[0.1 + 0.2j, 0.3 + 0.4j, 0.5 + 0.6j],
+            )
+        )
+
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="LINEAR_MAP_COMPLEX_TO_REAL post-processing expects exactly 2 arguments",
+        ):
+            imp.build(builder)
+
+    def test_discriminate_with_too_many_args_raises(self, builder, hw):
+        """DISCRIMINATE rejects more than one argument."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="measurement"
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.DISCRIMINATE,
+                args=[0.5, 1.0],
+            )
+        )
+
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="DISCRIMINATE post-processing expects exactly 1 argument",
+        ):
+            imp.build(builder)
+
+    def test_post_processing_on_non_integrated_acquire_raises(self, builder, hw):
+        """Post-processing (EqualiseOp/DiscriminateOp) requires IQResultType operand.
+
+        This test verifies the defensive check that ensures integrated acquisitions are
+        used. It builds a RAW acquire so the importer stores a non-integrated
+        AcquisitionType and then verifies the importer raises a clear error.
+        """
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(ch, time=1e-6, mode=AcquireMode.RAW, output_variable="measurement")
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.DISCRIMINATE,
+                args=[0.5],
+            )
+        )
+
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="Post-processing expects an IQResultType.*Ensure the acquire has mode INTEGRATOR",
+        ):
+            imp.build(builder)
+
 
 class TestPurrImporterUnsupportedInstructions:
     def test_custom_pulse_raises(self, builder, hw):
@@ -288,14 +518,17 @@ class TestPurrImporterUnsupportedInstructions:
         with pytest.raises(ValueError, match="Not yet supported"):
             imp.build(builder)
 
-    def test_post_processing_raises(self, builder, hw):
+    @pytest.mark.parametrize(
+        "type_", [PostProcessType.MEAN, PostProcessType.DOWN_CONVERT, PostProcessType.MUL]
+    )
+    def test_post_processing_raises(self, builder, hw, type_):
         ch = hw.get_qubit(0).get_acquire_channel()
-        acq = Acquire(ch, time=1e-6)
-        from qat.ir.instruction_basetypes import PostProcessType
+        acq = Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR)
+        builder.add(acq)
 
-        builder.add(PostProcessing(acq, PostProcessType.MEAN))
+        builder.add(PostProcessing(acq, process=type_))
         imp = PurrImporter()
-        with pytest.raises(ValueError, match="Not yet supported"):
+        with pytest.raises(ValueError, match="Unsupported post-processing type"):
             imp.build(builder)
 
     def test_sweep_raises(self, builder):

@@ -66,6 +66,7 @@ more-itertools = "^10.7.0"
 sympy = "^1.14.0"
 xdsl = "^0.59.0"
 bidict = "^0.22.0"
+immutabledict = ">=4.2.2"
 
 [tool.poetry.group.dev.dependencies]
 pip-audit = "^2.9.0"

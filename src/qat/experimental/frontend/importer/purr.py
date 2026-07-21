@@ -3,6 +3,7 @@
 
 from functools import singledispatchmethod
 
+import numpy as np
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
     BoolAttr,
@@ -23,18 +24,23 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
+    DiscriminateOp,
     DragGaussianWaveformOp,
+    EqualiseAttr,
+    EqualiseOp,
     ExtraSoftSquareWaveformOp,
     FrequencyAttr,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
     IntegrateOp,
+    IQResultType,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
     PulseNumericTypedAttr,
     PulseOp,
+    RealThresholdPolicyAttr,
     RoundedSquareWaveformOp,
     SechWaveformOp,
     SetupHoldWaveformOp,
@@ -63,6 +69,7 @@ from qat.purr.compiler.instructions import (
     PhaseSet,
     PhaseShift,
     PostProcessing,
+    PostProcessType,
     Pulse,
     QuantumInstruction,
     Repeat,
@@ -428,8 +435,11 @@ class PurrImporter(BaseLinearImporter):
 
         ops = [acquire_op]
 
+        acquire_result = acquire_op.acquisition_result
         if value.mode == AcquireMode.INTEGRATOR:
-            ops.append(IntegrateOp(acquire_op.acquisition_result))
+            integration_op = IntegrateOp(acquire_result)
+            ops.append(integration_op)
+            acquire_result = integration_op.result
         elif value.mode == AcquireMode.SCOPE:
             # TODO: COMPILER-1333
             raise NotImplementedError(
@@ -437,15 +447,70 @@ class PurrImporter(BaseLinearImporter):
             )
         self._add_ops(ops)
 
+        acquire_key = f"acquire_{value.output_variable}"
+        self._current_environment_variables.forceput(acquire_key, acquire_result)
+
     @translate.register
     def _(self, value: PostProcessing):
         """Handle a post-processing instruction.
 
         :param value: A post-processing instruction.
-        :raises ValueError: Always; post-processing is not yet representable in the Pulse
-            dialect.
         """
-        raise ValueError("Not yet supported by IR")
+
+        acquire_key = f"acquire_{value.quantum_targets[0].output_variable}"
+        prev_acquire_result = self._current_environment_variables.get(acquire_key)
+        if prev_acquire_result is None:
+            raise ValueError(
+                f"Post-processing instruction references acquisition '{acquire_key}' "
+                "but no prior acquisition found in the environment."
+            )
+
+        if not isinstance(prev_acquire_result.type, IQResultType):
+            raise ValueError(
+                f"Post-processing expects an IQResultType (from integrated acquisition), "
+                f"but got {prev_acquire_result.type}. Ensure the acquire has mode INTEGRATOR."
+            )
+
+        match value.process:
+            case PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
+                # This operation practically takes Re(az + b), which can be represented as
+                # an affine transformation of 0.5 * (az + a*z*) + Re(b).
+
+                args = value.args
+                if len(args) != 2:
+                    raise ValueError(
+                        f"LINEAR_MAP_COMPLEX_TO_REAL post-processing expects exactly 2 "
+                        f"arguments, got {len(args)}."
+                    )
+                linear_coeff = 0.5 * args[0]
+                conj_coeff = 0.5 * np.conj(args[0])
+                offset = np.real(args[1])
+
+                affine_attr = EqualiseAttr(
+                    linear_coefficient=linear_coeff,
+                    conjugate_coefficient=conj_coeff,
+                    translation=offset,
+                )
+                pp_op = EqualiseOp(prev_acquire_result, affine_attr)
+            case PostProcessType.DISCRIMINATE:
+                if len(value.args) != 1:
+                    raise ValueError(
+                        "DISCRIMINATE post-processing expects exactly 1 argument, "
+                        f"got {len(value.args)}."
+                    )
+
+                threshold = value.args[0]
+                # Legacy PuRR software post-processing emits {-1, 1} labels, while the
+                # pulse dialect currently represents threshold discrimination with
+                # RealThresholdPolicyAttr and StateKeyType(0, 1). Downstream state-mapping
+                # operations can remap these labels when needed.
+                policy_attr = RealThresholdPolicyAttr(threshold=threshold)
+                pp_op = DiscriminateOp(prev_acquire_result, policy_attr)
+            case _:
+                raise ValueError(f"Unsupported post-processing type {value.process}.")
+
+        self._current_environment_variables.forceput(acquire_key, pp_op.result)
+        self._add_ops([pp_op])
 
     @translate.register
     def _(self, value: Sweep):
