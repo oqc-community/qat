@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.ops module &mdash; qat-compiler 3.0.0.post292.dev20260721185115 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.ops module &mdash; qat-compiler 3.0.0.post293.dev20260721205530 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -19,6 +19,7 @@
       <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -1350,6 +1351,98 @@ by the operation definition.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiscriminateOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">policy</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp" title="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Discriminate equalised values to integer state keys.</p>
+<p>State discrimination is the mechanism of mapping an IQ value into a discrete state key,
+which can be used to classify the qubit state. In the most simple situation, this maps
+to a binary outcome, but in general, can map to many integer keys, with each revealing
+different information about the qubit state, or uncertainty in the qubit state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – The SSA value representing the IQ value operand subjected to state
+discrimination.</p></li>
+<li><p><strong>policy</strong> – The state discrimination policy to apply as an attribute.</p></li>
+<li><p><strong>result</strong> – The discriminated integer state result as an SSA value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.IQResultType" title="qat.experimental.dialect.pulse.ir.types.IQResultType"><code class="xref py py-class docutils literal notranslate"><span class="pre">IQResultType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The IQ value result, or an operation producing the IQ value as a
+result.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.params.policy"></span><strong>policy</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.params.policy">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr" title="qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminatorPolicyAttr</span></code></a></span>) – The state discrimination policy to be used.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.attributes" title="Link to this definition"></a></dt>
+<dd><p>The attributes attached to the operation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.location">
+<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LocationAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.location" title="Link to this definition"></a></dt>
+<dd><p>The source location attached to this operation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.discriminate'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.policy">
+<span class="sig-name descname"><span class="pre">policy</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.policy" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.properties" title="Link to this definition"></a></dt>
+<dd><p>The properties attached to the operation.
+Properties are inherent to the definition of an operation’s semantics, and
+thus cannot be discarded by transformations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.value">
+<span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.value" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DiscriminateOp.verify_" title="Link to this definition"></a></dt>
+<dd><p>Verifies that the result state type matches the attached policy.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DragGaussianWaveformOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">amplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std_dev</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_at_edges</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp" title="qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">DragGaussianWaveformOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <a class="reference internal" href="qat.experimental.dialect.pulse.ir.interfaces.html#qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface" title="qat.experimental.dialect.pulse.ir.interfaces.IsAnalyticalWaveformInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -1496,6 +1589,118 @@ by the operation definition.</p>
 <span class="sig-name descname"><span class="pre">zero_at_edges</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.DragGaussianWaveformOp.zero_at_edges" title="Link to this definition"></a></dt>
 <dd><p>Accessor for an operation property.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualiseOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">affine_transform</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp" title="qat.experimental.dialect.pulse.ir.ops.EqualiseOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Apply an affine transformation to an IQ result from a readout.</p>
+<p>This is expected to be the first step in the post-processing pipeline of a result, which
+is used to transform the IQ results into a standardized form for state discrimination.</p>
+<p>In superconducting qubit readout, the downconverted IQ signals can be distorted by
+hardware imperfections:</p>
+<ul class="simple">
+<li><p><strong>Phase imbalance</strong>: The I and Q channels may not be perfectly orthogonal, leading to
+a rotation of the IQ plane.</p></li>
+<li><p><strong>Gain imbalance</strong>: The I and Q channels may have different gains due to unequal
+amplifier chains.</p></li>
+<li><p><strong>DC offsets</strong>: Mixer leakage and biases in the amplifier chains can introduce DC
+offsets in the I and Q channels.</p></li>
+</ul>
+<p>The result is that the <code class="docutils literal notranslate"><span class="pre">(I,</span> <span class="pre">Q)</span></code> samples cluster on a distorted, offset ellipse rather
+than a compact point, degrading any downstream discriminator.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> instruction corrects all three imperfections in a single real affine
+transform with calibrated values:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{pmatrix} I' \\ Q' \end{pmatrix}
+= A \begin{pmatrix} I \\ Q \end{pmatrix} + \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">A</span></code> is a <strong>real</strong> 2×2 matrix (<code class="docutils literal notranslate"><span class="pre">transform</span></code>) and <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code> is the real
+offset vector (<code class="docutils literal notranslate"><span class="pre">offset</span></code>).  The output is returned as a complex value <code class="docutils literal notranslate"><span class="pre">I'</span> <span class="pre">+</span> <span class="pre">j</span> <span class="pre">Q'</span></code>.</p>
+<p>The affine transformation is represented by a property and not an operand because it is
+expected to be a constant value, and not a value that is computed at runtime. This
+allows for more efficient compilation and optimization of the pulse program.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – The SSA value representing the IQ result to be equalized.</p></li>
+<li><p><strong>affine_transform</strong> – The <code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseAttr</span></code> property that defines the
+correction to be applied to the IQ result.</p></li>
+<li><p><strong>result</strong> – The SSA value representing the resulting equalized IQ result, which can be
+used as an operand in later operations.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></span>) – The SSA value representing the IQ result to be equalized.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.params.affine_transform"></span><strong>affine_transform</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.params.affine_transform">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr" title="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseAttr</span></code></a></span>) – The <code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseAttr</span></code> property that defines the
+correction to be applied to the IQ result.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.affine_transform">
+<span class="sig-name descname"><span class="pre">affine_transform</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.affine_transform" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.attributes" title="Link to this definition"></a></dt>
+<dd><p>The attributes attached to the operation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.location">
+<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LocationAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.location" title="Link to this definition"></a></dt>
+<dd><p>The source location attached to this operation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.equalise'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.properties" title="Link to this definition"></a></dt>
+<dd><p>The properties attached to the operation.
+Properties are inherent to the definition of an operation’s semantics, and
+thus cannot be discarded by transformations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.value">
+<span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.value" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.EqualiseOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.EqualiseOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -4127,6 +4332,99 @@ by the operation definition.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StartContinuousWaveformOp.verify_">
 <span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StartContinuousWaveformOp.verify_" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StateMapOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mapping</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp" title="qat.experimental.dialect.pulse.ir.ops.StateMapOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateMapOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Maps a state key to a binary value.</p>
+<p>The state key is a value determined from state discrimination, which reveals information
+about the qubit state after a readout, but might not directly tell you the exact state
+of the qubit. In the circuit model of quantum computing, we work in the language of
+binary values, which represent the logical states of a given qubit basis. The mapping
+operator acts as a bridge between an arbitrary state discrimination to a binary value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – The operand that carries the discriminated state type.</p></li>
+<li><p><strong>mapping</strong> – The attribute that carries the mapping from discriminated state type to a
+binary value.</p></li>
+<li><p><strong>result</strong> – The mapped binary result.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.StateKeyType" title="qat.experimental.dialect.pulse.ir.types.StateKeyType"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateKeyType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the state key to be mapped.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.params.mapping"></span><strong>mapping</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.params.mapping">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr" title="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">StateMapDictAttr</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – The state mapping attribute that defines the mapping from state keys
+to binary values.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.attributes" title="Link to this definition"></a></dt>
+<dd><p>The attributes attached to the operation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.location">
+<span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LocationAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.location" title="Link to this definition"></a></dt>
+<dd><p>The source location attached to this operation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.mapping">
+<span class="sig-name descname"><span class="pre">mapping</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.mapping" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.state_map'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.properties">
+<span class="sig-name descname"><span class="pre">properties</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">Attribute]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.properties" title="Link to this definition"></a></dt>
+<dd><p>The properties attached to the operation.
+Properties are inherent to the definition of an operation’s semantics, and
+thus cannot be discarded by transformations.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.value">
+<span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.value" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.ops.StateMapOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.ops.StateMapOp.verify_" title="Link to this definition"></a></dt>
+<dd><p>Verifies that each state in the state type is represented in the state map.</p>
+</dd></dl>
 
 </dd></dl>
 

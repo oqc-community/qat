@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.attributes module &mdash; qat-compiler 3.0.0.post292.dev20260721185115 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.attributes module &mdash; qat-compiler 3.0.0.post293.dev20260721205530 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -19,6 +19,7 @@
       <script src="_static/documentation_options.js?v=c4370934"></script>
       <script src="_static/doctools.js?v=888ff710"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -644,7 +645,7 @@ float is provided, the imaginary part is set to 0.0.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.AmplitudeAttr.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.amplitude_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.AmplitudeAttr.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.amplitude_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.AmplitudeAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
@@ -653,6 +654,189 @@ float is provided, the imaginary part is set to 0.0.</p>
 <span class="sig-name descname"><span class="pre">real</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatData</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.AmplitudeAttr.real" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.ComplexData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ComplexData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code>]</p>
+<p>Store a Pythonic complex data type.</p>
+<p>Comparatively to the <code class="docutils literal notranslate"><span class="pre">complex.ComplexNumberAttr</span></code> type, this data object can
+store a Pythonic complex number without having to specify bitwidth (with its counterpart
+also breaking it up into two real components). This is analogous to the FloatData, which
+allows us to specify floats without specifying bitwidth. For the high level of
+abstraction targeted by the pulse dialect, we do not need to specify details like
+bitwidth, as this is specified when lowering to lower levels, be it a classical CPU, or
+quantum control system.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This data type is specified in the absence of an existing one in xDSL. If that
+changes in the future, this type would be marked for deprecation.</p>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.ComplexData.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataElement</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.ComplexData.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.complex_data'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.ComplexData.parse_parameter">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData.parse_parameter" title="Link to this definition"></a></dt>
+<dd><p>Parses the parameter represented as a string into a complex number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.ComplexData.print_parameter">
+<span class="sig-name descname"><span class="pre">print_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData.print_parameter" title="Link to this definition"></a></dt>
+<dd><p>Prints the complex parameter, representing the real and imaginary components as a
+two-element tuple.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiscriminatorPolicyAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametrizedAttribute</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Parent class for all discriminator policies, which are used to determine how to
+process IQ values.</p>
+<p>State labels are non-negative integers, with the exception of -1, which is reserved for
+representing an unmapped state, such as IQ values which cannot be confidently mapped to
+any state.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr.POLICY_NAME">
+<span class="sig-name descname"><span class="pre">POLICY_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr.POLICY_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.discriminator_policy'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr.state_range">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr.state_range" title="Link to this definition"></a></dt>
+<dd><p>Returns the range of state labels that the discriminator policy can discriminate
+between.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EqualiseAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear_coefficient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conjugate_coefficient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr" title="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseAttr</span></code></a></p>
+<p>An attribute that represents an affine transformation, used as part of the post-
+processing pipeline for acquired signals.</p>
+<p>In a complex space, an affine transformation of a complex number z can be represented
+as:</p>
+<div class="math notranslate nohighlight">
+\[z' = a * z + b * conj(z) + c\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(a\)</span> is the (complex) linear coefficient,</p></li>
+<li><p><span class="math notranslate nohighlight">\(b\)</span> is the (complex) conjugate coefficient,</p></li>
+<li><p><span class="math notranslate nohighlight">\(c\)</span> is the (complex) translation.</p></li>
+</ul>
+<p>If we consider this from a two-dimensional real space perspective, we can represent the
+affine transformation as</p>
+<div class="math notranslate nohighlight">
+\[z' = A * z + C\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">A</span></code> is an arbitrary 2x2 real matrix representing the linear transformation, and
+<code class="docutils literal notranslate"><span class="pre">C</span></code> is an arbitrary 2D real vector representing the translation.</p>
+<p>This attribute stores the transformation using the three complex numbers to be
+consistent with the complex representation of the IQ space. However, it offers utilities
+to expose the transformation in a real space representation, and also build from it.
+This allows a compact representation that is consistent with legacy PuRR
+<code class="docutils literal notranslate"><span class="pre">linear_map_complex_to_real</span></code>, and also the more generalised affine transformations
+defined in pydantic pipelines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.params.linear_coefficient"></span><strong>linear_coefficient</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.params.linear_coefficient">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></span>) – The (complex) linear coefficient.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.params.conjugate_coefficient"></span><strong>conjugate_coefficient</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.params.conjugate_coefficient">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></span>) – The (complex) conjugate coefficient.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.params.translation"></span><strong>translation</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.params.translation">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code></span>) – The (complex) translation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.conjugate_coefficient">
+<span class="sig-name descname"><span class="pre">conjugate_coefficient</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.conjugate_coefficient" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.from_real_space">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_real_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">linear_matrix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translation_vector</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.from_real_space" title="Link to this definition"></a></dt>
+<dd><p>Creates an EqualiseAttr from a real space representation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.from_real_space.params.linear_matrix"></span><strong>linear_matrix</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.from_real_space.params.linear_matrix">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float64</span></code>]</span>) – A 2x2 real matrix representing the linear transformation.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.from_real_space.params.translation_vector"></span><strong>translation_vector</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.from_real_space.params.translation_vector">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float64</span></code>]</span>) – A 2D real vector representing the translation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr" title="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">EqualiseAttr</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An instance of EqualiseAttr.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.linear_coefficient">
+<span class="sig-name descname"><span class="pre">linear_coefficient</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.linear_coefficient" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.linear_matrix">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">linear_matrix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.linear_matrix" title="Link to this definition"></a></dt>
+<dd><p>Returns the linear transformation matrix in real space representation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.affine_transform'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.translation">
+<span class="sig-name descname"><span class="pre">translation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.translation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.translation_vector">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">translation_vector</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">float64</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.EqualiseAttr.translation_vector" title="Link to this definition"></a></dt>
+<dd><p>Returns the translation vector in real space representation.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.ExternalPolicyAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExternalPolicyAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.ExternalPolicyAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr" title="qat.experimental.dialect.pulse.ir.attributes.DiscriminatorPolicyAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminatorPolicyAttr</span></code></a></p>
+<p>Stub for a future extension that will allow custom (off-chip) state discrimination to
+be hooked into the runtime post-processing facilities.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -716,7 +900,7 @@ enum.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.frequency_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.frequency_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
@@ -770,6 +954,95 @@ representing the frequency units.</p>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MaximumLikelihoodPolicyAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_centers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr" title="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaximumLikelihoodPolicyAttr</span></code></a></p>
+<p>A discriminator policy that discriminates between multiple states based on a maximum
+likelihood approach.</p>
+<p>State labels are non-negative integers, each mapping to a center represented by a
+complex number. Every IQ point can be assigned to the state label <code class="docutils literal notranslate"><span class="pre">k</span></code> with the highest
+normalised likelihood:</p>
+<div class="math notranslate nohighlight">
+\[\tilde{p}_k(z) = \frac{L_k(z)}{\sum_j L_j(z)},
+\quad L_k(z) = \exp\!\left(-\frac{|z - \mathrm{loc}_k|^2}{2\,\nu}\right)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\nu\)</span> is the noise power (variance) <code class="docutils literal notranslate"><span class="pre">noise_est</span></code>.</p>
+<p>If the maximum likelihood is below a threshold <code class="docutils literal notranslate"><span class="pre">p_min</span></code>, the IQ point is assigned to
+the state <code class="docutils literal notranslate"><span class="pre">-1</span></code> (unmapped).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_centers</strong> – A list of the different state centers which map respectively to
+their state labels, which are ordered from 0 to <code class="docutils literal notranslate"><span class="pre">len(state_centers)</span> <span class="pre">-</span> <span class="pre">1</span></code>. Each
+center is represented by a complex number.</p></li>
+<li><p><strong>noise_estimate</strong> – The noise power (variance) of the IQ values.</p></li>
+<li><p><strong>p_min</strong> – The minimum normalised likelihood required to assign an IQ point to a
+state label. If the maximum normalised likelihood is below this threshold, the IQ
+point is assigned to the state <code class="docutils literal notranslate"><span class="pre">-1</span></code> (unmapped).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.params.state_centers"></span><strong>state_centers</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.params.state_centers">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> | <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a>]</span>) – A list of the different state centers which map respectively
+to their state labels, which are ordered from 0 to <code class="docutils literal notranslate"><span class="pre">len(state_centers)</span> <span class="pre">-</span> <span class="pre">1</span></code>.
+Each center is represented by a complex number.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.params.noise_estimate"></span><strong>noise_estimate</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.params.noise_estimate">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The noise power (variance) of the IQ values. Defaults to 1.0
+if not provided. Noise estimate is only important if <code class="docutils literal notranslate"><span class="pre">p_min</span></code> is set to a value
+greater than 0.0, as it is used to calculate the normalised likelihoods of the
+IQ points. If <code class="docutils literal notranslate"><span class="pre">p_min</span></code> is set to 0.0, the noise estimate is ignored.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.params.p_min"></span><strong>p_min</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.params.p_min">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The minimum normalised likelihood required to assign an IQ point to a
+state label. If the maximum normalised likelihood is below this threshold, the
+IQ point is assigned to the state <code class="docutils literal notranslate"><span class="pre">-1</span></code> (unmapped).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.POLICY_NAME">
+<span class="sig-name descname"><span class="pre">POLICY_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'maximum_likelihood'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.POLICY_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.maximum_likelihood_policy'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.noise_estimate">
+<span class="sig-name descname"><span class="pre">noise_estimate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatData</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.noise_estimate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.p_min">
+<span class="sig-name descname"><span class="pre">p_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatData</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.p_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.state_centers">
+<span class="sig-name descname"><span class="pre">state_centers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.ComplexData" title="qat.experimental.dialect.pulse.ir.attributes.ComplexData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ComplexData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.state_centers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.state_range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.state_range" title="Link to this definition"></a></dt>
+<dd><p>The range of state labels that the discriminator policy can discriminate
+between.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr.verify" title="Link to this definition"></a></dt>
+<dd><p>Validates the properties of the maximum likelihood policy attribute.</p>
 </dd></dl>
 
 </dd></dl>
@@ -856,7 +1129,7 @@ radians.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.PhaseAttr.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.phase_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.PhaseAttr.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.phase_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.PhaseAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
@@ -887,6 +1160,60 @@ the concrete subclass.</p>
 <dd><p>Converts the attribute to a literal value, which is returned as a numeric value,
 and specified by the concrete subclass.</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RealThresholdPolicyAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr" title="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RealThresholdPolicyAttr</span></code></a></p>
+<p>A discriminator policy that discriminates between two states based on a real
+threshold.</p>
+<p>The discriminator works by mapping the IQ values to states <code class="docutils literal notranslate"><span class="pre">{0,</span> <span class="pre">1}</span></code> according to the
+classifier</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{state}(z) = \begin{cases}
+    0 &amp; \text{if } \Re(z) &lt; \text{threshold} \\
+    1 &amp; \text{if } \Re(z) \geq \text{threshold}
+\end{cases}\end{split}\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>threshold</strong> – The threshold value, which is used to determine the state of the IQ
+value.</p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.params.threshold"></span><strong>threshold</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.params.threshold">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The threshold value, which is used to determine the state of the
+IQ value.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.POLICY_NAME">
+<span class="sig-name descname"><span class="pre">POLICY_NAME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'real_threshold'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.POLICY_NAME" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.real_threshold_policy'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.state_range">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">state_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.state_range" title="Link to this definition"></a></dt>
+<dd><p>The range of state labels that the discriminator policy can discriminate
+between.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.threshold">
+<span class="sig-name descname"><span class="pre">threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatData</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.RealThresholdPolicyAttr.threshold" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -926,7 +1253,7 @@ of floats or complex numbers.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.sampled_waveform'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.sampled_waveform'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
@@ -956,6 +1283,53 @@ Raise a VerifyException otherwise.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.width">
 <span class="sig-name descname"><span class="pre">width</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.TimeAttr" title="qat.experimental.dialect.pulse.ir.attributes.TimeAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeAttr</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.SampledWaveformAttr.width" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StateMapDictAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">immutabledict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code>]]</p>
+<p>An attribute that represents a mapping from integer state labels to integer data,
+which for example, could be another state label, or a binary value.</p>
+<p>The expected use cases are for mapping state labels from state discrimination onto
+binary outputs.</p>
+<p>Initializes the state map dictionary attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.params.data"></span><strong>data</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.params.data">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – A mapping from integer state labels to integer attributes associated
+with those states.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataElement</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.state_map_dict'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.parse_parameter">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.parse_parameter" title="Link to this definition"></a></dt>
+<dd><p>Parses the parameters of the attribute, which are expected to be a dictionary
+representing the state mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">immutabledict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.print_parameter">
+<span class="sig-name descname"><span class="pre">print_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.StateMapDictAttr.print_parameter" title="Link to this definition"></a></dt>
+<dd><p>Prints the parameters of the attribute, which are expected to be a dictionary
+representing the state mapping.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1022,7 +1396,7 @@ and defaults to seconds if not provided.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.TimeAttr.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.time_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.time_attr'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
@@ -1103,7 +1477,7 @@ values.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.attributes.WeightsAttr.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.weights'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.WeightsAttr.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.weights'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.attributes.WeightsAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
