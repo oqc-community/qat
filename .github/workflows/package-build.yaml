@@ -48,7 +48,7 @@ jobs:
           repository: ${{ inputs.repository }}
 
       - name: Set up Python 3.x
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: ${{ env.PYTHON_VERSION }}
@@ -224,7 +224,7 @@ jobs:
           merge-multiple: true
 
       - name: Set up Python 3.x
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: "3.10"
@@ -287,7 +287,7 @@ jobs:
           pipx install poetry==${{ env.POETRY_VERSION }}
 
       - name: Set up Python 3.x
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         id: setup-python
         with:
           python-version: "3.10"
