@@ -968,6 +968,15 @@ class TestAcquireOp:
         assert acquire_op.weights == weights_attr
         acquire_op.verify()
 
+    def test_with_label(self):
+        """Tests that an AcquireOp with a label is valid and the label is accessible."""
+        frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
+        duration = ConstantOp(TimeAttr(400e-9))
+        label = StringAttr("acquire_label")
+        acquire_op = AcquireOp(frame.result, duration.result, label=label)
+        assert acquire_op.label == label
+        acquire_op.verify()
+
 
 class TestIntegrateOp:
     """Tests the integration operation with initialization and verification."""

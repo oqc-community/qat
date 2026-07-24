@@ -1831,6 +1831,9 @@ class AcquireOp(IRDLOperation):
     :ivar acquisition_result: The SSA value representing the resulting acquisition obtained
         from the acquisition, which can be used as an operand in later operations.
     :ivar weights: Optional weights attribute for the acquisition.
+    :ivar label: Optional string attribute to label the acquisition operation. Used for
+        observability and debugging, but does not semantically affect the operation or
+        contribute to dataflow.
     """
 
     name = "pulse.acquire"
@@ -1841,12 +1844,14 @@ class AcquireOp(IRDLOperation):
     frame_result = result_def(FrameType)
     acquisition_result = result_def(AcquisitionType)
     weights = opt_attr_def(WeightsAttr)
+    label = opt_attr_def(StringAttr)
 
     def __init__(
         self,
         frame: SSAValue | Operation,
         duration: SSAValue | Operation,
         weights: WeightsAttr | None = None,
+        label: str | StringAttr | None = None,
     ):
         """
         :param frame: The SSA value representing the frame on which to perform the
@@ -1854,13 +1859,18 @@ class AcquireOp(IRDLOperation):
         :param duration: The SSA value representing the duration of the acquisition, of type
             pulse.time.
         :param weights: Optional weights attribute for the acquisition.
+        :param label: Optional string attribute used to label the acquisition for
+            observability and debugging.
         """
         frame_ssa = SSAValue.get(frame, type=FrameType)
+        duration_ssa = SSAValue.get(duration, type=TimeType)
 
         attributes = {} if weights is None else {"weights": weights}
+        if label is not None:
+            attributes["label"] = StringAttr(label) if isinstance(label, str) else label
 
         return super().__init__(
-            operands=[frame, duration],
+            operands=[frame_ssa, duration_ssa],
             result_types=[frame_ssa.type, AcquisitionType()],
             attributes=attributes,
         )
