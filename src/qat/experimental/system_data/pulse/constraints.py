@@ -117,7 +117,7 @@ def _build_constraints_from_port_data(port_data: PortData) -> tuple[PortConstrai
 
 
 @dataclass(frozen=True)
-class PulseLevelConstraints(DerivedViewInterface):
+class PulseLevelConstraints(DerivedViewInterface[CanonicalSystemData]):
     """The ports available for a given hardware are static, at least at compile time, and we
     can calculate the properties of each port and the constraints they place at the pulse-
     level.
@@ -144,16 +144,16 @@ class PulseLevelConstraints(DerivedViewInterface):
         return self.granularity_ps * _PICOSECONDS_CONVERSION
 
     @classmethod
-    def from_canonical(cls, canonical_data: CanonicalSystemData) -> "PulseLevelConstraints":
+    def derive(cls, parent: CanonicalSystemData, **kwargs) -> "PulseLevelConstraints":
         """Builds the pulse-level constraints for a given hardware model.
 
-        :param canonical_data: The canonical hardware model to build the constraints from.
+        :param parent: The canonical hardware model to build the constraints from.
         :return: The pulse-level constraints for the given hardware model.
         """
 
         port_data = {}
         granularity = None
-        for port in canonical_data.ports:
+        for port in parent.ports:
             if port.id in port_data:
                 raise ValueError(
                     f"The port {port.id} is defined multiple times in the canonical data, "

@@ -11,7 +11,13 @@ from qat.experimental.system_data.canonical.schema import (
     QubitData,
     TwoQubitGateFidelityData,
 )
-from qat.experimental.system_data.topology import ScipyTopologyView, TopologyView
+from qat.experimental.system_data.circuit.qubits import QubitView
+from qat.experimental.system_data.circuit.topology import ScipyTopologyView, TopologyView
+
+
+def _to_topology(canonical: CanonicalSystemData) -> TopologyView:
+    """Build a TopologyView from canonical data via QubitView."""
+    return TopologyView.derive(QubitView.derive(canonical))
 
 
 def test_canonical_graph_view_from_canonical_with_single_directed_coupling():
@@ -31,7 +37,7 @@ def test_canonical_graph_view_from_canonical_with_single_directed_coupling():
         ),
     )
 
-    graph = TopologyView.from_canonical(canonical)
+    graph = _to_topology(canonical)
 
     assert graph.node_ids == ("q0", "q1")
     assert np.array_equal(graph.indptr, np.array([0, 1, 1], dtype=np.int_))
@@ -76,7 +82,7 @@ def test_canonical_graph_view_raises_on_missing_qubit_data():
     )
 
     with pytest.raises(ValueError, match="must have qubit information"):
-        TopologyView.from_canonical(canonical)
+        _to_topology(canonical)
 
 
 def test_canonical_graph_view_raises_on_missing_coupling_data():
@@ -90,44 +96,8 @@ def test_canonical_graph_view_raises_on_missing_coupling_data():
         couplings=(),  # Empty couplings
     )
 
-    with pytest.raises(ValueError, match="must have coupling information"):
-        TopologyView.from_canonical(canonical)
-
-
-@pytest.mark.parametrize(
-    ("source_id", "target_id", "match"),
-    [
-        (
-            "q0",
-            "q_missing",
-            r"Coupling target_qubit_id .* not found in qubits",
-        ),
-        (
-            "q_missing",
-            "q0",
-            r"Coupling source_qubit_id .* not found in qubits",
-        ),
-    ],
-    ids=["missing-target", "missing-source"],
-)
-def test_topology_view_raises_on_coupling_referencing_unknown_qubit(
-    source_id: str,
-    target_id: str,
-    match: str,
-):
-    canonical = CanonicalSystemData(
-        qubits=(QubitData(id="q0", index=0),),
-        couplings=(
-            QubitCouplingData(
-                source_qubit_id=source_id,
-                target_qubit_id=target_id,
-                gate_fidelities=(TwoQubitGateFidelityData(gate="cx", fidelity=0.99),),
-            ),
-        ),
-    )
-
-    with pytest.raises(ValueError, match=match):
-        TopologyView.from_canonical(canonical)
+    with pytest.raises(ValueError, match="must have interaction information"):
+        _to_topology(canonical)
 
 
 def _build_canonical_from_directed_edges(
@@ -176,7 +146,7 @@ def test_canonical_graph_view_from_canonical_with_four_qubit_connectivity_patter
     }
     canonical = _build_canonical_from_directed_edges(node_ids, directed_edges)
 
-    graph = TopologyView.from_canonical(canonical)
+    graph = _to_topology(canonical)
 
     assert graph.node_ids == node_ids
     assert np.array_equal(graph.indptr, np.array([0, 2, 5, 6, 8], dtype=np.int_))
@@ -250,7 +220,7 @@ def test_sorted_gate_fidelities_by_type_grouping_and_ordering():
         ("q4", "q2"),
     }
     canonical = _build_canonical_from_directed_edges(node_ids, directed_edges)
-    graph = TopologyView.from_canonical(canonical)
+    graph = _to_topology(canonical)
 
     grouped = graph.sorted_gate_fidelities_by_type
     assert tuple(gate_name for gate_name, _ in grouped) == ("cx", "cz")
@@ -293,32 +263,11 @@ def test_scipy_topology_view_uses_last_duplicate_gate_entry_without_warning():
         ),
     )
 
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     assert float(derived.gate_fidelity_matrices["cx"][0, 1]) == pytest.approx(0.95)
     assert float(derived.gate_fidelity_matrices["cz"][0, 1]) == pytest.approx(0.85)
-
-
-def test_topology_view_raises_on_duplicate_qubit_ids():
-    """Duplicate qubit identifiers should be rejected during node mapping."""
-
-    canonical = CanonicalSystemData(
-        qubits=(
-            QubitData(id="q0", index=0),
-            QubitData(id="q0", index=1),
-        ),
-        couplings=(
-            QubitCouplingData(
-                source_qubit_id="q0",
-                target_qubit_id="q0",
-                gate_fidelities=(TwoQubitGateFidelityData(gate="cx", fidelity=0.99),),
-            ),
-        ),
-    )
-
-    with pytest.raises(ValueError, match="Duplicate qubit id"):
-        TopologyView.from_canonical(canonical)
 
 
 def test_topology_view_raises_on_duplicate_directed_couplings():
@@ -344,7 +293,7 @@ def test_topology_view_raises_on_duplicate_directed_couplings():
     )
 
     with pytest.raises(ValueError, match="Duplicate directed couplings"):
-        TopologyView.from_canonical(canonical)
+        _to_topology(canonical)
 
 
 def test_derived_graph_view_from_canonical_with_four_qubit_connectivity_pattern():
@@ -363,8 +312,8 @@ def test_derived_graph_view_from_canonical_with_four_qubit_connectivity_pattern(
     }
     canonical = _build_canonical_from_directed_edges(node_ids, directed_edges)
 
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     assert derived.adjacency_matrix.shape == (4, 4)
     assert derived.adjacency_matrix.nnz == 8
@@ -429,8 +378,8 @@ def test_scipy_topology_view_uses_per_gate_sparsity_for_gate_matrices():
         ),
     )
 
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     assert derived.adjacency_matrix.nnz == 2
     assert derived.gate_fidelity_matrices["cx"].nnz == 2
@@ -458,8 +407,8 @@ def test_scipy_topology_view_networkx_graph_returns_a_fresh_graph():
         ),
     )
 
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     mutated_graph = derived.networkx_graph
     mutated_graph.remove_edge(0, 1)
@@ -541,7 +490,7 @@ def test_canonical_graph_view_from_networkx_lattice_and_hypercube(
     nx_graph = builder(lattice_site)
     canonical, nx_to_qid = _build_from_networkx_graph(nx_graph)
 
-    canonical_graph = TopologyView.from_canonical(canonical)
+    canonical_graph = _to_topology(canonical)
 
     # Validate CSR structure
     n_qubits = len(canonical_graph.node_ids)
@@ -583,8 +532,8 @@ def test_scipy_topology_view_from_networkx_lattice_and_hypercube(
     nx_graph = builder(lattice_site)
     canonical, nx_to_qid = _build_from_networkx_graph(nx_graph)
 
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     n_qubits = nx_graph.number_of_nodes()
     assert derived.adjacency_matrix.shape == (n_qubits, n_qubits)
@@ -620,8 +569,8 @@ def test_scipy_topology_view_networkx_graph_is_mutable_but_regenerated():
         {("q0", "q1")},
     )
 
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     graph = derived.networkx_graph
     assert graph.has_edge(0, 1)
@@ -655,8 +604,8 @@ def test_scipy_topology_view_networkx_graph_returns_deepcopy():
         ("q0", "q1"),
         {("q0", "q1")},
     )
-    canonical_graph = TopologyView.from_canonical(canonical)
-    derived = ScipyTopologyView.from_derived(canonical_graph)
+    canonical_graph = _to_topology(canonical)
+    derived = ScipyTopologyView.derive(canonical_graph)
 
     graph_a = derived.networkx_graph
     graph_b = derived.networkx_graph

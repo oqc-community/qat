@@ -2,29 +2,37 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
-from typing import TypeVar
+from typing import Generic, TypeVar, Union
 
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 
 _TDerivedView = TypeVar("_TDerivedView", bound="DerivedViewInterface")
+_TParent = TypeVar("_TParent", bound=Union[CanonicalSystemData, "DerivedViewInterface"])
 
 
-class DerivedViewInterface(ABC):
-    """A view of a canonical system data object derived from the canonical data.
+class DerivedViewInterface(ABC, Generic[_TParent]):
+    """A view derived from an upstream data source.
 
-    This is an abstract base class for derived views of canonical system data. They provide
-    a representation of relevant data in a form that is convenient to the given application,
-    such as a particular layer of abstraction, or a particular pass.
+    The type parameter ``_TParent`` declares what this view is derived from. That may be
+    :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData` for views
+    that sit directly on the canonical data, or another :class:`DerivedViewInterface`
+    subclass for views that sit further down the derivation chain.
+
+    Subclasses declare their parent type in the class header::
+
+        class QubitView(DerivedViewInterface[CanonicalSystemData]): ...
+        class TopologyView(DerivedViewInterface[QubitView]): ...
+        class ScipyTopologyView(DerivedViewInterface[TopologyView]): ...
+
+    and must implement :meth:`derive`.
     """
 
     @classmethod
     @abstractmethod
-    def from_canonical(
-        cls: type[_TDerivedView], canonical_data: CanonicalSystemData
-    ) -> _TDerivedView:
-        """Construct a derived view from canonical system data.
+    def derive(cls: type[_TDerivedView], parent: _TParent, **kwargs) -> _TDerivedView:
+        """Construct this view from its upstream parent.
 
-        :param canonical_data: The canonical system data to derive from.
-        :returns: A derived view of the canonical data.
+        :param parent: The upstream data source to derive from.
+        :returns: A new derived view built from ``parent``.
         """
         ...

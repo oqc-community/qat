@@ -124,13 +124,13 @@ class TestBuildPulseLevelConstraints:
 
     def test_building_gives_the_correct_granularity(self, canonical_data):
         """Tests that the granularity is correctly calculated from canonical data."""
-        pulse_constraints = PulseLevelConstraints.from_canonical(canonical_data)
+        pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.granularity_ps == 8000
         assert pulse_constraints.granularity_s == 8e-9
 
     def test_building_gives_correct_sample_times(self, canonical_data):
         """Tests that the sample times are correctly calculated from canonical data."""
-        pulse_constraints = PulseLevelConstraints.from_canonical(canonical_data)
+        pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].sample_time_ps == 1000
         assert pulse_constraints.ports["port_2"].sample_time_ps == 500
         assert pulse_constraints.ports["port_1"].sample_time_s == 1e-9
@@ -138,7 +138,7 @@ class TestBuildPulseLevelConstraints:
 
     def test_building_gives_correct_min_durations(self, canonical_data):
         """Tests that the minimum durations are correctly calculated from canonical data."""
-        pulse_constraints = PulseLevelConstraints.from_canonical(canonical_data)
+        pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].min_duration_ps == 8000
         assert pulse_constraints.ports["port_2"].min_duration_ps == 8000
         assert pulse_constraints.ports["port_1"].min_pulse_duration_s == 8e-9
@@ -146,7 +146,7 @@ class TestBuildPulseLevelConstraints:
 
     def test_building_gives_correct_max_durations(self, canonical_data):
         """Tests that the maximum durations are correctly calculated from canonical data."""
-        pulse_constraints = PulseLevelConstraints.from_canonical(canonical_data)
+        pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].max_duration_ps == 80000
         assert pulse_constraints.ports["port_2"].max_duration_ps is None
         assert pulse_constraints.ports["port_1"].max_pulse_duration_s == 8e-8
@@ -155,7 +155,7 @@ class TestBuildPulseLevelConstraints:
     def test_building_gives_correct_native_waveform_shapes(self, canonical_data):
         """Tests that native waveform shapes are correctly calculated from canonical
         data."""
-        pulse_constraints = PulseLevelConstraints.from_canonical(canonical_data)
+        pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].native_waveform_shapes == (
             SquareWaveformOp,
             GaussianWaveformOp,
@@ -166,7 +166,7 @@ class TestBuildPulseLevelConstraints:
 
     def test_building_gives_correct_acquire_allowed(self, canonical_data):
         """Tests that acquire_allowed is correctly calculated from canonical data."""
-        pulse_constraints = PulseLevelConstraints.from_canonical(canonical_data)
+        pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].acquire_allowed is True
         assert pulse_constraints.ports["port_2"].acquire_allowed is False
 
@@ -196,13 +196,13 @@ class TestBuildPulseLevelConstraintsErrors:
         )
         canonical_data = CanonicalSystemData(ports=(port_1, port_2))
         with pytest.raises(ValueError, match="The port port_2 has a different granularity"):
-            PulseLevelConstraints.from_canonical(canonical_data)
+            PulseLevelConstraints.derive(canonical_data)
 
     def test_no_ports_raises_value_error(self):
         """Tests that a ValueError is raised if there are no ports in canonical data."""
         canonical_data = CanonicalSystemData(ports=())
         with pytest.raises(ValueError, match="No ports were found in the canonical data"):
-            PulseLevelConstraints.from_canonical(canonical_data)
+            PulseLevelConstraints.derive(canonical_data)
 
     def test_unknown_waveform_shape_raises_value_error(self):
         """Tests that a ValueError is raised if a port has an unknown waveform shape."""
@@ -217,7 +217,7 @@ class TestBuildPulseLevelConstraintsErrors:
         )
         canonical_data = CanonicalSystemData(ports=(port,))
         with pytest.raises(ValueError, match="unknown waveform shape"):
-            PulseLevelConstraints.from_canonical(canonical_data)
+            PulseLevelConstraints.derive(canonical_data)
 
     def test_duplicate_port_ids_raises_value_error(self):
         """Tests that a ValueError is raised if duplicate port IDs are present."""
@@ -241,4 +241,4 @@ class TestBuildPulseLevelConstraintsErrors:
         )
         canonical_data = CanonicalSystemData(ports=(port_1, port_2))
         with pytest.raises(ValueError, match="is defined multiple times"):
-            PulseLevelConstraints.from_canonical(canonical_data)
+            PulseLevelConstraints.derive(canonical_data)

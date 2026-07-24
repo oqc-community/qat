@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Topology view assembled from canonical system data."""
+"""Topology view assembled from
+:class:`~qat.experimental.system_data.circuit.qubits.QubitView`."""
 
 from __future__ import annotations
 
@@ -16,12 +17,12 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.sparse import csr_matrix
 
-from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.circuit.qubits import QubitView
 from qat.experimental.system_data.derived.interface import DerivedViewInterface
 
 
 @dataclass(frozen=True)
-class TopologyView(DerivedViewInterface):
+class TopologyView(DerivedViewInterface[QubitView]):
     """Minimal canonical topology view encoded in a CSR-like graph structure.
 
     Connectivity is stored structurally by ``indptr`` and ``indices``. Here,
@@ -84,20 +85,29 @@ class TopologyView(DerivedViewInterface):
         return MappingProxyType({node_id: i for i, node_id in enumerate(self.node_ids)})
 
     @classmethod
-    def from_canonical(cls, canonical: CanonicalSystemData) -> TopologyView:
-        """Constructs a TopologyView from a CanonicalSystemData object, for topology
-        relevant data. This is a lightweight representation of the system connectivity,
-        stored as a custom CSR matrix form.
+    def derive(cls, parent: QubitView, **kwargs) -> TopologyView:
+        """Constructs a TopologyView from a
+        :class:`~qat.experimental.system_data.circuit.qubits.QubitView`.
 
-        :param canonical: The CanonicalSystemData object to convert.
+        This is a lightweight representation of the system connectivity, stored as a custom
+        CSR matrix form.
+
+        :param qubit_view: Qubit-level derived view to build topology from.
         :returns: Topology view with CSR connectivity and aligned fidelity data with
             associated metadata.
-        :raises ValueError: If qubit or coupling information is missing.
+        :raises ValueError: If the view contains no qubits or no interactions.
         """
-        cls._validate_canonical(canonical)
-        node_ids, node_index = cls._build_node_data(canonical)
-        row_by_node_id = {node_id: i for i, node_id in enumerate(node_ids)}
-        raw_edges = cls._build_raw_edges(canonical, row_by_node_id)
+        cls._validate(parent)
+        node_ids, node_index = cls._build_node_data(parent)
+        # interactions are pre-sorted by (source_position, target_position) by QubitView
+        raw_edges = [
+            (
+                i.source_position,
+                i.target_position,
+                tuple(i.gate_fidelities.items()),
+            )
+            for i in parent.interactions
+        ]
         indptr, indices, edge_couplings_data, edge_metadata = cls._build_csr_arrays(
             raw_edges, len(node_ids)
         )
@@ -111,78 +121,27 @@ class TopologyView(DerivedViewInterface):
         )
 
     @staticmethod
-    def _validate_canonical(canonical: CanonicalSystemData) -> None:
-        """Raises ValueError if the canonical data is missing qubits or couplings."""
-        if not canonical.qubits:
+    def _validate(qubit_view: QubitView) -> None:
+        """Raises ValueError if the view is missing qubits or interactions."""
+        if not qubit_view.qubits:
             raise ValueError(
-                "CanonicalSystemData must have qubit information to construct TopologyView"
+                "QubitView must have qubit information to construct TopologyView"
             )
-        if not canonical.couplings:
+        if not qubit_view.interactions:
             raise ValueError(
-                "CanonicalSystemData must have coupling information to construct "
-                "TopologyView"
+                "QubitView must have interaction information to construct TopologyView"
             )
 
     @staticmethod
     def _build_node_data(
-        canonical: CanonicalSystemData,
+        qubit_view: QubitView,
     ) -> tuple[tuple[str, ...], NDArray[np.uint32]]:
-        """Returns node identifiers and device qubit indices.
-
-        :raises ValueError: If duplicate qubit identifiers are present.
-        """
-        node_ids_list: list[str] = []
-        node_index_list: list[int] = []
-        seen_qubit_ids: set[str] = set()
-
-        for qubit in canonical.qubits:
-            if qubit.id in seen_qubit_ids:
-                raise ValueError(
-                    f"Duplicate qubit id {qubit.id!r} found in canonical qubit data."
-                )
-            seen_qubit_ids.add(qubit.id)
-            node_ids_list.append(qubit.id)
-            node_index_list.append(qubit.index)
-
-        return (
-            tuple(node_ids_list),
-            np.asarray(node_index_list, dtype=np.uint32),
+        """Returns node identifiers and device qubit indices from the qubit view."""
+        node_ids = tuple(qubit_view.qubits.keys())
+        node_index = np.asarray(
+            [q.index for q in qubit_view.qubits.values()], dtype=np.uint32
         )
-
-    @staticmethod
-    def _build_raw_edges(
-        canonical: CanonicalSystemData,
-        row_by_node_id: dict[str, int],
-    ) -> list[tuple[int, int, tuple[tuple[str, float], ...]]]:
-        """Returns sorted raw edges built from coupling data.
-
-        :raises ValueError: If a coupling references a qubit not present in the node map.
-        """
-        # Each raw edge is:
-        #   (source_row, target_row, ((gate_name, fidelity), ...))
-        # Example:
-        #   (0, 2, (("cx", 0.991), ("cz", 0.973)))
-        raw_edges: list[tuple[int, int, tuple[tuple[str, float], ...]]] = []
-        for coupling in canonical.couplings:
-            if coupling.source_qubit_id not in row_by_node_id:
-                raise ValueError(
-                    f"Coupling source_qubit_id {coupling.source_qubit_id!r} not found "
-                    "in qubits"
-                )
-            if coupling.target_qubit_id not in row_by_node_id:
-                raise ValueError(
-                    f"Coupling target_qubit_id {coupling.target_qubit_id!r} not found "
-                    "in qubits"
-                )
-            src = row_by_node_id[coupling.source_qubit_id]
-            dst = row_by_node_id[coupling.target_qubit_id]
-            gate_fidelities = tuple(
-                (gf.gate, float(gf.fidelity)) for gf in coupling.gate_fidelities
-            )
-            raw_edges.append((src, dst, gate_fidelities))
-        # Group all edges for the same source row together.
-        raw_edges.sort(key=lambda e: (e[0], e[1]))
-        return raw_edges
+        return node_ids, node_index
 
     @staticmethod
     def _build_csr_arrays(
@@ -372,7 +331,7 @@ class TopologyView(DerivedViewInterface):
 
 
 @dataclass(frozen=True)
-class ScipyTopologyView:
+class ScipyTopologyView(DerivedViewInterface[TopologyView]):
     """Topology view derived from canonical data as SciPy CSR matrices, as well as further
     allowing for return to a NetworkX graph representation.
 
@@ -389,21 +348,22 @@ class ScipyTopologyView:
     gate_fidelity_matrices: Mapping[str, csr_matrix]
 
     @classmethod
-    def from_derived(
+    def derive(
         cls,
-        canonical_graph: TopologyView,
+        parent: TopologyView,
+        **kwargs,
     ) -> ScipyTopologyView:
         """Constructs a :class:`ScipyTopologyView` from canonical graph data.
 
         :param canonical_graph: Topology view to convert.
         :returns: Derived view with binary adjacency and per-gate fidelity matrices.
         """
-        n = len(canonical_graph.node_ids)
+        n = len(parent.node_ids)
         shape = (n, n)
-        nnz = int(canonical_graph.indices.size)
+        nnz = int(parent.indices.size)
 
-        adjacency_matrix = cls._build_adjacency_matrix(canonical_graph, shape, nnz)
-        gate_fidelity_matrices = cls._build_gate_fidelity_matrices(canonical_graph, shape)
+        adjacency_matrix = cls._build_adjacency_matrix(parent, shape, nnz)
+        gate_fidelity_matrices = cls._build_gate_fidelity_matrices(parent, shape)
         return cls(
             adjacency_matrix=adjacency_matrix,
             gate_fidelity_matrices=MappingProxyType(gate_fidelity_matrices),
