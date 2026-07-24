@@ -1,0 +1,15 @@
+qat.experimental.dialect.results package
+========================================
+
+.. automodule:: qat.experimental.dialect.results
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.experimental.dialect.results.ir

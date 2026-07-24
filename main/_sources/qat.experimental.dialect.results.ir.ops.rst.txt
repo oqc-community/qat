@@ -1,0 +1,7 @@
+qat.experimental.dialect.results.ir.ops module
+==============================================
+
+.. automodule:: qat.experimental.dialect.results.ir.ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

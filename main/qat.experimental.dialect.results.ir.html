@@ -1,0 +1,1725 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.experimental.dialect.results.ir package &mdash; qat-compiler 3.0.0.post295.dev20260724123958 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.experimental.dialect.results.ir.attributes module" href="qat.experimental.dialect.results.ir.attributes.html" />
+    <link rel="prev" title="qat.experimental.dialect.results package" href="qat.experimental.dialect.results.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            qat-compiler
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/input.html">Supported input to the compiler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Readout Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/shot_selection.html">Shot Selection (Pre &amp; Post)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/target_data.html">TargetData Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.purr.html">qat.backend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.analysis.html">qat.backend.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.lowering.html">qat.backend.passes.purr.lowering module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.transform.html">qat.backend.passes.purr.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.validation.html">qat.backend.passes.purr.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.html">qat.backend.qblox package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.passes.html">qat.backend.qblox.passes package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html">qat.backend.qblox.passes.analysis module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.acquisition.html">qat.backend.qblox.acquisition module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.ir.html">qat.backend.qblox.ir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.target_data.html">qat.backend.qblox.target_data module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.base.html">qat.backend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.codegen_base.html">qat.backend.codegen_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.fallthrough.html">qat.backend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.graph.html">qat.backend.graph module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html">qat.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html">qat.core.config package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.configure.html">qat.core.config.configure module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.descriptions.html">qat.core.config.descriptions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.session.html">qat.core.config.session module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.validators.html">qat.core.config.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html">qat.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.qblox.html">qat.engines.qblox package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform_v1.echo.html">qat.engines.waveform_v1.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.model.html">qat.engines.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.native.html">qat.engines.native module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.zero.html">qat.engines.zero module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="qat.experimental.html">qat.experimental package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1.html">qat.experimental.dialect.q1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.ir.html">qat.experimental.dialect.q1.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_cf.html">qat.experimental.dialect.q1_cf package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.ir.html">qat.experimental.dialect.q1_cf.ir package</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_scf.html">qat.experimental.dialect.q1_scf package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.ir.html">qat.experimental.dialect.q1_scf.ir package</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.html">qat.experimental.dialect.q1_sequence.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.target.html">qat.experimental.dialect.q1_sequence.target module</a></li>
+</ul>
+</li>
+<li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.dialect.results.html">qat.experimental.dialect.results package</a><ul class="current">
+<li class="toctree-l6 current"><a class="current reference internal" href="#">qat.experimental.dialect.results.ir package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.frontend.html">qat.experimental.frontend package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.frontend.importer.html">qat.experimental.frontend.importer package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.base.html">qat.experimental.frontend.importer.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.purr.html">qat.experimental.frontend.importer.purr module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.canonical.html">qat.experimental.system_data.canonical package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html">qat.experimental.system_data.canonical.schema module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.derived.html">qat.experimental.system_data.derived package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.derived.interface.html">qat.experimental.system_data.derived.interface module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.materialisers.html">qat.experimental.system_data.materialisers package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.purr.html">qat.experimental.system_data.materialisers.purr package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.boundary.html">qat.experimental.system_data.materialisers.boundary module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.descriptor_resolution.html">qat.experimental.system_data.materialisers.descriptor_resolution module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.errors.html">qat.experimental.system_data.materialisers.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.plugin_loader.html">qat.experimental.system_data.materialisers.plugin_loader module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.plugins.html">qat.experimental.system_data.materialisers.plugins module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.types.html">qat.experimental.system_data.materialisers.types module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.pulse.html">qat.experimental.system_data.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.topology.html">qat.experimental.system_data.topology module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.utils.html">qat.experimental.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.utils.logging.html">qat.experimental.utils.logging module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.converters.html">qat.frontend.converters package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.converters.purr.html">qat.frontend.converters.purr module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.base.html">qat.frontend.parsers.qasm.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm2.html">qat.frontend.parsers.qasm.qasm2 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html">qat.frontend.parsers.qasm.qasm3 module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.html">qat.frontend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.purr.html">qat.frontend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.passes.purr.transform.html">qat.frontend.passes.purr.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.analysis.html">qat.frontend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.builder.html">qat.frontend.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.features.html">qat.integrations.features module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_1q.html">qat.ir.gates.gates_1q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_2q.html">qat.ir.gates.gates_2q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.native.html">qat.ir.gates.native module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.conversion.html">qat.ir.conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_basetypes.html">qat.ir.instruction_basetypes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.utils.html">qat.ir.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.html">qat.middleend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.decompositions.html">qat.middleend.decompositions package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.base.html">qat.middleend.decompositions.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.gates.html">qat.middleend.decompositions.gates module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.pulses.html">qat.middleend.decompositions.pulses module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.passes.html">qat.middleend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.gates.html">qat.middleend.passes.gates package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.transform.html">qat.middleend.passes.gates.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.validation.html">qat.middleend.passes.gates.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.purr.html">qat.middleend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.purr.analysis.html">qat.middleend.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.purr.transform.html">qat.middleend.passes.purr.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.purr.validation.html">qat.middleend.passes.purr.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.analysis.html">qat.middleend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.transform.html">qat.middleend.passes.transform module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qblox.html">qat.model.loaders.purr.qblox module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qiskit.html">qat.model.loaders.purr.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.rtcs.html">qat.model.loaders.purr.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.base.html">qat.model.loaders.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.qblox.html">qat.model.loaders.qblox module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.convert_purr.html">qat.model.convert_purr module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.post_processing.html">qat.model.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.validators.html">qat.model.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.legacy.html">qat.pipelines.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.base.html">qat.pipelines.legacy.base package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.base.compile.html">qat.pipelines.legacy.base.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.base.execute.html">qat.pipelines.legacy.base.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.base.full.html">qat.pipelines.legacy.base.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.echo.html">qat.pipelines.legacy.echo package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.echo.compile.html">qat.pipelines.legacy.echo.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.echo.execute.html">qat.pipelines.legacy.echo.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.echo.full.html">qat.pipelines.legacy.echo.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.qblox.html">qat.pipelines.legacy.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qblox.compile.html">qat.pipelines.legacy.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qblox.full.html">qat.pipelines.legacy.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html">qat.pipelines.legacy.qiskit package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qiskit.compile.html">qat.pipelines.legacy.qiskit.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qiskit.execute.html">qat.pipelines.legacy.qiskit.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qiskit.full.html">qat.pipelines.legacy.qiskit.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.rtcs.compile.html">qat.pipelines.legacy.rtcs.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.rtcs.full.html">qat.pipelines.legacy.rtcs.full module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.full.html">qat.pipelines.purr.waveform_v1.full module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.cache.html">qat.pipelines.cache module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html">qat.purr.backends.qblox.acquisition module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qat.html">qat.purr.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.passes.html">qat.runtime.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.purr.html">qat.runtime.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.purr.analysis.html">qat.runtime.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.purr.transform.html">qat.runtime.passes.purr.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.analysis.html">qat.runtime.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.expressions.html">qat.runtime.expressions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.piny.html">qat.utils.piny module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.uuid.html">qat.utils.uuid module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html">qat.executables module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">qat-compiler</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.experimental.html">qat.experimental package</a></li>
+          <li class="breadcrumb-item"><a href="qat.experimental.dialect.html">qat.experimental.dialect package</a></li>
+          <li class="breadcrumb-item"><a href="qat.experimental.dialect.results.html">qat.experimental.dialect.results package</a></li>
+      <li class="breadcrumb-item active">qat.experimental.dialect.results.ir package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.experimental.dialect.results.ir.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.experimental.dialect.results.ir">
+<span id="qat-experimental-dialect-results-ir-package"></span><h1>qat.experimental.dialect.results.ir package<a class="headerlink" href="#module-qat.experimental.dialect.results.ir" title="Link to this heading"></a></h1>
+<p>The Results dialect is used to model the collection and manipulation of results from
+quantum programs.</p>
+<p>It provides types and attributes to represent result records, arrays, and collections. The
+dialect also defines operations for creating and transforming those structures, including
+post-selection and record reshaping operations needed by existing lowering and runtime
+paths.</p>
+<p>This dialect is written heavily to be compatible with the legacy QAT runtime, but is
+expected to rapidly evolve to support more general and flexible results collection and
+manipulation in the future.</p>
+<p>The dialect is centered around collections of results:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsArrayType" title="qat.experimental.dialect.results.ir.ResultsArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a> allows us to represent a list-like collection of results,
+grouping them together in a single structure.</p></li>
+<li><p><a class="reference internal" href="#qat.experimental.dialect.results.ir.RecordType" title="qat.experimental.dialect.results.ir.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a> represents the entire results of a single shot with dictionary-like
+semantics, allowing each piece of data to be stored by a string key.</p></li>
+<li><p><a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="qat.experimental.dialect.results.ir.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a> allows us to represent a collection of results, enabling
+dynamic addition of records, such as adding results from a single shot after each shot
+completes.</p></li>
+</ul>
+<p>The types are not specific to any particular result data type, and allow us to store
+arbitrary types of data (e.g. signals, bits, integers, IQ values). Along with operations to
+assemble these data structures, the dialect also provides operations to manipulate records.
+For example, an operation to group entries in a record into one single entry, with the
+original entries placed within a <a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsArrayType" title="qat.experimental.dialect.results.ir.ResultsArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a>, and an operation to reduce
+records to selected data.</p>
+<p>The operations to create data structures and add them to the collections allows us to
+store results from each shot as we go. This suits the representation of programs at a high
+level, such as the gate-level or pulse-level. However, this is not always the way results
+are represented closer to the hardware. For example, a particular control system might not
+support pulse post-processing operations, and might just return raw IQ values. Then we would
+need to retroactively apply the post-processing chain once the whole ensemble of results are
+returned. To support this, the dialect also provides operations to apply a post-processing
+chain to an entire collection of results. The <a class="reference internal" href="#qat.experimental.dialect.results.ir.MapOp" title="qat.experimental.dialect.results.ir.MapOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapOp</span></code></a> allows us to specify a
+chain of operations that act on a <a class="reference internal" href="#qat.experimental.dialect.results.ir.RecordType" title="qat.experimental.dialect.results.ir.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>, and produce a new
+<a class="reference internal" href="#qat.experimental.dialect.results.ir.RecordType" title="qat.experimental.dialect.results.ir.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>. The <a class="reference internal" href="#qat.experimental.dialect.results.ir.MapOp" title="qat.experimental.dialect.results.ir.MapOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapOp</span></code></a> then maps this chain of operations to every record
+in a <a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="qat.experimental.dialect.results.ir.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a>. This allows us to transform from a representation that
+applies post-processing to results as they’re collected, to a representation that applies
+them retroactively to the entire collection of results.</p>
+<p>Additionally, the dialect provides a post-selection operation which can be parameterised
+with predicates to filter out results from a collection that do not satisfy the given
+predicates.</p>
+<p><strong>Mapping to post-processing in the runtime</strong></p>
+<p>The runtime operates on legacy instructions. The instructions within this dialect allow us
+to map those post-processing instructions:</p>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="#qat.experimental.dialect.results.ir.GroupEntriesOp" title="qat.experimental.dialect.results.ir.GroupEntriesOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupEntriesOp</span></code></a> maps to an Assign.</p></li>
+<li><p>The <a class="reference internal" href="#qat.experimental.dialect.results.ir.ReduceOp" title="qat.experimental.dialect.results.ir.ReduceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceOp</span></code></a> maps to a Return.</p></li>
+</ul>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">AddRecordOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp" title="qat.experimental.dialect.results.ir.ops.AddRecordOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AddRecordOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Adds a results record to a results collection.</p>
+<p>The operation takes a results collection and a results record as operands, and produces
+a new results collection that includes the added record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>collection</strong> – The SSA value representing the existing results collection.</p></li>
+<li><p><strong>record</strong> – The SSA value representing the results record to be added.</p></li>
+<li><p><strong>result</strong> – The resulting collection type, which is a ResultsCollectionType.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the AddRecordOp with the given collection and record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.AddRecordOp.params.collection"></span><strong>collection</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.AddRecordOp.params.collection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the existing results collection.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.AddRecordOp.params.record"></span><strong>record</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.AddRecordOp.params.record">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the results record to be added.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.collection">
+<span class="sig-name descname"><span class="pre">collection</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.collection" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.add_record'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.record">
+<span class="sig-name descname"><span class="pre">record</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.record" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.AddRecordOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.AddRecordOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateRecordOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp" title="qat.experimental.dialect.results.ir.ops.CreateRecordOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateRecordOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates a results record, which can be added to a results collection.</p>
+<p>The operation contains a sequence of keys and values, which are used to construct a
+results record. The keys must be unique, and each key must have a corresponding value.</p>
+<p>Since a record takes dictionary semantics, the keys and values are variable-length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keys</strong> – An array of string attributes representing the keys for the record.</p></li>
+<li><p><strong>values</strong> – A sequence of SSA values representing the values for the record.</p></li>
+<li><p><strong>result</strong> – The resulting record type, which is a RecordType.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the CreateRecordOp with the given keys and values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.CreateRecordOp.params.keys"></span><strong>keys</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.CreateRecordOp.params.keys">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – A sequence of strings representing the keys for the record.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.CreateRecordOp.params.values"></span><strong>values</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.CreateRecordOp.params.values">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>]</span>) – A sequence of SSA values representing the values for the record.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.keys" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.create_record'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.values">
+<span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.values" title="Link to this definition"></a></dt>
+<dd><p>Access a variadic construct in the case where it is the only variadic.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateRecordOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateRecordOp.verify_" title="Link to this definition"></a></dt>
+<dd><p>Verifies that the number of keys and values match.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateResultsArrayOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp" title="qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateResultsArrayOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates a results array, which can be added to a results collection.</p>
+<p>The operation contains a sequence of values, which are used to construct a results
+array. The values can be of any type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> – A sequence of SSA values representing the values for the array.</p></li>
+<li><p><strong>result</strong> – The resulting array type, which is a ResultsArrayType.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the CreateResultsArrayOp with the given values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.params.values"></span><strong>values</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.params.values">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>]</span>) – A sequence of SSA values representing the values for the array.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.create_array'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.values">
+<span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.values" title="Link to this definition"></a></dt>
+<dd><p>Access a variadic construct in the case where it is the only variadic.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsArrayOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsArrayOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsCollectionOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CreateResultsCollectionOp</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsCollectionOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp" title="qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateResultsCollectionOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Creates a results collection, which can be added to and filtered with given
+operations.</p>
+<p>The operation creates an empty results collection that can be populated by later
+operations such as <a class="reference internal" href="#qat.experimental.dialect.results.ir.AddRecordOp" title="qat.experimental.dialect.results.ir.AddRecordOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AddRecordOp</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>result</strong> – The resulting empty collection, which is a ResultsCollectionType.</p>
+</dd>
+</dl>
+<p>Initializes the CreateResultsCollectionOp with no values, as the collection is
+empty upon creation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsCollectionOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsCollectionOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsCollectionOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.create_collection'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsCollectionOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsCollectionOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsCollectionOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsCollectionOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsCollectionOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.CreateResultsCollectionOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.CreateResultsCollectionOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExtractOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_type</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp" title="qat.experimental.dialect.results.ir.ops.ExtractOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtractOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Extracts an entry from a record from a string key.</p>
+<p>As part of building the operation, the type of the extracted object must be specified.</p>
+<p>Initializes the ExtractOp with the given record, key, and result type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ExtractOp.params.record"></span><strong>record</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ExtractOp.params.record">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the existing results record.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ExtractOp.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ExtractOp.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – A string representing the key to extract from the record.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ExtractOp.params.result_type"></span><strong>result_type</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ExtractOp.params.result_type">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></span>) – The type of the extracted value, for example a built-in scalar
+type, RecordType, or ResultsArrayType.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.key">
+<span class="sig-name descname"><span class="pre">key</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.key" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.extract'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.record">
+<span class="sig-name descname"><span class="pre">record</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.record" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ExtractOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ExtractOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GroupEntriesOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp" title="qat.experimental.dialect.results.ir.ops.GroupEntriesOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupEntriesOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Groups entries in a record into a single entry, producing an array of those entries,
+ordered by the given keys, with the array stored with a provided key in the record.</p>
+<p>This operation is roughly equivalent to the Assign instruction in legacy IR. This
+operation has a lowering path which could make use of <a class="reference internal" href="#qat.experimental.dialect.results.ir.ExtractOp" title="qat.experimental.dialect.results.ir.ExtractOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtractOp</span></code></a> to extract the
+values from the record, and then a make a new record with the grouped entries. But
+currently, this operation is more useful to the current runtime.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This operation exists to support legacy runtime implementations of post-processing.
+Going forward, it is highly encouraged to assemble records in the structure that is
+desired to promote proper dataflow semantics.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This operation is likely to be flagged for deprecation in the future.</p>
+</div>
+<p>Initializes the GroupEntriesOp with the given collection, keys, and group key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.GroupEntriesOp.params.collection"></span><strong>collection</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.params.collection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the existing results record.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.GroupEntriesOp.params.keys"></span><strong>keys</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.params.keys">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – A list of strings representing the keys to group in the new entry.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.GroupEntriesOp.params.group_key"></span><strong>group_key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.params.group_key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – A string representing the key for the new grouped entry.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.collection">
+<span class="sig-name descname"><span class="pre">collection</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.collection" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.group_key">
+<span class="sig-name descname"><span class="pre">group_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.group_key" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.keys" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.group_entries'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.GroupEntriesOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.GroupEntriesOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IntegerStatePredicateAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disallowed_values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr" title="qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr</span></code></a></p>
+<p>Models a predicate for post selecting results based on an integer state.</p>
+<p>This attribute is used to filter results based on a specific integer state value. It is
+described by a key and a list of disallowed integer values. The key refers to the entry
+in a record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – The key of the entry in the record that post-selection is performed on.</p></li>
+<li><p><strong>disallowed_values</strong> – The list of values that are disallowed and will result in the
+record being post-selected out of the results collection.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the IntegerStatePredicateAttr with the given key and disallowed
+values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></span>) – The key of the entry in the record that post-selection is performed on.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.params.disallowed_values"></span><strong>disallowed_values</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.params.disallowed_values">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code>]</span>) – The list of values that are disallowed and will result in
+the record being post-selected out of the results collection.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.disallowed_values">
+<span class="sig-name descname"><span class="pre">disallowed_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.disallowed_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.key">
+<span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.integer_state_predicate'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.IntegerStatePredicateAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MapOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp" title="qat.experimental.dialect.results.ir.ops.MapOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">MapOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Maps a transformation over a record to a collection of records, producing a new
+collection of records.</p>
+<p>The operation contains a single region, which contains the operations that transform
+a record into a new record. The region has a block argument of type <a class="reference internal" href="#qat.experimental.dialect.results.ir.RecordType" title="qat.experimental.dialect.results.ir.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>,
+which represents the input record, and must yield a value of type <a class="reference internal" href="#qat.experimental.dialect.results.ir.RecordType" title="qat.experimental.dialect.results.ir.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>.
+The operation takes a <a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="qat.experimental.dialect.results.ir.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a> operand, which represents the
+collection of records to be transformed, and produces a new
+<a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="qat.experimental.dialect.results.ir.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a> result. The implication is that the transformation is
+applied to each record in the collection.</p>
+<p>The operation is modelled as pure to not allow for any side effects to be introduced
+within the region, and is enforced to be isolated from above to ensure that the region
+does not have access to any values outside of the region, which could introduce side
+effects.</p>
+<p>This is intended to allow for a granular post-processing chain to be implemented that
+acts locally to a record. It intentionally does not specify any details of how this is
+implemented, e.g., in parallel or sequentially, apply every operation to each record
+before moving onto the next or going operation-by-operation (on every record). Those
+details are left to the runtime implementation, or lowering if relevant.</p>
+<p>Within this block, you might expect to see operations such as <a class="reference internal" href="#qat.experimental.dialect.results.ir.ExtractOp" title="qat.experimental.dialect.results.ir.ExtractOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtractOp</span></code></a> to
+extract values from the record, and then post-processing chains (such as those defined
+in the pulse dialect) to transform the values, and then a <a class="reference internal" href="#qat.experimental.dialect.results.ir.CreateRecordOp" title="qat.experimental.dialect.results.ir.CreateRecordOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">CreateRecordOp</span></code></a> to
+create a new record. You might also expect to see operations such as
+<a class="reference internal" href="#qat.experimental.dialect.results.ir.GroupEntriesOp" title="qat.experimental.dialect.results.ir.GroupEntriesOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">GroupEntriesOp</span></code></a> to group entries in the record, or a <a class="reference internal" href="#qat.experimental.dialect.results.ir.ReduceOp" title="qat.experimental.dialect.results.ir.ReduceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceOp</span></code></a> to filter
+out entries.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – The SSA value representing the existing results collection.</p></li>
+<li><p><strong>body</strong> – The region containing the operations that transform a record into a new
+record.</p></li>
+<li><p><strong>result</strong> – The resulting collection type, which is a ResultsCollectionType.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the MapOp with the given collection and body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.MapOp.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.MapOp.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the existing results collection.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.MapOp.params.body"></span><strong>body</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.MapOp.params.body">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Block</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Region</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Block</span></code>]</span>) – The region or block(s) containing the operations that transform a
+record into a new record.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.body">
+<span class="sig-name descname"><span class="pre">body</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.body" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.map'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.value">
+<span class="sig-name descname"><span class="pre">value</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.value" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.MapOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.MapOp.verify_" title="Link to this definition"></a></dt>
+<dd><p>Verifies that the region begins with a block that has a single argument of type
+RecordType, and that the region yields a value of type RecordType.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">predicates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp" title="qat.experimental.dialect.results.ir.ops.PostSelectOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Filters a results collection based on a given predicate, producing a new collection
+that only includes records satisfying the predicate.</p>
+<p>The operation takes a results collection operand and a predicates property, and produces
+a new results collection that includes only the records that satisfy all configured
+predicates.</p>
+<p>This is used to filter a results collection to records that satisfy the predicate. This
+is modelled around legacy runtime implementations of post-selection, which post-selects
+on an entire collection of records, and filters them down. Lowering paths could be
+implemented to allow for an on-the-fly implementation of post-selection making use of
+classical control flow, given hardware compatibility.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>collection</strong> – The operand representing the existing results collection.</p></li>
+<li><p><strong>predicates</strong> – The predicate attributes used to filter records in the collection.</p></li>
+<li><p><strong>result</strong> – The resulting collection type, which is a ResultsCollectionType.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the PostSelectOp with the given collection and predicates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.PostSelectOp.params.collection"></span><strong>collection</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.PostSelectOp.params.collection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the existing results collection.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.PostSelectOp.params.predicates"></span><strong>predicates</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.PostSelectOp.params.predicates">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr" title="qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectPredicateAttr</span></code></a></span>) – The array of predicate attributes to filter records.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.collection">
+<span class="sig-name descname"><span class="pre">collection</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.collection" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.post_select'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.predicates">
+<span class="sig-name descname"><span class="pre">predicates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr" title="qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectPredicateAttr</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.predicates" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectPredicateAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostSelectPredicateAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectPredicateAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametrizedAttribute</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Models a predicate for post selecting results.</p>
+<p>Eventually, this class could be extended to provide a lowering hook.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.PostSelectPredicateAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.post_select_predicate'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.PostSelectPredicateAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.RecordType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.RecordType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a></p>
+<p>A type that carries a results record that can be added to a results collection.</p>
+<p>This is used to represent a single record of results, e.g., from a single shot. It has
+the semantics of a dictionary, where the entries are accessed by string keys, and it can
+store arbitrary data types.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.RecordType.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.RecordType.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.RecordType.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.record'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.RecordType.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReduceOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">collection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp" title="qat.experimental.dialect.results.ir.ops.ReduceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReduceOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reduces a record, down to a subset of the entries in the record, producing a new
+record or collection of records.</p>
+<p>We often want to gather a number of measurements to use in post-processing for use cases
+such as post-selection, and more general error mitigation methods. But not each of these
+measurements are the measurements that are requested in the original circuit. After the
+post-processing has completed and we have no need for these measurements, we can reduce
+records down to only the entries we would like to return.</p>
+<p>This is a high-level operation that is roughly equivalent to the Return instruction in
+legacy IR. This has a lowering path to extract the entries from the record, and then
+create a new record with only the entries that are requested. But currently, this
+operation is more useful to the current runtime.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This operation exists to support legacy runtime implementations of post-processing.
+Going forward, it is highly encouraged to assemble records in the structure that is
+desired to promote proper dataflow semantics.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This operation is likely to be flagged for deprecation in the future.</p>
+</div>
+<p>Initializes the ReduceOp with the given collection and keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ReduceOp.params.collection"></span><strong>collection</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ReduceOp.params.collection">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the existing results record.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.ReduceOp.params.keys"></span><strong>keys</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.ReduceOp.params.keys">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – A list of strings representing the keys to retain in the reduced
+records.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.collection">
+<span class="sig-name descname"><span class="pre">collection</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.collection" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.keys" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.reduce'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.result">
+<span class="sig-name descname"><span class="pre">result</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.result" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ReduceOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ReduceOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ResultsArrayType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsArrayType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ResultsArrayType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsArrayType" title="qat.experimental.dialect.results.ir.types.ResultsArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a></p>
+<p>A type that represents an array of results, which can be added to and filtered with
+given operations.</p>
+<p>This is used to represent a collection of results that can be indexed into, e.g., a
+register of classical bits measured from a quantum circuit. It takes standard array
+semantics, holding an ordered list of results.</p>
+<p><a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsArrayType" title="qat.experimental.dialect.results.ir.ResultsArrayType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a> is modelled to be immutable, and must be complete when
+constructed.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ResultsArrayType.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ResultsArrayType.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ResultsArrayType.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.array'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ResultsArrayType.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ResultsCollectionType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultsCollectionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType" title="qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a></p>
+<p>A type that represents a collection of results, which can be added to and filtered
+with given operations.</p>
+<p>Each entry is expected to hold the results of a single circuit execution, such as a
+single shot. Results can dynamically be added to the collection, and filtered away with
+given operations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ResultsCollectionType.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.ResultsCollectionType.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.ResultsCollectionType.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.collection'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.ResultsCollectionType.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.YieldOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">YieldOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.YieldOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp" title="qat.experimental.dialect.results.ir.ops.YieldOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">YieldOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Yields a record from a region, which can be used to produce a new collection of
+records.</p>
+<p>This operation is used to yield a record from a region, which can be used to produce a
+new collection of records. The yielded record must be of type RecordType.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>record</strong> – The SSA value representing the record to be yielded.</p>
+</dd>
+</dl>
+<p>Initializes the YieldOp with the given record.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.results.ir.YieldOp.params.record"></span><strong>record</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.YieldOp.params.record">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">SSAValue</span></code>[<a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType" title="qat.experimental.dialect.results.ir.types.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>]</span>) – The SSA value representing the record to be yielded.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.YieldOp.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.YieldOp.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL operation definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.YieldOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.yield'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.YieldOp.name" title="Link to this definition"></a></dt>
+<dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.YieldOp.record">
+<span class="sig-name descname"><span class="pre">record</span></span><a class="headerlink" href="#qat.experimental.dialect.results.ir.YieldOp.record" title="Link to this definition"></a></dt>
+<dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.YieldOp.traits">
+<span class="sig-name descname"><span class="pre">traits</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[OpTraits]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.ir.core.OpTraits</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.YieldOp.traits" title="Link to this definition"></a></dt>
+<dd><p>Traits attached to an operation definition.
+This is a static field, and is made empty by default by PyRDL if not set
+by the operation definition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.YieldOp.verify_">
+<span class="sig-name descname"><span class="pre">verify_</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.YieldOp.verify_" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html">qat.experimental.dialect.results.ir.attributes module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr"><code class="docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.disallowed_values"><code class="docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr.disallowed_values</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.key"><code class="docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr.key</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.IntegerStatePredicateAttr.name"><code class="docutils literal notranslate"><span class="pre">IntegerStatePredicateAttr.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr"><code class="docutils literal notranslate"><span class="pre">PostSelectPredicateAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr.name"><code class="docutils literal notranslate"><span class="pre">PostSelectPredicateAttr.name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html">qat.experimental.dialect.results.ir.ops module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp"><code class="docutils literal notranslate"><span class="pre">AddRecordOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.attributes"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.collection"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.collection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.location"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.name"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.properties"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.record"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.record</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.result"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.traits"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.AddRecordOp.verify_"><code class="docutils literal notranslate"><span class="pre">AddRecordOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.attributes"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.keys"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.keys</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.location"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.name"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.properties"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.result"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.traits"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.values"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.values</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateRecordOp.verify_"><code class="docutils literal notranslate"><span class="pre">CreateRecordOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.attributes"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.location"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.name"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.properties"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.result"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.traits"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.values"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.values</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsArrayOp.verify_"><code class="docutils literal notranslate"><span class="pre">CreateResultsArrayOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.attributes"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.location"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.name"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.properties"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.result"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.traits"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateResultsCollectionOp.verify_"><code class="docutils literal notranslate"><span class="pre">CreateResultsCollectionOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp"><code class="docutils literal notranslate"><span class="pre">ExtractOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.attributes"><code class="docutils literal notranslate"><span class="pre">ExtractOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">ExtractOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.key"><code class="docutils literal notranslate"><span class="pre">ExtractOp.key</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.location"><code class="docutils literal notranslate"><span class="pre">ExtractOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.name"><code class="docutils literal notranslate"><span class="pre">ExtractOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.properties"><code class="docutils literal notranslate"><span class="pre">ExtractOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.record"><code class="docutils literal notranslate"><span class="pre">ExtractOp.record</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.result"><code class="docutils literal notranslate"><span class="pre">ExtractOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.traits"><code class="docutils literal notranslate"><span class="pre">ExtractOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.verify_"><code class="docutils literal notranslate"><span class="pre">ExtractOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.attributes"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.collection"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.collection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.group_key"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.group_key</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.keys"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.keys</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.location"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.name"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.properties"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.result"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.traits"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.GroupEntriesOp.verify_"><code class="docutils literal notranslate"><span class="pre">GroupEntriesOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp"><code class="docutils literal notranslate"><span class="pre">MapOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.attributes"><code class="docutils literal notranslate"><span class="pre">MapOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.body"><code class="docutils literal notranslate"><span class="pre">MapOp.body</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">MapOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.location"><code class="docutils literal notranslate"><span class="pre">MapOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.name"><code class="docutils literal notranslate"><span class="pre">MapOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.properties"><code class="docutils literal notranslate"><span class="pre">MapOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.result"><code class="docutils literal notranslate"><span class="pre">MapOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.traits"><code class="docutils literal notranslate"><span class="pre">MapOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.value"><code class="docutils literal notranslate"><span class="pre">MapOp.value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.MapOp.verify_"><code class="docutils literal notranslate"><span class="pre">MapOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp"><code class="docutils literal notranslate"><span class="pre">PostSelectOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.attributes"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.collection"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.collection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.location"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.name"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.predicates"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.predicates</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.properties"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.result"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.traits"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.verify_"><code class="docutils literal notranslate"><span class="pre">PostSelectOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp"><code class="docutils literal notranslate"><span class="pre">ReduceOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.attributes"><code class="docutils literal notranslate"><span class="pre">ReduceOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.collection"><code class="docutils literal notranslate"><span class="pre">ReduceOp.collection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">ReduceOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.keys"><code class="docutils literal notranslate"><span class="pre">ReduceOp.keys</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.location"><code class="docutils literal notranslate"><span class="pre">ReduceOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.name"><code class="docutils literal notranslate"><span class="pre">ReduceOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.properties"><code class="docutils literal notranslate"><span class="pre">ReduceOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.result"><code class="docutils literal notranslate"><span class="pre">ReduceOp.result</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.traits"><code class="docutils literal notranslate"><span class="pre">ReduceOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.verify_"><code class="docutils literal notranslate"><span class="pre">ReduceOp.verify_()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp"><code class="docutils literal notranslate"><span class="pre">YieldOp</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.attributes"><code class="docutils literal notranslate"><span class="pre">YieldOp.attributes</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">YieldOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.location"><code class="docutils literal notranslate"><span class="pre">YieldOp.location</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.name"><code class="docutils literal notranslate"><span class="pre">YieldOp.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.properties"><code class="docutils literal notranslate"><span class="pre">YieldOp.properties</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.record"><code class="docutils literal notranslate"><span class="pre">YieldOp.record</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.traits"><code class="docutils literal notranslate"><span class="pre">YieldOp.traits</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.YieldOp.verify_"><code class="docutils literal notranslate"><span class="pre">YieldOp.verify_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html">qat.experimental.dialect.results.ir.types module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType"><code class="docutils literal notranslate"><span class="pre">RecordType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">RecordType.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.RecordType.name"><code class="docutils literal notranslate"><span class="pre">RecordType.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsArrayType"><code class="docutils literal notranslate"><span class="pre">ResultsArrayType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsArrayType.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">ResultsArrayType.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsArrayType.name"><code class="docutils literal notranslate"><span class="pre">ResultsArrayType.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType"><code class="docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">ResultsCollectionType.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.results.ir.types.html#qat.experimental.dialect.results.ir.types.ResultsCollectionType.name"><code class="docutils literal notranslate"><span class="pre">ResultsCollectionType.name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.experimental.dialect.results.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.results package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.experimental.dialect.results.ir.attributes.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.results.ir.attributes module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/index.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/index.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/index.html">3.0.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="qat.experimental.dialect.results.ir.html">main</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -17,3 +17,4 @@ Subpackages
    qat.experimental.dialect.q1_cf
    qat.experimental.dialect.q1_scf
    qat.experimental.dialect.q1_sequence
+   qat.experimental.dialect.results
