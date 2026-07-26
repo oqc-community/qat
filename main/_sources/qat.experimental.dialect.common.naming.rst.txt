@@ -1,0 +1,7 @@
+qat.experimental.dialect.common.naming module
+=============================================
+
+.. automodule:: qat.experimental.dialect.common.naming
+   :members:
+   :undoc-members:
+   :show-inheritance:

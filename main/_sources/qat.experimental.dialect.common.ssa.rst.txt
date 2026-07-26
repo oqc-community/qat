@@ -1,0 +1,7 @@
+qat.experimental.dialect.common.ssa module
+==========================================
+
+.. automodule:: qat.experimental.dialect.common.ssa
+   :members:
+   :undoc-members:
+   :show-inheritance:

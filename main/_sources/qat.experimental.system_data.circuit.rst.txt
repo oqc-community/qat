@@ -1,0 +1,16 @@
+qat.experimental.system\_data.circuit package
+=============================================
+
+.. automodule:: qat.experimental.system_data.circuit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.experimental.system_data.circuit.qubits
+   qat.experimental.system_data.circuit.topology

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.derived.interface module &mdash; qat-compiler 3.0.0.post295.dev20260724123958 documentation</title>
+  <title>qat.experimental.system_data.derived.interface module &mdash; qat-compiler 3.0.0.post297.dev20260726183504 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -163,6 +163,13 @@
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="qat.experimental.html">qat.experimental package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.naming.html">qat.experimental.dialect.common.naming module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.region.html">qat.experimental.dialect.common.region module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.ssa.html">qat.experimental.dialect.common.ssa module</a></li>
+</ul>
+</li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
@@ -178,10 +185,12 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_cf.html">qat.experimental.dialect.q1_cf package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.ir.html">qat.experimental.dialect.q1_cf.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.transforms.html">qat.experimental.dialect.q1_cf.transforms package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_scf.html">qat.experimental.dialect.q1_scf package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.ir.html">qat.experimental.dialect.q1_scf.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.html">qat.experimental.dialect.q1_scf.transforms package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
@@ -208,6 +217,11 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html">qat.experimental.system_data.canonical.schema module</a></li>
 </ul>
 </li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.circuit.html">qat.experimental.system_data.circuit package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.circuit.qubits.html">qat.experimental.system_data.circuit.qubits module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.circuit.topology.html">qat.experimental.system_data.circuit.topology module</a></li>
+</ul>
+</li>
 <li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.system_data.derived.html">qat.experimental.system_data.derived package</a><ul class="current">
 <li class="toctree-l6 current"><a class="current reference internal" href="#">qat.experimental.system_data.derived.interface module</a></li>
 </ul>
@@ -226,7 +240,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
 </ul>
 </li>
-<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.topology.html">qat.experimental.system_data.topology module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.utils.html">qat.experimental.utils package</a><ul>
@@ -606,24 +619,32 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.derived.interface.DerivedViewInterface">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DerivedViewInterface</span></span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
-<p>A view of a canonical system data object derived from the canonical data.</p>
-<p>This is an abstract base class for derived views of canonical system data. They provide
-a representation of relevant data in a form that is convenient to the given application,
-such as a particular layer of abstraction, or a particular pass.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TParent</span></code>]</p>
+<p>A view derived from an upstream data source.</p>
+<p>The type parameter <code class="docutils literal notranslate"><span class="pre">_TParent</span></code> declares what this view is derived from. That may be
+<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a> for views
+that sit directly on the canonical data, or another <a class="reference internal" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface" title="qat.experimental.system_data.derived.interface.DerivedViewInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DerivedViewInterface</span></code></a>
+subclass for views that sit further down the derivation chain.</p>
+<p>Subclasses declare their parent type in the class header:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">QubitView</span><span class="p">(</span><span class="n">DerivedViewInterface</span><span class="p">[</span><span class="n">CanonicalSystemData</span><span class="p">]):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TopologyView</span><span class="p">(</span><span class="n">DerivedViewInterface</span><span class="p">[</span><span class="n">QubitView</span><span class="p">]):</span> <span class="o">...</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ScipyTopologyView</span><span class="p">(</span><span class="n">DerivedViewInterface</span><span class="p">[</span><span class="n">TopologyView</span><span class="p">]):</span> <span class="o">...</span>
+</pre></div>
+</div>
+<p>and must implement <a class="reference internal" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.derive" title="qat.experimental.system_data.derived.interface.DerivedViewInterface.derive"><code class="xref py py-meth docutils literal notranslate"><span class="pre">derive()</span></code></a>.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_canonical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical" title="Link to this definition"></a></dt>
-<dd><p>Construct a derived view from canonical system data.</p>
+<dt class="sig sig-object py" id="qat.experimental.system_data.derived.interface.DerivedViewInterface.derive">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.derive" title="Link to this definition"></a></dt>
+<dd><p>Construct this view from its upstream parent.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical.params.canonical_data"></span><strong>canonical_data</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.from_canonical.params.canonical_data">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a></span>) – The canonical system data to derive from.</p>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.derived.interface.DerivedViewInterface.derive.params.parent"></span><strong>parent</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.derived.interface.DerivedViewInterface.derive.params.parent">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_TParent</span></code>, bound= <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a>, DerivedViewInterface])</span>) – The upstream data source to derive from.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_TDerivedView</span></code>, bound= DerivedViewInterface)</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A derived view of the canonical data.</p>
+<dd class="field-odd"><p>A new derived view built from <code class="docutils literal notranslate"><span class="pre">parent</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>

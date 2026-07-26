@@ -1,0 +1,7 @@
+qat.experimental.dialect.common.region module
+=============================================
+
+.. automodule:: qat.experimental.dialect.common.region
+   :members:
+   :undoc-members:
+   :show-inheritance:

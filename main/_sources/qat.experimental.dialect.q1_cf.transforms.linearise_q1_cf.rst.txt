@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1\_cf.transforms.linearise\_q1\_cf module
+===================================================================
+
+.. automodule:: qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf
+   :members:
+   :undoc-members:
+   :show-inheritance:
