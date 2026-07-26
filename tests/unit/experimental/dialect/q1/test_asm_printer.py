@@ -38,6 +38,8 @@ from qat.experimental.dialect.q1 import (
     JoRsOp,
     JzImmOp,
     JzRsOp,
+    LabelAttr,
+    LoopRdImmOp,
     MoveImmRdOp,
     MoveRsRdOp,
     NcoPhaseImm,
@@ -108,6 +110,16 @@ _PRINT_TABLE = [
     pytest.param(lambda: JzImmOp(AddressImm(200)), "jz", ("200",), None, id="jz_imm"),
     pytest.param(lambda: JnzImmOp(AddressImm(300)), "jnz", ("300",), None, id="jnz_imm"),
     pytest.param(lambda: JoImmOp(AddressImm(400)), "jo", ("400",), None, id="jo_imm"),
+    # I-format, symbolic label targets
+    pytest.param(lambda: JmpImmOp("body"), "jmp", ("@body",), None, id="jmp_label"),
+    pytest.param(lambda: JzImmOp(LabelAttr("exit")), "jz", ("@exit",), None, id="jz_label"),
+    pytest.param(
+        lambda: LoopRdImmOp(Registers.R16, "body"),
+        "loop",
+        ("R16", "@body"),
+        None,
+        id="loop_label",
+    ),
     pytest.param(
         lambda: SetMrkImmOp(UI4Imm(15)), "set_mrk", ("15",), None, id="set_mrk_imm"
     ),

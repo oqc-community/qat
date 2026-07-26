@@ -12,8 +12,8 @@ The dialect occupies the layer above flat ``q1`` (ISA mnemonics). It provides
 four terminators:
 
 - ``JmpBranchOp`` — unconditional branch.
-- ``FlagBranchOp`` — branch on a condition-code test of one register.
-- ``ComparisonBranchOp`` — branch on a comparison of two operands.
+- ``UnaryPredicateBranchOp`` — branch on a unary predicate over one register.
+- ``BinaryPredicateBranchOp`` — branch on a binary predicate over two operands.
 - ``LoopBranchOp`` — counted-loop back-edge.
 
 Reference: https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html
@@ -43,12 +43,13 @@ from xdsl.traits import IsTerminator
 from xdsl.utils.comparisons import to_signed, to_unsigned
 from xdsl.utils.exceptions import VerifyException
 
+from qat.experimental.dialect.common.cfg import SuccessorOperandsTrait
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_cf.ir.attrs import (
-    ComparisonPredicate,
-    ComparisonPredicateAttr,
-    FlagPredicate,
-    FlagPredicateAttr,
+    BinaryPredicate,
+    BinaryPredicateAttr,
+    UnaryPredicate,
+    UnaryPredicateAttr,
 )
 
 
@@ -155,6 +156,55 @@ def _verify_fall_through(op, else_block: Block) -> None:
         )
 
 
+class _JmpBranchSuccessors(SuccessorOperandsTrait):
+    """Successor edges of :class:`JmpBranchOp`: one unconditional edge."""
+
+    @classmethod
+    def successor_edges(cls, op: Operation) -> list[tuple[Block, list[SSAValue]]]:
+        if not isinstance(op, JmpBranchOp):
+            raise AssertionError(f"{cls.__name__} attached to {type(op).__name__}")
+        return [(op.successor, list(op.successor_arguments))]
+
+
+class _UnaryPredicateBranchSuccessors(SuccessorOperandsTrait):
+    """Successor edges of :class:`UnaryPredicateBranchOp`: ``then`` then ``else``."""
+
+    @classmethod
+    def successor_edges(cls, op: Operation) -> list[tuple[Block, list[SSAValue]]]:
+        if not isinstance(op, UnaryPredicateBranchOp):
+            raise AssertionError(f"{cls.__name__} attached to {type(op).__name__}")
+        return [
+            (op.then_block, list(op.then_arguments)),
+            (op.else_block, list(op.else_arguments)),
+        ]
+
+
+class _BinaryPredicateBranchSuccessors(SuccessorOperandsTrait):
+    """Successor edges of :class:`BinaryPredicateBranchOp`: ``then`` then ``else``."""
+
+    @classmethod
+    def successor_edges(cls, op: Operation) -> list[tuple[Block, list[SSAValue]]]:
+        if not isinstance(op, BinaryPredicateBranchOp):
+            raise AssertionError(f"{cls.__name__} attached to {type(op).__name__}")
+        return [
+            (op.then_block, list(op.then_arguments)),
+            (op.else_block, list(op.else_arguments)),
+        ]
+
+
+class _LoopBranchSuccessors(SuccessorOperandsTrait):
+    """Successor edges of :class:`LoopBranchOp`: ``body`` then ``exit``."""
+
+    @classmethod
+    def successor_edges(cls, op: Operation) -> list[tuple[Block, list[SSAValue]]]:
+        if not isinstance(op, LoopBranchOp):
+            raise AssertionError(f"{cls.__name__} attached to {type(op).__name__}")
+        return [
+            (op.body_block, list(op.body_arguments)),
+            (op.exit_block, list(op.exit_arguments)),
+        ]
+
+
 @irdl_op_definition
 class JmpBranchOp(HasRegisterConstraints, IRDLOperation):
     """Unconditional branch to a successor block.
@@ -173,7 +223,7 @@ class JmpBranchOp(HasRegisterConstraints, IRDLOperation):
     successor_arguments = var_operand_def(IntRegisterType)
     successor = successor_def()
 
-    traits = traits_def(IsTerminator())
+    traits = traits_def(IsTerminator(), _JmpBranchSuccessors())
 
     def __init__(
         self,
@@ -201,22 +251,23 @@ class JmpBranchOp(HasRegisterConstraints, IRDLOperation):
 
 
 @irdl_op_definition
-class FlagBranchOp(HasRegisterConstraints, IRDLOperation):
-    """Branch on a condition-code test of a single register.
+class UnaryPredicateBranchOp(HasRegisterConstraints, IRDLOperation):
+    """Branch on a unary predicate of a single register.
 
     The ``predicate`` selects the zero/sign test applied to ``rs``. The ``then``
     block is taken when the test holds; ``else`` is the fall-through successor
     and must immediately follow the parent block in its region. Lowers to a
-    ``test``/``cmp`` against zero followed by the matching flag jump at flat q1.
+    ``test``-based flag setup followed by the matching conditional jump at flat
+    q1.
 
     .. code-block:: mlir
 
-        q1_cf.flag_branch eqz %rs : q1.reg, ^then(...), ^else(...)
+        q1_cf.unary_predicate_branch eqz %rs : q1.reg, ^then(...), ^else(...)
     """
 
-    name = "q1_cf.flag_branch"
+    name = "q1_cf.unary_predicate_branch"
 
-    predicate = prop_def(FlagPredicateAttr)
+    predicate = prop_def(UnaryPredicateAttr)
     rs = operand_def(IntRegisterType)
     then_arguments = var_operand_def(IntRegisterType)
     else_arguments = var_operand_def(IntRegisterType)
@@ -226,19 +277,19 @@ class FlagBranchOp(HasRegisterConstraints, IRDLOperation):
     then_block = successor_def()
     else_block = successor_def()
 
-    traits = traits_def(IsTerminator())
+    traits = traits_def(IsTerminator(), _UnaryPredicateBranchSuccessors())
 
     def __init__(
         self,
-        predicate: FlagPredicate | FlagPredicateAttr,
+        predicate: UnaryPredicate | UnaryPredicateAttr,
         rs: SSAValue | Operation,
         then_arguments: Sequence[SSAValue | Operation],
         else_arguments: Sequence[SSAValue | Operation],
         then_block: Successor,
         else_block: Successor,
     ):
-        if isinstance(predicate, FlagPredicate):
-            predicate = FlagPredicateAttr(predicate)
+        if isinstance(predicate, UnaryPredicate):
+            predicate = UnaryPredicateAttr(predicate)
         super().__init__(
             operands=[rs, then_arguments, else_arguments],
             successors=(then_block, else_block),
@@ -268,7 +319,7 @@ class FlagBranchOp(HasRegisterConstraints, IRDLOperation):
 
     @classmethod
     def parse(cls, parser: Parser) -> Self:
-        predicate = parser.parse_str_enum(FlagPredicate)
+        predicate = parser.parse_str_enum(UnaryPredicate)
         rs = _parse_type_pair(parser)
         parser.parse_punctuation(",")
         then_block, then_args = _parse_successor(parser)
@@ -277,7 +328,7 @@ class FlagBranchOp(HasRegisterConstraints, IRDLOperation):
         return cls(predicate, rs, then_args, else_args, then_block, else_block)
 
     def const_evaluate(self, rs: int, bitwidth: int) -> bool:
-        """Evaluate the flag predicate on a constant operand value.
+        """Evaluate the unary predicate on a constant operand value.
 
         :param rs: Signless bit pattern of the tested register.
         :param bitwidth: Register width, used to reinterpret ``rs`` as signed or
@@ -286,33 +337,33 @@ class FlagBranchOp(HasRegisterConstraints, IRDLOperation):
             branch falls through to ``else``.
         """
         predicate = self.predicate.data
-        if predicate is FlagPredicate.eqz:
+        if predicate is UnaryPredicate.eqz:
             return to_unsigned(rs, bitwidth) == 0
-        if predicate is FlagPredicate.nez:
+        if predicate is UnaryPredicate.nez:
             return to_unsigned(rs, bitwidth) != 0
-        if predicate is FlagPredicate.ltz:
+        if predicate is UnaryPredicate.ltz:
             return to_signed(rs, bitwidth) < 0
         return to_signed(rs, bitwidth) >= 0  # gez
 
 
 @irdl_op_definition
-class ComparisonBranchOp(HasRegisterConstraints, IRDLOperation):
-    """Branch on a comparison of two operands.
+class BinaryPredicateBranchOp(HasRegisterConstraints, IRDLOperation):
+    """Branch on a binary predicate over two operands.
 
     The ``predicate`` selects the signed/unsigned comparison applied to ``lhs``
     and ``rhs``, both register-typed SSA values. The ``then`` block is taken when
     the comparison holds; ``else`` is the fall-through successor and must
     immediately follow the parent block in its region. Lowers to a ``cmp``
-    followed by the matching flag jump at flat q1.
+    followed by the matching conditional jump at flat q1.
 
     .. code-block:: mlir
 
-        q1_cf.comparison_branch slt %lhs : q1.reg, %rhs : q1.reg, ^then(...), ^else(...)
+        q1_cf.binary_predicate_branch slt %lhs : q1.reg, %rhs : q1.reg, ^then(...), ^else(...)
     """
 
-    name = "q1_cf.comparison_branch"
+    name = "q1_cf.binary_predicate_branch"
 
-    predicate = prop_def(ComparisonPredicateAttr)
+    predicate = prop_def(BinaryPredicateAttr)
     lhs = operand_def(IntRegisterType)
     rhs = operand_def(IntRegisterType)
     then_arguments = var_operand_def(IntRegisterType)
@@ -323,11 +374,11 @@ class ComparisonBranchOp(HasRegisterConstraints, IRDLOperation):
     then_block = successor_def()
     else_block = successor_def()
 
-    traits = traits_def(IsTerminator())
+    traits = traits_def(IsTerminator(), _BinaryPredicateBranchSuccessors())
 
     def __init__(
         self,
-        predicate: ComparisonPredicate | ComparisonPredicateAttr,
+        predicate: BinaryPredicate | BinaryPredicateAttr,
         lhs: SSAValue | Operation,
         rhs: SSAValue | Operation,
         then_arguments: Sequence[SSAValue | Operation],
@@ -335,8 +386,8 @@ class ComparisonBranchOp(HasRegisterConstraints, IRDLOperation):
         then_block: Successor,
         else_block: Successor,
     ):
-        if isinstance(predicate, ComparisonPredicate):
-            predicate = ComparisonPredicateAttr(predicate)
+        if isinstance(predicate, BinaryPredicate):
+            predicate = BinaryPredicateAttr(predicate)
         super().__init__(
             operands=[lhs, rhs, then_arguments, else_arguments],
             successors=(then_block, else_block),
@@ -368,7 +419,7 @@ class ComparisonBranchOp(HasRegisterConstraints, IRDLOperation):
 
     @classmethod
     def parse(cls, parser: Parser) -> Self:
-        predicate = parser.parse_str_enum(ComparisonPredicate)
+        predicate = parser.parse_str_enum(BinaryPredicate)
         lhs = _parse_type_pair(parser)
         parser.parse_punctuation(",")
         rhs = _parse_type_pair(parser)
@@ -379,7 +430,7 @@ class ComparisonBranchOp(HasRegisterConstraints, IRDLOperation):
         return cls(predicate, lhs, rhs, then_args, else_args, then_block, else_block)
 
     def const_evaluate(self, lhs: int, rhs: int, bitwidth: int) -> bool:
-        """Evaluate the comparison predicate on constant operand values.
+        """Evaluate the binary predicate on constant operand values.
 
         This is the hook a future CFG-canonicalisation pattern will call when both
         operands fold to constants: the branch is then rewritten to an
@@ -398,28 +449,28 @@ class ComparisonBranchOp(HasRegisterConstraints, IRDLOperation):
         unsigned_lhs, unsigned_rhs = to_unsigned(lhs, bitwidth), to_unsigned(rhs, bitwidth)
         signed_lhs, signed_rhs = to_signed(lhs, bitwidth), to_signed(rhs, bitwidth)
         match self.predicate.data:
-            case ComparisonPredicate.eq:
+            case BinaryPredicate.eq:
                 return unsigned_lhs == unsigned_rhs
-            case ComparisonPredicate.ne:
+            case BinaryPredicate.ne:
                 return unsigned_lhs != unsigned_rhs
-            case ComparisonPredicate.slt:
+            case BinaryPredicate.slt:
                 return signed_lhs < signed_rhs
-            case ComparisonPredicate.sle:
+            case BinaryPredicate.sle:
                 return signed_lhs <= signed_rhs
-            case ComparisonPredicate.sgt:
+            case BinaryPredicate.sgt:
                 return signed_lhs > signed_rhs
-            case ComparisonPredicate.sge:
+            case BinaryPredicate.sge:
                 return signed_lhs >= signed_rhs
-            case ComparisonPredicate.ult:
+            case BinaryPredicate.ult:
                 return unsigned_lhs < unsigned_rhs
-            case ComparisonPredicate.ule:
+            case BinaryPredicate.ule:
                 return unsigned_lhs <= unsigned_rhs
-            case ComparisonPredicate.ugt:
+            case BinaryPredicate.ugt:
                 return unsigned_lhs > unsigned_rhs
-            case ComparisonPredicate.uge:
+            case BinaryPredicate.uge:
                 return unsigned_lhs >= unsigned_rhs
             case _:
-                raise ValueError(f"Unhandled comparison predicate: {self.predicate.data}")
+                raise ValueError(f"Unhandled binary predicate: {self.predicate.data}")
 
 
 @irdl_op_definition
@@ -444,7 +495,7 @@ class LoopBranchOp(HasRegisterConstraints, IRDLOperation):
     body_block = successor_def()
     exit_block = successor_def()
 
-    traits = traits_def(IsTerminator())
+    traits = traits_def(IsTerminator(), _LoopBranchSuccessors())
 
     def __init__(
         self,

@@ -106,6 +106,11 @@ class TestEmitModule:
         result = emit_module(module)
         assert result == {}
 
+    def test_ignores_non_sequence_ops(self):
+        module = ModuleOp([NopOp(), SequenceOp("drive", [StopOp()])])
+        result = emit_module(module)
+        assert set(result.keys()) == {"drive"}
+
     def test_sequences_with_data(self):
         wf = make_waveform("wf0", 0, [0.5])
         acq = make_acquisition("acq0", 0, 1)

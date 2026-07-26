@@ -14,39 +14,39 @@ Reference: https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.ht
 from xdsl.ir import Dialect
 
 from qat.experimental.dialect.q1_cf.ir.attrs import (
-    ComparisonPredicate,
-    ComparisonPredicateAttr,
-    FlagPredicate,
-    FlagPredicateAttr,
+    BinaryPredicate,
+    BinaryPredicateAttr,
+    UnaryPredicate,
+    UnaryPredicateAttr,
 )
 from qat.experimental.dialect.q1_cf.ir.ops import (
-    ComparisonBranchOp,
-    FlagBranchOp,
+    BinaryPredicateBranchOp,
     JmpBranchOp,
     LoopBranchOp,
+    UnaryPredicateBranchOp,
 )
 
 Q1_cf = Dialect(
     "q1_cf",
     [
         JmpBranchOp,
-        FlagBranchOp,
-        ComparisonBranchOp,
+        UnaryPredicateBranchOp,
+        BinaryPredicateBranchOp,
         LoopBranchOp,
     ],
     [
-        FlagPredicateAttr,
-        ComparisonPredicateAttr,
+        UnaryPredicateAttr,
+        BinaryPredicateAttr,
     ],
 )
 
 __all__ = [
-    "ComparisonBranchOp",
-    "ComparisonPredicate",
-    "ComparisonPredicateAttr",
-    "FlagBranchOp",
-    "FlagPredicate",
-    "FlagPredicateAttr",
+    "BinaryPredicateBranchOp",
+    "BinaryPredicate",
+    "BinaryPredicateAttr",
+    "UnaryPredicateBranchOp",
+    "UnaryPredicate",
+    "UnaryPredicateAttr",
     "JmpBranchOp",
     "LoopBranchOp",
     "Q1_cf",

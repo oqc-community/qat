@@ -58,27 +58,27 @@ from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_cf.ir.attrs import (
-    ComparisonPredicate,
-    ComparisonPredicateAttr,
-    FlagPredicate,
-    FlagPredicateAttr,
+    BinaryPredicate,
+    BinaryPredicateAttr,
+    UnaryPredicate,
+    UnaryPredicateAttr,
 )
 from qat.experimental.dialect.q1_scf.ir.attrs import IterDomainAttr
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 
-# A predicate is either a single-operand flag test or a two-operand comparison.
-PredicateAttr = FlagPredicateAttr | ComparisonPredicateAttr
-_PREDICATE_CONSTRAINT = base(FlagPredicateAttr) | base(ComparisonPredicateAttr)
+# A predicate is either unary (single operand) or binary (two operands).
+PredicateAttr = UnaryPredicateAttr | BinaryPredicateAttr
+_PREDICATE_CONSTRAINT = base(UnaryPredicateAttr) | base(BinaryPredicateAttr)
 
 
 def _coerce_predicate(
-    predicate: PredicateAttr | FlagPredicate | ComparisonPredicate,
+    predicate: PredicateAttr | UnaryPredicate | BinaryPredicate,
 ) -> PredicateAttr:
     """Wrap a bare predicate enum member in its attribute, passing attrs through."""
-    if isinstance(predicate, FlagPredicate):
-        return FlagPredicateAttr(predicate)
-    if isinstance(predicate, ComparisonPredicate):
-        return ComparisonPredicateAttr(predicate)
+    if isinstance(predicate, UnaryPredicate):
+        return UnaryPredicateAttr(predicate)
+    if isinstance(predicate, BinaryPredicate):
+        return BinaryPredicateAttr(predicate)
     return predicate
 
 
@@ -109,26 +109,26 @@ def _print_predicate_operands(
 def _parse_predicate(parser: Parser) -> PredicateAttr:
     """Parse a bare predicate keyword into its attribute wrapper.
 
-    The flag and comparison predicate spellings are disjoint, so the keyword alone
+    The unary and binary predicate spellings are disjoint, so the keyword alone
     selects the predicate family.
 
-    :returns: A :class:`FlagPredicateAttr` or :class:`ComparisonPredicateAttr`.
+    :returns: A :class:`UnaryPredicateAttr` or :class:`BinaryPredicateAttr`.
     """
     keyword = parser.parse_optional_identifier()
     if keyword is not None:
-        flag = FlagPredicateAttr.enum_type.__members__.get(keyword)
+        flag = UnaryPredicateAttr.enum_type.__members__.get(keyword)
         if flag is not None:
-            return FlagPredicateAttr(flag)
-        comparison = ComparisonPredicateAttr.enum_type.__members__.get(keyword)
+            return UnaryPredicateAttr(flag)
+        comparison = BinaryPredicateAttr.enum_type.__members__.get(keyword)
         if comparison is not None:
-            return ComparisonPredicateAttr(comparison)
-    return parser.raise_error("expected a q1_scf flag or comparison predicate")
+            return BinaryPredicateAttr(comparison)
+    return parser.raise_error("expected a q1_scf unary or binary predicate")
 
 
 def _parse_predicate_operands(parser: Parser, predicate: PredicateAttr) -> list[SSAValue]:
     """Parse the register operands that follow a predicate keyword."""
     operands = [_parse_type_pair(parser)]
-    for _ in range(1 if isinstance(predicate, ComparisonPredicateAttr) else 0):
+    for _ in range(1 if isinstance(predicate, BinaryPredicateAttr) else 0):
         parser.parse_punctuation(",")
         operands.append(_parse_type_pair(parser))
     return operands
@@ -215,7 +215,7 @@ class ConditionOp(IRDLOperation):
 
     def __init__(
         self,
-        predicate: PredicateAttr | FlagPredicate | ComparisonPredicate,
+        predicate: PredicateAttr | UnaryPredicate | BinaryPredicate,
         predicate_args: Sequence[SSAValue | Operation],
         forward_args: Sequence[SSAValue | Operation],
     ):
@@ -225,7 +225,7 @@ class ConditionOp(IRDLOperation):
         )
 
     def verify_(self) -> None:
-        expected = 2 if isinstance(self.predicate, ComparisonPredicateAttr) else 1
+        expected = 2 if isinstance(self.predicate, BinaryPredicateAttr) else 1
         if len(self.predicate_args) != expected:
             raise VerifyException(
                 f"{self.name}: {self.predicate.data.value} predicate expects"
@@ -535,7 +535,7 @@ class IfOp(IRDLOperation):
 
     def __init__(
         self,
-        predicate: PredicateAttr | FlagPredicate | ComparisonPredicate,
+        predicate: PredicateAttr | UnaryPredicate | BinaryPredicate,
         predicate_args: Sequence[SSAValue | Operation],
         result_types: Sequence[Attribute],
         then_region: Region | Sequence[Operation] | Sequence[Block],
@@ -559,7 +559,7 @@ class IfOp(IRDLOperation):
         if len(self.then_region.blocks) != 1:
             raise VerifyException(f"{self.name}: then region must be a single block")
 
-        expected = 2 if isinstance(self.predicate, ComparisonPredicateAttr) else 1
+        expected = 2 if isinstance(self.predicate, BinaryPredicateAttr) else 1
         if len(self.predicate_args) != expected:
             raise VerifyException(
                 f"{self.name}: {self.predicate.data.value} predicate expects"

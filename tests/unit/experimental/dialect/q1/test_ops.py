@@ -13,7 +13,7 @@ get their own dedicated test class.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, get_args
 
 import pytest
 from xdsl.backend.register_allocatable import (
@@ -178,17 +178,29 @@ from qat.experimental.dialect.q1 import (
     XorRsImmRdOp,
     XorRsRsRdOp,
 )
+from qat.experimental.dialect.q1.ir.abstract_ops import JumpImmOperation, LoopImmOperation
 
 COMMENT_INPUTS = ["test-comment", StringAttr("test-comment")]
 
 
 def _imm_types(op_class) -> tuple[type[Q1Imm], ...]:
-    """Return the Q1Imm types bound to each imm slot of an op class (in slot order)."""
-    import typing
+    """Return the Q1Imm types bound to each imm slot of an op class (in slot order).
+
+    The result feeds :func:`_imm`, which constructs ops from integers, so only integer
+    immediate slots are reported. Jump and loop formats fix their target to the union
+    ``AddressImm | LabelAttr``: ``AddressImm`` is the integer immediate exercised by these
+    tests, whereas ``LabelAttr`` is a symbolic string target that carries no numeric range
+    and is out of scope for the numeric construction path. Every other format exposes its
+    slot types as type arguments of a ``Generic`` base.
+    """
+
+    if issubclass(op_class, JumpImmOperation | LoopImmOperation):
+        return (AddressImm,)
 
     return tuple(
         a
-        for a in typing.get_args(op_class.__orig_bases__[0])
+        for base in getattr(op_class, "__orig_bases__", ())
+        for a in get_args(base)
         if isinstance(a, type) and issubclass(a, Q1Imm)
     )
 

@@ -7,6 +7,16 @@ from typing import TypeVar
 from xdsl.backend.register_type import RegisterType
 from xdsl.irdl import irdl_attr_definition
 
+INT_REGISTER_BIT_WIDTH = 32
+"""Value width in bits of a Q1 integer register.
+
+The stored pattern is signless:
+an operation or predicate reinterprets it as signed or unsigned.
+"""
+
+INT_REGISTER_VALUE_MASK = (1 << INT_REGISTER_BIT_WIDTH) - 1
+"""Mask selecting the value bits of a Q1 integer register."""
+
 
 class Q1RegisterType(RegisterType, ABC):
     """A register type in the QBlox Q1 ISA."""

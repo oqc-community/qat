@@ -37,39 +37,45 @@ from xdsl.traits import IsTerminator
 from xdsl.utils.exceptions import VerifyException
 from xdsl.utils.test_value import create_ssa_value
 
-from qat.experimental.dialect.q1 import Q1, Registers, StopOp
+from qat.experimental.dialect.common.cfg import SuccessorOperandsTrait, successor_edges
+from qat.experimental.dialect.q1 import (
+    INT_REGISTER_BIT_WIDTH,
+    INT_REGISTER_VALUE_MASK,
+    Q1,
+    Registers,
+    StopOp,
+)
 from qat.experimental.dialect.q1_cf import (
-    ComparisonBranchOp,
-    ComparisonPredicate,
-    FlagBranchOp,
-    FlagPredicate,
+    BinaryPredicate,
+    BinaryPredicateBranchOp,
     JmpBranchOp,
     LoopBranchOp,
     Q1_cf,
+    UnaryPredicate,
+    UnaryPredicateBranchOp,
 )
 from qat.experimental.dialect.q1_sequence import Q1_sequence, SequenceOp
 
-# Register width and the signless bit patterns used to exercise const_evaluate.
-# const_evaluate receives operands as raw signless bits plus a width, and
-# reinterprets them as signed or unsigned per the predicate. _NEG1 and _MAXU are
-# the same all-ones pattern under two readings, so they pin that boundary.
-_BW = 32  # register width passed to const_evaluate as the bitwidth argument
-_NEG1 = (1 << _BW) - 1  # all-ones bits; signed reading is -1
-_MAXU = (1 << _BW) - 1  # same all-ones bits; unsigned reading is the maximum
+# Signless bit patterns used to exercise const_evaluate. const_evaluate receives
+# operands as raw signless bits plus a width, and reinterprets them as signed or
+# unsigned per the predicate. _NEG1 and _MAXU are the same all-ones pattern under
+# two readings, so they pin that boundary.
+_NEG1 = INT_REGISTER_VALUE_MASK  # all-ones bits; signed reading is -1
+_MAXU = INT_REGISTER_VALUE_MASK  # same all-ones bits; unsigned reading is the maximum
 
 
 def _make_jmp(dest_b: Block, dest_args: Sequence[SSAValue] = ()) -> JmpBranchOp:
     return JmpBranchOp(list(dest_args), dest_b)
 
 
-def _make_flag_branch_op(
+def _make_unary_predicate_branch_op(
     then_b: Block,
     else_b: Block,
     then_args: Sequence[SSAValue] = (),
     else_args: Sequence[SSAValue] = (),
-    predicate: FlagPredicate = FlagPredicate.eqz,
-) -> FlagBranchOp:
-    return FlagBranchOp(
+    predicate: UnaryPredicate = UnaryPredicate.eqz,
+) -> UnaryPredicateBranchOp:
+    return UnaryPredicateBranchOp(
         predicate,
         create_ssa_value(Registers.UNALLOCATED_INT),
         list(then_args),
@@ -79,14 +85,14 @@ def _make_flag_branch_op(
     )
 
 
-def _make_comparison_branch_op(
+def _make_binary_predicate_branch_op(
     then_b: Block,
     else_b: Block,
     then_args: Sequence[SSAValue] = (),
     else_args: Sequence[SSAValue] = (),
-    predicate: ComparisonPredicate = ComparisonPredicate.eq,
-) -> ComparisonBranchOp:
-    return ComparisonBranchOp(
+    predicate: BinaryPredicate = BinaryPredicate.eq,
+) -> BinaryPredicateBranchOp:
+    return BinaryPredicateBranchOp(
         predicate,
         create_ssa_value(Registers.UNALLOCATED_INT),
         create_ssa_value(Registers.UNALLOCATED_INT),
@@ -115,22 +121,23 @@ def _make_loop_branch_op(
 # The two conditional families share the then/else successor contract, so the
 # verifier suite parametrises over a branch-op maker for each.
 _BRANCH_OP_MAKERS = [
-    pytest.param(_make_flag_branch_op, id="flag_branch"),
-    pytest.param(_make_comparison_branch_op, id="comparison_branch"),
+    pytest.param(_make_unary_predicate_branch_op, id="unary_predicate_branch"),
+    pytest.param(_make_binary_predicate_branch_op, id="binary_predicate_branch"),
 ]
 
 # (op_type, mnemonic) for every op; drives name + trait coverage.
 _ALL_OPS = [
     (JmpBranchOp, "q1_cf.jmp_branch"),
-    (FlagBranchOp, "q1_cf.flag_branch"),
-    (ComparisonBranchOp, "q1_cf.comparison_branch"),
+    (UnaryPredicateBranchOp, "q1_cf.unary_predicate_branch"),
+    (BinaryPredicateBranchOp, "q1_cf.binary_predicate_branch"),
     (LoopBranchOp, "q1_cf.loop_branch"),
 ]
 
 _ALL_OP_IDS = [mnemonic for _, mnemonic in _ALL_OPS]
 
-# Every q1_cf op carries exactly these two traits.
-_EXPECTED_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
+# Every q1_cf op carries exactly these three traits. Each supplies its own edge
+# layout through SuccessorOperandsTrait, exercised in TestSuccessorOperandsTrait.
+_EXPECTED_TRAITS = (IsTerminator, HasRegisterConstraintsTrait, SuccessorOperandsTrait)
 
 
 def _build(op_type, then_b: Block, else_b: Block):
@@ -142,10 +149,10 @@ def _build(op_type, then_b: Block, else_b: Block):
     """
     if op_type is JmpBranchOp:
         return _make_jmp(then_b)
-    if op_type is FlagBranchOp:
-        return _make_flag_branch_op(then_b, else_b)
-    if op_type is ComparisonBranchOp:
-        return _make_comparison_branch_op(then_b, else_b)
+    if op_type is UnaryPredicateBranchOp:
+        return _make_unary_predicate_branch_op(then_b, else_b)
+    if op_type is BinaryPredicateBranchOp:
+        return _make_binary_predicate_branch_op(then_b, else_b)
     return _make_loop_branch_op(then_b, else_b)
 
 
@@ -201,6 +208,48 @@ class TestOpMetadata:
     def test_traits(self, op_type, mnemonic):
         op = _build(op_type, Block([StopOp()]), Block([StopOp()]))
         _assert_traits(op, _EXPECTED_TRAITS)
+
+
+class TestSuccessorOperandsTrait:
+    def test_jmp_branch_reports_its_single_edge(self):
+        dest = Block()
+        arg = create_ssa_value(Registers.UNALLOCATED_INT)
+        op = _make_jmp(dest, [arg])
+        assert successor_edges(op) == [(dest, [arg])]
+
+    @pytest.mark.parametrize("maker", _BRANCH_OP_MAKERS)
+    def test_conditional_branch_reports_then_before_else(self, maker):
+        then_b, else_b = Block(), Block()
+        then_arg = create_ssa_value(Registers.UNALLOCATED_INT)
+        else_arg = create_ssa_value(Registers.UNALLOCATED_INT)
+        op = maker(then_b, else_b, then_args=[then_arg], else_args=[else_arg])
+        assert successor_edges(op) == [(then_b, [then_arg]), (else_b, [else_arg])]
+
+    def test_loop_branch_reports_body_before_exit(self):
+        body_b, exit_b = Block(), Block()
+        body_arg = create_ssa_value(Registers.UNALLOCATED_INT)
+        exit_arg = create_ssa_value(Registers.UNALLOCATED_INT)
+        op = _make_loop_branch_op(body_b, exit_b, [body_arg], [exit_arg])
+        assert successor_edges(op) == [(body_b, [body_arg]), (exit_b, [exit_arg])]
+
+    def test_terminator_without_the_trait_has_no_edges(self):
+        assert successor_edges(StopOp()) == []
+
+    def test_trait_rejects_a_foreign_operation(self):
+        trait = JmpBranchOp.get_trait(SuccessorOperandsTrait)
+        assert trait is not None
+        with pytest.raises(AssertionError):
+            trait.successor_edges(StopOp())
+
+    @pytest.mark.parametrize(
+        "op_type",
+        [UnaryPredicateBranchOp, BinaryPredicateBranchOp, LoopBranchOp],
+    )
+    def test_each_branch_trait_rejects_a_foreign_operation(self, op_type):
+        trait = op_type.get_trait(SuccessorOperandsTrait)
+        assert trait is not None
+        with pytest.raises(AssertionError):
+            trait.successor_edges(StopOp())
 
 
 class TestUnconditionalBranch:
@@ -375,72 +424,76 @@ class TestRegisterConstraints:
 
 
 # (predicate, rs, taken) truth-table entries for the flag branch.
-_FLAG_CONST_CASES = [
-    pytest.param(FlagPredicate.eqz, 0, True, id="eqz-zero-taken"),
-    pytest.param(FlagPredicate.eqz, 5, False, id="eqz-nonzero-fallthrough"),
-    pytest.param(FlagPredicate.nez, 5, True, id="nez-nonzero-taken"),
-    pytest.param(FlagPredicate.nez, 0, False, id="nez-zero-fallthrough"),
-    pytest.param(FlagPredicate.ltz, _NEG1, True, id="ltz-negative-taken"),
-    pytest.param(FlagPredicate.ltz, 0, False, id="ltz-zero-fallthrough"),
-    pytest.param(FlagPredicate.ltz, 1, False, id="ltz-positive-fallthrough"),
-    pytest.param(FlagPredicate.gez, 0, True, id="gez-zero-taken"),
-    pytest.param(FlagPredicate.gez, 1, True, id="gez-positive-taken"),
-    pytest.param(FlagPredicate.gez, _NEG1, False, id="gez-negative-fallthrough"),
+_UNARY_PREDICATE_CONST_CASES = [
+    pytest.param(UnaryPredicate.eqz, 0, True, id="eqz-zero-taken"),
+    pytest.param(UnaryPredicate.eqz, 5, False, id="eqz-nonzero-fallthrough"),
+    pytest.param(UnaryPredicate.nez, 5, True, id="nez-nonzero-taken"),
+    pytest.param(UnaryPredicate.nez, 0, False, id="nez-zero-fallthrough"),
+    pytest.param(UnaryPredicate.ltz, _NEG1, True, id="ltz-negative-taken"),
+    pytest.param(UnaryPredicate.ltz, 0, False, id="ltz-zero-fallthrough"),
+    pytest.param(UnaryPredicate.ltz, 1, False, id="ltz-positive-fallthrough"),
+    pytest.param(UnaryPredicate.gez, 0, True, id="gez-zero-taken"),
+    pytest.param(UnaryPredicate.gez, 1, True, id="gez-positive-taken"),
+    pytest.param(UnaryPredicate.gez, _NEG1, False, id="gez-negative-fallthrough"),
 ]
 
 # (predicate, lhs, rhs, taken) truth-table entries for the comparison branch.
 # The -1/1 and MAXU pairs pin the signed vs unsigned reinterpretation boundary.
-_COMPARISON_CONST_CASES = [
-    pytest.param(ComparisonPredicate.eq, 7, 7, True, id="eq-equal-taken"),
-    pytest.param(ComparisonPredicate.eq, 7, 8, False, id="eq-unequal-fallthrough"),
-    pytest.param(ComparisonPredicate.ne, 7, 8, True, id="ne-unequal-taken"),
-    pytest.param(ComparisonPredicate.ne, 7, 7, False, id="ne-equal-fallthrough"),
-    pytest.param(ComparisonPredicate.slt, _NEG1, 1, True, id="slt-signed-lt-taken"),
-    pytest.param(ComparisonPredicate.slt, 1, _NEG1, False, id="slt-signed-not-lt"),
-    pytest.param(ComparisonPredicate.sle, 5, 5, True, id="sle-signed-equal-taken"),
-    pytest.param(ComparisonPredicate.sle, 1, _NEG1, False, id="sle-signed-not-le"),
-    pytest.param(ComparisonPredicate.sgt, 1, _NEG1, True, id="sgt-signed-gt-taken"),
-    pytest.param(ComparisonPredicate.sgt, _NEG1, 1, False, id="sgt-signed-not-gt"),
-    pytest.param(ComparisonPredicate.sge, 5, 5, True, id="sge-signed-equal-taken"),
-    pytest.param(ComparisonPredicate.sge, _NEG1, 1, False, id="sge-signed-not-ge"),
-    pytest.param(ComparisonPredicate.ult, 1, _MAXU, True, id="ult-unsigned-lt-taken"),
-    pytest.param(ComparisonPredicate.ult, _MAXU, 1, False, id="ult-unsigned-not-lt"),
-    pytest.param(ComparisonPredicate.ule, 1, _MAXU, True, id="ule-unsigned-le-taken"),
-    pytest.param(ComparisonPredicate.ule, _MAXU, 1, False, id="ule-unsigned-not-le"),
-    pytest.param(ComparisonPredicate.ugt, _MAXU, 1, True, id="ugt-unsigned-gt-taken"),
-    pytest.param(ComparisonPredicate.ugt, 1, _MAXU, False, id="ugt-unsigned-not-gt"),
-    pytest.param(ComparisonPredicate.uge, _MAXU, 1, True, id="uge-unsigned-ge-taken"),
-    pytest.param(ComparisonPredicate.uge, 1, _MAXU, False, id="uge-unsigned-not-ge"),
+_BINARY_PREDICATE_CONST_CASES = [
+    pytest.param(BinaryPredicate.eq, 7, 7, True, id="eq-equal-taken"),
+    pytest.param(BinaryPredicate.eq, 7, 8, False, id="eq-unequal-fallthrough"),
+    pytest.param(BinaryPredicate.ne, 7, 8, True, id="ne-unequal-taken"),
+    pytest.param(BinaryPredicate.ne, 7, 7, False, id="ne-equal-fallthrough"),
+    pytest.param(BinaryPredicate.slt, _NEG1, 1, True, id="slt-signed-lt-taken"),
+    pytest.param(BinaryPredicate.slt, 1, _NEG1, False, id="slt-signed-not-lt"),
+    pytest.param(BinaryPredicate.sle, 5, 5, True, id="sle-signed-equal-taken"),
+    pytest.param(BinaryPredicate.sle, 1, _NEG1, False, id="sle-signed-not-le"),
+    pytest.param(BinaryPredicate.sgt, 1, _NEG1, True, id="sgt-signed-gt-taken"),
+    pytest.param(BinaryPredicate.sgt, _NEG1, 1, False, id="sgt-signed-not-gt"),
+    pytest.param(BinaryPredicate.sge, 5, 5, True, id="sge-signed-equal-taken"),
+    pytest.param(BinaryPredicate.sge, _NEG1, 1, False, id="sge-signed-not-ge"),
+    pytest.param(BinaryPredicate.ult, 1, _MAXU, True, id="ult-unsigned-lt-taken"),
+    pytest.param(BinaryPredicate.ult, _MAXU, 1, False, id="ult-unsigned-not-lt"),
+    pytest.param(BinaryPredicate.ule, 1, _MAXU, True, id="ule-unsigned-le-taken"),
+    pytest.param(BinaryPredicate.ule, _MAXU, 1, False, id="ule-unsigned-not-le"),
+    pytest.param(BinaryPredicate.ugt, _MAXU, 1, True, id="ugt-unsigned-gt-taken"),
+    pytest.param(BinaryPredicate.ugt, 1, _MAXU, False, id="ugt-unsigned-not-gt"),
+    pytest.param(BinaryPredicate.uge, _MAXU, 1, True, id="uge-unsigned-ge-taken"),
+    pytest.param(BinaryPredicate.uge, 1, _MAXU, False, id="uge-unsigned-not-ge"),
 ]
 
 
 class TestConstEvaluate:
     """Each conditional branch folds its predicate over constant operand values."""
 
-    @pytest.mark.parametrize(("predicate", "rs", "taken"), _FLAG_CONST_CASES)
-    def test_flag(self, predicate: FlagPredicate, rs: int, taken: bool):
-        op = _make_flag_branch_op(Block([StopOp()]), Block([StopOp()]), predicate=predicate)
-        assert op.const_evaluate(rs, _BW) is taken
-
-    @pytest.mark.parametrize(("predicate", "lhs", "rhs", "taken"), _COMPARISON_CONST_CASES)
-    def test_comparison(
-        self, predicate: ComparisonPredicate, lhs: int, rhs: int, taken: bool
-    ):
-        op = _make_comparison_branch_op(
+    @pytest.mark.parametrize(("predicate", "rs", "taken"), _UNARY_PREDICATE_CONST_CASES)
+    def test_unary_predicate(self, predicate: UnaryPredicate, rs: int, taken: bool):
+        op = _make_unary_predicate_branch_op(
             Block([StopOp()]), Block([StopOp()]), predicate=predicate
         )
-        assert op.const_evaluate(lhs, rhs, _BW) is taken
+        assert op.const_evaluate(rs, INT_REGISTER_BIT_WIDTH) is taken
+
+    @pytest.mark.parametrize(
+        ("predicate", "lhs", "rhs", "taken"), _BINARY_PREDICATE_CONST_CASES
+    )
+    def test_binary_predicate(
+        self, predicate: BinaryPredicate, lhs: int, rhs: int, taken: bool
+    ):
+        op = _make_binary_predicate_branch_op(
+            Block([StopOp()]), Block([StopOp()]), predicate=predicate
+        )
+        assert op.const_evaluate(lhs, rhs, INT_REGISTER_BIT_WIDTH) is taken
 
     def test_signed_unsigned_divergence(self):
         """The same operands flip verdict under signed vs unsigned reading."""
-        signed = _make_comparison_branch_op(
-            Block([StopOp()]), Block([StopOp()]), predicate=ComparisonPredicate.sgt
+        signed = _make_binary_predicate_branch_op(
+            Block([StopOp()]), Block([StopOp()]), predicate=BinaryPredicate.sgt
         )
-        unsigned = _make_comparison_branch_op(
-            Block([StopOp()]), Block([StopOp()]), predicate=ComparisonPredicate.uge
+        unsigned = _make_binary_predicate_branch_op(
+            Block([StopOp()]), Block([StopOp()]), predicate=BinaryPredicate.uge
         )
-        assert signed.const_evaluate(_NEG1, 1, _BW) is False
-        assert unsigned.const_evaluate(_NEG1, 1, _BW) is True
+        assert signed.const_evaluate(_NEG1, 1, INT_REGISTER_BIT_WIDTH) is False
+        assert unsigned.const_evaluate(_NEG1, 1, INT_REGISTER_BIT_WIDTH) is True
 
 
 class TestRoundTrip:
@@ -457,10 +510,14 @@ class TestRoundTrip:
         then_b = Block([StopOp()])
         else_b = Block([StopOp()])
         entry = Block(arg_types=[Registers.R0])
-        entry.add_op(FlagBranchOp(FlagPredicate.eqz, entry.args[0], [], [], then_b, else_b))
+        entry.add_op(
+            UnaryPredicateBranchOp(
+                UnaryPredicate.eqz, entry.args[0], [], [], then_b, else_b
+            )
+        )
         seq = SequenceOp("ch0", Region([entry, else_b, then_b]))
         result = _build_print_reparse(seq)
-        assert "q1_cf.flag_branch eqz" in result
+        assert "q1_cf.unary_predicate_branch eqz" in result
 
     def test_cond_with_successor_args(self):
         """Comparison branch with distinct per-successor block args round-trips.
@@ -474,13 +531,13 @@ class TestRoundTrip:
         entry = Block(arg_types=[Registers.R0, Registers.R1])
         lhs, rhs = entry.args[0], entry.args[1]
         entry.add_op(
-            ComparisonBranchOp(
-                ComparisonPredicate.slt, lhs, rhs, [lhs], [rhs], then_b, else_b
+            BinaryPredicateBranchOp(
+                BinaryPredicate.slt, lhs, rhs, [lhs], [rhs], then_b, else_b
             )
         )
         seq = SequenceOp("ch0", Region([entry, else_b, then_b]))
         result = _build_print_reparse(seq)
-        assert "q1_cf.comparison_branch slt" in result
+        assert "q1_cf.binary_predicate_branch slt" in result
 
     def test_loop_with_back_edge(self):
         """Loop op with a back-edge (body == header) round-trips."""
@@ -492,28 +549,30 @@ class TestRoundTrip:
         result = _build_print_reparse(seq)
         assert "q1_cf.loop_branch" in result
 
-    @pytest.mark.parametrize("predicate", list(FlagPredicate), ids=lambda p: p.value)
-    def test_flag_predicate_round_trip(self, predicate: FlagPredicate):
-        """Every flag predicate spelling survives print/reparse."""
+    @pytest.mark.parametrize("predicate", list(UnaryPredicate), ids=lambda p: p.value)
+    def test_flag_predicate_round_trip(self, predicate: UnaryPredicate):
+        """Every unary predicate spelling survives print/reparse."""
         then_b = Block([StopOp()])
         else_b = Block([StopOp()])
         entry = Block(arg_types=[Registers.R0])
-        entry.add_op(FlagBranchOp(predicate, entry.args[0], [], [], then_b, else_b))
+        entry.add_op(
+            UnaryPredicateBranchOp(predicate, entry.args[0], [], [], then_b, else_b)
+        )
         seq = SequenceOp("ch0", Region([entry, else_b, then_b]))
         result = _build_print_reparse(seq)
-        assert f"q1_cf.flag_branch {predicate.value}" in result
+        assert f"q1_cf.unary_predicate_branch {predicate.value}" in result
 
-    @pytest.mark.parametrize("predicate", list(ComparisonPredicate), ids=lambda p: p.value)
-    def test_comparison_predicate_round_trip(self, predicate: ComparisonPredicate):
-        """Every comparison predicate spelling survives print/reparse."""
+    @pytest.mark.parametrize("predicate", list(BinaryPredicate), ids=lambda p: p.value)
+    def test_comparison_predicate_round_trip(self, predicate: BinaryPredicate):
+        """Every binary predicate spelling survives print/reparse."""
         then_b = Block([StopOp()])
         else_b = Block([StopOp()])
         entry = Block(arg_types=[Registers.R0, Registers.R1])
         lhs, rhs = entry.args[0], entry.args[1]
-        entry.add_op(ComparisonBranchOp(predicate, lhs, rhs, [], [], then_b, else_b))
+        entry.add_op(BinaryPredicateBranchOp(predicate, lhs, rhs, [], [], then_b, else_b))
         seq = SequenceOp("ch0", Region([entry, else_b, then_b]))
         result = _build_print_reparse(seq)
-        assert f"q1_cf.comparison_branch {predicate.value}" in result
+        assert f"q1_cf.binary_predicate_branch {predicate.value}" in result
 
 
 class TestIntegration:

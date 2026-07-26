@@ -18,11 +18,11 @@ from xdsl.parser import Parser
 from xdsl.printer import Printer
 
 from qat.experimental.dialect.q1_cf import (
-    ComparisonPredicate,
-    ComparisonPredicateAttr,
-    FlagPredicate,
-    FlagPredicateAttr,
+    BinaryPredicate,
+    BinaryPredicateAttr,
     Q1_cf,
+    UnaryPredicate,
+    UnaryPredicateAttr,
 )
 
 _FLAG_MEMBERS = {"eqz", "nez", "ltz", "gez"}
@@ -53,50 +53,50 @@ def _round_trip(attr):
 
 class TestPredicateEnums:
     def test_flag_members(self):
-        assert {member.value for member in FlagPredicate} == _FLAG_MEMBERS
+        assert {member.value for member in UnaryPredicate} == _FLAG_MEMBERS
 
     def test_comparison_members(self):
-        assert {member.value for member in ComparisonPredicate} == _COMPARISON_MEMBERS
+        assert {member.value for member in BinaryPredicate} == _COMPARISON_MEMBERS
 
-    @pytest.mark.parametrize("member", list(FlagPredicate), ids=lambda m: m.value)
-    def test_flag_member_is_str(self, member: FlagPredicate):
+    @pytest.mark.parametrize("member", list(UnaryPredicate), ids=lambda m: m.value)
+    def test_flag_member_is_str(self, member: UnaryPredicate):
         # StrEnum members are plain strings equal to their spelling.
         assert member == member.value
 
-    @pytest.mark.parametrize("member", list(ComparisonPredicate), ids=lambda m: m.value)
-    def test_comparison_member_is_str(self, member: ComparisonPredicate):
+    @pytest.mark.parametrize("member", list(BinaryPredicate), ids=lambda m: m.value)
+    def test_comparison_member_is_str(self, member: BinaryPredicate):
         assert member == member.value
 
 
 class TestPredicateAttributes:
-    @pytest.mark.parametrize("member", list(FlagPredicate), ids=lambda m: m.value)
-    def test_flag_attr_wraps_member(self, member: FlagPredicate):
-        attr = FlagPredicateAttr(member)
+    @pytest.mark.parametrize("member", list(UnaryPredicate), ids=lambda m: m.value)
+    def test_flag_attr_wraps_member(self, member: UnaryPredicate):
+        attr = UnaryPredicateAttr(member)
         assert attr.data is member
 
-    @pytest.mark.parametrize("member", list(ComparisonPredicate), ids=lambda m: m.value)
-    def test_comparison_attr_wraps_member(self, member: ComparisonPredicate):
-        attr = ComparisonPredicateAttr(member)
+    @pytest.mark.parametrize("member", list(BinaryPredicate), ids=lambda m: m.value)
+    def test_comparison_attr_wraps_member(self, member: BinaryPredicate):
+        attr = BinaryPredicateAttr(member)
         assert attr.data is member
 
     def test_flag_attr_name(self):
-        assert FlagPredicateAttr.name == "q1_cf.flag_predicate"
+        assert UnaryPredicateAttr.name == "q1_cf.unary_predicate"
 
     def test_comparison_attr_name(self):
-        assert ComparisonPredicateAttr.name == "q1_cf.comparison_predicate"
+        assert BinaryPredicateAttr.name == "q1_cf.binary_predicate"
 
-    @pytest.mark.parametrize("member", list(FlagPredicate), ids=lambda m: m.value)
-    def test_flag_attr_round_trips(self, member: FlagPredicate):
-        attr = FlagPredicateAttr(member)
+    @pytest.mark.parametrize("member", list(UnaryPredicate), ids=lambda m: m.value)
+    def test_flag_attr_round_trips(self, member: UnaryPredicate):
+        attr = UnaryPredicateAttr(member)
         printed, parsed = _round_trip(attr)
-        assert printed == f"#q1_cf<flag_predicate {member.value}>"
+        assert printed == f"#q1_cf<unary_predicate {member.value}>"
         assert parsed == attr
         assert parsed.data is member
 
-    @pytest.mark.parametrize("member", list(ComparisonPredicate), ids=lambda m: m.value)
-    def test_comparison_attr_round_trips(self, member: ComparisonPredicate):
-        attr = ComparisonPredicateAttr(member)
+    @pytest.mark.parametrize("member", list(BinaryPredicate), ids=lambda m: m.value)
+    def test_comparison_attr_round_trips(self, member: BinaryPredicate):
+        attr = BinaryPredicateAttr(member)
         printed, parsed = _round_trip(attr)
-        assert printed == f"#q1_cf<comparison_predicate {member.value}>"
+        assert printed == f"#q1_cf<binary_predicate {member.value}>"
         assert parsed == attr
         assert parsed.data is member

@@ -184,6 +184,8 @@ from qat.experimental.dialect.q1.ir.ops import (
     XorRsRsRdOp,
 )
 from qat.experimental.dialect.q1.ir.reg_desc import (
+    INT_REGISTER_BIT_WIDTH,
+    INT_REGISTER_VALUE_MASK,
     IntRegisterType,
     Q1RegisterType,
     Registers,
@@ -405,6 +407,8 @@ __all__ = [
     "FbPopDataImmRdOp",
     "FbPullDataRsRdOp",
     "IllegalOp",
+    "INT_REGISTER_BIT_WIDTH",
+    "INT_REGISTER_VALUE_MASK",
     "IntRegisterType",
     "JaImmOp",
     "JaRsOp",

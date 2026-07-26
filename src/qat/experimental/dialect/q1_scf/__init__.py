@@ -20,10 +20,10 @@ Reference: https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.ht
 from xdsl.ir import Dialect
 
 from qat.experimental.dialect.q1_cf.ir.attrs import (
-    ComparisonPredicate,
-    ComparisonPredicateAttr,
-    FlagPredicate,
-    FlagPredicateAttr,
+    BinaryPredicate,
+    BinaryPredicateAttr,
+    UnaryPredicate,
+    UnaryPredicateAttr,
 )
 from qat.experimental.dialect.q1_scf.ir.attrs import (
     IterDomainAttr,
@@ -54,11 +54,11 @@ Q1_scf = Dialect(
 )
 
 __all__ = [
-    "ComparisonPredicate",
-    "ComparisonPredicateAttr",
+    "BinaryPredicate",
+    "BinaryPredicateAttr",
     "ConditionOp",
-    "FlagPredicate",
-    "FlagPredicateAttr",
+    "UnaryPredicate",
+    "UnaryPredicateAttr",
     "ForOp",
     "IfOp",
     "IterDomainAttr",

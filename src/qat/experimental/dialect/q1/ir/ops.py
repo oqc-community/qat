@@ -37,9 +37,10 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     ImmRsRdOperation,
     ImmRsRdRdOperation,
     ImmRsRsRsImmOperation,
+    JumpImmOperation,
+    LoopImmOperation,
     NullaryOperation,
     Q1AsmOperation,
-    RdImmOperation,
     RdRsOperation,
     RsImmImmOperation,
     RsImmOperation,
@@ -234,8 +235,8 @@ class NopOp(NullaryOperation):
 
 
 @irdl_op_definition
-class JmpImmOp(ImmOperation[AddressImm]):
-    """Unconditional jump to an immediate address."""
+class JmpImmOp(JumpImmOperation):
+    """Unconditional jump to a target address or label."""
 
     name = "q1.i.jmp"
 
@@ -260,8 +261,8 @@ class JmpRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JzImmOp(ImmOperation[AddressImm]):
-    """Jump if `ZF == 1` to an immediate address."""
+class JzImmOp(JumpImmOperation):
+    """Jump if `ZF == 1` to a target address or label."""
 
     name = "q1.i.jz"
 
@@ -286,8 +287,8 @@ class JzRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JnzImmOp(ImmOperation[AddressImm]):
-    """Jump if `ZF == 0` to an immediate address."""
+class JnzImmOp(JumpImmOperation):
+    """Jump if `ZF == 0` to a target address or label."""
 
     name = "q1.i.jnz"
 
@@ -312,8 +313,8 @@ class JnzRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JoImmOp(ImmOperation[AddressImm]):
-    """Jump if `OF == 1` to an immediate address."""
+class JoImmOp(JumpImmOperation):
+    """Jump if `OF == 1` to a target address or label."""
 
     name = "q1.i.jo"
 
@@ -338,8 +339,8 @@ class JoRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JnoImmOp(ImmOperation[AddressImm]):
-    """Jump if `OF == 0` to an immediate address."""
+class JnoImmOp(JumpImmOperation):
+    """Jump if `OF == 0` to a target address or label."""
 
     name = "q1.i.jno"
 
@@ -364,8 +365,8 @@ class JnoRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JsImmOp(ImmOperation[AddressImm]):
-    """Jump if `NF == 1` to an immediate address."""
+class JsImmOp(JumpImmOperation):
+    """Jump if `NF == 1` to a target address or label."""
 
     name = "q1.i.js"
 
@@ -390,8 +391,8 @@ class JsRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JnsImmOp(ImmOperation[AddressImm]):
-    """Jump if `NF == 0` to an immediate address."""
+class JnsImmOp(JumpImmOperation):
+    """Jump if `NF == 0` to a target address or label."""
 
     name = "q1.i.jns"
 
@@ -416,7 +417,7 @@ class JnsRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JgImmOp(ImmOperation[AddressImm]):
+class JgImmOp(JumpImmOperation):
     """Jump if signed `a > b` condition holds (`ZF == 0` and `NF == OF`)."""
 
     name = "q1.i.jg"
@@ -442,7 +443,7 @@ class JgRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JlImmOp(ImmOperation[AddressImm]):
+class JlImmOp(JumpImmOperation):
     """Jump if signed `a < b` condition holds (`NF != OF`)."""
 
     name = "q1.i.jl"
@@ -468,7 +469,7 @@ class JlRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JleImmOp(ImmOperation[AddressImm]):
+class JleImmOp(JumpImmOperation):
     """Jump if signed `a <= b` condition holds (`ZF == 1` or `NF != OF`)."""
 
     name = "q1.i.jle"
@@ -494,7 +495,7 @@ class JleRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JaImmOp(ImmOperation[AddressImm]):
+class JaImmOp(JumpImmOperation):
     """Jump if unsigned `a > b` condition holds (`ZF == 0` and `CF == 0`)."""
 
     name = "q1.i.ja"
@@ -520,7 +521,7 @@ class JaRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JaeImmOp(ImmOperation[AddressImm]):
+class JaeImmOp(JumpImmOperation):
     """Jump if unsigned `a >= b` condition holds (`CF == 0`)."""
 
     name = "q1.i.jae"
@@ -546,7 +547,7 @@ class JaeRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JbImmOp(ImmOperation[AddressImm]):
+class JbImmOp(JumpImmOperation):
     """Jump if unsigned `a < b` condition holds (`CF == 1`)."""
 
     name = "q1.i.jb"
@@ -572,7 +573,7 @@ class JbRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JbeImmOp(ImmOperation[AddressImm]):
+class JbeImmOp(JumpImmOperation):
     """Jump if unsigned `a <= b` condition holds (`ZF == 1` or `CF == 1`)."""
 
     name = "q1.i.jbe"
@@ -598,7 +599,7 @@ class JbeRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class JgeImmOp(ImmOperation[AddressImm]):
+class JgeImmOp(JumpImmOperation):
     """Jump if signed `a >= b` condition holds (`NF == OF`)."""
 
     name = "q1.i.jge"
@@ -724,7 +725,7 @@ class JltRsImmRsOp(RsImmRsOperation[IntRegisterType, UI32Imm]):
 
 
 @irdl_op_definition
-class LoopRdImmOp(RdImmOperation[IntRegisterType, AddressImm]):
+class LoopRdImmOp(LoopImmOperation[IntRegisterType]):
     """Deprecated legacy loop: decrement source and jump while the result is non-zero."""
 
     name = "q1.ri.loop"

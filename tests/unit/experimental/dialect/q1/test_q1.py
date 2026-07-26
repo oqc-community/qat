@@ -4,10 +4,12 @@
 
 from io import StringIO
 
+import pytest
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
 
-from qat.experimental.dialect.q1 import Q1, Q1asmTarget, emit_program
+from qat.experimental.dialect.q1 import Q1, Q1asmTarget, StopOp, emit_program
+from qat.experimental.dialect.q1_sequence import SequenceOp
 
 _expected_q1_op_names = {
     "q1.x.label",
@@ -174,3 +176,9 @@ def test_q1_module_helpers_emit_and_register_ops():
     q1_op_names = {op.name for op in Q1.operations}
 
     assert q1_op_names == _expected_q1_op_names
+
+
+def test_emit_program_rejects_non_assembly_printable_ops():
+    module = ModuleOp([SequenceOp("Q0", [StopOp()])])
+    with pytest.raises(TypeError, match="Expected AssemblyPrintable op"):
+        emit_program(module.body, StringIO())

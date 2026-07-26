@@ -7,7 +7,11 @@ from xdsl.ir import Block, Region
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1 import NopOp, Registers, StopOp
-from qat.experimental.dialect.q1_cf import FlagBranchOp, FlagPredicate, JmpBranchOp
+from qat.experimental.dialect.q1_cf import (
+    JmpBranchOp,
+    UnaryPredicate,
+    UnaryPredicateBranchOp,
+)
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
@@ -155,7 +159,8 @@ class TestSequenceOpMultiBlock:
         seq.verify_()  # must not raise
 
     def test_two_block_cond_branch(self):
-        """A two-block SequenceOp with q1_cf.flag_branch (else is fall-through)."""
+        """A two-block SequenceOp with q1_cf.unary_predicate_branch (else is fall-
+        through)."""
 
         else_block = Block([StopOp()])
         then_block = Block([StopOp()])
@@ -163,7 +168,7 @@ class TestSequenceOpMultiBlock:
         entry_block = Block(arg_types=[Registers.R0])
         rs = entry_block.args[0]
         entry_block.add_op(
-            FlagBranchOp(FlagPredicate.eqz, rs, [], [], then_block, else_block)
+            UnaryPredicateBranchOp(UnaryPredicate.eqz, rs, [], [], then_block, else_block)
         )
         # entry -> else -> then (else must immediately follow the branch's block
         # to satisfy the q1_cf fall-through invariant)

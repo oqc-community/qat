@@ -4,8 +4,8 @@
 
 Two enumerations classify the conditions a branch may test:
 
-- ``FlagPredicate`` — a condition-code test (zero/sign) on a single register.
-- ``ComparisonPredicate`` — a signed/unsigned comparison between two operands,
+- ``UnaryPredicate`` — a condition-code test (zero/sign) on a single register.
+- ``BinaryPredicate`` — a signed/unsigned comparison between two operands,
   matching the ``arith.cmpi`` predicate set.
 
 Each enumeration is wrapped in an :class:`~xdsl.ir.EnumAttribute` so it can be
@@ -22,7 +22,7 @@ from xdsl.ir import EnumAttribute, SpacedOpaqueSyntaxAttribute, StrEnum
 from xdsl.irdl import irdl_attr_definition
 
 
-class FlagPredicate(StrEnum):
+class UnaryPredicate(StrEnum):
     """Condition-code test applied to a single register value."""
 
     eqz = auto()  # value == 0
@@ -31,7 +31,7 @@ class FlagPredicate(StrEnum):
     gez = auto()  # value >= 0 (signed)
 
 
-class ComparisonPredicate(StrEnum):
+class BinaryPredicate(StrEnum):
     """Comparison applied between two operand values."""
 
     eq = auto()  # ==
@@ -47,16 +47,14 @@ class ComparisonPredicate(StrEnum):
 
 
 @irdl_attr_definition
-class FlagPredicateAttr(EnumAttribute[FlagPredicate], SpacedOpaqueSyntaxAttribute):
-    """Attribute wrapper carrying a :class:`FlagPredicate`."""
+class UnaryPredicateAttr(EnumAttribute[UnaryPredicate], SpacedOpaqueSyntaxAttribute):
+    """Attribute wrapper carrying a :class:`UnaryPredicate`."""
 
-    name = "q1_cf.flag_predicate"
+    name = "q1_cf.unary_predicate"
 
 
 @irdl_attr_definition
-class ComparisonPredicateAttr(
-    EnumAttribute[ComparisonPredicate], SpacedOpaqueSyntaxAttribute
-):
-    """Attribute wrapper carrying a :class:`ComparisonPredicate`."""
+class BinaryPredicateAttr(EnumAttribute[BinaryPredicate], SpacedOpaqueSyntaxAttribute):
+    """Attribute wrapper carrying a :class:`BinaryPredicate`."""
 
-    name = "q1_cf.comparison_predicate"
+    name = "q1_cf.binary_predicate"

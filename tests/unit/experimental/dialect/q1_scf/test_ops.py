@@ -25,14 +25,14 @@ from xdsl.utils.exceptions import ParseError, VerifyException
 from qat.experimental.dialect.q1 import Q1, Registers, StopOp
 from qat.experimental.dialect.q1_cf import JmpBranchOp, Q1_cf
 from qat.experimental.dialect.q1_scf import (
-    ComparisonPredicate,
+    BinaryPredicate,
     ConditionOp,
-    FlagPredicate,
     ForOp,
     IfOp,
     IterDomainAttr,
     IterParameter,
     Q1_scf,
+    UnaryPredicate,
     WhileOp,
     YieldOp,
 )
@@ -71,7 +71,7 @@ def _build_print_reparse(seq_op: SequenceOp) -> str:
     return printed
 
 
-def _flag_if(predicate: FlagPredicate = FlagPredicate.nez) -> tuple[Block, IfOp]:
+def _flag_if(predicate: UnaryPredicate = UnaryPredicate.nez) -> tuple[Block, IfOp]:
     """Build a result-less if with a single flag operand and an empty then."""
     entry = Block(arg_types=[_REG])
     (flag,) = entry.args
@@ -117,7 +117,7 @@ class TestYieldOp:
         (flag,) = entry.args
         then_region = Region([Block([YieldOp(flag)])])
         else_region = Region([Block([YieldOp(flag)])])
-        op = IfOp(FlagPredicate.nez, [flag], [_REG], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [_REG], then_region, else_region)
         entry.add_ops([op, StopOp()])
         assert "q1_scf.yield" in _build_print_reparse(SequenceOp("ch0", Region([entry])))
 
@@ -143,27 +143,27 @@ class TestConditionArity:
         return SequenceOp("ch0", Region([entry]))
 
     def test_flag_condition_round_trips(self):
-        seq = self._while_with_condition(FlagPredicate.nez, 1)
+        seq = self._while_with_condition(UnaryPredicate.nez, 1)
         assert "q1_scf.condition" in _build_print_reparse(seq)
 
     def test_comparison_condition_round_trips(self):
-        seq = self._while_with_condition(ComparisonPredicate.slt, 2)
+        seq = self._while_with_condition(BinaryPredicate.slt, 2)
         assert "q1_scf.condition" in _build_print_reparse(seq)
 
     def test_flag_condition_rejects_two_operands(self):
-        seq = self._while_with_condition(FlagPredicate.nez, 2)
+        seq = self._while_with_condition(UnaryPredicate.nez, 2)
         with pytest.raises(VerifyException, match="predicate expects 1 operand"):
             seq.verify()
 
     def test_comparison_condition_rejects_one_operand(self):
-        seq = self._while_with_condition(ComparisonPredicate.slt, 1)
+        seq = self._while_with_condition(BinaryPredicate.slt, 1)
         with pytest.raises(VerifyException, match="predicate expects 2 operand"):
             seq.verify()
 
     def test_rejects_non_reg_predicate_operand(self):
         entry = Block(arg_types=[i32])
         (bad,) = entry.args
-        cond = ConditionOp(FlagPredicate.nez, [bad], [])
+        cond = ConditionOp(UnaryPredicate.nez, [bad], [])
         entry.add_op(cond)
         with pytest.raises(VerifyException, match="should be of base attribute q1.reg"):
             cond.verify()
@@ -171,7 +171,7 @@ class TestConditionArity:
     def test_rejected_outside_while(self):
         entry = Block(arg_types=[_REG])
         (acc,) = entry.args
-        entry.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        entry.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         module = ModuleOp(Region([entry]))
         with pytest.raises(VerifyException, match="expects parent op 'q1_scf.while'"):
             module.verify()
@@ -195,7 +195,7 @@ class TestWhileOp:
     def test_round_trips(self):
         before = Block(arg_types=[_REG])
         (acc,) = before.args
-        before.add_op(ConditionOp(ComparisonPredicate.slt, [acc, acc], [acc]))
+        before.add_op(ConditionOp(BinaryPredicate.slt, [acc, acc], [acc]))
         after = Block(arg_types=[_REG])
         (acc2,) = after.args
         after.add_op(YieldOp(acc2))
@@ -208,7 +208,7 @@ class TestWhileOp:
         entry = Block(arg_types=[_REG])
         (flag,) = entry.args
         before = Block()
-        before.add_op(ConditionOp(FlagPredicate.nez, [flag], []))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [flag], []))
         after = Block()
         after.add_op(YieldOp())
         op = WhileOp([], [], Region([before]), Region([after]))
@@ -219,7 +219,7 @@ class TestWhileOp:
     def test_before_arg_type_mismatch(self):
         before = Block(arg_types=[Registers.R0])  # differs from the _REG init type
         (acc,) = before.args
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         after = Block(arg_types=[_REG])
         after.add_op(YieldOp(after.args[0]))
         with pytest.raises(VerifyException, match="does not match init operand type"):
@@ -228,7 +228,7 @@ class TestWhileOp:
     def test_before_arg_count_mismatch(self):
         before = Block(arg_types=[_REG, _REG])  # one init, two before args
         acc = before.args[0]
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         after = Block(arg_types=[_REG])
         after.add_op(YieldOp(after.args[0]))
         with pytest.raises(VerifyException, match="before region expects 1 block"):
@@ -245,7 +245,7 @@ class TestWhileOp:
     def test_results_must_match_forwarded_args(self):
         before = Block(arg_types=[_REG])
         (acc,) = before.args
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], []))  # forwards nothing
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], []))  # forwards nothing
         after = Block(arg_types=[_REG])
         after.add_op(YieldOp(after.args[0]))
         with pytest.raises(VerifyException, match="forwarded"):
@@ -254,7 +254,7 @@ class TestWhileOp:
     def test_after_feedback_edge_mismatch(self):
         before = Block(arg_types=[_REG])
         (acc,) = before.args
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         after = Block(arg_types=[_REG])
         after.add_op(YieldOp())  # yields nothing back to the before block
         with pytest.raises(VerifyException, match="feedback edge"):
@@ -263,7 +263,7 @@ class TestWhileOp:
     def test_after_args_must_match_condition_forwarded_values(self):
         before = Block(arg_types=[_REG])
         (acc,) = before.args
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], []))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], []))
         after = Block(arg_types=[_REG])
         (next_acc,) = after.args
         after.add_op(YieldOp(next_acc))
@@ -273,7 +273,7 @@ class TestWhileOp:
     def test_missing_after_terminator(self):
         before = Block(arg_types=[_REG])
         (acc,) = before.args
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         after = Block(arg_types=[_REG])
         after.add_op(StopOp())  # not a yield
         with pytest.raises(VerifyException, match="terminated by q1_scf.yield"):
@@ -286,7 +286,7 @@ class TestWhileOp:
         (init,) = entry.args
         cond_block = Block(arg_types=[_REG])
         (acc,) = cond_block.args
-        cond_block.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        cond_block.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         branch_block = Block(arg_types=[_REG])
         (carried,) = branch_block.args
         branch_block.add_op(JmpBranchOp([carried], cond_block))
@@ -305,7 +305,7 @@ class TestWhileOp:
         (init,) = entry.args
         before = Block(arg_types=[_REG])
         (acc,) = before.args
-        before.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+        before.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
         yield_block = Block(arg_types=[_REG])
         (yielded,) = yield_block.args
         yield_block.add_op(YieldOp(yielded))
@@ -451,13 +451,13 @@ class TestForOp:
 
 class TestIfOp:
     def test_round_trips_flag_no_else(self):
-        entry, _ = _flag_if(FlagPredicate.eqz)
+        entry, _ = _flag_if(UnaryPredicate.eqz)
         assert "q1_scf.if" in _build_print_reparse(SequenceOp("ch0", Region([entry])))
 
     def test_round_trips_comparison(self):
         entry = Block(arg_types=[_REG, _REG])
         left, right = entry.args
-        op = IfOp(ComparisonPredicate.sge, [left, right], [], Region([Block([YieldOp()])]))
+        op = IfOp(BinaryPredicate.sge, [left, right], [], Region([Block([YieldOp()])]))
         entry.add_ops([op, StopOp()])
         assert "q1_scf.if" in _build_print_reparse(SequenceOp("ch0", Region([entry])))
 
@@ -466,14 +466,14 @@ class TestIfOp:
         flag, val = entry.args
         then_region = Region([Block([YieldOp(val)])])
         else_region = Region([Block([YieldOp(val)])])
-        op = IfOp(FlagPredicate.nez, [flag], [_REG], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [_REG], then_region, else_region)
         entry.add_ops([op, StopOp()])
         assert "else" in _build_print_reparse(SequenceOp("ch0", Region([entry])))
 
     def test_predicate_arity_mismatch(self):
         entry = Block(arg_types=[_REG])
         (flag,) = entry.args
-        op = IfOp(ComparisonPredicate.eq, [flag], [], Region([Block([YieldOp()])]))
+        op = IfOp(BinaryPredicate.eq, [flag], [], Region([Block([YieldOp()])]))
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="predicate expects 2 operand"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -482,7 +482,7 @@ class TestIfOp:
         entry = Block(arg_types=[_REG, _REG])
         flag, val = entry.args
         then_region = Region([Block([YieldOp(val)])])
-        op = IfOp(FlagPredicate.nez, [flag], [_REG], then_region)  # no else
+        op = IfOp(UnaryPredicate.nez, [flag], [_REG], then_region)  # no else
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="must have an else region"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -492,7 +492,7 @@ class TestIfOp:
         flag, val = entry.args
         then_region = Region([Block([YieldOp(val)])])
         else_region = Region([Block([YieldOp()])])  # yields nothing
-        op = IfOp(FlagPredicate.nez, [flag], [_REG], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [_REG], then_region, else_region)
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="matching types"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -501,7 +501,7 @@ class TestIfOp:
         entry = Block(arg_types=[_REG])
         (flag,) = entry.args
         then_region = Region([Block([StopOp()])])  # not a yield
-        op = IfOp(FlagPredicate.nez, [flag], [], then_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [], then_region)
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="then region must be terminated"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -511,7 +511,7 @@ class TestIfOp:
         flag, val = entry.args
         then_region = Region([Block([YieldOp()])])  # yields nothing, one result expected
         else_region = Region([Block([YieldOp(val)])])
-        op = IfOp(FlagPredicate.nez, [flag], [_REG], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [_REG], then_region, else_region)
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="do not match the results"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -521,7 +521,7 @@ class TestIfOp:
         (flag,) = entry.args
         then_region = Region([Block([YieldOp()])])
         else_region = Region([Block([StopOp()])])  # present but not a yield
-        op = IfOp(FlagPredicate.nez, [flag], [], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [], then_region, else_region)
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="else region must be terminated"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -533,7 +533,7 @@ class TestIfOp:
         (flag,) = entry.args
         yield_block = Block([YieldOp()])
         branch_block = Block([JmpBranchOp([], yield_block)])
-        op = IfOp(FlagPredicate.nez, [flag], [], Region([branch_block, yield_block]))
+        op = IfOp(UnaryPredicate.nez, [flag], [], Region([branch_block, yield_block]))
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="never share a region"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -547,7 +547,7 @@ class TestIfOp:
         yield_block = Block([YieldOp()])
         branch_block = Block([JmpBranchOp([], yield_block)])
         else_region = Region([branch_block, yield_block])
-        op = IfOp(FlagPredicate.nez, [flag], [], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [], then_region, else_region)
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="never share a region"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -556,7 +556,7 @@ class TestIfOp:
         # An empty then region carries no q1_cf op, so the single-block guard fires.
         entry = Block(arg_types=[_REG])
         (flag,) = entry.args
-        op = IfOp(FlagPredicate.nez, [flag], [], Region())
+        op = IfOp(UnaryPredicate.nez, [flag], [], Region())
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="then region must be a single block"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -567,7 +567,7 @@ class TestIfOp:
         (flag,) = entry.args
         then_region = Region([Block([YieldOp()])])
         else_region = Region([Block([YieldOp()]), Block([YieldOp()])])
-        op = IfOp(FlagPredicate.nez, [flag], [], then_region, else_region)
+        op = IfOp(UnaryPredicate.nez, [flag], [], then_region, else_region)
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="else region must be a single block"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -575,7 +575,7 @@ class TestIfOp:
     def test_rejects_non_reg_predicate_operand(self):
         entry = Block(arg_types=[i32])
         (bad,) = entry.args
-        op = IfOp(FlagPredicate.nez, [bad], [], Region([Block([YieldOp()])]))
+        op = IfOp(UnaryPredicate.nez, [bad], [], Region([Block([YieldOp()])]))
         entry.add_ops([op, StopOp()])
         with pytest.raises(VerifyException, match="should be of base attribute q1.reg"):
             SequenceOp("ch0", Region([entry])).verify()
@@ -589,7 +589,7 @@ class TestIfOp:
         ctx = Context()
         for dialect in (Builtin, Q1, Q1_cf, Q1_sequence, Q1_scf):
             ctx.load_dialect(dialect)
-        with pytest.raises(ParseError, match="flag or comparison predicate"):
+        with pytest.raises(ParseError, match="unary or binary predicate"):
             Parser(ctx, ir_text).parse_op()
 
     def test_allocate_registers_defers_to_compiler_911(self):
@@ -623,7 +623,7 @@ class TestSequenceAncestor:
             (init,) = container_block.args
             before = Block(arg_types=[_REG])
             (acc,) = before.args
-            before.add_op(ConditionOp(FlagPredicate.nez, [acc], [acc]))
+            before.add_op(ConditionOp(UnaryPredicate.nez, [acc], [acc]))
             after = Block(arg_types=[_REG])
             after.add_op(YieldOp(after.args[0]))
             container_block.add_op(
@@ -647,7 +647,7 @@ def test_nested_containers_round_trip():
 
     # if with feedforward results, both regions yielding the seed register.
     if_op = IfOp(
-        FlagPredicate.nez,
+        UnaryPredicate.nez,
         [flag],
         [_REG],
         Region([Block([YieldOp(seed)])]),
@@ -657,7 +657,7 @@ def test_nested_containers_round_trip():
     # while accumulating over the if result.
     before = Block(arg_types=[_REG])
     (acc,) = before.args
-    before.add_op(ConditionOp(ComparisonPredicate.slt, [acc, acc], [acc]))
+    before.add_op(ConditionOp(BinaryPredicate.slt, [acc, acc], [acc]))
     after = Block(arg_types=[_REG])
     after.add_op(YieldOp(after.args[0]))
     while_op = WhileOp([if_op.output[0]], [_REG], Region([before]), Region([after]))

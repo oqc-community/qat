@@ -24,7 +24,9 @@ from xdsl.irdl import IRDLOperation, operand_def, opt_prop_def, prop_def, result
 from xdsl.parser import Parser
 from xdsl.printer import Printer
 
+from qat.experimental.dialect.q1.ir.attrs import LabelAttr
 from qat.experimental.dialect.q1.ir.imm_desc import (
+    AddressImm,
     ImmT,
     ImmT1,
     ImmT2,
@@ -37,11 +39,35 @@ from qat.experimental.dialect.q1.ir.reg_desc import RInvT
 
 _Q1_OP_NAME_PATTERN = compile("^q1\\.([^.]*)\\.([^.]*)$")
 
-AssemblyInstructionArg: TypeAlias = Q1Imm | SSAValue | RegisterType | StringAttr | str
+AssemblyInstructionArg: TypeAlias = (
+    Q1Imm | LabelAttr | SSAValue | RegisterType | StringAttr | str
+)
+
+JumpTarget: TypeAlias = AddressImm | LabelAttr
+"""A jump destination: an immediate address or a symbolic label."""
+
+JumpTargetInput: TypeAlias = JumpTarget | int | str
+"""An unnormalised jump destination, accepting an integer address or label name."""
+
+
+def _as_jump_target(target: JumpTargetInput) -> JumpTarget:
+    """Normalise a jump destination to its attribute form.
+
+    Integers become :class:`AddressImm`, strings become :class:`LabelAttr`, and existing
+    attributes pass through unchanged.
+    """
+
+    if isinstance(target, int):
+        return AddressImm(target)
+    if isinstance(target, str):
+        return LabelAttr(target)
+    return target
 
 
 def _assembly_arg_str(arg: AssemblyInstructionArg) -> str:
-    if isinstance(arg, Q1Imm):
+    if isinstance(arg, LabelAttr):
+        return f"@{arg.data}"
+    elif isinstance(arg, Q1Imm):
         return str(arg.data)
     elif isinstance(arg, SSAValue):
         if not isinstance(t := arg.type, RegisterType):
@@ -232,6 +258,35 @@ class ImmOperation(Q1Instruction, ABC, Generic[ImmT]):
         return (self.imm,)
 
 
+class JumpImmOperation(Q1Instruction, ABC):
+    """A base class for jumps whose target is an immediate address or a symbolic label.
+
+    The immediate accepts either an :class:`AddressImm` or a :class:`LabelAttr`. Label
+    targets print in Q1 assembly as ``@name`` and are the form produced by linearising
+    ``q1_cf`` control flow.
+    """
+
+    imm = prop_def(JumpTarget)
+
+    def __init__(
+        self,
+        imm: JumpTargetInput,
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            properties={
+                "imm": _as_jump_target(imm),
+                "comment": comment,
+            },
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg, ...]:
+        return (self.imm,)
+
+
 class RsOperation(Q1Instruction, ABC, Generic[RInvT]):
     """A base class for QBlox Q1 operations that have one source register."""
 
@@ -359,6 +414,38 @@ class RdImmOperation(Q1Instruction, ABC, Generic[RInvT, ImmT]):
         super().__init__(
             properties={
                 "imm": imm,
+                "comment": comment,
+            },
+            result_types=[rd],
+        )
+
+    def assembly_line_args(self) -> tuple[AssemblyInstructionArg | None, ...]:
+        return self.rd, self.imm
+
+
+class LoopImmOperation(Q1Instruction, ABC, Generic[RInvT]):
+    """A base class for loop instructions with a counter register and address-or-label
+    target.
+
+    The counter register is decremented and the branch is taken while it remains non-zero.
+    The target accepts either an :class:`AddressImm` or a :class:`LabelAttr`.
+    """
+
+    rd: OpResult[RInvT] = result_def(RInvT)
+    imm = prop_def(JumpTarget)
+
+    def __init__(
+        self,
+        rd: RInvT,
+        imm: JumpTargetInput,
+        comment: str | StringAttr | None = None,
+    ):
+        if isinstance(comment, str):
+            comment = StringAttr(comment)
+
+        super().__init__(
+            properties={
+                "imm": _as_jump_target(imm),
                 "comment": comment,
             },
             result_types=[rd],
