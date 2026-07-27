@@ -15,8 +15,7 @@ their frame's port. A single :class:`ConstantOp` is emitted per distinct sample
 time, and each consuming :class:`PulseOp` is rewired to the appropriate one. This makes
 sharing a waveform across multiple ports safe.
 
-Shapes that hardware supports natively (defaulting to
-:class:`~qat.ir.waveforms.SquareWaveform`) are left untouched, and waveforms with any
+Shapes that hardware supports natively are left untouched, and waveforms with any
 non-constant operand (for example, sweep variables) are also skipped to be handled at
 runtime.
 
@@ -30,7 +29,7 @@ collapsed first and then treated as a compile-time-constant operand.
 """
 
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
@@ -44,8 +43,9 @@ from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, Ti
 from qat.experimental.dialect.pulse.ir.interfaces import IsAnalyticalWaveformInterface
 from qat.experimental.dialect.pulse.ir.ops import ConstantOp, PulseOp
 from qat.experimental.dialect.pulse.ir.types import FrameType, WaveformType
+from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 from qat.experimental.utils.logging import get_logger
-from qat.ir.waveforms import SquareWaveform, sample_waveform
+from qat.ir.waveforms import sample_waveform
 
 log = get_logger(__name__)
 
@@ -105,14 +105,9 @@ def _make_sampled_constant(waveform, sample_time: float) -> ConstantOp:
 class _RewriteAnalyticalWaveform(RewritePattern):
     """Replace analytical waveform ops with :class:`ConstantOp` samples per sample time."""
 
-    def __init__(
-        self,
-        port_sample_times: dict[str, float],
-        ignored_shapes: tuple[type, ...],
-    ):
+    def __init__(self, constraints: PulseLevelConstraints):
         super().__init__()
-        self._port_sample_times = port_sample_times
-        self._ignored_shapes = ignored_shapes
+        self._constraints = constraints
         self.visited = 0
         self.sampled = 0
 
@@ -123,6 +118,14 @@ class _RewriteAnalyticalWaveform(RewritePattern):
         self.visited += 1
         op_type = type(op).__name__
 
+        if self._constraints.supports_waveform_shape(type(op)):
+            log.debug(
+                f"waveform-evaluation: skipping {op_type}: "
+                f"{op_type} is listed as a natively-supported shape "
+                f"and will be played analytically by the hardware."
+            )
+            return
+
         waveform = op.build_waveform()
         if waveform is None:
             log.debug(
@@ -131,22 +134,14 @@ class _RewriteAnalyticalWaveform(RewritePattern):
             )
             return
 
-        if isinstance(waveform, self._ignored_shapes):
-            log.debug(
-                f"waveform-evaluation: skipping {op_type}: "
-                f"{type(waveform).__name__} is listed as a natively-supported shape "
-                f"and will be played analytically by the hardware."
-            )
-            return
-
         pulses_by_sample_time = _group_pulse_uses_by_sample_time(
-            op.results[0], self._port_sample_times
+            op.results[0], self._constraints.port_sample_times_seconds
         )
         if pulses_by_sample_time is None:
             log.debug(
                 f"waveform-evaluation: skipping {op_type}: at least one consumer is "
                 f"not a PulseOp with a resolvable sample time (known ports: "
-                f"{sorted(self._port_sample_times)})."
+                f"{sorted(self._constraints.ports)})."
             )
             return
 
@@ -174,20 +169,17 @@ class EvaluateWaveformsAsSamples(ModulePass):
     :class:`SampledWaveformAttr` of the pre-computed IQ samples — one per distinct
     sample time across the pulses that consume the waveform.
 
-    :ivar port_sample_times: Mapping from :class:`FrameType` port token
-        to the sample time in seconds used to discretise waveforms on that port.
-    :ivar ignored_shapes: Waveform shapes whose analytical form is natively supported by
-        the hardware and should not be sampled. Defaults to ``(SquareWaveform,)``.
+    :ivar constraints: The pulse-level constraints of the hardware, used to determine the
+        sample time for each port and whether a waveform shape is supported natively.
     """
 
     name = "waveform-evaluation"
 
-    port_sample_times: dict[str, float]
-    ignored_shapes: tuple[type, ...] = field(default_factory=lambda: (SquareWaveform,))
+    constraints: PulseLevelConstraints
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         CanonicalizePass().apply(ctx, op)
-        pattern = _RewriteAnalyticalWaveform(self.port_sample_times, self.ignored_shapes)
+        pattern = _RewriteAnalyticalWaveform(self.constraints)
         PatternRewriteWalker(pattern).rewrite_module(op)
         log.info(
             f"waveform-evaluation: sampled {pattern.sampled} of {pattern.visited} "

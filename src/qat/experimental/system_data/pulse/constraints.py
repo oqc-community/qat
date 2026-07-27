@@ -41,14 +41,12 @@ class PortConstraints:
     :ivar sample_time_ps: The sample time of the port in picoseconds.
     :ivar min_duration_ps: The minimum pulse and acquire duration times in picoseconds.
     :ivar max_duration_ps: The maximum pulse and acquire duration times in picoseconds.
-    :ivar native_waveform_shapes: The native waveform shapes supported by that port.
     :ivar acquire_allowed: Whether acquisitions are supported via that port.
     """
 
     sample_time_ps: int
     min_duration_ps: int
     max_duration_ps: int | None
-    native_waveform_shapes: tuple[type[IsAnalyticalWaveformInterface], ...]
     acquire_allowed: bool
 
     @cached_property
@@ -68,18 +66,15 @@ class PortConstraints:
             return None
         return self.max_duration_ps * _PICOSECONDS_CONVERSION
 
-    def supports_waveform_shape(
-        self, waveform_shape: type[IsAnalyticalWaveformInterface]
-    ) -> bool:
-        """Whether the given waveform shape is supported by the port."""
-        return waveform_shape in self.native_waveform_shapes
 
-
-def _build_constraints_from_port_data(port_data: PortData) -> tuple[PortConstraints, int]:
+def _build_constraints_from_port_data(
+    port_data: PortData,
+) -> tuple[PortConstraints, int, tuple[type[IsAnalyticalWaveformInterface], ...]]:
     """Builds the pulse-level constraints for a given port.
 
     :param port_data: The canonical port data to build the constraints from.
-    :return: The pulse-level constraints for the given port and the granularity.
+    :returns: The pulse-level constraints for the given port, the granularity and the native
+        waveform shapes supported on that port.
     """
 
     min_pulse_duration_ps = (
@@ -108,12 +103,11 @@ def _build_constraints_from_port_data(port_data: PortData) -> tuple[PortConstrai
         min_duration_ps=min_pulse_duration_ps,
         max_duration_ps=max_duration_ps,
         acquire_allowed=port_data.acquire_allowed,
-        native_waveform_shapes=tuple(native_shapes),
     )
 
     granularity = port_data.sample_time * port_data.block_size
 
-    return constraints, granularity
+    return constraints, granularity, tuple(native_shapes)
 
 
 @dataclass(frozen=True)
@@ -133,26 +127,50 @@ class PulseLevelConstraints(DerivedViewInterface[CanonicalSystemData]):
         All operations with a duration must be integer multiples of this. Currently, this is
         assumed to be constant across all ports, but later, this might be generalised to be
         specific to a given port type.
+    :ivar native_waveform_shapes: A tuple of waveform shapes that are natively supported by
+        the hardware and should not be sampled.
     """
 
     ports: Mapping[str, PortConstraints]
     granularity_ps: int
+    native_waveform_shapes: tuple[type[IsAnalyticalWaveformInterface], ...] = ()
+
+    def supports_waveform_shape(
+        self, waveform_shape: type[IsAnalyticalWaveformInterface]
+    ) -> bool:
+        """Returns whether the given waveform shape is supported by the hardware.
+
+        :param waveform_shape: The waveform shape to check.
+        :returns: Whether the given waveform shape is supported by the hardware.
+        """
+        return waveform_shape in self.native_waveform_shapes
 
     @cached_property
     def granularity_s(self) -> float:
         """The timing granularity of the hardware in seconds."""
         return self.granularity_ps * _PICOSECONDS_CONVERSION
 
+    @cached_property
+    def port_sample_times_seconds(self) -> Mapping[str, float]:
+        """The sample time of each port in seconds."""
+        return MappingProxyType(
+            {
+                port_id: constraints.sample_time_s
+                for port_id, constraints in self.ports.items()
+            }
+        )
+
     @classmethod
     def derive(cls, parent: CanonicalSystemData, **kwargs) -> "PulseLevelConstraints":
         """Builds the pulse-level constraints for a given hardware model.
 
         :param parent: The canonical hardware model to build the constraints from.
-        :return: The pulse-level constraints for the given hardware model.
+        :returns: The pulse-level constraints for the given hardware model.
         """
 
         port_data = {}
         granularity = None
+        native_waveform_shapes = None
         for port in parent.ports:
             if port.id in port_data:
                 raise ValueError(
@@ -160,14 +178,28 @@ class PulseLevelConstraints(DerivedViewInterface[CanonicalSystemData]):
                     f"which is not supported."
                 )
 
-            constraints, port_granularity = _build_constraints_from_port_data(port)
+            constraints, port_granularity, waveforms = _build_constraints_from_port_data(
+                port
+            )
+
             if granularity is None:
                 granularity = port_granularity
             elif granularity != port_granularity:
-                raise ValueError(
+                raise NotImplementedError(
                     f"The port {port.id} has a different granularity ({port_granularity}) "
                     f"than the other ports ({granularity}), which is not supported."
                 )
+
+            if native_waveform_shapes is None:
+                native_waveform_shapes = set(waveforms)
+            elif native_waveform_shapes != set(waveforms):
+                raise NotImplementedError(
+                    f"The port {port.id} has a different set of native waveform shapes "
+                    f"({sorted(w.__name__ for w in waveforms)}) than the other ports "
+                    f"({sorted(w.__name__ for w in native_waveform_shapes)}), which is not "
+                    f"supported."
+                )
+
             port_data[port.id] = constraints
 
         if granularity is None:
@@ -176,7 +208,9 @@ class PulseLevelConstraints(DerivedViewInterface[CanonicalSystemData]):
                 "be determined."
             )
 
+        sorted_waveforms = tuple(sorted(native_waveform_shapes, key=lambda s: s.__name__))
         return PulseLevelConstraints(
             ports=MappingProxyType(port_data),
             granularity_ps=granularity,
+            native_waveform_shapes=sorted_waveforms,
         )

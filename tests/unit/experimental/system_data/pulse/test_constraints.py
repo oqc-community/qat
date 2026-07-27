@@ -25,7 +25,6 @@ class TestPortConstraints:
             sample_time_ps=8000,
             min_duration_ps=0,
             max_duration_ps=None,
-            native_waveform_shapes=(),
             acquire_allowed=True,
         )
         assert constraints.sample_time_s == 8e-9
@@ -39,7 +38,6 @@ class TestPortConstraints:
             sample_time_ps=0,
             min_duration_ps=min_duration_ps,
             max_duration_ps=None,
-            native_waveform_shapes=(),
             acquire_allowed=True,
         )
         assert constraints.min_pulse_duration_s == min_duration_s
@@ -55,29 +53,9 @@ class TestPortConstraints:
             sample_time_ps=0,
             min_duration_ps=0,
             max_duration_ps=max_duration_ps,
-            native_waveform_shapes=(),
             acquire_allowed=True,
         )
         assert constraints.max_pulse_duration_s == max_duration_s
-
-    @pytest.mark.parametrize(
-        "waveform_shape, response",
-        [
-            (SquareWaveformOp, True),
-            (GaussianWaveformOp, True),
-            (SinWaveformOp, False),
-        ],
-    )
-    def test_supports_waveform_shape_gives_correct_value(self, waveform_shape, response):
-        """Tests that the supports_waveform_shape method gives the correct value."""
-        constraints = PortConstraints(
-            sample_time_ps=0,
-            min_duration_ps=0,
-            max_duration_ps=None,
-            native_waveform_shapes=(SquareWaveformOp, GaussianWaveformOp),
-            acquire_allowed=True,
-        )
-        assert constraints.supports_waveform_shape(waveform_shape) == response
 
 
 class TestPulseLevelConstraints:
@@ -91,9 +69,65 @@ class TestPulseLevelConstraints:
         )
         assert constraints.granularity_s == 8e-9
 
+    @pytest.mark.parametrize(
+        "waveform_shape, response",
+        [(SquareWaveformOp, True), (GaussianWaveformOp, True), (SinWaveformOp, False)],
+    )
+    def test_supports_waveform_shape_gives_correct_value(self, waveform_shape, response):
+        """Tests that the supports_waveform_shape method on PulseLevelConstraints gives the
+        correct value."""
+        constraints = PulseLevelConstraints(
+            ports={},
+            granularity_ps=0,
+            native_waveform_shapes=(SquareWaveformOp, GaussianWaveformOp),
+        )
+        assert constraints.supports_waveform_shape(waveform_shape) == response
+
+    def test_port_sample_times_seconds_gives_correct_value(self):
+        """Tests that port_sample_times_seconds returns a dict with correct values."""
+        port_constraints_1 = PortConstraints(
+            sample_time_ps=8000,
+            min_duration_ps=0,
+            max_duration_ps=None,
+            acquire_allowed=True,
+        )
+        port_constraints_2 = PortConstraints(
+            sample_time_ps=4000,
+            min_duration_ps=0,
+            max_duration_ps=None,
+            acquire_allowed=False,
+        )
+        constraints = PulseLevelConstraints(
+            ports={
+                "port_1": port_constraints_1,
+                "port_2": port_constraints_2,
+            },
+            granularity_ps=0,
+        )
+        port_times = constraints.port_sample_times_seconds
+        assert port_times == {"port_1": 8e-9, "port_2": 4e-9}
+
+    def test_port_sample_times_seconds_is_immutable(self):
+        """Tests that port_sample_times_seconds returns an immutable mapping."""
+        constraints = PulseLevelConstraints(
+            ports={
+                "port_1": PortConstraints(
+                    sample_time_ps=8000,
+                    min_duration_ps=0,
+                    max_duration_ps=None,
+                    acquire_allowed=True,
+                )
+            },
+            granularity_ps=0,
+        )
+
+        port_times = constraints.port_sample_times_seconds
+        with pytest.raises(TypeError):
+            port_times["port_2"] = 4e-9
+
 
 class TestBuildPulseLevelConstraints:
-    """Tests the ``PulseLevelConstraints.from_canonical`` class method."""
+    """Tests the ``PulseLevelConstraints.derive`` class method."""
 
     @pytest.fixture
     def canonical_data(self):
@@ -114,7 +148,7 @@ class TestBuildPulseLevelConstraints:
             block_size=16,
             min_blocks=1,
             max_blocks=-1,  # No limit on duration
-            native_waveform_shapes=("square",),
+            native_waveform_shapes=("square", "gaussian"),
             acquire_allowed=False,
         )
 
@@ -153,16 +187,13 @@ class TestBuildPulseLevelConstraints:
         assert pulse_constraints.ports["port_2"].max_pulse_duration_s is None
 
     def test_building_gives_correct_native_waveform_shapes(self, canonical_data):
-        """Tests that native waveform shapes are correctly calculated from canonical
-        data."""
+        """Tests that native waveform shapes are correctly calculated from canonical data
+        and stored on the PulseLevelConstraints object."""
         pulse_constraints = PulseLevelConstraints.derive(canonical_data)
-        assert pulse_constraints.ports["port_1"].native_waveform_shapes == (
+        assert set(pulse_constraints.native_waveform_shapes) == {
             SquareWaveformOp,
             GaussianWaveformOp,
-        )
-        assert pulse_constraints.ports["port_2"].native_waveform_shapes == (
-            SquareWaveformOp,
-        )
+        }
 
     def test_building_gives_correct_acquire_allowed(self, canonical_data):
         """Tests that acquire_allowed is correctly calculated from canonical data."""
@@ -172,17 +203,18 @@ class TestBuildPulseLevelConstraints:
 
 
 class TestBuildPulseLevelConstraintsErrors:
-    """Tests the ``PulseLevelConstraints.from_canonical`` error cases."""
+    """Tests the ``PulseLevelConstraints.derive`` error cases."""
 
-    def test_different_granularities_raises_value_error(self):
-        """Tests that a ValueError is raised if ports have different granularities."""
+    def test_different_granularities_raises_not_implemented_error(self):
+        """Tests that a NotImplementedError is raised if ports have different
+        granularities."""
         port_1 = PortData(
             id="port_1",
             sample_time=1000,
             block_size=8,
             min_blocks=1,
             max_blocks=10,
-            native_waveform_shapes=("square", "gaussian"),
+            native_waveform_shapes=("square",),
             acquire_allowed=True,
         )
         port_2 = PortData(
@@ -195,7 +227,37 @@ class TestBuildPulseLevelConstraintsErrors:
             acquire_allowed=False,
         )
         canonical_data = CanonicalSystemData(ports=(port_1, port_2))
-        with pytest.raises(ValueError, match="The port port_2 has a different granularity"):
+        with pytest.raises(
+            NotImplementedError, match="The port port_2 has a different granularity"
+        ):
+            PulseLevelConstraints.derive(canonical_data)
+
+    def test_different_native_waveforms_raises_not_implemented_error(self):
+        """Tests that a NotImplementedError is raised if ports have different native
+        waveform shapes."""
+        port_1 = PortData(
+            id="port_1",
+            sample_time=1000,
+            block_size=8,
+            min_blocks=1,
+            max_blocks=10,
+            native_waveform_shapes=("square", "gaussian"),
+            acquire_allowed=True,
+        )
+        port_2 = PortData(
+            id="port_2",
+            sample_time=1000,
+            block_size=8,
+            min_blocks=1,
+            max_blocks=10,
+            native_waveform_shapes=("square",),
+            acquire_allowed=False,
+        )
+        canonical_data = CanonicalSystemData(ports=(port_1, port_2))
+        with pytest.raises(
+            NotImplementedError,
+            match="The port port_2 has a different set of native waveform shapes",
+        ):
             PulseLevelConstraints.derive(canonical_data)
 
     def test_no_ports_raises_value_error(self):

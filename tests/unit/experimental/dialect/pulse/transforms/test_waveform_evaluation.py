@@ -15,7 +15,8 @@ from typing import Any
 import pytest
 from numpy.testing import assert_array_equal
 from xdsl.dialects.builtin import BoolAttr, StringAttr, i1
-from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
+from xdsl.ir import SSAValue
+from xdsl.irdl import IRDLOperation, irdl_op_definition, operand_def, result_def
 
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
@@ -52,6 +53,10 @@ from qat.experimental.dialect.pulse.ir.types import TimeType, WaveformType
 from qat.experimental.dialect.pulse.transforms.waveform_evaluation import (
     EvaluateWaveformsAsSamples,
 )
+from qat.experimental.system_data.pulse.constraints import (
+    PortConstraints,
+    PulseLevelConstraints,
+)
 from qat.ir.waveforms import (
     BlackmanWaveform,
     CosWaveform,
@@ -82,6 +87,35 @@ _CONTEXT = create_context(Pulse)
 
 PORT_CONTROL = "channel_1"
 PORT_READOUT = "channel_2"
+
+
+def _create_pulse_constraints(
+    port_sample_times: dict[str, float],
+    native_waveform_shapes: tuple[type, ...] = (SquareWaveformOp,),
+) -> PulseLevelConstraints:
+    """Create a PulseLevelConstraints object for testing.
+
+    :param port_sample_times: Dictionary mapping port IDs to sample times in seconds.
+    :param native_waveform_shapes: Tuple of native waveform shapes supported by the
+        hardware.
+    :returns: A PulseLevelConstraints object.
+    """
+    port_constraints = {}
+    for port_id, sample_time in port_sample_times.items():
+        # Convert from seconds to picoseconds
+        sample_time_ps = int(round(sample_time * 1e12))
+        port_constraints[port_id] = PortConstraints(
+            sample_time_ps=sample_time_ps,
+            min_duration_ps=0,
+            max_duration_ps=None,
+            acquire_allowed=True,
+        )
+
+    return PulseLevelConstraints(
+        ports=port_constraints,
+        granularity_ps=8000,
+        native_waveform_shapes=native_waveform_shapes,
+    )
 
 
 @irdl_op_definition
@@ -359,10 +393,11 @@ class TestWaveformShapeCoverage:
         assert get_operations_with_type(module, spec.op_cls) != []
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-            ignored_shapes=(),
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, spec.op_cls) == []
         sampled_constants = _get_sampled_constants(module)
@@ -378,10 +413,11 @@ class TestWaveformShapeCoverage:
         assert get_operations_with_type(module, spec.op_cls) != []
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-            ignored_shapes=(),
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         pulse_ops = get_operations_with_type(module, PulseOp)
         assert len(pulse_ops) == 1
@@ -394,10 +430,11 @@ class TestWaveformShapeCoverage:
         assert get_operations_with_type(module, spec.op_cls) != []
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-            ignored_shapes=(),
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         expected = sample_waveform(spec.build_pydantic_waveform(), control_sample_time)
         sampled_constant = _get_sampled_constants(module)[0]
@@ -432,12 +469,13 @@ class TestPulseOpRewrite:
         assert get_operations_with_type(module, GaussianWaveformOp) != []
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={
                 PORT_CONTROL: control_sample_time,
                 PORT_READOUT: readout_sample_time,
             },
-        ).apply(_CONTEXT, module)
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         sampled_constants = _get_sampled_constants(module)
         assert len(sampled_constants) == 1
@@ -449,9 +487,10 @@ class TestPulseOpRewrite:
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-        ).apply(_CONTEXT, module)
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
@@ -465,9 +504,10 @@ class TestPulseOpRewrite:
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-        ).apply(_CONTEXT, module)
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
@@ -482,9 +522,11 @@ class TestPulseOpRewrite:
         assert get_operations_with_type(module, spec.op_cls) != []
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, spec.op_cls) == []
         sampled_constants = _get_sampled_constants(module)
@@ -537,9 +579,10 @@ class TestPulseOpRewrite:
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 2
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-        ).apply(_CONTEXT, module)
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, GaussianWaveformOp) == []
         assert len(_get_sampled_constants(module)) == 2
@@ -561,9 +604,10 @@ class TestPulseOpRewrite:
             [freq, frame_a, frame_b, width, amp, rise, wf, pulse_a, pulse_b],
         )
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-        ).apply(_CONTEXT, module)
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, GaussianWaveformOp) == []
         sampled_constants = _get_sampled_constants(module)
@@ -598,12 +642,13 @@ class TestPulseOpRewrite:
             ],
         )
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={
                 PORT_CONTROL: control_sample_time,
                 PORT_READOUT: readout_sample_time,
             },
-        ).apply(_CONTEXT, module)
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, GaussianWaveformOp) == []
         sampled_constants = _get_sampled_constants(module)
@@ -613,9 +658,41 @@ class TestPulseOpRewrite:
         pulse_ops = get_operations_with_type(module, PulseOp)
         assert pulse_ops[0].waveform is not pulse_ops[1].waveform
 
+    def test_waveform_with_non_pulse_consumer_is_ignored(self, control_sample_time):
+        """Mocks a non-pulse op that takes a waveform operand, to test that such waveforms
+        with non pulse consumers are ignored."""
+
+        @irdl_op_definition
+        class NonPulseOp(IRDLOperation):
+            name = "test.non_pulse"
+            waveform = operand_def(WaveformType)
+
+            def __init__(self, waveform: SSAValue[WaveformType]):
+                super().__init__(operands=[waveform])
+
+        freq = ConstantOp(FrequencyAttr(5e9))
+        frame = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
+        width = ConstantOp(TimeAttr(80e-9))
+        amp = ConstantOp(AmplitudeAttr(0.5))
+        rise = ConstantOp(TimeAttr(10e-9))
+        wf = GaussianWaveformOp(width, amp, rise)
+        non_pulse = NonPulseOp(wf)
+
+        module = build_module_from_ops(
+            [freq, frame, width, amp, rise, wf, non_pulse],
+        )
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: control_sample_time},
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert get_operations_with_type(module, GaussianWaveformOp) == [wf]
+        assert _get_sampled_constants(module) == []
+
 
 @pytest.mark.parametrize("control_sample_time", [1e-9, 2e-9])
-class TestIgnoredShapes:
+class TestNativeWaveformShapes:
     """Tests that waveforms whose shape is listed as natively-supported are left as-is."""
 
     def test_square_is_ignored_by_default(self, control_sample_time):
@@ -624,9 +701,11 @@ class TestIgnoredShapes:
         assert len(get_operations_with_type(module, SquareWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(SquareWaveformOp,),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, SquareWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
@@ -638,10 +717,11 @@ class TestIgnoredShapes:
         assert len(get_operations_with_type(module, spec.op_cls)) == 1
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-            ignored_shapes=(spec.pydantic_cls,),
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(spec.op_cls,),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert len(get_operations_with_type(module, spec.op_cls)) == 1
         assert _get_sampled_constants(module) == []
@@ -652,10 +732,11 @@ class TestIgnoredShapes:
         assert get_operations_with_type(module, SquareWaveformOp) != []
         assert _get_sampled_constants(module) == []
 
-        EvaluateWaveformsAsSamples(
+        constraints = _create_pulse_constraints(
             port_sample_times={PORT_CONTROL: control_sample_time},
-            ignored_shapes=(),
-        ).apply(_CONTEXT, module)
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
 
         assert get_operations_with_type(module, SquareWaveformOp) == []
         assert len(_get_sampled_constants(module)) == 1
