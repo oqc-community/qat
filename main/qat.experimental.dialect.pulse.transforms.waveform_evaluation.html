@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post296.dev20260726183456 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post298.dev20260727131549 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -163,6 +163,13 @@
 </li>
 <li class="toctree-l3 current"><a class="reference internal" href="qat.experimental.html">qat.experimental package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.naming.html">qat.experimental.dialect.common.naming module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.region.html">qat.experimental.dialect.common.region module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.ssa.html">qat.experimental.dialect.common.ssa module</a></li>
+</ul>
+</li>
 <li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul class="current">
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6 current"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
@@ -178,10 +185,12 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_cf.html">qat.experimental.dialect.q1_cf package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.ir.html">qat.experimental.dialect.q1_cf.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.transforms.html">qat.experimental.dialect.q1_cf.transforms package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_scf.html">qat.experimental.dialect.q1_scf package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.ir.html">qat.experimental.dialect.q1_scf.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.html">qat.experimental.dialect.q1_scf.transforms package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
@@ -620,8 +629,7 @@ consumes the analytical waveform and groups them by the sample time associated w
 their frame’s port. A single <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code> is emitted per distinct sample
 time, and each consuming <code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOp</span></code> is rewired to the appropriate one. This makes
 sharing a waveform across multiple ports safe.</p>
-<p>Shapes that hardware supports natively (defaulting to
-<a class="reference internal" href="qat.ir.waveforms.html#qat.ir.waveforms.SquareWaveform" title="qat.ir.waveforms.SquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SquareWaveform</span></code></a>) are left untouched, and waveforms with any
+<p>Shapes that hardware supports natively are left untouched, and waveforms with any
 non-constant operand (for example, sweep variables) are also skipped to be handled at
 runtime.</p>
 <p>Sampling of acquisition weights is intentionally deferred; weights are expected to move to
@@ -632,7 +640,7 @@ chain that folds to a constant (e.g. <code class="docutils literal notranslate">
 collapsed first and then treated as a compile-time-constant operand.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveformsAsSamples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port_sample_times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignored_shapes=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveformsAsSamples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Evaluate analytical waveform ops into constant sampled waveforms.</p>
 <p>For every <code class="xref py py-class docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface</span></code> op with all-constant operands, the
@@ -641,12 +649,8 @@ op is replaced with one or more <code class="xref py py-class docutils literal n
 sample time across the pulses that consume the waveform.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>port_sample_times</strong> – Mapping from <code class="xref py py-class docutils literal notranslate"><span class="pre">FrameType</span></code> port token
-to the sample time in seconds used to discretise waveforms on that port.</p></li>
-<li><p><strong>ignored_shapes</strong> – Waveform shapes whose analytical form is natively supported by
-the hardware and should not be sampled. Defaults to <code class="docutils literal notranslate"><span class="pre">(SquareWaveform,)</span></code>.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>constraints</strong> – The pulse-level constraints of the hardware, used to determine the
+sample time for each port and whether a waveform shape is supported natively.</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -660,18 +664,13 @@ the hardware and should not be sampled. Defaults to <code class="docutils litera
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.ignored_shapes">
-<span class="sig-name descname"><span class="pre">ignored_shapes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.ignored_shapes" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.constraints">
+<span class="sig-name descname"><span class="pre">constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints" title="qat.experimental.system_data.pulse.constraints.PulseLevelConstraints"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseLevelConstraints</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.constraints" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'waveform-evaluation'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.name" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.port_sample_times">
-<span class="sig-name descname"><span class="pre">port_sample_times</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.port_sample_times" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
