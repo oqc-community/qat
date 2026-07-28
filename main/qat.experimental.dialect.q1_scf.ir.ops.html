@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_scf.ir.ops module &mdash; qat-compiler 3.0.0.post299.dev20260728150214 documentation</title>
+  <title>qat.experimental.dialect.q1_scf.ir.ops module &mdash; qat-compiler 3.0.0.post300.dev20260728192853 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -751,7 +751,7 @@ by the operation definition.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.ForOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ForOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iter_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">body</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_domain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.ForOp" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.ForOp" title="qat.experimental.dialect.q1_scf.ir.ops.ForOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.ForOp" title="qat.experimental.dialect.q1_scf.ir.ops.ForOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ForOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Counted loop whose induction value is the remaining count.</p>
 <p><code class="docutils literal notranslate"><span class="pre">iter_count</span></code> counts down to zero, mapping one-to-one onto the native Q1
 decrement-and-branch loop and onto <code class="docutils literal notranslate"><span class="pre">q1_cf.loop_branch</span></code>. The body is a single
@@ -764,18 +764,24 @@ the counted loop realises.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.ForOp.allocate_registers">
-<span class="sig-name descname"><span class="pre">allocate_registers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.ForOp.allocate_registers" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">allocate_registers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allocator</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.ForOp.allocate_registers" title="Link to this definition"></a></dt>
 <dd><p>Entry point for structured register allocation over this loop.</p>
-<p>Register allocation is implemented by COMPILER-911. This dialect exposes only the
-hook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>NotImplementedError</strong> – Always, until COMPILER-911 supplies the pass.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
+<p>This allocation is done under the following assumptions:
+:rtype: <span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<ul class="simple">
+<li><p>The iter_args that instantiate the loop-carried arguments are not consumed after
+initialising the loop. This is to prevent accidental reallocation due to the
+coalescing constraints between the iter_args and the block arguments.</p></li>
+<li><p>The iter_count is not consumed after initialising the loop. This is to prevent
+accidental reallocation due to the coalescing constraints between the iter_count
+and the induction variable.</p></li>
+<li><p>Relocations are applied to block arguments where required to allow for register
+allocation with the coalescing constraints.</p></li>
+</ul>
+<p>Because of these assumptions, not every allocation is possible. It’s expected that
+legalisation via relocations happens prior to allocation. In particular, lowering
+from other dialects would enforce this through move operations on iter args, block
+arguments and the induction variable.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -878,7 +884,7 @@ by the operation definition.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.IfOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IfOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">predicate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicate_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">then_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">else_region</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.IfOp" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.IfOp" title="qat.experimental.dialect.q1_scf.ir.ops.IfOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">IfOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.IfOp" title="qat.experimental.dialect.q1_scf.ir.ops.IfOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">IfOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Structured conditional for single-sequencer feedforward.</p>
 <p>Evaluates <code class="docutils literal notranslate"><span class="pre">predicate</span></code> over its register operands, runs the <code class="docutils literal notranslate"><span class="pre">then</span></code> region
 or the optional <code class="docutils literal notranslate"><span class="pre">else</span></code> region, and returns their yielded values as its
@@ -890,16 +896,15 @@ cross-sequencer message.</p>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.IfOp.allocate_registers">
-<span class="sig-name descname"><span class="pre">allocate_registers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.IfOp.allocate_registers" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">allocate_registers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allocator</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.IfOp.allocate_registers" title="Link to this definition"></a></dt>
 <dd><p>Entry point for structured register allocation over this conditional.</p>
-<p>Register allocation is implemented by COMPILER-911. This dialect exposes only the
-hook.</p>
+<p>Ensures the yield arguments of the then and else regions are allocated to the same
+registers as the results of the IfOp, and that the predicate operands are allocated
+to registers. Allocates each region separately, allowing use of shared registers
+between the two regions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>NotImplementedError</strong> – Always, until COMPILER-911 supplies the pass.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1004,7 +1009,7 @@ by the operation definition.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.WhileOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WhileOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result_types</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">before_region</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">after_region</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.WhileOp" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.WhileOp" title="qat.experimental.dialect.q1_scf.ir.ops.WhileOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">WhileOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.WhileOp" title="qat.experimental.dialect.q1_scf.ir.ops.WhileOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">WhileOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RegisterAllocatableOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>General structured loop with a <code class="docutils literal notranslate"><span class="pre">before</span></code>/<code class="docutils literal notranslate"><span class="pre">after</span></code> split.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">before</span></code> region computes and tests the loop condition and is terminated
 by <a class="reference internal" href="#qat.experimental.dialect.q1_scf.ir.ops.ConditionOp" title="qat.experimental.dialect.q1_scf.ir.ops.ConditionOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionOp</span></code></a>. The <code class="docutils literal notranslate"><span class="pre">after</span></code> region is the loop body, terminated by
@@ -1017,6 +1022,17 @@ arguments. Any structured loop is expressible in this form.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.WhileOp.after_region">
 <span class="sig-name descname"><span class="pre">after_region</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.WhileOp.after_region" title="Link to this definition"></a></dt>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_scf.ir.ops.WhileOp.allocate_registers">
+<span class="sig-name descname"><span class="pre">allocate_registers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allocator</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_scf.ir.ops.WhileOp.allocate_registers" title="Link to this definition"></a></dt>
+<dd><p>Entry point for structured register allocation over this loop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">

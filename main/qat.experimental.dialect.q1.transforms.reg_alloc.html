@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.transforms.reg_alloc module &mdash; qat-compiler 3.0.0.post299.dev20260728150214 documentation</title>
+  <title>qat.experimental.dialect.q1.transforms.reg_alloc module &mdash; qat-compiler 3.0.0.post300.dev20260728192853 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -628,6 +628,67 @@
   <section id="module-qat.experimental.dialect.q1.transforms.reg_alloc">
 <span id="qat-experimental-dialect-q1-transforms-reg-alloc-module"></span><h1>qat.experimental.dialect.q1.transforms.reg_alloc module<a class="headerlink" href="#module-qat.experimental.dialect.q1.transforms.reg_alloc" title="Link to this heading"></a></h1>
 <p>Q1 support for xDSL register allocation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LinearScanRegisterAllocationPass</span></span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
+<p>A pass that applies linear scan register allocation to all sequences in a module.</p>
+<p>It applies register allocation individually to each <code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceOp</span></code> defined
+throughout the module. The allocator works by walking the block within the sequence
+backwards, allocating registers for operands and freeing registers for results. This is
+a simple and efficient allocation strategy that avoids the complexity of graph colouring
+and fixed-point iteration.</p>
+<p>It is aimed at the structured control flow level (q1_scf); if a sequence contains
+multiple blocks, an exception will be raised. There are also certain requirements on
+for loops, see the documentation there.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass.apply" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1-lin-scan-reg-alloc'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.reg_alloc.LinearScanRegisterAllocationPass.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.reg_alloc.Q1LinearScanAllocator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1LinearScanAllocator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">available_registers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.reg_alloc.Q1LinearScanAllocator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BlockNaiveAllocator</span></code></p>
+<p>A linear scan register allocator for Q1 physical registers.</p>
+<p>Implements a register allocator strategy that traverses the use-def SSA chain backwards
+(i.e., from uses to defs) and allocates registers for operands and frees registers for
+results. This operates at the structured control flow level (q1_scf), and allows for
+simple and efficient allocation without resorting to more complex graph colouring
+algorithms and fixed-point iteration.</p>
+<p>The assumption that this operates at the structured control flow level means that it can
+only handle sequences with a single block, and will raise an exception if multiple
+blocks are present.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.q1.transforms.reg_alloc.Q1LinearScanAllocator.params.available_registers"></span><strong>available_registers</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.transforms.reg_alloc.Q1LinearScanAllocator.params.available_registers">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.q1.transforms.reg_alloc.Q1RegisterStack" title="qat.experimental.dialect.q1.transforms.reg_alloc.Q1RegisterStack"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1RegisterStack</span></code></a></span>) – The Q1 physical registers available for allocation.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.reg_alloc.Q1LinearScanAllocator.allocate_sequence">
+<span class="sig-name descname"><span class="pre">allocate_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequence</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.reg_alloc.Q1LinearScanAllocator.allocate_sequence" title="Link to this definition"></a></dt>
+<dd><p>Allocate registers for the given sequence operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.transforms.reg_alloc.Q1RegisterStack">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1RegisterStack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allocatable_registers=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_infinite_indices=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reserved_registers=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">available_registers=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_infinite=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.transforms.reg_alloc.Q1RegisterStack" title="Link to this definition"></a></dt>
