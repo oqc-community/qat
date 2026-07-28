@@ -17,6 +17,7 @@ import pytest
 from xdsl.context import Context
 from xdsl.dialects.builtin import Builtin, ModuleOp, i32
 from xdsl.ir import Block, Region
+from xdsl.irdl import IRDLOperation, irdl_op_definition, traits_def
 from xdsl.parser import Parser
 from xdsl.printer import Printer
 from xdsl.traits import HasAncestor, IsTerminator
@@ -438,15 +439,19 @@ class TestForOp:
         with pytest.raises(VerifyException, match="at least a terminator"):
             self._for(body).verify()
 
-    def test_allocate_registers_defers_to_compiler_911(self):
+    def test_wrong_terminator_type(self):
+        """Mocks up a terminator type and then tests that the for loop verifier rejects
+        it."""
+
+        @irdl_op_definition
+        class DummyTerminatorOp(IRDLOperation):
+            name = "dummy.terminator"
+            traits = traits_def(IsTerminator())
+
         body = Block(arg_types=[_REG, _REG])
-        _induction, carried = body.args
-        body.add_op(YieldOp(carried))
-        entry = Block(arg_types=[_REG, _REG])
-        count, init = entry.args
-        op = ForOp(count, [init], Region([body]))
-        with pytest.raises(NotImplementedError, match="COMPILER-911"):
-            op.allocate_registers()
+        body.add_op(DummyTerminatorOp())
+        with pytest.raises(VerifyException, match="q1_scf.yield"):
+            self._for(body).verify()
 
 
 class TestIfOp:
@@ -591,11 +596,6 @@ class TestIfOp:
             ctx.load_dialect(dialect)
         with pytest.raises(ParseError, match="unary or binary predicate"):
             Parser(ctx, ir_text).parse_op()
-
-    def test_allocate_registers_defers_to_compiler_911(self):
-        _entry, op = _flag_if()
-        with pytest.raises(NotImplementedError, match="COMPILER-911"):
-            op.allocate_registers()
 
 
 class TestYieldTerminatorHelper:

@@ -27,10 +27,13 @@ Reference: https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.ht
 
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Sequence
 
 from typing_extensions import Self
-from xdsl.ir import Attribute, Block, Operation, Region, SSAValue
+from xdsl.backend.register_allocatable import RegisterAllocatableOperation
+from xdsl.backend.register_allocator import BlockAllocator
+from xdsl.ir import Attribute, Block, BlockArgument, Operation, Region, SSAValue
 from xdsl.irdl import (
     AttrSizedOperandSegments,
     IRDLOperation,
@@ -54,7 +57,7 @@ from xdsl.traits import (
     RecursiveMemoryEffect,
     SingleBlockImplicitTerminator,
 )
-from xdsl.utils.exceptions import VerifyException
+from xdsl.utils.exceptions import DiagnosticException, VerifyException
 
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_cf.ir.attrs import (
@@ -252,7 +255,7 @@ class ConditionOp(IRDLOperation):
 
 
 @irdl_op_definition
-class WhileOp(IRDLOperation):
+class WhileOp(IRDLOperation, RegisterAllocatableOperation):
     """General structured loop with a ``before``/``after`` split.
 
     The ``before`` region computes and tests the loop condition and is terminated
@@ -369,9 +372,60 @@ class WhileOp(IRDLOperation):
         after_region = parser.parse_region()
         return cls(init_args, result_types, before_region, after_region)
 
+    def allocate_registers(self, allocator: BlockAllocator) -> None:
+        """Entry point for structured register allocation over this loop."""
+
+        # Allocate live_ins of both blocks to live throughout
+        for block in [self.before_region.block, self.after_region.block]:
+            for value in allocator.live_ins_per_block[block]:
+                allocator.allocate_value(value)
+
+        condition: ConditionOp = self.before_region.block.last_op
+        yield_op: YieldOp = self.after_region.block.last_op
+
+        # Allocate the condition of the before region to the results of the while loop and
+        # the block args of the after region
+        for forward_arg, result, block_arg in zip(
+            condition.forward_args, self.res, self.after_region.block.args, strict=True
+        ):
+            allocator.allocate_values_same_reg((forward_arg, result, block_arg))
+
+        # Allocate the before region block args to the yield of the after region
+        for before_arg, yield_arg in zip(
+            self.before_region.block.args, yield_op.arguments, strict=True
+        ):
+            allocator.allocate_values_same_reg((before_arg, yield_arg))
+
+        # Allocate both regions in their own nested scopes
+        with allocator.available_registers.reserve_registers(
+            [value.type for value in self.after_region.block.args]
+        ):
+            allocator.allocate_block(self.after_region.block)
+        with allocator.available_registers.reserve_registers(
+            [value.type for value in self.before_region.block.args]
+        ):
+            allocator.allocate_block(self.before_region.block)
+
+        # Free the block args of the before region; the after region block args have
+        # already been freed with the allocation of the before region.
+        for value in self.before_region.block.args:
+            allocator.free_value(value)
+
+        for init_arg, before_arg in zip(
+            self.init_args, self.before_region.block.args, strict=True
+        ):
+            if init_arg.type.is_allocated:
+                raise DiagnosticException(
+                    f"init_arg {init_arg} is already allocated to a register, which "
+                    f"implies that the init_arg is used within the body of the loop or "
+                    f"after the loop, which violates the register alignment assumption. "
+                    f"This should be fixed upstream with register relocation."
+                )
+            allocator.allocate_values_same_reg((init_arg, before_arg))
+
 
 @irdl_op_definition
-class ForOp(IRDLOperation):
+class ForOp(IRDLOperation, RegisterAllocatableOperation):
     """Counted loop whose induction value is the remaining count.
 
     ``iter_count`` counts down to zero, mapping one-to-one onto the native Q1
@@ -451,26 +505,173 @@ class ForOp(IRDLOperation):
                     f" {block_arg.type!r} does not match iter_arg type {iter_arg.type!r}"
                 )
 
-        yield_op = _yield_terminator(self.body)
-        if yield_op is None:
-            raise VerifyException(f"{self.name}: body must be terminated by q1_scf.yield")
+        # traits guarantee the terminator is a YieldOp, so we can safely cast it
+        yield_op: YieldOp = _yield_terminator(self.body)
         carried_types = tuple(v.type for v in self.iter_args)
         if tuple(v.type for v in yield_op.arguments) != carried_types:
             raise VerifyException(
                 f"{self.name}: body terminator operands must match the carried value types"
             )
 
-    def allocate_registers(self) -> None:
+    def _allocator_block_args_validation(self) -> None:
+        """Validates that the ForOp's block arguments and yield operands are not tangled in
+        a way that would not allow for register allocation without relocation, along with
+        the iter_args.
+
+        The ForOp is expected to have alignment with iter args and yield operands in terms
+        of the registers they use as we move across the iteration boundary. However, this
+        desirable and assumed feature places constraints on the registers. One such example
+        is ``{block_arg_0, block_arg_1} -> {yield_operand_1, yield_operand_0}``. One edge
+        connects ``block_arg_0`` to ``yield_operand_1`` and another edge connects
+        ``block_arg_1`` to ``yield_operand_0``, enforcing each pair to share a register.
+        Simultaneously, the yield operands are expected to be used in the same order as the
+        block arguments. This causes a contradiction, resulting in all four values sharing a
+        register, which is not possible.
+
+        A further example is something like:
+
+            block_arg -------------> operation_0 -------------> yield_operand
+                        |
+                        v --------------------------->operation_1
+
+        The ``operation_1`` happens after ``operation_0``. The constraints that the
+        ``block_arg`` and ``yield_operand`` share a register means that the edges
+        connecting to ``operation_0`` have the same allocation. However,
+        ``operation_0`` rewrites that register, which is supposed to be used by
+        ``operation_1`` at a later time. This is a contradiction, and the register
+        allocation is not possible without relocation.
+
+        This validation checks that if the block arguments are the yield operands, then
+        they have the correct ordering. It then checks for operations that have a block
+        argument as an operand and a yield operand as a result, and checks that there is no
+        subsequently timed operation on that block argument after the said operation. If
+        either of these things aren't true, we raise a diagnostic error.
+
+        Practically, this problem should be solved upstream and no IR that reaches this
+        stage should allow for such possibilities.
+        """
+
+        yield_op = self.body.block.last_op
+
+        yield_operand_producers: dict[Operation, list[int]] = defaultdict(list)
+        for index, operand in enumerate(yield_op.arguments):
+            if (
+                isinstance(operand, BlockArgument)
+                and (operand.owner is self.body.block)
+                and (operand.index != index + 1)
+            ):
+                raise DiagnosticException(
+                    "A yield operand found with a block argument at an index that does not "
+                    "match the index of the block argument. Register allocation is not "
+                    "possible without relocation, which is expected to happen upstream."
+                )
+            elif not isinstance(operand, BlockArgument):
+                yield_operand_producers[operand.owner].append(index)
+
+        yield_producer_ops = set(yield_operand_producers.keys())
+        if not yield_producer_ops:
+            return
+
+        # Pre-compute operation positions in the block for O(1) position comparisons
+        # instead of O(n) is_before_in_block() calls
+        position_map = {op: i for i, op in enumerate(self.body.block.ops)}
+
+        for op in yield_producer_ops:
+            for yield_index in yield_operand_producers[op]:
+                if op not in position_map:
+                    # It's a live-in define prior to the loop
+                    continue
+                block_arg = self.body.block.args[yield_index + 1]
+                for use in block_arg.uses:
+                    operation = use.operation
+                    while operation.parent_op() not in (self, None):
+                        operation = operation.parent_op()
+
+                    if position_map[op] < position_map[operation]:
+                        raise DiagnosticException(
+                            "ForOp carried block argument is used after the operation that "
+                            "defines the corresponding yield operand. Register allocation "
+                            "is not possible without relocation, which is expected to "
+                            "happen upstream."
+                        )
+
+    def allocate_registers(self, allocator: BlockAllocator) -> None:
         """Entry point for structured register allocation over this loop.
 
-        Register allocation is implemented by COMPILER-911. This dialect exposes only the
-        hook.
+        This allocation is done under the following assumptions:
 
-        :raises NotImplementedError: Always, until COMPILER-911 supplies the pass.
+        * The iter_args that instantiate the loop-carried arguments are not consumed after
+          initialising the loop. This is to prevent accidental reallocation due to the
+          coalescing constraints between the iter_args and the block arguments.
+        * The iter_count is not consumed after initialising the loop. This is to prevent
+          accidental reallocation due to the coalescing constraints between the iter_count
+          and the induction variable.
+        * Relocations are applied to block arguments where required to allow for register
+          allocation with the coalescing constraints.
+
+        Because of these assumptions, not every allocation is possible. It's expected that
+        legalisation via relocations happens prior to allocation. In particular, lowering
+        from other dialects would enforce this through move operations on iter args, block
+        arguments and the induction variable.
         """
-        raise NotImplementedError(
-            "q1_scf.for register allocation is provided by COMPILER-911"
-        )
+
+        self._allocator_block_args_validation()
+
+        # Allocate values defined outside the loop that are used within
+        live_ins = allocator.live_ins_per_block[self.body.block]
+        for value in live_ins:
+            allocator.allocate_value(value)
+
+        # Yield arguments and results need to be allocated to the same register
+        yield_op = self.body.block.last_op
+        for yield_arg, result in zip(yield_op.arguments, self.results, strict=True):
+            allocator.allocate_values_same_reg((yield_arg, result))
+
+        # Bind block arguments to the same registers as the yield; this is done separately
+        # to the previous step to catch tangled uses between the block args and the yield
+        # operands, e.g. (block_arg_1 -> yield_arg_2, block_arg_2 -> yield_arg_1)
+        for block_arg, yield_arg in zip(
+            self.body.block.args[1:], yield_op.arguments, strict=True
+        ):
+            allocator.allocate_values_same_reg((block_arg, yield_arg))
+        allocator.allocate_value(self.body.block.args[0])
+
+        # Reserve the registers used for loop-carried values and the induction variable for
+        # the duration of the loop, and then allocate the body of the loop
+        block_args = self.body.block.args
+        with allocator.available_registers.reserve_registers(
+            tuple(block_arg.type for block_arg in block_args)
+        ):
+            allocator.allocate_block(self.body.block)
+
+        # Free up the registers used for loop-carried values and the induction variable
+        # after the loop is done
+        allocator.free_value(self.body.block.args[0])
+        for block_arg in self.body.block.args[1:]:
+            allocator.free_value(block_arg)
+
+        # Bind the induction variable to the same register as iter_count
+        if self.iter_count.type.is_allocated:
+            raise DiagnosticException(
+                f"iter_count {self.iter_count} is already allocated to a register, which "
+                f"implies that the iter_count is used within the body of the loop or "
+                f"after the loop, which violates the register alignment assumption. "
+                f"This should be fixed upstream with register relocation."
+            )
+        allocator.allocate_values_same_reg((self.body.block.args[0], self.iter_count))
+
+        # Bind the iter_args to the same registers as the block arguments
+        for iter_arg, block_arg in zip(
+            self.iter_args, self.body.block.args[1:], strict=True
+        ):
+            if iter_arg.type.is_allocated:
+                raise DiagnosticException(
+                    f"iter_arg {iter_arg} is already allocated to a register, which "
+                    f"implies that the iter_arg is used within the body of the loop or "
+                    f"after the loop, which violates the register alignment assumption. "
+                    f"This should be fixed upstream with register relocation."
+                )
+            allocator.allocate_values_same_reg((iter_arg, block_arg))
 
     def print(self, printer: Printer) -> None:
         printer.print_string(" ")
@@ -508,7 +709,7 @@ class ForOp(IRDLOperation):
 
 
 @irdl_op_definition
-class IfOp(IRDLOperation):
+class IfOp(IRDLOperation, RegisterAllocatableOperation):
     """Structured conditional for single-sequencer feedforward.
 
     Evaluates ``predicate`` over its register operands, runs the ``then`` region
@@ -593,17 +794,40 @@ class IfOp(IRDLOperation):
                     f"{self.name}: then and else regions must yield matching types"
                 )
 
-    def allocate_registers(self) -> None:
+    def allocate_registers(self, allocator: BlockAllocator) -> None:
         """Entry point for structured register allocation over this conditional.
 
-        Register allocation is implemented by COMPILER-911. This dialect exposes only the
-        hook.
-
-        :raises NotImplementedError: Always, until COMPILER-911 supplies the pass.
+        Ensures the yield arguments of the then and else regions are allocated to the same
+        registers as the results of the IfOp, and that the predicate operands are allocated
+        to registers. Allocates each region separately, allowing use of shared registers
+        between the two regions.
         """
-        raise NotImplementedError(
-            "q1_scf.if register allocation is provided by COMPILER-911"
-        )
+
+        self._allocate_registers_for_region(allocator, self.then_region)
+
+        if self.else_region.blocks:
+            self._allocate_registers_for_region(allocator, self.else_region)
+
+        for operand in self.predicate_args:
+            allocator.allocate_value(operand)
+
+    def _allocate_registers_for_region(
+        self, allocator: BlockAllocator, region: Region
+    ) -> None:
+        """Allocate registers for a single region of the conditional.
+
+        This is a helper function to avoid code duplication between the then and else
+        regions.
+        """
+        live_ins = allocator.live_ins_per_block[region.block]
+        for value in live_ins:
+            allocator.allocate_value(value)
+
+        yield_op = _yield_terminator(region)
+        for yield_arg, result in zip(yield_op.arguments, self.output, strict=True):
+            allocator.allocate_values_same_reg((yield_arg, result))
+
+        allocator.allocate_block(region.block)
 
     def print(self, printer: Printer) -> None:
         printer.print_string(" ")

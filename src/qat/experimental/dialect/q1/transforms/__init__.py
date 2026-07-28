@@ -2,5 +2,6 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from qat.experimental.dialect.q1.transforms.reg_alloc import (
+    Q1LinearScanAllocator as Q1LinearScanAllocator,
     Q1RegisterStack as Q1RegisterStack,
 )
