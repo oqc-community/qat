@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.sequence\_outlining module
+====================================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.sequence_outlining
+   :members:
+   :undoc-members:
+   :show-inheritance:

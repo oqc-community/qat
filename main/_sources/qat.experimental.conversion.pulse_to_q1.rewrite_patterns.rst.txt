@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.rewrite\_patterns module
+==================================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.rewrite_patterns
+   :members:
+   :undoc-members:
+   :show-inheritance:

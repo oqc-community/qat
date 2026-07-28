@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.partition\_by\_frame module
+=====================================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.partition_by_frame
+   :members:
+   :undoc-members:
+   :show-inheritance:
