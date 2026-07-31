@@ -67,7 +67,7 @@ class _SymbolAllocator:
     When a physical channel token uniquely identifies one logical frame, the
     emitted symbol is derived from that token after normalisation. The
     normalised form is used only if it has not already been claimed by a prior
-    partition; otherwise the allocator falls back to deterministic ``frame_i``
+    partition. Otherwise the allocator falls back to deterministic ``frame_i``
     naming. When the token is shared across multiple frames, the fallback is
     applied unconditionally.
 
