@@ -12,12 +12,14 @@ from qat.experimental.dialect.q1_cf import (
     UnaryPredicate,
     UnaryPredicateBranchOp,
 )
+from qat.experimental.dialect.q1_scf.ir.ops import ForOp, YieldOp
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
     make_waveform,
     make_weight,
 )
+from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
 
 
 class TestSequenceOpConstruction:
@@ -186,3 +188,35 @@ class TestSequenceOpMultiBlock:
 
         with pytest.raises(VerifyException, match="must end with a terminator"):
             seq.verify_()
+
+
+class TestFindEnclosingSequence:
+    def test_direct_parent(self):
+        """Op directly inside a SequenceOp body is found immediately."""
+        nop = NopOp()
+        seq = SequenceOp("ch0", [nop, StopOp()])
+        assert find_enclosing_sequence(nop) is seq
+
+    def test_nested_inside_for_op(self):
+        """Op nested inside a ForOp body that is itself inside a SequenceOp is found by
+        walking past the ForOp."""
+        _reg = Registers.UNALLOCATED_INT
+
+        inner_nop = NopOp()
+        for_body = Block(arg_types=[_reg])
+        for_body.add_op(inner_nop)
+        for_body.add_op(YieldOp())
+
+        entry = Block(arg_types=[_reg])
+        (count,) = entry.args
+        for_op = ForOp(count, [], Region([for_body]))
+        entry.add_ops([for_op, StopOp()])
+        seq = SequenceOp("ch0", Region([entry]))
+
+        assert find_enclosing_sequence(inner_nop) is seq
+
+    def test_no_ancestor_raises(self):
+        """A standalone op with no SequenceOp ancestor raises ValueError."""
+        nop = NopOp()
+        with pytest.raises(ValueError, match="No SequenceOp found in the parent chain"):
+            find_enclosing_sequence(nop)

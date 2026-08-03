@@ -142,3 +142,18 @@ class SequenceOp(IRDLOperation):
                         f" '{self.channel_id.data}'"
                     )
                 names.add(entry_name)
+
+
+def find_enclosing_sequence(op: Operation) -> SequenceOp:
+    """Walk the parent chain to find the enclosing ``SequenceOp``.
+
+    :param op: The operation from which to start the upward search.
+    :returns: The nearest ancestor ``SequenceOp`` of ``op``.
+    :raises ValueError: If no ``SequenceOp`` is found in the parent chain.
+    """
+    tracked_op = op
+    while not isinstance(tracked_op, SequenceOp):
+        tracked_op = tracked_op.parent_op()
+        if tracked_op is None:
+            raise ValueError("No SequenceOp found in the parent chain.")
+    return tracked_op
