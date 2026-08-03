@@ -17,11 +17,15 @@ from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     build_frame_lineage_analysis,
 )
 from qat.experimental.dialect.pulse.utils import pulse_entry_block
-from qat.experimental.dialect.q1 import StopOp
+from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp, UI4Imm
 from qat.experimental.dialect.q1_sequence import SequenceOp
 
 _NON_SYMBOL_CHARS = re.compile(r"[^0-9A-Za-z_$.]")
 _MULTI_UNDERSCORE = re.compile(r"_+")
+
+# The bitmask has four bits; in binary, we want it to be 0011 which "opens" both output
+# paths for the RF modules. This is equivalent to 3 in decimal.
+_MARKER_BITMASK = 0b0011
 
 
 def _normalize_sequence_symbol(channel_token: str) -> str:
@@ -200,7 +204,11 @@ class Q1OutliningPass(ModulePass):
         channel_token, sequence_symbol = symbol_allocator.allocate(
             frame_id, frame, analysis
         )
-        sequence_ops = [*sequence_body, StopOp()]
+        sequence_ops = [
+            SetMrkImmOp(UI4Imm(_MARKER_BITMASK)),
+            *sequence_body,
+            StopOp(),
+        ]
         return SequenceOp(sequence_symbol, sequence_ops), channel_token, sequence_symbol
 
     def _emit_sequence_ops(

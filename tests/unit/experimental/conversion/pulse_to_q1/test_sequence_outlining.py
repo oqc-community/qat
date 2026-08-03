@@ -17,7 +17,7 @@ from qat.experimental.dialect.pulse.ir import ConstantOp, CreateFrameOp, Frequen
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineageAnalysis,
 )
-from qat.experimental.dialect.q1 import StopOp
+from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp
 from qat.experimental.dialect.q1_sequence import SequenceOp
 
 
@@ -42,6 +42,8 @@ class TestPulseToQ1SequenceOutlining:
         [seq] = list(module.body.block.ops)
         assert isinstance(seq, SequenceOp)
         assert seq.channel_id.data == "q0.drive"
+        assert isinstance(seq.body.block.first_op, SetMrkImmOp)
+        assert seq.body.block.first_op.mrk.data == 3
         assert any(isinstance(op, CreateFrameOp) for op in seq.body.block.ops)
         assert isinstance(seq.body.block.last_op, StopOp)
         seq.verify()
@@ -57,6 +59,8 @@ class TestPulseToQ1SequenceOutlining:
 
         sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         assert [seq.channel_id.data for seq in sequences] == ["q0.drive", "q1.drive"]
+        assert all(isinstance(seq.body.block.first_op, SetMrkImmOp) for seq in sequences)
+        assert all(seq.body.block.first_op.mrk.data == 3 for seq in sequences)
         assert all(
             any(isinstance(op, CreateFrameOp) for op in seq.body.block.ops)
             for seq in sequences

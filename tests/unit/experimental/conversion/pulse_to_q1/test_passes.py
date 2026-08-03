@@ -30,7 +30,7 @@ from qat.experimental.dialect.pulse.ir import (
     TimeAttr,
     WaitOp,
 )
-from qat.experimental.dialect.q1 import StopOp
+from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp
 from qat.experimental.dialect.q1_sequence import SequenceOp
 
 
@@ -82,6 +82,8 @@ def test_default_pulse_to_q1_pipeline_runs_outlining_pass():
     [seq] = list(module.body.block.ops)
     assert isinstance(seq, SequenceOp)
     assert seq.channel_id.data == "q0.drive"
+    assert isinstance(seq.body.block.first_op, SetMrkImmOp)
+    assert seq.body.block.first_op.mrk.data == 3
     assert isinstance(seq.body.block.last_op, StopOp)
 
 
