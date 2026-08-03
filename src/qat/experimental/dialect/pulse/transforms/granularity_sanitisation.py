@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
+from dataclasses import dataclass
+
 import numpy as np
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
@@ -15,6 +17,7 @@ from xdsl.pattern_rewriter import (
 from qat.experimental.dialect.pulse.ir import ConstantOp
 from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, TimeAttr
 from qat.experimental.dialect.pulse.ir.types import TimeType, WaveformType
+from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
 _COMPARISON_TOLERANCE = 1e-10
 
@@ -66,13 +69,13 @@ class GranularitySanitisation(RewritePattern):
     # granularity unit for all instructions. See COMPILER-1251 for a separate pass to handle
     # Acquire/Wait rounding-down requirements.
 
-    def __init__(self, granularity: float) -> None:
-        """Initializes the pattern with the given granularity.
+    def __init__(self, constraints: PulseLevelConstraints) -> None:
+        """Initializes the pattern with the given constraints.
 
-        :param granularity: Granularity in seconds.
+        :param constraints: Pulse level constraints containing the granularity.
         """
 
-        self.granularity = granularity
+        self.granularity = constraints.granularity_s
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: ConstantOp, rewriter: PatternRewriter) -> None:
@@ -139,25 +142,17 @@ class GranularitySanitisation(RewritePattern):
         rewriter.replace_op(op, new_waveform_op)
 
 
+@dataclass(frozen=True)
 class ApplyGranularitySanitisation(ModulePass):
     """Apply granularity sanitisation."""
 
     name = "apply-granularity-sanitisation"
 
-    def __init__(self, granularity: TimeAttr) -> None:
-        """Initialises the pass with a positive granularity.
-
-        :param granularity: Granularity used for sanitisation.
-        """
-
-        self.granularity = granularity.literal_value
-
-        if self.granularity <= 0.0:
-            raise ValueError("granularity must be greater than zero")
+    constraints: PulseLevelConstraints
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         walker = PatternRewriteWalker(
-            GranularitySanitisation(self.granularity),
+            GranularitySanitisation(self.constraints),
             apply_recursively=False,
         )
         walker.rewrite_module(op)

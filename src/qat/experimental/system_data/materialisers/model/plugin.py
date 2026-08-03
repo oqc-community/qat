@@ -30,8 +30,8 @@ from qat.experimental.system_data.materialisers.types import SourceType
 class DefaultAdditionalData(SourceAdditionalDataModel):
     """Additional-data contract for default v0.1.0 materialisation.
 
-    Default payloads require no extra inputs beyond the source payload itself, so this
-    model carries no fields.
+    Default payloads require no extra inputs beyond the source payload itself, so this model
+    carries no fields.
     """
 
 

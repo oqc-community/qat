@@ -68,7 +68,8 @@ from qat.experimental.system_data.materialisers.types import SourceType
 
 
 def build_version_structure_hash() -> str:
-    """Build a structural hash of :class:`CanonicalSystemData` for version mismatch detection.
+    """Build a structural hash of :class:`CanonicalSystemData` for version mismatch
+    detection.
 
     Recurses through all type hints on ``CanonicalSystemData`` and its children. Each field
     contributes a ``field_name[type_description]`` token; dataclass children are expanded
@@ -129,7 +130,8 @@ version_structure_hash = build_version_structure_hash()
 
 
 class CanonicalSystemDataBuilder:
-    """Fluent builder for :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`.
+    """Fluent builder for
+    :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`.
 
     All ``with_*`` methods accept primitive arguments and build the corresponding
     canonical objects internally, applying sensible defaults for optional fields.
@@ -352,7 +354,7 @@ class CanonicalSystemDataBuilder:
         :param id: Qubit identifier.
         :param index: Qubit index.
         :param modes: Modes supported by this qubit.  Defaults to an empty tuple.
-        :param operations: Operation definitions available on this qubit.  Defaults to an
+        :param operations: Operation definitions available on this qubit. Defaults to an
             empty tuple.
         :param readout_probability: Optional readout confusion probabilities.
         :returns: This builder instance.
@@ -379,8 +381,8 @@ class CanonicalSystemDataBuilder:
 
         :param source_qubit_id: Source qubit identifier.
         :param target_qubit_id: Target qubit identifier.
-        :param gate_fidelities: Per-gate fidelity entries for this directed pair.
-            Defaults to an empty tuple.
+        :param gate_fidelities: Per-gate fidelity entries for this directed pair. Defaults
+            to an empty tuple.
         :returns: This builder instance.
         """
         self._couplings.append(

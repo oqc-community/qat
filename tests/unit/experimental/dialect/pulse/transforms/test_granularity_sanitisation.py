@@ -19,6 +19,7 @@ from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
 )
 from qat.experimental.dialect.pulse.units import TimeUnits
+from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
 from tests.unit.utils.ir import build_module_from_ops
 
@@ -33,6 +34,16 @@ def create_drive_pulse(target: ConstantOp) -> tuple[CreateFrameOp, PulseOp]:
     frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
     pulse = PulseOp(frame, target)
     return frame, pulse
+
+
+def constraints_with_granularity(granularity_s: float) -> PulseLevelConstraints:
+    """Builds pulse-level constraints carrying the given granularity.
+
+    :param granularity_s: Granularity in seconds.
+    :returns: Constraints with the equivalent granularity in picoseconds.
+    """
+
+    return PulseLevelConstraints(ports={}, granularity_ps=round(granularity_s * 1e12))
 
 
 class TestGranularitySanitisation:
@@ -67,7 +78,9 @@ class TestGranularitySanitisation:
 
         module = build_module_from_ops([const_waveform, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -80,6 +93,8 @@ class TestGranularitySanitisation:
         assert np.isclose(
             constant_ops[0].fold()[0].width.literal_value,
             np.ceil(time_width / granularity) * granularity,
+            rtol=0.0,
+            atol=1e-15,
         )
         assert len(constant_ops[0].fold()[0].literal_value) == (num_samples + supersampling)
 
@@ -93,12 +108,16 @@ class TestGranularitySanitisation:
         frame, pulse = create_drive_pulse(const_time)
         module = build_module_from_ops([const_time, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         _, new_module = pass_instance.apply_to_clone(Context(), module)
 
         assert module.is_structurally_equivalent(new_module)
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -108,12 +127,17 @@ class TestGranularitySanitisation:
         ]
 
         assert len(constant_ops) == 1
-        assert np.isclose(constant_ops[0].fold()[0].literal_value, time_val)
+        assert np.isclose(
+            constant_ops[0].fold()[0].literal_value,
+            time_val,
+            rtol=0.0,
+            atol=1e-15,
+        )
 
     def test_invalid_time_constant_sanitisation_changed_with_units(self) -> None:
         granularity = 2e-9
         time_val_ns = 17
-        new_time_val_ns = 16
+        new_time_val_ns = 18
         new_time_val = new_time_val_ns * 1e-9
         time = TimeAttr(time_val_ns, TimeUnits.NANOSECOND)
         const_time = ConstantOp(time, TimeType())
@@ -121,12 +145,16 @@ class TestGranularitySanitisation:
         frame, pulse = create_drive_pulse(const_time)
         module = build_module_from_ops([const_time, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         _, new_module = pass_instance.apply_to_clone(Context(), module)
 
         assert not module.is_structurally_equivalent(new_module)
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -136,17 +164,24 @@ class TestGranularitySanitisation:
         ]
 
         assert len(constant_ops) == 1
-        assert np.isclose(constant_ops[0].fold()[0].literal_value, new_time_val)
+        assert np.isclose(
+            constant_ops[0].fold()[0].literal_value,
+            new_time_val,
+            rtol=0.0,
+            atol=1e-15,
+        )
 
     def test_time_constant_sanitisation_preserves_units(self) -> None:
-        granularity = TimeAttr(2, TimeUnits.NANOSECOND)
+        granularity = 2e-9
         time = TimeAttr(17, TimeUnits.NANOSECOND)
         const_time = ConstantOp(time, TimeType())
 
         frame, pulse = create_drive_pulse(const_time)
         module = build_module_from_ops([const_time, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(granularity)
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -161,7 +196,12 @@ class TestGranularitySanitisation:
 
         assert sanitised_time.unit.data == TimeUnits.NANOSECOND
         assert sanitised_time.value.data == 18
-        assert np.isclose(sanitised_time.literal_value, 18e-9)
+        assert np.isclose(
+            sanitised_time.literal_value,
+            18e-9,
+            rtol=0.0,
+            atol=1e-15,
+        )
 
     def test_valid_waveform_constant_sanitisation_no_change(self) -> None:
         granularity = 2e-9
@@ -181,12 +221,16 @@ class TestGranularitySanitisation:
         frame, pulse = create_drive_pulse(const_waveform)
         module = build_module_from_ops([const_waveform, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         _, new_module = pass_instance.apply_to_clone(Context(), module)
 
         assert module.is_structurally_equivalent(new_module)
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -199,12 +243,22 @@ class TestGranularitySanitisation:
 
         sanitised_waveform = constant_ops[0].fold()[0]
 
-        assert np.isclose(sanitised_waveform.width.literal_value, time_width)
-        assert np.isclose(sanitised_waveform.sample_time.literal_value, sampled_time)
+        assert np.isclose(
+            sanitised_waveform.width.literal_value,
+            time_width,
+            rtol=0.0,
+            atol=1e-15,
+        )
+        assert np.isclose(
+            sanitised_waveform.sample_time.literal_value,
+            sampled_time,
+            rtol=0.0,
+            atol=1e-15,
+        )
         np.testing.assert_array_equal(sanitised_waveform.literal_value, waveform_array)
 
     def test_waveform_constant_sanitisation_preserves_units(self) -> None:
-        granularity = TimeAttr(8, TimeUnits.NANOSECOND)
+        granularity = 8e-9
         sampled_time = TimeAttr(1, TimeUnits.NANOSECOND)
         time_width = TimeAttr(17, TimeUnits.NANOSECOND)
         waveform_array = np.ones(17, dtype=complex)
@@ -221,7 +275,9 @@ class TestGranularitySanitisation:
         frame, pulse = create_drive_pulse(const_waveform)
         module = build_module_from_ops([const_waveform, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(granularity)
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -236,14 +292,24 @@ class TestGranularitySanitisation:
 
         assert sanitised_waveform.width.unit.data == TimeUnits.NANOSECOND
         assert sanitised_waveform.width.value.data == 24
-        assert np.isclose(sanitised_waveform.width.literal_value, 24e-9)
+        assert np.isclose(
+            sanitised_waveform.width.literal_value,
+            24e-9,
+            rtol=0.0,
+            atol=1e-15,
+        )
         assert sanitised_waveform.sample_time.unit.data == TimeUnits.NANOSECOND
         assert sanitised_waveform.sample_time.value.data == 1
-        assert np.isclose(sanitised_waveform.sample_time.literal_value, 1e-9)
+        assert np.isclose(
+            sanitised_waveform.sample_time.literal_value,
+            1e-9,
+            rtol=0.0,
+            atol=1e-15,
+        )
         assert len(sanitised_waveform.literal_value) == 24
 
     def test_time_constant_sanitisation_in_nested_region(self) -> None:
-        granularity = TimeAttr(2, TimeUnits.NANOSECOND)
+        granularity = 2e-9
         condition = ArithConstantOp(BoolAttr(False, value_type=1), i1)
         const_time = ConstantOp(TimeAttr(17, TimeUnits.NANOSECOND), TimeType())
         frame, pulse = create_drive_pulse(const_time)
@@ -252,7 +318,9 @@ class TestGranularitySanitisation:
         if_op = IfOp(condition, [], true_region)
         module = build_module_from_ops([condition, if_op])
 
-        pass_instance = ApplyGranularitySanitisation(granularity)
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -267,7 +335,12 @@ class TestGranularitySanitisation:
 
         assert sanitised_time.unit.data == TimeUnits.NANOSECOND
         assert sanitised_time.value.data == 18
-        assert np.isclose(sanitised_time.literal_value, 18e-9)
+        assert np.isclose(
+            sanitised_time.literal_value,
+            18e-9,
+            rtol=0.0,
+            atol=1e-15,
+        )
 
     @pytest.mark.parametrize("time_val_ns", [3, 5, 15, 17, 99])
     def test_time_constant_sanitisation_modified_time_data_upon_invalid_time(
@@ -281,7 +354,9 @@ class TestGranularitySanitisation:
         frame, pulse = create_drive_pulse(const_time)
         module = build_module_from_ops([const_time, frame, pulse])
 
-        pass_instance = ApplyGranularitySanitisation(TimeAttr(granularity))
+        pass_instance = ApplyGranularitySanitisation(
+            constraints_with_granularity(granularity)
+        )
         pass_instance.apply(Context(), module)
 
         constant_ops = [
@@ -296,10 +371,10 @@ class TestGranularitySanitisation:
         sanitised_time = constant_ops[0].fold()[0]
         expected_time = np.ceil(time_val / granularity) * granularity
 
-        assert np.isclose(sanitised_time.literal_value, expected_time)
+        assert np.isclose(
+            sanitised_time.literal_value,
+            expected_time,
+            rtol=0.0,
+            atol=1e-15,
+        )
         assert sanitised_time.literal_value > time_val
-
-    @pytest.mark.parametrize("granularity", [0.0, -1e-9])
-    def test_invalid_granularity_raises(self, granularity: float) -> None:
-        with pytest.raises(ValueError, match="granularity must be greater than zero"):
-            ApplyGranularitySanitisation(TimeAttr(granularity))

@@ -177,7 +177,8 @@ def test_topology_calibration_id_custom():
 
 
 def test_topology_boundary_materialise_round_trip():
-    """build_default_echo_topology via the full boundary pathway reconstructs an equal instance."""
+    """build_default_echo_topology via the full boundary pathway reconstructs an equal
+    instance."""
     from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 
     builder = build_default_echo_topology(qubit_count=2, calibration_id="echo-boundary")
