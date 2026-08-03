@@ -8,4 +8,5 @@ from enum import Enum
 class SourceType(str, Enum):
     """Supported external source types."""
 
+    MODEL = "model"
     PURR = "purr"

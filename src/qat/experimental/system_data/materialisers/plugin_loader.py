@@ -4,7 +4,10 @@
 
 import importlib
 
-_BUILTIN_PLUGIN_MODULES = ("qat.experimental.system_data.materialisers.purr.plugin",)
+_BUILTIN_PLUGIN_MODULES = (
+    "qat.experimental.system_data.materialisers.model.plugin",
+    "qat.experimental.system_data.materialisers.purr.plugin",
+)
 
 
 def load_builtin_plugins() -> None:
