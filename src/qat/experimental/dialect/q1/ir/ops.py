@@ -3144,13 +3144,15 @@ class PlayRsRsImmOp(RsRsImmOperation[IntRegisterType, DurationImm]):
 
     @property
     def wave0(self):
-        """Semantic alias for the first generic rs field."""
+        """Pointer to the starting position for I quadrature values in dedicated waveform
+        memory."""
 
         return self.rs1
 
     @property
     def wave1(self):
-        """Semantic alias for the second generic rs field."""
+        """Pointer to the starting position for Q quadrature values in dedicated waveform
+        memory."""
 
         return self.rs2
 

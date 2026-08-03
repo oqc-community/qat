@@ -100,7 +100,7 @@ class AcquisitionAttr(ParametrizedAttribute):
     num_bins: BinCountImm = param_def(BinCountImm)
 
 
-def _make_dense_floats(
+def make_dense_floats(
     values: list[float],
 ) -> DenseIntOrFPElementsAttr:
     vec_type = VectorType(f32, [len(values)])
@@ -118,7 +118,7 @@ def make_waveform(name: str, index: int, samples: list[float]) -> WaveformAttr:
     return WaveformAttr(
         StringAttr(name),
         WaveformTableIndex(index),
-        _make_dense_floats(samples),
+        make_dense_floats(samples),
     )
 
 
@@ -133,7 +133,7 @@ def make_weight(name: str, index: int, coeffs: list[float]) -> WeightAttr:
     return WeightAttr(
         StringAttr(name),
         WeightTableIndex(index),
-        _make_dense_floats(coeffs),
+        make_dense_floats(coeffs),
     )
 
 

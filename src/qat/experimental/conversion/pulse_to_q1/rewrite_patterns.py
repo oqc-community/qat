@@ -3,21 +3,26 @@
 """Rewrite patterns for the Pulse-to-Q1 phase legalisation and lowering stages."""
 
 import hashlib
+from collections import defaultdict
 from collections.abc import Callable
 
 import numpy as np
 from xdsl.dialects.builtin import ArrayAttr
 from xdsl.ir import SSAValue
 from xdsl.pattern_rewriter import PatternRewriter, RewritePattern, op_type_rewrite_pattern
+from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
+    AmplitudeAttr,
+    ConstantOp,
     CreateFrameOp,
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
+    SampledWaveformAttr,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     SynchronizeOp,
@@ -26,13 +31,44 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.units import TIME_UNIT_EXPONENTS, TimeUnits
 from qat.experimental.dialect.pulse.utils import require_constant_operand
-from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, UI5Imm, UI24Imm
+from qat.experimental.dialect.q1 import (
+    DurationImm,
+    PlayImmImmImmOp,
+    SetAwgOffsImmImmOp,
+    SI16Imm,
+    UI10Imm,
+)
+from qat.experimental.dialect.q1.ir.imm_desc import UI5Imm, UI24Imm
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
     AcquireWeightedImmImmImmImmImmOp,
 )
-from qat.experimental.dialect.q1_sequence.ir.attrs import make_acquisition, make_weight
-from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
+from qat.experimental.dialect.q1_sequence import SequenceOp, find_enclosing_sequence
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    make_acquisition,
+    make_waveform,
+    make_weight,
+)
+
+
+def _register_waveform(
+    sequence_op: SequenceOp,
+    samples: list[float],
+    index: int,
+    name: str,
+) -> None:
+    """Append a Q1 waveform-table entry to a sequence.
+
+    Duplicate waveforms are assumed to have been folded and de-duplicated upstream, so this
+    simply appends a new entry without scanning the existing table for matching samples.
+
+    :param sequence_op: The sequence whose waveform table is extended in place.
+    :param samples: The float samples for the new waveform entry.
+    :param index: The waveform-table index to assign to the new entry.
+    :param name: The name assigned to the new waveform entry.
+    """
+    q1_waveform = make_waveform(name, index, samples)
+    sequence_op.waveforms = ArrayAttr(list(sequence_op.waveforms.data) + [q1_waveform])
 
 
 class RewriteCreateFrameOp(RewritePattern):
@@ -124,43 +160,175 @@ class RewritePhaseShiftOp(RewritePattern):
 
 
 class RewritePulseOp(RewritePattern):
-    """Skeleton for COMPILER-1343 pulse-playback macro-expansion."""
+    """Lowers a ``pulse.pulse`` op to a Q1 ``play`` instruction.
+
+    The pattern resolves the pulse's sampled waveform, registers its real (I) and
+    imaginary (Q) sample vectors in the enclosing sequence's waveform table, and
+    replaces the ``pulse.pulse`` op with a ``PlayImmImmImmOp`` that references the
+    two table indices and the waveform duration. The now-unused waveform
+    ``ConstantOp[SampledWaveformAttr]`` is erased once no other op consumes it.
+
+    Distinct sampled waveforms are assumed to have been folded and de-duplicated
+    upstream, so identical waveforms share a single ``ConstantOp``. Each such op is
+    therefore registered in the waveform table only once per sequence; subsequent
+    pulses referencing the same op reuse the cached table indices instead of
+    re-comparing sample arrays.
+    """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
+        """Initialise the pattern.
+
+        :param target_data: The QBlox target description used during lowering.
+        """
         self.target_data = target_data
+        self.sequence_to_waveform_to_index_map: dict[
+            SequenceOp, dict[ConstantOp, tuple[int, int]]
+        ] = defaultdict(dict)
 
     @op_type_rewrite_pattern
-    def match_and_rewrite(self, op: PulseOp, _rewriter: PatternRewriter) -> None:
-        # TODO(COMPILER-1345): Replace pulse.pulse with Q1 macro-expansion.
-        return
+    def match_and_rewrite(self, op: PulseOp, rewriter: PatternRewriter) -> None:
+        """Rewrite a single ``pulse.pulse`` op into a Q1 ``play`` instruction.
+
+        :param op: The ``pulse.pulse`` op to lower.
+        :param rewriter: The pattern rewriter used to mutate the IR.
+        :raises PassFailedException: If the pulse's waveform is not a ``ConstantOp``
+            holding a ``SampledWaveformAttr``, or if the pulse duration is outside the Q1
+            hardware limits.
+        """
+        pulse_op = op
+        waveform_op = pulse_op.waveform.owner
+        if not isinstance(waveform_op, ConstantOp) or not isinstance(
+            waveform_op.value, SampledWaveformAttr
+        ):
+            raise PassFailedException(
+                "Can only handle pulses that point to a SampledWaveformAttr, "
+                f"got {waveform_op}"
+            )
+
+        sequence_op = find_enclosing_sequence(pulse_op)
+        waveform_to_index_map = self.sequence_to_waveform_to_index_map[sequence_op]
+
+        if waveform_op not in waveform_to_index_map:
+            samples = waveform_op.value.literal_value
+            name = f"waveform_{len(waveform_to_index_map)}"
+
+            i_index = len(sequence_op.waveforms.data)
+            _register_waveform(sequence_op, samples.real.tolist(), i_index, name + "_I")
+            q_index = len(sequence_op.waveforms.data)
+            _register_waveform(sequence_op, samples.imag.tolist(), q_index, name + "_Q")
+
+            waveform_to_index_map[waveform_op] = (i_index, q_index)
+        else:
+            i_index, q_index = waveform_to_index_map[waveform_op]
+
+        # Convert duration to ns for Q1; each sample is assumed to be 1 ns, so we don't need
+        # to worry about rounding error.
+        duration_ns = round(waveform_op.value.width.value_in_unit(TimeUnits.NANOSECOND))
+        min_duration = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+
+        # TODO (COMPILER-1389): Remove this validation in favour of a dedicated pulse-level
+        # pass
+        if duration_ns < min_duration:
+            raise PassFailedException(
+                f"Pulse duration {duration_ns} ns is below minimum {min_duration} ns."
+            )
+
+        # Fails if pulse is too long
+        max_duration = self.target_data.Q1ASM_DATA.max_wait_time
+        if duration_ns > max_duration:
+            raise PassFailedException(
+                f"Pulse duration {duration_ns} ns is above maximum {max_duration} ns."
+            )
+
+        q1_pulse = PlayImmImmImmOp(
+            UI10Imm(i_index),
+            UI10Imm(q_index),
+            DurationImm(duration_ns),
+        )
+
+        rewriter.replace_op(pulse_op, [q1_pulse], new_results=[pulse_op.frame])
+        if not waveform_op.result.uses:
+            rewriter.erase_op(waveform_op)
 
 
 class RewriteStartContinuousWaveformOp(RewritePattern):
-    """Skeleton for COMPILER-1343 start-continuous-waveform macro-expansion."""
+    """Lowers a ``pulse.start_continuous_waveform`` op to a Q1 AWG offset.
+
+    A continuous waveform is emitted on Q1 hardware by latching a constant AWG
+    offset on both output paths. This pattern replaces the pulse op with a
+    ``SetAwgOffsImmImmOp`` carrying the I and Q offsets scaled to the DAC range.
+    Assumes Square waves have been legalised to `StartContinuousWaveformOp`,
+    `Delay`, and `StopContinuousWaveformOp`.
+    """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
+        """Initialise the pattern.
+
+        :param target_data: The QBlox target description used during lowering.
+        """
         self.target_data = target_data
 
     @op_type_rewrite_pattern
     def match_and_rewrite(
-        self, op: StartContinuousWaveformOp, _rewriter: PatternRewriter
+        self, op: StartContinuousWaveformOp, rewriter: PatternRewriter
     ) -> None:
-        # TODO(COMPILER-1345): Replace pulse.start_continuous_waveform with Q1 macro.
-        return
+        """Rewrite the op into a ``SetAwgOffsImmImmOp``.
+
+        :param op: The ``pulse.start_continuous_waveform`` op to lower.
+        :param rewriter: The pattern rewriter used to mutate the IR.
+        :raises PassFailedException: If the op's amplitude is not a ``ConstantOp``
+            holding an ``AmplitudeAttr``.
+        """
+        amplitude_op = op.amplitude.owner
+        if not isinstance(amplitude_op, ConstantOp) or not isinstance(
+            amplitude_op.value, AmplitudeAttr
+        ):
+            raise PassFailedException(
+                "Can only handle continuous waveforms with a constant AmplitudeAttr, "
+                f"got {amplitude_op}"
+            )
+
+        amplitude = amplitude_op.value.literal_value
+        max_offset = self.target_data.Q1ASM_DATA.max_offset
+        q1_start = SetAwgOffsImmImmOp(
+            SI16Imm(int(amplitude.real * max_offset)),
+            SI16Imm(int(amplitude.imag * max_offset)),
+        )
+        rewriter.replace_op(op, [q1_start], new_results=[op.frame])
+        if not amplitude_op.result.uses:
+            rewriter.erase_op(amplitude_op)
 
 
 class RewriteStopContinuousWaveformOp(RewritePattern):
-    """Skeleton for COMPILER-1343 stop-continuous-waveform macro-expansion."""
+    """Lowers a ``pulse.stop_continuous_waveform`` op to a Q1 AWG offset reset.
+
+    Stopping a continuous waveform corresponds to clearing the latched AWG offset
+    on both output paths, emitted as a ``SetAwgOffsImmImmOp`` with zero offsets.
+    Assumes Square waves have been legalised to `StartContinuousWaveformOp`,
+    `Delay`, and `StopContinuousWaveformOp`.
+    """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
+        """Initialise the pattern.
+
+        :param target_data: The QBlox target description used during lowering.
+        """
         self.target_data = target_data
 
     @op_type_rewrite_pattern
     def match_and_rewrite(
-        self, op: StopContinuousWaveformOp, _rewriter: PatternRewriter
+        self, op: StopContinuousWaveformOp, rewriter: PatternRewriter
     ) -> None:
-        # TODO(COMPILER-1345): Replace pulse.stop_continuous_waveform with Q1 macro.
-        return
+        """Rewrite the op into a zero-offset ``SetAwgOffsImmImmOp``.
+
+        :param op: The ``pulse.stop_continuous_waveform`` op to lower.
+        :param rewriter: The pattern rewriter used to mutate the IR.
+        """
+        q1_stop = SetAwgOffsImmImmOp(
+            SI16Imm(0),
+            SI16Imm(0),
+        )
+        rewriter.replace_op(op, [q1_stop], new_results=[op.frame])
 
 
 class RewriteAcquireOp(RewritePattern):

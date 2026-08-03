@@ -12,14 +12,13 @@ from qat.experimental.dialect.q1_cf import (
     UnaryPredicate,
     UnaryPredicateBranchOp,
 )
-from qat.experimental.dialect.q1_scf.ir.ops import ForOp, YieldOp
-from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.dialect.q1_scf import ForOp, YieldOp
+from qat.experimental.dialect.q1_sequence import SequenceOp, find_enclosing_sequence
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
     make_waveform,
     make_weight,
 )
-from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
 
 
 class TestSequenceOpConstruction:

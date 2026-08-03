@@ -14,7 +14,7 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
     WaveformTableIndex,
     WeightTableIndex,
 )
-from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
 from qat.experimental.dialect.q1_sequence.target import Q1SequenceTarget
 
 Q1_sequence = Dialect(
@@ -42,4 +42,5 @@ __all__ = [
     "WaveformTableIndex",
     "WeightAttr",
     "WeightTableIndex",
+    "find_enclosing_sequence",
 ]

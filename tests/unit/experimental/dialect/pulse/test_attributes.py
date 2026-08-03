@@ -139,6 +139,20 @@ class TestTimeAttr:
         assert attr.unit.data == units
         assert np.isclose(attr.literal_value, value)
 
+    @pytest.mark.parametrize(
+        "before_value, before_unit, after_value, after_unit",
+        [
+            (8, TimeUnits.SECOND, 8, TimeUnits.SECOND),
+            (80e-9, TimeUnits.SECOND, 80, TimeUnits.NANOSECOND),
+            (8, TimeUnits.MICROSECOND, 8e-6, TimeUnits.SECOND),
+        ],
+    )
+    def test_value_in_unit(self, before_value, before_unit, after_value, after_unit):
+        """Tests that the conversion utility gives the correct values."""
+        attr = TimeAttr(before_value, before_unit)
+        value_with_new_unit = attr.value_in_unit(after_unit)
+        assert np.isclose(value_with_new_unit, after_value)
+
 
 class TestFrequencyAttr:
     @pytest.mark.parametrize(

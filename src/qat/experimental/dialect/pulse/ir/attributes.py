@@ -111,6 +111,16 @@ class TimeAttr(PulseNumericTypedAttr[TimeType]):
         """Returns the time value in seconds."""
         return self.value.data * 10 ** TIME_UNIT_EXPONENTS[self.unit.data]
 
+    def value_in_unit(self, unit: TimeUnits) -> float | int:
+        """Returns the time value in the specified units.
+
+        :param unit: The units to convert the time value to.
+        :returns: The time value in the specified units.
+        """
+        return self.value.data * 10 ** (
+            TIME_UNIT_EXPONENTS[self.unit.data] - TIME_UNIT_EXPONENTS[unit]
+        )
+
     @property
     def associated_type(self) -> type[TimeType]:
         """Returns the associated dialect type."""

@@ -6,9 +6,17 @@ import math
 import numpy as np
 import pytest
 from xdsl.context import Context
-from xdsl.dialects.builtin import ModuleOp, StringAttr, UnrealizedConversionCastOp
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import (
+    FloatAttr,
+    ModuleOp,
+    StringAttr,
+    UnrealizedConversionCastOp,
+    f64,
+)
 from xdsl.ir import Operation
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
+from xdsl.pattern_rewriter import PatternRewriteWalker
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.backend.qblox.target_data import TARGET_DATA
@@ -26,27 +34,32 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     RewriteStopContinuousWaveformOp,
     RewriteSynchronizeOp,
     RewriteWaitOp,
+    _register_waveform,
     create_legalisation_patterns,
     create_pulse_to_q1_lowering_patterns,
 )
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
+    AddOp,
     AmplitudeAttr,
+    AmplitudeType,
     ConstantOp,
     CreateFrameOp,
     FrequencyAttr,
+    GaussianWaveformOp,
     IntegrateOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
     PhaseType,
     PulseOp,
-    SquareWaveformOp,
+    SampledWaveformAttr,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     SynchronizeOp,
     TimeAttr,
     WaitOp,
+    WaveformType,
     WeightsAttr,
 )
 from qat.experimental.dialect.pulse.units import TimeUnits
@@ -60,6 +73,8 @@ from qat.experimental.dialect.q1 import (
     JgeImmOp,
     JlImmOp,
     LabelOp,
+    PlayImmImmImmOp,
+    SetAwgOffsImmImmOp,
     SetPhDeltaImmOp,
     SetPhDeltaRsOp,
     SetPhImmOp,
@@ -69,6 +84,7 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1.ir.ops import UpdParamImmOp
 from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.attrs import make_dense_floats
 
 
 @irdl_op_definition
@@ -399,62 +415,6 @@ def test_rewrite_phase_shift_op_lowers_dynamic_radian_phase():
     assert any(isinstance(op, UpdParamImmOp) for op in body_ops)
 
 
-def test_rewrite_pulse_op_is_noop_skeleton():
-    """Verify that RewritePulseOp leaves pulse.pulse unchanged.
-
-    Replace this body with the actual Q1 macro-expansion assertion once COMPILER-1345 is
-    implemented.
-    """
-    freq, frame = _frame()
-    width = ConstantOp(TimeAttr(40e-9))
-    amp = ConstantOp(AmplitudeAttr(0.5))
-    waveform = SquareWaveformOp(width, amp)
-    pulse = PulseOp(frame, waveform)
-    module = _sequence_module(freq, frame, width, amp, waveform, pulse)
-
-    _run_q1_pipeline(module)
-
-    body_ops = _sequence_body_ops(module)
-    assert any(isinstance(op, PulseOp) for op in body_ops)
-
-
-def test_rewrite_start_continuous_waveform_op_is_noop_skeleton():
-    """Verify that RewriteStartContinuousWaveformOp leaves pulse.start_continuous_waveform
-    unchanged.
-
-    Replace this body with the actual Q1 macro-expansion assertion once COMPILER-1345 is
-    implemented.
-    """
-    freq, frame = _frame()
-    amp = ConstantOp(AmplitudeAttr(0.5))
-    start = StartContinuousWaveformOp(frame, amp)
-    module = _sequence_module(freq, frame, amp, start)
-
-    _run_q1_pipeline(module)
-
-    body_ops = _sequence_body_ops(module)
-    assert any(isinstance(op, StartContinuousWaveformOp) for op in body_ops)
-
-
-def test_rewrite_stop_continuous_waveform_op_is_noop_skeleton():
-    """Verify that RewriteStopContinuousWaveformOp leaves pulse.stop_continuous_waveform
-    unchanged.
-
-    Replace this body with the actual Q1 macro-expansion assertion once COMPILER-1345 is
-    implemented.
-    """
-    freq, frame = _frame()
-    amp = ConstantOp(AmplitudeAttr(0.5))
-    start = StartContinuousWaveformOp(frame, amp)
-    stop = StopContinuousWaveformOp(start)
-    module = _sequence_module(freq, frame, amp, start, stop)
-
-    _run_q1_pipeline(module)
-
-    body_ops = _sequence_body_ops(module)
-    assert any(isinstance(op, StopContinuousWaveformOp) for op in body_ops)
-
-
 class TestRewriteAcquireOp:
     """Tests for ``RewriteAcquireOp``: lowering ``pulse.acquire`` to the appropriate Q1
     acquire-family op (``AcquireImmImmImmOp`` for square-weight acquisitions,
@@ -726,3 +686,352 @@ class TestRewriteAcquireOp:
         pattern = RewriteAcquireOp(TARGET_DATA)
         with pytest.raises(ValueError, match="No SequenceOp found in the parent chain"):
             pattern.match_and_rewrite(acquire, None)
+
+
+def _sampled_waveform(samples) -> ConstantOp:
+    sample_time = 1e-9
+    width = len(samples) * sample_time
+    return ConstantOp(
+        SampledWaveformAttr(samples, TimeAttr(width), TimeAttr(sample_time)),
+        WaveformType(),
+    )
+
+
+def _pulse_ops(waveform_op: ConstantOp, channel: str = "q0.drive") -> list:
+    """Build the ops for a single pulse targeting a fresh frame."""
+    freq = ConstantOp(FrequencyAttr(4.8e9))
+    frame = CreateFrameOp(freq, StringAttr(channel))
+    pulse = PulseOp(frame, waveform_op)
+    return [freq, frame, waveform_op, pulse]
+
+
+def _sequence_with_pulse(waveform_op: ConstantOp) -> SequenceOp:
+    ops = [*_pulse_ops(waveform_op), StopOp()]
+    return SequenceOp("q0_drive", ops)
+
+
+class TestGenerateAndAddQ1Waveform:
+    def test_appends_entry_with_given_index_and_name(self):
+        sequence = SequenceOp("q0_drive", [StopOp()])
+        samples = [0.1, 0.2, 0.3]
+
+        _register_waveform(sequence, samples, 0, "wf_I")
+
+        assert len(sequence.waveforms.data) == 1
+        entry = sequence.waveforms.data[0]
+        assert entry.index.data == 0
+        assert entry.waveform_name.data == "wf_I"
+        assert entry.data == make_dense_floats(samples)
+
+    def test_appends_multiple_entries_in_order(self):
+        sequence = SequenceOp("q0_drive", [StopOp()])
+
+        _register_waveform(sequence, [0.1, 0.2, 0.3], 0, "wf_I")
+        _register_waveform(sequence, [0.4, 0.5, 0.6], 1, "wf_Q")
+
+        indices = [entry.index.data for entry in sequence.waveforms.data]
+        names = [entry.waveform_name.data for entry in sequence.waveforms.data]
+        assert indices == [0, 1]
+        assert names == ["wf_I", "wf_Q"]
+
+
+class TestRewritePulseOp:
+    def test_match_and_rewrite_replaces_pulse_with_play(self):
+        waveform_op = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j, 0.25 + 0.1j, 0.1 + 0.1j])
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
+        assert len(play_ops) == 1
+        play = play_ops[0]
+        assert play.imm1.data == 0
+        assert play.imm2.data == 1
+        assert play.imm3.data == 4
+
+    def test_match_and_rewrite_registers_i_and_q_waveforms(self):
+        waveform_op = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j, 0.25 + 0.1j, 0.1 + 0.1j])
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        names = [wf.waveform_name.data for wf in sequence.waveforms.data]
+        assert names == ["waveform_0_I", "waveform_0_Q"]
+
+    def test_match_and_rewrite_erases_unused_waveform_constant(self):
+        waveform_op = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j, 0.25 + 0.1j, 0.1 + 0.1j])
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        assert not any(
+            isinstance(op, ConstantOp) and isinstance(op.value, SampledWaveformAttr)
+            for op in sequence.body.block.ops
+        )
+
+    def test_match_and_rewrite_deduplicates_shared_waveform(self):
+        # Two pulses share a single (already folded) waveform ConstantOp.
+        waveform_op = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j, 0.25 + 0.1j, 0.1 + 0.1j])
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        pulse1 = PulseOp(frame, waveform_op)
+        pulse2 = PulseOp(pulse1, waveform_op)
+        sequence = SequenceOp(
+            "q0_drive", [freq, frame, waveform_op, pulse1, pulse2, StopOp()]
+        )
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
+        assert len(play_ops) == 2
+        assert all(play.imm1.data == 0 and play.imm2.data == 1 for play in play_ops)
+        # The waveform is registered only once (one I and one Q entry).
+        assert len(sequence.waveforms.data) == 2
+        assert not any(
+            isinstance(op, ConstantOp) and isinstance(op.value, SampledWaveformAttr)
+            for op in sequence.body.block.ops
+        )
+
+    def test_match_and_rewrite_returns_same_indices_for_repeated_waveform(self):
+        # Multiple pulses pointing at the same waveform reuse the same table indices.
+        waveform_op = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j, 0.25 + 0.1j, 0.1 + 0.1j])
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        pulse1 = PulseOp(frame, waveform_op)
+        pulse2 = PulseOp(frame, waveform_op)
+        pulse3 = PulseOp(frame, waveform_op)
+        sequence = SequenceOp(
+            "q0_drive",
+            [freq, frame, waveform_op, pulse1, pulse2, pulse3, StopOp()],
+        )
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
+        assert len(play_ops) == 3
+        # Every pulse pointing at the same waveform gets the same table indices back.
+        assert all((play.imm1.data, play.imm2.data) == (0, 1) for play in play_ops)
+        # The shared waveform is only registered once (one I and one Q entry).
+        assert len(sequence.waveforms.data) == 2
+
+    def test_match_and_rewrite_increments_indices_for_distinct_waveforms(self):
+        """Distinct sampled waveforms should be assigned fresh I/Q table indices."""
+
+        waveform_op_0 = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j, 0.25 + 0.1j, 0.1 + 0.1j])
+        waveform_op_1 = _sampled_waveform(
+            [0.3 + 0.2j, 0.4 + 0.2j, 0.35 + 0.2j, 0.15 + 0.2j]
+        )
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        pulse1 = PulseOp(frame, waveform_op_0)
+        pulse2 = PulseOp(pulse1, waveform_op_1)
+        sequence = SequenceOp(
+            "q0_drive",
+            [freq, frame, waveform_op_0, waveform_op_1, pulse1, pulse2, StopOp()],
+        )
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
+        assert len(play_ops) == 2
+        assert (play_ops[0].imm1.data, play_ops[0].imm2.data) == (0, 1)
+        assert (play_ops[1].imm1.data, play_ops[1].imm2.data) == (2, 3)
+
+        names = [wf.waveform_name.data for wf in sequence.waveforms.data]
+        assert names == [
+            "waveform_0_I",
+            "waveform_0_Q",
+            "waveform_1_I",
+            "waveform_1_Q",
+        ]
+
+    def test_match_and_rewrite_raises_for_non_sampled_waveform(self):
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        width = ArithConstantOp(FloatAttr(50e-9, f64), f64)
+        amp = ArithConstantOp(FloatAttr(0.23, f64), f64)
+        std = ArithConstantOp(FloatAttr(10e-9, f64), f64)
+        waveform = GaussianWaveformOp(width, amp, std)
+        pulse = PulseOp(frame, waveform)
+        sequence = SequenceOp(
+            "q0_drive", [freq, frame, width, amp, std, waveform, pulse, StopOp()]
+        )
+        module = ModuleOp([sequence])
+
+        with pytest.raises(PassFailedException, match="SampledWaveformAttr"):
+            PatternRewriteWalker(
+                RewritePulseOp(TARGET_DATA), apply_recursively=False
+            ).rewrite_module(module)
+
+    def test_pulse_with_too_small_value_raises_pass_failed_exception(self):
+        """When a pulse is less than 4ns, it cannot be played."""
+        waveform_op = _sampled_waveform([0.2 + 0.1j, 0.5 + 0.1j])
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+
+        with pytest.raises(PassFailedException, match="Pulse duration 2 ns is below"):
+            PatternRewriteWalker(
+                RewritePulseOp(TARGET_DATA), apply_recursively=False
+            ).rewrite_module(module)
+
+    def test_pulse_with_too_large_value_raises_pass_failed_exception(self):
+        """When a pulse is greater than the value set in target data, it cannot be
+        played."""
+
+        max_time = TARGET_DATA.Q1ASM_DATA.max_wait_time  # in ns
+        waveform_op = _sampled_waveform([0.2 + 0.1j] * (max_time + 1))
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+
+        with pytest.raises(
+            PassFailedException, match=f"Pulse duration {max_time + 1} ns is above"
+        ):
+            PatternRewriteWalker(
+                RewritePulseOp(TARGET_DATA), apply_recursively=False
+            ).rewrite_module(module)
+
+    @pytest.mark.parametrize("pulse_length", [4, TARGET_DATA.Q1ASM_DATA.max_wait_time])
+    def test_edge_case_times_lower_successfully(self, pulse_length):
+        """When a pulse is exactly 4ns or the maximum value set in target data it can be
+        played."""
+        waveform_op = _sampled_waveform([0.2 + 0.1j] * pulse_length)
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewritePulseOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
+        assert len(play_ops) == 1
+        play = play_ops[0]
+        assert play.imm3.data == pulse_length
+
+
+class TestRewriteStartContinuousWaveformOp:
+    def test_lowers_start_to_set_awg_offset(self):
+        amp = ConstantOp(AmplitudeAttr(0.5 + 0.25j), AmplitudeType())
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        start = StartContinuousWaveformOp(frame, amp)
+        sequence = SequenceOp("q0_drive", [freq, frame, amp, start, StopOp()])
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        offs_ops = [
+            op for op in sequence.body.block.ops if isinstance(op, SetAwgOffsImmImmOp)
+        ]
+        assert len(offs_ops) == 1
+        max_offset = TARGET_DATA.Q1ASM_DATA.max_offset
+        assert offs_ops[0].imm1.data == int(0.5 * max_offset)
+        assert offs_ops[0].imm2.data == int(0.25 * max_offset)
+
+    def test_erases_unused_amplitude_constant(self):
+        amp = ConstantOp(AmplitudeAttr(0.5 + 0.25j), AmplitudeType())
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        start = StartContinuousWaveformOp(frame, amp)
+        sequence = SequenceOp("q0_drive", [freq, frame, amp, start, StopOp()])
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        assert not any(
+            isinstance(op, ConstantOp) and isinstance(op.value, AmplitudeAttr)
+            for op in sequence.body.block.ops
+        )
+
+    def test_raises_for_non_amplitude_constant(self):
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        bad_amp = ConstantOp(TimeAttr(4e-9))
+        start = StartContinuousWaveformOp(frame, bad_amp)
+        sequence = SequenceOp("q0_drive", [freq, frame, bad_amp, start, StopOp()])
+        module = ModuleOp([sequence])
+
+        with pytest.raises(PassFailedException, match="AmplitudeAttr"):
+            PatternRewriteWalker(
+                RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+            ).rewrite_module(module)
+
+    def test_multiple_amplitude_uses_does_not_erase_constant_op(self):
+        """When the amplitude has multiple uses, it should not be erased."""
+
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        amp = ConstantOp(AmplitudeAttr(0.5 + 0.25j), AmplitudeType())
+        start = StartContinuousWaveformOp(frame, amp)
+        add = AddOp(amp, amp, AmplitudeType())
+        sequence = SequenceOp("q0_drive", [freq, frame, amp, start, add, StopOp()])
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        # The amplitude constant should still be present
+        assert any(
+            isinstance(op, ConstantOp) and isinstance(op.value, AmplitudeAttr)
+            for op in sequence.body.block.ops
+        )
+
+        # The start continuous waveform op should be replaced with a set AWG offset op
+        assert any(isinstance(op, SetAwgOffsImmImmOp) for op in sequence.body.block.ops)
+
+
+class TestRewriteStopContinuousWaveformOp:
+    def test_lowers_stop_to_zero_offset(self):
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        stop = StopContinuousWaveformOp(frame)
+        sequence = SequenceOp("q0_drive", [freq, frame, stop, StopOp()])
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewriteStopContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        offs_ops = [
+            op for op in sequence.body.block.ops if isinstance(op, SetAwgOffsImmImmOp)
+        ]
+        assert len(offs_ops) == 1
+        assert offs_ops[0].imm1.data == 0
+        assert offs_ops[0].imm2.data == 0
+
+    def test_replaces_stop_continuous_waveform_op(self):
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0.drive"))
+        stop = StopContinuousWaveformOp(frame)
+        sequence = SequenceOp("q0_drive", [freq, frame, stop, StopOp()])
+        module = ModuleOp([sequence])
+
+        PatternRewriteWalker(
+            RewriteStopContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+        ).rewrite_module(module)
+
+        assert not any(
+            isinstance(op, StopContinuousWaveformOp) for op in sequence.body.block.ops
+        )
