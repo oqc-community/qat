@@ -87,6 +87,7 @@ class SequencerDescription(NoExtraFieldsFrozenModel):
     max_acq_threshold: PositiveInt = (1 << 24) - 4
     max_sample_size_waveforms: PositiveInt = 16384
     max_num_instructions: PositiveInt = 12288
+    sample_rate: PositiveInt = 1e9  # TODO: Verify position/value.
 
     @classmethod
     def default(cls):

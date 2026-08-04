@@ -5,10 +5,11 @@
 import hashlib
 from collections import defaultdict
 from collections.abc import Callable
+from math import ceil
 
 import numpy as np
 from xdsl.dialects.builtin import ArrayAttr
-from xdsl.ir import SSAValue
+from xdsl.ir import Operation, SSAValue
 from xdsl.pattern_rewriter import PatternRewriter, RewritePattern, op_type_rewrite_pattern
 from xdsl.utils.exceptions import PassFailedException
 
@@ -29,16 +30,17 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
     WeightsAttr,
 )
+from qat.experimental.dialect.pulse.ir.interfaces import extract_constant_scalar
 from qat.experimental.dialect.pulse.units import TIME_UNIT_EXPONENTS, TimeUnits
 from qat.experimental.dialect.pulse.utils import require_constant_operand
 from qat.experimental.dialect.q1 import (
-    DurationImm,
     PlayImmImmImmOp,
     SetAwgOffsImmImmOp,
     SI16Imm,
     UI10Imm,
+    WaitImmOp,
 )
-from qat.experimental.dialect.q1.ir.imm_desc import UI5Imm, UI24Imm
+from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, UI5Imm, UI24Imm
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
     AcquireWeightedImmImmImmImmImmOp,
@@ -106,24 +108,52 @@ class RewriteSynchronizeOp(RewritePattern):
 
 
 class RewriteWaitOp(RewritePattern):
-    """Skeleton for COMPILER-1344 wait macro-expansion.
+    """Lower ``pulse.wait`` to one or more ``q1.wait`` instructions.
 
-    TODO(COMPILER-1343): Replace pulse.wait with Q1 macro-expansion.
+    The requested duration is converted from seconds to nanoseconds and aligned up to
+    the sequencer grid time. Durations that exceed the maximum wait immediate are split
+    into a chain of ``q1.wait`` instructions whose durations sum to the requested value.
+    The frame carried by ``pulse.wait`` is forwarded to downstream operations.
+
+    Register-driven durations that do not fold to a compile-time constant are left
+    untouched; those are handled elsewhere and are out of scope for this lowering.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
         self.target_data = target_data
 
     @op_type_rewrite_pattern
-    def match_and_rewrite(self, op: WaitOp, _rewriter: PatternRewriter) -> None:
-        # TODO(COMPILER-1343): Replace pulse.wait with Q1 macro-expansion.
-        return
+    def match_and_rewrite(self, op: WaitOp, rewriter: PatternRewriter) -> None:
+        duration_s = extract_constant_scalar(op.duration)
+        if duration_s is None:
+            return
+
+        grid_time = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+        max_wait_time = self.target_data.Q1ASM_DATA.max_wait_time
+
+        total_ns = int(
+            ceil(duration_s * self.target_data.CONTROL_SEQUENCER_DATA.sample_rate)
+        )
+        remainder = total_ns % grid_time
+        if remainder:
+            total_ns += grid_time - remainder
+
+        # Note: dosen't have a breakpoint to turn unrolling to
+        # hardware-based loops for now.
+        wait_ops: list[Operation] = []
+        while total_ns > max_wait_time:
+            wait_ops.append(WaitImmOp(DurationImm(max_wait_time)))
+            total_ns -= max_wait_time
+        if total_ns > 0:
+            wait_ops.append(WaitImmOp(DurationImm(total_ns)))
+
+        rewriter.replace_matched_op(wait_ops, new_results=[op.frame])
 
 
 class RewritePhaseSetOp(RewritePattern):
     """Match ``pulse.phase_set`` and delegate stage policy to ``rewrite_callable``.
 
-    The same matcher is used in legalisation and lowering. The callable decides whether the
+    The same matcher is used in legalisatiKon and lowering. The callable decides whether the
     rewrite remains in Pulse or emits Q1 instructions.
     """
 

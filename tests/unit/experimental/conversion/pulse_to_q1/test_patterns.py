@@ -81,6 +81,7 @@ from qat.experimental.dialect.q1 import (
     SetPhRsOp,
     StopOp,
     SubRsImmRdOp,
+    WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.ops import UpdParamImmOp
 from qat.experimental.dialect.q1_sequence import SequenceOp
@@ -162,12 +163,8 @@ def test_rewrite_synchronize_op_is_noop_skeleton():
     assert any(isinstance(op, SynchronizeOp) for op in body_ops)
 
 
-def test_rewrite_wait_op_is_noop_skeleton():
-    """Verify that RewriteWaitOp leaves pulse.wait unchanged.
-
-    Replace this body with the actual Q1 macro-expansion assertion once COMPILER-1343 is
-    implemented.
-    """
+def test_rewrite_wait_op_lowers_short_wait():
+    """A short wait lowers to a single ``q1.wait`` with the requested duration."""
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(16e-9))
     wait = WaitOp(frame, duration)
@@ -176,7 +173,27 @@ def test_rewrite_wait_op_is_noop_skeleton():
     _run_q1_pipeline(module)
 
     body_ops = _sequence_body_ops(module)
-    assert any(isinstance(op, WaitOp) for op in body_ops)
+    assert not any(isinstance(op, WaitOp) for op in body_ops)
+    wait_ops = [op for op in body_ops if isinstance(op, WaitImmOp)]
+    assert [op.duration.data for op in wait_ops] == [16]
+
+
+def test_rewrite_wait_op_chains_long_wait():
+    """A wait longer than the maximum immediate lowers to a chain summing to the value."""
+    max_wait_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
+    total_ns = 2 * max_wait_time + 16
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(total_ns * 1e-9))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PulseToQ1LoweringPass().apply(Context(), module)
+
+    [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+    wait_ops = [op for op in seq.body.block.ops if isinstance(op, WaitImmOp)]
+    durations = [op.duration.data for op in wait_ops]
+    assert durations == [max_wait_time, max_wait_time, 16]
+    assert sum(durations) == total_ns
 
 
 def test_rewrite_phase_set_op_lowers_to_set_ph_and_upd_param():
