@@ -109,12 +109,12 @@ class QatSessionConfig(QatConfig):
         return values
 
     @model_validator(mode="after")
-    def one_default(cls, values: dict) -> dict:
+    def one_default(self) -> "QatSessionConfig":
         """Ensures that exactly one PIPELINE is marked as default, or alternatively, one of
         COMPILE and EXECUTE pipelines is marked as default."""
-        compile_pipelines = values.COMPILE
-        execute_pipelines = values.EXECUTE
-        full_pipelines = values.PIPELINES
+        compile_pipelines = self.COMPILE
+        execute_pipelines = self.EXECUTE
+        full_pipelines = self.PIPELINES
 
         if (
             not (compile_pipelines or execute_pipelines)
@@ -122,7 +122,7 @@ class QatSessionConfig(QatConfig):
             and len(full_pipelines) == 1
         ):
             full_pipelines[0].default = True
-            return values
+            return self
 
         num_full_defaults = (
             sum(desc.default for desc in full_pipelines)
@@ -154,7 +154,7 @@ class QatSessionConfig(QatConfig):
                     f"multiple (including PIPELINES): {total_defaults}."
                 )
 
-        return values
+        return self
 
     @field_validator("HARDWARE", "ENGINES")
     @classmethod

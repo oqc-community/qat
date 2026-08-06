@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 import numpy as np
-from pydantic import Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from qat.ir.waveforms import GaussianWaveform, SoftSquareWaveform, SquareWaveform
 from qat.model.post_processing import PostProcessMethod
@@ -392,6 +392,8 @@ class Resonator(Component):
 
 
 class QubitPulseChannels(PulseChannelSet):
+    model_config = ConfigDict(validate_default=True)
+
     drive: DrivePulseChannel = Field(frozen=True, default=DrivePulseChannel())
     second_state: SecondStatePulseChannel = Field(
         frozen=True, default=SecondStatePulseChannel()
