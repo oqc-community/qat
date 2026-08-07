@@ -3,19 +3,23 @@
 
 import numpy as np
 import pytest
+from xdsl.dialects import func
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
     BoolAttr,
     ComplexType,
+    FlatSymbolRefAttr,
     FloatAttr,
+    FunctionType,
     IntAttr,
     IntegerAttr,
+    ModuleOp,
     StringAttr,
     f64,
     i64,
 )
 from xdsl.dialects.complex import ComplexNumberAttr, ConstantOp as ComplexConstantOp
-from xdsl.ir import Block
+from xdsl.ir import Attribute, Block, Operation, Region
 from xdsl.irdl import (
     AnyAttr,
     IRDLOperation,
@@ -24,6 +28,7 @@ from xdsl.irdl import (
     param_def,
     result_def,
 )
+from xdsl.traits import IsolatedFromAbove, SymbolTable
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.pulse.ir import (
@@ -33,6 +38,8 @@ from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
     AmplitudeType,
     BlackmanWaveformOp,
+    CallKernelOp,
+    CallKernelOpUserOpInterface,
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
@@ -50,6 +57,7 @@ from qat.experimental.dialect.pulse.ir import (
     GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     IQResultType,
+    KernelOp,
     MaxTimeOp,
     MixOp,
     ModuloOp,
@@ -59,6 +67,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseType,
     PulseOp,
     RealThresholdPolicyAttr,
+    ReturnOp,
     RoundedSquareWaveformOp,
     SampledWaveformAttr,
     ScaleOp,
@@ -1175,3 +1184,326 @@ class TestStateMapOp:
         op = StateMapOp(mock_op.res, {0: 0, 1: 2})
         with pytest.raises(VerifyException, match="binary"):
             op.verify()
+
+
+def _build_region(ops: list[Operation], arg_types: list[Attribute] | None = None) -> Region:
+    """Builds a single-block region with optional block arguments."""
+
+    block = Block(arg_types=arg_types or [])
+    block.add_ops(ops)
+    return Region(block)
+
+
+def _build_module(*ops: Operation) -> ModuleOp:
+    """Builds a module operation containing the given top-level ops."""
+
+    return ModuleOp(ops=list(ops))
+
+
+def _build_kernel(
+    name: str | StringAttr,
+    function_type: FunctionType | tuple[list[Attribute], list[Attribute]],
+    region: Region | type[Region.DEFAULT] = Region.DEFAULT,
+) -> KernelOp:
+    """Builds a kernel operation with a given signature and region."""
+
+    return KernelOp(name=name, function_type=function_type, region=region)
+
+
+class TestKernelOp:
+    """Tests the instantiation and verification of the kernel operation."""
+
+    def _build_body(
+        self,
+        ops: list[Operation],
+        arg_types: list[Attribute] | None = None,
+    ) -> Region:
+        """Builds a single-block body for kernel tests."""
+
+        block = Block(arg_types=arg_types or [])
+        block.add_ops(ops)
+
+        return Region(block)
+
+    def test_kernel_has_isolated_from_above_trait(self):
+        """Tests the kernel advertises IsolatedFromAbove semantics via its traits."""
+
+        kernel = _build_kernel("my_kernel", ([], []), Region())
+        assert kernel.has_trait(IsolatedFromAbove)
+
+    def test_kernel_is_recorded_in_symbol_table_of_module(self):
+        """The kernel should be accessible through the symbol table."""
+
+        kernel = _build_kernel("my_kernel", ([], []), Region())
+        module = _build_module(kernel)
+        found = SymbolTable.lookup_symbol(module, FlatSymbolRefAttr("my_kernel"))
+        assert found is kernel
+
+    def test_instantiation_from_string_builds_attribute(self):
+        """Tests that the kernel can be instantiated from a string and the attribute is
+        built correctly."""
+
+        kernel = _build_kernel("my_kernel", ([], []), Region())
+        assert kernel.sym_name == StringAttr("my_kernel")
+        kernel.verify()
+
+    def test_instantiation_from_string_attribute(self):
+        """Tests that the kernel can be instantiated from a string attribute and the
+        attribute is built correctly."""
+
+        symbol = StringAttr("my_kernel")
+        kernel = _build_kernel(symbol, ([], []), Region())
+        assert kernel.sym_name is symbol
+        kernel.verify()
+
+    def test_from_function_type_attribute(self):
+        """Tests that the kernel can be instantiated from a function type attribute and the
+        attribute is built correctly."""
+
+        function_type = FunctionType.from_lists([PhaseType()], [FrequencyType()])
+        kernel = _build_kernel("my_kernel", function_type, Region())
+        assert kernel.function_type is function_type
+        kernel.verify()
+
+    def test_function_type_from_tuple(self):
+        """Tests that the kernel can be instantiated from a tuple of input and output types
+        and the attribute is built correctly."""
+
+        kernel = _build_kernel("my_kernel", ([PhaseType()], [PhaseType()]), Region())
+        assert isinstance(kernel.function_type, FunctionType)
+        assert list(kernel.function_type.inputs) == [PhaseType()]
+        assert list(kernel.function_type.outputs) == [PhaseType()]
+        kernel.verify()
+
+    def test_frame_inputs_raises_verify_exception(self):
+        """Tests that the kernel cannot have frame inputs."""
+
+        kernel = _build_kernel("my_kernel", ([FrameType("drive")], []), Region())
+        with pytest.raises(VerifyException, match="Passing a frame as an argument"):
+            kernel.verify()
+
+    def test_frame_returns_raises_verify_exception(self):
+        """Tests that the kernel cannot have frame returns."""
+
+        kernel = _build_kernel("my_kernel", ([], [FrameType("drive")]), Region())
+        with pytest.raises(VerifyException, match="Returning a frame from a kernel"):
+            kernel.verify()
+
+    def test_region_with_no_blocks_passes_verification(self):
+        """Tests that a kernel with no blocks passes verification, which symbolically
+        represents a function defined elsewhere."""
+
+        kernel = _build_kernel("my_kernel", ([PhaseType()], [FrequencyType()]), Region())
+        kernel.verify()
+
+    def test_region_with_different_block_args_to_func_args_raises_verify_exception(self):
+        """Tests that a kernel with a block with arguments that do not match the function
+        type raises a verify exception."""
+
+        block = Block(arg_types=[FrequencyType()])
+        block.add_op(ReturnOp(block.args[0]))
+        body = Region(block)
+        kernel = _build_kernel("my_kernel", ([PhaseType()], [FrequencyType()]), body)
+        with pytest.raises(VerifyException, match="types of the block arguments"):
+            kernel.verify()
+
+    def test_with_valid_return_types_and_arguments_passes_verification(self):
+        """Tests that a kernel with a block with arguments that match the function type and
+        a return operation with matching types passes verification."""
+
+        block = Block(arg_types=[PhaseType()])
+        block.add_op(ReturnOp(block.args[0]))
+        body = Region(block)
+        kernel = _build_kernel("my_kernel", ([PhaseType()], [PhaseType()]), body)
+        kernel.verify()
+
+
+class TestReturnOp:
+    """Tests verification and initialisation of the return operation."""
+
+    def test_non_kernel_parent_raises_verify_exception(self):
+        """Tests that a return operation with a non-kernel parent raises a verify
+        exception."""
+
+        value = ConstantOp(PhaseAttr(0.0))
+        return_op = ReturnOp(value.result)
+        parent = func.FuncOp("main", ((), ()), _build_region([value, return_op]))
+        assert parent.body.block.last_op is return_op
+        with pytest.raises(VerifyException, match="expects parent op 'pulse.kernel'"):
+            return_op.verify()
+
+    def test_operations_after_in_block_raises_verify_exception(self):
+        """Tests that a return operation with operations after it in the block raises a
+        verify exception, as this is a terminator operation."""
+
+        value = ConstantOp(PhaseAttr(0.0))
+        return_op = ReturnOp(value.result)
+        trailing_op = ConstantOp(PhaseAttr(0.0))
+        body = _build_region([value, return_op, trailing_op])
+        kernel = _build_kernel("my_kernel", ([], [PhaseType()]), body)
+
+        with pytest.raises(VerifyException, match="must be the last operation"):
+            kernel.verify()
+
+    def test_return_types_that_are_different_to_parent_raises_verify_exception(self):
+        """Tests that a return operation with types that are different to the parent kernel
+        raises a verify exception."""
+
+        frequency = ConstantOp(FrequencyAttr(5.0e9))
+        return_op = ReturnOp(frequency.result)
+        body = _build_region([frequency, return_op])
+        kernel = _build_kernel("my_kernel", ([], [PhaseType()]), body)
+
+        with pytest.raises(VerifyException, match="return types of the return operation"):
+            kernel.verify()
+
+    def test_return_types_matching_parent_passes_verify_impl(self):
+        """A return op with matching parent function outputs should pass verify_."""
+
+        phase = ConstantOp(PhaseAttr(0.0))
+        return_op = ReturnOp(phase.result)
+        body = _build_region([phase, return_op], arg_types=[PhaseType()])
+        _build_kernel("my_kernel", ([PhaseType()], [PhaseType()]), body)
+
+        return_op.verify()
+
+
+class TestCallKernelOp:
+    """Tests the instantiation and verification of the call kernel operation."""
+
+    def test_instantiation_with_string_callee(self):
+        """Tests that the call kernel operation can be instantiated with a string callee and
+        the attribute is built correctly."""
+
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp("my_kernel", [argument.result], [PhaseType()])
+
+        assert call.callee == FlatSymbolRefAttr("my_kernel")
+        assert call.arguments == (argument.result,)
+        assert list(call.results.types) == [PhaseType()]
+
+    def test_instantiation_with_symbol_ref_attr_callee(self):
+        """Tests that the call kernel operation can be instantiated with a symbol ref attr
+        callee and the attribute is built correctly."""
+
+        argument = ConstantOp(PhaseAttr(0.25))
+        callee = FlatSymbolRefAttr("my_kernel")
+        call = CallKernelOp(callee, [argument.result], [PhaseType()])
+        assert call.callee is callee
+        assert call.arguments == (argument.result,)
+        assert list(call.results.types) == [PhaseType()]
+
+    def test_unfound_symbol_raises_verify_exception(self):
+        """Tests that the call kernel operation cannot be verified if the callee is not
+        found in the symbol table."""
+
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp("missing_kernel", [argument.result], [PhaseType()])
+        _build_module(argument, call)
+
+        with pytest.raises(VerifyException, match="no symbol was found"):
+            call.verify()
+
+    def test_non_kernel_callee_raises_verify_exception(self):
+        """Tests that the call kernel operation cannot be instantiated with a callee that is
+        not a kernel and raises a verify exception."""
+
+        non_kernel = func.FuncOp("my_kernel", ((PhaseType(),), (PhaseType(),)), Region())
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp("my_kernel", [argument.result], [PhaseType()])
+        _build_module(non_kernel, argument, call)
+
+        with pytest.raises(VerifyException, match="must reference a KernelOp"):
+            call.verify()
+
+    def test_mismatching_number_of_arguments_raises_verify_exception(self):
+        """Tests that the call kernel operation cannot be verified if the number of
+        arguments does not match the number of callee arguments."""
+
+        kernel = _build_kernel(
+            "my_kernel",
+            ([PhaseType(), FrequencyType()], [PhaseType()]),
+            Region(),
+        )
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp("my_kernel", [argument.result], [PhaseType()])
+        _build_module(kernel, argument, call)
+
+        with pytest.raises(VerifyException, match="same number of arguments"):
+            call.verify()
+
+    def test_mismatching_number_of_results_raises_verify_exception(self):
+        """Tests that the call kernel operation cannot be verified if the number of results
+        does not match the number of callee results."""
+
+        kernel = _build_kernel(
+            "my_kernel",
+            ([PhaseType()], [PhaseType(), FrequencyType()]),
+            Region(),
+        )
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp("my_kernel", [argument.result], [PhaseType()])
+        _build_module(kernel, argument, call)
+
+        with pytest.raises(VerifyException, match="same number of results"):
+            call.verify()
+
+    def test_mismatching_argument_types_raises_verify_exception(self):
+        """Tests that the call kernel operation cannot be verified if the argument types do
+        not match the callee argument types."""
+
+        kernel = _build_kernel("my_kernel", ([PhaseType()], [PhaseType()]), Region())
+        wrong_argument = ConstantOp(FrequencyAttr(5.0e9))
+        call = CallKernelOp("my_kernel", [wrong_argument.result], [PhaseType()])
+        _build_module(kernel, wrong_argument, call)
+
+        with pytest.raises(VerifyException, match="same argument types"):
+            call.verify()
+
+    def test_mismatching_result_types_raises_verify_exception(self):
+        """Tests that the call kernel operation cannot be verified if the result types do
+        not match the callee result types."""
+
+        kernel = _build_kernel("my_kernel", ([PhaseType()], [PhaseType()]), Region())
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp("my_kernel", [argument.result], [FrequencyType()])
+        _build_module(kernel, argument, call)
+
+        with pytest.raises(VerifyException, match="same result types"):
+            CallKernelOpUserOpInterface().verify(call)
+
+    def test_matching_multiple_result_types_passes_verification(self):
+        """Matching multiple outputs should verify without raising."""
+
+        kernel = _build_kernel(
+            "my_kernel",
+            ([PhaseType()], [PhaseType(), FrequencyType()]),
+            Region(),
+        )
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp(
+            "my_kernel",
+            [argument.result],
+            [[PhaseType(), FrequencyType()]],
+        )
+        _build_module(kernel, argument, call)
+        call.verify()
+
+    def test_mismatching_second_result_type_raises_verify_exception(self):
+        """If the second result type mismatches, verification should fail on index 1."""
+
+        kernel = _build_kernel(
+            "my_kernel",
+            ([PhaseType()], [PhaseType(), FrequencyType()]),
+            Region(),
+        )
+        argument = ConstantOp(PhaseAttr(0.25))
+        call = CallKernelOp(
+            "my_kernel",
+            [argument.result],
+            [[PhaseType(), AmplitudeType()]],
+        )
+        _build_module(kernel, argument, call)
+
+        with pytest.raises(VerifyException, match="result 1"):
+            call.verify()

@@ -9,12 +9,18 @@ from xdsl.dialects.builtin import (
     AnyFloat,
     BoolAttr,
     ComplexType,
+    FlatSymbolRefAttr,
+    FlatSymbolRefAttrConstr,
     FloatAttr,
+    FunctionType,
     IntegerType,
     StringAttr,
+    SymbolNameConstraint,
+    SymbolRefAttr,
     i1,
 )
 from xdsl.interfaces import HasFolderInterface
+from xdsl.ir import Region
 from xdsl.irdl import (
     AnyOf,
     AtLeast,
@@ -30,12 +36,22 @@ from xdsl.irdl import (
     operand_def,
     opt_attr_def,
     prop_def,
+    region_def,
     result_def,
     traits_def,
     var_operand_def,
     var_result_def,
 )
-from xdsl.traits import Commutative, ConstantLike, Pure
+from xdsl.traits import (
+    Commutative,
+    ConstantLike,
+    HasParent,
+    IsolatedFromAbove,
+    IsTerminator,
+    Pure,
+    ReturnLike,
+    SymbolOpInterface,
+)
 from xdsl.utils.exceptions import VerifyException
 
 from qat.ir.waveforms import (
@@ -71,6 +87,7 @@ from .attributes import (
 from .interfaces import IsAnalyticalWaveformInterface, extract_constant_scalar
 from .traits import (
     AdvancesTimeTrait,
+    CallKernelOpUserOpInterface,
     FrameCanonicalizationPatternsTrait,
     PulseTypesCanonicalizationPatternsTrait,
 )
@@ -2106,3 +2123,189 @@ class StateMapOp(IRDLOperation):
                 raise VerifyException(
                     f"State map values must be binary (i1: 0 or 1), but got {val.data}."
                 )
+
+
+@irdl_op_definition
+class KernelOp(IRDLOperation):
+    """Represents a pulse-level kernel with function semantics.
+
+    A kernel is the primary execution scope for a pulse program. It is modelled as a symbol
+    operation with a function signature and a body region. Calls target a kernel via symbol
+    reference, and verification ensures call operands and results match the signature.
+
+    The kernel is also an isolation boundary. Values such as frames, which model mutable
+    execution context on control hardware, cannot cross this boundary via function
+    arguments/results.
+
+    Classical operations may appear in the body when they are intended to execute within the
+    same hardware-scoped program, for example hardware-supported post-processing or feed-
+    forward control.
+
+    :ivar sym_name: Symbol name used to reference this kernel from call sites.
+    :ivar function_type: Function signature describing input and output value types.
+    :ivar body: Region containing the kernel entry block and pulse program operations.
+    """
+
+    name = "pulse.kernel"
+    traits = traits_def(IsolatedFromAbove(), SymbolOpInterface())
+    body = region_def()
+    sym_name = prop_def(SymbolNameConstraint())
+    function_type = prop_def(FunctionType)
+
+    def __init__(
+        self,
+        name: str | StringAttr,
+        function_type: FunctionType | tuple[Sequence[Attribute], Sequence[Attribute]],
+        region: Region | type[Region.DEFAULT] = Region.DEFAULT,
+    ):
+        """
+        :param name: Kernel symbol name. String inputs are converted to
+            :class:`StringAttr`.
+        :param function_type: Kernel signature. A tuple form ``(inputs, outputs)`` is
+            converted to :class:`FunctionType` via ``FunctionType.from_lists``.
+        :param region: Optional body region. By convention this region contains the entry
+            block and terminates with :class:`ReturnOp` when results are produced.
+        """
+        if isinstance(name, str):
+            name = StringAttr(name)
+
+        if isinstance(function_type, tuple):
+            function_type = FunctionType.from_lists(*function_type)
+
+        return super().__init__(
+            properties={"sym_name": name, "function_type": function_type},
+            regions=[region],
+        )
+
+    def verify_(self):
+        """Verifies kernel signature/body consistency and boundary constraints.
+
+        Enforced invariants:
+
+        * ``function_type`` inputs must not contain :class:`FrameType`.
+        * ``function_type`` outputs must not contain :class:`FrameType`.
+        * If a body block exists, entry block argument types must exactly match
+          ``function_type`` input types in order.
+        """
+
+        argument_types = self.function_type.inputs.data
+        if any(isinstance(at, FrameType) for at in argument_types):
+            raise VerifyException(
+                "Passing a frame as an argument to a kernel is not allowed, as frames are "
+                "not transmissible across kernel boundaries."
+            )
+
+        return_types = self.function_type.outputs.data
+        if any(isinstance(rt, FrameType) for rt in return_types):
+            raise VerifyException(
+                "Returning a frame from a kernel is not allowed, as frames are not "
+                "transmissible across kernel boundaries."
+            )
+
+        if len(self.body.blocks) == 0:
+            return
+
+        entry_block = self.body.blocks.first
+        block_arg_types = tuple(arg.type for arg in entry_block.args)
+        if block_arg_types != argument_types:
+            raise VerifyException(
+                f"The types of the block arguments must match the function type of the "
+                f"kernel, expected {argument_types}, got {block_arg_types}."
+            )
+
+
+@irdl_op_definition
+class ReturnOp(IRDLOperation):
+    """Terminates a kernel and yields values to the caller.
+
+    This operation is valid only inside :class:`KernelOp` and must be the final operation
+    in its block (enforced by traits). Operand types must match the parent kernel's
+    ``function_type`` outputs exactly.
+
+    :ivar arguments: Variable-length return operands yielded from the enclosing kernel.
+    """
+
+    name = "pulse.return"
+    traits = traits_def(HasParent(KernelOp), IsTerminator(), ReturnLike())
+
+    arguments = var_operand_def()
+
+    def __init__(self, *return_vals: SSAValue | Operation):
+        """
+        :param return_vals: SSA values returned to the caller. Their types are validated
+            against the parent kernel signature.
+        """
+        return super().__init__(operands=[return_vals])
+
+    def verify_(self):
+        """Verifies return operand types against the parent kernel signature.
+
+        Parent-type and terminator placement constraints are enforced by traits before this
+        method runs.
+        """
+
+        # Trait verification runs prior to this, guaranteeing that the parent is a KernelOp,
+        # so we can safely cast it here.
+        parent_op: KernelOp = self.parent_op()
+
+        return_types = self.arguments.types
+        function_return_types = parent_op.function_type.outputs.data
+        if function_return_types != return_types:
+            raise VerifyException(
+                f"The return types of the return operation must match the function type "
+                f"of the kernel, expected {function_return_types}, got {return_types}."
+            )
+
+
+@irdl_op_definition
+class CallKernelOp(IRDLOperation):
+    """Calls a :class:`KernelOp` by symbol reference.
+
+    The callee is stored as a flat symbol reference and resolved through the enclosing
+    symbol table. Verification for this operation is provided by
+    :class:`CallKernelOpUserOpInterface` and enforces:
+
+    * the callee symbol exists,
+    * the referenced symbol is a :class:`KernelOp`,
+    * argument count and argument types match the callee inputs,
+    * result count and result types match the callee outputs.
+
+    :ivar callee: Flat symbol reference naming the kernel to invoke.
+    :ivar arguments: Call operands passed positionally to the callee.
+    :ivar result: Values produced by the call, typed to the callee outputs.
+    """
+
+    name = "pulse.call_kernel"
+    traits = traits_def(CallKernelOpUserOpInterface())
+
+    callee = prop_def(FlatSymbolRefAttrConstr)
+    arguments = var_operand_def()
+    result = var_result_def()
+
+    def __init__(
+        self,
+        callee: str | SymbolRefAttr,
+        arguments: Sequence[SSAValue | Operation],
+        result_types: Sequence[Attribute] | Sequence[Sequence[Attribute]],
+    ):
+        """
+        :param callee: Kernel symbol name/reference. String inputs are converted to
+            :class:`FlatSymbolRefAttr`.
+        :param arguments: Positional SSA operands passed to the kernel.
+        :param result_types: Expected call result types, which must match the callee output
+            signature during verification.
+        """
+        if isinstance(callee, str):
+            callee = FlatSymbolRefAttr(callee)
+
+        grouped_result_types: list[list[Attribute]]
+        if result_types and isinstance(result_types[0], list | tuple):
+            grouped_result_types = [list(group) for group in result_types]
+        else:
+            grouped_result_types = [list(result_types)]
+
+        return super().__init__(
+            operands=[list(arguments)],
+            properties={"callee": callee},
+            result_types=grouped_result_types,
+        )

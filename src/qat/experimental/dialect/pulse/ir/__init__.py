@@ -40,6 +40,7 @@ from .ops import (
     AddOp,
     BinaryOp,
     BlackmanWaveformOp,
+    CallKernelOp,
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
@@ -52,6 +53,7 @@ from .ops import (
     GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     InternalBinaryOp,
+    KernelOp,
     MaxTimeOp,
     MixOp,
     ModuloOp,
@@ -59,6 +61,7 @@ from .ops import (
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
+    ReturnOp,
     RoundedSquareWaveformOp,
     ScaleOp,
     SechWaveformOp,
@@ -77,6 +80,7 @@ from .ops import (
 )
 from .traits import (
     AdvancesTimeTrait,
+    CallKernelOpUserOpInterface,
     FrameCanonicalizationPatternsTrait,
     PulseTypesCanonicalizationPatternsTrait,
 )
@@ -96,6 +100,7 @@ _ops = [
     AcquireOp,
     AddOp,
     BlackmanWaveformOp,
+    CallKernelOp,
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
@@ -107,12 +112,14 @@ _ops = [
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
     IntegrateOp,
+    KernelOp,
     MaxTimeOp,
     MixOp,
     ModuloOp,
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
+    ReturnOp,
     RoundedSquareWaveformOp,
     ScaleOp,
     SechWaveformOp,
@@ -134,6 +141,7 @@ _interfaces = [IsAnalyticalWaveformInterface]
 
 _traits = [
     AdvancesTimeTrait,
+    CallKernelOpUserOpInterface,
     FrameCanonicalizationPatternsTrait,
     PulseTypesCanonicalizationPatternsTrait,
 ]

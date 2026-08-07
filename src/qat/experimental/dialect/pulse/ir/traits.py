@@ -3,8 +3,15 @@
 """Contains traits that are used to describe properties of operations in the pulse dialect,
 and to apply canonicalization patterns to operations in the pulse dialect."""
 
+from xdsl.ir import Operation
 from xdsl.pattern_rewriter import RewritePattern
-from xdsl.traits import HasCanonicalizationPatternsTrait, OpTrait
+from xdsl.traits import (
+    HasCanonicalizationPatternsTrait,
+    OpTrait,
+    SymbolTable,
+    SymbolUserOpInterface,
+)
+from xdsl.utils.exceptions import VerifyException
 
 
 class AdvancesTimeTrait(OpTrait):
@@ -48,3 +55,62 @@ class FrameCanonicalizationPatternsTrait(HasCanonicalizationPatternsTrait):
         )
 
         return (FoldZeroPhaseShiftOp(), FoldZeroWaitOp())
+
+
+class CallKernelOpUserOpInterface(SymbolUserOpInterface):
+    """Symbol-user trait for call operations that target kernels.
+
+    Inheriting :class:`SymbolUserOpInterface` registers the operation as a symbol user.
+    This trait also verifies that the resolved callee is a :class:`KernelOp` and that call
+    operand/result signatures match the referenced kernel function type.
+    """
+
+    def verify(self, op: Operation):
+        """Verify symbol resolution and signature compatibility for a kernel call."""
+        found_callee = SymbolTable.lookup_symbol(op, op.callee)
+        if not found_callee:
+            raise VerifyException(
+                f"CallKernelOp must reference a KernelOp, but no symbol was found for "
+                f"{op.callee}."
+            )
+
+        from .ops import KernelOp
+
+        if not isinstance(found_callee, KernelOp):
+            raise VerifyException(
+                f"CallKernelOp must reference a KernelOp, but found {found_callee}"
+            )
+
+        if len(found_callee.function_type.inputs) != len(op.arguments):
+            raise VerifyException(
+                f"CallKernelOp must have the same number of arguments as the KernelOp it "
+                f"references, but found {len(op.arguments)} arguments and "
+                f"{len(found_callee.function_type.inputs)} inputs."
+            )
+
+        if len(found_callee.function_type.outputs) != len(op.results):
+            raise VerifyException(
+                f"CallKernelOp must have the same number of results as the KernelOp it "
+                f"references, but found {len(op.results)} results and "
+                f"{len(found_callee.function_type.outputs)} outputs."
+            )
+
+        for idx, (found_operand, operand) in enumerate(
+            zip(found_callee.function_type.inputs, op.arguments.types, strict=False)
+        ):
+            if found_operand != operand:
+                raise VerifyException(
+                    f"CallKernelOp must have the same argument types as the KernelOp it "
+                    f"references, but found argument {idx} with type {operand} and "
+                    f"KernelOp input type {found_operand}."
+                )
+
+        for idx, (found_output, result) in enumerate(
+            zip(found_callee.function_type.outputs, op.results.types, strict=False)
+        ):
+            if found_output != result:
+                raise VerifyException(
+                    f"CallKernelOp must have the same result types as the KernelOp it "
+                    f"references, but found result {idx} with type {result} and KernelOp "
+                    f"output type {found_output}."
+                )
