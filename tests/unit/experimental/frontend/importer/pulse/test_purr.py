@@ -5,14 +5,14 @@
 import numpy as np
 import pytest
 from xdsl.dialects import func
-from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import StringAttr
+from xdsl.dialects.builtin import ModuleOp
 from xdsl.interpreters.scf import scf
+from xdsl.ir import Operation
 
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
-    AmplitudeAttr,
     BlackmanWaveformOp,
+    CallKernelOp,
     ConstantOp,
     CosWaveformOp,
     CreateFrameOp,
@@ -20,12 +20,11 @@ from qat.experimental.dialect.pulse.ir import (
     DragGaussianWaveformOp,
     EqualiseOp,
     ExtraSoftSquareWaveformOp,
-    FrequencyAttr,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
     GaussianZeroEdgeWaveformOp,
     IntegrateOp,
-    PhaseAttr,
+    KernelOp,
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
@@ -38,17 +37,26 @@ from qat.experimental.dialect.pulse.ir import (
     SoftSquareWaveformOp,
     SquareWaveformOp,
     SynchronizeOp,
-    TimeAttr,
     WaitOp,
 )
-from qat.experimental.dialect.pulse.ir.attributes import RealThresholdPolicyAttr
-from qat.experimental.frontend.importer.purr import PurrImporter
+from qat.experimental.dialect.pulse.ir.attributes import (
+    RealThresholdPolicyAttr,
+    SampledWaveformAttr,
+)
+from qat.experimental.dialect.results.ir import (
+    CreateRecordOp,
+    CreateResultsArrayOp,
+    ExtractOp,
+    MapOp,
+)
+from qat.experimental.frontend.importer.pulse.purr import PurrImporter
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
+    Assign,
     CustomPulse,
     Delay,
     DeviceUpdate,
@@ -60,7 +68,9 @@ from qat.purr.compiler.instructions import (
     PostProcessing,
     PostProcessType,
     Pulse,
+    QuantumInstruction,
     Repeat,
+    Return,
     Sweep,
     Synchronize,
     Variable,
@@ -77,15 +87,34 @@ def builder(hw):
     return QuantumInstructionBuilder(hw)
 
 
-def _ops(importer: PurrImporter):
-    """Return the translated ops from inside the module's ``main`` function body."""
-    [main] = list(importer.module.body.block.ops)
-    assert isinstance(main, func.FuncOp)
-    return list(main.body.block.ops)
+def _ops(module: ModuleOp):
+    """Return all operations in a built module, including nested region ops."""
+
+    return list(module.walk())
 
 
-def _ops_of_type(importer: PurrImporter, op_type):
-    return [op for op in _ops(importer) if isinstance(op, op_type)]
+def _ops_of_type(module: ModuleOp, op_type):
+    return [op for op in _ops(module) if isinstance(op, op_type)]
+
+
+def _has_parent_of_type(op: Operation, parent_type: type[Operation]):
+    """Recursively walks up the parent chain to see if the operation is contained in a
+    function."""
+
+    parent = op.parent_op()
+    while parent is not None:
+        if isinstance(parent, parent_type):
+            return True
+        parent = parent.parent_op()
+    return False
+
+
+def _has_function_parent(op: Operation):
+    return _has_parent_of_type(op, func.FuncOp)
+
+
+def _has_kernel_parent(op: Operation):
+    return _has_parent_of_type(op, KernelOp)
 
 
 class TestPurrImporterPhase:
@@ -93,8 +122,8 @@ class TestPurrImporterPhase:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseShift(ch, 1.3))
         imp = PurrImporter()
-        imp.build(builder)
-        phase_ops = _ops_of_type(imp, PhaseShiftOp)
+        module = imp.build(builder)
+        phase_ops = _ops_of_type(module, PhaseShiftOp)
         assert len(phase_ops) == 1
         phase_const = phase_ops[0].phase.owner
         assert isinstance(phase_const, ConstantOp)
@@ -104,8 +133,8 @@ class TestPurrImporterPhase:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseSet(ch, 0.75))
         imp = PurrImporter()
-        imp.build(builder)
-        phase_set_ops = _ops_of_type(imp, PhaseSetOp)
+        module = imp.build(builder)
+        phase_set_ops = _ops_of_type(module, PhaseSetOp)
         assert len(phase_set_ops) == 1
         assert phase_set_ops[0].phase.owner.value.value.data == pytest.approx(0.75)
 
@@ -113,8 +142,8 @@ class TestPurrImporterPhase:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseReset(ch))
         imp = PurrImporter()
-        imp.build(builder)
-        phase_set_ops = _ops_of_type(imp, PhaseSetOp)
+        module = imp.build(builder)
+        phase_set_ops = _ops_of_type(module, PhaseSetOp)
         assert len(phase_set_ops) == 1
         assert phase_set_ops[0].phase.owner.value.value.data == pytest.approx(0.0)
 
@@ -123,8 +152,8 @@ class TestPurrImporterPhase:
         ch1 = hw.get_qubit(1).get_drive_channel()
         builder.add(PhaseReset([ch0, ch1]))
         imp = PurrImporter()
-        imp.build(builder)
-        assert len(_ops_of_type(imp, PhaseSetOp)) == 2
+        module = imp.build(builder)
+        assert len(_ops_of_type(module, PhaseSetOp)) == 2
 
 
 class TestPurrImporterDelayAndSync:
@@ -132,8 +161,8 @@ class TestPurrImporterDelayAndSync:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(Delay(ch, 320e-9))
         imp = PurrImporter()
-        imp.build(builder)
-        wait_ops = _ops_of_type(imp, WaitOp)
+        module = imp.build(builder)
+        wait_ops = _ops_of_type(module, WaitOp)
         assert len(wait_ops) == 1
         assert wait_ops[0].duration.owner.value.value.data == pytest.approx(320e-9)
 
@@ -141,16 +170,16 @@ class TestPurrImporterDelayAndSync:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(Synchronize(ch))
         imp = PurrImporter()
-        imp.build(builder)
-        assert _ops_of_type(imp, SynchronizeOp) == []
+        module = imp.build(builder)
+        assert _ops_of_type(module, SynchronizeOp) == []
 
     def test_synchronize_multi_targets_emits_sync_op(self, builder, hw):
         ch0 = hw.get_qubit(0).get_drive_channel()
         ch1 = hw.get_qubit(1).get_drive_channel()
         builder.add(Synchronize([ch0, ch1]))
         imp = PurrImporter()
-        imp.build(builder)
-        sync_ops = _ops_of_type(imp, SynchronizeOp)
+        module = imp.build(builder)
+        sync_ops = _ops_of_type(module, SynchronizeOp)
         assert len(sync_ops) == 1
         assert len(sync_ops[0].frames) == 2
 
@@ -160,9 +189,9 @@ class TestPurrImporterFrameTracking:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseShift(ch, 0.5))
         imp = PurrImporter()
-        imp.build(builder)
+        module = imp.build(builder)
 
-        create_frames = _ops_of_type(imp, CreateFrameOp)
+        create_frames = _ops_of_type(module, CreateFrameOp)
         assert len(create_frames) == 1
         assert create_frames[0].port.data == ch.physical_channel.full_id()
 
@@ -171,10 +200,10 @@ class TestPurrImporterFrameTracking:
         builder.add(PhaseShift(ch, 0.5))
         builder.add(PhaseShift(ch, 0.25))
         imp = PurrImporter()
-        imp.build(builder)
+        module = imp.build(builder)
         # Only one frame creation; later PhaseShifts consume the latest result.
-        assert len(_ops_of_type(imp, CreateFrameOp)) == 1
-        assert len(_ops_of_type(imp, PhaseShiftOp)) == 2
+        assert len(_ops_of_type(module, CreateFrameOp)) == 1
+        assert len(_ops_of_type(module, PhaseShiftOp)) == 2
 
     def test_distinct_channels_create_distinct_frames(self, builder, hw):
         ch0 = hw.get_qubit(0).get_drive_channel()
@@ -182,12 +211,12 @@ class TestPurrImporterFrameTracking:
         builder.add(PhaseShift(ch0, 0.1))
         builder.add(PhaseShift(ch1, 0.1))
         imp = PurrImporter()
-        imp.build(builder)
-        assert len(_ops_of_type(imp, CreateFrameOp)) == 2
+        module = imp.build(builder)
+        assert len(_ops_of_type(module, CreateFrameOp)) == 2
 
     def test_get_frame_key_uses_full_id(self, hw):
         ch = hw.get_qubit(0).get_drive_channel()
-        assert PurrImporter.get_frame_key(ch) == "purr_frame_" + ch.full_id()
+        assert PurrImporter._frame_key(ch) == ch.full_id()
 
     def test_chain_of_phase_shifts_threads_through_frame_results(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -195,10 +224,10 @@ class TestPurrImporterFrameTracking:
         builder.add(PhaseShift(ch, 0.2))
         builder.add(PhaseShift(ch, 0.3))
         imp = PurrImporter()
-        imp.build(builder)
-        create_frame_ops = _ops_of_type(imp, CreateFrameOp)
+        module = imp.build(builder)
+        create_frame_ops = _ops_of_type(module, CreateFrameOp)
         assert len(create_frame_ops) == 1
-        shifts = _ops_of_type(imp, PhaseShiftOp)
+        shifts = _ops_of_type(module, PhaseShiftOp)
         assert shifts[0].frame is create_frame_ops[0].result
         assert shifts[1].frame is shifts[0].result
         assert shifts[2].frame is shifts[1].result
@@ -212,9 +241,9 @@ class TestPurrImporterFrameTracking:
         builder.add(PhaseShift(ch0, 0.3))
         builder.add(PhaseShift(ch1, 0.4))
         imp = PurrImporter()
-        imp.build(builder)
-        [sync] = _ops_of_type(imp, SynchronizeOp)
-        shifts = _ops_of_type(imp, PhaseShiftOp)
+        module = imp.build(builder)
+        [sync] = _ops_of_type(module, SynchronizeOp)
+        shifts = _ops_of_type(module, PhaseShiftOp)
 
         # Check the first set of shift's frames are threaded to the sync
         first_shifts = shifts[:2]
@@ -229,10 +258,10 @@ class TestPurrImporterFrameTracking:
         builder.add(Delay(ch, 100e-9))
         builder.add(Pulse(ch, PulseShapeType.SQUARE, width=80e-9, amp=0.4))
         imp = PurrImporter()
-        imp.build(builder)
-        [shift] = _ops_of_type(imp, PhaseShiftOp)
-        [wait] = _ops_of_type(imp, WaitOp)
-        [pulse] = _ops_of_type(imp, PulseOp)
+        module = imp.build(builder)
+        [shift] = _ops_of_type(module, PhaseShiftOp)
+        [wait] = _ops_of_type(module, WaitOp)
+        [pulse] = _ops_of_type(module, PulseOp)
         assert wait.frame is shift.result
         assert pulse.frame is wait.result
 
@@ -242,12 +271,12 @@ class TestPurrImporterAcquire:
         ch = hw.get_qubit(0).get_acquire_channel()
         builder.add(Acquire(ch, time=1e-6))
         imp = PurrImporter()
-        imp.build(builder)
-        acq_ops = _ops_of_type(imp, AcquireOp)
+        module = imp.build(builder)
+        acq_ops = _ops_of_type(module, AcquireOp)
         assert len(acq_ops) == 1
         assert acq_ops[0].duration.owner.value.value.data == pytest.approx(1e-6)
         # No waveform constructed when no filter is given.
-        assert not any(isinstance(op, SquareWaveformOp) for op in _ops(imp))
+        assert not any(isinstance(op, SquareWaveformOp) for op in _ops(module))
 
     def test_acquire_with_filter_sets_weights(self, builder, hw):
         ch = hw.get_qubit(0).get_acquire_channel()
@@ -255,8 +284,8 @@ class TestPurrImporterAcquire:
         filt = CustomPulse(ch, weights_arr)
         builder.add(Acquire(ch, time=1e-6, filter=filt))
         imp = PurrImporter()
-        imp.build(builder)
-        acquire_ops = _ops_of_type(imp, AcquireOp)
+        module = imp.build(builder)
+        acquire_ops = _ops_of_type(module, AcquireOp)
         assert len(acquire_ops) == 1
         assert np.allclose(acquire_ops[0].weights.weights.data, weights_arr)
 
@@ -267,10 +296,10 @@ class TestPurrImporterAcquire:
         ch = hw.get_qubit(0).get_acquire_channel()
         builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
         imp = PurrImporter()
-        imp.build(builder)
-        acq_ops = _ops_of_type(imp, AcquireOp)
+        module = imp.build(builder)
+        acq_ops = _ops_of_type(module, AcquireOp)
         assert len(acq_ops) == 1
-        int_ops = _ops_of_type(imp, IntegrateOp)
+        int_ops = _ops_of_type(module, IntegrateOp)
         assert len(int_ops) == 1
         assert int_ops[0].acquisition is acq_ops[0].acquisition_result
 
@@ -282,6 +311,11 @@ class TestPurrImporterAcquire:
         imp = PurrImporter()
         with pytest.raises(NotImplementedError, match="Scope mode is not yet supported"):
             imp.build(builder)
+
+
+class TestPurrImporterPostProcessing:
+    """Tests that post-processing is applied to the acquisition, but is hoisted outside of
+    the kernel and that the correct post-processing operations are emitted."""
 
     def test_acquire_with_linear_map_creates_ssa_chain(self, builder, hw):
         """Creates instructions with an acquisition followed by LINEAR_MAP_COMPLEX_TO_REAL
@@ -304,16 +338,23 @@ class TestPurrImporterAcquire:
             )
         )
         imp = PurrImporter()
-        imp.build(builder)
-        acq_ops = _ops_of_type(imp, AcquireOp)
+        module = imp.build(builder)
+        acq_ops = _ops_of_type(module, AcquireOp)
         assert len(acq_ops) == 1
-        int_ops = _ops_of_type(imp, IntegrateOp)
+        int_ops = _ops_of_type(module, IntegrateOp)
         assert len(int_ops) == 1
-        equalise_ops = _ops_of_type(imp, EqualiseOp)
+        equalise_ops = _ops_of_type(module, EqualiseOp)
         assert len(equalise_ops) == 1
 
         assert acq_ops[0].acquisition_result is int_ops[0].acquisition
-        assert int_ops[0].result is equalise_ops[0].value
+        assert isinstance(equalise_ops[0].value.owner, ExtractOp)
+
+        map_ops = _ops_of_type(module, MapOp)
+        assert len(map_ops) == 1
+        map_body_ops = list(map_ops[0].body.block.ops)
+        [extract_op] = [op for op in map_body_ops if isinstance(op, ExtractOp)]
+        [equalise_op] = [op for op in map_body_ops if isinstance(op, EqualiseOp)]
+        assert map_body_ops.index(extract_op) < map_body_ops.index(equalise_op)
 
         affine = equalise_ops[0].affine_transform
         assert affine.linear_coefficient.data == 0.5 * a
@@ -330,6 +371,8 @@ class TestPurrImporterAcquire:
         translation = affine.translation_vector
         assert translation[0] == np.real(b)
         assert translation[1] == 0.0
+
+        assert _has_function_parent(equalise_ops[0])
 
     def test_acquire_with_discriminate_ssa_chain(self, builder, hw):
         """Creates instructions with an acquisition followed by DISCRIMINATE post-
@@ -351,16 +394,23 @@ class TestPurrImporterAcquire:
             )
         )
         imp = PurrImporter()
-        imp.build(builder)
-        acq_ops = _ops_of_type(imp, AcquireOp)
+        module = imp.build(builder)
+        acq_ops = _ops_of_type(module, AcquireOp)
         assert len(acq_ops) == 1
-        int_ops = _ops_of_type(imp, IntegrateOp)
+        int_ops = _ops_of_type(module, IntegrateOp)
         assert len(int_ops) == 1
-        discriminate_ops = _ops_of_type(imp, DiscriminateOp)
+        discriminate_ops = _ops_of_type(module, DiscriminateOp)
         assert len(discriminate_ops) == 1
 
         assert acq_ops[0].acquisition_result is int_ops[0].acquisition
-        assert int_ops[0].result is discriminate_ops[0].value
+        assert discriminate_ops[0].value.owner.name == "results.extract"
+
+        map_ops = _ops_of_type(module, MapOp)
+        assert len(map_ops) == 1
+        map_body_ops = list(map_ops[0].body.block.ops)
+        [extract_op] = [op for op in map_body_ops if isinstance(op, ExtractOp)]
+        [discriminate_op] = [op for op in map_body_ops if isinstance(op, DiscriminateOp)]
+        assert map_body_ops.index(extract_op) < map_body_ops.index(discriminate_op)
 
         policy = discriminate_ops[0].policy
         assert isinstance(policy, RealThresholdPolicyAttr)
@@ -406,7 +456,7 @@ class TestPurrImporterAcquire:
         imp = PurrImporter()
         with pytest.raises(
             ValueError,
-            match="LINEAR_MAP_COMPLEX_TO_REAL post-processing expects exactly 2 arguments",
+            match="LINEAR_MAP_COMPLEX_TO_REAL expects 2 arguments",
         ):
             imp.build(builder)
 
@@ -430,7 +480,7 @@ class TestPurrImporterAcquire:
         imp = PurrImporter()
         with pytest.raises(
             ValueError,
-            match="DISCRIMINATE post-processing expects exactly 1 argument",
+            match="DISCRIMINATE expects 1 argument",
         ):
             imp.build(builder)
 
@@ -454,7 +504,7 @@ class TestPurrImporterAcquire:
         imp = PurrImporter()
         with pytest.raises(
             ValueError,
-            match="LINEAR_MAP_COMPLEX_TO_REAL post-processing expects exactly 2 arguments",
+            match="LINEAR_MAP_COMPLEX_TO_REAL expects 2 arguments",
         ):
             imp.build(builder)
 
@@ -478,7 +528,7 @@ class TestPurrImporterAcquire:
         imp = PurrImporter()
         with pytest.raises(
             ValueError,
-            match="DISCRIMINATE post-processing expects exactly 1 argument",
+            match="DISCRIMINATE expects 1 argument",
         ):
             imp.build(builder)
 
@@ -510,14 +560,167 @@ class TestPurrImporterAcquire:
             imp.build(builder)
 
 
-class TestPurrImporterUnsupportedInstructions:
-    def test_custom_pulse_raises(self, builder, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
-        builder.add(CustomPulse(ch, np.zeros(8)))
+class TestPurrImporterReturns:
+    """Tests return instructions with the PurrImporter.
+
+    Tests that only those values are used in the returned record in the map operation, and
+    if none is given, it returns all.
+    """
+
+    def test_no_return_returns_all(self, builder, hw):
+        """Tests that no return instruction returns all variables in the record."""
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
         imp = PurrImporter()
-        with pytest.raises(ValueError, match="Not yet supported"):
+        module = imp.build(builder)
+        map_ops = _ops_of_type(module, MapOp)
+        assert len(map_ops) == 1
+
+        [create_record] = _ops_of_type(map_ops[0], CreateRecordOp)
+        assert tuple(key.data for key in create_record.keys.data) == (
+            "measurement1",
+            "measurement2",
+        )
+        assert isinstance(create_record.values[0].owner, ExtractOp)
+        assert isinstance(create_record.values[1].owner, ExtractOp)
+        assert create_record.values[0].owner.key.data == "measurement1"
+        assert create_record.values[1].owner.key.data == "measurement2"
+
+    def test_return_only_specified_variables(self, builder, hw):
+        """Tests that only the specified variables are returned in the record."""
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement3"))
+        builder.add(Return(["measurement1", "measurement3"]))
+        imp = PurrImporter()
+        module = imp.build(builder)
+        map_ops = _ops_of_type(module, MapOp)
+        assert len(map_ops) == 1
+
+        [create_record] = _ops_of_type(map_ops[0], CreateRecordOp)
+        assert tuple(key.data for key in create_record.keys.data) == (
+            "measurement1",
+            "measurement3",
+        )
+        assert isinstance(create_record.values[0].owner, ExtractOp)
+        assert isinstance(create_record.values[1].owner, ExtractOp)
+        assert create_record.values[0].owner.key.data == "measurement1"
+        assert create_record.values[1].owner.key.data == "measurement3"
+
+    def test_return_with_unknown_variable_raises(self, builder, hw):
+        """Tests that a return instruction with an unknown variable raises a ValueError."""
+        builder.add(Return(["unknown_var"]))
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="Return variables must be a subset of the post-processing results.",
+        ):
             imp.build(builder)
 
+
+class TestPurrImporterAssign:
+    """Tests assign instructions with the PurrImporter, which is used to move values into a
+    list or to a new identifier."""
+
+    def test_assign_with_list_of_variables(self, builder, hw):
+        """Tests that an assign instruction with a list of variables creates a record with
+        the correct keys and values."""
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
+        builder.add(Assign("my_list", ["measurement1", Variable("measurement2")]))
+        imp = PurrImporter()
+        module = imp.build(builder)
+        map_ops = _ops_of_type(module, MapOp)
+        assert len(map_ops) == 1
+
+        [create_record] = _ops_of_type(map_ops[0], CreateRecordOp)
+        assert "my_list" in tuple(key.data for key in create_record.keys.data)
+
+        my_list_index = next(
+            i for i, key in enumerate(create_record.keys.data) if key.data == "my_list"
+        )
+        my_list_value = create_record.values[my_list_index]
+        assert isinstance(my_list_value.owner, CreateResultsArrayOp)
+        assert len(my_list_value.owner.values) == 2
+        assert isinstance(my_list_value.owner.values[0].owner, ExtractOp)
+        assert my_list_value.owner.values[0].owner.key.data == "measurement1"
+        assert isinstance(my_list_value.owner.values[1].owner, ExtractOp)
+        assert my_list_value.owner.values[1].owner.key.data == "measurement2"
+
+    def test_assign_with_scalar_string_aliases_value(self, builder, hw):
+        """Scalar string assign should alias an existing SSA value under a new key."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
+        builder.add(Assign("measurement_alias", "measurement2"))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+        [map_op] = _ops_of_type(module, MapOp)
+        [create_record] = _ops_of_type(map_op, CreateRecordOp)
+
+        keys = tuple(key.data for key in create_record.keys.data)
+        assert "measurement2" in keys
+        assert "measurement_alias" in keys
+
+        source_idx = keys.index("measurement2")
+        alias_idx = keys.index("measurement_alias")
+        assert create_record.values[alias_idx] is create_record.values[source_idx]
+        assert isinstance(create_record.values[alias_idx].owner, ExtractOp)
+        assert create_record.values[alias_idx].owner.key.data == "measurement2"
+
+    def test_assign_with_scalar_variable_aliases_value(self, builder, hw):
+        """Scalar variable assign should alias an existing SSA value under a new key."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
+        builder.add(Assign("measurement_alias", Variable("measurement2")))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+        [map_op] = _ops_of_type(module, MapOp)
+        [create_record] = _ops_of_type(map_op, CreateRecordOp)
+
+        keys = tuple(key.data for key in create_record.keys.data)
+        assert "measurement2" in keys
+        assert "measurement_alias" in keys
+
+        source_idx = keys.index("measurement2")
+        alias_idx = keys.index("measurement_alias")
+        assert create_record.values[alias_idx] is create_record.values[source_idx]
+        assert isinstance(create_record.values[alias_idx].owner, ExtractOp)
+        assert create_record.values[alias_idx].owner.key.data == "measurement2"
+
+    def test_assign_list_with_non_variable_raises(self, builder, hw):
+        """Tests that an assign instruction with a list containing a non-variable raises a
+        ValueError."""
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
+        builder.add(Assign("my_list", ["measurement1", 5]))
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError, match="Cannot assign value 5 in assign instruction."
+        ):
+            imp.build(builder)
+
+    def test_assign_with_unknown_variable_raises(self, builder, hw):
+        """Tests that an assign instruction with an unknown variable raises a ValueError."""
+        builder.add(Assign("my_var", ["unknown_var"]))
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError,
+            match="Assign value unknown_var not found in post-processing results.",
+        ):
+            imp.build(builder)
+
+
+class TestPurrImporterUnsupportedInstructions:
     @pytest.mark.parametrize(
         "type_", [PostProcessType.MEAN, PostProcessType.DOWN_CONVERT, PostProcessType.MUL]
     )
@@ -534,13 +737,13 @@ class TestPurrImporterUnsupportedInstructions:
     def test_sweep_raises(self, builder):
         builder.add(Sweep())
         imp = PurrImporter()
-        with pytest.raises(ValueError, match="Not yet implemented"):
+        with pytest.raises(NotImplementedError, match="Sweep instructions"):
             imp.build(builder)
 
     def test_end_sweep_raises(self, builder):
         builder.add(EndSweep())
         imp = PurrImporter()
-        with pytest.raises(ValueError, match="Not yet implemented"):
+        with pytest.raises(ValueError, match="not a supported instruction"):
             imp.build(builder)
 
     def test_acquire_with_non_custom_pulse_weights(self, builder, hw):
@@ -549,6 +752,30 @@ class TestPurrImporterUnsupportedInstructions:
         builder.add(Acquire(ch, time=1e-6, filter=filter_))
         imp = PurrImporter()
         with pytest.raises(ValueError, match="Acquire filter must be a CustomPulse"):
+            imp.build(builder)
+
+    def test_variable_raises_value_error(self, builder):
+        builder.add(Variable("my_var"))
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError, match="Standalone variable instructions are not supported"
+        ):
+            imp.build(builder)
+
+    def test_instruction_with_variable_operand_raises(self, builder, hw):
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(PhaseShift(ch, Variable("measurement")))
+        imp = PurrImporter()
+        with pytest.raises(
+            NotImplementedError, match="Variable resolution is not yet supported."
+        ):
+            imp.build(builder)
+
+    def test_instruction_with_non_numeric_raises(self, builder, hw):
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(PhaseShift(ch, "not_a_number"))
+        imp = PurrImporter()
+        with pytest.raises(ValueError, match="Unsupported value type"):
             imp.build(builder)
 
 
@@ -694,45 +921,65 @@ class TestPurrImporterWaveformTranslation:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(Pulse(ch, **pulse_kwargs))
         imp = PurrImporter()
-        imp.build(builder)
-        assert len(_ops_of_type(imp, expected_op_type)) == 1
+        module = imp.build(builder)
+        assert len(_ops_of_type(module, expected_op_type)) == 1
         # Every pulse instruction also emits a PulseOp consuming the waveform.
-        pulse_ops = _ops_of_type(imp, PulseOp)
+        pulse_ops = _ops_of_type(module, PulseOp)
         assert len(pulse_ops) == 1
         assert isinstance(pulse_ops[0].waveform.owner, expected_op_type)
 
+    def test_custom_pulse_emits_pulse_op(self, builder, hw):
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(CustomPulse(ch, np.zeros(8)))
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [pulse_op] = _ops_of_type(module, PulseOp)
+        assert isinstance(pulse_op.waveform.owner, ConstantOp)
+        assert isinstance(pulse_op.waveform.owner.value, SampledWaveformAttr)
+
+    def test_custom_pulse_uses_samples_and_duration(self, builder, hw):
+        ch = hw.get_qubit(0).get_drive_channel()
+        samples = [0.25 + 0.5j, 0.5, -0.75j, -0.125]
+        builder.add(CustomPulse(ch, samples))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [pulse_op] = _ops_of_type(module, PulseOp)
+        waveform_owner = pulse_op.waveform.owner
+        assert isinstance(waveform_owner, ConstantOp)
+        assert isinstance(waveform_owner.value, SampledWaveformAttr)
+
+        sampled_attr = waveform_owner.value
+        assert np.allclose(
+            sampled_attr.samples.data, np.asarray(samples, dtype=np.complex128)
+        )
+        assert sampled_attr.width.literal_value == pytest.approx(
+            ch.sample_time * len(samples)
+        )
+        assert sampled_attr.sample_time.literal_value == pytest.approx(ch.sample_time)
+
 
 class TestPurrImporterDeviceUpdate:
-    def test_assigning_frequency_creates_new_frame(self, builder, hw):
+    def test_assigning_frequency_changes_frequency_value(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseShift(ch, 0.1))
         builder.add(DeviceUpdate(ch, "frequency", 6e9))
         builder.add(PhaseShift(ch, 0.2))
         imp = PurrImporter()
-        imp.build(builder)
-        # Two CreateFrame ops: the original and the device-update reissue.
-        create_frame_ops = _ops_of_type(imp, CreateFrameOp)
-        assert len(create_frame_ops) == 2
+        module = imp.build(builder)
+        # Device assign changes the frequency of the pulse channel in PuRR, check for
+        # correspondence here
+        create_frame_ops = _ops_of_type(module, CreateFrameOp)
+        assert len(create_frame_ops) == 1
         # Second create uses the freshly emitted frequency constant.
-        new_freq = create_frame_ops[1].frequency.owner
+        new_freq = create_frame_ops[0].frequency.owner
         assert isinstance(new_freq, ConstantOp)
         assert new_freq.value.value.data == pytest.approx(6e9)
         # Subsequent phase shift threads through the new frame.
-        shifts = _ops_of_type(imp, PhaseShiftOp)
-        assert shifts[1].frame is create_frame_ops[1].result
-
-    def test_variable_frequency_uses_source_variable(self, builder, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
-        builder.add(DeviceUpdate(ch, "frequency", Variable("freq_var")))
-        imp = PurrImporter()
-        # Pre-bind the source variable to a constant SSA value (inside main).
-        const_freq = ConstantOp(FrequencyAttr(7e9))
-        imp._current_block.add_op(const_freq)
-        imp._current_environment_variables["freq_var"] = const_freq.result
-        imp.build(builder)
-        creates = _ops_of_type(imp, CreateFrameOp)
-        # The new frame's frequency operand is the pre-bound SSA value.
-        assert creates[0].frequency is const_freq.result
+        shifts = _ops_of_type(module, PhaseShiftOp)
+        assert shifts[0].frame is create_frame_ops[0].result
 
     def test_unsupported_attribute_raises(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -748,6 +995,39 @@ class TestPurrImporterDeviceUpdate:
         with pytest.raises(ValueError, match="Unsupported device"):
             imp.build(builder)
 
+    def test_device_update_with_variable_frequency_raises_not_implemented_error(
+        self, builder, hw
+    ):
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(DeviceUpdate(ch, "frequency", Variable("my_var")))
+        imp = PurrImporter()
+        with pytest.raises(
+            NotImplementedError,
+            match="Variable resolution is not yet supported in the device update.",
+        ):
+            imp.build(builder)
+
+    def test_multiple_device_updates_on_same_channel_raises_value_error(self, builder, hw):
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(DeviceUpdate(ch, "frequency", 6e9))
+        builder.add(DeviceUpdate(ch, "frequency", 7e9))
+        imp = PurrImporter()
+        with pytest.raises(
+            ValueError, match="Multiple frequency updates for pulse channel"
+        ):
+            imp.build(builder)
+
+    def test_translate_unsupported_instruction_raises_value_error(self, builder, hw):
+        class UnsupportedQuantumInstruction(QuantumInstruction):
+            pass
+
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(UnsupportedQuantumInstruction(ch))
+
+        imp = PurrImporter()
+        with pytest.raises(ValueError, match="not a supported instruction"):
+            imp.build(builder)
+
 
 class TestPurrImporterRepeat:
     def test_single_repeat_opens_and_closes_scf_for(self, builder, hw):
@@ -756,124 +1036,114 @@ class TestPurrImporterRepeat:
         builder.add(PhaseShift(ch, 0.1))
         builder.add(EndRepeat())
         imp = PurrImporter()
-        imp.build(builder)
-        for_ops = [op for op in _ops(imp) if isinstance(op, scf.ForOp)]
+        module = imp.build(builder)
+        for_ops = [op for op in _ops(module) if isinstance(op, scf.ForOp)]
         assert len(for_ops) == 1
         # The PhaseShift lives inside the loop body.
         body_ops = list(for_ops[0].body.block.ops)
         assert any(isinstance(op, PhaseShiftOp) for op in body_ops)
 
-    def test_sequential_repeats(self, builder, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
+    def test_multiple_repeats_raises_value_error(self, builder):
         builder.add(Repeat(10))
-        builder.add(PhaseShift(ch, 0.1))
-        builder.add(EndRepeat())
         builder.add(Repeat(20))
-        builder.add(PhaseShift(ch, 0.2))
-        builder.add(EndRepeat())
-        imp = PurrImporter()
-        imp.build(builder)
-        for_ops = [op for op in _ops(imp) if isinstance(op, scf.ForOp)]
-        assert len(for_ops) == 2
-
-    def test_nested_repeats(self, builder, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
-        builder.add(Repeat(10))
-        builder.add(Repeat(5))
-        builder.add(PhaseShift(ch, 0.1))
         builder.add(EndRepeat())
         builder.add(EndRepeat())
         imp = PurrImporter()
-        imp.build(builder)
-        outer_for_ops = [op for op in _ops(imp) if isinstance(op, scf.ForOp)]
-        assert len(outer_for_ops) == 1
-        inner_for_ops = [
-            op for op in outer_for_ops[0].body.block.ops if isinstance(op, scf.ForOp)
-        ]
-        assert len(inner_for_ops) == 1
-        # The PhaseShift lives inside the inner loop.
-        inner_body_ops = list(inner_for_ops[0].body.block.ops)
-        assert any(isinstance(op, PhaseShiftOp) for op in inner_body_ops)
-
-
-class TestPurrImporterConstHelpers:
-    @pytest.mark.parametrize(
-        "value, expected_arith_type",
-        [(1.5, "f64"), (3, "i32")],
-    )
-    def test_get_const_without_attr(self, value, expected_arith_type):
-        imp = PurrImporter()
-        ssa = imp._get_const_or_var_ssa(value)
-        owner = ssa.owner
-        assert isinstance(owner, ArithConstantOp)
-        assert str(owner.result.type) == expected_arith_type
-
-    @pytest.mark.parametrize(
-        "attr_cls",
-        [TimeAttr, FrequencyAttr, PhaseAttr, AmplitudeAttr],
-    )
-    def test_literal_const_with_pulse_attr(self, attr_cls):
-        imp = PurrImporter()
-        ssa = imp._get_const_or_var_ssa(0.5, attr_cls)
-        owner = ssa.owner
-        assert isinstance(owner, ConstantOp)
-        assert isinstance(owner.value, attr_cls)
-
-    def test_variable_resolves_via_source_variable(self):
-        imp = PurrImporter()
-        const = ConstantOp(TimeAttr(1e-7))
-        imp._current_block.add_op(const)
-        imp._current_environment_variables["t_var"] = const.result
-        ssa = imp._get_const_or_var_ssa(Variable("t_var"), TimeAttr)
-        assert ssa is const.result
-
-    def test_invalid_value_type_raises(self):
-        imp = PurrImporter()
-        with pytest.raises(ValueError, match="Unsupported value"):
-            imp._get_const_or_var_ssa("not a number")
-
-    def test_invalid_attr_class_raises(self):
-        imp = PurrImporter()
-        # StringAttr is a real xDSL attribute but not one of the
-        # supported Pulse-dialect numeric attribute classes.
-        with pytest.raises(ValueError, match="Unsupported type"):
-            imp._get_const_or_var_ssa(0.5, StringAttr)
-
-    def test_int_literal_emits_i32_arith_constant(self):
-        imp = PurrImporter()
-        ssa = imp._get_const_or_var_ssa(42)
-        owner = ssa.owner
-        assert isinstance(owner, ArithConstantOp)
-        assert str(owner.result.type) == "i32"
-        assert owner.value.value.data == 42
+        with pytest.raises(
+            ValueError, match="Multiple repeat instructions are not supported."
+        ):
+            imp.build(builder)
 
 
 class TestPurrImporterModuleStructure:
     """End-to-end checks that the produced module is well-formed."""
 
+    def test_main_calls_kernel_then_maps_then_returns(self, builder, hw):
+        """Checks that main wires kernel execution through a results map and return."""
+
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(PhaseShift(ch, 0.1))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        main = next(
+            op
+            for op in module.body.block.ops
+            if isinstance(op, func.FuncOp) and op.sym_name.data == "main"
+        )
+        body_ops = list(main.body.block.ops)
+
+        assert len(body_ops) == 3
+        call_op, map_op, return_op = body_ops
+        assert isinstance(call_op, CallKernelOp)
+        assert isinstance(map_op, MapOp)
+        assert isinstance(return_op, func.ReturnOp)
+
+        assert map_op.value is call_op.result[0]
+        assert tuple(return_op.operands) == (map_op.result,)
+
+    def test_quantum_ops_are_nested_in_kernel_loop(self, builder, hw):
+        """Checks that repeated quantum ops are emitted in the kernel loop, not in main."""
+
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(Repeat(5))
+        builder.add(PhaseShift(ch, 0.1))
+        builder.add(EndRepeat())
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [for_op] = [op for op in _ops(module) if isinstance(op, scf.ForOp)]
+        loop_body_ops = list(for_op.body.block.ops)
+        phase_ops_in_loop = [op for op in loop_body_ops if isinstance(op, PhaseShiftOp)]
+
+        assert len(phase_ops_in_loop) == 1
+        assert _has_kernel_parent(phase_ops_in_loop[0])
+        assert not _has_function_parent(phase_ops_in_loop[0])
+
+        main = next(
+            op
+            for op in module.body.block.ops
+            if isinstance(op, func.FuncOp) and op.sym_name.data == "main"
+        )
+        assert _ops_of_type(main, PhaseShiftOp) == []
+        assert len(_ops_of_type(main, CallKernelOp)) == 1
+        assert len(_ops_of_type(main, MapOp)) == 1
+        assert len(_ops_of_type(main, func.ReturnOp)) == 1
+
     def test_empty_builder_produces_main_with_return_only(self, builder):
         imp = PurrImporter()
         module = imp.build(builder)
-        [main] = list(module.body.block.ops)
+        main = next(
+            op
+            for op in module.body.block.ops
+            if isinstance(op, func.FuncOp) and op.sym_name.data == "main"
+        )
         assert isinstance(main, func.FuncOp)
         assert main.sym_name.data == "main"
         body_ops = list(main.body.block.ops)
-        assert len(body_ops) == 1
-        assert isinstance(body_ops[0], func.ReturnOp)
+        assert len(body_ops) == 3
+        assert isinstance(body_ops[-1], func.ReturnOp)
 
     def test_build_terminates_main_with_func_return(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseShift(ch, 0.1))
         imp = PurrImporter()
-        imp.build(builder)
-        assert isinstance(_ops(imp)[-1], func.ReturnOp)
+        module = imp.build(builder)
+        main = next(
+            op
+            for op in module.body.block.ops
+            if isinstance(op, func.FuncOp) and op.sym_name.data == "main"
+        )
+        assert isinstance(list(main.body.block.ops)[-1], func.ReturnOp)
 
     def test_unknown_instruction_raises(self, builder):
         # A plain object is not a registered QuantumInstruction subtype,
         # so the singledispatch base method should fire.
         imp = PurrImporter()
         with pytest.raises(ValueError, match="not a supported instruction"):
-            imp.translate(object())
+            imp.translate(object(), None)
 
     def test_unsupported_pulse_shape_raises(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -884,58 +1154,3 @@ class TestPurrImporterModuleStructure:
         imp = PurrImporter()
         with pytest.raises(ValueError, match="Unsupported shape"):
             imp.build(builder)
-
-
-class TestPurrImporterPulseWithVariables:
-    def test_pulse_width_variable_resolves_via_environment(self, builder, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
-        builder.add(
-            Pulse(
-                ch,
-                PulseShapeType.SQUARE,
-                width=Variable("w_var"),
-                amp=0.4,
-            )
-        )
-        imp = PurrImporter()
-        # Pre-bind the variable to an SSA value inside main.
-        w_const = ConstantOp(TimeAttr(80e-9))
-        imp._current_block.add_op(w_const)
-        imp._current_environment_variables["w_var"] = w_const.result
-        imp.build(builder)
-        [sq] = _ops_of_type(imp, SquareWaveformOp)
-        # The waveform's width operand is the pre-bound SSA value -- no
-        # new constant was synthesised for it.
-        assert sq.width is w_const.result
-
-
-class TestPurrImporterRepeatThreading:
-    """Verify SSA values flow through ``scf.for`` iter-args/results correctly."""
-
-    def test_phase_shift_inside_repeat_threads_iter_arg(self, builder, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
-        # PhaseShift outside the loop seeds the env with an outer frame
-        # SSA value; the loop must capture it as an iter-arg.
-        builder.add(PhaseShift(ch, 0.1))
-        builder.add(Repeat(8))
-        builder.add(PhaseShift(ch, 0.2))
-        builder.add(EndRepeat())
-        imp = PurrImporter()
-        imp.build(builder)
-
-        outer_shifts = [op for op in _ops(imp) if isinstance(op, PhaseShiftOp)]
-        assert len(outer_shifts) == 1
-        [for_op] = [op for op in _ops(imp) if isinstance(op, scf.ForOp)]
-        # iter-args at enter time == the latest frame SSA value, which
-        # is the result of the outer phase shift.
-        assert for_op.iter_args[0] is outer_shifts[0].result
-        # The body block has one block argument per iter-arg (plus the
-        # induction variable).
-        assert len(for_op.body.block.args) == 2
-        # The yielded value matches the inner phase shift's result.
-        inner_shift = next(
-            op for op in for_op.body.block.ops if isinstance(op, PhaseShiftOp)
-        )
-        yield_op = for_op.body.block.last_op
-        assert isinstance(yield_op, scf.YieldOp)
-        assert list(yield_op.arguments) == [inner_shift.result]
