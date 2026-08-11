@@ -180,7 +180,10 @@ class TestTketOptimization:
                 ):
                     assert self._run_qasm2(TketOptimizations.GlobalisePhasedX)
         else:
-            with pytest.raises(ValueError, match="invalid value 128"):
+            with pytest.raises(
+                ValueError,
+                match=r"(invalid value 128|128 is not a valid TketOptimizations)",
+            ):
                 TketOptimizations(128)
             with Path(
                 testpath,
