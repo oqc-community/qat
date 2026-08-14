@@ -15,5 +15,6 @@ Subpackages
    qat.experimental.system_data.canonical
    qat.experimental.system_data.circuit
    qat.experimental.system_data.derived
+   qat.experimental.system_data.hardware
    qat.experimental.system_data.materialisers
    qat.experimental.system_data.pulse
