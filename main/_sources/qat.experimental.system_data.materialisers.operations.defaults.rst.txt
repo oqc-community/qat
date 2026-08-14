@@ -1,0 +1,7 @@
+qat.experimental.system\_data.materialisers.operations.defaults module
+======================================================================
+
+.. automodule:: qat.experimental.system_data.materialisers.operations.defaults
+   :members:
+   :undoc-members:
+   :show-inheritance:

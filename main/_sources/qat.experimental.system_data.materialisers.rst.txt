@@ -14,6 +14,7 @@ Subpackages
 
    qat.experimental.system_data.materialisers.echo
    qat.experimental.system_data.materialisers.model
+   qat.experimental.system_data.materialisers.operations
    qat.experimental.system_data.materialisers.purr
 
 Submodules
