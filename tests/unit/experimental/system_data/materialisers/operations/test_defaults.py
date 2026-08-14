@@ -5,6 +5,8 @@ import pytest
 
 from qat.experimental.system_data.canonical.schema import (
     AcquireOperationStepData,
+    AttributeEntry,
+    DelayOperationStepData,
     ErrorOperationStepData,
     OperationBinaryExprData,
     OperationCapabilityPredicateData,
@@ -16,22 +18,27 @@ from qat.experimental.system_data.canonical.schema import (
     OperationUnaryExprData,
     PhaseShiftOperationStepData,
     PulseOperationStepData,
+    ResetData,
     SyncOperationStepData,
 )
 from qat.experimental.system_data.materialisers.operations.defaults import (
     DefaultOperationBuilder,
+    _get_attribute_value,
+    _resolve_reset_methods,
     make_ccnot_operation,
     make_cnot_operation,
     make_cswap_operation,
     make_cx_operation,
     make_cy_operation,
     make_cz_operation,
+    make_ddrop_reset_operation,
     make_default_operations,
-    make_default_single_qubit_operations,
     make_ecr_operation,
     make_had_operation,
     make_initiate_operation,
     make_measure_operation,
+    make_passive_reset_operation,
+    make_reset_operation,
     make_rx_gate,
     make_ry_gate,
     make_rz_gate,
@@ -77,9 +84,10 @@ _SINGLE_QUBIT_PUBLIC_IDS = frozenset(
         "delay",
         "measure",
         "initiate",
+        "reset",
     }
 )
-_SINGLE_QUBIT_PRIVATE_IDS = frozenset({"X_pi_2", "X_pi"})
+_SINGLE_QUBIT_PRIVATE_IDS = frozenset({"X_pi_2", "X_pi", "passive_reset"})
 _SINGLE_QUBIT_ALL_IDS = _SINGLE_QUBIT_PUBLIC_IDS | _SINGLE_QUBIT_PRIVATE_IDS
 
 
@@ -114,6 +122,14 @@ def _cancellation_ids(control: str) -> frozenset[str]:
         (make_tdg_operation, "Tdg", "gate", "public"),
         (make_measure_operation, "measure", "gate", "public"),
         (make_initiate_operation, "initiate", "utility", "public"),
+        (make_reset_operation, "reset", "utility", "public"),
+        (
+            lambda: make_passive_reset_operation(duration_ps=1_000_000_000),
+            "passive_reset",
+            "utility",
+            "private",
+        ),
+        (make_ddrop_reset_operation, "ddrop_reset", "utility", "private"),
     ],
 )
 def test_operation_basic_properties(
@@ -142,6 +158,8 @@ def test_operation_basic_properties(
         make_tdg_operation,
         make_measure_operation,
         make_initiate_operation,
+        lambda: make_passive_reset_operation(duration_ps=1_000_000_000),
+        make_ddrop_reset_operation,
     ],
 )
 def test_single_variant_operations_are_unconditional(make_fn):
@@ -150,6 +168,23 @@ def test_single_variant_operations_are_unconditional(make_fn):
     op = make_fn()
     assert len(op.variants) == 1
     assert op.variants[0].when is None
+
+
+# ── Internal helper unit tests ────────────────────────────────────────────────
+
+
+def test_get_attribute_value_returns_none_for_absent_key():
+    """_get_attribute_value returns None when the key is not present in attributes."""
+    attrs = (AttributeEntry(key="duration", value=500),)
+    assert _get_attribute_value(attrs, "nonexistent") is None
+
+
+def test_resolve_reset_methods_falls_back_to_first_type_when_no_passive_or_default():
+    """When no matching default and no passive method present, the first method type is
+    used."""
+    reset_methods = (ResetData(type="ddrop", operation_name="ddrop_reset", attributes=()),)
+    _, resolved_default = _resolve_reset_methods(reset_methods, None)
+    assert resolved_default == "ddrop"
 
 
 @pytest.mark.parametrize(
@@ -600,6 +635,113 @@ class TestInitiateOperation:
         assert op.variants[0].operation_steps == ()
 
 
+class TestResetOperation:
+    @pytest.fixture(scope="class")
+    def passive_op(self):
+        return make_passive_reset_operation(duration_ps=1_000_000_000)
+
+    @pytest.fixture(scope="class")
+    def ddrop_op(self):
+        return make_ddrop_reset_operation()
+
+    @pytest.fixture(scope="class")
+    def ddrop_op_with_delay(self):
+        return make_ddrop_reset_operation(delay_ps=50_000)
+
+    @pytest.fixture(scope="class")
+    def reset_op(self):
+        return make_reset_operation()
+
+    def test_passive_reset_uses_drive_delay(self, passive_op):
+        """Verify passive reset is represented as a delay on drive mode."""
+        (step,) = passive_op.variants[0].operation_steps
+        assert isinstance(step, DelayOperationStepData)
+        assert step.mode_id == "drive"
+
+    def test_ddrop_reset_uses_reset_pulse(self, ddrop_op):
+        """Verify DDROP reset without delay emits only the two pulse steps."""
+        qubit_pulse, res_pulse = ddrop_op.variants[0].operation_steps
+        assert isinstance(qubit_pulse, PulseOperationStepData)
+        assert qubit_pulse.mode_id == "reset"
+        assert qubit_pulse.waveform_definition == "ddrop_reset"
+        assert isinstance(res_pulse, PulseOperationStepData)
+        assert res_pulse.mode_id == "readout_reset"
+        assert res_pulse.waveform_definition == "ddrop_reset"
+
+    def test_ddrop_reset_with_delay_appends_delay_steps(self, ddrop_op_with_delay):
+        """Verify DDROP reset with delay_ps appends integer delay steps on each mode."""
+        qubit_pulse, res_pulse, qubit_delay, res_delay = ddrop_op_with_delay.variants[
+            0
+        ].operation_steps
+
+        assert isinstance(qubit_pulse, PulseOperationStepData)
+        assert qubit_pulse.mode_id == "reset"
+        assert isinstance(res_pulse, PulseOperationStepData)
+        assert res_pulse.mode_id == "readout_reset"
+
+        assert isinstance(qubit_delay, DelayOperationStepData)
+        assert qubit_delay.mode_id == "reset"
+        assert qubit_delay.duration == 50_000
+
+        assert isinstance(res_delay, DelayOperationStepData)
+        assert res_delay.mode_id == "readout_reset"
+        assert res_delay.duration == 50_000
+
+    def test_reset_defaults_to_passive_when_no_metadata(self, reset_op):
+        """Verify reset defaults to passive reset when no reset metadata is supplied."""
+        assert len(reset_op.variants) == 1
+        (step,) = reset_op.variants[0].operation_steps
+        assert isinstance(step, OperationReferenceStepData)
+        assert step.operation_id == "passive_reset"
+        assert reset_op.parameters == ()
+
+    def test_reset_uses_default_reset_method_operation_name(self):
+        """Verify reset resolves the default method via operation_name metadata."""
+        reset_methods = (
+            ResetData(
+                type="passive",
+                operation_name="passive_custom",
+                attributes=(AttributeEntry(key="duration", value=1234),),
+            ),
+            ResetData(
+                type="ddrop",
+                operation_name="ddrop_custom",
+                attributes=(),
+            ),
+        )
+
+        op = make_reset_operation(
+            reset_methods=reset_methods,
+            default_reset_method="ddrop",
+        )
+
+        assert op.parameters == ()
+        assert len(op.variants) == 1
+        (step,) = op.variants[0].operation_steps
+        assert isinstance(step, OperationReferenceStepData)
+        assert step.operation_id == "ddrop_custom"
+
+    def test_reset_passive_uses_operation_name_from_reset_metadata(self):
+        """Verify passive reset forwards to the operation named in reset metadata."""
+        reset_methods = (
+            ResetData(
+                type="passive",
+                operation_name="passive_custom",
+                attributes=(AttributeEntry(key="duration", value=4321),),
+            ),
+        )
+
+        op = make_reset_operation(
+            reset_methods=reset_methods,
+            default_reset_method="passive",
+        )
+
+        assert op.parameters == ()
+        (step,) = op.variants[0].operation_steps
+        assert isinstance(step, OperationReferenceStepData)
+        assert step.operation_id == "passive_custom"
+
+
 # ── ZX / ECR / CNOT / cancellations ──────────────────────────────────────────
 
 
@@ -755,12 +897,10 @@ class TestDefaultOperationBuilder:
         assert b.control_qubit_ids == ("q2",)
         assert b.has_x_pi is False
 
-    def test_build_single_qubit_ids_match_module_level(self, single_qubit_ops):
-        """Verify that build_single_qubit_operations() returns the same operation IDs as the
-        module-level function."""
-        assert {op.id for op in single_qubit_ops} == {
-            op.id for op in make_default_single_qubit_operations()
-        }
+    def test_build_single_qubit_ids(self, single_qubit_ops):
+        """Verify that build_single_qubit_operations() returns the expected operation
+        IDs."""
+        assert {op.id for op in single_qubit_ops} == _SINGLE_QUBIT_ALL_IDS
 
     def test_build_with_topology_ids_match_module_level(self, full_ops):
         """Verify that build() with full topology returns the same IDs as
@@ -801,15 +941,83 @@ class TestDefaultOperationBuilder:
             DefaultOperationBuilder(qubit_id="")
 
     def test_private_single_qubit_operations_include_primitives(self, builder):
-        """Verify that default private single-qubit support ops include X_pi_2 and X_pi when
-        has_x_pi=True."""
+        """Verify that default private support ops include pulse and reset helpers."""
         ids = {op.id for op in builder.make_private_single_qubit_operations()}
-        assert ids == {"X_pi_2", "X_pi"}
+        assert ids == {"X_pi_2", "X_pi", "passive_reset"}
 
     def test_private_single_qubit_operations_respect_has_x_pi(self, builder_no_x_pi):
-        """Verify that has_x_pi=False removes X_pi from private support ops."""
+        """Verify has_x_pi=False removes X_pi while retaining reset support ops."""
         ids = {op.id for op in builder_no_x_pi.make_private_single_qubit_operations()}
-        assert ids == {"X_pi_2"}
+        assert ids == {"X_pi_2", "passive_reset"}
+
+    def test_private_single_qubit_operations_follow_reset_method_operation_name(self):
+        """Verify private reset helper operation IDs come from reset metadata."""
+        builder = DefaultOperationBuilder(
+            qubit_id="q0",
+            reset_methods=(
+                ResetData(
+                    type="passive",
+                    operation_name="passive_custom",
+                    attributes=(AttributeEntry(key="duration", value=2000),),
+                ),
+                ResetData(
+                    type="ddrop",
+                    operation_name="ddrop_custom",
+                    attributes=(),
+                ),
+            ),
+            default_reset_method="passive",
+            ddrop_delay_ps=75_000,
+        )
+        private_ops = {op.id: op for op in builder.make_private_single_qubit_operations()}
+        assert "passive_custom" in private_ops
+        assert "ddrop_custom" in private_ops
+        # Verify delay is threaded into the ddrop operation's steps.
+        ddrop_steps = private_ops["ddrop_custom"].variants[0].operation_steps
+        assert len(ddrop_steps) == 4
+        delay_durations = {
+            s.duration for s in ddrop_steps if isinstance(s, DelayOperationStepData)
+        }
+        assert delay_durations == {75_000}
+
+    def test_private_single_qubit_operations_raises_on_unknown_reset_type(self):
+        """Verify an unsupported reset method type raises ValueError."""
+        builder = DefaultOperationBuilder(
+            qubit_id="q0",
+            reset_methods=(
+                ResetData(
+                    type="unknown_type",
+                    operation_name="unknown_reset",
+                    attributes=(),
+                ),
+            ),
+            default_reset_method="unknown_type",
+        )
+        with pytest.raises(ValueError, match="Unsupported reset method type"):
+            builder.make_private_single_qubit_operations()
+
+    def test_make_reset_operation_uses_builder_default_reset_method(self):
+        """Verify builder reset operation points at the default reset method operation."""
+        builder = DefaultOperationBuilder(
+            qubit_id="q0",
+            reset_methods=(
+                ResetData(
+                    type="passive",
+                    operation_name="passive_custom",
+                    attributes=(AttributeEntry(key="duration", value=9000),),
+                ),
+                ResetData(
+                    type="ddrop",
+                    operation_name="ddrop_custom",
+                    attributes=(),
+                ),
+            ),
+            default_reset_method="ddrop",
+        )
+        reset_op = builder.make_reset_operation()
+        (step,) = reset_op.variants[0].operation_steps
+        assert isinstance(step, OperationReferenceStepData)
+        assert step.operation_id == "ddrop_custom"
 
     def test_extra_operations_override_default(self, builder):
         """Verify that an extra OperationData with a matching id replaces the default in
@@ -824,53 +1032,6 @@ class TestDefaultOperationBuilder:
         custom_op = OperationData(id="my_custom_gate", kind="gate", interface="public")
         ops = builder.build(extra_operations=(custom_op,))
         assert any(op.id == "my_custom_gate" for op in ops)
-
-
-# ── Aggregate: make_default_single_qubit_operations ──────────────────────────
-
-
-class TestDefaultSingleQubitOperations:
-    @pytest.fixture(scope="class")
-    def ops(self):
-        return make_default_single_qubit_operations()
-
-    @pytest.fixture(scope="class")
-    def ops_no_x_pi(self):
-        return make_default_single_qubit_operations(has_x_pi=False)
-
-    def test_complete_id_set(self, ops):
-        """Verify that the full expected set of single-qubit operation IDs is produced."""
-        assert {op.id for op in ops} == _SINGLE_QUBIT_ALL_IDS
-
-    def test_public_private_split(self, ops):
-        """Verify that operations are correctly classified as public or private."""
-        assert {op.id for op in ops if op.interface == "public"} == _SINGLE_QUBIT_PUBLIC_IDS
-        assert {
-            op.id for op in ops if op.interface == "private"
-        } == _SINGLE_QUBIT_PRIVATE_IDS
-
-    def test_no_duplicates(self, ops):
-        """Verify that no operation id appears more than once in the output."""
-        ids = [op.id for op in ops]
-        assert len(ids) == len(set(ids))
-
-    def test_without_x_pi_excludes_x_pi(self, ops_no_x_pi):
-        """Verify that has_x_pi=False removes X_pi while retaining X_pi_2."""
-        ids = {op.id for op in ops_no_x_pi}
-        assert "X_pi" not in ids and "X_pi_2" in ids
-
-    def test_without_x_pi_correct_count(self, ops, ops_no_x_pi):
-        """Verify that has_x_pi=False yields exactly one fewer operation than
-        has_x_pi=True."""
-        assert len(ops_no_x_pi) == len(ops) - 1
-
-    def test_extra_operations_override(self):
-        """Verify that an extra OperationData with a matching id replaces the default in-
-        place."""
-        custom_h = OperationData(id="H", kind="gate", interface="public")
-        ops = make_default_single_qubit_operations(extra_operations=(custom_h,))
-        h_ops = [op for op in ops if op.id == "H"]
-        assert len(h_ops) == 1 and h_ops[0] is custom_h
 
 
 # ── Aggregate: make_default_operations ───────────────────────────────────────

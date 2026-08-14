@@ -5,6 +5,12 @@ import copy
 
 import pytest
 
+from qat.experimental.system_data.canonical.schema import (
+    AttributeEntry,
+    DelayOperationStepData,
+    OperationReferenceStepData,
+    ResetData,
+)
 from qat.experimental.system_data.materialisers.errors import (
     MaterialisationConsistencyError,
     MaterialisationIntegrityError,
@@ -166,6 +172,7 @@ def test_capability_builders_cover_empty_and_default_resolution_paths():
 
     methods, resolved_default = _build_reset_methods(["passive"], None, 1e-6)
     assert methods[0].type == "passive"
+    assert methods[0].operation_name == "passive_reset"
     assert resolved_default == "passive"
 
 
@@ -296,6 +303,42 @@ def test_qubit_builder_materialises_modes_and_readout_probability():
     assert qubit.readout_probability is not None
 
 
+def test_build_qubits_propagates_reset_methods_into_operations():
+    """Verify reset_methods/default_reset_method reach the per-qubit operation set."""
+
+    quantum_devices = {
+        "q0": {
+            "id": "q0",
+            "index": 0,
+            "pulse_channels": {"drive": {"pulse_channel": {"id": "ch_q0_drive"}}},
+            "pulse_hw_x_pi_2": {"shape": "square", "width": 20e-9, "amp": 0.2},
+        }
+    }
+
+    qubits = _build_qubits(
+        quantum_devices=quantum_devices,
+        error_mitigation=None,
+        reset_methods=(
+            ResetData(
+                type="passive",
+                operation_name="passive_reset",
+                attributes=(AttributeEntry(key="duration", value=500_000_000),),
+            ),
+            ResetData(type="ddrop", operation_name="ddrop_reset", attributes=()),
+        ),
+        default_reset_method="ddrop",
+    )
+
+    op_ids = {op.id for op in qubits[0].operations}
+    assert "reset" in op_ids
+    assert "ddrop_reset" in op_ids
+
+    reset_op = next(op for op in qubits[0].operations if op.id == "reset")
+    (step,) = reset_op.variants[0].operation_steps
+    assert isinstance(step, OperationReferenceStepData)
+    assert step.operation_id == "ddrop_reset"
+
+
 def test_build_operations_adds_topology_derived_operations_with_target_owned_crc():
     control_payload = {
         "id": "q0",
@@ -364,6 +407,64 @@ def test_build_operations_omits_x_pi_and_direct_x_pi_variants_when_uncalibrated(
             if hasattr(step, "operation_id")
         }
         assert "X_pi" not in referenced_ids
+
+
+def test_build_operations_extracts_ddrop_delay_from_payload():
+    """Verify _build_operations reads ddrop delay and embeds it in the ddrop operation."""
+
+    qubit_payload = {
+        "id": "q0",
+        "pulse_channels": {"drive": {"pulse_channel": {"id": "ch_q0_drive"}}},
+        "pulse_hw_x_pi_2": {"shape": "square", "width": 20e-9, "amp": 0.2},
+        "ddrop_reset": {
+            "shape": "square",
+            "width": 20e-9,
+            "qubit_amp": 0.3,
+            "delay": 100e-9,
+        },
+    }
+
+    operations = _build_operations(
+        qubit_payload,
+        reset_methods=(
+            ResetData(type="ddrop", operation_name="ddrop_reset", attributes=()),
+        ),
+        default_reset_method="ddrop",
+    )
+    ddrop_op = next(op for op in operations if op.id == "ddrop_reset")
+    delay_steps = [
+        s
+        for s in ddrop_op.variants[0].operation_steps
+        if isinstance(s, DelayOperationStepData)
+    ]
+    assert len(delay_steps) == 2
+    assert all(s.duration == 100_000 for s in delay_steps)
+
+
+def test_build_operations_ddrop_without_delay_emits_no_delay_steps():
+    """Verify ddrop_reset without a delay field produces only pulse steps."""
+
+    qubit_payload = {
+        "id": "q0",
+        "pulse_channels": {"drive": {"pulse_channel": {"id": "ch_q0_drive"}}},
+        "pulse_hw_x_pi_2": {"shape": "square", "width": 20e-9, "amp": 0.2},
+        "ddrop_reset": {"shape": "square", "width": 20e-9, "qubit_amp": 0.3},
+    }
+
+    operations = _build_operations(
+        qubit_payload,
+        reset_methods=(
+            ResetData(type="ddrop", operation_name="ddrop_reset", attributes=()),
+        ),
+        default_reset_method="ddrop",
+    )
+    ddrop_op = next(op for op in operations if op.id == "ddrop_reset")
+    delay_steps = [
+        s
+        for s in ddrop_op.variants[0].operation_steps
+        if isinstance(s, DelayOperationStepData)
+    ]
+    assert delay_steps == []
 
 
 def test_postprocess_parser_helpers_cover_success_and_rejection_paths():

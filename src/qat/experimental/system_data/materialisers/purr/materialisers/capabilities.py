@@ -48,22 +48,16 @@ def _build_reset_methods(
 
     methods: list[ResetData] = []
     for reset_type in supported_reset_methods:
+        attributes: list[AttributeEntry] = []
         if reset_type == "passive" and reset_duration is not None:
-            methods.append(
-                ResetData(
-                    type="passive",
-                    attributes=(AttributeEntry(key="duration", value=reset_duration),),
-                )
+            attributes = [AttributeEntry(key="duration", value=reset_duration)]
+        methods.append(
+            ResetData(
+                type=reset_type,
+                operation_name=f"{reset_type}_reset",
+                attributes=tuple(attributes),
             )
-        else:
-            methods.append(
-                ResetData(
-                    type=reset_type,
-                    attributes=(
-                        AttributeEntry(key="operation_name", value=f"{reset_type}_reset"),
-                    ),
-                )
-            )
+        )
 
     resolved_default = default_reset_method
     supported_set = {method.type for method in methods}

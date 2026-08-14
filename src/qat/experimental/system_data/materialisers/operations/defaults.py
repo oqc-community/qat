@@ -45,6 +45,7 @@ from typing import Any
 
 from qat.experimental.system_data.canonical.schema import (
     AcquireOperationStepData,
+    AttributeEntry,
     DelayOperationStepData,
     ErrorOperationStepData,
     OperationBinaryExprData,
@@ -60,6 +61,7 @@ from qat.experimental.system_data.canonical.schema import (
     OperationVariantData,
     PhaseShiftOperationStepData,
     PulseOperationStepData,
+    ResetData,
     SyncOperationStepData,
 )
 from qat.experimental.system_data.materialisers.operations.operation_builder import (
@@ -81,6 +83,7 @@ _PI_OVER_4 = OperationBinaryExprData(op="div", left=_PI, right=4)
 _NEG_PI_OVER_4 = OperationUnaryExprData(op="neg", operand=_PI_OVER_4)
 
 _RADIAN_ISCLOSE_TOLERANCE = 1e-8
+_DEFAULT_PASSIVE_RESET_DURATION_PS = 1_000_000_000
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
@@ -105,6 +108,84 @@ def _simple_operation(
         parameters=parameters,
         variants=(_unconditional(*steps),),
     )
+
+
+def _get_attribute_value(
+    attributes: tuple[AttributeEntry, ...],
+    key: str,
+) -> Any | None:
+    """Return the value for ``key`` from ``attributes`` if present."""
+    for attribute in attributes:
+        if attribute.key == key:
+            return attribute.value
+    return None
+
+
+def _resolve_reset_methods(
+    reset_methods: tuple[ResetData, ...],
+    default_reset_method: str | None,
+) -> tuple[tuple[ResetData, ...], str]:
+    """Resolve reset methods and default method for operation generation."""
+    if not reset_methods:
+        reset_methods = (
+            ResetData(
+                type="passive",
+                operation_name="passive_reset",
+                attributes=(
+                    AttributeEntry(
+                        key="duration", value=_DEFAULT_PASSIVE_RESET_DURATION_PS
+                    ),
+                ),
+            ),
+        )
+
+    methods_by_type = {method.type: method for method in reset_methods}
+
+    if default_reset_method in methods_by_type:
+        return reset_methods, default_reset_method
+    if "passive" in methods_by_type:
+        return reset_methods, "passive"
+    return reset_methods, reset_methods[0].type
+
+
+def _make_reset_private_operations(
+    reset_methods: tuple[ResetData, ...],
+    default_reset_method: str | None,
+    ddrop_delay_ps: int | None = None,
+) -> tuple[tuple[ResetData, ...], str, list[OperationData]]:
+    """Build resolved reset methods and their corresponding private operations.
+
+    :param reset_methods: Supported reset strategies (top-level canonical metadata).
+    :param default_reset_method: Default reset method type selected from ``reset_methods``.
+    :returns: Tuple of (resolved_reset_methods, resolved_default_reset_method, reset_private_ops).
+    """
+    resolved_reset_methods, resolved_default = _resolve_reset_methods(
+        reset_methods,
+        default_reset_method,
+    )
+
+    reset_private_ops: list[OperationData] = []
+    for method in resolved_reset_methods:
+        operation_name = method.operation_name
+        if method.type == "passive":
+            duration = int(_get_attribute_value(method.attributes, "duration"))
+            reset_private_ops.append(
+                make_passive_reset_operation(
+                    operation_id=operation_name,
+                    duration_ps=duration,
+                )
+            )
+        elif method.type == "ddrop":
+            reset_private_ops.append(
+                make_ddrop_reset_operation(
+                    operation_id=operation_name,
+                    delay_ps=ddrop_delay_ps,
+                )
+            )
+        else:
+            raise ValueError(f"Unsupported reset method type: {method.type}")
+
+    return resolved_reset_methods, resolved_default, reset_private_ops
 
 
 def _theta_ref_gate(id: str, base_op: str, theta: Any) -> OperationData:
@@ -559,6 +640,72 @@ def make_measure_operation() -> OperationData:
         "public",
         PulseOperationStepData(mode_id="measure", waveform_definition="measure"),
         AcquireOperationStepData(mode_id="acquire", acquire_definition="acquire"),
+    )
+
+
+def make_passive_reset_operation(
+    operation_id: str = "passive_reset",
+    *,
+    duration_ps: int,
+) -> OperationData:
+    """Return a passive reset operation.
+
+    Passive reset is represented as a delay on the ``drive`` mode, with a
+    fixed duration in picoseconds sourced from the canonical reset metadata.
+    """
+    return _simple_operation(
+        operation_id,
+        "utility",
+        "private",
+        DelayOperationStepData(mode_id="drive", duration=duration_ps),
+    )
+
+
+def make_ddrop_reset_operation(
+    operation_id: str = "ddrop_reset",
+    *,
+    delay_ps: int | None = None,
+) -> OperationData:
+    """Return a DDROP reset operation.
+
+    Fires a simultaneous pulse on the qubit-side ``reset`` mode and the resonator-side
+    ``readout_reset`` mode. When ``delay_ps`` is provided, a delay step is appended to
+    each mode after the pulse.
+
+    :param delay_ps: Post-pulse settling delay in picoseconds, sourced from the
+        ddrop_reset calibration payload. Omit when no delay is calibrated.
+    """
+    steps: list[Any] = [
+        PulseOperationStepData(mode_id="reset", waveform_definition="ddrop_reset"),
+        PulseOperationStepData(mode_id="readout_reset", waveform_definition="ddrop_reset"),
+    ]
+    if delay_ps is not None:
+        steps.append(DelayOperationStepData(mode_id="reset", duration=delay_ps))
+        steps.append(DelayOperationStepData(mode_id="readout_reset", duration=delay_ps))
+    return _simple_operation(operation_id, "utility", "private", *steps)
+
+
+def make_reset_operation(
+    reset_methods: tuple[ResetData, ...] = (),
+    default_reset_method: str | None = None,
+) -> OperationData:
+    """Return the public reset operation.
+
+    The reset method is selected from top-level reset metadata: ``default_reset_method``
+    identifies the method type, which is resolved against ``reset_methods`` and mapped to
+    the method's ``operation_name`` attribute.
+    """
+    resolved_methods, resolved_default = _resolve_reset_methods(
+        reset_methods,
+        default_reset_method,
+    )
+    method = next(item for item in resolved_methods if item.type == resolved_default)
+
+    return _simple_operation(
+        "reset",
+        "utility",
+        "public",
+        OperationReferenceStepData(operation_id=method.operation_name),
     )
 
 
@@ -1034,13 +1181,42 @@ class DefaultOperationBuilder(AbstractOperationBuilder):
     :class:`~qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder`.
     """
 
+    def __init__(
+        self,
+        qubit_id: str,
+        coupled_qubit_ids: tuple[str, ...] = (),
+        control_qubit_ids: tuple[str, ...] = (),
+        has_x_pi: bool = True,
+        reset_methods: tuple[ResetData, ...] = (),
+        default_reset_method: str | None = None,
+        ddrop_delay_ps: int | None = None,
+    ) -> None:
+        super().__init__(
+            qubit_id=qubit_id,
+            coupled_qubit_ids=coupled_qubit_ids,
+            control_qubit_ids=control_qubit_ids,
+            has_x_pi=has_x_pi,
+        )
+        self.reset_methods, self.default_reset_method = _resolve_reset_methods(
+            reset_methods,
+            default_reset_method,
+        )
+        self.ddrop_delay_ps = ddrop_delay_ps
+
     # ── Private/support single-qubit operations ──────────────────────────────
 
     def make_private_single_qubit_operations(self) -> tuple[OperationData, ...]:
         """Return private pulse primitives used by default gate decompositions."""
+        _, _, reset_ops = _make_reset_private_operations(
+            self.reset_methods,
+            self.default_reset_method,
+            self.ddrop_delay_ps,
+        )
+
         return (
             make_x_pi_2_operation(),
             *((make_x_pi_operation(),) if self.has_x_pi else ()),
+            *tuple(reset_ops),
         )
 
     def make_z_operation(self) -> OperationData:
@@ -1132,6 +1308,13 @@ class DefaultOperationBuilder(AbstractOperationBuilder):
         """Return the initiate operation."""
         return make_initiate_operation()
 
+    def make_reset_operation(self) -> OperationData:
+        """Return the reset operation."""
+        return make_reset_operation(
+            reset_methods=self.reset_methods,
+            default_reset_method=self.default_reset_method,
+        )
+
     # ── Multi-qubit gates ─────────────────────────────────────────────────────
 
     def make_two_qubit_operations(self) -> tuple[OperationData, ...]:
@@ -1206,99 +1389,14 @@ def make_initiate_operation() -> OperationData:
     )
 
 
-# TODO: Open question — should reset be modelled as an OperationData?
-#
-# The builder's ``reset`` emits IR-level ``Reset`` + ``PhaseReset`` instructions
-# rather than waveform/mode-level calibration steps.  Reset strategies (passive
-# delay, active feedback, DDROP) each have distinct hardware implementations that
-# would need to be expressed as conditional variants (similar to the X gate's
-# direct_x_pi capability variants).  Whether this belongs in the operation schema
-# or remains purely at the IR instruction level is still an open design question.
-# COMPILER-XXXX
-
-
-def _merge_operations(
-    base: tuple[OperationData, ...],
-    extra: tuple[OperationData, ...],
-) -> tuple[OperationData, ...]:
-    """Merge ``extra`` into ``base`` using last-wins ID deduplication.
-
-    Operations in ``extra`` whose ``id`` matches an existing entry in ``base``
-    replace that entry in-place (preserving insertion order). New IDs are
-    appended at the end.
-
-    :param base: Base operation set to start from.
-    :param extra: Additional or replacement operations. Any operation whose
-        ``id`` matches an entry in ``base`` replaces it; new IDs are appended.
-    :returns: Merged tuple with the same order as ``base``, overrides in-place,
-        new operations appended.
-    """
-    by_id: dict[str, OperationData] = {op.id: op for op in base}
-    for op in extra:
-        by_id[op.id] = op
-    return tuple(by_id.values())
-
-
-def make_default_single_qubit_operations(
-    has_x_pi: bool = True,
-    own_qubit_id: str | None = None,
-    coupled_qubit_ids: tuple[str, ...] = (),
-    extra_operations: tuple[OperationData, ...] = (),
-) -> tuple[OperationData, ...]:
-    """Return the standard single-qubit operation set.
-
-    Includes: X_pi_2, Z, X, Y, U, H, SX, SXdg, S, Sdg, T, Tdg, measure, initiate, and
-    the QASM2 aliases rx, ry, rz, u1, u2, id. ``X_pi`` is included only when
-    ``has_x_pi`` is ``True``.
-
-    :param has_x_pi: Whether a calibrated X(π) pulse is available on the qubit.
-        Controls inclusion of ``X_pi`` and the corresponding variants in
-        parameterised ``rx`` and ``ry``.
-    :param own_qubit_id: Identifier of the qubit that will own these operations.
-        Forwarded to :func:`make_rz_gate` for cross-qubit CR mode phase shifts.
-    :param coupled_qubit_ids: Identifiers of target qubits this qubit drives.
-        Forwarded to :func:`make_rz_gate` to include CRC and CR frame shifts.
-    :param extra_operations: Additional or replacement operations. Any operation whose
-        ``id`` matches a default replaces it in-place (last-wins); new IDs are appended.
-        Use this to add target-specific gates or override a default with a
-        hardware-specific decomposition. Callers outside QAT can pass
-        :class:`~qat.experimental.system_data.canonical.schema.OperationData` instances
-        constructed directly from the schema without importing this module.
-    """
-    defaults = (
-        make_x_pi_2_operation(),
-        *((make_x_pi_operation(),) if has_x_pi else ()),
-        make_rz_gate(own_qubit_id=own_qubit_id, coupled_qubit_ids=coupled_qubit_ids),
-        make_rx_gate(has_x_pi=has_x_pi),
-        make_ry_gate(has_x_pi=has_x_pi),
-        make_u_gate(),
-        make_x_gate(),
-        make_y_gate(),
-        make_z_gate(),
-        make_had_operation(),
-        make_sx_operation(),
-        make_sxdg_operation(),
-        make_s_operation(),
-        make_sdg_operation(),
-        make_t_operation(),
-        make_tdg_operation(),
-        make_u1_gate(),
-        make_u2_gate(),
-        make_id_gate(),
-        make_delay_operation(),
-        make_measure_operation(),
-        make_initiate_operation(),
-    )
-    if not extra_operations:
-        return defaults
-    return _merge_operations(defaults, extra_operations)
-
-
 def make_default_operations(
     qubit_id: str,
     coupled_qubit_ids: tuple[str, ...] = (),
     control_qubit_ids: tuple[str, ...] = (),
     has_x_pi: bool = True,
+    reset_methods: tuple[ResetData, ...] = (),
+    default_reset_method: str | None = None,
+    ddrop_delay_ps: int | None = None,
     extra_operations: tuple[OperationData, ...] = (),
 ) -> tuple[OperationData, ...]:
     """Return the full default operation set for a qubit.
@@ -1311,32 +1409,23 @@ def make_default_operations(
     :param has_x_pi: Whether a calibrated X(π) pulse is available on the qubit.
         Controls inclusion of ``X_pi`` and the corresponding variants in
         parameterised ``rx`` and ``ry``.
+    :param reset_methods: Supported reset strategies (top-level canonical metadata).
+    :param default_reset_method: Default reset method type selected from
+        ``reset_methods``.
+    :param ddrop_delay_ps: Post-pulse settling delay in picoseconds for DDROP reset,
+        sourced from the ddrop_reset calibration payload. Omit when uncalibrated.
     :param extra_operations: Additional or replacement operations applied after the full
         default set (including topology-derived multi-qubit operations) is assembled.
         Any operation whose ``id`` matches a default replaces it in-place (last-wins);
-        new IDs are appended. See :func:`make_default_single_qubit_operations` for
-        details on the extension pattern.
+        new IDs are appended.
     :returns: Tuple of canonical :class:`OperationData` instances.
     """
-    if not isinstance(qubit_id, str) or not qubit_id:
-        raise ValueError("qubit_id must be a non-empty string.")
-
-    operations: list[OperationData] = list(
-        make_default_single_qubit_operations(
-            has_x_pi=has_x_pi,
-            own_qubit_id=qubit_id,
-            coupled_qubit_ids=coupled_qubit_ids,
-        )
-    )
-    for target_id in coupled_qubit_ids:
-        operations.append(
-            make_zx_operation(target_qubit_id=target_id, own_qubit_id=qubit_id)
-        )
-        operations.append(make_ecr_operation(target_qubit_id=target_id))
-        operations.append(make_cnot_operation(target_qubit_id=target_id))
-    for ctrl_id in control_qubit_ids:
-        operations.append(make_zx_pi_4_cancellation_operation(control_qubit_id=ctrl_id))
-        operations.append(make_zx_neg_pi_4_cancellation_operation(control_qubit_id=ctrl_id))
-    if not extra_operations:
-        return tuple(operations)
-    return _merge_operations(tuple(operations), extra_operations)
+    return DefaultOperationBuilder(
+        qubit_id=qubit_id,
+        coupled_qubit_ids=coupled_qubit_ids,
+        control_qubit_ids=control_qubit_ids,
+        has_x_pi=has_x_pi,
+        reset_methods=reset_methods,
+        default_reset_method=default_reset_method,
+        ddrop_delay_ps=ddrop_delay_ps,
+    ).build(extra_operations=extra_operations)

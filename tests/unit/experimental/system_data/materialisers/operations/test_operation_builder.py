@@ -72,6 +72,9 @@ class _BuilderWithoutPrivateOps(AbstractOperationBuilder):
     def make_initiate_operation(self) -> OperationData:
         return _op("initiate")
 
+    def make_reset_operation(self) -> OperationData:
+        return _op("reset")
+
     def make_two_qubit_operations(self) -> tuple[OperationData, ...]:
         return (_op("twoq"),)
 

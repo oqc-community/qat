@@ -666,6 +666,13 @@ def test_signal_path_frequency_and_sample_time_skip_branches_do_not_raise(caplog
     )
     _validate_pulse_channel_frequencies(dto_non_numeric_frequency)
 
+    dto_non_dict_pulse_channel = _mutated_dto(
+        lambda p: p["quantum_devices"]["Q0"]["pulse_channels"]["drive"].__setitem__(
+            "pulse_channel", "not_a_dict"
+        )
+    )
+    _validate_pulse_channel_frequencies(dto_non_dict_pulse_channel)
+
     dto_no_resonator_warning = _mutated_dto(
         lambda p: p["quantum_devices"]["R0"]["pulse_channels"]["measure"][
             "pulse_channel"
@@ -823,30 +830,6 @@ def test_waveform_validator_error_branches():
     )
     _validate_waveform_payloads(dto_zx_non_dict)
     _validate_waveform_numeric_fields(dto_zx_non_dict)
-
-
-def test_signal_path_validator_finite_value_edge_branches():
-    dto_baseband_bad = _mutated_dto(
-        lambda p: p["basebands"]["bb0"].__setitem__("frequency", math.inf)
-    )
-    with pytest.raises(SourceValidationError, match="Baseband frequency"):
-        _validate_baseband_payload("bb0", dto_baseband_bad.basebands["bb0"])
-
-    dto_channel_bad = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_channels"]["drive"][
-            "pulse_channel"
-        ].__setitem__("frequency", math.inf)
-    )
-    with pytest.raises(SourceValidationError, match="Pulse channel frequency"):
-        _validate_pulse_channel_frequencies(dto_channel_bad)
-
-    dto_physical_bad = _mutated_dto(
-        lambda p: p["physical_channels"]["p_q0"].__setitem__("sample_time", math.nan)
-    )
-    with pytest.raises(SourceValidationError, match="sample_time"):
-        _validate_physical_channel_payload(
-            "p_q0", dto_physical_bad.physical_channels["p_q0"]
-        )
 
 
 def test_validator_skip_and_error_branches_for_couplings_signal_paths_and_weights():

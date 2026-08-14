@@ -104,7 +104,7 @@ SCHEMA_CASES = [
             "gate_fidelities": (TwoQubitGateFidelityData(gate="cx", fidelity=0.99),),
         },
     ),
-    (ResetData, {"type": "passive"}),
+    (ResetData, {"type": "passive", "operation_name": "passive_reset"}),
     (AcquireModeData, {"type": "integrator"}),
     (CanonicalSystemData, {"calibration_id": "cal0", "acquire_limit": 100}),
 ]
@@ -237,7 +237,7 @@ def test_canonical_system_data_accepts_nested_records():
         gate_fidelities=(TwoQubitGateFidelityData(gate="cx", fidelity=0.99),),
     )
     acquire_mode = AcquireModeData(type="integrator")
-    reset = ResetData(type="passive")
+    reset = ResetData(type="passive", operation_name="passive_reset")
 
     system_data = CanonicalSystemData(
         calibration_id="cal0",

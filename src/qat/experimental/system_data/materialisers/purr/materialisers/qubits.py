@@ -11,6 +11,7 @@ from qat.experimental.system_data.canonical.schema import (
     ProbabilityEntry,
     QubitData,
     ReadoutProbabilityData,
+    ResetData,
     WaveformData,
 )
 from qat.experimental.system_data.materialisers.operations.defaults import (
@@ -380,6 +381,8 @@ def _build_operations(
     qubit_payload: dict[str, Any],
     operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
     extra_operations: tuple[OperationData, ...] = (),
+    reset_methods: tuple[ResetData, ...] = (),
+    default_reset_method: str | None = None,
 ) -> tuple[OperationData, ...]:
     """Build the canonical operation set for a qubit.
 
@@ -398,12 +401,24 @@ def _build_operations(
         :class:`~qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder`
         to customise individual operations for a specific hardware target.
     :param extra_operations: Additional or replacement operations (last-wins by ID).
+    :param reset_methods: Supported reset strategies from top-level canonical metadata.
+    :param default_reset_method: Default reset method type.
     """
+    ddrop_reset = qubit_payload.get("ddrop_reset")
+    ddrop_delay_ps: int | None = None
+    if isinstance(ddrop_reset, dict):
+        delay_s = ddrop_reset.get("delay")
+        if delay_s is not None:
+            ddrop_delay_ps = int(_seconds_to_picoseconds(delay_s))
+
     builder = operation_builder_type(
         qubit_id=qubit_payload.get("id"),
         coupled_qubit_ids=_get_coupled_qubit_ids(qubit_payload),
         control_qubit_ids=_get_control_qubit_ids(qubit_payload),
         has_x_pi=_has_x_pi_waveform(qubit_payload),
+        reset_methods=reset_methods,
+        default_reset_method=default_reset_method,
+        ddrop_delay_ps=ddrop_delay_ps,
     )
     return builder.build(extra_operations=extra_operations)
 
@@ -414,6 +429,8 @@ def _build_qubits(
     error_mitigation: Any,
     operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
     extra_operations: tuple[OperationData, ...] = (),
+    reset_methods: tuple[ResetData, ...] = (),
+    default_reset_method: str | None = None,
 ) -> tuple[QubitData, ...]:
     """Build canonical qubit records from PuRR quantum-device payloads."""
 
@@ -438,6 +455,8 @@ def _build_qubits(
                     device_payload,
                     operation_builder_type=operation_builder_type,
                     extra_operations=extra_operations,
+                    reset_methods=reset_methods,
+                    default_reset_method=default_reset_method,
                 ),
                 readout_probability=_build_readout_probability(
                     error_mitigation=error_mitigation,

@@ -269,6 +269,8 @@ def _materialise_canonical_top_level(
             error_mitigation=dto.error_mitigation,
             operation_builder_type=operation_builder_type,
             extra_operations=extra_operations,
+            reset_methods=reset_methods,
+            default_reset_method=default_reset_method,
         ),
         couplings=_build_couplings(
             qubit_direction_couplings=dto.qubit_direction_couplings,

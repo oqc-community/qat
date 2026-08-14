@@ -108,6 +108,9 @@ class AbstractOperationBuilder(ABC):
     def make_initiate_operation(self) -> OperationData: ...  # pragma: no cover
 
     @abstractmethod
+    def make_reset_operation(self) -> OperationData: ...  # pragma: no cover
+
+    @abstractmethod
     def make_two_qubit_operations(
         self,
     ) -> tuple[OperationData, ...]: ...  # pragma: no cover
@@ -146,6 +149,7 @@ class AbstractOperationBuilder(ABC):
             self.make_delay_operation(),
             self.make_measure_operation(),
             self.make_initiate_operation(),
+            self.make_reset_operation(),
         )
         if not extra_operations:
             return defaults

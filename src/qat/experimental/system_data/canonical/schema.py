@@ -807,11 +807,14 @@ class ResetData:
     one supported strategy and optional metadata about its behavior.
 
     :ivar type: Reset strategy type (for example ``passive``).
+    :ivar operation_name: Name of the operation that implements this reset strategy
+        (for example ``passive_reset``).
     :ivar attributes: Additional reset strategy metadata. (for example, a ``passive`` reset
         might include a ``duration`` attribute for the expected T1 decay time).
     """
 
     type: str
+    operation_name: str
     attributes: tuple[AttributeEntry, ...] = ()
 
 

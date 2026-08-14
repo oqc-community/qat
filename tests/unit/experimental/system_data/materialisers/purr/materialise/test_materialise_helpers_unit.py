@@ -85,6 +85,8 @@ def test_capability_helpers_cover_append_and_default_resolution_paths():
 
     methods, resolved_default = _build_reset_methods(["active", "passive"], "bad", 1e-6)
     assert {method.type for method in methods} == {"active", "passive"}
+    for method in methods:
+        assert method.operation_name is not None
     assert resolved_default == "passive"
 
 

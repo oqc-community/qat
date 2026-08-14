@@ -231,7 +231,9 @@ class CanonicalSystemDataBuilder:
         :param attributes: Optional additional strategy metadata entries.
         :returns: This builder instance.
         """
-        self._reset_methods.append(ResetData(type=type, attributes=attributes))
+        self._reset_methods.append(
+            ResetData(type=type, operation_name=f"{type}_reset", attributes=attributes)
+        )
         return self
 
     def with_default_reset_method(self, method: str) -> CanonicalSystemDataBuilder:

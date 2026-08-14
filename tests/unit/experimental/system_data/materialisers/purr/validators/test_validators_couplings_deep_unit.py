@@ -210,3 +210,54 @@ def test_coupling_validator_remaining_continue_paths():
         SourceConsistencyError, match="missing CR/CRC pulse-channel mappings"
     ):
         _validate_cr_crc_matches_coupling_graph(dto_unknown_index)
+
+
+def test_iter_normalized_cr_crc_entries_skips_unparseable_key():
+    """_iter_normalized_cr_crc_entries skips entries with a key that passes the
+    cross_resonance filter but doesn't match the full CRCRC key pattern."""
+    dto = _mutated_dto(
+        lambda p: p["quantum_devices"]["Q0"]["pulse_channels"].update(
+            {
+                "Q0.extra.cross_resonance": {
+                    "pulse_channel": {
+                        "id": "Q0.Q1.cross_resonance",
+                        "physical_channel": {"id": "p_q0"},
+                    }
+                }
+            }
+        )
+    )
+    entries = list(_iter_normalized_cr_crc_entries(dto))
+    assert all(
+        not (
+            e["source_id"] == "Q0"
+            and e["suffix"] == "cross_resonance"
+            and e["target_id"] == "extra"
+        )
+        for e in entries
+    )
+
+
+def test_iter_normalized_cr_crc_entries_skips_mismatched_suffix():
+    """_iter_normalized_cr_crc_entries skips entries whose channel ID suffix mismatches the
+    key suffix."""
+    dto = _mutated_dto(
+        lambda p: p["quantum_devices"]["Q0"]["pulse_channels"].update(
+            {
+                "Q1.cross_resonance_cancellation": {
+                    "pulse_channel": {
+                        "id": "Q0.Q1.cross_resonance",
+                        "physical_channel": {"id": "p_q0"},
+                    }
+                }
+            }
+        )
+    )
+    entries = list(_iter_normalized_cr_crc_entries(dto))
+    assert not any(
+        e["source_id"] == "Q0"
+        and e["suffix"] == "cross_resonance"
+        and e.get("target_id") == "Q1"
+        for e in entries
+        if e["suffix"] == "cross_resonance_cancellation"
+    )

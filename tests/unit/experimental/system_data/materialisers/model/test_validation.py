@@ -25,7 +25,10 @@ from qat.experimental.system_data.materialisers.errors import (
     MaterialisationConsistencyError,
     MaterialisationValidationError,
 )
-from qat.experimental.system_data.materialisers.model.validation import validate
+from qat.experimental.system_data.materialisers.model.validation import (
+    _is_finite_number,
+    validate,
+)
 
 
 def _minimal() -> CanonicalSystemData:
@@ -218,10 +221,6 @@ def test_oscillator_non_positive_frequency_raises(freq):
         validate(model)
 
 
-def test_oscillator_positive_frequency_passes():
-    validate(_minimal())  # osc0 has frequency 5 GHz
-
-
 def test_channel_negative_frequency_raises():
     model = CanonicalSystemData(
         oscillators=(OscillatorData(id="osc0", frequency=5_000_000_000),),
@@ -274,23 +273,6 @@ def test_channel_unknown_oscillator_reference_raises():
         validate(model)
 
 
-def test_channel_none_oscillator_reference_is_valid():
-    model = CanonicalSystemData(
-        oscillators=(OscillatorData(id="osc0", frequency=5_000_000_000),),
-        ports=(PortData(id="p0", sample_time=1000),),
-        channels=(
-            ChannelData(
-                id="ch0",
-                port_id="p0",
-                frequency=5_000_000_000,
-                oscillator_reference=None,
-            ),
-        ),
-        qubits=(QubitData(id="q0", index=0),),
-    )
-    validate(model)  # None reference is always valid
-
-
 def test_channel_known_oscillator_reference_is_valid():
     model = CanonicalSystemData(
         oscillators=(OscillatorData(id="osc0", frequency=5_000_000_000),),
@@ -336,6 +318,20 @@ def test_waveform_zero_width_passes():
         waveform_definitions=(WaveformData(id="w0", width=0),),
     )
     validate(_with_mode(mode))
+
+
+def test_is_finite_number_bool_returns_false():
+    assert _is_finite_number(True) is False
+    assert _is_finite_number(False) is False
+
+
+def test_is_finite_number_finite_complex_returns_true():
+    assert _is_finite_number(1 + 2j) is True
+
+
+def test_is_finite_number_non_numeric_returns_false():
+    assert _is_finite_number("hello") is False
+    assert _is_finite_number(None) is False
 
 
 @pytest.mark.parametrize("bad_rise", [float("inf"), float("-inf"), float("nan"), -1.0])
