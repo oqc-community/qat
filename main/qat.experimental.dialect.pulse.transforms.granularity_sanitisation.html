@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.granularity_sanitisation module &mdash; qat-compiler 3.0.0.post304.dev20260814125953 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.granularity_sanitisation module &mdash; qat-compiler 3.0.0.post310.dev20260814130023 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -633,15 +633,9 @@
 <span id="qat-experimental-dialect-pulse-transforms-granularity-sanitisation-module"></span><h1>qat.experimental.dialect.pulse.transforms.granularity_sanitisation module<a class="headerlink" href="#module-qat.experimental.dialect.pulse.transforms.granularity_sanitisation" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ApplyGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">granularity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ApplyGranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Apply granularity sanitisation.</p>
-<p>Initialises the pass with a positive granularity.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.params.granularity"></span><strong>granularity</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.params.granularity">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr" title="qat.experimental.dialect.pulse.ir.attributes.TimeAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeAttr</span></code></a></span>) – Granularity used for sanitisation.</p>
-</dd>
-</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.apply" title="Link to this definition"></a></dt>
@@ -653,6 +647,11 @@
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.constraints">
+<span class="sig-name descname"><span class="pre">constraints</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints" title="qat.experimental.system_data.pulse.constraints.PulseLevelConstraints"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseLevelConstraints</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.constraints" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'apply-granularity-sanitisation'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -661,7 +660,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">granularity</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GranularitySanitisation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Rounds the durations of quantum instructions so they are multiples of the clock
 cycle.</p>
@@ -676,10 +675,10 @@ that the new duration is a multiple of the granularity.</p>
 <p>This pass has the potential to invalidate the timings for sequences of instructions
 that are time-sensitive.</p>
 </div>
-<p>Initializes the pattern with the given granularity.</p>
+<p>Initializes the pattern with the given constraints.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation.params.granularity"></span><strong>granularity</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation.params.granularity">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – Granularity in seconds.</p>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation.params.constraints"></span><strong>constraints</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.GranularitySanitisation.params.constraints">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints" title="qat.experimental.system_data.pulse.constraints.PulseLevelConstraints"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseLevelConstraints</span></code></a></span>) – Pulse level constraints containing the granularity.</p>
 </dd>
 </dl>
 <dl class="py method">

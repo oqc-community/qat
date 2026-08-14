@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.traits module &mdash; qat-compiler 3.0.0.post304.dev20260814125953 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.traits module &mdash; qat-compiler 3.0.0.post310.dev20260814130023 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -640,6 +640,22 @@ and to apply canonicalization patterns to operations in the pulse dialect.</p>
 <p>A trait that signifies an operation advances time on the frame(s) it acts on.</p>
 <p>The time does not need to be known at compile time, and in that sense, can be runtime
 dynamic.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.CallKernelOpUserOpInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CallKernelOpUserOpInterface</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.CallKernelOpUserOpInterface" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">SymbolUserOpInterface</span></code></p>
+<p>Symbol-user trait for call operations that target kernels.</p>
+<p>Inheriting <code class="xref py py-class docutils literal notranslate"><span class="pre">SymbolUserOpInterface</span></code> registers the operation as a symbol user.
+This trait also verifies that the resolved callee is a <code class="xref py py-class docutils literal notranslate"><span class="pre">KernelOp</span></code> and that call
+operand/result signatures match the referenced kernel function type.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.traits.CallKernelOpUserOpInterface.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.traits.CallKernelOpUserOpInterface.verify" title="Link to this definition"></a></dt>
+<dd><p>Verify symbol resolution and signature compatibility for a kernel call.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">

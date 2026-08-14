@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TargetData Demo &mdash; qat-compiler 3.0.0.post304.dev20260814125953 documentation</title>
+  <title>TargetData Demo &mdash; qat-compiler 3.0.0.post310.dev20260814130023 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -759,12 +759,12 @@ custom resonator instruction_memory_size: 70000
 <div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Invalid duration config caught:
 1 validation error for QubitDescription
   Value error, Min. pulse duration cannot be larger than max. pulse duration. [type=value_error, input_value={&#39;pulse_duration_min&#39;: 2e...se_duration_max&#39;: 1e-06}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.11/v/value_error
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
 
 Clock-cycle mismatch caught:
 1 validation error for TargetData
   Value error, Different clock cycles for qubit and resonator are currently not supported. [type=value_error, input_value={&#39;QUBIT_DATA&#39;: QubitDescr...f_freq_max=10000000000)}, input_type=dict]
-    For further information visit https://errors.pydantic.dev/2.11/v/value_error
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
 </pre></div>
 </div>
 </div>
@@ -808,8 +808,8 @@ Clock-cycle mismatch caught:
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Unseeded call 1 clock_cycle: 5e-09
-Unseeded call 2 clock_cycle: 6.000000000000001e-09
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Unseeded call 1 clock_cycle: 6.000000000000001e-09
+Unseeded call 2 clock_cycle: 1e-08
 Unseeded reproducible: False
 
 Seeded call 1 clock_cycle: 5e-09
