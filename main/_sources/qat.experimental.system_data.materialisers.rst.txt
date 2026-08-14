@@ -12,6 +12,8 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   qat.experimental.system_data.materialisers.echo
+   qat.experimental.system_data.materialisers.model
    qat.experimental.system_data.materialisers.purr
 
 Submodules
@@ -21,6 +23,7 @@ Submodules
    :maxdepth: 4
 
    qat.experimental.system_data.materialisers.boundary
+   qat.experimental.system_data.materialisers.builder
    qat.experimental.system_data.materialisers.descriptor_resolution
    qat.experimental.system_data.materialisers.errors
    qat.experimental.system_data.materialisers.plugin_loader
