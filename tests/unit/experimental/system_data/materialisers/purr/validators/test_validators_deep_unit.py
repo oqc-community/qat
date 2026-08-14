@@ -67,13 +67,6 @@ def _make_dto() -> PurrIngressV010:
                             "auxiliary_qubit": "Q1",
                         }
                     },
-                    "Q1.cross_resonance_cancellation": {
-                        "pulse_channel": {
-                            "id": "Q0.Q1.cross_resonance_cancellation",
-                            "physical_channel": {"id": "p_q0"},
-                            "frequency": 5e9,
-                        }
-                    },
                     "drive": {
                         "pulse_channel": {
                             "id": "Q0.drive",
@@ -112,13 +105,20 @@ def _make_dto() -> PurrIngressV010:
                 "id": "Q1",
                 "index": 1,
                 "pulse_channels": {
+                    "Q0.cross_resonance_cancellation": {
+                        "pulse_channel": {
+                            "id": "Q0.Q1.cross_resonance_cancellation",
+                            "physical_channel": {"id": "p_q0"},
+                            "frequency": 5e9,
+                        }
+                    },
                     "drive": {
                         "pulse_channel": {
                             "id": "Q1.drive",
                             "physical_channel": {"id": "p_q1"},
                             "frequency": 5.1e9,
                         }
-                    }
+                    },
                 },
             },
             "R0": {
@@ -208,7 +208,7 @@ def test_validate_coupling_direction_entry_errors(entry, exc_type, msg):
                 "bad.cross_resonance",
                 p["quantum_devices"]["Q0"]["pulse_channels"].pop("Q1.cross_resonance"),
             ),
-            "must match '<target>.cross_resonance",
+            "must match '<peer>.cross_resonance",
         ),
         (
             lambda p: p["quantum_devices"]["Q0"]["pulse_channels"][
@@ -256,8 +256,8 @@ def test_validate_cr_crc_channel_mapping_keys_consistency_errors(channel_id, msg
 
 def test_validate_cr_crc_counterparts_and_graph_and_auxiliary_target_errors():
     dto_missing_counterpart = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_channels"].pop(
-            "Q1.cross_resonance_cancellation"
+        lambda p: p["quantum_devices"]["Q1"]["pulse_channels"].pop(
+            "Q0.cross_resonance_cancellation"
         )
     )
     with pytest.raises(SourceConsistencyError, match="missing counterpart"):

@@ -7,10 +7,17 @@ from typing import Any
 from qat.experimental.system_data.canonical.schema import (
     AcquireDefinitionData,
     ModeData,
+    OperationData,
     ProbabilityEntry,
     QubitData,
     ReadoutProbabilityData,
     WaveformData,
+)
+from qat.experimental.system_data.materialisers.operations.defaults import (
+    DefaultOperationBuilder,
+)
+from qat.experimental.system_data.materialisers.operations.operation_builder import (
+    AbstractOperationBuilder,
 )
 from qat.experimental.system_data.materialisers.purr.materialisers.common import (
     _as_float,
@@ -319,10 +326,94 @@ def _build_readout_probability(
     return ReadoutProbabilityData(probability_entries=tuple(probability_entries))
 
 
+def _get_coupled_qubit_ids(qubit_payload: dict[str, Any]) -> tuple[str, ...]:
+    """Extract target qubit IDs from cross-resonance pulse channels.
+
+    PuRR encodes two-qubit coupling as pulse channels named
+    ``"{target_id}.cross_resonance"``. This helper collects the unique set of
+    target IDs in definition order, preserving the first occurrence.
+    """
+    pulse_channels = qubit_payload.get("pulse_channels")
+    if not isinstance(pulse_channels, dict):
+        return ()
+    coupled: list[str] = []
+    for pulse_key in pulse_channels:
+        if isinstance(pulse_key, str) and pulse_key.endswith(".cross_resonance"):
+            target_id = pulse_key.split(".")[0]
+            if target_id not in coupled:
+                coupled.append(target_id)
+    return tuple(coupled)
+
+
+def _get_control_qubit_ids(qubit_payload: dict[str, Any]) -> tuple[str, ...]:
+    """Extract control qubit IDs from cross-resonance-cancellation pulse channels.
+
+    PuRR encodes the target side of a two-qubit coupling as pulse channels named
+    ``"{control_id}.cross_resonance_cancellation"``. This helper collects the unique
+    set of control IDs in definition order.
+    """
+    pulse_channels = qubit_payload.get("pulse_channels")
+    if not isinstance(pulse_channels, dict):
+        return ()
+    controls: list[str] = []
+    for pulse_key in pulse_channels:
+        if isinstance(pulse_key, str) and pulse_key.endswith(
+            ".cross_resonance_cancellation"
+        ):
+            control_id = pulse_key.split(".")[0]
+            if control_id not in controls:
+                controls.append(control_id)
+    return tuple(controls)
+
+
+def _has_x_pi_waveform(qubit_payload: dict[str, Any]) -> bool:
+    """Return ``True`` when the qubit payload contains a calibrated X(π) pulse.
+
+    PuRR stores the full-pi X pulse parameters under ``pulse_hw_x_pi``. When absent
+    the ``X_pi`` operation and the ``X``/``Y`` gate variants that reference it must
+    be omitted to avoid unresolvable operation references.
+    """
+    return isinstance(qubit_payload.get("pulse_hw_x_pi"), dict)
+
+
+def _build_operations(
+    qubit_payload: dict[str, Any],
+    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+    extra_operations: tuple[OperationData, ...] = (),
+) -> tuple[OperationData, ...]:
+    """Build the canonical operation set for a qubit.
+
+    Single-qubit operations (X_pi_2, Z, X, Y, U, H, SX, SXdg, S, Sdg, T, Tdg,
+    measure, initiate) are always included. ``X_pi`` and the ``X``/``Y`` gate
+    variants that reference it are included only when the qubit has a calibrated
+    X(π) pulse (``pulse_hw_x_pi`` present in the PuRR payload).
+
+    For each coupled target qubit (detected via cross-resonance pulse channels),
+    ZX(±π/4), ECR, and CNOT operations are appended. For each control qubit that
+    drives this qubit (detected via cross-resonance-cancellation channels), ZX
+    cancellation-tone primitives are appended.
+
+    :param qubit_payload: PuRR quantum-device payload dict for the qubit.
+    :param operation_builder_type: Builder class to instantiate. Subclass
+        :class:`~qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder`
+        to customise individual operations for a specific hardware target.
+    :param extra_operations: Additional or replacement operations (last-wins by ID).
+    """
+    builder = operation_builder_type(
+        qubit_id=qubit_payload.get("id"),
+        coupled_qubit_ids=_get_coupled_qubit_ids(qubit_payload),
+        control_qubit_ids=_get_control_qubit_ids(qubit_payload),
+        has_x_pi=_has_x_pi_waveform(qubit_payload),
+    )
+    return builder.build(extra_operations=extra_operations)
+
+
 def _build_qubits(
     *,
     quantum_devices: dict[str, Any],
     error_mitigation: Any,
+    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+    extra_operations: tuple[OperationData, ...] = (),
 ) -> tuple[QubitData, ...]:
     """Build canonical qubit records from PuRR quantum-device payloads."""
 
@@ -342,6 +433,11 @@ def _build_qubits(
                 modes=_build_qubit_modes(
                     quantum_devices=quantum_devices,
                     qubit_payload=device_payload,
+                ),
+                operations=_build_operations(
+                    device_payload,
+                    operation_builder_type=operation_builder_type,
+                    extra_operations=extra_operations,
                 ),
                 readout_probability=_build_readout_probability(
                     error_mitigation=error_mitigation,

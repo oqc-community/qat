@@ -35,13 +35,6 @@ def _make_dto() -> PurrIngressV010:
                             "auxiliary_qubit": "Q1",
                         }
                     },
-                    "Q1.cross_resonance_cancellation": {
-                        "pulse_channel": {
-                            "id": "Q0.Q1.cross_resonance_cancellation",
-                            "physical_channel": {"id": "p_q0"},
-                            "frequency": 5e9,
-                        }
-                    },
                     "drive": {
                         "pulse_channel": {
                             "id": "Q0.drive",
@@ -54,7 +47,15 @@ def _make_dto() -> PurrIngressV010:
             "Q1": {
                 "id": "Q1",
                 "index": 1,
-                "pulse_channels": {},
+                "pulse_channels": {
+                    "Q0.cross_resonance_cancellation": {
+                        "pulse_channel": {
+                            "id": "Q0.Q1.cross_resonance_cancellation",
+                            "physical_channel": {"id": "p_q0"},
+                            "frequency": 5e9,
+                        }
+                    }
+                },
             },
         },
         "pulse_channels": {},
@@ -114,8 +115,8 @@ def test_validate_coupling_indices_success_and_error_path():
 
 def test_validate_cr_crc_counterparts_and_auxiliary_target_branches():
     dto_missing = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_channels"].pop(
-            "Q1.cross_resonance_cancellation"
+        lambda p: p["quantum_devices"]["Q1"]["pulse_channels"].pop(
+            "Q0.cross_resonance_cancellation"
         )
     )
     with pytest.raises(SourceConsistencyError, match="missing counterpart"):
@@ -196,8 +197,8 @@ def test_coupling_validator_remaining_continue_paths():
                         "physical_channel": {"id": "p_q0"},
                     }
                 },
-                "Q5.cross_resonance": {"pulse_channel": "bad"},
-                "Q5.cross_resonance_cancellation": {"pulse_channel": "bad"},
+                "Q5.cross_resonance.extra": {"pulse_channel": "bad"},
+                "Q5.cross_resonance_cancellation.extra": {"pulse_channel": "bad"},
             }
         )
     )

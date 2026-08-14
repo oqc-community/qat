@@ -29,10 +29,17 @@ from pydantic import ValidationError
 from qat.experimental.system_data.canonical.schema import (
     AttributeEntry,
     CanonicalSystemData,
+    OperationData,
 )
 from qat.experimental.system_data.materialisers.errors import (
     SourceValidationError,
     UnsupportedSourceVersionError,
+)
+from qat.experimental.system_data.materialisers.operations.defaults import (
+    DefaultOperationBuilder,
+)
+from qat.experimental.system_data.materialisers.operations.operation_builder import (
+    AbstractOperationBuilder,
 )
 from qat.experimental.system_data.materialisers.purr.adapter import adapt_purr_payload
 from qat.experimental.system_data.materialisers.purr.ingress.v0_1_0 import PurrIngressV010
@@ -227,6 +234,8 @@ def _materialise_canonical_top_level(
     *,
     dto: PurrIngressV010,
     source_version: str,
+    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+    extra_operations: tuple[OperationData, ...] = (),
 ) -> CanonicalSystemData:
     """Assemble canonical system data from validated PuRR ingress payloads."""
 
@@ -258,6 +267,8 @@ def _materialise_canonical_top_level(
         qubits=_build_qubits(
             quantum_devices=dto.quantum_devices,
             error_mitigation=dto.error_mitigation,
+            operation_builder_type=operation_builder_type,
+            extra_operations=extra_operations,
         ),
         couplings=_build_couplings(
             qubit_direction_couplings=dto.qubit_direction_couplings,
@@ -284,6 +295,8 @@ def materialise_purr_v0_1_0(
     native_waveform_shapes: list[str] | None = None,
     decoder_extra_reduce_target_types: list[str] | None = None,
     decoder_extra_reduce_target_suffixes: list[str] | None = None,
+    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+    extra_operations: tuple[OperationData, ...] = (),
 ) -> CanonicalSystemData:
     """Materialise canonical system data from a PuRR v0.1.0 source payload.
 
@@ -306,6 +319,16 @@ def materialise_purr_v0_1_0(
         ``py/reduce`` targets allowed by the source decoder at runtime.
     :param decoder_extra_reduce_target_suffixes: Optional extra terminal type-name
         suffixes allowed by the source decoder at runtime.
+    :param operation_builder_type: Builder class used to construct per-qubit
+        operations. Subclass
+        :class:`~qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder`
+        and pass the subclass here to customise or replace specific gate
+        decompositions for a target hardware variant (e.g. DDQ).
+    :param extra_operations: Additional or replacement
+        :class:`~qat.experimental.system_data.canonical.schema.OperationData`
+        instances applied to every qubit's operation set after the default set is
+        assembled (last-wins by ID). Use this for data-driven runtime extensions
+        without subclassing.
     :returns: Materialised canonical system data.
     :raises UnsupportedSourceVersionError: If source version is unsupported.
     :raises SourceValidationError: If DTO validation fails.
@@ -379,4 +402,6 @@ def materialise_purr_v0_1_0(
     return _materialise_canonical_top_level(
         dto=enriched_ingress_dto,
         source_version=source_version,
+        operation_builder_type=operation_builder_type,
+        extra_operations=extra_operations,
     )

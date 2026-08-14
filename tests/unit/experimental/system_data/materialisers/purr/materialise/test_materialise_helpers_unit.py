@@ -325,10 +325,14 @@ def test_materialise_default_args_and_supported_reset_branch_permutations(monkey
     )
     monkeypatch.setattr(purr_materialise, "validate_purr_ingress_graph", lambda _dto: None)
 
-    def _capture_top_level(*, dto, source_version):
+    def _capture_top_level(
+        *, dto, source_version, operation_builder_type, extra_operations
+    ):
         captured["source_version"] = source_version
         captured["supported_acquire_modes"] = dto.supported_acquire_modes
         captured["physical_channels"] = dto.physical_channels
+        captured["operation_builder_type"] = operation_builder_type
+        captured["extra_operations"] = extra_operations
         return object()
 
     monkeypatch.setattr(
@@ -343,3 +347,5 @@ def test_materialise_default_args_and_supported_reset_branch_permutations(monkey
     )
     assert result is not None
     assert captured["source_version"] == "0.1.0"
+    assert captured["operation_builder_type"] is purr_materialise.DefaultOperationBuilder
+    assert captured["extra_operations"] == ()

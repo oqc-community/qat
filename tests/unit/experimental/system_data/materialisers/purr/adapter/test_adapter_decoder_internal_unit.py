@@ -51,6 +51,142 @@ def test_adapter_normalise_top_level_and_errors():
         adapter._normalise_top_level({"quantum_devices": {}})
 
 
+def test_adapter_normalises_legacy_crc_ownership_to_target_side():
+    payload = {
+        "quantum_devices": {
+            "Q0": {
+                "pulse_channels": {
+                    "Q1.cross_resonance": {
+                        "pulse_channel": {"id": "Q0.Q1.cross_resonance"}
+                    },
+                    "Q1.cross_resonance_cancellation": {
+                        "pulse_channel": {"id": "Q0.Q1.cross_resonance_cancellation"}
+                    },
+                }
+            },
+            "Q1": {"pulse_channels": {}},
+        },
+        "pulse_channels": {},
+        "physical_channels": {},
+        "basebands": {},
+    }
+
+    adapted = adapter.adapt_purr_payload(payload)
+
+    assert (
+        "Q1.cross_resonance_cancellation"
+        not in adapted["quantum_devices"]["Q0"]["pulse_channels"]
+    )
+    assert (
+        "Q0.cross_resonance_cancellation"
+        in adapted["quantum_devices"]["Q1"]["pulse_channels"]
+    )
+    assert (
+        adapted["quantum_devices"]["Q1"]["pulse_channels"][
+            "Q0.cross_resonance_cancellation"
+        ]["pulse_channel"]["id"]
+        == "Q0.Q1.cross_resonance_cancellation"
+    )
+
+
+def test_adapter_keeps_canonical_target_owned_crc_entries_unchanged():
+    payload = {
+        "quantum_devices": {
+            "Q0": {
+                "pulse_channels": {
+                    "Q1.cross_resonance": {"pulse_channel": {"id": "Q0.Q1.cross_resonance"}}
+                }
+            },
+            "Q1": {
+                "pulse_channels": {
+                    "Q0.cross_resonance_cancellation": {
+                        "pulse_channel": {"id": "Q0.Q1.cross_resonance_cancellation"}
+                    }
+                }
+            },
+        },
+        "pulse_channels": {},
+        "physical_channels": {},
+        "basebands": {},
+    }
+
+    adapted = adapter.adapt_purr_payload(payload)
+
+    assert (
+        "Q0.cross_resonance_cancellation"
+        in adapted["quantum_devices"]["Q1"]["pulse_channels"]
+    )
+    assert (
+        "Q1.cross_resonance_cancellation"
+        not in adapted["quantum_devices"]["Q0"]["pulse_channels"]
+    )
+
+
+def test_adapter_synthesises_missing_crc_from_cr_mapping():
+    payload = {
+        "quantum_devices": {
+            "Q0": {
+                "pulse_channels": {
+                    "Q1.cross_resonance": {
+                        "pulse_channel": {
+                            "id": "Q0.Q1.cross_resonance",
+                            "physical_channel": {"id": "p_q0"},
+                            "frequency": 5e9,
+                            "scale": 0.8,
+                        }
+                    }
+                }
+            },
+            "Q1": {"pulse_channels": {}},
+        },
+        "pulse_channels": {},
+        "physical_channels": {},
+        "basebands": {},
+    }
+
+    adapted = adapter.adapt_purr_payload(payload)
+
+    assert (
+        "Q0.cross_resonance_cancellation"
+        in adapted["quantum_devices"]["Q1"]["pulse_channels"]
+    )
+    synthesized = adapted["quantum_devices"]["Q1"]["pulse_channels"][
+        "Q0.cross_resonance_cancellation"
+    ]["pulse_channel"]
+    assert synthesized["id"] == "Q0.Q1.cross_resonance_cancellation"
+    assert synthesized["physical_channel"] == {"id": "p_q0"}
+    assert synthesized["frequency"] == 5e9
+
+
+def test_adapter_creates_placeholder_target_for_legacy_crc_when_target_missing():
+    payload = {
+        "quantum_devices": {
+            "Q0": {
+                "pulse_channels": {
+                    "Q9.cross_resonance_cancellation": {
+                        "pulse_channel": {"id": "Q0.Q9.cross_resonance_cancellation"}
+                    }
+                }
+            }
+        },
+        "pulse_channels": {},
+        "physical_channels": {},
+        "basebands": {},
+    }
+
+    adapted = adapter.adapt_purr_payload(payload)
+
+    assert "Q9" in adapted["quantum_devices"]
+    assert (
+        "Q0.cross_resonance_cancellation"
+        in adapted["quantum_devices"]["Q9"]["pulse_channels"]
+    )
+    assert (
+        "Q9.cross_resonance_cancellation"
+        not in adapted["quantum_devices"]["Q0"]["pulse_channels"]
+    )
+
+
 def test_adapter_reference_and_projection_helpers_cover_cyclic_and_repeated_nodes():
     assert adapter._build_reference_stub({"id": "x"}) == {"id": "x"}
     assert adapter._build_reference_stub({"instrument_id": "x"}) == {"instrument_id": "x"}

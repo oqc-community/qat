@@ -51,13 +51,6 @@ def _make_dto(**overrides):
                             "auxiliary_qubit": "Q1",
                         }
                     },
-                    "Q1.cross_resonance_cancellation": {
-                        "pulse_channel": {
-                            "id": "Q0.Q1.cross_resonance_cancellation",
-                            "physical_channel": {"id": "p_q0"},
-                            "frequency": 5e9,
-                        }
-                    },
                 },
                 "pulse_hw_x_pi_2": {"width": 20e-9, "rise": 5e-9, "amp": 0.2},
                 "pulse_hw_x_pi": {"width": 40e-9, "rise": 10e-9, "amp": 0.4},
@@ -83,7 +76,15 @@ def _make_dto(**overrides):
             "Q1": {
                 "id": "Q1",
                 "index": 1,
-                "pulse_channels": {},
+                "pulse_channels": {
+                    "Q0.cross_resonance_cancellation": {
+                        "pulse_channel": {
+                            "id": "Q0.Q1.cross_resonance_cancellation",
+                            "physical_channel": {"id": "p_q0"},
+                            "frequency": 5e9,
+                        }
+                    }
+                },
             },
         },
         "pulse_channels": {
@@ -185,8 +186,8 @@ def test_coupling_validators_cover_counterpart_and_channel_id_consistency():
     _validate_cr_crc_counterparts(dto)
 
     bad_counterpart = _make_dto()
-    del bad_counterpart.quantum_devices["Q0"]["pulse_channels"][
-        "Q1.cross_resonance_cancellation"
+    del bad_counterpart.quantum_devices["Q1"]["pulse_channels"][
+        "Q0.cross_resonance_cancellation"
     ]
     with pytest.raises(SourceConsistencyError, match="missing counterpart"):
         _validate_cr_crc_counterparts(bad_counterpart)
@@ -197,3 +198,10 @@ def test_coupling_validators_cover_counterpart_and_channel_id_consistency():
     ] = "Q0.Q2.cross_resonance"
     with pytest.raises(SourceConsistencyError, match="does not match"):
         _validate_cr_crc_channel_mapping_keys(bad_key)
+
+    bad_crc_key = _make_dto()
+    bad_crc_key.quantum_devices["Q1"]["pulse_channels"]["Q0.cross_resonance_cancellation"][
+        "pulse_channel"
+    ]["id"] = "Q0.Q0.cross_resonance_cancellation"
+    with pytest.raises(SourceConsistencyError, match="target mapping"):
+        _validate_cr_crc_channel_mapping_keys(bad_crc_key)

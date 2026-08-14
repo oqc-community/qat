@@ -38,6 +38,7 @@ from qat.experimental.system_data.materialisers.purr.materialisers.postprocess i
 from qat.experimental.system_data.materialisers.purr.materialisers.qubits import (
     _build_acquire_definitions_for_mode,
     _build_mode_from_pulse_view,
+    _build_operations,
     _build_qubit_modes,
     _build_qubits,
     _build_readout_probability,
@@ -293,6 +294,76 @@ def test_qubit_builder_materialises_modes_and_readout_probability():
     assert qubit.id == "q0"
     assert len(qubit.modes) >= 2
     assert qubit.readout_probability is not None
+
+
+def test_build_operations_adds_topology_derived_operations_with_target_owned_crc():
+    control_payload = {
+        "id": "q0",
+        "pulse_channels": {
+            "drive": {"pulse_channel": {"id": "ch_q0_drive"}},
+            "q1.cross_resonance": {"pulse_channel": {"id": "ch_q0_cr_q1"}},
+            "q2.cross_resonance": {"pulse_channel": {"id": "ch_q0_cr_q2"}},
+        },
+        "pulse_hw_x_pi_2": {"shape": "square", "width": 20e-9, "amp": 0.2},
+        "pulse_hw_x_pi": {"shape": "square", "width": 40e-9, "amp": 0.4},
+    }
+
+    target_payload = {
+        "id": "q1",
+        "pulse_channels": {
+            "drive": {"pulse_channel": {"id": "ch_q1_drive"}},
+            "q0.cross_resonance_cancellation": {
+                "pulse_channel": {"id": "ch_q1_crc_from_q0"}
+            },
+        },
+        "pulse_hw_x_pi_2": {"shape": "square", "width": 20e-9, "amp": 0.2},
+        "pulse_hw_x_pi": {"shape": "square", "width": 40e-9, "amp": 0.4},
+    }
+
+    control_operations = _build_operations(control_payload)
+    control_operation_ids = {operation.id for operation in control_operations}
+
+    target_operations = _build_operations(target_payload)
+    target_operation_ids = {operation.id for operation in target_operations}
+
+    assert {
+        "zx_q1",
+        "ecr_q1",
+        "cnot_q1",
+        "zx_q2",
+        "ecr_q2",
+        "cnot_q2",
+    }.issubset(control_operation_ids)
+
+    assert {
+        "zx_pi_4_cancellation_q0",
+        "zx_neg_pi_4_cancellation_q0",
+    }.issubset(target_operation_ids)
+
+
+def test_build_operations_omits_x_pi_and_direct_x_pi_variants_when_uncalibrated():
+    qubit_payload = {
+        "id": "q0",
+        "pulse_channels": {"drive": {"pulse_channel": {"id": "ch_q0_drive"}}},
+        "pulse_hw_x_pi_2": {"shape": "square", "width": 20e-9, "amp": 0.2},
+    }
+
+    operations = _build_operations(qubit_payload)
+    operation_ids = {operation.id for operation in operations}
+
+    assert "X_pi" not in operation_ids
+
+    rotation_ops = [operation for operation in operations if operation.id in {"rx", "ry"}]
+    assert {operation.id for operation in rotation_ops} == {"rx", "ry"}
+
+    for operation in rotation_ops:
+        referenced_ids = {
+            step.operation_id
+            for variant in operation.variants
+            for step in variant.operation_steps
+            if hasattr(step, "operation_id")
+        }
+        assert "X_pi" not in referenced_ids
 
 
 def test_postprocess_parser_helpers_cover_success_and_rejection_paths():

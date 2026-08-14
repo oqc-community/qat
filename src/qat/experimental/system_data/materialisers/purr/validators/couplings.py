@@ -134,7 +134,7 @@ def _validate_cr_crc_channel_mapping_keys(dto: PurrIngressV010) -> None:
         parsed_key = _parse_cr_crc_key(pulse_key)
         if parsed_key is None:
             _raise_validation_error(
-                "CR/CRC pulse-channel key must match '<target>.cross_resonance(_cancellation)'.",
+                "CR/CRC pulse-channel key must match '<peer>.cross_resonance(_cancellation)'.",
                 path=path_prefix,
                 details={"pulse_key": pulse_key},
             )
@@ -163,25 +163,42 @@ def _validate_cr_crc_channel_mapping_keys(dto: PurrIngressV010) -> None:
                 details={"pulse_channel_id": pulse_channel_id},
             )
 
-        key_target, key_suffix = parsed_key
+        key_peer, key_suffix = parsed_key
         id_source, id_target, id_suffix = parsed_channel_id
 
-        if id_source != device_id:
+        if key_suffix == "cross_resonance":
+            expected_source = device_id
+            expected_target = key_peer
+        else:
+            # CRC channels are owned by the target qubit and keyed by the control id.
+            expected_source = key_peer
+            expected_target = device_id
+
+        if id_source != expected_source:
             raise SourceConsistencyError(
-                "CR/CRC pulse channel source in id does not match owning device id.",
+                "CR/CRC pulse channel source in id does not match expected mapping.",
                 source_type="purr",
                 path=f"{path_prefix}.pulse_channel.id",
-                details={"device_id": device_id, "id_source": id_source},
+                details={
+                    "device_id": device_id,
+                    "key_peer": key_peer,
+                    "suffix": key_suffix,
+                    "id_source": id_source,
+                    "expected_source": expected_source,
+                },
             )
 
-        if id_target != key_target:
+        if id_target != expected_target:
             raise SourceConsistencyError(
-                "CR/CRC target qubit in key does not match pulse_channel.id target.",
+                "CR/CRC pulse-channel key does not match pulse_channel.id target mapping.",
                 source_type="purr",
                 path=path_prefix,
                 details={
-                    "key_target": key_target,
+                    "device_id": device_id,
+                    "key_peer": key_peer,
+                    "suffix": key_suffix,
                     "id_target": id_target,
+                    "expected_target": expected_target,
                     "pulse_channel_id": pulse_channel_id,
                 },
             )
@@ -241,8 +258,12 @@ def _validate_cr_crc_counterparts(dto: PurrIngressV010) -> None:
         parsed_key = _parse_cr_crc_key(pulse_key)
         if parsed_key is None:
             continue
-        target, suffix = parsed_key
-        present_keys.add((device_id, target, suffix))
+        peer_id, suffix = parsed_key
+        if suffix == "cross_resonance":
+            source_id, target_id = device_id, peer_id
+        else:
+            source_id, target_id = peer_id, device_id
+        present_keys.add((source_id, target_id, suffix))
 
     missing_counterparts: set[tuple[str, str, str]] = set()
     for source, target, suffix in present_keys:
@@ -274,7 +295,7 @@ def _iter_normalized_cr_crc_entries(dto: PurrIngressV010):
         parsed_key = _parse_cr_crc_key(pulse_key)
         if parsed_key is None:
             continue
-        key_target, key_suffix = parsed_key
+        key_peer, key_suffix = parsed_key
 
         pulse_channel = pulse_view.get("pulse_channel")
         if not isinstance(pulse_channel, dict):
@@ -289,7 +310,17 @@ def _iter_normalized_cr_crc_entries(dto: PurrIngressV010):
             continue
 
         id_source, id_target, id_suffix = parsed_channel_id
-        if id_source != device_id or id_target != key_target or id_suffix != key_suffix:
+        if id_suffix != key_suffix:
+            continue
+
+        if key_suffix == "cross_resonance":
+            expected_source = device_id
+            expected_target = key_peer
+        else:
+            expected_source = key_peer
+            expected_target = device_id
+
+        if id_source != expected_source or id_target != expected_target:
             continue
 
         yield {
