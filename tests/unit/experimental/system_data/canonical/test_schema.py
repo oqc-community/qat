@@ -15,14 +15,20 @@ from qat.experimental.system_data.canonical.schema import (
     CanonicalSystemData,
     ChannelData,
     DelayOperationStepData,
+    ErrorOperationStepData,
     ExternalResourceData,
     LinearMapToRealMethodData,
     MaxLikelihoodDiscriminateParams,
     MaxLikelihoodMethodData,
     ModeData,
+    OperationBinaryExprData,
     OperationData,
+    OperationNamedConstantData,
+    OperationParameterRefData,
     OperationVariantData,
     OscillatorData,
+    PhaseSetOperationStepData,
+    PhaseShiftOperationStepData,
     PortData,
     ProbabilityEntry,
     PulseOperationStepData,
@@ -33,6 +39,10 @@ from qat.experimental.system_data.canonical.schema import (
     SyncOperationStepData,
     TwoQubitGateFidelityData,
     WaveformData,
+)
+
+from tests.unit.experimental.system_data.canonical.error_type_checker import (
+    is_valid_error_type,
 )
 
 SCHEMA_CASES = [
@@ -63,6 +73,10 @@ SCHEMA_CASES = [
         {"mode_id": "mode0", "waveform_definition": "wf0"},
     ),
     (SyncOperationStepData, {"mode_ids": frozenset({"mode0"})}),
+    (
+        PhaseSetOperationStepData,
+        {"mode_id": "mode0", "phase": OperationParameterRefData(parameter="theta")},
+    ),
     (OperationData, {"id": "op0"}),
     (
         LinearMapToRealMethodData,
@@ -199,6 +213,10 @@ def test_canonical_system_data_accepts_nested_records():
             OperationVariantData(
                 when=None,
                 operation_steps=(
+                    PhaseSetOperationStepData(
+                        mode_id="mode0",
+                        phase=OperationParameterRefData(parameter="theta"),
+                    ),
                     PulseOperationStepData(mode_id="mode0", waveform_definition="wf0"),
                     AcquireOperationStepData(mode_id="mode0", acquire_definition="acq0"),
                     DelayOperationStepData(mode_id="mode0", duration=20_000),
@@ -314,3 +332,134 @@ def test_max_likelihood_method_data_accepts_affine_transform_and_offset(transfor
 
     assert method.transform == transform
     assert method.offset == offset
+
+
+# ── DelayOperationStepData.duration widening ─────────────────────────────────
+
+
+def test_delay_operation_step_data_accepts_integer_duration():
+    """Fixed integer picosecond duration still works after the type widening."""
+    step = DelayOperationStepData(mode_id="drive", duration=1_000)
+    assert step.duration == 1_000
+
+
+def test_delay_operation_step_data_accepts_parameter_ref_duration():
+    """Symbolic parameter reference is accepted as duration (NumericSymbolicValueData)."""
+    ref = OperationParameterRefData(parameter="duration")
+    step = DelayOperationStepData(mode_id="drive", duration=ref)
+    assert step.duration is ref
+
+
+def test_delay_operation_step_data_accepts_symbolic_expression_duration():
+    """Symbolic expression (e.g. PI * 2) is accepted as duration."""
+    expr = OperationBinaryExprData(
+        op="mul", left=OperationNamedConstantData(name="pi"), right=2
+    )
+    step = DelayOperationStepData(mode_id="drive", duration=expr)
+    assert step.duration is expr
+
+
+# ── PhaseShiftOperationStepData ───────────────────────────────────────────────
+
+
+def test_phase_shift_step_data_basic_construction():
+    """PhaseShiftOperationStepData can be constructed with required fields."""
+    step = PhaseShiftOperationStepData(
+        mode_id="drive",
+        phase=OperationNamedConstantData(name="pi"),
+    )
+    assert step.mode_id == "drive"
+    assert step.qubit_id is None
+
+
+def test_phase_shift_step_data_qubit_id_defaults_to_none():
+    """qubit_id defaults to None (same-qubit reference)."""
+    step = PhaseShiftOperationStepData(
+        mode_id="drive",
+        phase=OperationBinaryExprData(
+            op="div", left=OperationNamedConstantData(name="pi"), right=2
+        ),
+    )
+    assert step.qubit_id is None
+
+
+def test_phase_shift_step_data_accepts_cross_qubit_id():
+    """qubit_id can be set to reference a mode on a different qubit."""
+    step = PhaseShiftOperationStepData(
+        mode_id="q0.cross_resonance",
+        phase=OperationNamedConstantData(name="pi"),
+        qubit_id="q1",
+    )
+    assert step.qubit_id == "q1"
+
+
+def test_phase_shift_step_data_is_frozen():
+    """PhaseShiftOperationStepData instances are immutable."""
+    step = PhaseShiftOperationStepData(
+        mode_id="drive",
+        phase=OperationNamedConstantData(name="pi"),
+    )
+    with pytest.raises(FrozenInstanceError):
+        step.mode_id = "other"  # type: ignore[misc]
+
+
+# ── ErrorOperationStepData ────────────────────────────────────────────────────
+
+
+def test_error_operation_step_data_default_values():
+    """ErrorOperationStepData has sensible defaults for both fields."""
+
+    step = ErrorOperationStepData()
+    assert step.error_type == "NotImplementedError"
+    assert step.message == ""
+
+
+def test_error_operation_step_data_custom_values():
+    """Custom error_type and message are stored correctly."""
+
+    step = ErrorOperationStepData(
+        error_type="ValueError",
+        message="SWAP gate not yet implemented.",
+    )
+    assert step.error_type == "ValueError"
+    assert step.message == "SWAP gate not yet implemented."
+
+
+def test_error_operation_step_data_is_frozen():
+    """ErrorOperationStepData instances are immutable."""
+    step = ErrorOperationStepData(error_type="NotImplementedError", message="test")
+    with pytest.raises(FrozenInstanceError):
+        step.error_type = "RuntimeError"  # type: ignore[misc]
+
+
+def test_error_operation_step_data_in_operation_variant():
+    """ErrorOperationStepData can be nested inside an OperationVariantData."""
+
+    variant = OperationVariantData(
+        operation_steps=(
+            ErrorOperationStepData(
+                error_type="NotImplementedError",
+                message="Not yet supported.",
+            ),
+        ),
+    )
+    (step,) = variant.operation_steps
+    assert isinstance(step, ErrorOperationStepData)
+    assert step.error_type == "NotImplementedError"
+
+
+def test_error_operation_step_data_error_type_is_valid_exception():
+    """error_type default value resolves to a real Python built-in exception."""
+
+    assert is_valid_error_type(ErrorOperationStepData().error_type)
+
+
+def test_error_operation_step_data_custom_error_type_is_valid_exception():
+    """Builtin exceptions pass; unqualified user names and qualified importable paths are
+    handled correctly."""
+
+    assert is_valid_error_type(ErrorOperationStepData(error_type="ValueError").error_type)
+    assert is_valid_error_type("qat.runtime.exceptions.ExecutionError")
+    assert not is_valid_error_type("MyCustomError")  # unqualified, not a built-in
+    assert not is_valid_error_type("3")
+    assert not is_valid_error_type("")

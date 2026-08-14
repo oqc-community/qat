@@ -297,9 +297,11 @@ class OperationParameterData:
     constraints. They are referenced by step arguments and predicates.
 
     :ivar name: Parameter name.
-    :ivar type_expr: Type expression string validated before constructing this
-        dataclass. Examples include ``float``, ``float | int``, ``list[qubit_id]``,
-        or ``list[mode_id | qubit_id]``.
+    :ivar type_expr: A Python type-expression string describing the expected parameter
+        type. Must be parseable as a valid Python expression. Built-in defaults
+        are implicitly trusted; externally-provided instances are validated before
+        materialisation. Examples include ``"int"``, ``"float"``, ``"float | int"``,
+        ``"list[qubit_id]"``, or ``"list[mode_id | qubit_id]"``.
     :ivar default_value: Optional default value, which may be a literal (int, float,
         complex, bool, str) or a symbolic value (parameter reference, named constant,
         unary/binary expression).
@@ -399,8 +401,8 @@ class OperationBinaryExprData:
         )
 
     :ivar op: Binary operator identifier.
-    :ivar left: Left symbolic operand.
-    :ivar right: Right symbolic operand.
+    :ivar left: Left numeric symbolic operand.
+    :ivar right: Right numeric symbolic operand.
     """
 
     op: Literal["add", "sub", "mul", "div"]
@@ -420,32 +422,52 @@ class OperationBinaryExprData:
     )
 
 
-SymbolicValueData = (
+NumericSymbolicValueData = (
     int
     | float
     | complex
-    | bool
-    | str
     | OperationParameterRefData
     | OperationNamedConstantData
     | OperationUnaryExprData
     | OperationBinaryExprData
 )
+"""Symbolic value restricted to numeric operands.
+
+Covers all cases needed for angles, durations, and other numeric field values:
+
+- ``int`` / ``float`` / ``complex`` — literal numeric values.
+- :class:`OperationParameterRefData` — reference to a named parameter.
+- :class:`OperationNamedConstantData` — a named constant such as ``pi``.
+- :class:`OperationUnaryExprData` — unary expression such as ``-pi``.
+- :class:`OperationBinaryExprData` — binary expression such as ``pi / 2``.
+
+Use this type for fields where ``str`` and ``bool`` are not meaningful
+(e.g. phase angles in radians or delay durations in picoseconds).
+See :data:`SymbolicValueData` for the unrestricted superset.
+"""
+
+SymbolicValueData = NumericSymbolicValueData | bool | str
+"""Unrestricted symbolic value — a superset of :data:`NumericSymbolicValueData`.
+
+Extends :data:`NumericSymbolicValueData` with ``bool`` and ``str`` for contexts
+where non-numeric literal values are valid (e.g. generic step arguments or
+default parameter values).
+"""
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class OperationComparisonPredicateData:
-    """Predicate evaluating a comparison over symbolic values.
+    """Predicate evaluating a comparison over numeric symbolic values.
 
     :ivar op: Comparison operator identifier.
-    :ivar left: Left symbolic operand.
-    :ivar right: Right symbolic operand.
+    :ivar left: Left numeric symbolic operand.
+    :ivar right: Right numeric symbolic operand.
     :ivar tolerance: Optional tolerance for ``isclose`` comparisons.
     """
 
     op: Literal["eq", "ne", "lt", "le", "gt", "ge", "isclose"]
-    left: SymbolicValueData
-    right: SymbolicValueData
+    left: NumericSymbolicValueData
+    right: NumericSymbolicValueData
     tolerance: float | None = None
 
 
@@ -509,11 +531,13 @@ class DelayOperationStepData:
     A step links an operation to a mode and a delay duration to apply on that mode.
 
     :ivar mode_id: Referenced mode identifier.
-    :ivar duration: Delay duration in picoseconds.
+    :ivar duration: Delay duration as a numeric symbolic value. May be a fixed
+        integer (picoseconds) or a symbolic expression referencing an operation
+        parameter. Non-numeric types (``str``, ``bool``) are excluded.
     """
 
     mode_id: str
-    duration: int
+    duration: NumericSymbolicValueData
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -543,6 +567,50 @@ class SyncOperationStepData:
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class PhaseShiftOperationStepData:
+    """Virtual phase-shift step applied to a mode's reference frame.
+
+    No physical pulse is emitted. This step represents a virtual Z rotation: the
+    hardware implementation tracks the shift as a frame offset on the specified mode.
+
+    When applied to the ``drive`` mode the runtime is expected to propagate the frame
+    shift to all associated cross-resonance and cross-resonance-cancellation modes via
+    the accompanying ``qubit_id``-qualified steps in the same variant (one per coupled
+    qubit).
+
+    :ivar mode_id: The mode whose reference frame is shifted.
+    :ivar phase: Symbolic phase value in radians as a numeric symbolic value.
+        Non-numeric types (``str``, ``bool``) are excluded.
+    :ivar qubit_id: Optional qubit identifier for cross-qubit mode references.
+        When ``None`` the mode belongs to the same qubit that owns the operation.
+    """
+
+    mode_id: str
+    phase: NumericSymbolicValueData
+    qubit_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class PhaseSetOperationStepData:
+    """Virtual phase-set step applied to a mode's reference frame.
+
+    No physical pulse is emitted. This step represents an absolute phase update: the
+    hardware implementation sets the frame offset on the specified mode to the supplied
+    value.
+
+    :ivar mode_id: The mode whose reference frame is set.
+    :ivar phase: Symbolic phase value in radians as a numeric symbolic value.
+        Non-numeric types (``str``, ``bool``) are excluded.
+    :ivar qubit_id: Optional qubit identifier for cross-qubit mode references.
+        When ``None`` the mode belongs to the same qubit that owns the operation.
+    """
+
+    mode_id: str
+    phase: NumericSymbolicValueData
+    qubit_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class OperationReferenceStepData:
     """Step that references another operation by id on a specific qubit.
 
@@ -566,12 +634,38 @@ class OperationReferenceStepData:
     arguments: tuple[tuple[str, SymbolicValueData], ...] = ()
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class ErrorOperationStepData:
+    """Step that signals an error condition when executed.
+
+    Used to mark operations that are not yet implemented or otherwise unavailable. When a
+    variant containing this step is selected for execution, the runtime should raise the
+    exception identified by ``error_type``.
+
+    ``error_type`` is an unconstrained string at the schema level. Operations
+    generated by the built-in defaults are implicitly trusted; externally-provided
+    instances should be validated before materialisation. Runtimes must resolve
+    ``error_type`` via a static ``match`` statement or registry — not via ``eval``
+    or reflection.
+
+    :ivar error_type: Name of the exception type to raise (e.g., ``"NotImplementedError"``,
+        or a fully-qualified path such as ``"qat.runtime.exceptions.ExecutionError"``).
+    :ivar message: Error message to include in the raised exception.
+    """
+
+    error_type: str = "NotImplementedError"
+    message: str = ""
+
+
 OperationStepData = (
     PulseOperationStepData
     | AcquireOperationStepData
     | DelayOperationStepData
     | SyncOperationStepData
+    | PhaseShiftOperationStepData
+    | PhaseSetOperationStepData
     | OperationReferenceStepData
+    | ErrorOperationStepData
 )
 
 
