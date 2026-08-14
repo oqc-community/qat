@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.canonical.schema module &mdash; qat-compiler 3.0.0.post313.dev20260814131149 documentation</title>
+  <title>qat.experimental.system_data.canonical.schema module &mdash; qat-compiler 3.0.0.post315.dev20260814131207 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -930,18 +930,54 @@ frequency anchor for derived mixing calculations.</p></li>
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>mode_id</strong> – Referenced mode identifier.</p></li>
-<li><p><strong>duration</strong> – Delay duration in picoseconds.</p></li>
+<li><p><strong>duration</strong> – Delay duration as a numeric symbolic value. May be a fixed
+integer (picoseconds) or a symbolic expression referencing an operation
+parameter. Non-numeric types (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>) are excluded.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.DelayOperationStepData.duration">
-<span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.DelayOperationStepData.duration" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">duration</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.DelayOperationStepData.duration" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.DelayOperationStepData.mode_id">
 <span class="sig-name descname"><span class="pre">mode_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.DelayOperationStepData.mode_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.ErrorOperationStepData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ErrorOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NotImplementedError'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ErrorOperationStepData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Step that signals an error condition when executed.</p>
+<p>Used to mark operations that are not yet implemented or otherwise unavailable. When a
+variant containing this step is selected for execution, the runtime should raise the
+exception identified by <code class="docutils literal notranslate"><span class="pre">error_type</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">error_type</span></code> is an unconstrained string at the schema level. Operations
+generated by the built-in defaults are implicitly trusted; externally-provided
+instances should be validated before materialisation. Runtimes must resolve
+<code class="docutils literal notranslate"><span class="pre">error_type</span></code> via a static <code class="docutils literal notranslate"><span class="pre">match</span></code> statement or registry — not via <code class="docutils literal notranslate"><span class="pre">eval</span></code>
+or reflection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>error_type</strong> – Name of the exception type to raise (e.g., <code class="docutils literal notranslate"><span class="pre">&quot;NotImplementedError&quot;</span></code>,
+or a fully-qualified path such as <code class="docutils literal notranslate"><span class="pre">&quot;qat.runtime.exceptions.ExecutionError&quot;</span></code>).</p></li>
+<li><p><strong>message</strong> – Error message to include in the raised exception.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.ErrorOperationStepData.error_type">
+<span class="sig-name descname"><span class="pre">error_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ErrorOperationStepData.error_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.ErrorOperationStepData.message">
+<span class="sig-name descname"><span class="pre">message</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ErrorOperationStepData.message" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1162,29 +1198,423 @@ pre-selection.</p></li>
 
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.NumericSymbolicValueData">
+<span class="sig-name descname"><span class="pre">NumericSymbolicValueData</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationParameterRefData</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationNamedConstantData</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationUnaryExprData</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationBinaryExprData</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.NumericSymbolicValueData" title="Link to this definition"></a></dt>
+<dd><p>Symbolic value restricted to numeric operands.</p>
+<p>Covers all cases needed for angles, durations, and other numeric field values:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span></code> / <code class="docutils literal notranslate"><span class="pre">float</span></code> / <code class="docutils literal notranslate"><span class="pre">complex</span></code> — literal numeric values.</p></li>
+<li><p><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> — reference to a named parameter.</p></li>
+<li><p><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> — a named constant such as <code class="docutils literal notranslate"><span class="pre">pi</span></code>.</p></li>
+<li><p><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> — unary expression such as <code class="docutils literal notranslate"><span class="pre">-pi</span></code>.</p></li>
+<li><p><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a> — binary expression such as <code class="docutils literal notranslate"><span class="pre">pi</span> <span class="pre">/</span> <span class="pre">2</span></code>.</p></li>
+</ul>
+<p>Use this type for fields where <code class="docutils literal notranslate"><span class="pre">str</span></code> and <code class="docutils literal notranslate"><span class="pre">bool</span></code> are not meaningful
+(e.g. phase angles in radians or delay durations in picoseconds).
+See <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.SymbolicValueData" title="qat.experimental.system_data.canonical.schema.SymbolicValueData"><code class="xref py py-data docutils literal notranslate"><span class="pre">SymbolicValueData</span></code></a> for the unrestricted superset.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationBinaryExprData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationBinaryExprData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Binary arithmetic expression over two symbolic values.</p>
+<p>Supported operators: <code class="docutils literal notranslate"><span class="pre">add</span></code>, <code class="docutils literal notranslate"><span class="pre">sub</span></code>, <code class="docutils literal notranslate"><span class="pre">mul</span></code>, and <code class="docutils literal notranslate"><span class="pre">div</span></code>. This is a pure data
+structure with no string evaluation, so there is no injection risk.</p>
+<p>Examples — U gate angle arguments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OperationBinaryExprData</span><span class="p">(</span>                             <span class="c1"># lamb + pi</span>
+    <span class="n">op</span><span class="o">=</span><span class="s2">&quot;add&quot;</span><span class="p">,</span>
+    <span class="n">left</span><span class="o">=</span><span class="n">OperationParameterRefData</span><span class="p">(</span><span class="n">parameter</span><span class="o">=</span><span class="s2">&quot;lamb&quot;</span><span class="p">),</span>
+    <span class="n">right</span><span class="o">=</span><span class="n">OperationNamedConstantData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">OperationBinaryExprData</span><span class="p">(</span>                             <span class="c1"># pi - theta</span>
+    <span class="n">op</span><span class="o">=</span><span class="s2">&quot;sub&quot;</span><span class="p">,</span>
+    <span class="n">left</span><span class="o">=</span><span class="n">OperationNamedConstantData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span><span class="p">),</span>
+    <span class="n">right</span><span class="o">=</span><span class="n">OperationParameterRefData</span><span class="p">(</span><span class="n">parameter</span><span class="o">=</span><span class="s2">&quot;theta&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">OperationBinaryExprData</span><span class="p">(</span>                             <span class="c1"># 2 * theta</span>
+    <span class="n">op</span><span class="o">=</span><span class="s2">&quot;mul&quot;</span><span class="p">,</span>
+    <span class="n">left</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">right</span><span class="o">=</span><span class="n">OperationParameterRefData</span><span class="p">(</span><span class="n">parameter</span><span class="o">=</span><span class="s2">&quot;theta&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+<span class="n">OperationBinaryExprData</span><span class="p">(</span>                             <span class="c1"># pi / 2</span>
+    <span class="n">op</span><span class="o">=</span><span class="s2">&quot;div&quot;</span><span class="p">,</span>
+    <span class="n">left</span><span class="o">=</span><span class="n">OperationNamedConstantData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span><span class="p">),</span>
+    <span class="n">right</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – Binary operator identifier.</p></li>
+<li><p><strong>left</strong> – Left numeric symbolic operand.</p></li>
+<li><p><strong>right</strong> – Right numeric symbolic operand.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationBinaryExprData.left">
+<span class="sig-name descname"><span class="pre">left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData.left" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationBinaryExprData.op">
+<span class="sig-name descname"><span class="pre">op</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'add'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'sub'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'mul'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'div'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData.op" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationBinaryExprData.right">
+<span class="sig-name descname"><span class="pre">right</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData.right" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationCapabilityPredicateData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">capability</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Predicate evaluating a boolean qubit capability flag.</p>
+<p>This enables variant selection based on qubit-owned metadata, for example
+<code class="docutils literal notranslate"><span class="pre">direct_x_pi</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>capability</strong> – Capability key.</p></li>
+<li><p><strong>expected</strong> – Required boolean value.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData.capability">
+<span class="sig-name descname"><span class="pre">capability</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData.capability" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData.expected">
+<span class="sig-name descname"><span class="pre">expected</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData.expected" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationComparisonPredicateData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Predicate evaluating a comparison over numeric symbolic values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – Comparison operator identifier.</p></li>
+<li><p><strong>left</strong> – Left numeric symbolic operand.</p></li>
+<li><p><strong>right</strong> – Right numeric symbolic operand.</p></li>
+<li><p><strong>tolerance</strong> – Optional tolerance for <code class="docutils literal notranslate"><span class="pre">isclose</span></code> comparisons.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.left">
+<span class="sig-name descname"><span class="pre">left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.left" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.op">
+<span class="sig-name descname"><span class="pre">op</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'eq'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'ne'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'lt'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'le'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'gt'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'ge'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'isclose'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.op" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.right">
+<span class="sig-name descname"><span class="pre">right</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.right" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.tolerance">
+<span class="sig-name descname"><span class="pre">tolerance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData.tolerance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'composite'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'private'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variants</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Canonical operation definition composed of ordered steps.</p>
-<p>Operations may represent native hardware primitives or composite virtual instructions
-expanded into nested steps.</p>
+<p>Canonical qubit-owned operation definition.</p>
+<p><code class="docutils literal notranslate"><span class="pre">OperationData</span></code> is the single abstraction for both customer-facing gates and
+internal helper operations. Gate-ness is expressed by <code class="docutils literal notranslate"><span class="pre">kind</span></code> and <code class="docutils literal notranslate"><span class="pre">interface</span></code>
+metadata, not by a separate schema object.</p>
+<p>Operations are decomposed via <code class="docutils literal notranslate"><span class="pre">variants</span></code>, which support symbolic parameters and
+conditional expansions. Each variant contains ordered operation steps or nested
+operations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> – Operation identifier.</p></li>
-<li><p><strong>operation_steps</strong> – Ordered operation steps or nested operations.</p></li>
+<li><p><strong>kind</strong> – Operation kind tag.</p></li>
+<li><p><strong>interface</strong> – Visibility classification.</p></li>
+<li><p><strong>parameters</strong> – Operation parameter signature.</p></li>
+<li><p><strong>variants</strong> – Conditional expansion variants.</p></li>
+<li><p><strong>attributes</strong> – Additional unstructured metadata.</p></li>
 </ul>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.AttributeEntry" title="qat.experimental.system_data.canonical.schema.AttributeEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeEntry</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.id">
 <span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.operation_steps">
-<span class="sig-name descname"><span class="pre">operation_steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.PulseOperationStepData" title="qat.experimental.system_data.canonical.schema.PulseOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.AcquireOperationStepData" title="qat.experimental.system_data.canonical.schema.AcquireOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.DelayOperationStepData" title="qat.experimental.system_data.canonical.schema.DelayOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">DelayOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.SyncOperationStepData" title="qat.experimental.system_data.canonical.schema.SyncOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.operation_steps" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.interface">
+<span class="sig-name descname"><span class="pre">interface</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'public'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'private'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.interface" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'gate'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'pulse_primitive'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'acquire_primitive'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'utility'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'composite'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.kind" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.parameters">
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterData" title="qat.experimental.system_data.canonical.schema.OperationParameterData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterData</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.parameters" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationData.variants">
+<span class="sig-name descname"><span class="pre">variants</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationVariantData" title="qat.experimental.system_data.canonical.schema.OperationVariantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationVariantData</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationData.variants" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationNamedConstantData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationNamedConstantData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Named mathematical constant used in symbolic expressions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> – Supported constant identifier.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationNamedConstantData.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'pi'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'tau'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'e'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationParameterData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Named input parameter accepted by an operation.</p>
+<p>Parameters define the operation signature, including defaults and optional numeric
+constraints. They are referenced by step arguments and predicates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Parameter name.</p></li>
+<li><p><strong>type_expr</strong> – A Python type-expression string describing the expected parameter
+type. Must be parseable as a valid Python expression. Built-in defaults
+are implicitly trusted; externally-provided instances are validated before
+materialisation. Examples include <code class="docutils literal notranslate"><span class="pre">&quot;int&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;float&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;float</span> <span class="pre">|</span> <span class="pre">int&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;list[qubit_id]&quot;</span></code>, or <code class="docutils literal notranslate"><span class="pre">&quot;list[mode_id</span> <span class="pre">|</span> <span class="pre">qubit_id]&quot;</span></code>.</p></li>
+<li><p><strong>default_value</strong> – Optional default value, which may be a literal (int, float,
+complex, bool, str) or a symbolic value (parameter reference, named constant,
+unary/binary expression).</p></li>
+<li><p><strong>optional</strong> – Whether callers may omit this parameter.</p></li>
+<li><p><strong>units</strong> – Optional units string, for example <code class="docutils literal notranslate"><span class="pre">rad</span></code> or <code class="docutils literal notranslate"><span class="pre">ps</span></code>.</p></li>
+<li><p><strong>min_value</strong> – Optional inclusive lower bound for numeric values.</p></li>
+<li><p><strong>max_value</strong> – Optional inclusive upper bound for numeric values.</p></li>
+<li><p><strong>attributes</strong> – Optional extensibility metadata for backend-specific constraints.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.attributes">
+<span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.AttributeEntry" title="qat.experimental.system_data.canonical.schema.AttributeEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeEntry</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.default_value">
+<span class="sig-name descname"><span class="pre">default_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.default_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.max_value">
+<span class="sig-name descname"><span class="pre">max_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.max_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.min_value">
+<span class="sig-name descname"><span class="pre">min_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.min_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.optional">
+<span class="sig-name descname"><span class="pre">optional</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.optional" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.type_expr">
+<span class="sig-name descname"><span class="pre">type_expr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.type_expr" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterData.units">
+<span class="sig-name descname"><span class="pre">units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterData.units" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterRefData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationParameterRefData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reference to a named operation parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameter</strong> – Parameter name from the surrounding operation signature.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationParameterRefData.parameter">
+<span class="sig-name descname"><span class="pre">parameter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData.parameter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationPredicateClauseData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationPredicateClauseData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationPredicateClauseData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Boolean combination of nested predicates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – Boolean operator identifier.</p></li>
+<li><p><strong>predicates</strong> – Child predicates.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationPredicateClauseData.op">
+<span class="sig-name descname"><span class="pre">op</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'all'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'any'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'not'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationPredicateClauseData.op" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationPredicateClauseData.predicates">
+<span class="sig-name descname"><span class="pre">predicates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData" title="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationComparisonPredicateData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData" title="qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationCapabilityPredicateData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationPredicateClauseData" title="qat.experimental.system_data.canonical.schema.OperationPredicateClauseData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationPredicateClauseData</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationPredicateClauseData.predicates" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationReferenceStepData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationReferenceStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arguments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationReferenceStepData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Step that references another operation by id on a specific qubit.</p>
+<p>This is the lightweight call-site form used to reuse qubit-owned operation
+definitions without inlining nested <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a> bodies.</p>
+<p>In the per-qubit ownership model, operations are always owned by a qubit.
+If <code class="docutils literal notranslate"><span class="pre">qubit_id</span></code> is omitted (None), the referenced operation is assumed to be
+owned by the same qubit that owns the containing operation (useful for single-qubit
+decompositions). Specify <code class="docutils literal notranslate"><span class="pre">qubit_id</span></code> to reference operations owned by a different
+qubit (useful for multi-qubit gates).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>operation_id</strong> – Referenced operation identifier.</p></li>
+<li><p><strong>qubit_id</strong> – Optional qubit ID that owns the referenced operation (e.g., “q0”, “q1”).
+If None, the referenced operation is on the same qubit as the containing operation.</p></li>
+<li><p><strong>arguments</strong> – Optional <code class="docutils literal notranslate"><span class="pre">(parameter_name,</span> <span class="pre">value)</span></code> pairs to pass to the referenced operation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationReferenceStepData.arguments">
+<span class="sig-name descname"><span class="pre">arguments</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">],</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationReferenceStepData.arguments" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationReferenceStepData.operation_id">
+<span class="sig-name descname"><span class="pre">operation_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationReferenceStepData.operation_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationReferenceStepData.qubit_id">
+<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationReferenceStepData.qubit_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationUnaryExprData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationUnaryExprData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operand</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Unary arithmetic expression over a symbolic value.</p>
+<p>Supported operators: <code class="docutils literal notranslate"><span class="pre">neg</span></code> (negation). This is a pure data structure with
+no string evaluation, so there is no injection risk.</p>
+<p>Example — <code class="docutils literal notranslate"><span class="pre">-pi/2</span></code> for a Z-rotation angle:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">OperationUnaryExprData</span><span class="p">(</span>
+    <span class="n">op</span><span class="o">=</span><span class="s2">&quot;neg&quot;</span><span class="p">,</span>
+    <span class="n">operand</span><span class="o">=</span><span class="n">OperationNamedConstantData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;pi&quot;</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>op</strong> – Unary operator identifier.</p></li>
+<li><p><strong>operand</strong> – Symbolic operand.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationUnaryExprData.op">
+<span class="sig-name descname"><span class="pre">op</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'neg'</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData.op" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationUnaryExprData.operand">
+<span class="sig-name descname"><span class="pre">operand</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData.operand" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationVariantData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationVariantData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">when</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationVariantData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A conditionally selected ordered expansion for an operation.</p>
+<p><code class="docutils literal notranslate"><span class="pre">when</span></code> is optional. If omitted, the variant is treated as unconditional. Multiple
+variants can model argument- and capability-dependent behavior (for example selecting
+direct <code class="docutils literal notranslate"><span class="pre">pi</span></code> pulses when available, otherwise decomposing via helper operations).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>when</strong> – Optional predicate that must evaluate to true for this variant.</p></li>
+<li><p><strong>operation_steps</strong> – Ordered operation steps or nested operations.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationVariantData.operation_steps">
+<span class="sig-name descname"><span class="pre">operation_steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.PulseOperationStepData" title="qat.experimental.system_data.canonical.schema.PulseOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.AcquireOperationStepData" title="qat.experimental.system_data.canonical.schema.AcquireOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.DelayOperationStepData" title="qat.experimental.system_data.canonical.schema.DelayOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">DelayOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.SyncOperationStepData" title="qat.experimental.system_data.canonical.schema.SyncOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">SyncOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData" title="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseShiftOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData" title="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PhaseSetOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationReferenceStepData" title="qat.experimental.system_data.canonical.schema.OperationReferenceStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationReferenceStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.ErrorOperationStepData" title="qat.experimental.system_data.canonical.schema.ErrorOperationStepData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ErrorOperationStepData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationVariantData.operation_steps" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationVariantData.when">
+<span class="sig-name descname"><span class="pre">when</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData" title="qat.experimental.system_data.canonical.schema.OperationComparisonPredicateData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationComparisonPredicateData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData" title="qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationCapabilityPredicateData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationPredicateClauseData" title="qat.experimental.system_data.canonical.schema.OperationPredicateClauseData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationPredicateClauseData</span></code></a> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationVariantData.when" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1218,6 +1648,81 @@ channels and optionally links to the external resource that implements it.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OscillatorData.id">
 <span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OscillatorData.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseSetOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Virtual phase-set step applied to a mode’s reference frame.</p>
+<p>No physical pulse is emitted. This step represents an absolute phase update: the
+hardware implementation sets the frame offset on the specified mode to the supplied
+value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode_id</strong> – The mode whose reference frame is set.</p></li>
+<li><p><strong>phase</strong> – Symbolic phase value in radians as a numeric symbolic value.
+Non-numeric types (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>) are excluded.</p></li>
+<li><p><strong>qubit_id</strong> – Optional qubit identifier for cross-qubit mode references.
+When <code class="docutils literal notranslate"><span class="pre">None</span></code> the mode belongs to the same qubit that owns the operation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.mode_id">
+<span class="sig-name descname"><span class="pre">mode_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.mode_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.phase">
+<span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.phase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.qubit_id">
+<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.qubit_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShiftOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Virtual phase-shift step applied to a mode’s reference frame.</p>
+<p>No physical pulse is emitted. This step represents a virtual Z rotation: the
+hardware implementation tracks the shift as a frame offset on the specified mode.</p>
+<p>When applied to the <code class="docutils literal notranslate"><span class="pre">drive</span></code> mode the runtime is expected to propagate the frame
+shift to all associated cross-resonance and cross-resonance-cancellation modes via
+the accompanying <code class="docutils literal notranslate"><span class="pre">qubit_id</span></code>-qualified steps in the same variant (one per coupled
+qubit).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode_id</strong> – The mode whose reference frame is shifted.</p></li>
+<li><p><strong>phase</strong> – Symbolic phase value in radians as a numeric symbolic value.
+Non-numeric types (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>) are excluded.</p></li>
+<li><p><strong>qubit_id</strong> – Optional qubit identifier for cross-qubit mode references.
+When <code class="docutils literal notranslate"><span class="pre">None</span></code> the mode belongs to the same qubit that owns the operation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.mode_id">
+<span class="sig-name descname"><span class="pre">mode_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.mode_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.phase">
+<span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.phase" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.qubit_id">
+<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.qubit_id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1327,7 +1832,7 @@ prepared_state was prepared.</p></li>
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PulseOperationStepData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_definition</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PulseOperationStepData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Single step in an operation expansion.</p>
+<p>Single pulse step in an operation expansion.</p>
 <p>A step links an operation to a mode and a pulse definition to apply on that mode.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
@@ -1474,6 +1979,15 @@ might include a <code class="docutils literal notranslate"><span class="pre">dur
 <span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ResetData.type" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.SymbolicValueData">
+<span class="sig-name descname"><span class="pre">SymbolicValueData</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">complex</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationParameterRefData</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationNamedConstantData</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationUnaryExprData</span> <span class="pre">|</span> <span class="pre">qat.experimental.system_data.canonical.schema.OperationBinaryExprData</span> <span class="pre">|</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">str</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.SymbolicValueData" title="Link to this definition"></a></dt>
+<dd><p>Unrestricted symbolic value — a superset of <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.NumericSymbolicValueData" title="qat.experimental.system_data.canonical.schema.NumericSymbolicValueData"><code class="xref py py-data docutils literal notranslate"><span class="pre">NumericSymbolicValueData</span></code></a>.</p>
+<p>Extends <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.NumericSymbolicValueData" title="qat.experimental.system_data.canonical.schema.NumericSymbolicValueData"><code class="xref py py-data docutils literal notranslate"><span class="pre">NumericSymbolicValueData</span></code></a> with <code class="docutils literal notranslate"><span class="pre">bool</span></code> and <code class="docutils literal notranslate"><span class="pre">str</span></code> for contexts
+where non-numeric literal values are valid (e.g. generic step arguments or
+default parameter values).</p>
 </dd></dl>
 
 <dl class="py class">
