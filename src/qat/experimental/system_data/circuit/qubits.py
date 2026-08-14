@@ -44,7 +44,7 @@ def _measurement_fidelity_from_readout(
 def _flatten_operation_ids(operation: OperationData) -> tuple[str, ...]:
     """Recursively collect ids of leaf operations within an operation tree, depth-first.
 
-    Walks the ``operation_steps`` tree. Any step that is itself an
+    Walks the ``operation_steps`` of each variant. Any step that is itself an
     :class:`~qat.experimental.system_data.canonical.schema.OperationData` is recursed
     into. A node is considered a leaf when none of its steps are ``OperationData``;
     at that point its ``id`` is collected.
@@ -52,7 +52,8 @@ def _flatten_operation_ids(operation: OperationData) -> tuple[str, ...]:
     :param operation: Root operation to flatten.
     :returns: Tuple of leaf operation ids in depth-first traversal order.
     """
-    nested_ops = [s for s in operation.operation_steps if isinstance(s, OperationData)]
+    all_steps = [step for variant in operation.variants for step in variant.operation_steps]
+    nested_ops = [s for s in all_steps if isinstance(s, OperationData)]
     if not nested_ops:
         return (operation.id,)
     ids: list[str] = []

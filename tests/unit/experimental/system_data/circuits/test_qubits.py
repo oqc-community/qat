@@ -8,6 +8,7 @@ import pytest
 from qat.experimental.system_data.canonical.schema import (
     CanonicalSystemData,
     OperationData,
+    OperationVariantData,
     ProbabilityEntry,
     QubitCouplingData,
     QubitData as CanonicalQubitData,
@@ -23,7 +24,10 @@ from qat.experimental.system_data.circuit.qubits import (
 
 
 def _make_op(op_id: str, *steps) -> OperationData:
-    return OperationData(id=op_id, operation_steps=tuple(steps))
+    return OperationData(
+        id=op_id,
+        variants=(OperationVariantData(operation_steps=tuple(steps)),),
+    )
 
 
 def _make_readout(*pairs: tuple[int, int, float]) -> ReadoutProbabilityData:

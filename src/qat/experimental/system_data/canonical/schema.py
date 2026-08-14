@@ -289,8 +289,205 @@ class ModeData:
     preselect_disallowed_states: frozenset[int] | None = None
 
 
-# This is still under design and subject to change as we determine how we want to
-# "serialise" and "restore" "functions" like sequences or gates.
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationParameterData:
+    """Named input parameter accepted by an operation.
+
+    Parameters define the operation signature, including defaults and optional numeric
+    constraints. They are referenced by step arguments and predicates.
+
+    :ivar name: Parameter name.
+    :ivar type_expr: Type expression string validated before constructing this
+        dataclass. Examples include ``float``, ``float | int``, ``list[qubit_id]``,
+        or ``list[mode_id | qubit_id]``.
+    :ivar default_value: Optional default value, which may be a literal (int, float,
+        complex, bool, str) or a symbolic value (parameter reference, named constant,
+        unary/binary expression).
+    :ivar optional: Whether callers may omit this parameter.
+    :ivar units: Optional units string, for example ``rad`` or ``ps``.
+    :ivar min_value: Optional inclusive lower bound for numeric values.
+    :ivar max_value: Optional inclusive upper bound for numeric values.
+    :ivar attributes: Optional extensibility metadata for backend-specific constraints.
+    """
+
+    name: str
+    type_expr: str
+    default_value: SymbolicValueData | None = None
+    optional: bool = False
+    units: str | None = None
+    min_value: float | int | None = None
+    max_value: float | int | None = None
+    attributes: tuple[AttributeEntry, ...] = ()
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationParameterRefData:
+    """Reference to a named operation parameter.
+
+    :ivar parameter: Parameter name from the surrounding operation signature.
+    """
+
+    parameter: str
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationNamedConstantData:
+    """Named mathematical constant used in symbolic expressions.
+
+    :ivar name: Supported constant identifier.
+    """
+
+    name: Literal["pi", "tau", "e"]
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationUnaryExprData:
+    """Unary arithmetic expression over a symbolic value.
+
+    Supported operators: ``neg`` (negation). This is a pure data structure with
+    no string evaluation, so there is no injection risk.
+
+    Example — ``-pi/2`` for a Z-rotation angle::
+
+        OperationUnaryExprData(
+            op="neg",
+            operand=OperationNamedConstantData(name="pi"),
+        )
+
+    :ivar op: Unary operator identifier.
+    :ivar operand: Symbolic operand.
+    """
+
+    op: Literal["neg"]
+    operand: (
+        OperationParameterRefData
+        | OperationNamedConstantData
+        | OperationBinaryExprData
+        | int
+        | float
+    )
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationBinaryExprData:
+    """Binary arithmetic expression over two symbolic values.
+
+    Supported operators: ``add``, ``sub``, ``mul``, and ``div``. This is a pure data
+    structure with no string evaluation, so there is no injection risk.
+
+    Examples — U gate angle arguments::
+
+        OperationBinaryExprData(                             # lamb + pi
+            op="add",
+            left=OperationParameterRefData(parameter="lamb"),
+            right=OperationNamedConstantData(name="pi"),
+        )
+        OperationBinaryExprData(                             # pi - theta
+            op="sub",
+            left=OperationNamedConstantData(name="pi"),
+            right=OperationParameterRefData(parameter="theta"),
+        )
+        OperationBinaryExprData(                             # 2 * theta
+            op="mul",
+            left=2,
+            right=OperationParameterRefData(parameter="theta"),
+        )
+        OperationBinaryExprData(                             # pi / 2
+            op="div",
+            left=OperationNamedConstantData(name="pi"),
+            right=2,
+        )
+
+    :ivar op: Binary operator identifier.
+    :ivar left: Left symbolic operand.
+    :ivar right: Right symbolic operand.
+    """
+
+    op: Literal["add", "sub", "mul", "div"]
+    left: (
+        OperationParameterRefData
+        | OperationNamedConstantData
+        | OperationUnaryExprData
+        | int
+        | float
+    )
+    right: (
+        OperationParameterRefData
+        | OperationNamedConstantData
+        | OperationUnaryExprData
+        | int
+        | float
+    )
+
+
+SymbolicValueData = (
+    int
+    | float
+    | complex
+    | bool
+    | str
+    | OperationParameterRefData
+    | OperationNamedConstantData
+    | OperationUnaryExprData
+    | OperationBinaryExprData
+)
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationComparisonPredicateData:
+    """Predicate evaluating a comparison over symbolic values.
+
+    :ivar op: Comparison operator identifier.
+    :ivar left: Left symbolic operand.
+    :ivar right: Right symbolic operand.
+    :ivar tolerance: Optional tolerance for ``isclose`` comparisons.
+    """
+
+    op: Literal["eq", "ne", "lt", "le", "gt", "ge", "isclose"]
+    left: SymbolicValueData
+    right: SymbolicValueData
+    tolerance: float | None = None
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationCapabilityPredicateData:
+    """Predicate evaluating a boolean qubit capability flag.
+
+    This enables variant selection based on qubit-owned metadata, for example
+    ``direct_x_pi``.
+
+    :ivar capability: Capability key.
+    :ivar expected: Required boolean value.
+    """
+
+    capability: str
+    expected: bool = True
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationPredicateClauseData:
+    """Boolean combination of nested predicates.
+
+    :ivar op: Boolean operator identifier.
+    :ivar predicates: Child predicates.
+    """
+
+    op: Literal["all", "any", "not"]
+    predicates: tuple[
+        OperationComparisonPredicateData
+        | OperationCapabilityPredicateData
+        | OperationPredicateClauseData,
+        ...,
+    ]
+
+
+OperationPredicateData = (
+    OperationComparisonPredicateData
+    | OperationCapabilityPredicateData
+    | OperationPredicateClauseData
+)
+
+
 @dataclass(frozen=True, slots=True, kw_only=True)
 class AcquireOperationStepData:
     """Single acquisition step in an operation expansion.
@@ -305,8 +502,6 @@ class AcquireOperationStepData:
     acquire_definition: str | AcquireDefinitionData
 
 
-# This is still under design and subject to change as we determine how we want to
-# "serialise" and "restore" "functions" like sequences or gates.
 @dataclass(frozen=True, slots=True, kw_only=True)
 class DelayOperationStepData:
     """Single delay step in an operation expansion.
@@ -321,11 +516,9 @@ class DelayOperationStepData:
     duration: int
 
 
-# This is still under design and subject to change as we determine how we want to
-# "serialise" and "restore" "functions" like sequences or gates.
 @dataclass(frozen=True, slots=True, kw_only=True)
 class PulseOperationStepData:
-    """Single step in an operation expansion.
+    """Single pulse step in an operation expansion.
 
     A step links an operation to a mode and a pulse definition to apply on that mode.
 
@@ -337,8 +530,6 @@ class PulseOperationStepData:
     waveform_definition: str | WaveformData
 
 
-# This is still under design and subject to change as we determine how we want to
-# "serialise" and "restore" "functions" like sequences or gates.
 @dataclass(frozen=True, slots=True, kw_only=True)
 class SyncOperationStepData:
     """Single synchronization step in an operation expansion.
@@ -351,29 +542,87 @@ class SyncOperationStepData:
     mode_ids: frozenset[str]
 
 
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationReferenceStepData:
+    """Step that references another operation by id on a specific qubit.
+
+    This is the lightweight call-site form used to reuse qubit-owned operation
+    definitions without inlining nested :class:`OperationData` bodies.
+
+    In the per-qubit ownership model, operations are always owned by a qubit.
+    If ``qubit_id`` is omitted (None), the referenced operation is assumed to be
+    owned by the same qubit that owns the containing operation (useful for single-qubit
+    decompositions). Specify ``qubit_id`` to reference operations owned by a different
+    qubit (useful for multi-qubit gates).
+
+    :ivar operation_id: Referenced operation identifier.
+    :ivar qubit_id: Optional qubit ID that owns the referenced operation (e.g., "q0", "q1").
+        If None, the referenced operation is on the same qubit as the containing operation.
+    :ivar arguments: Optional ``(parameter_name, value)`` pairs to pass to the referenced operation.
+    """
+
+    operation_id: str
+    qubit_id: str | None = None
+    arguments: tuple[tuple[str, SymbolicValueData], ...] = ()
+
+
 OperationStepData = (
     PulseOperationStepData
     | AcquireOperationStepData
     | DelayOperationStepData
     | SyncOperationStepData
+    | OperationReferenceStepData
 )
 
 
-# This is still under design and subject to change as we determine how we want to
-# "serialise" and "restore" "functions" like sequences or gates.
 @dataclass(frozen=True, slots=True, kw_only=True)
-class OperationData:
-    """Canonical operation definition composed of ordered steps.
+class OperationVariantData:
+    """A conditionally selected ordered expansion for an operation.
 
-    Operations may represent native hardware primitives or composite virtual instructions
-    expanded into nested steps.
+    ``when`` is optional. If omitted, the variant is treated as unconditional. Multiple
+    variants can model argument- and capability-dependent behavior (for example selecting
+    direct ``pi`` pulses when available, otherwise decomposing via helper operations).
 
-    :ivar id: Operation identifier.
+    :ivar when: Optional predicate that must evaluate to true for this variant.
     :ivar operation_steps: Ordered operation steps or nested operations.
     """
 
-    id: str
+    when: OperationPredicateData | None = None
     operation_steps: tuple[OperationStepData | OperationData, ...] = ()
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class OperationData:
+    """Canonical qubit-owned operation definition.
+
+    ``OperationData`` is the single abstraction for both customer-facing gates and
+    internal helper operations. Gate-ness is expressed by ``kind`` and ``interface``
+    metadata, not by a separate schema object.
+
+    Operations are decomposed via ``variants``, which support symbolic parameters and
+    conditional expansions. Each variant contains ordered operation steps or nested
+    operations.
+
+    :ivar id: Operation identifier.
+    :ivar kind: Operation kind tag.
+    :ivar interface: Visibility classification.
+    :ivar parameters: Operation parameter signature.
+    :ivar variants: Conditional expansion variants.
+    :ivar attributes: Additional unstructured metadata.
+    """
+
+    id: str
+    kind: Literal[
+        "gate",
+        "pulse_primitive",
+        "acquire_primitive",
+        "utility",
+        "composite",
+    ] = "composite"
+    interface: Literal["public", "private"] = "private"
+    parameters: tuple[OperationParameterData, ...] = ()
+    variants: tuple[OperationVariantData, ...] = ()
+    attributes: tuple[AttributeEntry, ...] = ()
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

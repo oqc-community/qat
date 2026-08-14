@@ -21,6 +21,7 @@ from qat.experimental.system_data.canonical.schema import (
     MaxLikelihoodMethodData,
     ModeData,
     OperationData,
+    OperationVariantData,
     OscillatorData,
     PortData,
     ProbabilityEntry,
@@ -194,11 +195,16 @@ def test_canonical_system_data_accepts_nested_records():
     )
     operation = OperationData(
         id="op0",
-        operation_steps=(
-            PulseOperationStepData(mode_id="mode0", waveform_definition="wf0"),
-            AcquireOperationStepData(mode_id="mode0", acquire_definition="acq0"),
-            DelayOperationStepData(mode_id="mode0", duration=20_000),
-            SyncOperationStepData(mode_ids=frozenset({"mode0"})),
+        variants=(
+            OperationVariantData(
+                when=None,
+                operation_steps=(
+                    PulseOperationStepData(mode_id="mode0", waveform_definition="wf0"),
+                    AcquireOperationStepData(mode_id="mode0", acquire_definition="acq0"),
+                    DelayOperationStepData(mode_id="mode0", duration=20_000),
+                    SyncOperationStepData(mode_ids=frozenset({"mode0"})),
+                ),
+            ),
         ),
     )
     qubit = QubitData(
@@ -241,7 +247,10 @@ def test_canonical_system_data_accepts_nested_records():
     assert system_data.channels[0].port_id == "p0"
     assert system_data.channels[0].oscillator_reference == "osc0"
     assert system_data.qubits[0].modes[0].waveform_definitions[0].id == "wf0"
-    assert system_data.qubits[0].operations[0].operation_steps[0].mode_id == "mode0"
+    assert (
+        system_data.qubits[0].operations[0].variants[0].operation_steps[0].mode_id
+        == "mode0"
+    )
     assert system_data.qubits[0].modes[0].post_process_method is not None
     assert system_data.qubits[0].modes[0].post_process_method.method == "max_likelihood"
     assert system_data.qubits[0].modes[0].preselect_disallowed_states == frozenset({1})

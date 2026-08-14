@@ -14,6 +14,7 @@ from qat.experimental.system_data.canonical.schema import (
     MaxLikelihoodMethodData,
     ModeData,
     OperationData,
+    OperationVariantData,
     ProbabilityEntry,
     ReadoutProbabilityData,
     TwoQubitGateFidelityData,
@@ -413,11 +414,14 @@ def test_with_qubit_mode_max_likelihood_post_process():
 
 def test_with_qubit_with_operations():
     step = DelayOperationStepData(mode_id="drive_q0", duration=500)
-    op = OperationData(id="delay_op", operation_steps=(step,))
+    op = OperationData(
+        id="delay_op",
+        variants=(OperationVariantData(operation_steps=(step,)),),
+    )
     canonical = _base().with_qubit("q1", 1, operations=(op,)).build()
     assert len(canonical.qubits[1].operations) == 1
     assert canonical.qubits[1].operations[0].id == "delay_op"
-    assert canonical.qubits[1].operations[0].operation_steps == (step,)
+    assert canonical.qubits[1].operations[0].variants[0].operation_steps == (step,)
 
 
 def test_with_qubit_with_readout_probability():
