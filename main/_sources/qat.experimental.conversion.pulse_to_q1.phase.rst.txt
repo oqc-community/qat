@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.phase module
+======================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.phase
+   :members:
+   :undoc-members:
+   :show-inheritance:
