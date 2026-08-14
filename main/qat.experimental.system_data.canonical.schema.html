@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.canonical.schema module &mdash; qat-compiler 3.0.0.post317.dev20260814131639 documentation</title>
+  <title>qat.experimental.system_data.canonical.schema module &mdash; qat-compiler 3.0.0.post318.dev20260814131722 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1956,7 +1956,7 @@ measured state pair, rather than requiring a fixed binary confusion-matrix layou
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.ResetData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ResetData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResetData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">operation_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ResetData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Supported reset-strategy descriptor for hardware capabilities.</p>
 <p>Hardware backends may expose different reset strategies. This record captures
@@ -1965,6 +1965,8 @@ one supported strategy and optional metadata about its behavior.</p>
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> – Reset strategy type (for example <code class="docutils literal notranslate"><span class="pre">passive</span></code>).</p></li>
+<li><p><strong>operation_name</strong> – Name of the operation that implements this reset strategy
+(for example <code class="docutils literal notranslate"><span class="pre">passive_reset</span></code>).</p></li>
 <li><p><strong>attributes</strong> – Additional reset strategy metadata. (for example, a <code class="docutils literal notranslate"><span class="pre">passive</span></code> reset
 might include a <code class="docutils literal notranslate"><span class="pre">duration</span></code> attribute for the expected T1 decay time).</p></li>
 </ul>
@@ -1973,6 +1975,11 @@ might include a <code class="docutils literal notranslate"><span class="pre">dur
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.ResetData.attributes">
 <span class="sig-name descname"><span class="pre">attributes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.AttributeEntry" title="qat.experimental.system_data.canonical.schema.AttributeEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeEntry</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ResetData.attributes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.ResetData.operation_name">
+<span class="sig-name descname"><span class="pre">operation_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.ResetData.operation_name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

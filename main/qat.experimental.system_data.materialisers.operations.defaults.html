@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.materialisers.operations.defaults module &mdash; qat-compiler 3.0.0.post317.dev20260814131639 documentation</title>
+  <title>qat.experimental.system_data.materialisers.operations.defaults module &mdash; qat-compiler 3.0.0.post318.dev20260814131722 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -678,7 +678,7 @@ in the mode’s calibration data, as built by the PuRR qubit materialiser:</p>
 </section>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultOperationBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultOperationBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_reset_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddrop_delay_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.materialisers.operations.operation_builder.html#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder" title="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOperationBuilder</span></code></a></p>
 <p>Builds the default transmon gate-set operation set for a single qubit.</p>
 <p>Each operation is a method that returns an <a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>
@@ -796,6 +796,17 @@ consistent qubit context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder.make_reset_operation">
+<span class="sig-name descname"><span class="pre">make_reset_operation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder.make_reset_operation" title="Link to this definition"></a></dt>
+<dd><p>Return the reset operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1120,8 +1131,26 @@ The builder raises <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.make_ddrop_reset_operation">
+<span class="sig-name descname"><span class="pre">make_ddrop_reset_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ddrop_reset'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_ddrop_reset_operation" title="Link to this definition"></a></dt>
+<dd><p>Return a DDROP reset operation.</p>
+<p>Fires a simultaneous pulse on the qubit-side <code class="docutils literal notranslate"><span class="pre">reset</span></code> mode and the resonator-side
+<code class="docutils literal notranslate"><span class="pre">readout_reset</span></code> mode. When <code class="docutils literal notranslate"><span class="pre">delay_ps</span></code> is provided, a delay step is appended to
+each mode after the pulse.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_ddrop_reset_operation.params.delay_ps"></span><strong>delay_ps</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_ddrop_reset_operation.params.delay_ps">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Post-pulse settling delay in picoseconds, sourced from the
+ddrop_reset calibration payload. Omit when no delay is calibrated.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_operations">
-<span class="sig-name descname"><span class="pre">make_default_operations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_operations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">make_default_operations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_reset_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddrop_delay_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_operations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations" title="Link to this definition"></a></dt>
 <dd><p>Return the full default operation set for a qubit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1134,11 +1163,15 @@ qubit is the target). Generates ZX cancellation-tone primitives for each.</p></l
 <li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.has_x_pi"></span><strong>has_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.has_x_pi">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether a calibrated X(π) pulse is available on the qubit.
 Controls inclusion of <code class="docutils literal notranslate"><span class="pre">X_pi</span></code> and the corresponding variants in
 parameterised <code class="docutils literal notranslate"><span class="pre">rx</span></code> and <code class="docutils literal notranslate"><span class="pre">ry</span></code>.</p></li>
+<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.reset_methods"></span><strong>reset_methods</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.reset_methods">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.ResetData" title="qat.experimental.system_data.canonical.schema.ResetData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResetData</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – Supported reset strategies (top-level canonical metadata).</p></li>
+<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.default_reset_method"></span><strong>default_reset_method</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.default_reset_method">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Default reset method type selected from
+<code class="docutils literal notranslate"><span class="pre">reset_methods</span></code>.</p></li>
+<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.ddrop_delay_ps"></span><strong>ddrop_delay_ps</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.ddrop_delay_ps">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span>) – Post-pulse settling delay in picoseconds for DDROP reset,
+sourced from the ddrop_reset calibration payload. Omit when uncalibrated.</p></li>
 <li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.extra_operations"></span><strong>extra_operations</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_operations.params.extra_operations">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – Additional or replacement operations applied after the full
 default set (including topology-derived multi-qubit operations) is assembled.
 Any operation whose <code class="docutils literal notranslate"><span class="pre">id</span></code> matches a default replaces it in-place (last-wins);
-new IDs are appended. See <a class="reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations" title="qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_default_single_qubit_operations()</span></code></a> for
-details on the extension pattern.</p></li>
+new IDs are appended.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1146,37 +1179,6 @@ details on the extension pattern.</p></li>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tuple of canonical <code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code> instances.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations">
-<span class="sig-name descname"><span class="pre">make_default_single_qubit_operations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">own_qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_operations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations" title="Link to this definition"></a></dt>
-<dd><p>Return the standard single-qubit operation set.</p>
-<p>Includes: X_pi_2, Z, X, Y, U, H, SX, SXdg, S, Sdg, T, Tdg, measure, initiate, and
-the QASM2 aliases rx, ry, rz, u1, u2, id. <code class="docutils literal notranslate"><span class="pre">X_pi</span></code> is included only when
-<code class="docutils literal notranslate"><span class="pre">has_x_pi</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.has_x_pi"></span><strong>has_x_pi</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.has_x_pi">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether a calibrated X(π) pulse is available on the qubit.
-Controls inclusion of <code class="docutils literal notranslate"><span class="pre">X_pi</span></code> and the corresponding variants in
-parameterised <code class="docutils literal notranslate"><span class="pre">rx</span></code> and <code class="docutils literal notranslate"><span class="pre">ry</span></code>.</p></li>
-<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.own_qubit_id"></span><strong>own_qubit_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.own_qubit_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – Identifier of the qubit that will own these operations.
-Forwarded to <a class="reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_rz_gate" title="qat.experimental.system_data.materialisers.operations.defaults.make_rz_gate"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_rz_gate()</span></code></a> for cross-qubit CR mode phase shifts.</p></li>
-<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.coupled_qubit_ids"></span><strong>coupled_qubit_ids</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.coupled_qubit_ids">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – Identifiers of target qubits this qubit drives.
-Forwarded to <a class="reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_rz_gate" title="qat.experimental.system_data.materialisers.operations.defaults.make_rz_gate"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_rz_gate()</span></code></a> to include CRC and CR frame shifts.</p></li>
-<li><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.extra_operations"></span><strong>extra_operations</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_default_single_qubit_operations.params.extra_operations">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span>) – Additional or replacement operations. Any operation whose
-<code class="docutils literal notranslate"><span class="pre">id</span></code> matches a default replaces it in-place (last-wins); new IDs are appended.
-Use this to add target-specific gates or override a default with a
-hardware-specific decomposition. Callers outside QAT can pass
-<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a> instances
-constructed directly from the schema without importing this module.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1272,6 +1274,33 @@ sequence.</p>
 <p>Sends a measurement pulse on the <code class="docutils literal notranslate"><span class="pre">measure</span></code> mode (using the <code class="docutils literal notranslate"><span class="pre">measure</span></code> waveform
 definition) and captures the qubit response on the <code class="docutils literal notranslate"><span class="pre">acquire</span></code> mode (using the
 <code class="docutils literal notranslate"><span class="pre">acquire</span></code> acquire definition).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.make_passive_reset_operation">
+<span class="sig-name descname"><span class="pre">make_passive_reset_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'passive_reset'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_ps</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_passive_reset_operation" title="Link to this definition"></a></dt>
+<dd><p>Return a passive reset operation.</p>
+<p>Passive reset is represented as a delay on the <code class="docutils literal notranslate"><span class="pre">drive</span></code> mode, with a
+fixed duration in picoseconds sourced from the canonical reset metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.make_reset_operation">
+<span class="sig-name descname"><span class="pre">make_reset_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reset_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_reset_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_reset_operation" title="Link to this definition"></a></dt>
+<dd><p>Return the public reset operation.</p>
+<p>The reset method is selected from top-level reset metadata: <code class="docutils literal notranslate"><span class="pre">default_reset_method</span></code>
+identifies the method type, which is resolved against <code class="docutils literal notranslate"><span class="pre">reset_methods</span></code> and mapped to
+the method’s <code class="docutils literal notranslate"><span class="pre">operation_name</span></code> attribute.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a></span></p>
