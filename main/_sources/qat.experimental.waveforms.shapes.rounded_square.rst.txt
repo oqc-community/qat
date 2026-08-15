@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.rounded\_square module
+========================================================
+
+.. automodule:: qat.experimental.waveforms.shapes.rounded_square
+   :members:
+   :undoc-members:
+   :show-inheritance:

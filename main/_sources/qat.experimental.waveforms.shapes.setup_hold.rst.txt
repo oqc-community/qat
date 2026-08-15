@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.setup\_hold module
+====================================================
+
+.. automodule:: qat.experimental.waveforms.shapes.setup_hold
+   :members:
+   :undoc-members:
+   :show-inheritance:

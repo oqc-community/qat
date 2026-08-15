@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.exceptions module
+===================================================
+
+.. automodule:: qat.experimental.waveforms.shapes.exceptions
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.sinusoidal module
+===================================================
+
+.. automodule:: qat.experimental.waveforms.shapes.sinusoidal
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.gaussian module
+=================================================
+
+.. automodule:: qat.experimental.waveforms.shapes.gaussian
+   :members:
+   :undoc-members:
+   :show-inheritance:

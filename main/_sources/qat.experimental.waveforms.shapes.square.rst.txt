@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.square module
+===============================================
+
+.. automodule:: qat.experimental.waveforms.shapes.square
+   :members:
+   :undoc-members:
+   :show-inheritance:

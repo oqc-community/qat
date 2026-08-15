@@ -17,3 +17,4 @@ Subpackages
    qat.experimental.frontend
    qat.experimental.system_data
    qat.experimental.utils
+   qat.experimental.waveforms

@@ -1,0 +1,7 @@
+qat.experimental.waveforms.shapes.sech module
+=============================================
+
+.. automodule:: qat.experimental.waveforms.shapes.sech
+   :members:
+   :undoc-members:
+   :show-inheritance:
