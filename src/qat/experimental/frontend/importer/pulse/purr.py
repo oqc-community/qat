@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import math
 from collections import defaultdict
 from dataclasses import dataclass, field
 from functools import singledispatchmethod
@@ -32,6 +33,13 @@ from qat.experimental.dialect.results.ir import (
     YieldOp,
 )
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
+from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
+from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
+from qat.experimental.waveforms.shapes.rounded_square import RoundedSquareWaveformShape
+from qat.experimental.waveforms.shapes.sech import SechWaveformShape
+from qat.experimental.waveforms.shapes.setup_hold import SetupHoldWaveformShape
+from qat.experimental.waveforms.shapes.sinusoidal import SinusoidalWaveformShape
+from qat.experimental.waveforms.shapes.soft_square import SoftSquareWaveformShape
 from qat.purr.compiler.builders import QuantumInstructionBuilder
 from qat.purr.compiler.devices import PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
@@ -433,113 +441,199 @@ class PurrImporter:
         waveform_name = self._get_waveform_name()
         width = float(self._resolve_numeric(purr_waveform.width))
         amplitude = self._resolve_numeric(purr_waveform.amp)
+        drag = self._resolve_numeric(purr_waveform.drag)
 
         match purr_waveform.shape:
             case PulseShapeType.SQUARE:
                 builder.create_square_waveform(waveform_name, amplitude, width)
             case PulseShapeType.GAUSSIAN:
+                shape = GaussianWaveformShape.from_gaussian_waveform(
+                    rise=float(self._resolve_numeric(purr_waveform.rise))
+                )
                 builder.create_gaussian_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.rise)),
+                    shape.fractional_breadth,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.SOFT_SQUARE:
+                shape = SoftSquareWaveformShape.from_soft_square_waveform(
+                    rise=float(self._resolve_numeric(purr_waveform.rise)),
+                    width=width,
+                )
                 builder.create_soft_square_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.rise)),
+                    shape.fractional_top_width,
+                    shape.fractional_rise,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.SOFTER_SQUARE:
-                builder.create_softer_square_waveform(
+                shape = SoftSquareWaveformShape.from_softer_square_waveform(
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    rise=float(self._resolve_numeric(purr_waveform.rise)),
+                    width=width,
+                )
+                builder.create_soft_square_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
-                    float(self._resolve_numeric(purr_waveform.rise)),
+                    shape.fractional_top_width,
+                    shape.fractional_rise,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.EXTRA_SOFT_SQUARE:
-                builder.create_extra_soft_square_waveform(
+                shape = SoftSquareWaveformShape.from_extra_soft_square_waveform(
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    rise=float(self._resolve_numeric(purr_waveform.rise)),
+                    width=width,
+                )
+                builder.create_soft_square_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
-                    float(self._resolve_numeric(purr_waveform.rise)),
+                    shape.fractional_top_width,
+                    shape.fractional_rise,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.GAUSSIAN_SQUARE:
+                shape = GaussianSquareWaveformShape.from_legacy(
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    width=width,
+                    square_width=float(self._resolve_numeric(purr_waveform.square_width)),
+                    zero_at_edges=bool(self._resolve_numeric(purr_waveform.zero_at_edges)),
+                )
                 builder.create_gaussian_square_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
-                    float(self._resolve_numeric(purr_waveform.square_width)),
-                    bool(self._resolve_numeric(purr_waveform.zero_at_edges)),
+                    shape.fractional_rise,
+                    shape.fractional_top_width,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.SOFTER_GAUSSIAN:
-                builder.create_softer_gaussian_waveform(
+                shape = GaussianWaveformShape.from_softer_gaussian_waveform(
+                    rise=float(self._resolve_numeric(purr_waveform.rise))
+                )
+                builder.create_gaussian_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.rise)),
+                    shape.fractional_breadth,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.BLACKMAN:
-                builder.create_blackman_waveform(waveform_name, amplitude, width)
+                builder.create_blackman_waveform(waveform_name, amplitude, width, drag)
             case PulseShapeType.SETUP_HOLD:
+                shape = SetupHoldWaveformShape.from_legacy(
+                    amp_setup=self._resolve_numeric(purr_waveform.amp_setup),
+                    amp=amplitude,
+                    rise=float(self._resolve_numeric(purr_waveform.rise)),
+                    width=width,
+                )
                 builder.create_setup_hold_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    self._resolve_numeric(purr_waveform.amp_setup),
-                    float(self._resolve_numeric(purr_waveform.rise)),
+                    shape.setup,
+                    shape.rise_location,
                 )
             case PulseShapeType.ROUNDED_SQUARE:
+                shape = RoundedSquareWaveformShape.from_legacy(
+                    rise=float(self._resolve_numeric(purr_waveform.rise)),
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    width=width,
+                )
                 builder.create_rounded_square_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.rise)),
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
+                    shape.fractional_top_width,
+                    shape.fractional_rise,
+                    drag,
                 )
             case PulseShapeType.GAUSSIAN_DRAG:
-                builder.create_drag_gaussian_waveform(
+                shape = GaussianWaveformShape.from_gaussian_zero_edge_waveform(
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    width=width,
+                    zero_at_edges=bool(self._resolve_numeric(purr_waveform.zero_at_edges)),
+                )
+                drag_coefficient = float(self._resolve_numeric(purr_waveform.beta))
+                builder.create_gaussian_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
-                    self._resolve_numeric(purr_waveform.beta),
-                    bool(self._resolve_numeric(purr_waveform.zero_at_edges)),
+                    shape.fractional_breadth,
+                    shape.regularize,
+                    drag_coefficient,
                 )
             case PulseShapeType.GAUSSIAN_ZERO_EDGE:
-                builder.create_gaussian_zero_edge_waveform(
+                shape = GaussianWaveformShape.from_gaussian_zero_edge_waveform(
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    width=width,
+                    zero_at_edges=bool(self._resolve_numeric(purr_waveform.zero_at_edges)),
+                )
+                builder.create_gaussian_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
-                    bool(self._resolve_numeric(purr_waveform.zero_at_edges)),
+                    shape.fractional_breadth,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.SECH:
+                shape = SechWaveformShape.from_legacy(
+                    std_dev=float(self._resolve_numeric(purr_waveform.std_dev)),
+                    width=width,
+                )
                 builder.create_sech_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.std_dev)),
+                    shape.fractional_breadth,
+                    shape.regularize,
+                    drag,
                 )
             case PulseShapeType.COS:
-                builder.create_cos_waveform(
+                shape = SinusoidalWaveformShape.from_frequency(
+                    frequency=float(self._resolve_numeric(purr_waveform.frequency)),
+                    width=width,
+                    internal_phase=float(
+                        self._resolve_numeric(purr_waveform.internal_phase)
+                    )
+                    + math.pi / 2.0,
+                )
+                builder.create_sinusoidal_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.frequency)),
-                    float(self._resolve_numeric(purr_waveform.internal_phase)),
+                    shape.number_of_periods,
+                    shape.internal_phase,
+                    drag,
                 )
             case PulseShapeType.SIN:
-                builder.create_sin_waveform(
+                shape = SinusoidalWaveformShape.from_frequency(
+                    frequency=float(self._resolve_numeric(purr_waveform.frequency)),
+                    width=width,
+                    internal_phase=float(
+                        self._resolve_numeric(purr_waveform.internal_phase)
+                    ),
+                )
+                builder.create_sinusoidal_waveform(
                     waveform_name,
                     amplitude,
                     width,
-                    float(self._resolve_numeric(purr_waveform.frequency)),
-                    float(self._resolve_numeric(purr_waveform.internal_phase)),
+                    shape.number_of_periods,
+                    shape.internal_phase,
+                    drag,
                 )
             case _:
                 raise ValueError(f"Unsupported shape, {purr_waveform.shape}.")

@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from xdsl.context import Context
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import FloatAttr, ModuleOp, StringAttr, f64
+from xdsl.dialects.builtin import BoolAttr, FloatAttr, ModuleOp, StringAttr, f64, i1
 from xdsl.ir import Block
 
 from qat.experimental.dialect.pulse.ir.attributes import (
@@ -34,9 +34,9 @@ from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_in
 def _build_waveform_ops():
     amplitude = ConstantOp(AmplitudeAttr(1.0))
     width = ConstantOp(TimeAttr(800e-9))
-    rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
-    waveform = GaussianWaveformOp(width, amplitude, rise)
-    return [amplitude, width, rise, waveform], waveform
+    fractional_breadth = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
+    waveform = GaussianWaveformOp(width, amplitude, fractional_breadth, BoolAttr(False, i1))
+    return [amplitude, width, fractional_breadth, waveform], waveform
 
 
 def _build_acquire_ops():

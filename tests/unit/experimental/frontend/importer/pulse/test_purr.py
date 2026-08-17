@@ -14,15 +14,11 @@ from qat.experimental.dialect.pulse.ir import (
     BlackmanWaveformOp,
     CallKernelOp,
     ConstantOp,
-    CosWaveformOp,
     CreateFrameOp,
     DiscriminateOp,
-    DragGaussianWaveformOp,
     EqualiseOp,
-    ExtraSoftSquareWaveformOp,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
-    GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     KernelOp,
     PhaseSetOp,
@@ -31,9 +27,7 @@ from qat.experimental.dialect.pulse.ir import (
     RoundedSquareWaveformOp,
     SechWaveformOp,
     SetupHoldWaveformOp,
-    SinWaveformOp,
-    SofterGaussianWaveformOp,
-    SofterSquareWaveformOp,
+    SinusoidalWaveformOp,
     SoftSquareWaveformOp,
     SquareWaveformOp,
     SynchronizeOp,
@@ -785,11 +779,23 @@ WAVEFORM_CASES = [
         SquareWaveformOp,
     ),
     (
-        {"shape": PulseShapeType.GAUSSIAN, "width": 80e-9, "amp": 0.5, "rise": 16e-9},
+        {
+            "shape": PulseShapeType.GAUSSIAN,
+            "width": 80e-9,
+            "amp": 0.5,
+            "rise": 16e-9,
+            "drag": 0.15,
+        },
         GaussianWaveformOp,
     ),
     (
-        {"shape": PulseShapeType.SOFT_SQUARE, "width": 80e-9, "amp": 0.5, "rise": 1e-9},
+        {
+            "shape": PulseShapeType.SOFT_SQUARE,
+            "width": 80e-9,
+            "amp": 0.5,
+            "rise": 1e-9,
+            "drag": 0.2,
+        },
         SoftSquareWaveformOp,
     ),
     (
@@ -799,8 +805,9 @@ WAVEFORM_CASES = [
             "amp": 0.5,
             "std_dev": 8e-9,
             "rise": 1e-9,
+            "drag": 0.1,
         },
-        SofterSquareWaveformOp,
+        SoftSquareWaveformOp,
     ),
     (
         {
@@ -809,8 +816,9 @@ WAVEFORM_CASES = [
             "amp": 0.5,
             "std_dev": 8e-9,
             "rise": 1e-9,
+            "drag": 0.05,
         },
-        ExtraSoftSquareWaveformOp,
+        SoftSquareWaveformOp,
     ),
     (
         {
@@ -820,6 +828,7 @@ WAVEFORM_CASES = [
             "std_dev": 8e-9,
             "square_width": 40e-9,
             "zero_at_edges": 1,
+            "drag": 0.12,
         },
         GaussianSquareWaveformOp,
     ),
@@ -829,11 +838,12 @@ WAVEFORM_CASES = [
             "width": 80e-9,
             "amp": 0.5,
             "rise": 16e-9,
+            "drag": 0.08,
         },
-        SofterGaussianWaveformOp,
+        GaussianWaveformOp,
     ),
     (
-        {"shape": PulseShapeType.BLACKMAN, "width": 80e-9, "amp": 0.5},
+        {"shape": PulseShapeType.BLACKMAN, "width": 80e-9, "amp": 0.5, "drag": 0.18},
         BlackmanWaveformOp,
     ),
     (
@@ -853,6 +863,7 @@ WAVEFORM_CASES = [
             "amp": 0.5,
             "rise": 1e-9,
             "std_dev": 8e-9,
+            "drag": 0.22,
         },
         RoundedSquareWaveformOp,
     ),
@@ -865,7 +876,7 @@ WAVEFORM_CASES = [
             "beta": 0.1,
             "zero_at_edges": 0,
         },
-        DragGaussianWaveformOp,
+        GaussianWaveformOp,
     ),
     (
         {
@@ -874,8 +885,9 @@ WAVEFORM_CASES = [
             "amp": 0.5,
             "std_dev": 8e-9,
             "zero_at_edges": 1,
+            "drag": 0.11,
         },
-        GaussianZeroEdgeWaveformOp,
+        GaussianWaveformOp,
     ),
     (
         {
@@ -883,6 +895,7 @@ WAVEFORM_CASES = [
             "width": 80e-9,
             "amp": 0.5,
             "std_dev": 8e-9,
+            "drag": 0.09,
         },
         SechWaveformOp,
     ),
@@ -893,8 +906,9 @@ WAVEFORM_CASES = [
             "amp": 0.5,
             "frequency": 5e9,
             "internal_phase": 0.5,
+            "drag": 0.14,
         },
-        CosWaveformOp,
+        SinusoidalWaveformOp,
     ),
     (
         {
@@ -903,8 +917,9 @@ WAVEFORM_CASES = [
             "amp": 0.5,
             "frequency": 5e9,
             "internal_phase": 0.5,
+            "drag": 0.19,
         },
-        SinWaveformOp,
+        SinusoidalWaveformOp,
     ),
 ]
 
@@ -927,6 +942,15 @@ class TestPurrImporterWaveformTranslation:
         pulse_ops = _ops_of_type(module, PulseOp)
         assert len(pulse_ops) == 1
         assert isinstance(pulse_ops[0].waveform.owner, expected_op_type)
+
+        # Verify DRAG coefficient if present in kwargs
+        expected_drag = pulse_kwargs.get("drag")
+        if expected_drag is not None:
+            waveform_op = pulse_ops[0].waveform.owner
+            assert len(waveform_op.drag_coefficients) == 1
+            assert waveform_op.drag_coefficients[0].owner.value.value.data == pytest.approx(
+                expected_drag
+            )
 
     def test_custom_pulse_emits_pulse_op(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -959,6 +983,25 @@ class TestPurrImporterWaveformTranslation:
             ch.sample_time * len(samples)
         )
         assert sampled_attr.sample_time.literal_value == pytest.approx(ch.sample_time)
+
+    def test_gaussian_drag_maps_beta_to_drag_coefficient(self, builder, hw):
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(
+            Pulse(
+                ch,
+                shape=PulseShapeType.GAUSSIAN_DRAG,
+                width=80e-9,
+                amp=0.5,
+                std_dev=8e-9,
+                beta=0.1,
+                zero_at_edges=0,
+            )
+        )
+
+        module = PurrImporter().build(builder)
+        [waveform_op] = _ops_of_type(module, GaussianWaveformOp)
+        assert len(waveform_op.drag_coefficients) == 1
+        assert waveform_op.drag_coefficients[0].owner.value.value.data == pytest.approx(0.1)
 
 
 class TestPurrImporterDeviceUpdate:

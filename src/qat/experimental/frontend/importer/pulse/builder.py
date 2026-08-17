@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-
-
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import BoolAttr, IndexType
+from xdsl.dialects.builtin import BoolAttr, FloatAttr, IndexType, f64
 from xdsl.interpreters.scf import scf
 from xdsl.ir import Block, Operation, Region, SSAValue
 
@@ -12,15 +10,11 @@ from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
     BlackmanWaveformOp,
     ConstantOp,
-    CosWaveformOp,
     CreateFrameOp,
-    DragGaussianWaveformOp,
-    ExtraSoftSquareWaveformOp,
     FrameType,
     FrequencyAttr,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
-    GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     PhaseAttr,
     PhaseSetOp,
@@ -31,9 +25,7 @@ from qat.experimental.dialect.pulse.ir import (
     SampledWaveformAttr,
     SechWaveformOp,
     SetupHoldWaveformOp,
-    SinWaveformOp,
-    SofterGaussianWaveformOp,
-    SofterSquareWaveformOp,
+    SinusoidalWaveformOp,
     SoftSquareWaveformOp,
     SquareWaveformOp,
     SynchronizeOp,
@@ -77,6 +69,18 @@ def _create_phase_constant_op(phase: float) -> ConstantOp:
     return ConstantOp(PhaseAttr(phase))
 
 
+def _create_float_constant_op(value: float) -> ArithConstantOp:
+    """Create a builtin float constant for dimensionless waveform parameters."""
+    return ArithConstantOp(FloatAttr(value, 64), f64)
+
+
+def _create_drag_constant_ops(
+    drag_coefficients: tuple[float, ...],
+) -> list[ArithConstantOp]:
+    """Create builtin float constants for DRAG coefficients."""
+    return [_create_float_constant_op(value) for value in drag_coefficients]
+
+
 class PulseKernelBuilder:
     """Base class for importers that translate a program into the Pulse dialect.
 
@@ -104,12 +108,12 @@ class PulseKernelBuilder:
 
         kernel = (
             PulseKernelBuilder("my_kernel", shots=1000)
-            .create_frame("q0/drive", 4.8e9)
-            .create_frame("q0/readout", 8.8e9)
-            .create_frame("q0/acquire", 8.8e9)
+            .create_frame("q0/drive", 4.8e9, "q0")
+            .create_frame("q0/readout", 8.8e9, "r0")
+            .create_frame("q0/acquire", 8.8e9, "r0")
             .phase_set("q0/drive", 0.0)
             .phase_set("q0/acquire", 0.0)
-            .create_gaussian_waveform("q0/drive", 0.5, 80e-9, 20e-9)
+            .create_gaussian_waveform("q0/drive", 0.5, 80e-9, 0.47, False)
             .create_square_waveform("q0/readout", 0.5, 800e-9)
             .pulse("q0/drive", "q0/drive")
             .phase_shift("q0/drive", 1.57)
@@ -117,7 +121,7 @@ class PulseKernelBuilder:
             .synchronize("q0/drive", "q0/readout", "q0/acquire")
             .pulse("q0/readout", "q0/readout")
             .wait("q0/acquire", 80e-9)
-            .acquire("q0/acquire", 800e-9, integrate=True)
+            .acquire("q0/acquire", "q0_meas", 800e-9, integrate=True)
             .synchronize("q0/drive", "q0/readout", "q0/acquire")
             .wait("q0/drive", 500e-6)
             .synchronize("q0/drive", "q0/readout", "q0/acquire")
@@ -266,7 +270,10 @@ class PulseKernelBuilder:
         return self
 
     def create_square_waveform(
-        self, waveform_name: str, amplitude: float, duration: float
+        self,
+        waveform_name: str,
+        amplitude: float,
+        duration: float,
     ) -> "PulseKernelBuilder":
         """Create a square waveform and add it to the pulse block.
 
@@ -283,97 +290,90 @@ class PulseKernelBuilder:
         return self
 
     def create_gaussian_waveform(
-        self, waveform_name: str, amplitude: float, duration: float, std_dev: float
+        self,
+        waveform_name: str,
+        amplitude: float,
+        duration: float,
+        fractional_breadth: float,
+        regularize: bool = False,
+        *drag_coefficients: float,
     ) -> "PulseKernelBuilder":
         """Create a Gaussian waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation of the Gaussian.
+        :param fractional_breadth: Gaussian width proportion in normalized units.
+        :param regularize: Whether to regularize the shape at the edges.
+        :param drag_coefficients: DRAG coefficients by derivative order, starting at order
+            1.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        gaussian_waveform_op = GaussianWaveformOp(time_op, amplitude_op, std_op)
-        self._add_ops(amplitude_op, time_op, std_op, gaussian_waveform_op)
+        fractional_breadth_op = _create_float_constant_op(fractional_breadth)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
+        gaussian_waveform_op = GaussianWaveformOp(
+            time_op,
+            amplitude_op,
+            fractional_breadth_op,
+            BoolAttr(regularize, value_type=1),
+            *(op.result for op in drag_ops),
+        )
+        self._add_ops(
+            amplitude_op,
+            time_op,
+            fractional_breadth_op,
+            *drag_ops,
+            gaussian_waveform_op,
+        )
         self._waveforms.set_by_name(waveform_name, gaussian_waveform_op.result)
         return self
 
     def create_soft_square_waveform(
-        self, waveform_name: str, amplitude: float, duration: float, rise: float
+        self,
+        waveform_name: str,
+        amplitude: float,
+        duration: float,
+        fractional_top_width: float,
+        fractional_rise: float,
+        regularize: bool = False,
+        *drag_coefficients: float,
     ) -> "PulseKernelBuilder":
         """Create a soft square waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param rise: The rise time of the soft square.
+        :param fractional_top_width: Flat-top proportion in normalized units.
+        :param fractional_rise: Rise and fall width proportion in normalized units.
+        :param regularize: Whether to regularize the shape at the edges.
+        :param drag_coefficients: DRAG coefficients by derivative order, starting at order
+            1.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        rise_op = _create_time_constant_op(rise)
-        soft_square_waveform_op = SoftSquareWaveformOp(time_op, amplitude_op, rise_op)
-        self._add_ops(amplitude_op, time_op, rise_op, soft_square_waveform_op)
+        fractional_top_width_op = _create_float_constant_op(fractional_top_width)
+        fractional_rise_op = _create_float_constant_op(fractional_rise)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
+        soft_square_waveform_op = SoftSquareWaveformOp(
+            time_op,
+            amplitude_op,
+            fractional_top_width_op,
+            fractional_rise_op,
+            BoolAttr(regularize, value_type=1),
+            *(op.result for op in drag_ops),
+        )
+        self._add_ops(
+            amplitude_op,
+            time_op,
+            fractional_top_width_op,
+            fractional_rise_op,
+            *drag_ops,
+            soft_square_waveform_op,
+        )
         self._waveforms.set_by_name(waveform_name, soft_square_waveform_op.result)
-        return self
-
-    def create_softer_square_waveform(
-        self,
-        waveform_name: str,
-        amplitude: float,
-        duration: float,
-        std_dev: float,
-        rise: float,
-    ) -> "PulseKernelBuilder":
-        """Create a softer square waveform and add it to the pulse block.
-
-        :param waveform_name: The name of the waveform to create.
-        :param amplitude: The amplitude of the waveform.
-        :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation.
-        :param rise: The rise time.
-        :returns: The PulseKernelBuilder instance for method chaining.
-        """
-        amplitude_op = _create_amplitude_constant_op(amplitude)
-        time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        rise_op = _create_time_constant_op(rise)
-        softer_square_waveform_op = SofterSquareWaveformOp(
-            time_op, amplitude_op, std_op, rise_op
-        )
-        self._add_ops(amplitude_op, time_op, std_op, rise_op, softer_square_waveform_op)
-        self._waveforms.set_by_name(waveform_name, softer_square_waveform_op.result)
-        return self
-
-    def create_extra_soft_square_waveform(
-        self,
-        waveform_name: str,
-        amplitude: float,
-        duration: float,
-        std_dev: float,
-        rise: float,
-    ) -> "PulseKernelBuilder":
-        """Create an extra soft square waveform and add it to the pulse block.
-
-        :param waveform_name: The name of the waveform to create.
-        :param amplitude: The amplitude of the waveform.
-        :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation.
-        :param rise: The rise time.
-        :returns: The PulseKernelBuilder instance for method chaining.
-        """
-        amplitude_op = _create_amplitude_constant_op(amplitude)
-        time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        rise_op = _create_time_constant_op(rise)
-        extra_soft_square_waveform_op = ExtraSoftSquareWaveformOp(
-            time_op, amplitude_op, std_op, rise_op
-        )
-        self._add_ops(amplitude_op, time_op, std_op, rise_op, extra_soft_square_waveform_op)
-        self._waveforms.set_by_name(waveform_name, extra_soft_square_waveform_op.result)
         return self
 
     def create_gaussian_square_waveform(
@@ -381,72 +381,70 @@ class PulseKernelBuilder:
         waveform_name: str,
         amplitude: float,
         duration: float,
-        std_dev: float,
-        square_width: float,
-        zero_at_edges: bool = False,
+        fractional_rise: float,
+        fractional_top_width: float,
+        regularize: bool = False,
+        drag_coefficient: float | None = None,
     ) -> "PulseKernelBuilder":
         """Create a Gaussian square waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation of the Gaussian.
-        :param square_width: The width of the square portion.
-        :param zero_at_edges: Whether the waveform should be zero at the edges.
+        :param fractional_rise: Gaussian edge-width proportion in normalized units.
+        :param fractional_top_width: Flat-top proportion in normalized units.
+        :param regularize: Whether to regularize the shape at the edges.
+        :param drag_coefficient: DRAG coefficient. Gaussian-square supports at most one.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
+        drag_coefficients = (drag_coefficient,) if drag_coefficient is not None else ()
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        square_width_op = _create_time_constant_op(square_width)
+        fractional_rise_op = _create_float_constant_op(fractional_rise)
+        fractional_top_width_op = _create_float_constant_op(fractional_top_width)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
         gaussian_square_waveform_op = GaussianSquareWaveformOp(
             time_op,
             amplitude_op,
-            std_op,
-            square_width_op,
-            BoolAttr(zero_at_edges, value_type=1),
+            fractional_rise_op,
+            fractional_top_width_op,
+            BoolAttr(regularize, value_type=1),
+            *(op.result for op in drag_ops),
         )
         self._add_ops(
-            amplitude_op, time_op, std_op, square_width_op, gaussian_square_waveform_op
+            amplitude_op,
+            time_op,
+            fractional_rise_op,
+            fractional_top_width_op,
+            *drag_ops,
+            gaussian_square_waveform_op,
         )
         self._waveforms.set_by_name(waveform_name, gaussian_square_waveform_op.result)
         return self
 
-    def create_softer_gaussian_waveform(
-        self, waveform_name: str, amplitude: float, duration: float, std_dev: float
-    ) -> "PulseKernelBuilder":
-        """Create a softer Gaussian waveform and add it to the pulse block.
-
-        :param waveform_name: The name of the waveform to create.
-        :param amplitude: The amplitude of the waveform.
-        :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation of the Gaussian.
-        :returns: The PulseKernelBuilder instance for method chaining.
-        """
-        amplitude_op = _create_amplitude_constant_op(amplitude)
-        time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        softer_gaussian_waveform_op = SofterGaussianWaveformOp(
-            time_op, amplitude_op, std_op
-        )
-        self._add_ops(amplitude_op, time_op, std_op, softer_gaussian_waveform_op)
-        self._waveforms.set_by_name(waveform_name, softer_gaussian_waveform_op.result)
-        return self
-
     def create_blackman_waveform(
-        self, waveform_name: str, amplitude: float, duration: float
+        self,
+        waveform_name: str,
+        amplitude: float,
+        duration: float,
+        *drag_coefficients: float,
     ) -> "PulseKernelBuilder":
         """Create a Blackman waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
+        :param drag_coefficients: DRAG coefficients by derivative order, starting at order
+            1.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        blackman_waveform_op = BlackmanWaveformOp(time_op, amplitude_op)
-        self._add_ops(amplitude_op, time_op, blackman_waveform_op)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
+        blackman_waveform_op = BlackmanWaveformOp(
+            time_op, amplitude_op, *(op.result for op in drag_ops)
+        )
+        self._add_ops(amplitude_op, time_op, *drag_ops, blackman_waveform_op)
         self._waveforms.set_by_name(waveform_name, blackman_waveform_op.result)
         return self
 
@@ -455,27 +453,31 @@ class PulseKernelBuilder:
         waveform_name: str,
         amplitude: float,
         duration: float,
-        amplitude_setup: float,
-        rise: float,
+        setup: float,
+        fractional_rise: float,
     ) -> "PulseKernelBuilder":
         """Create a setup hold waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param amplitude_setup: The amplitude of the setup portion.
-        :param rise: The rise time.
+        :param setup: Relative setup amplitude.
+        :param fractional_rise: Fraction of width occupied by the setup segment.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        amplitude_setup_op = _create_amplitude_constant_op(amplitude_setup)
-        rise_op = _create_time_constant_op(rise)
+        setup_op = _create_float_constant_op(setup)
+        fractional_rise_op = _create_float_constant_op(fractional_rise)
         setup_hold_waveform_op = SetupHoldWaveformOp(
-            time_op, amplitude_op, amplitude_setup_op, rise_op
+            time_op, amplitude_op, setup_op, fractional_rise_op
         )
         self._add_ops(
-            amplitude_op, time_op, amplitude_setup_op, rise_op, setup_hold_waveform_op
+            amplitude_op,
+            time_op,
+            setup_op,
+            fractional_rise_op,
+            setup_hold_waveform_op,
         )
         self._waveforms.set_by_name(waveform_name, setup_hold_waveform_op.result)
         return self
@@ -485,155 +487,126 @@ class PulseKernelBuilder:
         waveform_name: str,
         amplitude: float,
         duration: float,
-        rise: float,
-        std_dev: float,
+        fractional_top_width: float,
+        fractional_rise: float,
+        *drag_coefficients: float,
     ) -> "PulseKernelBuilder":
         """Create a rounded square waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param rise: The rise time.
-        :param std_dev: The standard deviation.
+        :param fractional_top_width: Flat-top proportion in normalized units.
+        :param fractional_rise: Rise and fall width proportion in normalized units.
+        :param drag_coefficients: DRAG coefficients by derivative order, starting at order
+            1.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        rise_op = _create_time_constant_op(rise)
-        std_op = _create_time_constant_op(std_dev)
+        fractional_top_width_op = _create_float_constant_op(fractional_top_width)
+        fractional_rise_op = _create_float_constant_op(fractional_rise)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
         rounded_square_waveform_op = RoundedSquareWaveformOp(
-            time_op, amplitude_op, rise_op, std_op
+            time_op,
+            amplitude_op,
+            fractional_top_width_op,
+            fractional_rise_op,
+            *(op.result for op in drag_ops),
         )
-        self._add_ops(amplitude_op, time_op, rise_op, std_op, rounded_square_waveform_op)
+        self._add_ops(
+            amplitude_op,
+            time_op,
+            fractional_top_width_op,
+            fractional_rise_op,
+            *drag_ops,
+            rounded_square_waveform_op,
+        )
         self._waveforms.set_by_name(waveform_name, rounded_square_waveform_op.result)
         return self
 
-    def create_drag_gaussian_waveform(
-        self,
-        waveform_name: str,
-        amplitude: float,
-        duration: float,
-        std_dev: float,
-        beta: float,
-        zero_at_edges: bool = False,
-    ) -> "PulseKernelBuilder":
-        """Create a dragged Gaussian waveform and add it to the pulse block.
-
-        :param waveform_name: The name of the waveform to create.
-        :param amplitude: The amplitude of the waveform.
-        :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation of the Gaussian.
-        :param beta: The DRAG coefficient.
-        :param zero_at_edges: Whether the waveform should be zero at the edges.
-        :returns: The PulseKernelBuilder instance for method chaining.
-        """
-        amplitude_op = _create_amplitude_constant_op(amplitude)
-        time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        beta_op = _create_amplitude_constant_op(beta)
-        drag_gaussian_waveform_op = DragGaussianWaveformOp(
-            time_op, amplitude_op, std_op, beta_op, BoolAttr(zero_at_edges, value_type=1)
-        )
-        self._add_ops(amplitude_op, time_op, std_op, beta_op, drag_gaussian_waveform_op)
-        self._waveforms.set_by_name(waveform_name, drag_gaussian_waveform_op.result)
-        return self
-
-    def create_gaussian_zero_edge_waveform(
-        self,
-        waveform_name: str,
-        amplitude: float,
-        duration: float,
-        std_dev: float,
-        zero_at_edges: bool = False,
-    ) -> "PulseKernelBuilder":
-        """Create a Gaussian zero edge waveform and add it to the pulse block.
-
-        :param waveform_name: The name of the waveform to create.
-        :param amplitude: The amplitude of the waveform.
-        :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation of the Gaussian.
-        :param zero_at_edges: Whether the waveform should be zero at the edges.
-        :returns: The PulseKernelBuilder instance for method chaining.
-        """
-        amplitude_op = _create_amplitude_constant_op(amplitude)
-        time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        gaussian_zero_edge_waveform_op = GaussianZeroEdgeWaveformOp(
-            time_op, amplitude_op, std_op, BoolAttr(zero_at_edges, value_type=1)
-        )
-        self._add_ops(amplitude_op, time_op, std_op, gaussian_zero_edge_waveform_op)
-        self._waveforms.set_by_name(waveform_name, gaussian_zero_edge_waveform_op.result)
-        return self
-
     def create_sech_waveform(
-        self, waveform_name: str, amplitude: float, duration: float, std_dev: float
+        self,
+        waveform_name: str,
+        amplitude: float,
+        duration: float,
+        fractional_breadth: float,
+        regularize: bool = False,
+        *drag_coefficients: float,
     ) -> "PulseKernelBuilder":
         """Create a hyperbolic secant (sech) waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param std_dev: The standard deviation.
+        :param fractional_breadth: Sech width proportion in normalized units.
+        :param regularize: Whether to regularize the shape at the edges.
+        :param drag_coefficients: DRAG coefficients by derivative order, starting at order
+            1.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        std_op = _create_time_constant_op(std_dev)
-        sech_waveform_op = SechWaveformOp(time_op, amplitude_op, std_op)
-        self._add_ops(amplitude_op, time_op, std_op, sech_waveform_op)
+        fractional_breadth_op = _create_float_constant_op(fractional_breadth)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
+        sech_waveform_op = SechWaveformOp(
+            time_op,
+            amplitude_op,
+            fractional_breadth_op,
+            BoolAttr(regularize, value_type=1),
+            *(op.result for op in drag_ops),
+        )
+        self._add_ops(
+            amplitude_op,
+            time_op,
+            fractional_breadth_op,
+            *drag_ops,
+            sech_waveform_op,
+        )
         self._waveforms.set_by_name(waveform_name, sech_waveform_op.result)
         return self
 
-    def create_cos_waveform(
+    def create_sinusoidal_waveform(
         self,
         waveform_name: str,
         amplitude: float,
         duration: float,
-        frequency: float,
-        phase: float = 0.0,
+        number_of_periods: float,
+        internal_phase: float = 0.0,
+        *drag_coefficients: float,
     ) -> "PulseKernelBuilder":
-        """Create a cosine waveform and add it to the pulse block.
+        """Create a sinusoidal waveform and add it to the pulse block.
 
         :param waveform_name: The name of the waveform to create.
         :param amplitude: The amplitude of the waveform.
         :param duration: The duration of the waveform.
-        :param frequency: The frequency of the cosine.
-        :param phase: The internal phase of the cosine.
+        :param number_of_periods: Number of periods across the waveform domain.
+        :param internal_phase: Internal phase offset in radians.
+        :param drag_coefficients: DRAG coefficients by derivative order, starting at order
+            1.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         amplitude_op = _create_amplitude_constant_op(amplitude)
         time_op = _create_time_constant_op(duration)
-        freq_op = _create_frequency_constant_op(frequency)
-        phase_op = _create_phase_constant_op(phase)
-        cos_waveform_op = CosWaveformOp(time_op, amplitude_op, freq_op, phase_op)
-        self._add_ops(amplitude_op, time_op, freq_op, phase_op, cos_waveform_op)
-        self._waveforms.set_by_name(waveform_name, cos_waveform_op.result)
-        return self
-
-    def create_sin_waveform(
-        self,
-        waveform_name: str,
-        amplitude: float,
-        duration: float,
-        frequency: float,
-        phase: float = 0.0,
-    ) -> "PulseKernelBuilder":
-        """Create a sine waveform and add it to the pulse block.
-
-        :param waveform_name: The name of the waveform to create.
-        :param amplitude: The amplitude of the waveform.
-        :param duration: The duration of the waveform.
-        :param frequency: The frequency of the sine.
-        :param phase: The internal phase of the sine.
-        :returns: The PulseKernelBuilder instance for method chaining.
-        """
-        amplitude_op = _create_amplitude_constant_op(amplitude)
-        time_op = _create_time_constant_op(duration)
-        freq_op = _create_frequency_constant_op(frequency)
-        phase_op = _create_phase_constant_op(phase)
-        sin_waveform_op = SinWaveformOp(time_op, amplitude_op, freq_op, phase_op)
-        self._add_ops(amplitude_op, time_op, freq_op, phase_op, sin_waveform_op)
-        self._waveforms.set_by_name(waveform_name, sin_waveform_op.result)
+        number_of_periods_op = _create_float_constant_op(number_of_periods)
+        internal_phase_op = _create_phase_constant_op(internal_phase)
+        drag_ops = _create_drag_constant_ops(drag_coefficients)
+        sinusoidal_waveform_op = SinusoidalWaveformOp(
+            time_op,
+            amplitude_op,
+            number_of_periods_op,
+            internal_phase_op,
+            *(op.result for op in drag_ops),
+        )
+        self._add_ops(
+            amplitude_op,
+            time_op,
+            number_of_periods_op,
+            internal_phase_op,
+            *drag_ops,
+            sinusoidal_waveform_op,
+        )
+        self._waveforms.set_by_name(waveform_name, sinusoidal_waveform_op.result)
         return self
 
     def create_custom_waveform(

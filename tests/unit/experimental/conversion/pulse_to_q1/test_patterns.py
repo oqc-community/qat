@@ -8,11 +8,13 @@ import pytest
 from xdsl.context import Context
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
+    BoolAttr,
     FloatAttr,
     ModuleOp,
     StringAttr,
     UnrealizedConversionCastOp,
     f64,
+    i1,
 )
 from xdsl.ir import Operation
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
@@ -883,13 +885,14 @@ class TestRewritePulseOp:
     def test_match_and_rewrite_raises_for_non_sampled_waveform(self):
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0.drive"))
-        width = ArithConstantOp(FloatAttr(50e-9, f64), f64)
-        amp = ArithConstantOp(FloatAttr(0.23, f64), f64)
-        std = ArithConstantOp(FloatAttr(10e-9, f64), f64)
-        waveform = GaussianWaveformOp(width, amp, std)
+        width = ConstantOp(TimeAttr(50e-9))
+        amp = ConstantOp(AmplitudeAttr(0.23))
+        fractional_breadth = ArithConstantOp(FloatAttr(0.2, f64), f64)
+        waveform = GaussianWaveformOp(width, amp, fractional_breadth, BoolAttr(False, i1))
         pulse = PulseOp(frame, waveform)
         sequence = SequenceOp(
-            "q0_drive", [freq, frame, width, amp, std, waveform, pulse, StopOp()]
+            "q0_drive",
+            [freq, frame, width, amp, fractional_breadth, waveform, pulse, StopOp()],
         )
         module = ModuleOp([sequence])
 

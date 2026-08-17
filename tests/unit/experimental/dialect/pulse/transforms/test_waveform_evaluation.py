@@ -4,19 +4,22 @@
 sampled waveforms via :class:`ConstantOp` and :class:`SampledWaveformAttr`.
 
 The tests are data-driven: a :class:`_WaveformSpec` per analytical shape declares the op
-class, the corresponding pydantic waveform, and the values used for each operand and
-boolean property. Generic tests iterate over every spec, so adding a new analytical
-waveform op only requires appending one entry to :data:`_ALL_SPECS`.
+class, the values used for each operand, and the boolean property values. Generic tests
+iterate over every spec, so adding a new analytical waveform op only requires appending
+one entry to :data:`_WAVEFORM_SPECS`.
 """
 
 from dataclasses import dataclass, field
 from typing import Any
 
+import numpy as np
 import pytest
 from numpy.testing import assert_array_equal
-from xdsl.dialects.builtin import BoolAttr, StringAttr, i1
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import BoolAttr, FloatAttr, StringAttr, f64, i1
 from xdsl.ir import SSAValue
 from xdsl.irdl import IRDLOperation, irdl_op_definition, operand_def, result_def
+from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
@@ -27,55 +30,30 @@ from qat.experimental.dialect.pulse.ir import (
     Pulse,
     TimeAttr,
 )
-from qat.experimental.dialect.pulse.ir.attributes import (
-    PulseNumericTypedAttr,
-    SampledWaveformAttr,
-)
+from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr
 from qat.experimental.dialect.pulse.ir.ops import (
     BlackmanWaveformOp,
-    CosWaveformOp,
-    DragGaussianWaveformOp,
-    ExtraSoftSquareWaveformOp,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
-    GaussianZeroEdgeWaveformOp,
     PulseOp,
     RoundedSquareWaveformOp,
     SechWaveformOp,
     SetupHoldWaveformOp,
-    SinWaveformOp,
-    SofterGaussianWaveformOp,
-    SofterSquareWaveformOp,
+    SinusoidalWaveformOp,
     SoftSquareWaveformOp,
     SquareWaveformOp,
+    extract_constant_scalar,
 )
 from qat.experimental.dialect.pulse.ir.types import TimeType, WaveformType
 from qat.experimental.dialect.pulse.transforms.waveform_evaluation import (
     EvaluateWaveformsAsSamples,
+    _seconds_to_picoseconds,
 )
 from qat.experimental.system_data.pulse.constraints import (
     PortConstraints,
     PulseLevelConstraints,
 )
-from qat.ir.waveforms import (
-    BlackmanWaveform,
-    CosWaveform,
-    DragGaussianWaveform,
-    ExtraSoftSquareWaveform,
-    GaussianSquareWaveform,
-    GaussianWaveform,
-    GaussianZeroEdgeWaveform,
-    RoundedSquareWaveform,
-    SechWaveform,
-    SetupHoldWaveform,
-    SinWaveform,
-    SofterGaussianWaveform,
-    SofterSquareWaveform,
-    SoftSquareWaveform,
-    SquareWaveform,
-    Waveform,
-    sample_waveform,
-)
+from qat.experimental.waveforms.evaluate import evaluate_waveform
 
 from tests.unit.utils.ir import (
     build_module_from_ops,
@@ -119,50 +97,39 @@ def _create_pulse_constraints(
 
 
 @irdl_op_definition
-class _SweepTimeOp(IRDLOperation):
-    """A dummy op producing a non-constant ``pulse.time`` SSA value used to model a sweep
-    variable feeding the width operand of a waveform."""
+class _ProducerOp(IRDLOperation):
+    """A dummy op producing a non-constant SSA value for regression tests."""
 
-    name = "test.sweep_time"
-    result = result_def(TimeType)
+    name = "test.producer"
+    result = result_def()
 
-    def __init__(self):
-        super().__init__(result_types=[TimeType()])
+    def __init__(self, result_type):
+        super().__init__(result_types=[result_type])
 
 
 @dataclass(frozen=True)
 class _WaveformSpec:
-    """Describes how to build one analytical waveform op and its pydantic reference.
+    """Describes how to build one analytical waveform op for the rewrite tests.
 
     :ivar op_cls: The xDSL waveform op class under test.
-    :ivar pydantic_cls: The QAT pydantic :class:`Waveform` subclass the op maps to.
     :ivar operands: Ordered map from pydantic kwarg name to a
-        ``(PulseNumericTypedAttr subclass, python value)`` pair, in the same order the op
+        ``(attribute class, python value)`` pair, in the same order the op
         constructor expects the SSA operands.
-    :ivar bool_props: Map from pydantic kwarg name to boolean value, for properties
-        (currently only ``zero_at_edges``) that the op constructor takes as trailing
+    :ivar bool_props: Map from property name to boolean value for trailing
         ``BoolAttr`` arguments.
     """
 
     op_cls: type
-    pydantic_cls: type[Waveform]
-    operands: dict[str, tuple[type[PulseNumericTypedAttr], Any]]
+    operands: dict[str, tuple[type[Any], Any]]
     bool_props: dict[str, bool] = field(default_factory=dict)
 
     @property
     def id(self) -> str:
         return self.op_cls.__name__
 
-    def build_pydantic_waveform(self) -> Waveform:
-        """Return the reference pydantic waveform built from this spec's values."""
-        kwargs: dict[str, Any] = {name: value for name, (_, value) in self.operands.items()}
-        kwargs.update(self.bool_props)
-        return self.pydantic_cls(**kwargs)
-
 
 _SQUARE_SPEC = _WaveformSpec(
     op_cls=SquareWaveformOp,
-    pydantic_cls=SquareWaveform,
     operands={
         "width": (TimeAttr, 80e-9),
         "amp": (AmplitudeAttr, 0.5),
@@ -171,69 +138,39 @@ _SQUARE_SPEC = _WaveformSpec(
 
 _GAUSSIAN_SPEC = _WaveformSpec(
     op_cls=GaussianWaveformOp,
-    pydantic_cls=GaussianWaveform,
     operands={
         "width": (TimeAttr, 80e-9),
         "amp": (AmplitudeAttr, 0.5),
-        "rise": (TimeAttr, 10e-9),
+        "fractional_breadth": (FloatAttr, 0.47),
     },
+    bool_props={"regularize": False},
 )
 
 _WAVEFORM_SPECS: list[_WaveformSpec] = [
     _SQUARE_SPEC,
     _WaveformSpec(
         op_cls=SoftSquareWaveformOp,
-        pydantic_cls=SoftSquareWaveform,
         operands={
             "width": (TimeAttr, 80e-9),
             "amp": (AmplitudeAttr, 0.5),
-            "rise": (TimeAttr, 10e-9),
+            "fractional_top_width": (FloatAttr, 0.5),
+            "fractional_rise": (FloatAttr, 0.1),
         },
-    ),
-    _WaveformSpec(
-        op_cls=SofterSquareWaveformOp,
-        pydantic_cls=SofterSquareWaveform,
-        operands={
-            "width": (TimeAttr, 80e-9),
-            "amp": (AmplitudeAttr, 0.5),
-            "std_dev": (TimeAttr, 20e-9),
-            "rise": (TimeAttr, 10e-9),
-        },
-    ),
-    _WaveformSpec(
-        op_cls=ExtraSoftSquareWaveformOp,
-        pydantic_cls=ExtraSoftSquareWaveform,
-        operands={
-            "width": (TimeAttr, 80e-9),
-            "amp": (AmplitudeAttr, 0.5),
-            "std_dev": (TimeAttr, 20e-9),
-            "rise": (TimeAttr, 10e-9),
-        },
+        bool_props={"regularize": False},
     ),
     _WaveformSpec(
         op_cls=GaussianSquareWaveformOp,
-        pydantic_cls=GaussianSquareWaveform,
         operands={
             "width": (TimeAttr, 160e-9),
             "amp": (AmplitudeAttr, 0.5),
-            "std_dev": (TimeAttr, 20e-9),
-            "square_width": (TimeAttr, 80e-9),
+            "fractional_rise": (FloatAttr, 0.25),
+            "fractional_top_width": (FloatAttr, 0.5),
         },
-        bool_props={"zero_at_edges": True},
+        bool_props={"regularize": True},
     ),
     _GAUSSIAN_SPEC,
     _WaveformSpec(
-        op_cls=SofterGaussianWaveformOp,
-        pydantic_cls=SofterGaussianWaveform,
-        operands={
-            "width": (TimeAttr, 80e-9),
-            "amp": (AmplitudeAttr, 0.5),
-            "rise": (TimeAttr, 10e-9),
-        },
-    ),
-    _WaveformSpec(
         op_cls=BlackmanWaveformOp,
-        pydantic_cls=BlackmanWaveform,
         operands={
             "width": (TimeAttr, 80e-9),
             "amp": (AmplitudeAttr, 0.5),
@@ -241,73 +178,39 @@ _WAVEFORM_SPECS: list[_WaveformSpec] = [
     ),
     _WaveformSpec(
         op_cls=SetupHoldWaveformOp,
-        pydantic_cls=SetupHoldWaveform,
         operands={
             "width": (TimeAttr, 80e-9),
             "amp": (AmplitudeAttr, 0.5),
-            "amp_setup": (AmplitudeAttr, 0.25),
-            "rise": (TimeAttr, 10e-9),
+            "setup": (FloatAttr, 0.5),
+            "fractional_rise": (FloatAttr, 0.1),
         },
     ),
     _WaveformSpec(
         op_cls=RoundedSquareWaveformOp,
-        pydantic_cls=RoundedSquareWaveform,
         operands={
             "width": (TimeAttr, 80e-9),
             "amp": (AmplitudeAttr, 0.5),
-            "rise": (TimeAttr, 10e-9),
-            "std_dev": (TimeAttr, 20e-9),
+            "fractional_top_width": (FloatAttr, 0.5),
+            "fractional_rise": (FloatAttr, 0.1),
         },
     ),
     _WaveformSpec(
-        op_cls=DragGaussianWaveformOp,
-        pydantic_cls=DragGaussianWaveform,
+        op_cls=SinusoidalWaveformOp,
         operands={
             "width": (TimeAttr, 80e-9),
             "amp": (AmplitudeAttr, 0.5),
-            "std_dev": (TimeAttr, 20e-9),
-            "beta": (TimeAttr, 0.1),
-        },
-        bool_props={"zero_at_edges": True},
-    ),
-    _WaveformSpec(
-        op_cls=GaussianZeroEdgeWaveformOp,
-        pydantic_cls=GaussianZeroEdgeWaveform,
-        operands={
-            "width": (TimeAttr, 80e-9),
-            "amp": (AmplitudeAttr, 0.5),
-            "std_dev": (TimeAttr, 20e-9),
-        },
-        bool_props={"zero_at_edges": True},
-    ),
-    _WaveformSpec(
-        op_cls=CosWaveformOp,
-        pydantic_cls=CosWaveform,
-        operands={
-            "width": (TimeAttr, 80e-9),
-            "amp": (AmplitudeAttr, 0.5),
-            "frequency": (FrequencyAttr, 5e6),
-            "internal_phase": (PhaseAttr, 0.0),
-        },
-    ),
-    _WaveformSpec(
-        op_cls=SinWaveformOp,
-        pydantic_cls=SinWaveform,
-        operands={
-            "width": (TimeAttr, 80e-9),
-            "amp": (AmplitudeAttr, 0.5),
-            "frequency": (FrequencyAttr, 5e6),
+            "number_of_periods": (FloatAttr, 0.5),
             "internal_phase": (PhaseAttr, 0.0),
         },
     ),
     _WaveformSpec(
         op_cls=SechWaveformOp,
-        pydantic_cls=SechWaveform,
         operands={
             "width": (TimeAttr, 80e-9),
             "amp": (AmplitudeAttr, 0.5),
-            "std_dev": (TimeAttr, 20e-9),
+            "fractional_breadth": (FloatAttr, 1.0 / 3.0),
         },
+        bool_props={"regularize": False},
     ),
 ]
 
@@ -326,6 +229,7 @@ def _build_module_with_pulse(
     port: str = PORT_CONTROL,
     operand_overrides: dict[str, IRDLOperation] | None = None,
     bool_prop_overrides: dict[str, bool] | None = None,
+    drag_coefficients: list[float | IRDLOperation] | None = None,
 ) -> tuple:
     """Build a minimal module containing one instance of ``spec``'s waveform op feeding a
     :class:`PulseOp` on a frame with the requested ``port``.
@@ -340,6 +244,7 @@ def _build_module_with_pulse(
     """
     overrides = operand_overrides or {}
     bool_overrides = bool_prop_overrides or {}
+    drag_coefficients = drag_coefficients or []
 
     freq = ConstantOp(FrequencyAttr(5e9))
     frame = CreateFrameOp(freq, StringAttr(port))
@@ -350,12 +255,23 @@ def _build_module_with_pulse(
         if pyd_name in overrides:
             operand_op = overrides[pyd_name]
         else:
-            operand_op = ConstantOp(attr_cls(value))
+            if attr_cls is FloatAttr:
+                operand_op = ArithConstantOp(FloatAttr(value, 64), f64)
+            else:
+                operand_op = ConstantOp(attr_cls(value))
         ops_in_order.append(operand_op)
         ctor_args.append(operand_op)
 
     for prop_name, prop_default in spec.bool_props.items():
         ctor_args.append(BoolAttr(bool_overrides.get(prop_name, prop_default), i1))
+
+    for drag_coefficient in drag_coefficients:
+        if isinstance(drag_coefficient, IRDLOperation):
+            drag_coefficient_op = drag_coefficient
+        else:
+            drag_coefficient_op = ArithConstantOp(FloatAttr(drag_coefficient, 64), f64)
+        ops_in_order.append(drag_coefficient_op)
+        ctor_args.append(drag_coefficient_op)
 
     waveform = spec.op_cls(*ctor_args)
     pulse = PulseOp(frame, waveform)
@@ -375,14 +291,32 @@ def _get_sampled_constants(module) -> list[ConstantOp]:
     ]
 
 
+class TestSecondToPicosecondConversion:
+    @pytest.mark.parametrize("seconds", [0.0, -1e-9])
+    def test_non_positive_value_raises(self, seconds):
+        with pytest.raises(PassFailedException, match="must be positive"):
+            _seconds_to_picoseconds(seconds, value_name="Sample time")
+
+    def test_sub_picosecond_value_raises(self):
+        with pytest.raises(PassFailedException, match="at least 1 ps"):
+            _seconds_to_picoseconds(0.4e-12, value_name="Sample time")
+
+    def test_non_representable_value_raises(self):
+        with pytest.raises(
+            PassFailedException,
+            match="cannot be represented as integer picoseconds",
+        ):
+            _seconds_to_picoseconds(1.5e-12, value_name="Sample time")
+
+
 @pytest.mark.parametrize("control_sample_time", [1e-9, 2e-9])
 @pytest.mark.parametrize("spec", _WAVEFORM_SPECS, ids=_spec_id)
 class TestWaveformShapeCoverage:
     """Runs the pass over every analytical waveform shape and checks the rewrite outcome.
 
     Covers replacement, PulseOp re-wiring, and sample fidelity for every op in
-    :data:`_ALL_SPECS`. Any new analytical waveform op is tested here for free by adding
-    a new spec entry.
+    :data:`_WAVEFORM_SPECS`. Any new analytical waveform op is tested here for free by
+    adding a new spec entry.
     """
 
     def test_analytical_waveform_is_replaced_with_sampled_constant(
@@ -425,7 +359,7 @@ class TestWaveformShapeCoverage:
         assert pulse_ops[0].waveform is sampled_constants[0].result
 
     def test_samples_match_reference_sampling(self, spec, control_sample_time):
-        module, _ = _build_module_with_pulse(spec)
+        module, waveform_op = _build_module_with_pulse(spec)
 
         assert get_operations_with_type(module, spec.op_cls) != []
         assert _get_sampled_constants(module) == []
@@ -435,10 +369,21 @@ class TestWaveformShapeCoverage:
             native_waveform_shapes=(),
         )
         EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
-
-        expected = sample_waveform(spec.build_pydantic_waveform(), control_sample_time)
+        # Compute expected samples inline
+        width = extract_constant_scalar(waveform_op.width)
+        amplitude = extract_constant_scalar(waveform_op.amplitude)
+        assert width is not None and amplitude is not None
+        width_ps = int(round(width * 1e12))
+        sample_time_ps = int(round(control_sample_time * 1e12))
+        expected = evaluate_waveform(
+            width=width_ps,
+            sample_time=sample_time_ps,
+            shape=waveform_op.build_shape(),
+            amplitude=amplitude,
+            drag_coefficients=[],
+        )
         sampled_constant = _get_sampled_constants(module)[0]
-        assert_array_equal(sampled_constant.value.samples.data, expected.samples)
+        assert_array_equal(sampled_constant.value.samples.data, expected)
 
 
 @pytest.mark.parametrize("control_sample_time", [1e-9, 2e-9])
@@ -496,7 +441,7 @@ class TestPulseOpRewrite:
         assert _get_sampled_constants(module) == []
 
     def test_non_constant_operand_leaves_waveform_untouched(self, control_sample_time):
-        sweep_width = _SweepTimeOp()
+        sweep_width = _ProducerOp(TimeType())
         module, _ = _build_module_with_pulse(
             _GAUSSIAN_SPEC, operand_overrides={"width": sweep_width}
         )
@@ -512,11 +457,55 @@ class TestPulseOpRewrite:
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert _get_sampled_constants(module) == []
 
-    @pytest.mark.parametrize("zero_at_edges", [True, False])
-    @pytest.mark.parametrize("spec", _BOOL_PROP_SPECS, ids=_spec_id)
-    def test_bool_property_is_extracted(self, spec, zero_at_edges, control_sample_time):
+    def test_non_constant_shape_parameter_leaves_waveform_untouched(
+        self, control_sample_time
+    ):
+        sweep_fractional_breadth = _ProducerOp(f64)
         module, _ = _build_module_with_pulse(
-            spec, bool_prop_overrides={"zero_at_edges": zero_at_edges}
+            _GAUSSIAN_SPEC,
+            operand_overrides={"fractional_breadth": sweep_fractional_breadth},
+        )
+
+        assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
+        assert _get_sampled_constants(module) == []
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: control_sample_time},
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
+        assert _get_sampled_constants(module) == []
+
+    def test_non_constant_drag_coefficient_leaves_waveform_untouched(
+        self, control_sample_time
+    ):
+        """Tests that a producer not registered as a constant leaves the waveform untouched,
+        even if the other operands are constant."""
+        sweep_drag = _ProducerOp(f64)
+        module, _ = _build_module_with_pulse(
+            _GAUSSIAN_SPEC,
+            drag_coefficients=[sweep_drag],
+        )
+
+        assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
+        assert _get_sampled_constants(module) == []
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: control_sample_time},
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
+        assert _get_sampled_constants(module) == []
+
+    @pytest.mark.parametrize("regularize", [True, False])
+    @pytest.mark.parametrize("spec", _BOOL_PROP_SPECS, ids=_spec_id)
+    def test_bool_property_is_extracted(self, spec, regularize, control_sample_time):
+        module, waveform_op = _build_module_with_pulse(
+            spec, bool_prop_overrides={"regularize": regularize}
         )
 
         assert get_operations_with_type(module, spec.op_cls) != []
@@ -531,15 +520,78 @@ class TestPulseOpRewrite:
         assert get_operations_with_type(module, spec.op_cls) == []
         sampled_constants = _get_sampled_constants(module)
         assert len(sampled_constants) == 1
-
-        pydantic_kwargs: dict[str, Any] = {
-            name: value for name, (_, value) in spec.operands.items()
-        }
-        pydantic_kwargs["zero_at_edges"] = zero_at_edges
-        expected = sample_waveform(
-            spec.pydantic_cls(**pydantic_kwargs), control_sample_time
+        # Compute expected samples inline
+        width = extract_constant_scalar(waveform_op.width)
+        amplitude = extract_constant_scalar(waveform_op.amplitude)
+        assert width is not None and amplitude is not None
+        width_ps = int(round(width * 1e12))
+        sample_time_ps = int(round(control_sample_time * 1e12))
+        expected = evaluate_waveform(
+            width=width_ps,
+            sample_time=sample_time_ps,
+            shape=waveform_op.build_shape(),
+            amplitude=amplitude,
+            drag_coefficients=[],
         )
-        assert_array_equal(sampled_constants[0].value.samples.data, expected.samples)
+        assert_array_equal(sampled_constants[0].value.samples.data, expected)
+
+    def test_incompatible_width_raises_pass_failed_exception(self, control_sample_time):
+        module, _ = _build_module_with_pulse(_GAUSSIAN_SPEC)
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: 3e-9},
+            native_waveform_shapes=(),
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match="Width .* is not an integer multiple of sample time",
+        ):
+            EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+    def test_drag_coefficients_are_included_in_sampling(self, control_sample_time):
+        module, waveform_op = _build_module_with_pulse(
+            _GAUSSIAN_SPEC,
+            drag_coefficients=[0.1, 0.2],
+        )
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: control_sample_time},
+            native_waveform_shapes=(),
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+        # Compute expected samples inline with and without DRAG
+        width = extract_constant_scalar(waveform_op.width)
+        amplitude = extract_constant_scalar(waveform_op.amplitude)
+        assert width is not None and amplitude is not None
+        drag_coefficients = [
+            extract_constant_scalar(drag_coefficient)
+            for drag_coefficient in waveform_op.drag_coefficients
+        ]
+        assert all(coefficient is not None for coefficient in drag_coefficients)
+        width_ps = int(round(width * 1e12))
+        sample_time_ps = int(round(control_sample_time * 1e12))
+        shape = waveform_op.build_shape()
+        expected_with_drag = evaluate_waveform(
+            width=width_ps,
+            sample_time=sample_time_ps,
+            shape=shape,
+            amplitude=amplitude,
+            drag_coefficients=[
+                coefficient for coefficient in drag_coefficients if coefficient is not None
+            ],
+        )
+        expected_without_drag = evaluate_waveform(
+            width=width_ps,
+            sample_time=sample_time_ps,
+            shape=shape,
+            amplitude=amplitude,
+            drag_coefficients=[],
+        )
+
+        sampled_constant = _get_sampled_constants(module)[0]
+        assert_array_equal(sampled_constant.value.samples.data, expected_with_drag)
+        assert not np.allclose(expected_with_drag, expected_without_drag)
 
     def test_two_pulses_are_rewritten_independently(self, control_sample_time):
         freq = ConstantOp(FrequencyAttr(5e9))
@@ -549,14 +601,14 @@ class TestPulseOpRewrite:
         )
         width_a = ConstantOp(TimeAttr(80e-9))
         amp_a = ConstantOp(AmplitudeAttr(0.5))
-        rise_a = ConstantOp(TimeAttr(10e-9))
-        wf_a = GaussianWaveformOp(width_a, amp_a, rise_a)
+        fractional_breadth_a = ArithConstantOp(FloatAttr(0.4, 64), f64)
+        wf_a = GaussianWaveformOp(width_a, amp_a, fractional_breadth_a, BoolAttr(False, i1))
         pulse_a = PulseOp(frame, wf_a)
 
         width_b = ConstantOp(TimeAttr(120e-9))
         amp_b = ConstantOp(AmplitudeAttr(0.25))
-        rise_b = ConstantOp(TimeAttr(20e-9))
-        wf_b = GaussianWaveformOp(width_b, amp_b, rise_b)
+        fractional_breadth_b = ArithConstantOp(FloatAttr(0.3, 64), f64)
+        wf_b = GaussianWaveformOp(width_b, amp_b, fractional_breadth_b, BoolAttr(False, i1))
         pulse_b = PulseOp(pulse_a, wf_b)
 
         module = build_module_from_ops(
@@ -565,12 +617,12 @@ class TestPulseOpRewrite:
                 frame,
                 width_a,
                 amp_a,
-                rise_a,
+                fractional_breadth_a,
                 wf_a,
                 pulse_a,
                 width_b,
                 amp_b,
-                rise_b,
+                fractional_breadth_b,
                 wf_b,
                 pulse_b,
             ],
@@ -595,13 +647,23 @@ class TestPulseOpRewrite:
         frame_b = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
         width = ConstantOp(TimeAttr(80e-9))
         amp = ConstantOp(AmplitudeAttr(0.5))
-        rise = ConstantOp(TimeAttr(10e-9))
-        wf = GaussianWaveformOp(width, amp, rise)
+        fractional_breadth = ArithConstantOp(FloatAttr(0.4, 64), f64)
+        wf = GaussianWaveformOp(width, amp, fractional_breadth, BoolAttr(False, i1))
         pulse_a = PulseOp(frame_a, wf)
         pulse_b = PulseOp(frame_b, wf)
 
         module = build_module_from_ops(
-            [freq, frame_a, frame_b, width, amp, rise, wf, pulse_a, pulse_b],
+            [
+                freq,
+                frame_a,
+                frame_b,
+                width,
+                amp,
+                fractional_breadth,
+                wf,
+                pulse_a,
+                pulse_b,
+            ],
         )
 
         constraints = _create_pulse_constraints(
@@ -623,8 +685,8 @@ class TestPulseOpRewrite:
         frame_readout = CreateFrameOp(freq, StringAttr(PORT_READOUT))
         width = ConstantOp(TimeAttr(80e-9))
         amp = ConstantOp(AmplitudeAttr(0.5))
-        rise = ConstantOp(TimeAttr(10e-9))
-        wf = GaussianWaveformOp(width, amp, rise)
+        fractional_breadth = ArithConstantOp(FloatAttr(0.4, 64), f64)
+        wf = GaussianWaveformOp(width, amp, fractional_breadth, BoolAttr(False, i1))
         pulse_control = PulseOp(frame_control, wf)
         pulse_readout = PulseOp(frame_readout, wf)
 
@@ -635,7 +697,7 @@ class TestPulseOpRewrite:
                 frame_readout,
                 width,
                 amp,
-                rise,
+                fractional_breadth,
                 wf,
                 pulse_control,
                 pulse_readout,
@@ -674,12 +736,12 @@ class TestPulseOpRewrite:
         frame = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
         width = ConstantOp(TimeAttr(80e-9))
         amp = ConstantOp(AmplitudeAttr(0.5))
-        rise = ConstantOp(TimeAttr(10e-9))
-        wf = GaussianWaveformOp(width, amp, rise)
+        fractional_breadth = ArithConstantOp(FloatAttr(0.4, 64), f64)
+        wf = GaussianWaveformOp(width, amp, fractional_breadth, BoolAttr(False, i1))
         non_pulse = NonPulseOp(wf)
 
         module = build_module_from_ops(
-            [freq, frame, width, amp, rise, wf, non_pulse],
+            [freq, frame, width, amp, fractional_breadth, wf, non_pulse],
         )
 
         constraints = _create_pulse_constraints(

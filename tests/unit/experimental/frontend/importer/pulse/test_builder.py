@@ -11,13 +11,9 @@ from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
     BlackmanWaveformOp,
     ConstantOp,
-    CosWaveformOp,
     CreateFrameOp,
-    DragGaussianWaveformOp,
-    ExtraSoftSquareWaveformOp,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
-    GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     PhaseSetOp,
     PhaseShiftOp,
@@ -27,9 +23,7 @@ from qat.experimental.dialect.pulse.ir import (
     SampledWaveformAttr,
     SechWaveformOp,
     SetupHoldWaveformOp,
-    SinWaveformOp,
-    SofterGaussianWaveformOp,
-    SofterSquareWaveformOp,
+    SinusoidalWaveformOp,
     SoftSquareWaveformOp,
     SquareWaveformOp,
     SynchronizeOp,
@@ -59,8 +53,11 @@ def _kernel_body(kernel: KernelOp):
 
 def _pulse_constant_value(ssa_value):
     owner = ssa_value.owner
-    assert isinstance(owner, ConstantOp)
-    return owner.value.literal_value
+    if isinstance(owner, ConstantOp):
+        return owner.value.literal_value
+    if isinstance(owner, ArithConstantOp):
+        return owner.value.value.data
+    raise AssertionError(f"Unexpected constant owner type: {type(owner).__name__}")
 
 
 def _assert_no_repeat_epilogue(kernel: KernelOp):
@@ -267,7 +264,7 @@ class TestPulseKernelWaveformOperations:
 
     @staticmethod
     def _assert_zero_at_edges(op):
-        assert bool(op.zero_at_edges.value.data)
+        assert bool(op.regularize.value.data)
 
     def test_square_waveform_gives_correct_ops(self):
         """Does a square waveform and then finalises, inspecting the waveform has the
@@ -282,23 +279,37 @@ class TestPulseKernelWaveformOperations:
         correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_gaussian_waveform("wf", 0.5, 80e-9, 16e-9)
+            .create_gaussian_waveform("wf", 0.5, 80e-9, 0.4)
             .finalize()
         )
-        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e-9, 0.5, 16e-9])
+        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e-9, 0.5, 0.4])
 
     def test_gaussian_square_waveform_gives_correct_ops(self):
         """Does a gaussian square waveform and then finalises, inspecting the waveform has
         the correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_gaussian_square_waveform("wf", 0.5, 80e-9, 16e-9, 40e-9, True)
+            .create_gaussian_square_waveform("wf", 0.5, 80e-9, 0.3, 0.5, True)
             .finalize()
         )
         self._assert_waveform_op(
             kernel,
             GaussianSquareWaveformOp,
-            [80e-9, 0.5, 16e-9, 40e-9],
+            [80e-9, 0.5, 0.3, 0.5],
+            self._assert_zero_at_edges,
+        )
+
+    def test_gaussian_square_waveform_with_drag_coefficients_gives_correct_ops(self):
+        """Gaussian-square waveforms should allow one first-order DRAG coefficient."""
+        kernel = (
+            PulseKernelBuilder("test")
+            .create_gaussian_square_waveform("wf", 0.5, 80e-9, 0.3, 0.5, True, 0.1)
+            .finalize()
+        )
+        self._assert_waveform_op(
+            kernel,
+            GaussianSquareWaveformOp,
+            [80e-9, 0.5, 0.3, 0.5, 0.1],
             self._assert_zero_at_edges,
         )
 
@@ -307,42 +318,49 @@ class TestPulseKernelWaveformOperations:
         correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_soft_square_waveform("wf", 0.5, 80e-9, 1e-9)
+            .create_soft_square_waveform("wf", 0.5, 80e-9, 0.75, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SoftSquareWaveformOp, [80e-9, 0.5, 1e-9])
+        self._assert_waveform_op(kernel, SoftSquareWaveformOp, [80e-9, 0.5, 0.75, 0.2])
 
-    def test_softer_square_waveform_gives_correct_ops(self):
-        """Does a softer square waveform and then finalises, inspecting the waveform has the
-        correct properties."""
+    def test_regularized_soft_square_waveform_gives_correct_ops(self):
+        """Does a regularized soft square waveform and then finalises, inspecting the
+        waveform has the correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_softer_square_waveform("wf", 0.5, 80e-9, 8e-9, 1e-9)
-            .finalize()
-        )
-        self._assert_waveform_op(kernel, SofterSquareWaveformOp, [80e-9, 0.5, 8e-9, 1e-9])
-
-    def test_extra_soft_square_waveform_gives_correct_ops(self):
-        """Does an extra soft square waveform and then finalises, inspecting the waveform
-        has the correct properties."""
-        kernel = (
-            PulseKernelBuilder("test")
-            .create_extra_soft_square_waveform("wf", 0.5, 80e-9, 8e-9, 1e-9)
+            .create_soft_square_waveform("wf", 0.5, 80e-9, 0.75, 0.2, True)
             .finalize()
         )
         self._assert_waveform_op(
-            kernel, ExtraSoftSquareWaveformOp, [80e-9, 0.5, 8e-9, 1e-9]
+            kernel,
+            SoftSquareWaveformOp,
+            [80e-9, 0.5, 0.75, 0.2],
+            self._assert_zero_at_edges,
         )
 
-    def test_softer_gaussian_waveform_gives_correct_ops(self):
-        """Does a softer gaussian waveform and then finalises, inspecting the waveform has
-        the correct properties."""
+    def test_regularized_gaussian_waveform_gives_correct_ops(self):
+        """Does a regularized gaussian waveform and then finalises, inspecting the waveform
+        has the correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_softer_gaussian_waveform("wf", 0.5, 80e-9, 16e-9)
+            .create_gaussian_waveform("wf", 0.5, 80e-9, 0.4, True)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SofterGaussianWaveformOp, [80e-9, 0.5, 16e-9])
+        self._assert_waveform_op(
+            kernel,
+            GaussianWaveformOp,
+            [80e-9, 0.5, 0.4],
+            self._assert_zero_at_edges,
+        )
+
+    def test_gaussian_waveform_with_drag_coefficients_gives_correct_ops(self):
+        """Gaussian waveforms should accept variadic DRAG coefficients."""
+        kernel = (
+            PulseKernelBuilder("test")
+            .create_gaussian_waveform("wf", 0.5, 80e-9, 0.4, False, 0.1, 0.2)
+            .finalize()
+        )
+        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e-9, 0.5, 0.4, 0.1, 0.2])
 
     def test_blackman_waveform_gives_correct_ops(self):
         """Does a Blackman waveform and then finalises, inspecting the waveform has the
@@ -357,80 +375,40 @@ class TestPulseKernelWaveformOperations:
         correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_setup_hold_waveform("wf", 0.5, 80e-9, 0.25, 16e-9)
+            .create_setup_hold_waveform("wf", 0.5, 80e-9, 0.25, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SetupHoldWaveformOp, [80e-9, 0.5, 0.25, 16e-9])
+        self._assert_waveform_op(kernel, SetupHoldWaveformOp, [80e-9, 0.5, 0.25, 0.2])
 
     def test_rounded_square_waveform_gives_correct_ops(self):
         """Does a rounded square waveform and then finalises, inspecting the waveform has
         the correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_rounded_square_waveform("wf", 0.5, 80e-9, 1e-9, 8e-9)
+            .create_rounded_square_waveform("wf", 0.5, 80e-9, 0.5, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, RoundedSquareWaveformOp, [80e-9, 0.5, 1e-9, 8e-9])
-
-    def test_drag_gaussian_waveform_gives_correct_ops(self):
-        """Does a drag gaussian waveform and then finalises, inspecting the waveform has the
-        correct properties."""
-        kernel = (
-            PulseKernelBuilder("test")
-            .create_drag_gaussian_waveform("wf", 0.5, 80e-9, 8e-9, 0.1, True)
-            .finalize()
-        )
-        self._assert_waveform_op(
-            kernel,
-            DragGaussianWaveformOp,
-            [80e-9, 0.5, 8e-9, 0.1],
-            self._assert_zero_at_edges,
-        )
-
-    def test_gaussian_zero_edge_waveform_gives_correct_ops(self):
-        """Does a gaussian zero edge waveform and then finalises, inspecting the waveform
-        has the correct properties."""
-        kernel = (
-            PulseKernelBuilder("test")
-            .create_gaussian_zero_edge_waveform("wf", 0.5, 80e-9, 8e-9, True)
-            .finalize()
-        )
-        self._assert_waveform_op(
-            kernel,
-            GaussianZeroEdgeWaveformOp,
-            [80e-9, 0.5, 8e-9],
-            self._assert_zero_at_edges,
-        )
+        self._assert_waveform_op(kernel, RoundedSquareWaveformOp, [80e-9, 0.5, 0.5, 0.2])
 
     def test_sech_waveform_gives_correct_ops(self):
         """Does a sech waveform and then finalises, inspecting the waveform has the correct
         properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_sech_waveform("wf", 0.5, 80e-9, 8e-9)
+            .create_sech_waveform("wf", 0.5, 80e-9, 0.3)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SechWaveformOp, [80e-9, 0.5, 8e-9])
+        self._assert_waveform_op(kernel, SechWaveformOp, [80e-9, 0.5, 0.3])
 
-    def test_cos_waveform_gives_correct_ops(self):
-        """Does a cosine waveform and then finalises, inspecting the waveform has the
+    def test_sinusoidal_waveform_gives_correct_ops(self):
+        """Does a sinusoidal waveform and then finalises, inspecting the waveform has the
         correct properties."""
         kernel = (
             PulseKernelBuilder("test")
-            .create_cos_waveform("wf", 0.5, 80e-9, 5e9, 0.25)
+            .create_sinusoidal_waveform("wf", 0.5, 80e-9, 3.0, 0.25)
             .finalize()
         )
-        self._assert_waveform_op(kernel, CosWaveformOp, [80e-9, 0.5, 5e9, 0.25])
-
-    def test_sin_waveform_gives_correct_ops(self):
-        """Does a sine waveform and then finalises, inspecting the waveform has the correct
-        properties."""
-        kernel = (
-            PulseKernelBuilder("test")
-            .create_sin_waveform("wf", 0.5, 80e-9, 5e9, 0.25)
-            .finalize()
-        )
-        self._assert_waveform_op(kernel, SinWaveformOp, [80e-9, 0.5, 5e9, 0.25])
+        self._assert_waveform_op(kernel, SinusoidalWaveformOp, [80e-9, 0.5, 3.0, 0.25])
 
     def test_custom_waveform_gives_correct_attribute_payload(self):
         """Custom waveforms should be emitted as a constant sampled waveform."""

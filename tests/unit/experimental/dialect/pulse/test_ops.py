@@ -41,20 +41,16 @@ from qat.experimental.dialect.pulse.ir import (
     CallKernelOp,
     CallKernelOpUserOpInterface,
     ConstantOp,
-    CosWaveformOp,
     CreateFrameOp,
     DiscriminateOp,
     DiscriminatorPolicyAttr,
-    DragGaussianWaveformOp,
     EqualiseAttr,
     EqualiseOp,
-    ExtraSoftSquareWaveformOp,
     FrameType,
     FrequencyAttr,
     FrequencyType,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
-    GaussianZeroEdgeWaveformOp,
     IntegrateOp,
     IQResultType,
     KernelOp,
@@ -73,9 +69,7 @@ from qat.experimental.dialect.pulse.ir import (
     ScaleOp,
     SechWaveformOp,
     SetupHoldWaveformOp,
-    SinWaveformOp,
-    SofterGaussianWaveformOp,
-    SofterSquareWaveformOp,
+    SinusoidalWaveformOp,
     SoftSquareWaveformOp,
     SquareWaveformOp,
     StartContinuousWaveformOp,
@@ -91,6 +85,40 @@ from qat.experimental.dialect.pulse.ir import (
     WeightsAttr,
 )
 from qat.experimental.dialect.pulse.ir.attributes import StateMapDictAttr
+from qat.experimental.waveforms.shapes.blackman import BlackmanWaveformShape
+from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
+from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
+from qat.experimental.waveforms.shapes.rounded_square import RoundedSquareWaveformShape
+from qat.experimental.waveforms.shapes.sech import SechWaveformShape
+from qat.experimental.waveforms.shapes.setup_hold import SetupHoldWaveformShape
+from qat.experimental.waveforms.shapes.sinusoidal import SinusoidalWaveformShape
+from qat.experimental.waveforms.shapes.soft_square import SoftSquareWaveformShape
+from qat.experimental.waveforms.shapes.square import SquareWaveformShape
+
+
+@irdl_op_definition
+class _ProducerOp(IRDLOperation):
+    name = "test.producer"
+    result = result_def()
+
+    def __init__(self, result_type: Attribute):
+        super().__init__(result_types=[result_type])
+
+
+def _float_constant(value: float):
+    return ArithConstantOp(FloatAttr(value, 64), f64).results[0]
+
+
+def _time_constant(value: float):
+    return ConstantOp(TimeAttr(value)).results[0]
+
+
+def _amplitude_constant(value: float | complex):
+    return ConstantOp(AmplitudeAttr(value)).results[0]
+
+
+def _phase_constant(value: float):
+    return ConstantOp(PhaseAttr(value)).results[0]
 
 
 class TestConstantOp:
@@ -486,52 +514,91 @@ class TestModuloOp:
 
 
 class TestSoftSquareWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "fractional_top_width": _float_constant(0.5),
+        "fractional_rise": _float_constant(0.1),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "fractional_top_width": f64,
+        "fractional_rise": f64,
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return SoftSquareWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["fractional_top_width"],
+            shape_operands["fractional_rise"],
+            False,
+            _float_constant(0.2),
+        )
+
     def test_initialization(self):
         width = ConstantOp(TimeAttr(800e-9))
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
 
-        op = SoftSquareWaveformOp(width, amplitude, rise)
+        op = SoftSquareWaveformOp(
+            width,
+            amplitude,
+            fractional_top_width,
+            fractional_rise,
+            BoolAttr(False, value_type=1),
+        )
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.rise == rise.results[0]
+        assert op.fractional_top_width == fractional_top_width.results[0]
+        assert op.fractional_rise == fractional_rise.results[0]
+        assert not op.regularize.value.data
         assert op.result.type == WaveformType()
         op.verify()
 
-
-class TestSofterSquareWaveformOp:
-    def test_initialization(self):
+    def test_initialization_accepts_bool_for_regularize(self):
         width = ConstantOp(TimeAttr(800e-9))
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        std_dev = ConstantOp(TimeAttr(200e-9))
-        rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
 
-        op = SofterSquareWaveformOp(width, amplitude, std_dev, rise)
-        assert op.width == width.results[0]
-        assert op.amplitude == amplitude.results[0]
-        assert op.std_dev == std_dev.results[0]
-        assert op.rise == rise.results[0]
-        assert op.result.type == WaveformType()
+        op = SoftSquareWaveformOp(
+            width,
+            amplitude,
+            fractional_top_width,
+            fractional_rise,
+            False,
+        )
+        assert op.regularize.value.data is False
         op.verify()
 
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a soft-square shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
 
-class TestExtraSoftSquareWaveformOp:
-    def test_initialization(self):
-        width = ConstantOp(TimeAttr(800e-9))
-        amplitude = ConstantOp(AmplitudeAttr(1.0))
-        std_dev = ConstantOp(TimeAttr(200e-9))
-        rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
+        assert isinstance(shape, SoftSquareWaveformShape)
+        assert shape.fractional_top_width == pytest.approx(0.5)
+        assert shape.fractional_rise == pytest.approx(0.1)
+        assert shape.regularize is False
 
-        op = ExtraSoftSquareWaveformOp(width, amplitude, std_dev, rise)
-        assert op.width == width.results[0]
-        assert op.amplitude == amplitude.results[0]
-        assert op.std_dev == std_dev.results[0]
-        assert op.rise == rise.results[0]
-        assert op.result.type == WaveformType()
-        op.verify()
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any soft-square shape param cannot be constant-folded."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
 
 
 class TestSquareWaveformOp:
+    @staticmethod
+    def _build_waveform_op():
+        return SquareWaveformOp(_time_constant(800e-9), _amplitude_constant(1.0))
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
@@ -542,52 +609,226 @@ class TestSquareWaveformOp:
         assert op.result.type == WaveformType()
         op.verify()
 
+    def test_build_shape_always_returns_square_shape(self):
+        """SquareWaveformOp has no shape params so build_shape always returns the shape."""
+        shape = self._build_waveform_op().build_shape()
+
+        assert isinstance(shape, SquareWaveformShape)
+
+    def test_drag_coefficients_returns_empty_tuple(self):
+        op = self._build_waveform_op()
+
+        assert op.drag_coefficients == ()
+
 
 class TestGaussianSquareWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "fractional_rise": _float_constant(0.2),
+        "fractional_top_width": _float_constant(0.5),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "fractional_rise": f64,
+        "fractional_top_width": f64,
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return GaussianSquareWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["fractional_rise"],
+            shape_operands["fractional_top_width"],
+            False,
+            _float_constant(0.1),
+        )
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
-        std_dev = ConstantOp(TimeAttr(200e-9))
-        square_width = ConstantOp(TimeAttr(400e-9))
-        zero_at_edges = BoolAttr(False, value_type=1)
+        fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        regularize = BoolAttr(False, value_type=1)
 
         op = GaussianSquareWaveformOp(
-            width, amplitude, std_dev, square_width, zero_at_edges
+            width,
+            amplitude,
+            fractional_rise,
+            fractional_top_width,
+            regularize,
         )
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.std_dev == std_dev.results[0]
-        assert op.square_width == square_width.results[0]
-        assert op.zero_at_edges.value.data is False
+        assert op.fractional_rise == fractional_rise.results[0]
+        assert op.fractional_top_width == fractional_top_width.results[0]
+        assert op.regularize.value.data is False
         assert op.result.type == WaveformType()
         op.verify()
+
+    def test_initialization_accepts_single_drag_coefficient(self):
+        amplitude = ConstantOp(AmplitudeAttr(1.0))
+        width = ConstantOp(TimeAttr(800e-9))
+        fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        drag_coefficient = ArithConstantOp(FloatAttr(0.1, 64), f64)
+
+        op = GaussianSquareWaveformOp(
+            width,
+            amplitude,
+            fractional_rise,
+            fractional_top_width,
+            False,
+            drag_coefficient,
+        )
+        assert len(op.drag_coefficients) == 1
+        assert op.drag_coefficients[0] == drag_coefficient.results[0]
+        op.verify()
+
+    def test_initialization_accepts_bool_for_regularize(self):
+        amplitude = ConstantOp(AmplitudeAttr(1.0))
+        width = ConstantOp(TimeAttr(800e-9))
+        fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+
+        op = GaussianSquareWaveformOp(
+            width,
+            amplitude,
+            fractional_rise,
+            fractional_top_width,
+            False,
+        )
+        assert op.regularize.value.data is False
+        op.verify()
+
+    def test_multiple_drag_coefficients_raises_verify_exception_on_verification(self):
+        """Multiple DRAG coefficients are not allowed."""
+
+        amplitude = ConstantOp(AmplitudeAttr(1.0))
+        width = ConstantOp(TimeAttr(800e-9))
+        fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        drag_first = ArithConstantOp(FloatAttr(0.1, 64), f64)
+        drag_second = ArithConstantOp(FloatAttr(0.2, 64), f64)
+
+        op = GaussianSquareWaveformOp(
+            width,
+            amplitude,
+            fractional_rise,
+            fractional_top_width,
+            False,
+            drag_first,
+            drag_second,
+        )
+        with pytest.raises(VerifyException, match="supports at most one DRAG coefficient"):
+            op.verify()
+
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a Gaussian-square shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
+
+        assert isinstance(shape, GaussianSquareWaveformShape)
+        assert shape.fractional_rise == pytest.approx(0.2)
+        assert shape.fractional_top_width == pytest.approx(0.5)
+        assert shape.regularize is False
+
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any Gaussian-square shape param is non-constant."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
 
 
 class TestGaussianWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "fractional_breadth": _float_constant(0.47),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "fractional_breadth": f64,
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return GaussianWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["fractional_breadth"],
+            False,
+            _float_constant(0.1),
+        )
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
-        rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
+        fractional_breadth = ArithConstantOp(FloatAttr(0.47, 64), f64)
 
-        op = GaussianWaveformOp(width, amplitude, rise)
+        op = GaussianWaveformOp(
+            width,
+            amplitude,
+            fractional_breadth,
+            BoolAttr(False, value_type=1),
+        )
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.rise == rise.results[0]
+        assert op.fractional_breadth == fractional_breadth.results[0]
+        assert not op.regularize.value.data
         assert op.result.type == WaveformType()
         op.verify()
 
-
-class TestSofterGaussianWaveformOp:
-    def test_initialization(self):
+    def test_initialization_accepts_bool_for_regularize(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
-        rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
-        op = SofterGaussianWaveformOp(width, amplitude, rise)
-        assert op.width == width.results[0]
-        assert op.amplitude == amplitude.results[0]
-        assert op.rise == rise.results[0]
-        assert op.result.type == WaveformType()
+        fractional_breadth = ArithConstantOp(FloatAttr(0.47, 64), f64)
+
+        op = GaussianWaveformOp(width, amplitude, fractional_breadth, False)
+        assert op.regularize.value.data is False
         op.verify()
+
+    def test_initialization_with_drag_coefficients(self):
+        amplitude = ConstantOp(AmplitudeAttr(1.0))
+        width = ConstantOp(TimeAttr(800e-9))
+        fractional_breadth = ArithConstantOp(FloatAttr(0.47, 64), f64)
+        drag_first = ArithConstantOp(FloatAttr(0.1, 64), f64)
+        drag_second = ArithConstantOp(FloatAttr(0.2, 64), f64)
+
+        op = GaussianWaveformOp(
+            width,
+            amplitude,
+            fractional_breadth,
+            False,
+            drag_first,
+            drag_second,
+        )
+        assert len(op.drag_coefficients) == 2
+        assert op.drag_coefficients[0].owner.value.value.data == pytest.approx(0.1)
+        assert op.drag_coefficients[1].owner.value.value.data == pytest.approx(0.2)
+        op.verify()
+
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a Gaussian shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
+
+        assert isinstance(shape, GaussianWaveformShape)
+        assert shape.fractional_breadth == pytest.approx(0.47)
+        assert shape.regularize is False
+
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any Gaussian shape param is non-constant."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
 
 
 class TestBlackmanWaveformOp:
@@ -601,130 +842,262 @@ class TestBlackmanWaveformOp:
         assert op.result.type == WaveformType()
         op.verify()
 
+    def test_build_shape_always_returns_blackman_shape(self):
+        """BlackmanWaveformOp has no shape params so build_shape always returns the
+        shape."""
+        op = BlackmanWaveformOp(
+            _time_constant(800e-9), _amplitude_constant(1.0), _float_constant(0.1)
+        )
+        shape = op.build_shape()
+
+        assert isinstance(shape, BlackmanWaveformShape)
+
 
 class TestSetupHoldWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "setup": _float_constant(0.5),
+        "fractional_rise": _float_constant(0.1),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "setup": f64,
+        "fractional_rise": f64,
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return SetupHoldWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["setup"],
+            shape_operands["fractional_rise"],
+        )
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
-        amp_setup = ConstantOp(AmplitudeAttr(1.0))
-        rise = ConstantOp(TimeAttr(200e-9))
+        setup = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
 
-        op = SetupHoldWaveformOp(width, amplitude, amp_setup, rise)
+        op = SetupHoldWaveformOp(width, amplitude, setup, fractional_rise)
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.amp_setup == amp_setup.results[0]
-        assert op.rise == rise.results[0]
+        assert op.setup == setup.results[0]
+        assert op.fractional_rise == fractional_rise.results[0]
         assert op.result.type == WaveformType()
         op.verify()
+
+    def test_drag_coefficients_returns_empty_tuple(self):
+        op = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS)
+
+        assert op.drag_coefficients == ()
+
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a setup-hold shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
+
+        assert isinstance(shape, SetupHoldWaveformShape)
+        assert shape.setup == pytest.approx(0.5)
+        assert shape.rise_location == pytest.approx(0.1)
+
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any setup-hold shape param is non-constant."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
 
 
 class TestRoundedSquareWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "fractional_top_width": _float_constant(0.5),
+        "fractional_rise": _float_constant(0.1),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "fractional_top_width": f64,
+        "fractional_rise": f64,
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return RoundedSquareWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["fractional_top_width"],
+            shape_operands["fractional_rise"],
+            _float_constant(0.2),
+        )
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
-        rise = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
-        std_dev = ConstantOp(TimeAttr(200e-9))
+        fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
+        fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
 
-        op = RoundedSquareWaveformOp(width, amplitude, rise, std_dev)
+        op = RoundedSquareWaveformOp(
+            width,
+            amplitude,
+            fractional_top_width,
+            fractional_rise,
+        )
 
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.rise == rise.results[0]
-        assert op.std_dev == std_dev.results[0]
+        assert op.fractional_top_width == fractional_top_width.results[0]
+        assert op.fractional_rise == fractional_rise.results[0]
         assert op.result.type == WaveformType()
         op.verify()
 
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a rounded-square shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
 
-class TestDragGaussianWaveformOp:
+        assert isinstance(shape, RoundedSquareWaveformShape)
+        assert shape.fractional_top_width == pytest.approx(0.5)
+        assert shape.fractional_rise == pytest.approx(0.1)
+
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any rounded-square shape param is non-constant."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
+
+
+class TestSinusoidalWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "number_of_periods": _float_constant(0.5),
+        "internal_phase": _phase_constant(1.57),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "number_of_periods": f64,
+        "internal_phase": PhaseType(),
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return SinusoidalWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["number_of_periods"],
+            shape_operands["internal_phase"],
+            _float_constant(0.2),
+        )
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(
-            TimeAttr(800e-9),
-        )
-        std_dev = ConstantOp(TimeAttr(200e-9))
-        beta = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
-        zero_at_edges = BoolAttr(False, value_type=1)
-
-        op = DragGaussianWaveformOp(width, amplitude, std_dev, beta, zero_at_edges)
-
-        assert op.width == width.results[0]
-        assert op.amplitude == amplitude.results[0]
-        assert op.std_dev == std_dev.results[0]
-        assert op.beta == beta.results[0]
-        assert op.zero_at_edges.value.data is False
-
-        assert op.result.type == WaveformType()
-        op.verify()
-
-
-class TestGaussianZeroEdgeWaveformOp:
-    def test_initialization(self):
-        amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(
-            TimeAttr(800e-9),
-        )
-        std_dev = ConstantOp(TimeAttr(200e-9))
-        zero_at_edges = BoolAttr(False, 1)
-
-        op = GaussianZeroEdgeWaveformOp(width, amplitude, std_dev, zero_at_edges)
-
-        assert op.width == width.results[0]
-        assert op.amplitude == amplitude.results[0]
-        assert op.std_dev == std_dev.results[0]
-        assert not op.zero_at_edges.value.data
-
-        assert op.result.type == WaveformType()
-        op.verify()
-
-
-class TestCosWaveformOp:
-    def test_initialization(self):
-        amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(
-            TimeAttr(800e-9),
-        )
-        frequency = ConstantOp(FrequencyAttr(5.0e9))
+        width = ConstantOp(TimeAttr(800e-9))
+        number_of_periods = ArithConstantOp(FloatAttr(0.5, 64), f64)
         internal_phase = ConstantOp(PhaseAttr(1.57))
 
-        op = CosWaveformOp(width, amplitude, frequency, internal_phase)
+        op = SinusoidalWaveformOp(width, amplitude, number_of_periods, internal_phase)
+
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.frequency == frequency.results[0]
+        assert op.number_of_periods == number_of_periods.results[0]
         assert op.internal_phase == internal_phase.results[0]
+
         assert op.result.type == WaveformType()
         op.verify()
 
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a sinusoidal shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
 
-class TestSinWaveformOp:
-    def test_initialization(self):
-        amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(
-            TimeAttr(800e-9),
-        )
-        frequency = ConstantOp(FrequencyAttr(5.0e9))
-        internal_phase = ConstantOp(PhaseAttr(1.57))
+        assert isinstance(shape, SinusoidalWaveformShape)
+        assert shape.number_of_periods == pytest.approx(0.5)
+        assert shape.internal_phase == pytest.approx(1.57)
 
-        op = SinWaveformOp(width, amplitude, frequency, internal_phase)
-        assert op.width == width.results[0]
-        assert op.amplitude == amplitude.results[0]
-        assert op.frequency == frequency.results[0]
-        assert op.internal_phase == internal_phase.results[0]
-        assert op.result.type == WaveformType()
-        op.verify()
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any sinusoidal shape param is non-constant."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
 
 
 class TestSechWaveformOp:
+    _BUILD_SHAPE_OPERANDS = {
+        "fractional_breadth": _float_constant(1.0 / 3.0),
+    }
+    _BUILD_SHAPE_OPERAND_TYPES = {
+        "fractional_breadth": f64,
+    }
+
+    @staticmethod
+    def _build_waveform_op(shape_operands):
+        return SechWaveformOp(
+            _time_constant(800e-9),
+            _amplitude_constant(1.0),
+            shape_operands["fractional_breadth"],
+            False,
+            _float_constant(0.1),
+        )
+
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         width = ConstantOp(TimeAttr(800e-9))
-        std_dev = ConstantOp(TimeAttr(200e-9))
+        fractional_breadth = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
-        op = SechWaveformOp(width, amplitude, std_dev)
+        op = SechWaveformOp(
+            width,
+            amplitude,
+            fractional_breadth,
+            BoolAttr(False, value_type=1),
+        )
         assert op.width == width.results[0]
         assert op.amplitude == amplitude.results[0]
-        assert op.std_dev == std_dev.results[0]
+        assert op.fractional_breadth == fractional_breadth.results[0]
+        assert not op.regularize.value.data
         assert op.result.type == WaveformType()
         op.verify()
+
+    def test_initialization_accepts_bool_for_regularize(self):
+        amplitude = ConstantOp(AmplitudeAttr(1.0))
+        width = ConstantOp(TimeAttr(800e-9))
+        fractional_breadth = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
+
+        op = SechWaveformOp(width, amplitude, fractional_breadth, False)
+        assert op.regularize.value.data is False
+        op.verify()
+
+    def test_build_shape_returns_expected_shape(self):
+        """Builds a sech shape when shape operands are constants."""
+        shape = self._build_waveform_op(self._BUILD_SHAPE_OPERANDS).build_shape()
+
+        assert isinstance(shape, SechWaveformShape)
+        assert shape.fractional_breadth == pytest.approx(1.0 / 3.0)
+        assert shape.regularize is False
+
+    @pytest.mark.parametrize(
+        "operand_name",
+        [pytest.param(name, id=name) for name in _BUILD_SHAPE_OPERAND_TYPES],
+    )
+    def test_build_shape_returns_none_for_non_constant_shape_params(self, operand_name):
+        """Returns ``None`` when any sech shape param is non-constant."""
+        non_constant_operands = dict(self._BUILD_SHAPE_OPERANDS)
+        non_constant_operands[operand_name] = _ProducerOp(
+            self._BUILD_SHAPE_OPERAND_TYPES[operand_name]
+        ).results[0]
+
+        assert self._build_waveform_op(non_constant_operands).build_shape() is None
 
 
 class TestCreateFrameOp:

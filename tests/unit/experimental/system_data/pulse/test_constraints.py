@@ -6,7 +6,7 @@ import pytest
 
 from qat.experimental.dialect.pulse.ir import (
     GaussianWaveformOp,
-    SinWaveformOp,
+    SinusoidalWaveformOp,
     SquareWaveformOp,
 )
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData, PortData
@@ -71,7 +71,11 @@ class TestPulseLevelConstraints:
 
     @pytest.mark.parametrize(
         "waveform_shape, response",
-        [(SquareWaveformOp, True), (GaussianWaveformOp, True), (SinWaveformOp, False)],
+        [
+            (SquareWaveformOp, True),
+            (GaussianWaveformOp, True),
+            (SinusoidalWaveformOp, False),
+        ],
     )
     def test_supports_waveform_shape_gives_correct_value(self, waveform_shape, response):
         """Tests that the supports_waveform_shape method on PulseLevelConstraints gives the

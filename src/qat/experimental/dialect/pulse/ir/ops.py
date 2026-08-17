@@ -54,23 +54,15 @@ from xdsl.traits import (
 )
 from xdsl.utils.exceptions import VerifyException
 
-from qat.ir.waveforms import (
-    BlackmanWaveform,
-    CosWaveform,
-    DragGaussianWaveform,
-    ExtraSoftSquareWaveform,
-    GaussianSquareWaveform,
-    GaussianWaveform,
-    GaussianZeroEdgeWaveform,
-    RoundedSquareWaveform,
-    SechWaveform,
-    SetupHoldWaveform,
-    SinWaveform,
-    SofterGaussianWaveform,
-    SofterSquareWaveform,
-    SoftSquareWaveform,
-    SquareWaveform,
-)
+from qat.experimental.waveforms.shapes.blackman import BlackmanWaveformShape
+from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
+from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
+from qat.experimental.waveforms.shapes.rounded_square import RoundedSquareWaveformShape
+from qat.experimental.waveforms.shapes.sech import SechWaveformShape
+from qat.experimental.waveforms.shapes.setup_hold import SetupHoldWaveformShape
+from qat.experimental.waveforms.shapes.sinusoidal import SinusoidalWaveformShape
+from qat.experimental.waveforms.shapes.soft_square import SoftSquareWaveformShape
+from qat.experimental.waveforms.shapes.square import SquareWaveformShape
 
 from .attributes import (
     AmplitudeAttr,
@@ -84,7 +76,7 @@ from .attributes import (
     TimeAttr,
     WeightsAttr,
 )
-from .interfaces import IsAnalyticalWaveformInterface, extract_constant_scalar
+from .interfaces import IsAnalyticalWaveformInterface
 from .traits import (
     AdvancesTimeTrait,
     CallKernelOpUserOpInterface,
@@ -113,6 +105,30 @@ _CONSTANT_OP_ATTRS = (
     SampledWaveformAttr,
 )
 _ARITH_OP_TYPES = _CONSTANT_OP_TYPES + (AcquisitionType,)
+
+
+def extract_constant_scalar(ssa: SSAValue) -> float | complex | None:
+    """Return the Python scalar behind ``ssa`` if it is a compile-time constant.
+
+    Handles both pulse-dialect ``ConstantOp`` values (which fold to a
+    :class:`PulseNumericTypedAttr`) and standard ``arith.constant`` values (which
+    fold to a :class:`FloatAttr`). Returns ``None`` otherwise.
+
+    Complex values whose imaginary part is exactly zero are narrowed to ``float``,
+    so waveform fields typed strictly as ``float`` accept scalars extracted from an
+    :class:`AmplitudeAttr`, which always stores its literal value as ``complex``.
+    """
+
+    attr = ConstantLike.get_constant_value(ssa)
+    if isinstance(attr, PulseNumericTypedAttr):
+        value = attr.literal_value
+    elif isinstance(attr, FloatAttr):
+        value = attr.value.data
+    else:
+        return None
+    if isinstance(value, complex) and value.imag == 0:
+        return value.real
+    return value
 
 
 @irdl_op_definition
@@ -522,7 +538,11 @@ class SquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
     amplitude = operand_def(AmplitudeType)
     result = result_def(WaveformType)
 
-    def __init__(self, width: SSAValue | Operation, amplitude: SSAValue | Operation):
+    def __init__(
+        self,
+        width: SSAValue | Operation,
+        amplitude: SSAValue | Operation,
+    ):
         """
         :param width: The duration of the square waveform, represented as a SSA value of
             type pulse.time.
@@ -531,20 +551,20 @@ class SquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
         """
         return super().__init__(operands=[width, amplitude], result_types=[WaveformType()])
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        if width is None or amp is None:
-            return None
-        return SquareWaveform(width=width, amp=amp)
+    @property
+    def drag_coefficients(self) -> tuple[SSAValue, ...]:
+        return ()
+
+    def build_shape(self):
+        return SquareWaveformShape()
 
 
 @irdl_op_definition
 class SoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A square pulse with smooth ``tanh``-shaped rise and fall edges.
+    """A soft-square waveform shape with explicit normalized shape parameters.
 
-    The envelope uses two hyperbolic-tangent steps to produce rounded transitions while
-    maintaining a flat top.
+    This op matches :class:`SoftSquareWaveformShape` by exposing
+    ``fractional_top_width``, ``fractional_rise``, and ``regularize`` directly.
 
     Example of how this looks in textual MLIR:
 
@@ -552,15 +572,19 @@ class SoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %rise = arith.constant<0.1> : !f64
-        %waveform = pulse.soft_square_waveform(%width, %amplitude, %rise) : !pulse.waveform
+        %fractional_top_width = arith.constant<0.5> : !f64
+        %fractional_rise = arith.constant<0.1> : !f64
+        %waveform = pulse.soft_square_waveform<false>(
+            %width, %amplitude, %fractional_top_width, %fractional_rise
+        ) : !pulse.waveform
 
     :ivar width: The duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
         pulse.amplitude.
-    :ivar rise: Controls the steepness of the tanh transition. Larger values produce a more
-        gradual edge; smaller values approach a sharp step.
+    :ivar fractional_top_width: Flat-top proportion in normalized units.
+    :ivar fractional_rise: Combined rise+fall proportion in normalized units.
+    :ivar regularize: Whether to make the envelope zero at the edges and one at the peak.
     :ivar result: The SSA value representing the resulting softened square waveform, which
         can be used as an operand in later operations.
     """
@@ -570,175 +594,62 @@ class SoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    rise = operand_def(AnyFloat)
+    fractional_top_width = operand_def(AnyFloat)
+    fractional_rise = operand_def(AnyFloat)
+    drag_coefficients = var_operand_def(AnyFloat)
+    regularize = prop_def(BoolAttr)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        rise: SSAValue | Operation,
+        fractional_top_width: SSAValue | Operation,
+        fractional_rise: SSAValue | Operation,
+        regularize: bool | BoolAttr,
+        *drag_coefficients: SSAValue | Operation,
     ):
         """
         :param width: The duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the waveform, represented as a SSA value of type
             pulse.amplitude.
-        :param rise: The rise of the waveform.
+        :param fractional_top_width: Flat-top proportion in normalized units.
+        :param fractional_rise: Rise and fall width  proportion in normalized units.
+        :param regularize: Whether to normalize the shape to zero at edges.
         """
+        regularize = (
+            BoolAttr(regularize, value_type=1)
+            if isinstance(regularize, bool)
+            else regularize
+        )
         return super().__init__(
-            operands=[width, amplitude, rise], result_types=[WaveformType()]
+            operands=[
+                width,
+                amplitude,
+                fractional_top_width,
+                fractional_rise,
+                list(drag_coefficients),
+            ],
+            properties={"regularize": regularize},
+            result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        rise = extract_constant_scalar(self.rise)
-        if width is None or amp is None or rise is None:
+    def build_shape(self):
+        fractional_top_width = extract_constant_scalar(self.fractional_top_width)
+        fractional_rise = extract_constant_scalar(self.fractional_rise)
+        if fractional_top_width is None or fractional_rise is None:
             return None
-        return SoftSquareWaveform(width=width, amp=amp, rise=rise)
-
-
-@irdl_op_definition
-class SofterSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A normalised double-tanh square pulse with extra edge softening.
-
-    Similar to :class:`SoftSquareWaveform` but the envelope is normalised so that the peak
-    is always one and the edges are pulled further toward zero by offsetting with the rise
-    parameter on both sides.
-
-    Example of how this looks in textual MLIR:
-
-    .. code-block:: mlir
-
-        %width = pulse.constant<128e-9> : !pulse.time
-        %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %rise = arith.constant<0.1> : !f64
-        %waveform = pulse.softer_square_waveform(%width, %amplitude, %std_dev, %rise)
-            : !pulse.waveform
-
-    :ivar width: The duration of the waveform, represented as a SSA value of type
-        pulse.time.
-    :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
-        pulse.amplitude.
-    :ivar std_dev: Half-width parameter governing the flat-top duration.
-    :ivar rise: Edge rise/fall scale.  Larger values give a softer slope than
-        :class:`SoftSquareWaveform` because the tanh transitions are shifted inward by
-        exactly one ``rise`` step on each side.
-    :ivar result: The SSA value representing the resulting softened square waveform, which
-        can be used as an operand in later operations.
-    """
-
-    name = "pulse.softer_square_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "softer_square"
-
-    width = operand_def(TimeType)
-    amplitude = operand_def(AmplitudeType)
-    std_dev = operand_def(TimeType)
-    rise = operand_def(AnyFloat)
-    result = result_def(WaveformType)
-
-    def __init__(
-        self,
-        width: SSAValue | Operation,
-        amplitude: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
-        rise: SSAValue | Operation,
-    ):
-        """
-        :param width: The duration of the square waveform, represented as a SSA value of
-            type pulse.time.
-        :param amplitude: The amplitude of the square waveform, represented as a SSA value
-            of type pulse.amplitude.
-        :param std_dev: Half-width parameter governing the flat-top duration.
-        :param rise: The SSA value representation of the rise parameter.
-        """
-        return super().__init__(
-            operands=[width, amplitude, std_dev, rise], result_types=[WaveformType()]
+        return SoftSquareWaveformShape(
+            fractional_top_width=fractional_top_width,
+            fractional_rise=fractional_rise,
+            regularize=bool(self.regularize.value.data),
         )
-
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        std_dev = extract_constant_scalar(self.std_dev)
-        rise = extract_constant_scalar(self.rise)
-        if width is None or amp is None or std_dev is None or rise is None:
-            return None
-        return SofterSquareWaveform(width=width, amp=amp, std_dev=std_dev, rise=rise)
-
-
-@irdl_op_definition
-class ExtraSoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A square pulse with heavily softened edges.
-
-    Example of how this looks in textual MLIR:
-
-    .. code-block:: mlir
-
-        %width = pulse.constant<128e-9> : !pulse.time
-        %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %rise = arith.constant<0.1> : !f64
-        %waveform = pulse.extra_soft_square_waveform(%width, %amplitude, %std_dev, %rise)
-            : !pulse.waveform
-
-    :ivar width: The duration of the waveform, represented as a SSA value of type
-        pulse.time.
-    :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
-        pulse.amplitude.
-    :ivar std_dev: Half-width parameter governing the flat-top duration.
-    :ivar rise: Edge rise/fall scale.  Larger values give a softer slope than
-        :class:`SofterSquareWaveform` because the tanh transitions are shifted inward by
-        more than one ``rise`` step on each side.
-    :ivar result: The SSA value representing the resulting softened square waveform, which
-        can be used as an operand in later operations.
-    """
-
-    name = "pulse.extra_soft_square_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "extra_soft_square"
-
-    width = operand_def(TimeType)
-    amplitude = operand_def(AmplitudeType)
-    std_dev = operand_def(TimeType)
-    rise = operand_def(AnyFloat)
-    result = result_def(WaveformType)
-
-    def __init__(
-        self,
-        width: SSAValue | Operation,
-        amplitude: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
-        rise: SSAValue | Operation,
-    ):
-        """
-        :param width: The duration of the square waveform, represented as a SSA value of
-            type pulse.time.
-        :param amplitude: The amplitude of the square waveform, represented as a SSA value
-            of type pulse.amplitude.
-        :param std_dev: The SSA value representation of the standard deviation parameter
-            governing the flat-top duration.
-        :param rise: The SSA value representation of the rise parameter.
-        """
-        return super().__init__(
-            operands=[width, amplitude, std_dev, rise], result_types=[WaveformType()]
-        )
-
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        std_dev = extract_constant_scalar(self.std_dev)
-        rise = extract_constant_scalar(self.rise)
-        if width is None or amp is None or std_dev is None or rise is None:
-            return None
-        return ExtraSoftSquareWaveform(width=width, amp=amp, std_dev=std_dev, rise=rise)
 
 
 @irdl_op_definition
 class GaussianSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A square pulse with a Gaussian rise and fall at the edges, i.e a flat-top pulse with
-    Gaussian-shaped rise and fall flanks. The envelope is flat (value = 1) over the inner
-    square_width and decays as a Gaussian outside that region.
+    """A Gaussian-square waveform with normalized shape parameters.
 
     Example of how this looks in textual MLIR:
 
@@ -746,21 +657,23 @@ class GaussianSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %square_width = pulse.constant<64e-9> : !pulse.time
-        %waveform = pulse.gaussian_square_waveform<true>(%width, %amplitude, %std_dev,%square_width)
-            : !pulse.waveform
+        %fractional_rise = arith.constant<0.2> : !f64
+        %fractional_top_width = arith.constant<0.5> : !f64
+        %waveform = pulse.gaussian_square_waveform<true>(
+            %width, %amplitude, %fractional_rise, %fractional_top_width
+        ) : !pulse.waveform
 
 
     :ivar width: The duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
         pulse.amplitude.
-    :ivar square_width: Duration of the central flat-top section.
-    :ivar std_dev: Standard deviation of the Gaussian flanks.  Larger values produce more
-        gradual rise/fall; smaller values produce steeper flanks.
-    :ivar zero_at_edges: If True, the envelope is offset and rescaled so that it is exactly
-        zero at the outermost sample points.
+    :ivar fractional_rise: Rise and fall width proportion in normalized units.
+    :ivar fractional_top_width: Flat-top proportion in normalized units.
+    :ivar drag_coefficients: Optional first-order DRAG coefficient. Gaussian-square only
+        supports one coefficient because higher-order derivatives are not part of the
+        shape model.
+    :ivar regularize: Whether to make the envelope zero at the edges and one at the peak.
     :ivar result: The SSA value representing the resulting Gaussian-square waveform, which
         can be used as an operand in later operations.
     """
@@ -770,46 +683,60 @@ class GaussianSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    std_dev = operand_def(TimeType)
-    square_width = operand_def(TimeType)
-    zero_at_edges = prop_def(BoolAttr)
+    fractional_rise = operand_def(AnyFloat)
+    fractional_top_width = operand_def(AnyFloat)
+    drag_coefficients = var_operand_def(AnyFloat)
+    regularize = prop_def(BoolAttr)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
-        square_width: SSAValue | Operation,
-        zero_at_edges: BoolAttr,
+        fractional_rise: SSAValue | Operation,
+        fractional_top_width: SSAValue | Operation,
+        regularize: bool | BoolAttr,
+        *drag_coefficients: SSAValue | Operation,
     ):
+        regularize = (
+            BoolAttr(regularize, value_type=1)
+            if isinstance(regularize, bool)
+            else regularize
+        )
         return super().__init__(
-            operands=[width, amplitude, std_dev, square_width],
-            properties={"zero_at_edges": zero_at_edges},
+            operands=[
+                width,
+                amplitude,
+                fractional_rise,
+                fractional_top_width,
+                list(drag_coefficients),
+            ],
+            properties={"regularize": regularize},
             result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        std_dev = extract_constant_scalar(self.std_dev)
-        square_width = extract_constant_scalar(self.square_width)
-        if width is None or amp is None or std_dev is None or square_width is None:
+    def verify_(self):
+        if len(self.drag_coefficients) > 1:
+            raise VerifyException(
+                "GaussianSquareWaveformOp supports at most one DRAG coefficient "
+                "(first-order only)."
+            )
+
+    def build_shape(self):
+        fractional_rise = extract_constant_scalar(self.fractional_rise)
+        fractional_top_width = extract_constant_scalar(self.fractional_top_width)
+        if fractional_rise is None or fractional_top_width is None:
             return None
-        zero_at_edges = bool(self.zero_at_edges.value.data)
-        return GaussianSquareWaveform(
-            width=width,
-            amp=amp,
-            std_dev=std_dev,
-            square_width=square_width,
-            zero_at_edges=zero_at_edges,
+        return GaussianSquareWaveformShape(
+            fractional_top_width=fractional_top_width,
+            fractional_rise=fractional_rise,
+            regularize=bool(self.regularize.value.data),
         )
 
 
 @irdl_op_definition
 class GaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """Represents a Gaussian waveform, defined by its duration, amplitude, and standard
-    deviation.
+    """Represents a Gaussian waveform with normalized shape parameters.
 
     Example of how this looks in textual MLIR:
 
@@ -817,16 +744,17 @@ class GaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %rise = arith.constant<0.1> : !f64
-        %waveform = pulse.gaussian_waveform(%width, %amplitude, %rise) : !pulse.waveform
+        %fractional_breadth = arith.constant<0.47> : !f64
+        %waveform = pulse.gaussian_waveform<false>(
+            %width, %amplitude, %fractional_breadth
+        ) : !pulse.waveform
 
     :ivar width: The duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
         pulse.amplitude.
-    :ivar rise: Dimensionless shape parameter contributing to the effective width
-        k = width * rise.  A larger rise spreads the Gaussian; a smaller rise narrows
-        it.
+    :ivar fractional_breadth: Gaussian width proportion in normalized units.
+    :ivar regularize: Whether to make the envelope zero at the edges and one at the peak.
     :ivar result: The SSA value representing the resulting Gaussian waveform, which can be
         used as an operand in later operations.
     """
@@ -836,94 +764,46 @@ class GaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    rise = operand_def(AnyFloat)
+    fractional_breadth = operand_def(AnyFloat)
+    drag_coefficients = var_operand_def(AnyFloat)
+    regularize = prop_def(BoolAttr)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        rise: SSAValue | Operation,
+        fractional_breadth: SSAValue | Operation,
+        regularize: bool | BoolAttr,
+        *drag_coefficients: SSAValue | Operation,
     ):
         """
         :param width: The duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the waveform, represented as a SSA value of type
             pulse.amplitude.
-        :param rise: The SSA value representation of the rise parameter.
+        :param fractional_breadth: Gaussian width proportion in normalized units.
+        :param regularize: Whether to normalize the shape to zero at edges.
         """
+        regularize = (
+            BoolAttr(regularize, value_type=1)
+            if isinstance(regularize, bool)
+            else regularize
+        )
         return super().__init__(
-            operands=[width, amplitude, rise], result_types=[WaveformType()]
+            operands=[width, amplitude, fractional_breadth, list(drag_coefficients)],
+            properties={"regularize": regularize},
+            result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        rise = extract_constant_scalar(self.rise)
-        if width is None or amp is None or rise is None:
+    def build_shape(self):
+        fractional_breadth = extract_constant_scalar(self.fractional_breadth)
+        if fractional_breadth is None:
             return None
-        return GaussianWaveform(width=width, amp=amp, rise=rise)
-
-
-@irdl_op_definition
-class SofterGaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A Gaussian envelope normalised so the minimum is zero and peak is one.
-
-    Uses the same underlying :class:`GaussianFunction` as :class:`GaussianWaveform` but
-    subtracts the edge value and rescales, ensuring the pulse is exactly zero at
-    ±width/2 (approximately) and peaks at 1.
-
-    Example of how this looks in textual MLIR:
-
-    .. code-block:: mlir
-
-        %width = pulse.constant<128e-9> : !pulse.time
-        %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %rise = arith.constant<0.1> : !f64
-        %waveform = pulse.softer_gaussian_waveform(%width, %amplitude, %rise)
-            : !pulse.waveform
-
-    :ivar width: The duration of the waveform, represented as a SSA value of type
-        pulse.time.
-    :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
-        pulse.amplitude.
-    :ivar rise: Shape parameter contributing to the effective width.
-    :ivar result: The SSA value representing the resulting softened Gaussian waveform, which
-        can be used as an operand in later operations.
-    """
-
-    name = "pulse.softer_gaussian_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "softer_gaussian"
-
-    width = operand_def(TimeType)
-    amplitude = operand_def(AmplitudeType)
-    rise = operand_def(AnyFloat)
-    result = result_def(WaveformType)
-
-    def __init__(
-        self,
-        width: SSAValue | Operation,
-        amplitude: SSAValue | Operation,
-        rise: SSAValue | Operation,
-    ):
-        """
-        :param width: The duration of the waveform, represented as a SSA value of type
-            pulse.time.
-        :param amplitude: The amplitude of the waveform, represented as a SSA value of type
-            pulse.amplitude.
-        :param rise: The SSA value representation of the rise parameter.
-        """
-        return super().__init__(
-            operands=[width, amplitude, rise], result_types=[WaveformType()]
+        return GaussianWaveformShape(
+            fractional_breadth=fractional_breadth,
+            regularize=bool(self.regularize.value.data),
         )
-
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        rise = extract_constant_scalar(self.rise)
-        if width is None or amp is None or rise is None:
-            return None
-        return SofterGaussianWaveform(width=width, amp=amp, rise=rise)
 
 
 @irdl_op_definition
@@ -950,23 +830,28 @@ class BlackmanWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
+    drag_coefficients = var_operand_def(AnyFloat)
     result = result_def(WaveformType)
 
-    def __init__(self, width: SSAValue | Operation, amplitude: SSAValue | Operation):
+    def __init__(
+        self,
+        width: SSAValue | Operation,
+        amplitude: SSAValue | Operation,
+        *drag_coefficients: SSAValue | Operation,
+    ):
         """
         :param width: The duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the waveform, represented as a SSA value of type
             pulse.amplitude.
         """
-        return super().__init__(operands=[width, amplitude], result_types=[WaveformType()])
+        return super().__init__(
+            operands=[width, amplitude, list(drag_coefficients)],
+            result_types=[WaveformType()],
+        )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        if width is None or amp is None:
-            return None
-        return BlackmanWaveform(width=width, amp=amp)
+    def build_shape(self):
+        return BlackmanWaveformShape()
 
 
 @irdl_op_definition
@@ -980,19 +865,17 @@ class SetupHoldWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %rise = pulse.constant<32e-9> : !pulse.time
-        %amp_setup = pulse.constant<0.5> : !pulse.amplitude
-        %waveform = pulse.setup_hold_waveform(%width, %amplitude, %amp_setup, %rise)
+        %setup = arith.constant<0.5> : !f64
+        %fractional_rise = arith.constant<0.1> : !f64
+        %waveform = pulse.setup_hold_waveform(%width, %amplitude, %setup, %fractional_rise)
             : !pulse.waveform
 
     :ivar width: The total duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the hold portion of the waveform, represented as a SSA
         value of type pulse.amplitude.
-    :ivar amp_setup: The amplitude of the setup portion of the waveform, represented as a
-        SSA value of type pulse.amplitude.
-    :ivar rise: The duration of the setup portion of the waveform, represented as a SSA
-        value of type pulse.time.
+    :ivar setup: Relative setup amplitude with respect to the hold segment amplitude.
+    :ivar fractional_rise: Fraction of width occupied by the setup segment.
     :ivar result: The SSA value representing the resulting setup-hold waveform, which can be
         used as an operand in later operations.
     """
@@ -1002,39 +885,40 @@ class SetupHoldWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    amp_setup = operand_def(AmplitudeType)
-    rise = operand_def(TimeType)
+    setup = operand_def(AnyFloat)
+    fractional_rise = operand_def(AnyFloat)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        amp_setup: SSAValue | Operation,
-        rise: SSAValue | Operation,
+        setup: SSAValue | Operation,
+        fractional_rise: SSAValue | Operation,
     ):
         """
         :param width: The total duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the hold portion of the waveform, represented as
             a SSA value of type pulse.amplitude.
-        :param amp_setup: The amplitude of the setup portion of the waveform, represented as
-            a SSA value of type pulse.amplitude.
-        :param rise: The duration of the setup portion of the waveform, represented as a SSA
-            value of type pulse.time.
+        :param setup: Relative setup amplitude.
+        :param fractional_rise: Fraction of width occupied by the setup segment.
         """
         return super().__init__(
-            operands=[width, amplitude, amp_setup, rise], result_types=[WaveformType()]
+            operands=[width, amplitude, setup, fractional_rise],
+            result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        amp_setup = extract_constant_scalar(self.amp_setup)
-        rise = extract_constant_scalar(self.rise)
-        if width is None or amp is None or amp_setup is None or rise is None:
+    @property
+    def drag_coefficients(self) -> tuple[SSAValue, ...]:
+        return ()
+
+    def build_shape(self):
+        setup = extract_constant_scalar(self.setup)
+        fractional_rise = extract_constant_scalar(self.fractional_rise)
+        if setup is None or fractional_rise is None:
             return None
-        return SetupHoldWaveform(width=width, amp=amp, amp_setup=amp_setup, rise=rise)
+        return SetupHoldWaveformShape(setup=setup, rise_location=fractional_rise)
 
 
 @irdl_op_definition
@@ -1053,18 +937,19 @@ class RoundedSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %rise = arith.constant<0.1> : !f64
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %waveform = pulse.rounded_square_waveform(%width, %amplitude, %rise, %std_dev)
+        %fractional_top_width = arith.constant<0.5> : !f64
+        %fractional_rise = arith.constant<0.1> : !f64
+        %waveform = pulse.rounded_square_waveform(
+            %width, %amplitude, %fractional_top_width, %fractional_rise
+        )
         : !pulse.waveform
 
     :ivar width: The duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
         pulse.amplitude.
-    :ivar rise: The SSA value representation of the rise parameter.
-    :ivar std_dev: The SSA value representation of the standard deviation parameter
-        governing the flat-top duration.
+    :ivar fractional_top_width: Flat-top proportion in normalized units.
+    :ivar fractional_rise: Edge-width proportion in normalized units.
     :ivar result: The SSA value representing the resulting rounded square waveform that can
         be used as an operand in later operations.
     """
@@ -1074,121 +959,52 @@ class RoundedSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    rise = operand_def(AnyFloat)
-    std_dev = operand_def(TimeType)
+    fractional_top_width = operand_def(AnyFloat)
+    fractional_rise = operand_def(AnyFloat)
+    drag_coefficients = var_operand_def(AnyFloat)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        rise: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
+        fractional_top_width: SSAValue | Operation,
+        fractional_rise: SSAValue | Operation,
+        *drag_coefficients: SSAValue | Operation,
     ):
         """
         :param width: The duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the waveform, represented as a SSA value of type
             pulse.amplitude.
-        :param rise: The SSA value representation of the rise parameter.
-        :param std_dev: The SSA value representation of the standard deviation parameter
-            governing the flat-top duration.
+        :param fractional_top_width: Flat-top proportion in normalized units.
+        :param fractional_rise: Edge-width proportion in normalized units.
         """
         return super().__init__(
-            operands=[width, amplitude, rise, std_dev], result_types=[WaveformType()]
-        )
-
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        rise = extract_constant_scalar(self.rise)
-        std_dev = extract_constant_scalar(self.std_dev)
-        if width is None or amp is None or rise is None or std_dev is None:
-            return None
-        return RoundedSquareWaveform(width=width, amp=amp, rise=rise, std_dev=std_dev)
-
-
-@irdl_op_definition
-class DragGaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """Drag Gaussian, tighter on one side and long tail on the other.
-
-    Example of how this looks in textual MLIR:
-
-    .. code-block:: mlir
-
-        %width = pulse.constant<128e-9> : !pulse.time
-        %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %beta = arith.constant<0.1> : !f64
-        %waveform = pulse.drag_gaussian_waveform<true>(%width, %amplitude, %std_dev, %beta)
-            : !pulse.waveform
-
-    :ivar width: The duration of the waveform, represented as a SSA value of type
-        pulse.time.
-    :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
-        pulse.amplitude.
-    :ivar std_dev: The SSA value representation of the standard deviation parameter
-        governing the width of the Gaussian.
-    :ivar beta: The SSA value representation of the DRAG coefficient, controlling the
-        magnitude of the imaginary component of the waveform.
-    :ivar zero_at_edges: A boolean property indicating whether to normalise the envelope to
-        zero at its edges.
-    :ivar result: The SSA value representing the resulting DRAG Gaussian waveform, which can
-        be used as an operand in later operations.
-    """
-
-    name = "pulse.drag_gaussian_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "drag_gaussian"
-
-    width = operand_def(TimeType)
-    amplitude = operand_def(AmplitudeType)
-    std_dev = operand_def(TimeType)
-    beta = operand_def(AnyFloat)
-    zero_at_edges = prop_def(BoolAttr)
-    result = result_def(WaveformType)
-
-    def __init__(
-        self,
-        width: SSAValue | Operation,
-        amplitude: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
-        beta: SSAValue | Operation,
-        zero_at_edges: BoolAttr,
-    ):
-        """
-        :param width: The duration of the waveform, represented as a SSA value of type
-            pulse.time.
-        :param amplitude: The amplitude of the waveform, represented as a SSA value of type
-            pulse.amplitude.
-        :param std_dev: The SSA value representation of the standard deviation parameter
-            governing the width of the Gaussian.
-        :param beta: The SSA value representation of the DRAG coefficient, controlling the
-            magnitude of the imaginary component of the waveform.
-        :param zero_at_edges: The boolean property indicating whether to normalise the
-            envelope to zero at its edges.
-        """
-        return super().__init__(
-            operands=[width, amplitude, std_dev, beta],
-            properties={"zero_at_edges": zero_at_edges},
+            operands=[
+                width,
+                amplitude,
+                fractional_top_width,
+                fractional_rise,
+                list(drag_coefficients),
+            ],
             result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        std_dev = extract_constant_scalar(self.std_dev)
-        beta = extract_constant_scalar(self.beta)
-        if width is None or amp is None or std_dev is None or beta is None:
+    def build_shape(self):
+        fractional_top_width = extract_constant_scalar(self.fractional_top_width)
+        fractional_rise = extract_constant_scalar(self.fractional_rise)
+        if fractional_top_width is None or fractional_rise is None:
             return None
-        zero_at_edges = bool(self.zero_at_edges.value.data)
-        return DragGaussianWaveform(
-            width=width, amp=amp, std_dev=std_dev, beta=beta, zero_at_edges=zero_at_edges
+        return RoundedSquareWaveformShape(
+            fractional_top_width=fractional_top_width,
+            fractional_rise=fractional_rise,
         )
 
 
 @irdl_op_definition
-class GaussianZeroEdgeWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A Gaussian pulse that can be normalized to be zero at the edges.
+class SinusoidalWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
+    """A sinusoidal waveform shape.
 
     Example of how this looks in textual MLIR:
 
@@ -1196,201 +1012,69 @@ class GaussianZeroEdgeWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %waveform = pulse.gaussian_zero_edge_waveform<true>(%width, %amplitude, %std_dev)
-            : !pulse.waveform
-
-    :ivar width: The duration of the waveform, represented as a SSA value of type
-        pulse.time.
-    :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
-        pulse.amplitude.
-    :ivar std_dev: The SSA value representation of the standard deviation parameter
-        governing the width of the Gaussian.
-    :ivar zero_at_edges: A boolean property indicating whether to normalise the envelope to
-        zero at its edges.
-    :ivar result: The SSA value representing the resulting Gaussian waveform, which can be
-        used as an operand in later operations.
-    """
-
-    name = "pulse.gaussian_zero_edge_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "gaussian_zero_edge"
-
-    width = operand_def(TimeType)
-    amplitude = operand_def(AmplitudeType)
-    std_dev = operand_def(TimeType)
-    zero_at_edges = prop_def(BoolAttr)
-    result = result_def(WaveformType)
-
-    def __init__(
-        self,
-        width: SSAValue | Operation,
-        amplitude: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
-        zero_at_edges: BoolAttr,
-    ):
-        """
-        :param width: The duration of the waveform, represented as a SSA value of type
-            pulse.time.
-        :param amplitude: The amplitude of the waveform, represented as a SSA value of type
-            pulse.amplitude.
-        :param std_dev: The SSA value representation of the standard deviation parameter
-            governing the width of the Gaussian.
-        :param zero_at_edges: The boolean property indicating whether to normalise the
-            envelope to zero at its edges.
-        """
-        return super().__init__(
-            operands=[width, amplitude, std_dev],
-            properties={"zero_at_edges": zero_at_edges},
-            result_types=[WaveformType()],
-        )
-
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        std_dev = extract_constant_scalar(self.std_dev)
-        if width is None or amp is None or std_dev is None:
-            return None
-        zero_at_edges = bool(self.zero_at_edges.value.data)
-        return GaussianZeroEdgeWaveform(
-            width=width, amp=amp, std_dev=std_dev, zero_at_edges=zero_at_edges
-        )
-
-
-@irdl_op_definition
-class CosWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A cosine-oscillating envelope.
-
-    Example of how this looks in textual MLIR:
-
-    .. code-block:: mlir
-
-        %width = pulse.constant<128e-9> : !pulse.time
-        %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %frequency = pulse.constant<5e9> : !pulse.frequency
+        %number_of_periods = arith.constant<0.5> : !f64
         %internal_phase = pulse.constant<1.5708> : !pulse.phase
-        %waveform = pulse.cos_waveform(%width, %amplitude, %frequency, %internal_phase)
+        %waveform = pulse.sinusoidal_waveform(
+            %width, %amplitude, %number_of_periods, %internal_phase
+        )
             : !pulse.waveform
 
     :ivar width: The duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
         pulse.amplitude.
-    :ivar frequency: The oscillation frequency of the waveform, represented as a SSA value
-        of type pulse.frequency.
+    :ivar number_of_periods: Number of periods across the normalized waveform domain.
     :ivar internal_phase: The internal phase offset of the waveform, represented as a SSA
         value of type pulse.phase.
-    :ivar result: The SSA value representing the resulting cosine waveform.
+    :ivar result: The SSA value representing the resulting sinusoidal waveform.
     """
 
-    name = "pulse.cos_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "cos"
+    name = "pulse.sinusoidal_waveform"
+    WAVEFORM_NAME: ClassVar[str] = "sinusoidal"
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    frequency = operand_def(FrequencyType)
+    number_of_periods = operand_def(AnyFloat)
     internal_phase = operand_def(PhaseType)
+    drag_coefficients = var_operand_def(AnyFloat)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        frequency: SSAValue | Operation,
+        number_of_periods: SSAValue | Operation,
         internal_phase: SSAValue | Operation,
+        *drag_coefficients: SSAValue | Operation,
     ):
         """
         :param width: The duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the waveform, represented as a SSA value of type
             pulse.amplitude.
-        :param frequency: The oscillation frequency of the waveform, represented as a SSA
-            value of type pulse.frequency.
+        :param number_of_periods: Number of periods across the waveform.
         :param internal_phase: The internal phase offset of the waveform, represented as a
             SSA value of type pulse.phase.
         """
         return super().__init__(
-            operands=[width, amplitude, frequency, internal_phase],
+            operands=[
+                width,
+                amplitude,
+                number_of_periods,
+                internal_phase,
+                list(drag_coefficients),
+            ],
             result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        frequency = extract_constant_scalar(self.frequency)
+    def build_shape(self):
+        number_of_periods = extract_constant_scalar(self.number_of_periods)
         internal_phase = extract_constant_scalar(self.internal_phase)
-        if width is None or amp is None or frequency is None or internal_phase is None:
+        if number_of_periods is None or internal_phase is None:
             return None
-        return CosWaveform(
-            width=width, amp=amp, frequency=frequency, internal_phase=internal_phase
-        )
-
-
-@irdl_op_definition
-class SinWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
-    """A sine-oscillating envelope.
-
-    Example of how this looks in textual MLIR:
-
-    .. code-block:: mlir
-
-        %width = pulse.constant<128e-9> : !pulse.time
-        %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %frequency = pulse.constant<5e9> : !pulse.frequency
-        %internal_phase = pulse.constant<1.5708> : !pulse.phase
-        %waveform = pulse.sin_waveform(%width, %amplitude, %frequency, %internal_phase)
-            : !pulse.waveform
-
-    :ivar width: The duration of the waveform, represented as a SSA value of type
-        pulse.time.
-    :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
-        pulse.amplitude.
-    :ivar frequency: The oscillation frequency of the waveform, represented as a SSA value
-        of type pulse.frequency.
-    :ivar internal_phase: The internal phase offset of the waveform, represented as a SSA
-        value of type pulse.phase.
-    :ivar result: The SSA value representing the resulting sine waveform.
-    """
-
-    name = "pulse.sin_waveform"
-    WAVEFORM_NAME: ClassVar[str] = "sin"
-
-    width = operand_def(TimeType)
-    amplitude = operand_def(AmplitudeType)
-    frequency = operand_def(FrequencyType)
-    internal_phase = operand_def(PhaseType)
-    result = result_def(WaveformType)
-
-    def __init__(
-        self,
-        width: SSAValue | Operation,
-        amplitude: SSAValue | Operation,
-        frequency: SSAValue | Operation,
-        internal_phase: SSAValue | Operation,
-    ):
-        """
-        :param width: The duration of the waveform, represented as a SSA value of type
-            pulse.time.
-        :param amplitude: The amplitude of the waveform, represented as a SSA value of type
-            pulse.amplitude.
-        :param frequency: The oscillation frequency of the waveform, represented as a SSA
-            value of type pulse.frequency.
-        :param internal_phase: The internal phase offset of the waveform, represented as a
-            SSA value of type pulse.phase.
-        """
-        return super().__init__(
-            operands=[width, amplitude, frequency, internal_phase],
-            result_types=[WaveformType()],
-        )
-
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        frequency = extract_constant_scalar(self.frequency)
-        internal_phase = extract_constant_scalar(self.internal_phase)
-        if width is None or amp is None or frequency is None or internal_phase is None:
-            return None
-        return SinWaveform(
-            width=width, amp=amp, frequency=frequency, internal_phase=internal_phase
+        return SinusoidalWaveformShape(
+            number_of_periods=number_of_periods,
+            internal_phase=internal_phase,
         )
 
 
@@ -1408,15 +1092,17 @@ class SechWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
         %width = pulse.constant<128e-9> : !pulse.time
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %std_dev = pulse.constant<32e-9> : !pulse.time
-        %waveform = pulse.sech_waveform(%width, %amplitude, %std_dev) : !pulse.waveform
+        %fractional_breadth = arith.constant<0.33> : !f64
+        %waveform = pulse.sech_waveform<false>(
+            %width, %amplitude, %fractional_breadth
+        ) : !pulse.waveform
 
     :ivar width: The duration of the waveform, represented as a SSA value of type
         pulse.time.
     :ivar amplitude: The amplitude of the waveform, represented as a SSA value of type
         pulse.amplitude.
-    :ivar std_dev: The SSA value representation of the width parameter `sigma` of the sech
-        pulse.
+    :ivar fractional_breadth: Sech width proportion in normalized units.
+    :ivar regularize: Whether to make the envelope zero at the edges and one at the peak.
     :ivar result: The SSA value representing the resulting sech waveform, which can be
         used as an operand in later operations.
     """
@@ -1426,34 +1112,46 @@ class SechWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
-    std_dev = operand_def(TimeType)
+    fractional_breadth = operand_def(AnyFloat)
+    drag_coefficients = var_operand_def(AnyFloat)
+    regularize = prop_def(BoolAttr)
     result = result_def(WaveformType)
 
     def __init__(
         self,
         width: SSAValue | Operation,
         amplitude: SSAValue | Operation,
-        std_dev: SSAValue | Operation,
+        fractional_breadth: SSAValue | Operation,
+        regularize: bool | BoolAttr,
+        *drag_coefficients: SSAValue | Operation,
     ):
         """
         :param width: The duration of the waveform, represented as a SSA value of type
             pulse.time.
         :param amplitude: The amplitude of the waveform, represented as a SSA value of type
             pulse.amplitude.
-        :param std_dev: The SSA value representation of the width parameter `sigma` of the
-            sech pulse.
+        :param fractional_breadth: Sech width proportion in normalized units.
+        :param regularize: Whether to normalize the shape to zero at edges.
         """
+        regularize = (
+            BoolAttr(regularize, value_type=1)
+            if isinstance(regularize, bool)
+            else regularize
+        )
         return super().__init__(
-            operands=[width, amplitude, std_dev], result_types=[WaveformType()]
+            operands=[width, amplitude, fractional_breadth, list(drag_coefficients)],
+            properties={"regularize": regularize},
+            result_types=[WaveformType()],
         )
 
-    def build_waveform(self):
-        width = extract_constant_scalar(self.width)
-        amp = extract_constant_scalar(self.amplitude)
-        std_dev = extract_constant_scalar(self.std_dev)
-        if width is None or amp is None or std_dev is None:
+    def build_shape(self):
+        fractional_breadth = extract_constant_scalar(self.fractional_breadth)
+        if fractional_breadth is None:
             return None
-        return SechWaveform(width=width, amp=amp, std_dev=std_dev)
+        return SechWaveformShape(
+            fractional_breadth=fractional_breadth,
+            regularize=bool(self.regularize.value.data),
+        )
 
 
 @irdl_op_definition

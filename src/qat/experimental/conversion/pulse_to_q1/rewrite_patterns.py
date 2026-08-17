@@ -30,7 +30,7 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
     WeightsAttr,
 )
-from qat.experimental.dialect.pulse.ir.interfaces import extract_constant_scalar
+from qat.experimental.dialect.pulse.ir.ops import extract_constant_scalar
 from qat.experimental.dialect.pulse.units import TIME_UNIT_EXPONENTS, TimeUnits
 from qat.experimental.dialect.pulse.utils import require_constant_operand
 from qat.experimental.dialect.q1 import (

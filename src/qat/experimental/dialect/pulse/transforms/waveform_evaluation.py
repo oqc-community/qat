@@ -31,6 +31,7 @@ collapsed first and then treated as a compile-time-constant operand.
 from collections import defaultdict
 from dataclasses import dataclass
 
+import numpy as np
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.ir import SSAValue
@@ -38,16 +39,46 @@ from xdsl.passes import ModulePass
 from xdsl.pattern_rewriter import PatternRewriter, PatternRewriteWalker, RewritePattern
 from xdsl.rewriter import InsertPoint
 from xdsl.transforms.canonicalize import CanonicalizePass
+from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, TimeAttr
 from qat.experimental.dialect.pulse.ir.interfaces import IsAnalyticalWaveformInterface
-from qat.experimental.dialect.pulse.ir.ops import ConstantOp, PulseOp
+from qat.experimental.dialect.pulse.ir.ops import (
+    ConstantOp,
+    PulseOp,
+    extract_constant_scalar,
+)
 from qat.experimental.dialect.pulse.ir.types import FrameType, WaveformType
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 from qat.experimental.utils.logging import get_logger
-from qat.ir.waveforms import sample_waveform
+from qat.experimental.waveforms.evaluate import evaluate_waveform
+from qat.experimental.waveforms.shapes.base import WaveformShape
 
 log = get_logger(__name__)
+_PICOSECONDS_PER_SECOND = 1e12
+
+
+def _seconds_to_picoseconds(seconds: float, *, value_name: str) -> int:
+    """Convert seconds to integer picoseconds with pass-level validation."""
+
+    if seconds <= 0:
+        raise PassFailedException(f"{value_name} must be positive.")
+
+    picoseconds = int(round(seconds * _PICOSECONDS_PER_SECOND))
+    if picoseconds <= 0:
+        raise PassFailedException(f"{value_name} must be at least 1 ps after conversion.")
+
+    if not np.isclose(
+        picoseconds / _PICOSECONDS_PER_SECOND,
+        seconds,
+        rtol=0.0,
+        atol=1e-15,
+    ):
+        raise PassFailedException(
+            f"{value_name} {seconds} cannot be represented as integer picoseconds."
+        )
+
+    return picoseconds
 
 
 def _resolve_sample_time(
@@ -90,14 +121,55 @@ def _group_pulse_uses_by_sample_time(
     return grouped
 
 
-def _make_sampled_constant(waveform, sample_time: float) -> ConstantOp:
-    sampled = sample_waveform(waveform, sample_time)
+def _make_sampled_constant(
+    op: IsAnalyticalWaveformInterface,
+    shape: WaveformShape,
+    sample_time: float,
+) -> ConstantOp | None:
+    """Create a constant op with sampled waveform, or return None if operands are non-
+    constant.
+
+    Extracts width, amplitude, and DRAG coefficients from the op's operands, validates
+    they are compile-time constants, and samples the waveform. Returns None if any
+    operand is not a constant.
+
+    :param op: The analytical waveform operation.
+    :param shape: The already-built waveform shape.
+    :param sample_time: Desired sample time in seconds.
+    :returns: A ``ConstantOp`` with sampled waveform, or ``None`` if sampling is skipped.
+    """
+    # TODO: COMPILER-1388, units should be in ps by default
+    width: float = extract_constant_scalar(op.width)
+    amplitude: float | complex = extract_constant_scalar(op.amplitude)
+    if width is None or amplitude is None:
+        return None
+
+    drag_coefficients_operands = op.drag_coefficients
+    drag_coefficients: list[float] = []
+    for drag_coefficient_operand in drag_coefficients_operands:
+        drag_coefficient: float = extract_constant_scalar(drag_coefficient_operand)
+        if drag_coefficient is None:
+            return None
+        drag_coefficients.append(float(drag_coefficient))
+
+    width_ps = _seconds_to_picoseconds(width, value_name="Width")
+    sample_time_ps = _seconds_to_picoseconds(sample_time, value_name="Sample time")
+
+    if width_ps % sample_time_ps != 0:
+        raise PassFailedException(
+            f"Width {width} is not an integer multiple of sample time {sample_time}."
+        )
+
+    samples = evaluate_waveform(
+        width=width_ps,
+        sample_time=sample_time_ps,
+        shape=shape,
+        amplitude=amplitude,
+        drag_coefficients=drag_coefficients,
+    )
+
     return ConstantOp(
-        SampledWaveformAttr(
-            sampled.samples,
-            TimeAttr(waveform.duration),
-            TimeAttr(sampled.sample_time),
-        ),
+        SampledWaveformAttr(samples, TimeAttr(width), TimeAttr(sample_time)),
         result_type=WaveformType(),
     )
 
@@ -126,11 +198,11 @@ class _RewriteAnalyticalWaveform(RewritePattern):
             )
             return
 
-        waveform = op.build_waveform()
-        if waveform is None:
+        shape = op.build_shape()
+        if shape is None:
             log.debug(
-                f"waveform-evaluation: skipping {op_type}: at least one operand is "
-                f"not a compile-time constant; leaving waveform for the assembler."
+                f"waveform-evaluation: skipping {op_type}: shape parameters are not "
+                "compile-time constants; leaving waveform for the assembler."
             )
             return
 
@@ -145,15 +217,28 @@ class _RewriteAnalyticalWaveform(RewritePattern):
             )
             return
 
+        sampled_constants_by_sample_time = {}
+        for sample_time in pulses_by_sample_time:
+            constant_op = _make_sampled_constant(op, shape, sample_time)
+            if constant_op is None:
+                log.debug(
+                    f"waveform-evaluation: skipping {op_type}: width, amplitude, or drag "
+                    "coefficient is not a compile-time constant; leaving waveform for the "
+                    "assembler."
+                )
+                return
+            sampled_constants_by_sample_time[sample_time] = constant_op
+
         for sample_time, uses in pulses_by_sample_time.items():
-            constant_op = _make_sampled_constant(waveform, sample_time)
+            constant_op = sampled_constants_by_sample_time[sample_time]
             rewriter.insert_op(constant_op, InsertPoint.before(op))
             for pulse, operand_index in uses:
                 pulse.operands[operand_index] = constant_op.result
+            width = extract_constant_scalar(op.width)
             log.debug(
-                f"waveform-evaluation: sampled {op_type} ({type(waveform).__name__}) "
+                f"waveform-evaluation: sampled {op_type} ({type(shape).__name__}) "
                 f"with sample_time={sample_time:.3e}s, duration="
-                f"{waveform.duration:.3e}s, rewired {len(uses)} pulse(s)."
+                f"{width:.3e}s, rewired {len(uses)} pulse(s)."
             )
 
         rewriter.erase_op(op)
