@@ -1,0 +1,7 @@
+qat.experimental.waveforms.evaluate module
+==========================================
+
+.. automodule:: qat.experimental.waveforms.evaluate
+   :members:
+   :undoc-members:
+   :show-inheritance:

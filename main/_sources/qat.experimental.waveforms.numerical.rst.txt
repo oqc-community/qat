@@ -1,0 +1,7 @@
+qat.experimental.waveforms.numerical module
+===========================================
+
+.. automodule:: qat.experimental.waveforms.numerical
+   :members:
+   :undoc-members:
+   :show-inheritance:
