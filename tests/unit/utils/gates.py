@@ -92,7 +92,7 @@ def two_q_gate_tests():
 
 
 def circuit_as_unitary(num_qubits, ir):
-    """Calcualtes the unitary  for Qat IR composed of gates.
+    """Calculates the unitary  for Qat IR composed of gates.
 
     Qubit operations are ignored, and control flow is not supported.
     """
