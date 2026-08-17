@@ -1,0 +1,7 @@
+qat.experimental.analysis.post\_processing module
+=================================================
+
+.. automodule:: qat.experimental.analysis.post_processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
