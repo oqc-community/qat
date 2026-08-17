@@ -235,27 +235,27 @@ class GroupEntriesOp(IRDLOperation):
 
     name = "results.group_entries"
 
-    collection = operand_def(RecordType)
+    record = operand_def(RecordType)
     keys: ArrayAttr[StringAttr] = prop_def(ArrayAttr[StringAttr])
     group_key: StringAttr = prop_def(StringAttr)
     result = result_def(RecordType)
 
     def __init__(
         self,
-        collection: SSAValue[RecordType] | Operation,
+        record: SSAValue[RecordType] | Operation,
         keys: Sequence[str],
         group_key: str,
     ):
-        """Initializes the GroupEntriesOp with the given collection, keys, and group key.
+        """Initializes the GroupEntriesOp with the given record, keys, and group key.
 
-        :param collection: The SSA value representing the existing results record.
+        :param record: The SSA value representing the existing results record.
         :param keys: A list of strings representing the keys to group in the new entry.
         :param group_key: A string representing the key for the new grouped entry.
         """
-        collection = SSAValue.get(collection, type=RecordType)
+        record = SSAValue.get(record, type=RecordType)
         keys_attr = ArrayAttr([StringAttr(key) for key in keys])
         return super().__init__(
-            operands=[collection],
+            operands=[record],
             result_types=[RecordType()],
             properties={"keys": keys_attr, "group_key": StringAttr(group_key)},
         )
@@ -268,7 +268,7 @@ class GroupEntriesOp(IRDLOperation):
 @irdl_op_definition
 class ReduceOp(IRDLOperation):
     """Reduces a record, down to a subset of the entries in the record, producing a new
-    record or collection of records.
+    record.
 
     We often want to gather a number of measurements to use in post-processing for use cases
     such as post-selection, and more general error mitigation methods. But not each of these
@@ -295,25 +295,25 @@ class ReduceOp(IRDLOperation):
 
     name = "results.reduce"
 
-    collection = operand_def(RecordType)
+    record = operand_def(RecordType)
     keys: ArrayAttr[StringAttr] = prop_def(ArrayAttr[StringAttr])
     result = result_def(RecordType)
 
     def __init__(
         self,
-        collection: SSAValue[RecordType] | Operation,
+        record: SSAValue[RecordType] | Operation,
         keys: Sequence[str],
     ):
-        """Initializes the ReduceOp with the given collection and keys.
+        """Initializes the ReduceOp with the given record and keys.
 
-        :param collection: The SSA value representing the existing results record.
+        :param record: The SSA value representing the existing results record.
         :param keys: A list of strings representing the keys to retain in the reduced
-            records.
+            record.
         """
-        collection = SSAValue.get(collection, type=RecordType)
+        record = SSAValue.get(record, type=RecordType)
         keys_attr = ArrayAttr([StringAttr(key) for key in keys])
         return super().__init__(
-            operands=[collection],
+            operands=[record],
             result_types=[RecordType()],
             properties={"keys": keys_attr},
         )

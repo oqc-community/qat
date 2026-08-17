@@ -193,14 +193,14 @@ class TestGroupEntriesOp:
     """Tests the GroupEntriesOp, which groups entries in a results record."""
 
     def test_initialization_and_properties_with_record(self):
-        """Tests that the GroupEntriesOp can be initialized with a collection and a key and
-        that its properties return the expected values."""
+        """Tests that the GroupEntriesOp can be initialized with a record and a key and that
+        its properties return the expected values."""
         record = _MockRecordOp()
 
         op = GroupEntriesOp(record.res, ["a", "b"], "grouped")
         op.verify()
 
-        assert op.collection is record.res
+        assert op.record is record.res
         assert op.keys == ArrayAttr([StringAttr("a"), StringAttr("b")])
         assert op.group_key == StringAttr("grouped")
         assert op.result.type == RecordType()
@@ -226,7 +226,7 @@ class TestReduceOp:
         op = ReduceOp(record.res, ["a", "b"])
         op.verify()
 
-        assert op.collection is record.res
+        assert op.record is record.res
         assert op.keys == ArrayAttr([StringAttr("a"), StringAttr("b")])
         assert op.result.type == RecordType()
 
