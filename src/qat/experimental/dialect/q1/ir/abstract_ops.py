@@ -15,7 +15,7 @@ from collections.abc import Sequence
 from re import compile
 from typing import Generic, TypeAlias
 
-from xdsl.backend.assembly_printer import AssemblyPrinter, OneLineAssemblyPrintable
+from xdsl.backend.assembly_printer import OneLineAssemblyPrintable
 from xdsl.backend.register_allocatable import HasRegisterConstraints, RegisterConstraints
 from xdsl.backend.register_type import RegisterType
 from xdsl.dialects.builtin import StringAttr
@@ -24,7 +24,9 @@ from xdsl.irdl import IRDLOperation, operand_def, opt_prop_def, prop_def, result
 from xdsl.parser import Parser
 from xdsl.printer import Printer
 
-from qat.experimental.dialect.q1.ir.attrs import LabelAttr
+from qat.experimental.dialect.q1.ir.arg_format import WithArgument
+from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, LabelAttr
+from qat.experimental.dialect.q1.ir.emission_context import EmissionContext
 from qat.experimental.dialect.q1.ir.imm_desc import (
     AddressImm,
     ImmT,
@@ -64,23 +66,6 @@ def _as_jump_target(target: JumpTargetInput) -> JumpTarget:
     return target
 
 
-def _assembly_arg_str(arg: AssemblyInstructionArg) -> str:
-    if isinstance(arg, LabelAttr):
-        return f"@{arg.data}"
-    elif isinstance(arg, Q1Imm):
-        return str(arg.data)
-    elif isinstance(arg, SSAValue):
-        if not isinstance(t := arg.type, RegisterType):
-            raise ValueError(f"Unexpected register type {t}")
-        return t.register_name.data
-    elif isinstance(arg, RegisterType):
-        return arg.register_name.data
-    elif isinstance(arg, StringAttr):
-        return arg.data
-
-    return arg
-
-
 class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
     """Base class for operations that can be printed and parsed.
 
@@ -92,6 +77,7 @@ class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
     """
 
     comment = opt_prop_def(StringAttr)
+    debug_info = opt_prop_def(DebugInfoAttr)
 
     @classmethod
     def parse(cls, parser: Parser) -> Q1AsmOperation:
@@ -173,16 +159,119 @@ class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
 
         raise NotImplementedError
 
-    def assembly_line(self) -> str | None:
-        """Emits Q1 assembly instruction line corresponding to this operation."""
+    def with_debug_info(self, debug_info: DebugInfoAttr | None) -> Q1AsmOperation:
+        """Attach debug information to this operation and return ``self``.
 
-        instruction_name = self.assembly_mnemonic()
-        arg_str = ", ".join(
-            _assembly_arg_str(arg) for arg in self.assembly_line_args() if arg is not None
+        Mutates the operation in-place so that :meth:`assembly_line` can derive an
+        inline comment from the attached debug metadata.  Returns ``self`` to support
+        fluent construction::
+
+            q1_op = NopOp().with_debug_info(DebugInfoAttr("pulse.pulse", "q0_drive"))
+
+        When *debug_info* is ``None`` the method is a no-op, so callers do not need
+        to guard against ``None`` before calling.
+
+        :param debug_info: The debug information attribute to attach, or ``None`` to
+            leave the operation unchanged.
+        :returns: This operation, with ``debug_info`` set (or unchanged if ``None``).
+        """
+        if debug_info is not None:
+            self.properties["debug_info"] = debug_info
+        return self
+
+    def print_arg(self, arg: AssemblyInstructionArg) -> str:
+        """Return the textual form of a single assembly argument.
+
+        Delegates to :meth:`~qat.experimental.dialect.q1.ir.arg_format.WithArgument.print_arg`
+        for any arg that implements
+        :class:`~qat.experimental.dialect.q1.ir.arg_format.WithArgument`.  For
+        :class:`~xdsl.ir.SSAValue`, delegation is applied to its type attribute.
+        :class:`~xdsl.dialects.builtin.StringAttr` falls back to ``arg.data``;
+        everything else falls back to ``str(arg)``.
+
+        Override this method in operations that require custom per-argument formatting.
+
+        :param arg: The argument to format.
+        :returns: Textual form of the argument.
+        """
+        if isinstance(arg, WithArgument):
+            return arg.print_arg()
+        if isinstance(arg, SSAValue):
+            t = arg.type
+            if not isinstance(t, WithArgument):
+                raise ValueError(f"Unexpected register type {t}")
+            return t.print_arg()
+        if isinstance(arg, StringAttr):
+            return arg.data
+        return str(arg)
+
+    def print_args(self) -> str:
+        """Return the formatted argument string for assembly emission.
+
+        Joins :meth:`print_arg` results for each argument from
+        :meth:`assembly_line_args` using ``", "`` as separator.  Override
+        :meth:`print_arg` to customise per-argument formatting, or override
+        this method entirely when a non-comma separator is required (e.g.
+        :class:`~qat.experimental.dialect.q1.ir.ops.DefDirectiveOp`).
+
+        :returns: Formatted argument string, or ``""`` if there are no arguments.
+        """
+        return ", ".join(
+            self.print_arg(arg) for arg in self.assembly_line_args() if arg is not None
         )
-        return AssemblyPrinter.assembly_line(
-            instruction_name, arg_str, self.comment, is_indented=False
-        )
+
+    def _print_instruction(self) -> str | None:
+        """Return the instruction text without any trailing comment.
+
+        The default implementation prints ``<mnemonic> <args>`` using the values from
+        :meth:`assembly_mnemonic` and :meth:`print_args`.  Override this method in
+        operations that require non-standard textual formats (e.g.
+        :class:`~qat.experimental.dialect.q1.ir.ops.LabelOp`).
+
+        :returns: Bare instruction text, or ``None`` to suppress emission entirely.
+        """
+        return f"{self.assembly_mnemonic()} {self.print_args()}".strip()
+
+    def _build_comment(self, ctx: EmissionContext) -> str | None:
+        """Return the comment text to append to the instruction, or ``None``.
+
+        Combines the explicit ``comment`` property with any debug-info derived text.
+        When both are present they are joined with ``" | "``.  The *ctx* controls
+        whether debug-info text is included; the explicit ``comment`` is always included
+        regardless of context flags.
+
+        :param ctx: Emission context controlling optional annotations.
+        :returns: Comment text (without leading ``#``), or ``None``.
+        """
+        parts: list[str] = []
+        if self.comment is not None:
+            parts.append(self.comment.data)
+        if ctx.emit_debug_info and self.debug_info is not None:
+            parts.append(self.debug_info.format_comment())
+        return " | ".join(parts) if parts else None
+
+    def assembly_line(self, ctx: EmissionContext | None = None) -> str | None:
+        """Emits Q1 assembly instruction line for this operation.
+
+        Calls :meth:`_print_instruction` for the mnemonic-and-arguments text and
+        :meth:`_build_comment` for the optional trailing comment, then joins them.
+        The *ctx* controls which optional annotations are included; pass
+        ``EmissionContext(emit_debug_info=False)`` to omit debug-info comments (e.g.
+        for production output).  Explicit ``comment`` properties are never suppressed.
+
+        :param ctx: Emission context controlling which annotations are emitted.
+            Defaults to a new :class:`EmissionContext` with all default settings.
+        :returns: The assembly text for this instruction, or ``None``.
+        """
+        if ctx is None:
+            ctx = EmissionContext()
+        instruction = self._print_instruction()
+        if instruction is None:
+            return None
+        comment = self._build_comment(ctx)
+        if not comment:
+            return instruction
+        return f"{instruction} # {comment}"
 
 
 class Q1RegAllocOperation(HasRegisterConstraints, IRDLOperation, ABC):

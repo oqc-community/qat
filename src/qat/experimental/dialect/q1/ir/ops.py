@@ -18,7 +18,6 @@ Flag mnemonic glossary used in op docstrings:
 * `OF`: overflow flag
 """
 
-from xdsl.backend.assembly_printer import AssemblyPrinter
 from xdsl.dialects.builtin import StringAttr
 from xdsl.irdl import irdl_op_definition, prop_def, traits_def
 from xdsl.traits import Commutative, IsTerminator, Pure
@@ -114,11 +113,8 @@ class LabelOp(Q1AsmOperation):
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg | None, ...]:
         return ()
 
-    def assembly_line(self) -> str | None:
-        if self.comment is None:
-            return f"{self.reference.data}:"
-
-        return f"{self.reference.data}: # {self.comment.data}"
+    def _print_instruction(self) -> str | None:
+        return f"{self.reference.data}:"
 
 
 @irdl_op_definition
@@ -165,10 +161,9 @@ class DefDirectiveOp(Q1AsmOperation):
     def assembly_line_args(self) -> tuple[AssemblyInstructionArg | None, ...]:
         return self.alias, self.value
 
-    def assembly_line(self) -> str | None:
-        arg_str = f"{self.alias.data} {self.value.data}"
-        return AssemblyPrinter.assembly_line(
-            self.assembly_mnemonic(), arg_str, self.comment, is_indented=False
+    def print_args(self) -> str:
+        return " ".join(
+            self.print_arg(arg) for arg in self.assembly_line_args() if arg is not None
         )
 
 

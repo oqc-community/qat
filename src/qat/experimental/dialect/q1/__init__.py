@@ -11,7 +11,13 @@ https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html
 from xdsl.ir import Dialect
 
 from qat.experimental.dialect.q1.errors import Q1AsmParseError
-from qat.experimental.dialect.q1.ir.attrs import LabelAttr
+from qat.experimental.dialect.q1.ir.arg_format import WithArgument
+from qat.experimental.dialect.q1.ir.attrs import (
+    DebugInfoAttr,
+    LabelAttr,
+    ProvenanceInfoAttr,
+)
+from qat.experimental.dialect.q1.ir.emission_context import EmissionContext
 from qat.experimental.dialect.q1.ir.imm_desc import (
     AddressImm,
     BoolImm,
@@ -390,6 +396,7 @@ __all__ = [
     "CmpRsRsOp",
     "DefDirectiveOp",
     "DurationImm",
+    "EmissionContext",
     "FbAcqIqIdImmImmOp",
     "FbAcqIqIdRsImmOp",
     "FbAcqIqShiftImmImmOp",
@@ -490,6 +497,7 @@ __all__ = [
     "OrRsRsRdOp",
     "PlayImmImmImmOp",
     "PlayRsRsImmOp",
+    "ProvenanceInfoAttr",
     "Q1",
     "Q1AsmParseError",
     "Q1Imm",
@@ -544,6 +552,7 @@ __all__ = [
     "WaitSyncRsOp",
     "WaitTriggerImmImmOp",
     "WaitTriggerRsRsOp",
+    "WithArgument",
     "XorRsImmRdOp",
     "XorRsRsRdOp",
     "emit_program",

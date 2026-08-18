@@ -7,6 +7,8 @@ from typing import TypeVar
 from xdsl.backend.register_type import RegisterType
 from xdsl.irdl import irdl_attr_definition
 
+from qat.experimental.dialect.q1.ir.arg_format import WithArgument
+
 INT_REGISTER_BIT_WIDTH = 32
 """Value width in bits of a Q1 integer register.
 
@@ -18,7 +20,7 @@ INT_REGISTER_VALUE_MASK = (1 << INT_REGISTER_BIT_WIDTH) - 1
 """Mask selecting the value bits of a Q1 integer register."""
 
 
-class Q1RegisterType(RegisterType, ABC):
+class Q1RegisterType(WithArgument, RegisterType, ABC):
     """A register type in the QBlox Q1 ISA."""
 
     @classmethod
@@ -26,6 +28,9 @@ class Q1RegisterType(RegisterType, ABC):
         """Get the general-purpose register at the given index."""
 
         return Registers.GPR[index]
+
+    def print_arg(self) -> str:
+        return self.register_name.data
 
 
 Q1_REGISTER_INDEX_BY_NAME = {f"R{i}": i for i in range(64)}

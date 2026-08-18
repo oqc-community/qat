@@ -12,7 +12,7 @@ from xdsl.parser import Parser
 from xdsl.printer import Printer
 from xdsl.utils.test_value import create_ssa_value
 
-from qat.experimental.dialect.q1 import IntRegisterType, Registers, UI32Imm
+from qat.experimental.dialect.q1 import IntRegisterType, LabelAttr, Registers, UI32Imm
 from qat.experimental.dialect.q1.ir.abstract_ops import (
     ImmImmImmImmImmOperation,
     ImmImmImmOperation,
@@ -29,7 +29,6 @@ from qat.experimental.dialect.q1.ir.abstract_ops import (
     RsRsImmOperation,
     RsRsRdOperation,
     RsRsRdRdOperation,
-    _assembly_arg_str,
 )
 
 
@@ -108,16 +107,22 @@ class DummyIRsRdRdOp(ImmRsRdRdOperation[IntRegisterType, UI32Imm]):
     name = "q1.irrr.dummy"
 
 
-def test_assembly_arg_str():
-    assert _assembly_arg_str("plain") == "plain"
-    assert _assembly_arg_str(Registers.R4) == "R4"
-    assert _assembly_arg_str(UI32Imm(11)) == "11"
-    assert _assembly_arg_str(create_ssa_value(Registers.R5)) == "R5"
-    assert _assembly_arg_str(StringAttr("text")) == "text"
+def test_print_arg_type_dispatch():
+    """print_arg() converts each argument type to its expected textual form."""
+    op = DummyIIOp(UI32Imm(1), UI32Imm(2))
+    assert op.print_arg(LabelAttr("body")) == "@body"
+    assert op.print_arg(UI32Imm(11)) == "11"
+    assert op.print_arg(Registers.R4) == "R4"
+    assert op.print_arg(create_ssa_value(Registers.R5)) == "R5"
+    assert op.print_arg(StringAttr("text")) == "text"
+    assert op.print_arg("plain") == "plain"
 
-    bad_ssa = create_ssa_value(IntegerType(32))
+
+def test_print_arg_bad_ssa_raises():
+    """A non-register SSAValue raises ValueError."""
+    op = DummyIIOp(UI32Imm(1), UI32Imm(2))
     with pytest.raises(ValueError, match="Unexpected register type"):
-        _assembly_arg_str(bad_ssa)
+        op.print_arg(create_ssa_value(IntegerType(32)))
 
 
 def test_assembly_line_args_raises():
@@ -259,10 +264,11 @@ def test_assembly_mnemonic_raises():
     ],
 )
 def test_shape_assembly_line_args(op_factory, expected_args) -> None:
-    """``assembly_line_args()`` stringifies each shape's args via ``_assembly_arg_str``."""
+    """``print_args()`` joins each shape's args in the expected textual form."""
 
     op = op_factory()
-    actual = tuple(_assembly_arg_str(arg) for arg in op.assembly_line_args())
+    result = op.print_args()
+    actual = tuple(result.split(", ")) if result else ()
     assert actual == expected_args
 
 

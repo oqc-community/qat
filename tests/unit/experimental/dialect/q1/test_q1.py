@@ -180,5 +180,5 @@ def test_q1_module_helpers_emit_and_register_ops():
 
 def test_emit_program_rejects_non_assembly_printable_ops():
     module = ModuleOp([SequenceOp("Q0", [StopOp()])])
-    with pytest.raises(TypeError, match="Expected AssemblyPrintable op"):
+    with pytest.raises(TypeError, match="Expected Q1AsmOperation op"):
         emit_program(module.body, StringIO())

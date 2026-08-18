@@ -10,6 +10,7 @@ from math import ceil
 import numpy as np
 from xdsl.dialects.builtin import ArrayAttr
 from xdsl.ir import Operation, SSAValue
+from xdsl.irdl import IRDLOperation
 from xdsl.pattern_rewriter import PatternRewriter, RewritePattern, op_type_rewrite_pattern
 from xdsl.utils.exceptions import PassFailedException
 
@@ -40,6 +41,7 @@ from qat.experimental.dialect.q1 import (
     UI10Imm,
     WaitImmOp,
 )
+from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, ProvenanceInfoAttr
 from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, UI5Imm, UI24Imm
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
@@ -71,6 +73,42 @@ def _register_waveform(
     """
     q1_waveform = make_waveform(name, index, samples)
     sequence_op.waveforms = ArrayAttr(list(sequence_op.waveforms.data) + [q1_waveform])
+
+
+def _get_enclosing_port(op: Operation) -> str | None:
+    """Return the channel port token of the ``q1_sequence.sequence`` that contains *op*.
+
+    After outlining, pulse ops live inside a ``SequenceOp`` body region. Walking up
+    through the block → region → parent-op chain retrieves the sequence's ``sym_name``,
+    which is the normalised channel token (e.g. ``"q0_drive"``).
+
+    :param op: The operation whose enclosing sequence is to be found.
+    :returns: The ``sym_name`` data string, or ``None`` if *op* is not inside a
+        ``SequenceOp``.
+    """
+    region = op.parent_region()
+    if region is None:
+        return None
+    parent = region.parent
+    if not isinstance(parent, SequenceOp):
+        return None
+    return parent.sym_name.data
+
+
+def _make_debug_info(op: IRDLOperation) -> DebugInfoAttr | None:
+    """Build a :class:`~qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr` for *op*.
+
+    Combines the pulse dialect op name (``op.name``) with the physical channel token
+    returned by :func:`_get_enclosing_port`.  Returns ``None`` when *op* is not inside
+    a ``SequenceOp`` (e.g. during isolated unit tests).
+
+    :param op: The pulse op being lowered.
+    :returns: A ``DebugInfoAttr`` recording the source op and port, or ``None``.
+    """
+    port = _get_enclosing_port(op)
+    if port is None:
+        return None
+    return ProvenanceInfoAttr(source_op=op.name, port=port)
 
 
 class RewriteCreateFrameOp(RewritePattern):
@@ -140,12 +178,15 @@ class RewriteWaitOp(RewritePattern):
 
         # Note: dosen't have a breakpoint to turn unrolling to
         # hardware-based loops for now.
+        debug_info = _make_debug_info(op)
         wait_ops: list[Operation] = []
         while total_ns > max_wait_time:
-            wait_ops.append(WaitImmOp(DurationImm(max_wait_time)))
+            wait_ops.append(
+                WaitImmOp(DurationImm(max_wait_time)).with_debug_info(debug_info)
+            )
             total_ns -= max_wait_time
         if total_ns > 0:
-            wait_ops.append(WaitImmOp(DurationImm(total_ns)))
+            wait_ops.append(WaitImmOp(DurationImm(total_ns)).with_debug_info(debug_info))
 
         rewriter.replace_matched_op(wait_ops, new_results=[op.frame])
 
@@ -167,7 +208,7 @@ class RewritePhaseSetOp(RewritePattern):
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: PhaseSetOp, rewriter: PatternRewriter) -> None:
-        self.rewrite_callable(op, rewriter, self.target_data)
+        self.rewrite_callable(op, rewriter, self.target_data, _make_debug_info(op))
 
 
 class RewritePhaseShiftOp(RewritePattern):
@@ -186,7 +227,7 @@ class RewritePhaseShiftOp(RewritePattern):
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: PhaseShiftOp, rewriter: PatternRewriter) -> None:
-        self.rewrite_callable(op, rewriter, self.target_data)
+        self.rewrite_callable(op, rewriter, self.target_data, _make_debug_info(op))
 
 
 class RewritePulseOp(RewritePattern):
@@ -274,7 +315,7 @@ class RewritePulseOp(RewritePattern):
             UI10Imm(i_index),
             UI10Imm(q_index),
             DurationImm(duration_ns),
-        )
+        ).with_debug_info(_make_debug_info(op))
 
         rewriter.replace_op(pulse_op, [q1_pulse], new_results=[pulse_op.frame])
         if not waveform_op.result.uses:
@@ -323,7 +364,7 @@ class RewriteStartContinuousWaveformOp(RewritePattern):
         q1_start = SetAwgOffsImmImmOp(
             SI16Imm(int(amplitude.real * max_offset)),
             SI16Imm(int(amplitude.imag * max_offset)),
-        )
+        ).with_debug_info(_make_debug_info(op))
         rewriter.replace_op(op, [q1_start], new_results=[op.frame])
         if not amplitude_op.result.uses:
             rewriter.erase_op(amplitude_op)
@@ -357,7 +398,7 @@ class RewriteStopContinuousWaveformOp(RewritePattern):
         q1_stop = SetAwgOffsImmImmOp(
             SI16Imm(0),
             SI16Imm(0),
-        )
+        ).with_debug_info(_make_debug_info(op))
         rewriter.replace_op(op, [q1_stop], new_results=[op.frame])
 
 
@@ -391,6 +432,7 @@ class RewriteAcquireOp(RewritePattern):
         # TODO(COMPILER-1349): Write ``duration_ns`` as the integration length into the
         # ``SequencerDataAttr`` on the enclosing ``SequenceOp`` once that attribute is
         # defined (pending the physical Qblox system data PR).
+        debug_info = _make_debug_info(op)
         if isinstance(weights_attr := op.weights, WeightsAttr):
             weights_data = weights_attr.weights.data
             weight_index_i = self._register_weight(sequencer, weights_data.real)
@@ -401,12 +443,13 @@ class RewriteAcquireOp(RewritePattern):
                 UI5Imm(weight_index_i),
                 UI5Imm(weight_index_q),
                 DurationImm(duration_ns),
-            )
+            ).with_debug_info(debug_info)
         else:
             assert weights_attr is None
             new_acquire_op = AcquireImmImmImmOp(
                 UI5Imm(acq_idx), UI24Imm(bin_idx), DurationImm(duration_ns)
-            )
+            ).with_debug_info(debug_info)
+
         # TODO: Support lowering of pulse.acquire acquisition_result
         # consumers (e.g. pulse.integrate). Once supported, replace the check below
         # with proper lowering logic. Post COMPILER-1369 work.
@@ -499,11 +542,17 @@ def create_legalisation_patterns() -> tuple[RewritePattern, ...]:
     return (
         RewritePhaseSetOp(
             TARGET_DATA,
-            rewrite_callable=lambda op, rewriter, _target_data: canonicalise(op, rewriter),
+            rewrite_callable=lambda op,
+            rewriter,
+            _target_data,
+            _debug_info=None: canonicalise(op, rewriter),
         ),
         RewritePhaseShiftOp(
             TARGET_DATA,
-            rewrite_callable=lambda op, rewriter, _target_data: canonicalise(op, rewriter),
+            rewrite_callable=lambda op,
+            rewriter,
+            _target_data,
+            _debug_info=None: canonicalise(op, rewriter),
         ),
     )
 

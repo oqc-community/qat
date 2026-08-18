@@ -20,8 +20,10 @@ from xdsl.parser import AttrParser
 from xdsl.printer import Printer
 from xdsl.utils.exceptions import VerifyException
 
+from qat.experimental.dialect.q1.ir.arg_format import WithArgument
 
-class Q1Imm(Data[int]):
+
+class Q1Imm(WithArgument, Data[int]):
     """Base class for all Q1 immediate value attributes.
 
     Subclasses set :attr:`_MIN` and :attr:`_MAX` (inclusive) and inherit the
@@ -53,6 +55,9 @@ class Q1Imm(Data[int]):
 
     def print_parameter(self, printer: Printer) -> None:
         printer.print_string(f"<{self.data}>")
+
+    def print_arg(self) -> str:
+        return str(self.data)
 
 
 @irdl_attr_definition

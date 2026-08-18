@@ -136,7 +136,12 @@ def create_parameters(selections, indices=None):
     return params
 
 
-def do_emit(model: QbloxLiveHardwareModel, backend_type: type, builder, ignore_empty=True):
+def do_emit(
+    model: QbloxLiveHardwareModel,
+    backend_type: type,
+    builder,
+    ignore_empty=True,
+):
     if backend_type == QbloxBackend1:
         middleend_pipeline = middleend_pipeline1(model, TARGET_DATA)
         backend_pipeline = backend_pipeline1()

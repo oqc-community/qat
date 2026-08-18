@@ -48,6 +48,7 @@ from qat.experimental.dialect.q1 import (
     SubRsImmRdOp,
     UpdParamImmOp,
 )
+from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
 
 
 class PhaseLegalisation:
@@ -102,6 +103,7 @@ class PhaseLowering:
         op: PhaseSetOp | PhaseShiftOp,
         rewriter: PatternRewriter,
         target_data: QbloxTargetData,
+        debug_info: DebugInfoAttr | None = None,
     ) -> None:
         """Apply the lowering-stage phase rewrite.
 
@@ -122,6 +124,13 @@ class PhaseLowering:
             phase_steps_imm = SU32Imm(seq_data.nco_max_phase_steps)
             zero_imm = SU32Imm(0)
             phase_steps = op.phase
+
+            primary = (
+                SetPhRsOp(phase_steps)
+                if isinstance(op, PhaseSetOp)
+                else SetPhDeltaRsOp(phase_steps)
+            ).with_debug_info(debug_info)
+
             dynamic_phase_ops = [
                 CmpRsImmOp(phase_steps, zero_imm),
                 JgeImmOp(non_negative_label),
@@ -139,9 +148,7 @@ class PhaseLowering:
                 CmpRsImmOp(phase_steps, phase_steps_imm),
                 JaeImmOp(reduce_loop_label),
                 LabelOp(done_label),
-                SetPhRsOp(phase_steps)
-                if isinstance(op, PhaseSetOp)
-                else SetPhDeltaRsOp(phase_steps),
+                primary,
                 UpdParamImmOp(DurationImm(seq_data.grid_time)),
             ]
             rewriter.replace_op(op, dynamic_phase_ops, (op.frame,))
@@ -155,16 +162,13 @@ class PhaseLowering:
         phase_deg = np.rad2deg(legalised_radians)
         steps = int(round(phase_deg * seq_data.nco_phase_steps_per_deg))
         steps %= seq_data.nco_max_phase_steps
+        primary = (
+            SetPhImmOp(NcoPhaseImm(steps))
+            if isinstance(op, PhaseSetOp)
+            else SetPhDeltaImmOp(NcoPhaseImm(steps))
+        ).with_debug_info(debug_info)
         rewriter.replace_op(
             op,
-            [
-                SetPhImmOp(NcoPhaseImm(steps)),
-                UpdParamImmOp(DurationImm(seq_data.grid_time)),
-            ]
-            if isinstance(op, PhaseSetOp)
-            else [
-                SetPhDeltaImmOp(NcoPhaseImm(steps)),
-                UpdParamImmOp(DurationImm(seq_data.grid_time)),
-            ],
+            [primary, UpdParamImmOp(DurationImm(seq_data.grid_time))],
             (op.frame,),
         )
