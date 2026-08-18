@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1.ir.arg\_format module
+=================================================
+
+.. automodule:: qat.experimental.dialect.q1.ir.arg_format
+   :members:
+   :undoc-members:
+   :show-inheritance:

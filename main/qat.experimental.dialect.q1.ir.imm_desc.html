@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.imm_desc module &mdash; qat-compiler 3.0.0.post324.dev20260817191916 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.imm_desc module &mdash; qat-compiler 3.0.0.post325.dev20260818160155 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.experimental.dialect.q1.ir.ops module" href="qat.experimental.dialect.q1.ir.ops.html" />
-    <link rel="prev" title="qat.experimental.dialect.q1.ir.attrs module" href="qat.experimental.dialect.q1.ir.attrs.html" /> 
+    <link rel="prev" title="qat.experimental.dialect.q1.ir.emission_context module" href="qat.experimental.dialect.q1.ir.emission_context.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -733,7 +733,7 @@ acquisition indices, jump addresses, and generic 32-bit values.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1Imm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.q1.ir.arg_format.html#qat.experimental.dialect.q1.ir.arg_format.WithArgument" title="qat.experimental.dialect.q1.ir.arg_format.WithArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">WithArgument</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 <p>Base class for all Q1 immediate value attributes.</p>
 <p>Subclasses set <code class="xref py py-attr docutils literal notranslate"><span class="pre">_MIN</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">_MAX</span></code> (inclusive) and inherit the
 construction-time and IR-level validation. They may also override
@@ -745,6 +745,20 @@ construction-time and IR-level validation. They may also override
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.print_arg">
+<span class="sig-name descname"><span class="pre">print_arg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm.print_arg" title="Link to this definition"></a></dt>
+<dd><p>Return the textual form of this value as a Q1 assembly argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Textual representation of this value for assembly emission.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1053,7 +1067,7 @@ or unsigned 32-bit representation (e.g. <code class="docutils literal notranslat
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.experimental.dialect.q1.ir.attrs.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.q1.ir.attrs module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.experimental.dialect.q1.ir.emission_context.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.q1.ir.emission_context module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.experimental.dialect.q1.ir.ops.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.q1.ir.ops module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

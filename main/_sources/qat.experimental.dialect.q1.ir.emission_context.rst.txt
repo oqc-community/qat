@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1.ir.emission\_context module
+=======================================================
+
+.. automodule:: qat.experimental.dialect.q1.ir.emission_context
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.attrs module &mdash; qat-compiler 3.0.0.post324.dev20260817191916 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.attrs module &mdash; qat-compiler 3.0.0.post325.dev20260818160155 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -22,8 +22,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.experimental.dialect.q1.ir.imm_desc module" href="qat.experimental.dialect.q1.ir.imm_desc.html" />
-    <link rel="prev" title="qat.experimental.dialect.q1.ir.abstract_ops module" href="qat.experimental.dialect.q1.ir.abstract_ops.html" /> 
+    <link rel="next" title="qat.experimental.dialect.q1.ir.emission_context module" href="qat.experimental.dialect.q1.ir.emission_context.html" />
+    <link rel="prev" title="qat.experimental.dialect.q1.ir.arg_format module" href="qat.experimental.dialect.q1.ir.arg_format.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -662,9 +662,35 @@
   <section id="module-qat.experimental.dialect.q1.ir.attrs">
 <span id="qat-experimental-dialect-q1-ir-attrs-module"></span><h1>qat.experimental.dialect.q1.ir.attrs module<a class="headerlink" href="#module-qat.experimental.dialect.q1.ir.attrs" title="Link to this heading"></a></h1>
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DebugInfoAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ParametrizedAttribute</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base for debug information carried on a lowered Q1 op.</p>
+<p>Subclasses record structured debug metadata that the assembly printer uses to
+emit per-instruction inline comments.  The attribute is stripped in production
+builds by passing <code class="docutils literal notranslate"><span class="pre">emit_debug_info=False</span></code> to
+<a class="reference internal" href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.emit_program" title="qat.experimental.dialect.q1.target.emit_program"><code class="xref py py-func docutils literal notranslate"><span class="pre">emit_program()</span></code></a>.</p>
+<p>Concrete implementations must provide <a class="reference internal" href="#qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr.format_comment" title="qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr.format_comment"><code class="xref py py-meth docutils literal notranslate"><span class="pre">format_comment()</span></code></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr.format_comment">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format_comment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.DebugInfoAttr.format_comment" title="Link to this definition"></a></dt>
+<dd><p>Return a human-readable comment string for this debug info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Comment text to be appended to the assembly instruction.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.LabelAttr">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LabelAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.LabelAttr" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.q1.ir.arg_format.html#qat.experimental.dialect.q1.ir.arg_format.WithArgument" title="qat.experimental.dialect.q1.ir.arg_format.WithArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">WithArgument</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.LabelAttr.data">
 <span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataElement</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.LabelAttr.data" title="Link to this definition"></a></dt>
@@ -688,6 +714,20 @@
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.LabelAttr.print_arg">
+<span class="sig-name descname"><span class="pre">print_arg</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.LabelAttr.print_arg" title="Link to this definition"></a></dt>
+<dd><p>Return the textual form of this value as a Q1 assembly argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Textual representation of this value for assembly emission.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.LabelAttr.print_parameter">
 <span class="sig-name descname"><span class="pre">print_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.LabelAttr.print_parameter" title="Link to this definition"></a></dt>
 <dd><p>Print the attribute parameter.</p>
@@ -700,6 +740,63 @@
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProvenanceInfoAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr" title="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProvenanceInfoAttr</span></code></a></p>
+<p>Provenance information carried on a lowered Q1 op.</p>
+<p>Records the originating pulse dialect operation and the physical channel port so
+that the assembly printer can emit per-instruction inline comments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.source_op"></span><strong>source_op</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.source_op">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The pulse dialect op name that this Q1 instruction was lowered
+from (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;pulse.pulse&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;pulse.acquire&quot;</span></code>).</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.port"></span><strong>port</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.port">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The physical channel token from the enclosing
+<code class="docutils literal notranslate"><span class="pre">q1_sequence.sequence</span></code> symbol (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;q0_drive&quot;</span></code>).</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.source_op"></span><strong>source_op</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.source_op">¶</a> – Originating pulse op name.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.port"></span><strong>port</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.params.port">¶</a> – Physical channel token from the enclosing sequence.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.format_comment">
+<span class="sig-name descname"><span class="pre">format_comment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.format_comment" title="Link to this definition"></a></dt>
+<dd><p>Return a human-readable comment string derived from the provenance info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A comment of the form <code class="docutils literal notranslate"><span class="pre">&quot;from</span> <span class="pre">&lt;source_op&gt;</span> <span class="pre">on</span> <span class="pre">&lt;port&gt;&quot;</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.provenance_info'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.port">
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.attributes._ParameterDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.port" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.source_op">
+<span class="sig-name descname"><span class="pre">source_op</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.attributes._ParameterDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.source_op" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -707,8 +804,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.experimental.dialect.q1.ir.abstract_ops.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.q1.ir.abstract_ops module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.experimental.dialect.q1.ir.imm_desc.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.q1.ir.imm_desc module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.experimental.dialect.q1.ir.arg_format.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.q1.ir.arg_format module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.experimental.dialect.q1.ir.emission_context.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.q1.ir.emission_context module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
