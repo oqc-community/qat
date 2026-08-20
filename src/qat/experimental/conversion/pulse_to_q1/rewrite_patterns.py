@@ -8,11 +8,19 @@ from collections.abc import Callable
 from math import ceil
 
 import numpy as np
-from xdsl.dialects.builtin import ArrayAttr
+from xdsl.context import Context
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import ArrayAttr, IndexType, IntegerAttr, IntegerType, ModuleOp
 from xdsl.ir import Operation, SSAValue
 from xdsl.irdl import IRDLOperation
-from xdsl.pattern_rewriter import PatternRewriter, RewritePattern, op_type_rewrite_pattern
-from xdsl.utils.exceptions import PassFailedException
+from xdsl.passes import ModulePass
+from xdsl.pattern_rewriter import (
+    PatternRewriter,
+    PatternRewriteWalker,
+    RewritePattern,
+    op_type_rewrite_pattern,
+)
+from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
@@ -35,6 +43,7 @@ from qat.experimental.dialect.pulse.ir.ops import extract_constant_scalar
 from qat.experimental.dialect.pulse.units import TIME_UNIT_EXPONENTS, TimeUnits
 from qat.experimental.dialect.pulse.utils import require_constant_operand
 from qat.experimental.dialect.q1 import (
+    MoveImmRdOp,
     PlayImmImmImmOp,
     SetAwgOffsImmImmOp,
     SI16Imm,
@@ -42,17 +51,55 @@ from qat.experimental.dialect.q1 import (
     WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, ProvenanceInfoAttr
-from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, UI5Imm, UI24Imm
+from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, SU32Imm, UI5Imm, UI24Imm
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
     AcquireWeightedImmImmImmImmImmOp,
 )
+from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_sequence import SequenceOp, find_enclosing_sequence
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
     make_waveform,
     make_weight,
 )
+
+
+class LowerArithIntegerConstantToMoveOp(ModulePass, RewritePattern):
+    """Lower ``arith.constant`` with an integer or index type to ``q1.ir.move``.
+
+    An ``arith.constant`` whose result type is
+    :class:`~xdsl.dialects.builtin.IntegerType` or
+    :class:`~xdsl.dialects.builtin.IndexType` is replaced by a ``q1.ir.move``
+    instruction that loads the same immediate value into a virtual register.
+    Constants whose result type is not an integer or index (e.g. floating-point)
+    are left unchanged.
+
+    The immediate must fit in the 32-bit signed-or-unsigned range accepted by
+    ``q1.ir.move`` (``SU32Imm``: ``[-2**31, 2**32 - 1]``).  Values outside that
+    range raise :class:`~xdsl.utils.exceptions.PassFailedException`.
+    """
+
+    name = "lower-arith-integer-constant-to-move"
+
+    @op_type_rewrite_pattern
+    def match_and_rewrite(self, op: ArithConstantOp, rewriter: PatternRewriter) -> None:
+        if not isinstance(op.result.type, IntegerType | IndexType):
+            return
+        if not isinstance(op.value, IntegerAttr):
+            return
+        value = op.value.value.data
+        try:
+            imm = SU32Imm(value)
+        except VerifyException as exc:
+            raise PassFailedException(
+                f"arith.constant value {value} is out of range for q1.ir.move "
+                f"(SU32Imm supports [{SU32Imm._MIN}, {SU32Imm._MAX}])"
+            ) from exc
+        rewriter.replace_op(op, MoveImmRdOp(imm, IntRegisterType.unallocated()))
+
+    def apply(self, ctx: Context, op: ModuleOp) -> None:
+        PatternRewriteWalker(self, apply_recursively=False).rewrite_module(op)
 
 
 def _register_waveform(
@@ -573,6 +620,7 @@ def create_pulse_to_q1_lowering_patterns(
 
     resolved_target_data = target_data or TARGET_DATA
     return (
+        LowerArithIntegerConstantToMoveOp(),
         RewritePhaseSetOp(resolved_target_data, rewrite_callable=PhaseLowering()),
         RewritePhaseShiftOp(resolved_target_data, rewrite_callable=PhaseLowering()),
         RewriteCreateFrameOp(resolved_target_data),

@@ -10,11 +10,14 @@ from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
     BoolAttr,
     FloatAttr,
+    IndexType,
+    IntegerAttr,
     ModuleOp,
     StringAttr,
     UnrealizedConversionCastOp,
     f64,
     i1,
+    i64,
 )
 from xdsl.ir import Operation
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
@@ -27,6 +30,7 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
     Q1PulseLegalisationPass,
 )
 from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
+    LowerArithIntegerConstantToMoveOp,
     RewriteAcquireOp,
     RewriteCreateFrameOp,
     RewritePhaseSetOp,
@@ -75,6 +79,7 @@ from qat.experimental.dialect.q1 import (
     JgeImmOp,
     JlImmOp,
     LabelOp,
+    MoveImmRdOp,
     PlayImmImmImmOp,
     SetAwgOffsImmImmOp,
     SetPhDeltaImmOp,
@@ -86,6 +91,7 @@ from qat.experimental.dialect.q1 import (
     WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.ops import UpdParamImmOp
+from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import make_dense_floats
 
@@ -124,19 +130,20 @@ def _sequence_body_ops(module: ModuleOp) -> list[Operation]:
     return list(seq.body.block.ops)
 
 
-def test_lowering_pattern_factory_returns_nine_patterns():
+def test_lowering_pattern_factory_returns_ten_patterns():
     """Verify that the pattern factory returns the full rewrite set in order."""
     patterns = create_pulse_to_q1_lowering_patterns()
-    assert len(patterns) == 9
-    assert isinstance(patterns[0], RewritePhaseSetOp)
-    assert isinstance(patterns[1], RewritePhaseShiftOp)
-    assert isinstance(patterns[2], RewriteCreateFrameOp)
-    assert isinstance(patterns[3], RewriteSynchronizeOp)
-    assert isinstance(patterns[4], RewriteWaitOp)
-    assert isinstance(patterns[5], RewritePulseOp)
-    assert isinstance(patterns[6], RewriteStartContinuousWaveformOp)
-    assert isinstance(patterns[7], RewriteStopContinuousWaveformOp)
-    assert isinstance(patterns[8], RewriteAcquireOp)
+    assert len(patterns) == 10
+    assert isinstance(patterns[0], LowerArithIntegerConstantToMoveOp)
+    assert isinstance(patterns[1], RewritePhaseSetOp)
+    assert isinstance(patterns[2], RewritePhaseShiftOp)
+    assert isinstance(patterns[3], RewriteCreateFrameOp)
+    assert isinstance(patterns[4], RewriteSynchronizeOp)
+    assert isinstance(patterns[5], RewriteWaitOp)
+    assert isinstance(patterns[6], RewritePulseOp)
+    assert isinstance(patterns[7], RewriteStartContinuousWaveformOp)
+    assert isinstance(patterns[8], RewriteStopContinuousWaveformOp)
+    assert isinstance(patterns[9], RewriteAcquireOp)
 
 
 def test_legalisation_pattern_factory_returns_two_patterns():
@@ -1055,3 +1062,111 @@ class TestRewriteStopContinuousWaveformOp:
         assert not any(
             isinstance(op, StopContinuousWaveformOp) for op in sequence.body.block.ops
         )
+
+
+class TestLowerArithIntegerConstantToMoveOp:
+    """Tests for ``LowerArithIntegerConstantToMoveOp``.
+
+    Integer and index ``arith.constant`` operations arise naturally from structured
+    control-flow lowering: loop bounds and CFG branch counts begin as
+    ``arith.constant`` values before being consumed by ``q1_scf.for`` or other
+    loop/CFG constructs.  The pattern converts each such constant into a
+    ``q1.ir.move`` instruction that materialises the value as a hardware immediate
+    in a virtual register.
+    """
+
+    @staticmethod
+    def _lower(module: ModuleOp) -> None:
+        PatternRewriteWalker(
+            LowerArithIntegerConstantToMoveOp(), apply_recursively=False
+        ).rewrite_module(module)
+
+    def test_integer_constant_lowers_to_move(self):
+        """An i32 ``arith.constant`` (typical for-loop bound) lowers to ``q1.ir.move``."""
+        const = ArithConstantOp.from_int_and_width(10, 32)
+        cast = UnrealizedConversionCastOp(
+            operands=[const], result_types=[IntRegisterType.unallocated()]
+        )
+        sequence = SequenceOp("q0_drive", [const, cast, StopOp()])
+        module = ModuleOp([sequence])
+
+        self._lower(module)
+
+        body_ops = list(sequence.body.block.ops)
+        assert not any(isinstance(op, ArithConstantOp) for op in body_ops)
+        move_ops = [op for op in body_ops if isinstance(op, MoveImmRdOp)]
+        assert len(move_ops) == 1
+        assert move_ops[0].imm.data == 10
+        assert isinstance(move_ops[0].rd.type, IntRegisterType)
+
+    def test_index_constant_lowers_to_move(self):
+        """An IndexType ``arith.constant`` (typical loop iteration index) lowers to
+        ``q1.ir.move``."""
+        const = ArithConstantOp(IntegerAttr(5, IndexType()))
+        cast = UnrealizedConversionCastOp(
+            operands=[const], result_types=[IntRegisterType.unallocated()]
+        )
+        sequence = SequenceOp("q0_drive", [const, cast, StopOp()])
+        module = ModuleOp([sequence])
+
+        self._lower(module)
+
+        body_ops = list(sequence.body.block.ops)
+        assert not any(isinstance(op, ArithConstantOp) for op in body_ops)
+        move_ops = [op for op in body_ops if isinstance(op, MoveImmRdOp)]
+        assert len(move_ops) == 1
+        assert move_ops[0].imm.data == 5
+        assert isinstance(move_ops[0].rd.type, IntRegisterType)
+
+    def test_float_constant_is_not_lowered(self):
+        """A float ``arith.constant`` is not matched and remains unchanged."""
+        const = ArithConstantOp(FloatAttr(3.14, f64))
+        sequence = SequenceOp("q0_drive", [const, StopOp()])
+        module = ModuleOp([sequence])
+
+        self._lower(module)
+
+        body_ops = list(sequence.body.block.ops)
+        assert any(isinstance(op, ArithConstantOp) for op in body_ops)
+        assert not any(isinstance(op, MoveImmRdOp) for op in body_ops)
+
+    def test_multiple_loop_bounds_all_lower(self):
+        """Multiple integer and index constants in one sequence body are all lowered.
+
+        This models a sequence body that contains both an i32 repetition count and an
+        index-typed loop variable before ``q1_scf`` lowering has run.
+        """
+        count_i32 = ArithConstantOp.from_int_and_width(100, 32)
+        count_idx = ArithConstantOp(IntegerAttr(8, IndexType()))
+        cast1 = UnrealizedConversionCastOp(
+            operands=[count_i32], result_types=[IntRegisterType.unallocated()]
+        )
+        cast2 = UnrealizedConversionCastOp(
+            operands=[count_idx], result_types=[IntRegisterType.unallocated()]
+        )
+        sequence = SequenceOp("q0_drive", [count_i32, count_idx, cast1, cast2, StopOp()])
+        module = ModuleOp([sequence])
+
+        self._lower(module)
+
+        body_ops = list(sequence.body.block.ops)
+        assert not any(isinstance(op, ArithConstantOp) for op in body_ops)
+        move_ops = [op for op in body_ops if isinstance(op, MoveImmRdOp)]
+        assert len(move_ops) == 2
+        assert {m.imm.data for m in move_ops} == {100, 8}
+
+    def test_out_of_range_integer_raises(self):
+        """A value outside the 32-bit SU32Imm range raises ``PassFailedException``.
+
+        A 64-bit loop bound that does not fit in the Q1 move-immediate field cannot
+        be lowered and must be caught early.
+        """
+        const = ArithConstantOp(IntegerAttr(2**33, i64))
+        cast = UnrealizedConversionCastOp(
+            operands=[const], result_types=[IntRegisterType.unallocated()]
+        )
+        sequence = SequenceOp("q0_drive", [const, cast, StopOp()])
+        module = ModuleOp([sequence])
+
+        with pytest.raises(PassFailedException, match="out of range"):
+            self._lower(module)
