@@ -1,16 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from enum import Enum
 from math import isclose
+from typing import ClassVar
 
 import numpy as np
 from xdsl.dialects.builtin import FloatAttr, IntegerAttr
 from xdsl.dialects.complex import ComplexNumberAttr
 from xdsl.ir import TypeAttribute
 from xdsl.irdl import Attribute
+from xdsl.passes import ModulePass
 from xdsl.pattern_rewriter import PatternRewriter, RewritePattern, op_type_rewrite_pattern
 from xdsl.traits import ConstantLike
+from xdsl.transforms.canonicalize import CanonicalizePass
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir import (
@@ -33,6 +37,7 @@ from qat.experimental.dialect.pulse.units import (
     FREQUENCY_UNIT_EXPONENTS,
     TIME_UNIT_EXPONENTS,
 )
+from qat.experimental.passes.pass_ordering import OrderedPass
 
 
 class PulseConstantFoldAdapter(ABC):
@@ -248,3 +253,37 @@ class FoldMaxTimeOp(RewritePattern):
         operand_values = [operand.fold()[0].literal_value for operand in operands]
         max_index = np.argmax(operand_values)
         rewriter.replace_op(op, [], operands[max_index].results)
+
+
+@dataclass(frozen=True)
+class OrderedCanonicalizePass(OrderedPass, CanonicalizePass):
+    """Canonicalize a pulse module while declaring pipeline ordering constraints.
+
+    This is the standalone constant-folding stage that must run ahead of passes which
+    only accept canonical :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp`
+    operands, such as
+    :class:`~qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples`.
+
+    It inherits :class:`~xdsl.transforms.canonicalize.CanonicalizePass`, which applies
+    the pulse dialect's constant-folding patterns (:class:`FoldConstantConstantOp`,
+    :class:`FoldMaxTimeOp`) so that any operand chain that is constant after folding (for
+    example ``pulse.add`` of two :class:`ConstantOp`\\ s) collapses to a single
+    :class:`ConstantOp`.
+    """
+
+    name = "constant-propagation"
+
+    _runs_before: ClassVar[frozenset[type[ModulePass]] | None] = None
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        # This pass must run before the waveform-evaluation pass, which relies on it to
+        # canonicalise every constant operand chain into a ``ConstantOp``. Imported
+        # lazily: waveform_evaluation imports this module at load time, so a
+        # module-level import of it here would be circular.
+        if OrderedCanonicalizePass._runs_before is None:
+            from qat.experimental.dialect.pulse.transforms.waveform_evaluation import (
+                EvaluateWaveformsAsSamples,
+            )
+
+            OrderedCanonicalizePass._runs_before = frozenset({EvaluateWaveformsAsSamples})
+        return OrderedCanonicalizePass._runs_before

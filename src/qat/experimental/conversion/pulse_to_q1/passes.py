@@ -29,6 +29,7 @@ from qat.experimental.dialect.pulse.utils import (
     extract_phase_radians,
     extract_time_seconds,
 )
+from qat.experimental.passes.pass_ordering import OrderedPassPipeline
 
 _TIME_ROUNDING_TOLERANCE_NS = 1e-3
 
@@ -160,7 +161,7 @@ def create_default_pulse_to_q1_pipeline(
     :returns: Pass pipeline for the default Pulse-to-Q1 conversion flow.
     """
 
-    return PassPipeline(
+    return OrderedPassPipeline(
         (
             Q1OutliningPass(target_data=target_data),
             Q1PulseValidationPass(target_data=target_data),

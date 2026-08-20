@@ -22,6 +22,7 @@ from xdsl.irdl import IRDLOperation, irdl_op_definition, operand_def, result_def
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir import (
+    AddOp,
     AmplitudeAttr,
     ConstantOp,
     CreateFrameOp,
@@ -45,6 +46,7 @@ from qat.experimental.dialect.pulse.ir.ops import (
     extract_constant_scalar,
 )
 from qat.experimental.dialect.pulse.ir.types import TimeType, WaveformType
+from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
 from qat.experimental.dialect.pulse.transforms.waveform_evaluation import (
     EvaluateWaveformsAsSamples,
     _seconds_to_picoseconds,
@@ -802,3 +804,86 @@ class TestNativeWaveformShapes:
 
         assert get_operations_with_type(module, SquareWaveformOp) == []
         assert len(_get_sampled_constants(module)) == 1
+
+
+@pytest.mark.parametrize("control_sample_time", [1e-9, 2e-9])
+class TestConstantFoldedOperands:
+    """Behaviour around operands that only become constant after constant propagation.
+
+    Waveform evaluation no longer folds constants itself; it relies on
+    :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
+    having run first. These tests pin that separation of concerns down.
+    """
+
+    def _build_module_with_folded_width(self):
+        """Build a Gaussian whose width operand is ``add(40ns, 40ns)`` before folding."""
+        freq = ConstantOp(FrequencyAttr(5e9))
+        frame = CreateFrameOp(freq, StringAttr(PORT_CONTROL))
+        width_lhs = ConstantOp(TimeAttr(40e-9))
+        width_rhs = ConstantOp(TimeAttr(40e-9))
+        width = AddOp(width_lhs, width_rhs, TimeType())
+        amp = ConstantOp(AmplitudeAttr(0.5))
+        fractional_breadth = ArithConstantOp(FloatAttr(0.47, f64), f64)
+        wf = GaussianWaveformOp(width, amp, fractional_breadth, BoolAttr(False, i1))
+        pulse = PulseOp(frame, wf)
+        module = build_module_from_ops(
+            [
+                freq,
+                frame,
+                width_lhs,
+                width_rhs,
+                width,
+                amp,
+                fractional_breadth,
+                wf,
+                pulse,
+            ]
+        )
+        return module, wf
+
+    def test_folded_arith_operand_is_evaluated_after_constant_propagation(
+        self, control_sample_time
+    ):
+        module, wf = self._build_module_with_folded_width()
+
+        assert len(get_operations_with_type(module, AddOp)) == 1
+        assert _get_sampled_constants(module) == []
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: control_sample_time},
+        )
+        OrderedCanonicalizePass().apply(_CONTEXT, module)
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert get_operations_with_type(module, GaussianWaveformOp) == []
+        assert get_operations_with_type(module, AddOp) == []
+        sampled_constants = _get_sampled_constants(module)
+        assert len(sampled_constants) == 1
+
+        width = extract_constant_scalar(wf.width)
+        amplitude = extract_constant_scalar(wf.amplitude)
+        assert width is not None and amplitude is not None
+        width_ps = int(round(width * 1e12))
+        sample_time_ps = int(round(control_sample_time * 1e12))
+        expected = evaluate_waveform(
+            width=width_ps,
+            sample_time=sample_time_ps,
+            shape=wf.build_shape(),
+            amplitude=amplitude,
+            drag_coefficients=[],
+        )
+        assert_array_equal(sampled_constants[0].value.samples.data, expected)
+
+    def test_folded_operand_is_skipped_without_constant_propagation(
+        self, control_sample_time
+    ):
+        module, _ = self._build_module_with_folded_width()
+
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: control_sample_time},
+        )
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
+        assert len(get_operations_with_type(module, AddOp)) == 1
+        assert _get_sampled_constants(module) == []

@@ -23,13 +23,17 @@ Sampling of acquisition weights is intentionally deferred; weights are expected 
 an attribute on :class:`~qat.experimental.dialect.pulse.ir.ops.AcquireOp` rather than a
 waveform operand, at which point a dedicated pass can materialise them.
 
-The pass runs xDSL's :class:`CanonicalizePass` before its own rewrites, so any operand
-chain that folds to a constant (e.g. ``arith.mulf`` of two ``arith.constant``\\ s) is
-collapsed first and then treated as a compile-time-constant operand.
+Constant folding is a separate concern handled by
+:class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`,
+which must run before this pass. That pass collapses any operand chain that folds to a
+constant (e.g. ``pulse.add`` of two ``ConstantOp``\\ s) into a single ``ConstantOp``, so
+this pass only ever has to recognise canonical constant operands. The requirement is
+enforced by the pipeline builder via :meth:`required_predecessors`.
 """
 
 from collections import defaultdict
 from dataclasses import dataclass
+from typing import ClassVar
 
 import numpy as np
 from xdsl.context import Context
@@ -38,7 +42,6 @@ from xdsl.ir import SSAValue
 from xdsl.passes import ModulePass
 from xdsl.pattern_rewriter import PatternRewriter, PatternRewriteWalker, RewritePattern
 from xdsl.rewriter import InsertPoint
-from xdsl.transforms.canonicalize import CanonicalizePass
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, TimeAttr
@@ -49,6 +52,8 @@ from qat.experimental.dialect.pulse.ir.ops import (
     extract_constant_scalar,
 )
 from qat.experimental.dialect.pulse.ir.types import FrameType, WaveformType
+from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
+from qat.experimental.passes.pass_ordering import OrderedPass
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 from qat.experimental.utils.logging import get_logger
 from qat.experimental.waveforms.evaluate import evaluate_waveform
@@ -246,7 +251,7 @@ class _RewriteAnalyticalWaveform(RewritePattern):
 
 
 @dataclass(frozen=True)
-class EvaluateWaveformsAsSamples(ModulePass):
+class EvaluateWaveformsAsSamples(OrderedPass, ModulePass):
     """Evaluate analytical waveform ops into constant sampled waveforms.
 
     For every :class:`IsAnalyticalWaveformInterface` op with all-constant operands, the
@@ -262,8 +267,18 @@ class EvaluateWaveformsAsSamples(ModulePass):
 
     constraints: PulseLevelConstraints
 
+    _required_predecessors: ClassVar[frozenset[type[ModulePass]] | None] = None
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        # Constant folding must have run before this pass so that every
+        # genuinely-constant operand chain is already a canonical ``ConstantOp``.
+        if EvaluateWaveformsAsSamples._required_predecessors is None:
+            EvaluateWaveformsAsSamples._required_predecessors = frozenset(
+                {OrderedCanonicalizePass}
+            )
+        return EvaluateWaveformsAsSamples._required_predecessors
+
     def apply(self, ctx: Context, op: ModuleOp) -> None:
-        CanonicalizePass().apply(ctx, op)
         pattern = _RewriteAnalyticalWaveform(self.constraints)
         PatternRewriteWalker(pattern).rewrite_module(op)
         log.info(
