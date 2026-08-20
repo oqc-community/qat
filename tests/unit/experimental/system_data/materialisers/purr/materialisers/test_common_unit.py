@@ -9,7 +9,6 @@ from qat.experimental.system_data.materialisers.purr.materialisers.qubits import
     _build_waveforms_for_mode,
     _get_control_qubit_ids,
     _get_coupled_qubit_ids,
-    _normalise_waveform_rise,
 )
 
 
@@ -64,12 +63,6 @@ def test_get_control_qubit_ids_deduplicates_same_peer():
         }
     )
     assert result == ("Q0",)
-
-
-def test_normalise_waveform_rise_with_non_string_shape():
-    """When shape has no .value and is not a string, shape_name.lower() is skipped."""
-    result = _normalise_waveform_rise({"rise": 1.0, "shape": 42})
-    assert result == 1.0
 
 
 def test_build_waveforms_for_mode_cr_without_zx_map():

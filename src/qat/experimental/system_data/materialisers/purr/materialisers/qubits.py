@@ -2,10 +2,12 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Qubit-, mode-, waveform-, and readout-probability builders for PuRR materialisation."""
 
+from math import pi
 from typing import Any
 
 from qat.experimental.system_data.canonical.schema import (
     AcquireDefinitionData,
+    AttributeEntry,
     ModeData,
     OperationData,
     ProbabilityEntry,
@@ -21,6 +23,7 @@ from qat.experimental.system_data.materialisers.operations.operation_builder imp
     AbstractOperationBuilder,
 )
 from qat.experimental.system_data.materialisers.purr.materialisers.common import (
+    _as_complex,
     _as_float,
     _seconds_to_picoseconds,
 )
@@ -31,54 +34,193 @@ from qat.experimental.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-_RISE_RATIO_SHAPES = {"gaussian", "softer_gaussian"}
-_RISE_TIME_SHAPES = {
-    "soft_square",
-    "softer_square",
-    "extra_soft_square",
-    "rounded_square",
-    "setup_hold",
-}
 
+def _build_shape_name_and_parameters(
+    shape: str | None,
+    amp: float | None,
+    width: float | None,
+    extra_parameters: dict[str, Any],
+) -> tuple[str, tuple[AttributeEntry, ...]] | None:
+    """Build a shape attribute entry from the shape name and its parameters.
 
-def _normalise_waveform_rise(payload: dict[str, Any]) -> int | float | None:
-    """Normalise rise by shape semantics.
+    The shape name is normalised to lower-case, and the expected parameters for that shape
+    are extracted from the waveform payload. Any other parameters are ignored.
 
-    PuRR uses mixed rise semantics:
-    - Gaussian-like shapes use a dimensionless ratio.
-    - Soft-square/rounded-like shapes use rise as time in seconds.
+    Validation happens prior to manifestation, so just returns None if the shape is not
+    recognised, which practically is an impossibility.
     """
 
-    rise = payload.get("rise")
-    if rise is None or not isinstance(rise, int | float):
-        return rise
+    if shape is None:
+        return None
 
-    shape = payload.get("shape")
-    shape_name = shape.value if hasattr(shape, "value") else shape
-    if isinstance(shape_name, str):
-        shape_name = shape_name.lower()
+    match shape.lower():
+        case "blackman":
+            return "blackman", ()
+        case "cos":
+            if width is None:
+                return None
+            internal_phase = extra_parameters.get("internal_phase", 0.0) + pi / 2
+            freq = extra_parameters.get("frequency", 0.0)
+            number_of_periods = freq * width
+            return "sinusoidal", (
+                AttributeEntry(key="internal_phase", value=internal_phase),
+                AttributeEntry(key="number_of_periods", value=number_of_periods),
+            )
+        case "drag_gaussian":
+            # The DragGaussian is equivalent to a breadth of 1.0
+            return "gaussian", (AttributeEntry(key="fractional_breadth", value=1.0),)
+        case "extra_soft_square":
+            if width is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            std_dev = extra_parameters.get("std_dev", 0.0)
+            return "soft_square", (
+                AttributeEntry(
+                    key="fractional_top_width", value=(std_dev - 4.0 * rise) / width
+                ),
+                AttributeEntry(key="fractional_rise", value=2.0 * rise / width),
+                AttributeEntry(key="regularize", value=True),
+            )
+        case "gaussian":
+            rise = extra_parameters.get("rise", 0.0)
+            return "gaussian", (
+                AttributeEntry(key="fractional_breadth", value=2.0**0.5 * rise),
+                AttributeEntry(key="regularize", value=False),
+            )
+        case "gaussian_zero_edges":
+            if width is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            zero_at_edges = extra_parameters.get("zero_at_edges", False)
+            return "gaussian", (
+                AttributeEntry(key="fractional_breadth", value=2.0 * rise / width),
+                AttributeEntry(key="regularize", value=zero_at_edges),
+            )
+        case "gaussian_square":
+            if width is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            std_dev = extra_parameters.get("std_dev", 0.0)
+            zero_at_edges = extra_parameters.get("zero_at_edges", False)
+            return "gaussian_square", (
+                AttributeEntry(key="fractional_rise", value=2.0 * rise / width),
+                AttributeEntry(key="fractional_top_width", value=std_dev / width),
+                AttributeEntry(key="regularize", value=zero_at_edges),
+            )
+        case "rounded_square":
+            if width is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            std_dev = extra_parameters.get("std_dev", 0.0)
+            return "rounded_square", (
+                AttributeEntry(key="fractional_top_width", value=std_dev / width),
+                AttributeEntry(key="fractional_rise", value=2.0 * rise / width),
+            )
+        case "sech":
+            if width is None:
+                return None
+            std_dev = extra_parameters.get("std_dev", 0.0)
+            return "sech", (
+                AttributeEntry(key="fractional_breadth", value=2.0 * std_dev / width),
+            )
+        case "setup_hold":
+            if width is None or amp is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            amp_setup = extra_parameters.get("amp_setup", 0.0)
+            return "setup_hold", (
+                AttributeEntry(key="setup", value=amp_setup / amp),
+                AttributeEntry(key="rise_location", value=rise / width),
+            )
+        case "sin":
+            if width is None:
+                return None
+            internal_phase = extra_parameters.get("internal_phase", 0.0)
+            freq = extra_parameters.get("frequency", 0.0)
+            number_of_periods = freq * width
+            return "sinusoidal", (
+                AttributeEntry(key="internal_phase", value=internal_phase),
+                AttributeEntry(key="number_of_periods", value=number_of_periods),
+            )
+        case "soft_square":
+            if width is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            return "soft_square", (
+                AttributeEntry(key="fractional_top_width", value=1.0 - rise / width),
+                AttributeEntry(key="fractional_rise", value=2.0 * rise / width),
+            )
+        case "softer_gaussian":
+            rise = extra_parameters.get("rise", 0.0)
+            return "gaussian", (
+                AttributeEntry(key="fractional_breadth", value=2.0**0.5 * rise),
+                AttributeEntry(key="regularize", value=True),
+            )
+        case "softer_square":
+            if width is None:
+                return None
+            rise = extra_parameters.get("rise", 0.0)
+            std_dev = extra_parameters.get("std_dev", 0.0)
+            return "soft_square", (
+                AttributeEntry(
+                    key="fractional_top_width", value=(std_dev - 2.0 * rise) / width
+                ),
+                AttributeEntry(key="fractional_rise", value=2.0 * rise / width),
+                AttributeEntry(key="regularize", value=True),
+            )
+        case "square":
+            return "square", ()
+        case _:
+            return None
 
-    if shape_name in _RISE_RATIO_SHAPES:
-        return float(rise)
-    if shape_name in _RISE_TIME_SHAPES:
-        return _seconds_to_picoseconds(float(rise))
 
-    return rise
+def _build_waveform_data(waveform_id: str, payload: dict[str, Any]) -> WaveformData | None:
+    """Convert one PuRR pulse-parameter mapping into canonical waveform data.
 
+    Extracts the expected parameters for any waveform, then bundles any other parameters
+    into a tuple of attribute entries.
+    """
 
-def _build_waveform_data(waveform_id: str, payload: dict[str, Any]) -> WaveformData:
-    """Convert one PuRR pulse-parameter mapping into canonical waveform data."""
+    width = _as_float(payload.get("width"), default=None)
+    amp = _as_complex(payload.get("amp"), default=None)
+    phase = _as_float(payload.get("phase"), default=None)
+    purr_shape = payload.get("shape")
+
+    # For drag_gaussian, beta is mapped to drag in the canonical form
+    if isinstance(purr_shape, str) and purr_shape.lower() == "drag_gaussian":
+        drag = _as_float(payload.get("beta"), default=None)
+    else:
+        drag = _as_float(payload.get("drag"), default=None)
+
+    purr_parameters = {
+        key: value
+        for key, value in payload.items()
+        if key not in {"shape", "width", "amp", "phase", "drag"}
+    }
+
+    built_shape = _build_shape_name_and_parameters(purr_shape, amp, width, purr_parameters)
+    if built_shape is None:
+        return None
+    built_name, built_parameters = built_shape
 
     return WaveformData(
         id=waveform_id,
-        shape=payload.get("shape"),
-        width=_seconds_to_picoseconds(payload.get("width")),
-        rise=_normalise_waveform_rise(payload),
-        amp=_as_float(payload.get("amp"), default=None),
-        drag=_as_float(payload.get("drag"), default=None),
-        phase=_as_float(payload.get("phase"), default=None),
-        amp_setup=_as_float(payload.get("amp_setup"), default=None),
+        width=_seconds_to_picoseconds(width),
+        amp=amp,
+        phase=phase,
+        drag=drag,
+        shape=built_name,
+        shape_parameters=built_parameters,
     )
+
+
+def _append_to_pulse_payload(
+    waveforms: list[WaveformData], waveform_id: str, pulse_payload: dict[str, Any]
+) -> None:
+    """Append a canonical waveform to the list of waveforms for a given pulse channel."""
+    waveform = _build_waveform_data(waveform_id, pulse_payload)
+    if waveform is not None:
+        waveforms.append(waveform)
 
 
 def _build_waveforms_for_mode(
@@ -94,14 +236,14 @@ def _build_waveforms_for_mode(
     if pulse_key in {"drive", "second_state"}:
         pulse_half = qubit_payload.get("pulse_hw_x_pi_2")
         if isinstance(pulse_half, dict):
-            waveforms.append(_build_waveform_data("x_pi_2", pulse_half))
+            _append_to_pulse_payload(waveforms, "x_pi_2", pulse_half)
         pulse_full = qubit_payload.get("pulse_hw_x_pi")
         if isinstance(pulse_full, dict):
-            waveforms.append(_build_waveform_data("x_pi", pulse_full))
+            _append_to_pulse_payload(waveforms, "x_pi", pulse_full)
     elif pulse_key in {"measure", "macq"}:
         pulse_measure = qubit_payload.get("pulse_measure")
         if isinstance(pulse_measure, dict):
-            waveforms.append(_build_waveform_data("measure", pulse_measure))
+            _append_to_pulse_payload(waveforms, "measure", pulse_measure)
     elif pulse_key.endswith("cross_resonance") or pulse_key.endswith(
         "cross_resonance_cancellation"
     ):
@@ -110,7 +252,7 @@ def _build_waveforms_for_mode(
         if isinstance(zx_map, dict):
             zx_pulse = zx_map.get(target_id)
             if isinstance(zx_pulse, dict):
-                waveforms.append(_build_waveform_data("zx_pi_4", zx_pulse))
+                _append_to_pulse_payload(waveforms, "zx_pi_4", zx_pulse)
     elif pulse_key == "reset":
         pulse_reset = qubit_payload.get("ddrop_reset")
         if isinstance(pulse_reset, dict):
@@ -120,7 +262,7 @@ def _build_waveforms_for_mode(
             amp = r_amp if is_readout else q_amp
             if amp is not None:
                 pulse_data["amp"] = amp
-                waveforms.append(_build_waveform_data("ddrop_reset", pulse_data))
+                _append_to_pulse_payload(waveforms, "ddrop_reset", pulse_data)
     elif pulse_key == "freq_shift":
         pulse_data = {
             "shape": "square",
@@ -128,7 +270,7 @@ def _build_waveforms_for_mode(
             "phase": pulse_channel.get("phase"),
             "width": None,
         }
-        waveforms.append(_build_waveform_data("freq_shift", pulse_data))
+        _append_to_pulse_payload(waveforms, "freq_shift", pulse_data)
     elif pulse_key == "acquire":
         pass
     else:

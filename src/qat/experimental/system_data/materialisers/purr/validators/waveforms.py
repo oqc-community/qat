@@ -14,6 +14,150 @@ from qat.experimental.system_data.materialisers.purr.validators.common import (
     _raise_validation_error,
 )
 
+_SHAPE_PARAMETERS_ALWAYS_REQUIRED = ("width", "amp")
+
+_SHAPE_PARAMETERS_ALWAYS_OPTIONAL = ("phase", "drag")
+
+_SHAPE_PARAMETER_REQUIREMENTS = {
+    "blackman": (),
+    "cos": (),
+    "drag_gaussian": ("rise",),
+    "extra_soft_square": ("rise", "std_dev"),
+    "gaussian": ("rise",),
+    "gaussian_zero_edges": ("rise",),
+    "gaussian_square": ("rise", "std_dev"),
+    "rounded_square": ("rise", "std_dev"),
+    "sech": ("std_dev",),
+    "setup_hold": ("rise", "amp_setup"),
+    "sin": (),
+    "soft_square": ("rise",),
+    "softer_gaussian": ("rise",),
+    "softer_square": ("rise", "std_dev"),
+    "square": (),
+}
+
+_SHAPE_PARAMETER_OPTIONAL = {
+    "blackman": (),
+    "cos": ("frequency", "internal_phase"),
+    "drag_gaussian": ("beta", "zero_at_edges"),
+    "extra_soft_square": (),
+    "gaussian": (),
+    "gaussian_zero_edges": ("zero_at_edges",),
+    "gaussian_square": (),
+    "rounded_square": (),
+    "sech": ("zero_at_edges",),
+    "setup_hold": (),
+    "sin": ("frequency", "internal_phase"),
+    "soft_square": (),
+    "softer_gaussian": (),
+    "softer_square": (),
+    "square": (),
+}
+
+
+def _validate_finite_positive_param(
+    *,
+    param: str,
+    value: Any,
+    required_params: tuple[str, ...],
+    optional_params: tuple[str, ...],
+    path: str,
+):
+    """Raise if *param* is required but missing/invalid, or optional but invalid.
+
+    Valid means a finite number strictly greater than zero.
+    """
+    invalid = (
+        value is None
+        or not isinstance(value, int | float)
+        or not math.isfinite(value)
+        or value <= 0
+    )
+    if (param in required_params and invalid) or (
+        param in optional_params and value is not None and invalid
+    ):
+        _raise_validation_error(
+            f"Waveform {param} must be a finite positive number.",
+            path=path,
+            details={"value": value},
+        )
+
+
+def _validate_finite_non_negative_param(
+    *,
+    param: str,
+    value: Any,
+    required_params: tuple[str, ...],
+    optional_params: tuple[str, ...],
+    path: str,
+) -> None:
+    """Raise if *param* is required but missing/invalid, or optional but invalid.
+
+    Valid means a finite number greater than or equal to zero.
+    """
+    invalid = (
+        value is None
+        or not isinstance(value, int | float)
+        or not math.isfinite(value)
+        or value < 0
+    )
+    if (param in required_params and invalid) or (
+        param in optional_params and value is not None and invalid
+    ):
+        _raise_validation_error(
+            f"Waveform {param} must be a finite non-negative number.",
+            path=path,
+            details={"value": value},
+        )
+
+
+def _validate_finite_param(
+    *,
+    param: str,
+    value: Any,
+    required_params: tuple[str, ...],
+    optional_params: tuple[str, ...],
+    path: str,
+) -> None:
+    """Raise if *param* is required but missing/invalid, or optional but invalid.
+
+    Valid means a finite number.
+    """
+    invalid = (
+        value is None or not isinstance(value, int | float) or not math.isfinite(value)
+    )
+    if (param in required_params and invalid) or (
+        param in optional_params and value is not None and invalid
+    ):
+        _raise_validation_error(
+            f"Waveform {param} must be a finite number.",
+            path=path,
+            details={"value": value},
+        )
+
+
+def _validate_bool_int_param(
+    *,
+    param: str,
+    value: Any,
+    required_params: tuple[str, ...],
+    optional_params: tuple[str, ...],
+    path: str,
+) -> None:
+    """Raise if *param* is required but missing/invalid, or optional but invalid.
+
+    Valid means a boolean or integer.
+    """
+    invalid = value is None or not isinstance(value, bool | int)
+    if (param in required_params and invalid) or (
+        param in optional_params and value is not None and invalid
+    ):
+        _raise_validation_error(
+            f"Waveform {param} must be a boolean or integer.",
+            path=path,
+            details={"value": value, "value_type": type(value).__name__},
+        )
+
 
 def _validate_waveform_field_bounds(
     *,
@@ -21,25 +165,115 @@ def _validate_waveform_field_bounds(
     field_name: str,
     waveform: dict[str, Any],
 ) -> None:
-    """Validate width and rise bounds for a single drive/readout waveform."""
+    """Validates the fields of a waveform are within their allowed bounds.
 
-    width = waveform.get("width")
-    if width is not None and (
-        not isinstance(width, int | float) or not math.isfinite(width) or width < 0
-    ):
-        _raise_validation_error(
-            "Waveform width must be a finite non-negative number when provided.",
-            path=f"$.quantum_devices.{device_id}.{field_name}.width",
-            details={"value": width},
-        )
+    ``shape``, ``width``, and ``amp`` are required. ``phase`` and ``drag`` are optional
+    parameters shared across waveforms but must be finite when present.
 
-    rise = waveform.get("rise")
-    if isinstance(rise, int | float) and (not math.isfinite(rise) or rise < 0):
+    ``rise`` and ``std_dev`` are shape-dependent and must be positive (> 0) where
+    required or when provided. ``amp_setup`` is required for some shapes and must be
+    finite. Other shape-dependent parameters (``frequency``, ``internal_phase``, ``beta``,
+    ``zero_at_edges``) are validated for finiteness when present.
+    """
+
+    shape = waveform.get("shape")
+    if not isinstance(shape, str) or shape.lower() not in _SHAPE_PARAMETER_REQUIREMENTS:
         _raise_validation_error(
-            "Waveform rise must be a finite non-negative number when numeric.",
-            path=f"$.quantum_devices.{device_id}.{field_name}.rise",
-            details={"value": rise},
+            "Waveform shape must be one of the allowed shapes.",
+            path=f"$.quantum_devices.{device_id}.{field_name}.shape",
+            details={"value": shape, "allowed_shapes": list(_SHAPE_PARAMETER_REQUIREMENTS)},
         )
+    shape_lower = shape.lower()
+    required_params = _SHAPE_PARAMETERS_ALWAYS_REQUIRED + _SHAPE_PARAMETER_REQUIREMENTS.get(
+        shape_lower, ()
+    )
+    optional_params = _SHAPE_PARAMETERS_ALWAYS_OPTIONAL + _SHAPE_PARAMETER_OPTIONAL.get(
+        shape_lower, ()
+    )
+
+    # Width and amp always required
+    _validate_finite_non_negative_param(
+        param="width",
+        value=waveform.get("width"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.width",
+    )
+    _validate_finite_param(
+        param="amp",
+        value=waveform.get("amp"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.amp",
+    )
+
+    # Phase and drag are for all shapes, but optional
+    _validate_finite_param(
+        param="phase",
+        value=waveform.get("phase"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.phase",
+    )
+    _validate_finite_param(
+        param="drag",
+        value=waveform.get("drag"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.drag",
+    )
+
+    # Other parameters are shape-dependent, sometimes required, sometimes optional,
+    # sometimes not relevant
+    _validate_finite_positive_param(
+        param="rise",
+        value=waveform.get("rise"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.rise",
+    )
+    _validate_finite_positive_param(
+        param="std_dev",
+        value=waveform.get("std_dev"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.std_dev",
+    )
+    _validate_finite_param(
+        param="amp_setup",
+        value=waveform.get("amp_setup"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.amp_setup",
+    )
+    _validate_bool_int_param(
+        param="zero_at_edges",
+        value=waveform.get("zero_at_edges"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.zero_at_edges",
+    )
+    _validate_finite_param(
+        param="beta",
+        value=waveform.get("beta"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.beta",
+    )
+    _validate_finite_param(
+        param="frequency",
+        value=waveform.get("frequency"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.frequency",
+    )
+    _validate_finite_param(
+        param="internal_phase",
+        value=waveform.get("internal_phase"),
+        required_params=required_params,
+        optional_params=optional_params,
+        path=f"$.quantum_devices.{device_id}.{field_name}.internal_phase",
+    )
 
 
 def _validate_cross_resonance_waveform(

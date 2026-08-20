@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 import copy
+from math import pi
 
 import pytest
 
@@ -48,6 +49,7 @@ from qat.experimental.system_data.materialisers.purr.materialisers.qubits import
     _build_qubit_modes,
     _build_qubits,
     _build_readout_probability,
+    _build_shape_name_and_parameters,
     _build_waveform_data,
     _build_waveforms_for_mode,
     _resolve_resonator_payload,
@@ -59,6 +61,15 @@ from qat.experimental.system_data.materialisers.purr.materialisers.signal_paths 
     _build_ports,
     _register_external_resource_from_payload,
 )
+from qat.experimental.waveforms.shapes.blackman import BlackmanWaveformShape
+from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
+from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
+from qat.experimental.waveforms.shapes.rounded_square import RoundedSquareWaveformShape
+from qat.experimental.waveforms.shapes.sech import SechWaveformShape
+from qat.experimental.waveforms.shapes.setup_hold import SetupHoldWaveformShape
+from qat.experimental.waveforms.shapes.sinusoidal import SinusoidalWaveformShape
+from qat.experimental.waveforms.shapes.soft_square import SoftSquareWaveformShape
+from qat.experimental.waveforms.shapes.square import SquareWaveformShape
 
 
 def _synthetic_quantum_devices():
@@ -759,46 +770,302 @@ def test_qubit_reset_waveform_helper_skips_missing_or_none_amplitudes(
     )
 
 
-def test_build_waveform_data_normalises_rise_by_shape_semantics():
-    gaussian = _build_waveform_data(
-        "gaussian",
-        {
-            "shape": "gaussian",
-            "width": 100e-9,
-            "rise": 1 / 3,
-        },
-    )
-    assert gaussian.rise == pytest.approx(1 / 3)
+def test_build_shape_returns_none_when_width_is_none():
+    """Tests shapes the can and cannot be built with width=None."""
+    assert _build_shape_name_and_parameters("square", 0.2, None, {}) is not None
+    assert _build_shape_name_and_parameters("gaussian_square", 0.2, None, {}) is None
 
-    soft_square = _build_waveform_data(
-        "soft_square",
-        {
-            "shape": "soft_square",
-            "width": 100e-9,
-            "rise": 10e-9,
-        },
-    )
-    assert soft_square.rise == 10_000
 
-    rounded_square = _build_waveform_data(
-        "rounded_square",
+def test_build_shape_returns_none_when_amp_is_none():
+    """Tests shapes the can and cannot be built with amp=None."""
+    assert _build_shape_name_and_parameters("setup_hold", None, 100e-9, {}) is None
+    assert _build_shape_name_and_parameters("gaussian", None, 100e-9, {}) is not None
+
+
+def test_build_shape_returns_none_when_shape_is_none():
+    assert _build_shape_name_and_parameters(None, 0.2, 100e-9, {}) is None
+
+
+def test_build_shape_returns_none_for_unknown_shape_default_case():
+    assert _build_shape_name_and_parameters("unknown_shape", 0.2, 100e-9, {}) is None
+
+
+def test_build_waveform_data_returns_none_when_shape_unrecognised():
+    assert (
+        _build_waveform_data("w", {"shape": "custom_shape", "width": 100e-9, "amp": 0.2})
+        is None
+    )
+
+
+def test_build_waveforms_for_mode_silently_drops_waveform_when_shape_returns_none():
+    """When _build_waveform_data returns None (e.g. width missing for a shape that needs
+    it), _build_waveforms_for_mode must drop the waveform rather than propagate None."""
+    qubit_payload = {
+        "id": "q0",
+        # soft_square with no width — _build_shape returns None
+        "pulse_hw_x_pi_2": {"shape": "soft_square", "amp": 0.2},
+        # valid second waveform that should still be included
+        "pulse_hw_x_pi": {"shape": "square", "width": 40e-9, "amp": 0.4},
+    }
+    waveforms = _build_waveforms_for_mode(qubit_payload, "drive", {})
+    assert all(w is not None for w in waveforms)
+    assert len(waveforms) == 1
+    assert waveforms[0].id == "x_pi"
+
+
+def test_drag_gaussian_maps_beta_to_drag_and_ignores_drag_field():
+    """For drag_gaussian, beta is mapped to WaveformData.drag; the drag field is ignored
+    even when both beta and drag are present."""
+    waveform_data = _build_waveform_data(
+        "test_wf",
         {
-            "shape": "rounded_square",
+            "shape": "drag_gaussian",
             "width": 100e-9,
+            "amp": 0.2,
             "rise": 5e-9,
+            "beta": 0.25,
+            "drag": 0.99,
         },
     )
-    assert rounded_square.rise == 5_000
+    assert waveform_data is not None
+    assert waveform_data.drag == 0.25
+    assert waveform_data.shape == "gaussian"
 
-    unknown = _build_waveform_data(
-        "unknown",
-        {
-            "shape": "custom_shape",
-            "width": 100e-9,
-            "rise": 0.25,
-        },
+
+def test_other_shapes_use_drag_not_beta():
+    """For non-drag_gaussian shapes, drag parameter should be used (not beta)."""
+    waveform_data = _build_waveform_data(
+        "test_wf",
+        {"shape": "square", "width": 100e-9, "amp": 0.2, "drag": 0.15, "beta": 0.99},
     )
-    assert unknown.rise == 0.25
+    assert waveform_data is not None
+    # drag should be used, not beta
+    assert waveform_data.drag == 0.15
+
+
+@pytest.mark.parametrize(
+    (
+        "shape,width,amp,extra_parameters,expected_shape,expected_parameter_names,"
+        "factory_shape_builder"
+    ),
+    [
+        (
+            "blackman",
+            100e-9,
+            0.2,
+            {},
+            "blackman",
+            set(),
+            lambda width, amp, params: BlackmanWaveformShape(),
+        ),
+        (
+            "cos",
+            100e-9,
+            0.2,
+            {"frequency": 25e6, "internal_phase": 0.1},
+            "sinusoidal",
+            {"internal_phase", "number_of_periods"},
+            lambda width, amp, params: SinusoidalWaveformShape.from_frequency(
+                frequency=params["frequency"],
+                width=width,
+                internal_phase=params["internal_phase"] + pi / 2,
+            ),
+        ),
+        (
+            "drag_gaussian",
+            100e-9,
+            0.2,
+            {"rise": 10e-9, "beta": 0.25},
+            "gaussian",
+            {"fractional_breadth"},
+            lambda width, amp, params: GaussianWaveformShape(fractional_breadth=1.0),
+        ),
+        (
+            "extra_soft_square",
+            100e-9,
+            0.2,
+            {"rise": 10e-9, "std_dev": 70e-9},
+            "soft_square",
+            {"fractional_top_width", "fractional_rise", "regularize"},
+            lambda width, amp, params: (
+                SoftSquareWaveformShape.from_extra_soft_square_waveform(
+                    std_dev=params["std_dev"],
+                    rise=params["rise"],
+                    width=width,
+                )
+            ),
+        ),
+        (
+            "gaussian_zero_edges",
+            100e-9,
+            0.2,
+            {"rise": 10e-9, "zero_at_edges": True},
+            "gaussian",
+            {"fractional_breadth", "regularize"},
+            lambda width, amp, params: (
+                GaussianWaveformShape.from_gaussian_zero_edge_waveform(
+                    std_dev=params["rise"],
+                    width=width,
+                    zero_at_edges=params["zero_at_edges"],
+                )
+            ),
+        ),
+        (
+            "gaussian",
+            100e-9,
+            0.2,
+            {"rise": 1 / 3},
+            "gaussian",
+            {"fractional_breadth", "regularize"},
+            lambda width, amp, params: GaussianWaveformShape.from_gaussian_waveform(
+                rise=params["rise"]
+            ),
+        ),
+        (
+            "softer_gaussian",
+            100e-9,
+            0.2,
+            {"rise": 1 / 3},
+            "gaussian",
+            {"fractional_breadth", "regularize"},
+            lambda width, amp, params: GaussianWaveformShape.from_softer_gaussian_waveform(
+                rise=params["rise"]
+            ),
+        ),
+        (
+            "gaussian_square",
+            100e-9,
+            0.2,
+            {"rise": 10e-9, "std_dev": 50e-9},
+            "gaussian_square",
+            {"fractional_rise", "fractional_top_width", "regularize"},
+            lambda width, amp, params: GaussianSquareWaveformShape.from_legacy(
+                std_dev=params["rise"],
+                width=width,
+                square_width=params["std_dev"],
+            ),
+        ),
+        (
+            "rounded_square",
+            100e-9,
+            0.2,
+            {"rise": 5e-9, "std_dev": 50e-9},
+            "rounded_square",
+            {"fractional_top_width", "fractional_rise"},
+            lambda width, amp, params: RoundedSquareWaveformShape.from_legacy(
+                rise=params["rise"],
+                std_dev=params["std_dev"],
+                width=width,
+            ),
+        ),
+        (
+            "sech",
+            100e-9,
+            0.2,
+            {"std_dev": 20e-9},
+            "sech",
+            {"fractional_breadth"},
+            lambda width, amp, params: SechWaveformShape.from_legacy(
+                std_dev=params["std_dev"],
+                width=width,
+            ),
+        ),
+        (
+            "setup_hold",
+            100e-9,
+            0.4,
+            {"rise": 10e-9, "amp_setup": 0.1},
+            "setup_hold",
+            {"setup", "rise_location"},
+            lambda width, amp, params: SetupHoldWaveformShape.from_legacy(
+                amp_setup=params["amp_setup"],
+                amp=amp,
+                rise=params["rise"],
+                width=width,
+            ),
+        ),
+        (
+            "soft_square",
+            100e-9,
+            0.2,
+            {"rise": 10e-9},
+            "soft_square",
+            {"fractional_top_width", "fractional_rise"},
+            lambda width, amp, params: SoftSquareWaveformShape.from_soft_square_waveform(
+                rise=params["rise"],
+                width=width,
+            ),
+        ),
+        (
+            "softer_square",
+            100e-9,
+            0.2,
+            {"rise": 10e-9, "std_dev": 60e-9},
+            "soft_square",
+            {"fractional_top_width", "fractional_rise", "regularize"},
+            lambda width, amp, params: SoftSquareWaveformShape.from_softer_square_waveform(
+                std_dev=params["std_dev"],
+                rise=params["rise"],
+                width=width,
+            ),
+        ),
+        (
+            "sin",
+            100e-9,
+            0.2,
+            {"frequency": 25e6, "internal_phase": 0.1},
+            "sinusoidal",
+            {"internal_phase", "number_of_periods"},
+            lambda width, amp, params: SinusoidalWaveformShape.from_frequency(
+                frequency=params["frequency"],
+                width=width,
+                internal_phase=params["internal_phase"],
+            ),
+        ),
+        (
+            "square",
+            100e-9,
+            0.2,
+            {},
+            "square",
+            set(),
+            lambda width, amp, params: SquareWaveformShape(),
+        ),
+    ],
+)
+def test_build_shape_converts_and_matches_factory_parameterisation(
+    shape,
+    width,
+    amp,
+    extra_parameters,
+    expected_shape,
+    expected_parameter_names,
+    factory_shape_builder,
+):
+    """Verify that _build_shape produces shape parameters numerically identical to those
+    produced by the canonical waveform-shape factory classes in the compiler.
+
+    This is a parity test: it guards against drift between the materialiser's parameter
+    derivation and the compiler's authoritative implementations.  Any divergence here
+    means the system-data materialiser would produce shapes that differ from what the
+    compiler would generate for the same pulse definition.
+    """
+    built = _build_shape_name_and_parameters(shape, amp, width, extra_parameters)
+    assert built is not None
+
+    canonical_shape, shape_parameters = built
+    assert canonical_shape == expected_shape
+    assert {entry.key for entry in shape_parameters} == expected_parameter_names
+
+    shape_from_factory = factory_shape_builder(width, amp, extra_parameters)
+    actual_parameters = {entry.key: entry.value for entry in shape_parameters}
+
+    for name, actual_value in actual_parameters.items():
+        expected_value = getattr(shape_from_factory, name)
+        if isinstance(expected_value, float):
+            assert actual_value == pytest.approx(expected_value)
+        else:
+            assert actual_value == expected_value
 
 
 def test_qubit_resonator_resolution_and_readout_probability_edge_paths():

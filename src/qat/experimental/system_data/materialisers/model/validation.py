@@ -222,7 +222,11 @@ def _validate_channels(
 
 
 def _validate_waveform(*, waveform: WaveformData, path_root: str) -> None:
-    """Validate waveform timing and numeric bounds."""
+    """Validate waveform timing and numeric bounds.
+
+    Extra parameters are designed to be extensible for additions to future waveforms, and
+    aren't strictly validated here.
+    """
     path = f"{path_root}.waveform_definitions[{waveform.id}]"
     if waveform.width is not None and waveform.width < 0:
         _raise_validation_error(
@@ -230,15 +234,14 @@ def _validate_waveform(*, waveform: WaveformData, path_root: str) -> None:
             path=f"{path}.width",
             details={"value": waveform.width},
         )
-    if waveform.rise is not None and (
-        not _is_finite_real(waveform.rise) or waveform.rise < 0
-    ):
+    if waveform.amp is not None and not _is_finite_number(waveform.amp):
         _raise_validation_error(
-            "Waveform rise must be a finite non-negative number.",
-            path=f"{path}.rise",
-            details={"value": waveform.rise},
+            "Waveform amp must be a finite number.",
+            path=f"{path}.amp",
+            details={"value": waveform.amp},
         )
-    for field_name in ("amp", "drag", "phase", "amp_setup"):
+
+    for field_name in ("drag", "phase"):
         value = getattr(waveform, field_name)
         if value is not None and not _is_finite_real(value):
             _raise_validation_error(

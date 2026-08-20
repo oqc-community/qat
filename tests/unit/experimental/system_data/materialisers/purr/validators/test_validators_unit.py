@@ -52,9 +52,19 @@ def _make_dto(**overrides):
                         }
                     },
                 },
-                "pulse_hw_x_pi_2": {"width": 20e-9, "rise": 5e-9, "amp": 0.2},
-                "pulse_hw_x_pi": {"width": 40e-9, "rise": 10e-9, "amp": 0.4},
-                "pulse_measure": {"width": 100e-9, "amp": 0.8},
+                "pulse_hw_x_pi_2": {
+                    "shape": "gaussian",
+                    "width": 20e-9,
+                    "rise": 5e-9,
+                    "amp": 0.2,
+                },
+                "pulse_hw_x_pi": {
+                    "shape": "gaussian",
+                    "width": 40e-9,
+                    "rise": 10e-9,
+                    "amp": 0.4,
+                },
+                "pulse_measure": {"shape": "square", "width": 100e-9, "amp": 0.8},
                 "measure_acquire": {
                     "delay": 10e-9,
                     "width": 40e-9,

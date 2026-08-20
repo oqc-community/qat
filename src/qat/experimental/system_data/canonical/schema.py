@@ -136,27 +136,21 @@ class WaveformData:
     applied.
 
     :ivar id: Waveform definition identifier.
-    :ivar shape: Named waveform shape.
     :ivar width: Waveform width in picoseconds.
-    :ivar rise: Rise fraction or rise time in picoseconds, depending on shape semantics.
-        Time values must be defined as integer picoseconds, while fractional values are
-        defined as floats in the range [0.0, 1.0].
     :ivar amp: Waveform amplitude.
-    :ivar drag: DRAG coefficient.
     :ivar phase: Waveform phase in radians.
-    :ivar amp_setup: Optional setup/plateau amplitude.
+    :ivar drag: DRAG coefficient.
+    :ivar shape: Named waveform shape.
+    :ivar shape_parameters: Attributes that contain the parameters for shapes.
     """
 
-    # TODO: Sort out common parameters from shape specific ones and potentially make the shape
-    # specific ones attribute entries - COMPILER-1218
     id: str
-    shape: str | None = None
     width: int | None = None
-    rise: int | float | None = None
-    amp: float | None = None
-    drag: float | None = None
+    amp: complex | float | None = None
     phase: float | None = None
-    amp_setup: float | None = None
+    drag: float | None = None
+    shape: str | None = None
+    shape_parameters: tuple[AttributeEntry, ...] = ()
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

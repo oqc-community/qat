@@ -6,6 +6,7 @@ import pytest
 
 from qat.experimental.system_data.canonical.schema import (
     AcquireDefinitionData,
+    AttributeEntry,
     CanonicalSystemData,
     ChannelData,
     LinearMapToRealMethodData,
@@ -334,27 +335,21 @@ def test_is_finite_number_non_numeric_returns_false():
     assert _is_finite_number(None) is False
 
 
-@pytest.mark.parametrize("bad_rise", [float("inf"), float("-inf"), float("nan"), -1.0])
-def test_waveform_invalid_rise_raises(bad_rise):
-    mode = ModeData(
-        id="drive_q0",
-        channel_id="ch0",
-        waveform_definitions=(WaveformData(id="w0", rise=bad_rise),),
-    )
-    with pytest.raises(MaterialisationValidationError, match="[Ww]aveform rise"):
-        validate(_with_mode(mode))
-
-
 def test_waveform_zero_rise_passes():
     mode = ModeData(
         id="drive_q0",
         channel_id="ch0",
-        waveform_definitions=(WaveformData(id="w0", rise=0.0),),
+        waveform_definitions=(
+            WaveformData(
+                id="w0",
+                shape_parameters=(AttributeEntry(key="fractional_rise", value=0.0),),
+            ),
+        ),
     )
     validate(_with_mode(mode))
 
 
-@pytest.mark.parametrize("field", ["amp", "drag", "phase", "amp_setup"])
+@pytest.mark.parametrize("field", ["amp", "drag", "phase"])
 @pytest.mark.parametrize(
     "bad_value",
     [float("inf"), float("-inf"), float("nan")],
@@ -369,7 +364,7 @@ def test_waveform_non_finite_numeric_field_raises(field, bad_value):
         validate(_with_mode(mode))
 
 
-@pytest.mark.parametrize("field", ["amp", "drag", "phase", "amp_setup"])
+@pytest.mark.parametrize("field", ["amp", "drag", "phase"])
 def test_waveform_none_numeric_field_passes(field):
     """None values for optional waveform numeric fields are acceptable."""
     mode = ModeData(

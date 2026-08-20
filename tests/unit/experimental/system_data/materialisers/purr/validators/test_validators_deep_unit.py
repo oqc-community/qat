@@ -76,9 +76,19 @@ def _make_dto() -> PurrIngressV010:
                         }
                     },
                 },
-                "pulse_hw_x_pi_2": {"width": 20e-9, "rise": 5e-9, "amp": 0.2},
-                "pulse_hw_x_pi": {"width": 40e-9, "rise": 10e-9, "amp": 0.4},
-                "pulse_measure": {"width": 100e-9, "amp": 0.8},
+                "pulse_hw_x_pi_2": {
+                    "shape": "gaussian",
+                    "width": 20e-9,
+                    "rise": 5e-9,
+                    "amp": 0.2,
+                },
+                "pulse_hw_x_pi": {
+                    "shape": "gaussian",
+                    "width": 40e-9,
+                    "rise": 10e-9,
+                    "amp": 0.4,
+                },
+                "pulse_measure": {"shape": "square", "width": 100e-9, "amp": 0.8},
                 "pulse_hw_zx_pi_4": {
                     "Q1": {"width": 20e-9, "amp": 0.2, "phase": 0.0, "drag": 0.0}
                 },
@@ -704,51 +714,186 @@ def test_signal_path_warning_helper_covers_non_dict_skip_branches():
     _warn_sample_time_consistency(fake_dto)
 
 
-def test_waveform_validator_error_branches():
-    dto_width_bad = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__setitem__("width", -1)
-    )
-    with pytest.raises(SourceValidationError, match="Waveform width"):
-        _validate_waveform_payloads(dto_width_bad)
+_EXTRA_SHAPE_PARAMS: dict[str, dict[str, tuple[str, ...]]] = {
+    "cos": {"required": (), "optional": ("frequency", "internal_phase")},
+    "drag_gaussian": {"required": ("rise",), "optional": ("beta", "zero_at_edges")},
+    "extra_soft_square": {"required": ("rise", "std_dev"), "optional": ()},
+    "gaussian": {"required": ("rise",), "optional": ()},
+    "gaussian_square": {"required": ("rise", "std_dev"), "optional": ()},
+    "gaussian_zero_edges": {"required": ("rise",), "optional": ("zero_at_edges",)},
+    "rounded_square": {"required": ("rise", "std_dev"), "optional": ()},
+    "sech": {"required": ("std_dev",), "optional": ("zero_at_edges",)},
+    "setup_hold": {"required": ("rise", "amp_setup"), "optional": ()},
+    "sin": {"required": (), "optional": ("frequency", "internal_phase")},
+    "soft_square": {"required": ("rise",), "optional": ()},
+    "softer_gaussian": {"required": ("rise",), "optional": ()},
+    "softer_square": {"required": ("rise", "std_dev"), "optional": ()},
+}
 
-    dto_width_inf = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__setitem__(
-            "width", math.inf
+_SHAPE_PARAM_VALID_VALUES: dict[str, object] = {
+    "amp_setup": 0.5,
+    "beta": 0.1,
+    "frequency": 5.0e9,
+    "internal_phase": 0.25,
+    "rise": 5.0e-9,
+    "std_dev": 5.0e-9,
+    "zero_at_edges": 1,
+}
+
+_SHAPE_PARAM_INVALID_VALUES: dict[str, object] = {
+    "amp_setup": math.inf,
+    "beta": math.nan,
+    "frequency": math.inf,
+    "internal_phase": "bad",
+    "rise": 0.0,
+    "std_dev": 0.0,
+    "zero_at_edges": "yes",
+}
+
+
+def _shape_required_updates(shape: str) -> dict[str, object]:
+    updates: dict[str, object] = {"shape": shape}
+    for param in _EXTRA_SHAPE_PARAMS[shape]["required"]:
+        updates[param] = _SHAPE_PARAM_VALID_VALUES[param]
+    return updates
+
+
+def test_waveform_validator_width_amp_required_for_single_shape_branches():
+    required_invalid_values = {"width": -1.0, "amp": math.inf}
+    required_valid_values = {"width": 20.0e-9, "amp": 0.2}
+
+    for param in ("width", "amp"):
+        dto_valid = _mutated_dto(
+            lambda p, field=param: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                {"shape": "gaussian", field: required_valid_values[field]}
+            )
         )
-    )
-    with pytest.raises(SourceValidationError, match="Waveform width"):
-        _validate_waveform_payloads(dto_width_inf)
+        _validate_waveform_payloads(dto_valid)
 
-    dto_width_nan = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__setitem__(
-            "width", math.nan
+        dto_missing = _mutated_dto(
+            lambda p, field=param: (
+                p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update({"shape": "gaussian"}),
+                p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].pop(field, None),
+            )[-1]
         )
-    )
-    with pytest.raises(SourceValidationError, match="Waveform width"):
-        _validate_waveform_payloads(dto_width_nan)
+        with pytest.raises(SourceValidationError, match=f"Waveform {param}"):
+            _validate_waveform_payloads(dto_missing)
 
-    dto_rise_bad = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__setitem__("rise", -1)
-    )
-    with pytest.raises(SourceValidationError, match="Waveform rise"):
-        _validate_waveform_payloads(dto_rise_bad)
-
-    dto_rise_inf = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__setitem__(
-            "rise", math.inf
+        dto_invalid = _mutated_dto(
+            lambda p, field=param: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                {"shape": "gaussian", field: required_invalid_values[field]}
+            )
         )
-    )
-    with pytest.raises(SourceValidationError, match="Waveform rise"):
-        _validate_waveform_payloads(dto_rise_inf)
+        with pytest.raises(SourceValidationError, match=f"Waveform {param}"):
+            _validate_waveform_payloads(dto_invalid)
 
-    dto_rise_nan = _mutated_dto(
-        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__setitem__(
-            "rise", math.nan
+
+def test_waveform_validator_phase_drag_optional_for_single_shape_branches():
+    optional_invalid_values = {"phase": math.inf, "drag": "bad"}
+    optional_valid_values = {"phase": 0.25, "drag": 0.1}
+
+    for param in ("phase", "drag"):
+        dto_missing_optional = _mutated_dto(
+            lambda p, field=param: (
+                p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update({"shape": "gaussian"}),
+                p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].pop(field, None),
+            )[-1]
         )
-    )
-    with pytest.raises(SourceValidationError, match="Waveform rise"):
-        _validate_waveform_payloads(dto_rise_nan)
+        _validate_waveform_payloads(dto_missing_optional)
 
+        dto_valid_optional = _mutated_dto(
+            lambda p, field=param: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                {"shape": "gaussian", field: optional_valid_values[field]}
+            )
+        )
+        _validate_waveform_payloads(dto_valid_optional)
+
+        dto_invalid_optional = _mutated_dto(
+            lambda p, field=param: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                {"shape": "gaussian", field: optional_invalid_values[field]}
+            )
+        )
+        with pytest.raises(SourceValidationError, match=f"Waveform {param}"):
+            _validate_waveform_payloads(dto_invalid_optional)
+
+
+def test_waveform_validator_shape_extra_params_branches():
+    for shape, config in _EXTRA_SHAPE_PARAMS.items():
+        for param in config["required"]:
+            dto_valid_required = _mutated_dto(
+                lambda p, waveform_shape=shape, field=param: p["quantum_devices"]["Q0"][
+                    "pulse_hw_x_pi_2"
+                ].update(
+                    {
+                        **_shape_required_updates(waveform_shape),
+                        field: _SHAPE_PARAM_VALID_VALUES[field],
+                    }
+                )
+            )
+            _validate_waveform_payloads(dto_valid_required)
+
+            dto_missing_required = _mutated_dto(
+                lambda p, waveform_shape=shape, field=param: (
+                    p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                        _shape_required_updates(waveform_shape)
+                    ),
+                    p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].pop(field, None),
+                )[-1]
+            )
+            with pytest.raises(SourceValidationError, match=f"Waveform {param}"):
+                _validate_waveform_payloads(dto_missing_required)
+
+            dto_invalid_required = _mutated_dto(
+                lambda p, waveform_shape=shape, field=param: p["quantum_devices"]["Q0"][
+                    "pulse_hw_x_pi_2"
+                ].update(
+                    {
+                        **_shape_required_updates(waveform_shape),
+                        field: _SHAPE_PARAM_INVALID_VALUES[field],
+                    }
+                )
+            )
+            with pytest.raises(SourceValidationError, match=f"Waveform {param}"):
+                _validate_waveform_payloads(dto_invalid_required)
+
+        for param in config["optional"]:
+            dto_missing_optional = _mutated_dto(
+                lambda p, waveform_shape=shape, field=param: (
+                    p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                        _shape_required_updates(waveform_shape)
+                    ),
+                    p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].pop(field, None),
+                )[-1]
+            )
+            _validate_waveform_payloads(dto_missing_optional)
+
+            dto_valid_optional = _mutated_dto(
+                lambda p, waveform_shape=shape, field=param: p["quantum_devices"]["Q0"][
+                    "pulse_hw_x_pi_2"
+                ].update(
+                    {
+                        **_shape_required_updates(waveform_shape),
+                        field: _SHAPE_PARAM_VALID_VALUES[field],
+                    }
+                )
+            )
+            _validate_waveform_payloads(dto_valid_optional)
+
+            dto_invalid_optional = _mutated_dto(
+                lambda p, waveform_shape=shape, field=param: p["quantum_devices"]["Q0"][
+                    "pulse_hw_x_pi_2"
+                ].update(
+                    {
+                        **_shape_required_updates(waveform_shape),
+                        field: _SHAPE_PARAM_INVALID_VALUES[field],
+                    }
+                )
+            )
+            with pytest.raises(SourceValidationError, match=f"Waveform {param}"):
+                _validate_waveform_payloads(dto_invalid_optional)
+
+
+def test_waveform_validator_misc_error_branches():
     dto_zx_bad = _mutated_dto(
         lambda p: p["quantum_devices"]["Q0"]["pulse_hw_zx_pi_4"]["Q1"].__setitem__(
             "width", -1
@@ -830,6 +975,58 @@ def test_waveform_validator_error_branches():
     )
     _validate_waveform_payloads(dto_zx_non_dict)
     _validate_waveform_numeric_fields(dto_zx_non_dict)
+
+
+def test_waveform_validator_field_error_branches():
+    """Tests that the waveform validator raises for fields with values that are not
+    allowed."""
+
+    dto_bad_shape = _mutated_dto(
+        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+            {"shape": "not_a_shape"}
+        )
+    )
+    with pytest.raises(SourceValidationError, match="Waveform shape"):
+        _validate_waveform_payloads(dto_bad_shape)
+
+    dto_no_shape = _mutated_dto(
+        lambda p: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].__delitem__("shape")
+    )
+    with pytest.raises(SourceValidationError, match="Waveform shape"):
+        _validate_waveform_payloads(dto_no_shape)
+
+    # 0 and 1 must be accepted as integer equivalents of False/True
+    for int_value in (0, 1):
+        dto_zero_at_edges_int = _mutated_dto(
+            lambda p, v=int_value: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+                {"shape": "drag_gaussian", "zero_at_edges": v}
+            )
+        )
+        _validate_waveform_payloads(dto_zero_at_edges_int)  # must not raise
+
+
+@pytest.mark.parametrize("std_dev", [0.0, -1.0, math.inf, math.nan])
+def test_waveform_validator_ignores_std_dev_when_not_declared_for_shape(
+    std_dev,
+):
+    """std_dev is ignored when not required/optional for the selected shape."""
+    dto_bad_std_dev = _mutated_dto(
+        lambda p, value=std_dev: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+            {"shape": "gaussian", "rise": 5e-9, "std_dev": value}
+        )
+    )
+    _validate_waveform_payloads(dto_bad_std_dev)
+
+
+@pytest.mark.parametrize("amp_setup", [math.inf, "bad"])
+def test_waveform_validator_ignores_amp_setup_when_not_declared_for_shape(amp_setup):
+    """amp_setup is ignored when not required/optional for the selected shape."""
+    dto_bad_amp_setup = _mutated_dto(
+        lambda p, value=amp_setup: p["quantum_devices"]["Q0"]["pulse_hw_x_pi_2"].update(
+            {"shape": "gaussian", "rise": 5e-9, "amp_setup": value}
+        )
+    )
+    _validate_waveform_payloads(dto_bad_amp_setup)
 
 
 def test_validator_skip_and_error_branches_for_couplings_signal_paths_and_weights():
