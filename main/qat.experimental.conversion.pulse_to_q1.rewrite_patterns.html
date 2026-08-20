@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post328.dev20260820151617 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post329.dev20260820155226 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -665,6 +665,48 @@
   <section id="module-qat.experimental.conversion.pulse_to_q1.rewrite_patterns">
 <span id="qat-experimental-conversion-pulse-to-q1-rewrite-patterns-module"></span><h1>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module<a class="headerlink" href="#module-qat.experimental.conversion.pulse_to_q1.rewrite_patterns" title="Link to this heading"></a></h1>
 <p>Rewrite patterns for the Pulse-to-Q1 phase legalisation and lowering stages.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LowerArithIntegerConstantToMoveOp</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
+<p>Lower <code class="docutils literal notranslate"><span class="pre">arith.constant</span></code> with an integer or index type to <code class="docutils literal notranslate"><span class="pre">q1.ir.move</span></code>.</p>
+<p>An <code class="docutils literal notranslate"><span class="pre">arith.constant</span></code> whose result type is
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IntegerType</span></code> or
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IndexType</span></code> is replaced by a <code class="docutils literal notranslate"><span class="pre">q1.ir.move</span></code>
+instruction that loads the same immediate value into a virtual register.
+Constants whose result type is not an integer or index (e.g. floating-point)
+are left unchanged.</p>
+<p>The immediate must fit in the 32-bit signed-or-unsigned range accepted by
+<code class="docutils literal notranslate"><span class="pre">q1.ir.move</span></code> (<code class="docutils literal notranslate"><span class="pre">SU32Imm</span></code>: <code class="docutils literal notranslate"><span class="pre">[-2**31,</span> <span class="pre">2**32</span> <span class="pre">-</span> <span class="pre">1]</span></code>).  Values outside that
+range raise <code class="xref py py-class docutils literal notranslate"><span class="pre">PassFailedException</span></code>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.apply" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.match_and_rewrite">
+<span class="sig-name descname"><span class="pre">match_and_rewrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewriter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PatternRewriter</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.match_and_rewrite" title="Link to this definition"></a></dt>
+<dd><p>Match an operation, and optionally perform a rewrite using the rewriter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'lower-arith-integer-constant-to-move'</span></em><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteAcquireOp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteAcquireOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteAcquireOp" title="Link to this definition"></a></dt>
