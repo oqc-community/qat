@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.constants module &mdash; qat-compiler 3.0.0.post327.dev20260820102927 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.constants module &mdash; qat-compiler 3.0.0.post328.dev20260820151617 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -226,6 +226,10 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.environment.html">qat.experimental.frontend.importer.environment module</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.passes.html">qat.experimental.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.passes.pass_ordering.html">qat.experimental.passes.pass_ordering module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
@@ -702,6 +706,39 @@ with maximum time.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OrderedCanonicalizePass</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalizePass</span></code></p>
+<p>Canonicalize a pulse module while declaring pipeline ordering constraints.</p>
+<p>This is the standalone constant-folding stage that must run ahead of passes which
+only accept canonical <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ConstantOp" title="qat.experimental.dialect.pulse.ir.ops.ConstantOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code></a>
+operands, such as
+<a class="reference internal" href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvaluateWaveformsAsSamples</span></code></a>.</p>
+<p>It inherits <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalizePass</span></code>, which applies
+the pulse dialect’s constant-folding patterns (<a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp" title="qat.experimental.dialect.pulse.transforms.constants.FoldConstantConstantOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">FoldConstantConstantOp</span></code></a>,
+<a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp" title="qat.experimental.dialect.pulse.transforms.constants.FoldMaxTimeOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">FoldMaxTimeOp</span></code></a>) so that any operand chain that is constant after folding (for
+example <code class="docutils literal notranslate"><span class="pre">pulse.add</span></code> of two <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code>s) collapses to a single
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'constant-propagation'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass.name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass.runs_before">
+<span class="sig-name descname"><span class="pre">runs_before</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass.runs_before" title="Link to this definition"></a></dt>
+<dd><p>Pass classes that, if present in the same pipeline, must run <strong>after</strong> this
+pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code>]]</span></p>
 </dd>
 </dl>
 </dd></dl>

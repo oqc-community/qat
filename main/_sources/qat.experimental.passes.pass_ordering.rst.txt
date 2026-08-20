@@ -1,0 +1,7 @@
+qat.experimental.passes.pass\_ordering module
+=============================================
+
+.. automodule:: qat.experimental.passes.pass_ordering
+   :members:
+   :undoc-members:
+   :show-inheritance:

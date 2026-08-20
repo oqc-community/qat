@@ -16,6 +16,7 @@ Subpackages
    qat.experimental.conversion
    qat.experimental.dialect
    qat.experimental.frontend
+   qat.experimental.passes
    qat.experimental.system_data
    qat.experimental.utils
    qat.experimental.waveforms

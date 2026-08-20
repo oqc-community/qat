@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post327.dev20260820102927 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post328.dev20260820151617 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -226,6 +226,10 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.environment.html">qat.experimental.frontend.importer.environment module</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.passes.html">qat.experimental.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.passes.pass_ordering.html">qat.experimental.passes.pass_ordering module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
@@ -679,13 +683,16 @@ runtime.</p>
 <p>Sampling of acquisition weights is intentionally deferred; weights are expected to move to
 an attribute on <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp" title="qat.experimental.dialect.pulse.ir.ops.AcquireOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireOp</span></code></a> rather than a
 waveform operand, at which point a dedicated pass can materialise them.</p>
-<p>The pass runs xDSL’s <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalizePass</span></code> before its own rewrites, so any operand
-chain that folds to a constant (e.g. <code class="docutils literal notranslate"><span class="pre">arith.mulf</span></code> of two <code class="docutils literal notranslate"><span class="pre">arith.constant</span></code>s) is
-collapsed first and then treated as a compile-time-constant operand.</p>
+<p>Constant folding is a separate concern handled by
+<a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass" title="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedCanonicalizePass</span></code></a>,
+which must run before this pass. That pass collapses any operand chain that folds to a
+constant (e.g. <code class="docutils literal notranslate"><span class="pre">pulse.add</span></code> of two <code class="docutils literal notranslate"><span class="pre">ConstantOp</span></code>s) into a single <code class="docutils literal notranslate"><span class="pre">ConstantOp</span></code>, so
+this pass only ever has to recognise canonical constant operands. The requirement is
+enforced by the pipeline builder via <code class="xref py py-meth docutils literal notranslate"><span class="pre">required_predecessors()</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">EvaluateWaveformsAsSamples</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">constraints</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
 <p>Evaluate analytical waveform ops into constant sampled waveforms.</p>
 <p>For every <code class="xref py py-class docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface</span></code> op with all-constant operands, the
 op is replaced with one or more <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code>s carrying a
@@ -714,8 +721,20 @@ sample time for each port and whether a waveform shape is supported natively.</p
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'waveform-evaluation'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.name" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-data docutils literal notranslate"><span class="pre">ClassVar</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'waveform-evaluation'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.required_predecessors">
+<span class="sig-name descname"><span class="pre">required_predecessors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.required_predecessors" title="Link to this definition"></a></dt>
+<dd><p>Pass classes that <strong>must</strong> be present in the same pipeline and run <strong>before</strong>
+this pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

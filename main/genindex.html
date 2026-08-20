@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post327.dev20260820102927 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post328.dev20260820151617 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -579,6 +579,10 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.environment.html">qat.experimental.frontend.importer.environment module</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.passes.html">qat.experimental.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.passes.pass_ordering.html">qat.experimental.passes.pass_ordering module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
@@ -13886,6 +13890,10 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.frontend.importer.pulse.purr.html#module-qat.experimental.frontend.importer.pulse.purr">qat.experimental.frontend.importer.pulse.purr</a>
 </li>
+        <li><a href="qat.experimental.passes.html#module-qat.experimental.passes">qat.experimental.passes</a>
+</li>
+        <li><a href="qat.experimental.passes.pass_ordering.html#module-qat.experimental.passes.pass_ordering">qat.experimental.passes.pass_ordering</a>
+</li>
         <li><a href="qat.experimental.system_data.html#module-qat.experimental.system_data">qat.experimental.system_data</a>
 </li>
         <li><a href="qat.experimental.system_data.canonical.html#module-qat.experimental.system_data.canonical">qat.experimental.system_data.canonical</a>
@@ -15128,6 +15136,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo.name">(OperatorInfo attribute)</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass.name">(OrderedCanonicalizePass attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.OrRsImmRdOp.name">(OrRsImmRdOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.OrRsImmRdOp.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.OrRsRsRdOp.name">(OrRsRsRdOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.OrRsRsRdOp.name">[1]</a>
@@ -15957,6 +15967,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.waveforms.shapes.base.html#qat.experimental.waveforms.shapes.base.derivative_definition.params.order_parameter">order_parameter (qat.experimental.waveforms.shapes.base.derivative_definition parameter)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass">OrderedCanonicalizePass (class in qat.experimental.dialect.pulse.transforms.constants)</a>
+</li>
+      <li><a href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass">OrderedPass (class in qat.experimental.passes.pass_ordering)</a>
+</li>
+      <li><a href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPassPipeline">OrderedPassPipeline (class in qat.experimental.passes.pass_ordering)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.OrRsImmRdOp">OrRsImmRdOp (class in qat.experimental.dialect.q1)</a>
 
       <ul>
@@ -16051,6 +16067,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.OffsetConfig.params.out0_path1">(qat.backend.qblox.config.specification.OffsetConfig parameter)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.AttConfig.out1">out1 (AttConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.AttConfig.out1">[1]</a>
 
       <ul>
@@ -16085,8 +16103,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.OffsetConfig.params.out1">(qat.backend.qblox.config.specification.OffsetConfig parameter)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.LoConfig.out1_en">out1_en (LoConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.LoConfig.out1_en">[1]</a>
 
       <ul>
@@ -16581,6 +16597,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.core.pass_base.html#qat.purr.core.pass_base.PassConcept">(class in qat.purr.core.pass_base)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.validate_pass_ordering.params.passes">passes (qat.experimental.passes.pass_ordering.validate_pass_ordering parameter)</a>
+</li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassInfoMixin">PassInfoMixin (class in qat.core.pass_base)</a>
 
       <ul>
@@ -19318,6 +19336,20 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.passes
+
+      <ul>
+        <li><a href="qat.experimental.passes.html#module-qat.experimental.passes">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.passes.pass_ordering
+
+      <ul>
+        <li><a href="qat.experimental.passes.pass_ordering.html#module-qat.experimental.passes.pass_ordering">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.system_data
 
       <ul>
@@ -20199,6 +20231,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.default.html#module-qat.middleend.default">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.middleend.fallthrough
 
@@ -20206,8 +20240,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.fallthrough.html#module-qat.middleend.fallthrough">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.middleend.passes
 
@@ -22655,6 +22687,12 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.dialect.pulse.utils.html#qat.experimental.dialect.pulse.utils.require_constant_operand">require_constant_operand() (in module qat.experimental.dialect.pulse.utils)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples.required_predecessors">required_predecessors() (EvaluateWaveformsAsSamples method)</a>
+
+      <ul>
+        <li><a href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass.required_predecessors">(OrderedPass method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.engines.model.html#qat.engines.model.requires_hardware_model">requires_hardware_model() (in module qat.engines.model)</a>
 </li>
       <li><a href="qat.core.config.validators.html#qat.core.config.validators.requires_model">requires_model() (in module qat.core.config.validators)</a>
@@ -24007,6 +24045,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.run_tket_optimizations_qir">run_tket_optimizations_qir() (in module qat.purr.integrations.tket)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass.runs_before">runs_before() (OrderedCanonicalizePass method)</a>
+
+      <ul>
+        <li><a href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass.runs_before">(OrderedPass method)</a>
+</li>
+      </ul></li>
       <li><a href="qat.pipelines.pipeline.html#qat.pipelines.pipeline.ExecutePipeline.runtime">runtime (ExecutePipeline property)</a>
 
       <ul>
@@ -26972,6 +27016,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.model.device.html#qat.model.device.Qubit.validate_mean_z_map_args_or_post_process_method">validate_mean_z_map_args_or_post_process_method() (Qubit method)</a>
 </li>
       <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.validate_non_negative">validate_non_negative() (in module qat.utils.pydantic)</a>
+</li>
+      <li><a href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.validate_pass_ordering">validate_pass_ordering() (in module qat.experimental.passes.pass_ordering)</a>
 </li>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.validate_physical_channel_naming">validate_physical_channel_naming() (PhysicalHardwareModel method)</a>
 </li>
