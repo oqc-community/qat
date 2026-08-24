@@ -38,6 +38,7 @@ from pydantic import ValidationError
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.materialisers.descriptor_resolution import (
     resolve_source_descriptor,
+    source_type_label,
 )
 from qat.experimental.system_data.materialisers.errors import (
     MaterialisationError,
@@ -112,7 +113,7 @@ def materialise(
     )
     if plugin is None:
         raise UnsupportedSourceVersionError.for_version(
-            source_type=resolved_source.value,
+            source_type=source_type_label(resolved_source),
             source_version=source_version,
             supported_versions=source_versions,
         )
@@ -123,7 +124,7 @@ def materialise(
         raise
     except Exception as exc:
         raise SourceIntegrityError.for_check_failure(
-            source_type=resolved_source.value,
+            source_type=source_type_label(resolved_source),
             source_version=source_version,
             check="plugin_integrity_execution",
             cause=exc,
@@ -138,7 +139,7 @@ def materialise(
     except ValidationError as exc:
         raise SourceValidationError(
             "source_additional_data validation failed.",
-            source_type=resolved_source.value,
+            source_type=source_type_label(resolved_source),
             source_version=source_version,
             path="$.source_additional_data",
             details={"errors": exc.errors(include_url=False)},

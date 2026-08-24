@@ -23,10 +23,20 @@ from qat.experimental.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+def source_type_label(source_type: SourceType | str) -> str:
+    """Return a string label for a source type, whether enum or plain string."""
+    return source_type.value if isinstance(source_type, SourceType) else source_type
+
+
 def _supported_source_values() -> tuple[str, ...]:
     """Return supported source identifiers for structured error payloads."""
 
-    return tuple(member.value for member in SourceType)
+    values: list[str] = [member.value for member in SourceType]
+    for plugin in get_registered_materialiser_plugins():
+        source_type = source_type_label(plugin.source_type)
+        if source_type not in values:
+            values.append(source_type)
+    return tuple(values)
 
 
 def _extract_payload_metadata(
@@ -62,27 +72,52 @@ def _extract_payload_metadata(
 def _resolve_source_type_hint(
     source_type_hint: str,
     source_version_hint: str | None,
-) -> SourceType:
-    """Resolve a metadata source-type hint to ``SourceType`` or raise unsupported."""
+) -> SourceType | str:
+    """Resolve a metadata source-type hint to ``SourceType`` or a registered string."""
 
     try:
         return SourceType(source_type_hint)
-    except ValueError as exc:
-        raise UnsupportedSourceError.for_source(
-            source_type=source_type_hint,
-            source_version=source_version_hint,
-            supported_sources=_supported_source_values(),
-        ) from exc
+    except ValueError:
+        pass
+    # Accept plain-string source types registered by external plugins.
+    if any(
+        plugin.source_type == source_type_hint
+        for plugin in get_registered_materialiser_plugins()
+    ):
+        return source_type_hint
+    raise UnsupportedSourceError.for_source(
+        source_type=source_type_hint,
+        source_version=source_version_hint,
+        supported_sources=_supported_source_values(),
+    )
+
+
+def _resolve_via_supersession(
+    matches: set[tuple[SourceType | str, str]],
+    matched_plugins: list,
+) -> set[tuple[SourceType | str, str]]:
+    """Remove descriptors superseded by another plugin in the matched set."""
+    plugin_map = {(p.source_type, p.source_version): p for p in matched_plugins}
+    superseded: set[tuple[SourceType | str, str]] = set()
+    for descriptor in matches:
+        plugin = plugin_map.get(descriptor)
+        if plugin is None:
+            continue
+        for entry in getattr(plugin, "supersedes", ()):
+            if entry in matches:
+                superseded.add(entry)
+    return matches - superseded
 
 
 def _detect_source_descriptor_via_plugins(
     source_payload: dict[str, Any],
     *,
-    candidate_source_type: SourceType | None = None,
-) -> tuple[SourceType, str] | None:
+    candidate_source_type: SourceType | str | None = None,
+) -> tuple[SourceType | str, str] | None:
     """Detect source descriptor by delegating to registered plugin detectors."""
 
-    matches: set[tuple[SourceType, str]] = set()
+    matches: set[tuple[SourceType | str, str]] = set()
+    matched_plugins: list = []
     for plugin in get_registered_materialiser_plugins(candidate_source_type):
         detected = plugin.resolve_type_and_version(source_payload)
         if detected is None:
@@ -91,37 +126,51 @@ def _detect_source_descriptor_via_plugins(
         if detected != (plugin.source_type, plugin.source_version):
             raise SourceValidationError(
                 "Plugin detector returned descriptor mismatch.",
-                source_type=plugin.source_type.value,
+                source_type=source_type_label(plugin.source_type),
                 source_version=plugin.source_version,
                 path="$.metadata",
                 details={
-                    "detected_source_type": detected[0].value,
+                    "detected_source_type": source_type_label(detected[0]),
                     "detected_source_version": detected[1],
                 },
             )
 
         matches.add(detected)
+        matched_plugins.append(plugin)
 
     if not matches:
         return None
 
     if len(matches) > 1:
-        raise SourceValidationError(
-            "Ambiguous source descriptor detected from payload pattern matching.",
-            path="$.metadata",
-            details={
-                "candidates": tuple(
-                    sorted((source.value, version) for source, version in matches)
-                )
-            },
-        )
+        remaining = _resolve_via_supersession(matches, matched_plugins)
+        if len(remaining) == 0:
+            raise SourceValidationError(
+                "Circular supersession: all matching plugins supersede each other.",
+                path="$.metadata",
+                details={
+                    "candidates": tuple(
+                        sorted((source_type_label(s), v) for s, v in matches)
+                    )
+                },
+            )
+        if len(remaining) > 1:
+            raise SourceValidationError(
+                "Ambiguous source descriptor detected from payload pattern matching.",
+                path="$.metadata",
+                details={
+                    "candidates": tuple(
+                        sorted((source_type_label(s), v) for s, v in remaining)
+                    )
+                },
+            )
+        return next(iter(remaining))
 
     return next(iter(matches))
 
 
 def _resolve_source_version(
     *,
-    source_type: SourceType,
+    source_type: SourceType | str,
     requested_version: str | None,
 ) -> str:
     """Resolve source version against registered plugin versions."""
@@ -129,7 +178,7 @@ def _resolve_source_version(
     source_versions = get_registered_source_versions(source_type)
     if not source_versions:
         raise UnsupportedSourceError.for_source(
-            source_type=source_type.value,
+            source_type=source_type_label(source_type),
             source_version=requested_version,
             supported_sources=_supported_source_values(),
         )
@@ -140,21 +189,23 @@ def _resolve_source_version(
 
         raise SourceValidationError(
             "Could not infer source_version from payload metadata.",
-            source_type=source_type.value,
+            source_type=source_type_label(source_type),
             path="$.source_version",
             details={"supported_versions": source_versions},
         )
 
     if requested_version not in source_versions:
         raise UnsupportedSourceVersionError.for_version(
-            source_type=source_type.value,
+            source_type=source_type_label(source_type),
             source_version=requested_version,
             supported_versions=source_versions,
         )
     return requested_version
 
 
-def resolve_source_descriptor(source_payload: dict[str, Any]) -> tuple[SourceType, str]:
+def resolve_source_descriptor(
+    source_payload: dict[str, Any],
+) -> tuple[SourceType | str, str]:
     """Resolve source descriptor from payload metadata or pattern detection."""
 
     source_type_hint, source_version_hint = _extract_payload_metadata(source_payload)

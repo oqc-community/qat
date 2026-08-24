@@ -13,6 +13,17 @@ Plugin authors should define two things in their source package:
     - ``verify_integrity`` for source trust/integrity checks,
     - ``materialise`` to build and return ``CanonicalSystemData``.
 
+External packages may use a plain string for ``source_type`` instead of a
+``SourceType`` enum value.  This lets third-party plugins register under their own
+source identity without requiring changes to the built-in enum.
+
+Plugins that extend or specialise an existing plugin may declare a ``supersedes``
+class attribute — a tuple of ``(source_type, source_version)`` descriptors.  When
+payload detection matches multiple plugins, any descriptor listed in the winning
+plugin's ``supersedes`` set is filtered out before the ambiguity check.  This
+allows a more-specific plugin to take precedence over a generic one without
+modifying the generic plugin.
+
 Plugins are registered by calling ``register_materialiser_plugin`` from this module,
 typically as an import-side effect in the plugin module itself.
 """
@@ -51,14 +62,16 @@ class SourceMaterialiserPlugin(Protocol):
             helper: MyHelperType
 
         class MySourcePlugin:
-            source_type = SourceType.MY_SOURCE
+            source_type = "my-source"  # SourceType enum value or plain string
             source_version = "1.0.0"
             additional_data_model = MySourceAdditionalData
+            # Optional: declare precedence over a less-specific plugin.
+            supersedes = ((SourceType.PURR, "0.1.0"),)
 
             def resolve_type_and_version(
                 self,
                 source_payload: dict[str, Any],
-            ) -> tuple[SourceType, str] | None:
+            ) -> tuple[SourceType | str, str] | None:
                 ...
 
             def verify_integrity(self, source_payload: dict[str, Any]) -> None:
@@ -76,14 +89,14 @@ class SourceMaterialiserPlugin(Protocol):
     Register the plugin via ``register_materialiser_plugin`` in this module.
     """
 
-    source_type: SourceType
+    source_type: SourceType | str
     source_version: str
     additional_data_model: type[SourceAdditionalDataModel]
 
     def resolve_type_and_version(
         self,
         source_payload: dict[str, Any],
-    ) -> tuple[SourceType, str] | None:
+    ) -> tuple[SourceType | str, str] | None:
         """Return this plugin descriptor when payload matches, else ``None``.
 
         The detector may use payload metadata and/or structural pattern checks, but it
@@ -113,7 +126,7 @@ class SourceMaterialiserPlugin(Protocol):
         """
 
 
-_PluginKey = tuple[SourceType, str]
+_PluginKey = tuple[SourceType | str, str]
 _PLUGIN_REGISTRY: dict[_PluginKey, SourceMaterialiserPlugin] = {}
 
 
@@ -130,6 +143,33 @@ def _plugin_identity(plugin: SourceMaterialiserPlugin) -> tuple[str, str, str, s
     )
 
 
+def _is_valid_source_type(source_type: object) -> bool:
+    """Return whether a source type is an enum or a non-empty string."""
+    return isinstance(source_type, SourceType | str) and bool(source_type)
+
+
+def _is_reserved_source_type(source_type: SourceType | str) -> bool:
+    """Return whether a source type belongs to the built-in enum namespace."""
+    return isinstance(source_type, str) and any(
+        source_type == member.value for member in SourceType
+    )
+
+
+def _is_valid_source_version(source_version: object) -> bool:
+    """Return whether a source version is a non-empty string."""
+    return isinstance(source_version, str) and bool(source_version)
+
+
+def _is_valid_source_descriptor(descriptor: object) -> bool:
+    """Return whether a source descriptor is a valid type/version tuple."""
+    return (
+        isinstance(descriptor, tuple)
+        and len(descriptor) == 2
+        and _is_valid_source_type(descriptor[0])
+        and _is_valid_source_version(descriptor[1])
+    )
+
+
 def register_materialiser_plugin(
     *,
     plugin: SourceMaterialiserPlugin,
@@ -137,9 +177,19 @@ def register_materialiser_plugin(
 ) -> None:
     """Register a materialiser plugin for source type/version dispatch."""
 
-    if not isinstance(plugin.source_type, SourceType):
-        raise ValueError("plugin.source_type must be a SourceType value.")
-    if not isinstance(plugin.source_version, str) or not plugin.source_version:
+    if not _is_valid_source_type(plugin.source_type):
+        raise ValueError(
+            "plugin.source_type must be a SourceType value or a non-empty string."
+        )
+    if (
+        isinstance(plugin.source_type, str)
+        and not isinstance(plugin.source_type, SourceType)
+        and _is_reserved_source_type(plugin.source_type)
+    ):
+        raise ValueError(
+            "plugin.source_type string conflicts with a built-in SourceType value."
+        )
+    if not _is_valid_source_version(plugin.source_version):
         raise ValueError("plugin.source_version must be a non-empty string.")
     if not isinstance(plugin.additional_data_model, type) or not issubclass(
         plugin.additional_data_model, SourceAdditionalDataModel
@@ -147,6 +197,14 @@ def register_materialiser_plugin(
         raise ValueError(
             "plugin.additional_data_model must subclass SourceAdditionalDataModel."
         )
+    supersedes = getattr(plugin, "supersedes", ())
+    if not isinstance(supersedes, tuple):
+        raise ValueError("plugin.supersedes must be a tuple of source descriptors.")
+    for entry in supersedes:
+        if not _is_valid_source_descriptor(entry):
+            raise ValueError(
+                "plugin.supersedes entries must each be a (SourceType | str, str) 2-tuple."
+            )
 
     key = (plugin.source_type, plugin.source_version)
     if key in _PLUGIN_REGISTRY and not replace:
@@ -161,6 +219,23 @@ def register_materialiser_plugin(
     _PLUGIN_REGISTRY[key] = plugin
 
 
+def _source_type_matches(registered: SourceType | str, requested: SourceType | str) -> bool:
+    """Return True when ``registered`` and ``requested`` refer to the same source type.
+
+    Accepts either form so callers using a string get the same result as those using an
+    enum.
+    """
+    if registered == requested:
+        return True
+    # Coerce string to SourceType for backward compatibility with enum-keyed plugins.
+    if isinstance(requested, str):
+        try:
+            return registered == SourceType(requested)
+        except ValueError:
+            pass
+    return False
+
+
 def get_materialiser_plugin(
     *,
     source_type: SourceType | str,
@@ -168,32 +243,45 @@ def get_materialiser_plugin(
 ) -> SourceMaterialiserPlugin | None:
     """Return the registered plugin for ``source_type``/``source_version``."""
 
-    try:
-        resolved_source = SourceType(source_type)
-    except ValueError:
-        return None
+    plugin = _PLUGIN_REGISTRY.get((source_type, source_version))
+    if plugin is not None:
+        return plugin
+    if isinstance(source_type, str):
+        try:
+            return _PLUGIN_REGISTRY.get((SourceType(source_type), source_version))
+        except ValueError:
+            pass
+    return None
 
-    return _PLUGIN_REGISTRY.get((resolved_source, source_version))
 
-
-def get_registered_source_versions(source_type: SourceType) -> tuple[str, ...]:
+def get_registered_source_versions(source_type: SourceType | str) -> tuple[str, ...]:
     """Return sorted registered versions for a source type."""
 
     return tuple(
-        sorted(version for source, version in _PLUGIN_REGISTRY if source == source_type)
+        sorted(
+            version
+            for source, version in _PLUGIN_REGISTRY
+            if _source_type_matches(source, source_type)
+        )
     )
 
 
 def get_registered_materialiser_plugins(
-    source_type: SourceType | None = None,
+    source_type: SourceType | str | None = None,
 ) -> tuple[SourceMaterialiserPlugin, ...]:
     """Return registered plugins in deterministic registry-key order.
 
     When ``source_type`` is provided, only plugins for that source are returned.
     """
 
+    def _sort_key(item: tuple[_PluginKey, Any]) -> tuple[str, str]:
+        (st, version), _ = item
+        return (st.value if isinstance(st, SourceType) else st, version)
+
     return tuple(
         plugin
-        for (registered_source, _), plugin in sorted(_PLUGIN_REGISTRY.items())
-        if source_type is None or registered_source == source_type
+        for (registered_source, _), plugin in sorted(
+            _PLUGIN_REGISTRY.items(), key=_sort_key
+        )
+        if source_type is None or _source_type_matches(registered_source, source_type)
     )
