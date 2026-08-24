@@ -192,15 +192,13 @@ def test_materialise_helper_functions_and_version_error_paths(monkeypatch):
                     "index": 0,
                     "pulse_channels": {"reset": {}},
                     "ddrop_reset": {},
-                    "active_reset": {},
-                    "active_reset_payload": {},
                 },
-                "Q1": {"index": 1, "active_reset": {}},
+                "Q1": {"index": 1},
             }
         }
     )
     assert "ddrop" in methods
-    assert "active" in methods
+    assert "active" not in methods
 
     injected_preexisting_passive = purr_materialise._inject_supported_reset_methods(
         {
@@ -212,6 +210,20 @@ def test_materialise_helper_functions_and_version_error_paths(monkeypatch):
     )
     assert injected_preexisting_passive["supported_reset_methods"].count("passive") == 1
     assert injected_preexisting_passive["default_reset_method"] == "passive"
+
+    injected_existing_passive_without_detection = (
+        purr_materialise._inject_supported_reset_methods(
+            {
+                "quantum_devices": {},
+                "supported_reset_methods": ["passive"],
+                "default_reset_method": "passive",
+                "passive_reset_time": 1e-6,
+            }
+        )
+    )
+    assert injected_existing_passive_without_detection["supported_reset_methods"] == [
+        "passive"
+    ]
 
     injected = purr_materialise._inject_supported_reset_methods(
         {

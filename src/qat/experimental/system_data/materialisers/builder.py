@@ -227,7 +227,7 @@ class CanonicalSystemDataBuilder:
         """Append a supported reset strategy descriptor.
 
         :param type: Reset strategy type string, for example ``"passive"`` or
-            ``"active"``.
+            ``"ddrop"``.
         :param attributes: Optional additional strategy metadata entries.
         :returns: This builder instance.
         """

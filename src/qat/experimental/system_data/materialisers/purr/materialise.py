@@ -69,7 +69,10 @@ from qat.model.target_data import TargetData
 
 _SUPPORTED_PURR_SOURCE_VERSIONS = ("0.1.0",)
 
-_RESET_DEFAULT_ORDER = ("passive", "active", "ddrop")
+# Detected methods are ordered by this priority when selecting the default reset method if
+# none is specified in the source payload. This order is also used to sort the supported
+# reset methods list in the canonical system data.
+_RESET_DEFAULT_ORDER = ("passive", "ddrop")
 
 
 def _is_qubit_device_payload(device_payload: dict[str, Any]) -> bool:
@@ -104,12 +107,6 @@ def _detect_supported_reset_methods(payload: dict[str, Any]) -> list[str]:
                     device_payload.get("ddrop_reset"), dict
                 ):
                     found_methods.add("ddrop")
-                if "active_reset" in pulse_channels:
-                    found_methods.add("active")
-
-            active_reset = device_payload.get("active_reset")
-            if isinstance(active_reset, dict):
-                found_methods.add("active")
 
     return [method for method in _RESET_DEFAULT_ORDER if method in found_methods]
 

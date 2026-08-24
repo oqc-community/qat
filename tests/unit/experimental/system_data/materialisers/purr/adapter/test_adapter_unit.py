@@ -190,24 +190,22 @@ def test_detect_supported_reset_methods_uses_structural_qubit_classification():
                 "id": "R1",
                 "pulse_channels": {"reset": {}},
             },
-            # Qubit by index; should contribute active + ddrop.
+            # Qubit by index; should contribute ddrop.
             "qubit_by_index": {
                 "id": "device_a",
                 "index": 3,
                 "pulse_channels": {
                     "reset": {},
-                    "active_reset": {},
                 },
             },
-            # Qubit by measure_device fallback; should contribute active.
+            # Qubit by measure_device fallback; no built-in reset method.
             "qubit_by_measure_device": {
                 "id": "device_b",
                 "measure_device": {"id": "R2"},
-                "active_reset": {},
             },
         }
     }
 
     supported = _detect_supported_reset_methods(payload)
 
-    assert supported == ["active", "ddrop"]
+    assert supported == ["ddrop"]
