@@ -3,7 +3,7 @@
 """Qubit-, mode-, waveform-, and readout-probability builders for PuRR materialisation."""
 
 from math import pi
-from typing import Any
+from typing import Any, Protocol
 
 from qat.experimental.system_data.canonical.schema import (
     AcquireDefinitionData,
@@ -33,6 +33,39 @@ from qat.experimental.system_data.materialisers.purr.materialisers.postprocess i
 from qat.experimental.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class OperationBuilderFactory(Protocol):
+    """Construct an operation builder from stable materialisation inputs."""
+
+    def __call__(
+        self,
+        *,
+        qubit_payload: dict[str, Any],
+        reset_methods: tuple[ResetData, ...],
+        default_reset_method: str | None,
+        ddrop_delay_ps: int | None,
+    ) -> AbstractOperationBuilder:
+        """Build an operation builder for one qubit."""
+
+
+def _build_default_operation_builder(
+    *,
+    qubit_payload: dict[str, Any],
+    reset_methods: tuple[ResetData, ...],
+    default_reset_method: str | None,
+    ddrop_delay_ps: int | None,
+) -> AbstractOperationBuilder:
+    """Build the default operation builder for one qubit."""
+    return DefaultOperationBuilder(
+        qubit_id=qubit_payload.get("id"),
+        coupled_qubit_ids=_get_coupled_qubit_ids(qubit_payload),
+        control_qubit_ids=_get_control_qubit_ids(qubit_payload),
+        has_x_pi=_has_x_pi_waveform(qubit_payload),
+        reset_methods=reset_methods,
+        default_reset_method=default_reset_method,
+        ddrop_delay_ps=ddrop_delay_ps,
+    )
 
 
 def _build_shape_name_and_parameters(
@@ -521,7 +554,7 @@ def _has_x_pi_waveform(qubit_payload: dict[str, Any]) -> bool:
 
 def _build_operations(
     qubit_payload: dict[str, Any],
-    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+    build_operation_builder: OperationBuilderFactory = _build_default_operation_builder,
     extra_operations: tuple[OperationData, ...] = (),
     reset_methods: tuple[ResetData, ...] = (),
     default_reset_method: str | None = None,
@@ -539,9 +572,8 @@ def _build_operations(
     cancellation-tone primitives are appended.
 
     :param qubit_payload: PuRR quantum-device payload dict for the qubit.
-    :param operation_builder_type: Builder class to instantiate. Subclass
-        :class:`~qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder`
-        to customise individual operations for a specific hardware target.
+    :param build_operation_builder: Factory that constructs the operation builder
+        from the stable qubit materialisation inputs.
     :param extra_operations: Additional or replacement operations (last-wins by ID).
     :param reset_methods: Supported reset strategies from top-level canonical metadata.
     :param default_reset_method: Default reset method type.
@@ -553,11 +585,8 @@ def _build_operations(
         if delay_s is not None:
             ddrop_delay_ps = int(_seconds_to_picoseconds(delay_s))
 
-    builder = operation_builder_type(
-        qubit_id=qubit_payload.get("id"),
-        coupled_qubit_ids=_get_coupled_qubit_ids(qubit_payload),
-        control_qubit_ids=_get_control_qubit_ids(qubit_payload),
-        has_x_pi=_has_x_pi_waveform(qubit_payload),
+    builder = build_operation_builder(
+        qubit_payload=qubit_payload,
         reset_methods=reset_methods,
         default_reset_method=default_reset_method,
         ddrop_delay_ps=ddrop_delay_ps,
@@ -569,7 +598,7 @@ def _build_qubits(
     *,
     quantum_devices: dict[str, Any],
     error_mitigation: Any,
-    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+    build_operation_builder: OperationBuilderFactory = _build_default_operation_builder,
     extra_operations: tuple[OperationData, ...] = (),
     reset_methods: tuple[ResetData, ...] = (),
     default_reset_method: str | None = None,
@@ -595,7 +624,7 @@ def _build_qubits(
                 ),
                 operations=_build_operations(
                     device_payload,
-                    operation_builder_type=operation_builder_type,
+                    build_operation_builder=build_operation_builder,
                     extra_operations=extra_operations,
                     reset_methods=reset_methods,
                     default_reset_method=default_reset_method,

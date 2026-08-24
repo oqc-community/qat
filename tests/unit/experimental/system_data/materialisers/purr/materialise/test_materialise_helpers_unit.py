@@ -262,21 +262,33 @@ def test_materialise_helper_functions_and_version_error_paths(monkeypatch):
     assert shaped["physical_channels"]["raw"] == "bad"
 
     with pytest.raises(UnsupportedSourceVersionError):
-        purr_materialise.materialise_purr_v0_1_0(
-            source_payload=_base_payload(),
+        purr_materialise.PurrMaterialiserV010().materialise(
+            adapted_payload={},
             source_version="9.9.9",
         )
 
-    monkeypatch.setattr(
-        purr_materialise,
-        "adapt_purr_payload",
-        lambda _payload, **_kwargs: {"x": 1},
-    )
     with pytest.raises(SourceValidationError, match="ingress DTO validation failed"):
-        purr_materialise.materialise_purr_v0_1_0(
-            source_payload=_base_payload(),
+        purr_materialise.PurrMaterialiserV010().materialise(
+            adapted_payload={},
+            source_version="9.9.9",
+            strict_version_check=False,
+        )
+
+    with pytest.raises(SourceValidationError, match="ingress DTO validation failed"):
+        purr_materialise.PurrMaterialiserV010().materialise(
+            adapted_payload={"x": 1},
             source_version="0.1.0",
         )
+
+
+def test_materialiser_preserves_explicit_empty_configuration_lists():
+    materialiser = purr_materialise.PurrMaterialiserV010(
+        supported_acquire_modes=[],
+        native_waveform_shapes=[],
+    )
+
+    assert materialiser._supported_acquire_modes == []
+    assert materialiser._native_waveform_shapes == []
 
 
 def test_materialise_enrichment_validation_error_path(monkeypatch):
@@ -290,11 +302,6 @@ def test_materialise_enrichment_validation_error_path(monkeypatch):
 
     monkeypatch.setattr(
         purr_materialise,
-        "adapt_purr_payload",
-        lambda _payload, **_kwargs: valid_adapted,
-    )
-    monkeypatch.setattr(
-        purr_materialise,
         "validate_purr_ingress_graph",
         lambda _dto: None,
     )
@@ -304,9 +311,9 @@ def test_materialise_enrichment_validation_error_path(monkeypatch):
 
     monkeypatch.setattr(purr_materialise, "_inject_target_data_fields", _invalid_inject)
 
-    with pytest.raises(SourceValidationError, match="Compiler enrichment produced"):
-        purr_materialise.materialise_purr_v0_1_0(
-            source_payload=_base_payload(),
+    with pytest.raises(SourceValidationError, match="could not be prepared"):
+        purr_materialise.PurrMaterialiserV010().materialise(
+            adapted_payload=valid_adapted,
             source_version="0.1.0",
         )
 
@@ -332,34 +339,71 @@ def test_materialise_default_args_and_supported_reset_branch_permutations(monkey
         "basebands": {"bb0": {"frequency": 5e9}},
     }
 
-    monkeypatch.setattr(
-        purr_materialise,
-        "adapt_purr_payload",
-        lambda _payload, **_kwargs: valid_adapted,
-    )
     monkeypatch.setattr(purr_materialise, "validate_purr_ingress_graph", lambda _dto: None)
+    configured_acquire_modes = ["integrator"]
 
-    def _capture_top_level(
-        *, dto, source_version, operation_builder_type, extra_operations
-    ):
+    def _capture_top_level(self, *, dto, source_version):
+        dto.supported_acquire_modes.append("scope")
         captured["source_version"] = source_version
         captured["supported_acquire_modes"] = dto.supported_acquire_modes
         captured["physical_channels"] = dto.physical_channels
-        captured["operation_builder_type"] = operation_builder_type
-        captured["extra_operations"] = extra_operations
+        captured["operation_builder_type"] = self._operation_builder_type
+        captured["extra_operations"] = self._extra_operations
         return object()
 
     monkeypatch.setattr(
-        purr_materialise, "_materialise_canonical_top_level", _capture_top_level
+        purr_materialise.PurrMaterialiserV010, "assemble", _capture_top_level
     )
 
-    result = purr_materialise.materialise_purr_v0_1_0(
-        source_payload=_base_payload(),
-        source_version="0.1.0",
-        supported_acquire_modes=["integrator"],
+    result = purr_materialise.PurrMaterialiserV010(
+        supported_acquire_modes=configured_acquire_modes,
         native_waveform_shapes=["gaussian"],
+    ).materialise(
+        adapted_payload=valid_adapted,
+        source_version="0.1.0",
     )
     assert result is not None
     assert captured["source_version"] == "0.1.0"
     assert captured["operation_builder_type"] is purr_materialise.DefaultOperationBuilder
     assert captured["extra_operations"] == ()
+    assert configured_acquire_modes == ["integrator"]
+
+
+def test_materialiser_subclass_builder_hooks_are_used(monkeypatch):
+    valid_adapted = _base_payload() | {
+        "physical_channels": {
+            "p_q0": {"id": "p_q0", "sample_time": 1e-9, "acquire_allowed": False},
+            "p_r0": {"id": "p_r0", "sample_time": 1e-9, "acquire_allowed": True},
+        },
+        "basebands": {"bb0": {"frequency": 5e9}},
+    }
+    calls = []
+
+    class _HookedMaterialiser(purr_materialise.PurrMaterialiserV010):
+        def build_qubits(self, **kwargs):
+            calls.append("qubits")
+            return super().build_qubits(**kwargs)
+
+        def build_operation_builder(self, **kwargs):
+            calls.append("operation_builder")
+            return super().build_operation_builder(**kwargs)
+
+        def build_channels(self, **kwargs):
+            calls.append("channels")
+            return super().build_channels(**kwargs)
+
+        def build_couplings(self, **kwargs):
+            calls.append("couplings")
+            return super().build_couplings(**kwargs)
+
+    monkeypatch.setattr(purr_materialise, "validate_purr_ingress_graph", lambda _dto: None)
+    # Use valid_adapted which has quantum_devices and physical_channels but no couplings.
+    valid_adapted["qubit_direction_couplings"] = []
+
+    result = _HookedMaterialiser().materialise(
+        adapted_payload=valid_adapted,
+        source_version="0.1.0",
+    )
+
+    assert result is not None
+    assert calls == ["channels", "qubits", "operation_builder", "couplings"]

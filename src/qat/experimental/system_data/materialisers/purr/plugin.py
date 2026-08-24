@@ -76,23 +76,31 @@ class PurrV010Plugin:
         source_version: str,
         additional_data: PurrV010AdditionalData,
     ) -> CanonicalSystemData:
+        from qat.experimental.system_data.materialisers.purr.adapter import (
+            adapt_purr_payload,
+        )
         from qat.experimental.system_data.materialisers.purr.materialise import (
-            materialise_purr_v0_1_0,
+            PurrMaterialiserV010,
         )
 
-        return materialise_purr_v0_1_0(
-            source_payload=source_payload,
-            source_version=source_version,
+        adapted_payload = adapt_purr_payload(
+            source_payload,
+            extra_reduce_target_types=(
+                set(additional_data.decoder_extra_reduce_target_types)
+                if additional_data.decoder_extra_reduce_target_types is not None
+                else None
+            ),
+            extra_reduce_target_suffixes=(
+                set(additional_data.decoder_extra_reduce_target_suffixes)
+                if additional_data.decoder_extra_reduce_target_suffixes is not None
+                else None
+            ),
+        )
+        return PurrMaterialiserV010(
             target_data=additional_data.target_data,
             supported_acquire_modes=additional_data.supported_acquire_modes,
             native_waveform_shapes=additional_data.native_waveform_shapes,
-            decoder_extra_reduce_target_types=(
-                additional_data.decoder_extra_reduce_target_types
-            ),
-            decoder_extra_reduce_target_suffixes=(
-                additional_data.decoder_extra_reduce_target_suffixes
-            ),
-        )
+        ).materialise(adapted_payload=adapted_payload, source_version=source_version)
 
 
 register_materialiser_plugin(plugin=PurrV010Plugin())

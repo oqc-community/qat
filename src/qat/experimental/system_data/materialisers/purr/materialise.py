@@ -29,7 +29,11 @@ from pydantic import ValidationError
 from qat.experimental.system_data.canonical.schema import (
     AttributeEntry,
     CanonicalSystemData,
+    ChannelData,
     OperationData,
+    QubitCouplingData,
+    QubitData,
+    ResetData,
 )
 from qat.experimental.system_data.materialisers.errors import (
     SourceValidationError,
@@ -41,7 +45,6 @@ from qat.experimental.system_data.materialisers.operations.defaults import (
 from qat.experimental.system_data.materialisers.operations.operation_builder import (
     AbstractOperationBuilder,
 )
-from qat.experimental.system_data.materialisers.purr.adapter import adapt_purr_payload
 from qat.experimental.system_data.materialisers.purr.ingress.v0_1_0 import PurrIngressV010
 from qat.experimental.system_data.materialisers.purr.materialisers.capabilities import (
     _build_acquire_limit,
@@ -56,6 +59,9 @@ from qat.experimental.system_data.materialisers.purr.materialisers.external_reso
 )
 from qat.experimental.system_data.materialisers.purr.materialisers.qubits import (
     _build_qubits,
+    _get_control_qubit_ids,
+    _get_coupled_qubit_ids,
+    _has_x_pi_waveform,
 )
 from qat.experimental.system_data.materialisers.purr.materialisers.signal_paths import (
     _build_channels,
@@ -227,180 +233,255 @@ def _inject_native_waveform_shapes(
     return payload
 
 
-def _materialise_canonical_top_level(
-    *,
-    dto: PurrIngressV010,
-    source_version: str,
-    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
-    extra_operations: tuple[OperationData, ...] = (),
-) -> CanonicalSystemData:
-    """Assemble canonical system data from validated PuRR ingress payloads."""
+class PurrMaterialiserV010:
+    """Template-method materialiser for PuRR v0.1.0 source payloads.
 
-    external_resources = ExternalResourceRegistry()
+    Subclass and override :meth:`prepare_ingress`, :meth:`build_qubits`,
+    :meth:`build_channels`, :meth:`build_couplings`, or :meth:`assemble` to
+    customise specific pipeline stages without duplicating the full flow.
 
-    acquire_modes, default_acquire_mode = _build_acquire_modes(
-        dto.supported_acquire_modes,
-        dto.default_acquire_mode,
-    )
-    reset_methods, default_reset_method = _build_reset_methods(
-        dto.supported_reset_methods,
-        dto.default_reset_method,
-        dto.passive_reset_time,
-    )
+    :meth:`materialise` orchestrates the standard validation and assembly
+    stages. Subclasses are intended to customise the flow through the hooks
+    documented above.
+    """
 
-    return CanonicalSystemData(
-        calibration_id=dto.calibration_id,
-        acquire_limit=_build_acquire_limit(dto.repeat_limit),
-        acquire_modes=acquire_modes,
-        default_acquire_mode=default_acquire_mode,
-        reset_methods=reset_methods,
-        default_reset_method=default_reset_method,
-        oscillators=_build_oscillators(dto.basebands, external_resources),
-        ports=_build_ports(dto.physical_channels, external_resources),
-        channels=_build_channels(
-            quantum_devices=dto.quantum_devices,
-            physical_channels=dto.physical_channels,
-        ),
-        qubits=_build_qubits(
-            quantum_devices=dto.quantum_devices,
-            error_mitigation=dto.error_mitigation,
-            operation_builder_type=operation_builder_type,
-            extra_operations=extra_operations,
+    def __init__(
+        self,
+        *,
+        target_data: TargetData | None = None,
+        supported_acquire_modes: list[str] | None = None,
+        native_waveform_shapes: list[str] | None = None,
+        operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
+        extra_operations: tuple[OperationData, ...] = (),
+    ) -> None:
+        self._target_data = target_data if target_data is not None else TargetData()
+        self._supported_acquire_modes = (
+            supported_acquire_modes
+            if supported_acquire_modes is not None
+            else ["integrator", "raw", "scope"]
+        )
+        self._native_waveform_shapes = (
+            native_waveform_shapes if native_waveform_shapes is not None else ["square"]
+        )
+        self._operation_builder_type = operation_builder_type
+        self._extra_operations = extra_operations
+
+    def prepare_ingress(
+        self,
+        *,
+        adapted_payload: dict[str, Any],
+        source_ingress_dto: PurrIngressV010,
+    ) -> dict[str, Any]:
+        """Enrich the adapted payload before canonical assembly.
+
+        Called after boundary validation; the returned dict is re-validated before assembly.
+        Override to inject hardware-specific fields alongside or instead of the standard
+        compiler enrichment.
+
+        :param adapted_payload: Boundary-normalised payload from the adapter.
+        :param source_ingress_dto: Validated ingress DTO from the adapted payload.
+        :returns: Enriched payload dict ready for the second model_validate pass.
+        """
+        payload = _inject_target_data_fields(adapted_payload, self._target_data)
+        payload = _inject_supported_reset_methods(payload)
+        payload = _inject_native_waveform_shapes(payload, self._native_waveform_shapes)
+        payload.setdefault(
+            "supported_acquire_modes",
+            list(
+                source_ingress_dto.supported_acquire_modes or self._supported_acquire_modes
+            ),
+        )
+        return payload
+
+    def build_operation_builder(
+        self,
+        *,
+        qubit_payload: dict[str, Any],
+        reset_methods: tuple[ResetData, ...],
+        default_reset_method: str | None,
+        ddrop_delay_ps: int | None,
+    ) -> AbstractOperationBuilder:
+        """Build the operation builder for a single qubit.
+
+        Override to supply a hardware-specific builder or to inject extra
+        constructor arguments for a particular qubit.
+
+        :param qubit_payload: Raw PuRR quantum-device payload for the qubit.
+        :param reset_methods: Reset method objects from canonical assembly.
+        :param default_reset_method: Default reset method identifier.
+        :param ddrop_delay_ps: DDrop reset delay in picoseconds, or ``None``.
+        :returns: A configured, ready-to-use operation builder instance.
+        """
+        return self._operation_builder_type(
+            qubit_id=qubit_payload.get("id"),
+            coupled_qubit_ids=_get_coupled_qubit_ids(qubit_payload),
+            control_qubit_ids=_get_control_qubit_ids(qubit_payload),
+            has_x_pi=_has_x_pi_waveform(qubit_payload),
             reset_methods=reset_methods,
             default_reset_method=default_reset_method,
-        ),
-        couplings=_build_couplings(
-            qubit_direction_couplings=dto.qubit_direction_couplings,
-            quantum_devices=dto.quantum_devices,
-        ),
-        external_resources=external_resources.to_tuple(),
-        metadata=(
-            AttributeEntry(key="materialiser_source_type", value="purr"),
-            AttributeEntry(key="materialiser_source_version", value=source_version),
-            AttributeEntry(
-                key="materialiser_status",
-                value="experimental_partial_mapping",
-            ),
-        ),
-    )
-
-
-def materialise_purr_v0_1_0(
-    *,
-    source_payload: dict[str, Any],
-    source_version: str,
-    target_data: TargetData | None = None,
-    supported_acquire_modes: list[str] | None = None,
-    native_waveform_shapes: list[str] | None = None,
-    decoder_extra_reduce_target_types: list[str] | None = None,
-    decoder_extra_reduce_target_suffixes: list[str] | None = None,
-    operation_builder_type: type[AbstractOperationBuilder] = DefaultOperationBuilder,
-    extra_operations: tuple[OperationData, ...] = (),
-) -> CanonicalSystemData:
-    """Materialise canonical system data from a PuRR v0.1.0 source payload.
-
-    This runs the PuRR boundary flow:
-
-    1. Source-version compatibility check.
-    2. Payload adaptation/decoding into boundary-normalised plain data.
-    3. Ingress DTO validation.
-    4. Graph-level consistency validation.
-    5. Canonical materialisation.
-
-    :param source_payload: Raw parsed PuRR payload.
-    :param source_version: Source contract version.
-    :param target_data: Compiler target data required by downstream mappings.
-    :param supported_acquire_modes: Fallback acquire modes applied when the
-        source payload does not provide explicit supported modes.
-    :param native_waveform_shapes: Compiler-owned waveform shape defaults
-        injected per physical channel when absent from the source payload.
-    :param decoder_extra_reduce_target_types: Optional extra fully-qualified
-        ``py/reduce`` targets allowed by the source decoder at runtime.
-    :param decoder_extra_reduce_target_suffixes: Optional extra terminal type-name
-        suffixes allowed by the source decoder at runtime.
-    :param operation_builder_type: Builder class used to construct per-qubit
-        operations. Subclass
-        :class:`~qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder`
-        and pass the subclass here to customise or replace specific gate
-        decompositions for a target hardware variant (e.g. DDQ).
-    :param extra_operations: Additional or replacement
-        :class:`~qat.experimental.system_data.canonical.schema.OperationData`
-        instances applied to every qubit's operation set after the default set is
-        assembled (last-wins by ID). Use this for data-driven runtime extensions
-        without subclassing.
-    :returns: Materialised canonical system data.
-    :raises UnsupportedSourceVersionError: If source version is unsupported.
-    :raises SourceValidationError: If DTO validation fails.
-
-    This function is version-specific by design. New PuRR source versions should
-    be implemented as new entrypoints and registered in the boundary registry.
-    """
-    if supported_acquire_modes is None:
-        supported_acquire_modes = ["integrator", "raw", "scope"]
-    if native_waveform_shapes is None:
-        native_waveform_shapes = ["square"]
-    if source_version not in _SUPPORTED_PURR_SOURCE_VERSIONS:
-        raise UnsupportedSourceVersionError.for_version(
-            source_type="purr",
-            source_version=source_version,
-            supported_versions=_SUPPORTED_PURR_SOURCE_VERSIONS,
+            ddrop_delay_ps=ddrop_delay_ps,
         )
 
-    adapted_payload = adapt_purr_payload(
-        source_payload,
-        extra_reduce_target_types=(
-            set(decoder_extra_reduce_target_types)
-            if decoder_extra_reduce_target_types is not None
-            else None
-        ),
-        extra_reduce_target_suffixes=(
-            set(decoder_extra_reduce_target_suffixes)
-            if decoder_extra_reduce_target_suffixes is not None
-            else None
-        ),
-    )
+    def build_qubits(
+        self,
+        *,
+        dto: PurrIngressV010,
+        reset_methods: tuple[ResetData, ...],
+        default_reset_method: str | None,
+    ) -> tuple[QubitData, ...]:
+        """Build per-qubit data from the enriched ingress DTO.
 
-    try:
-        # Stage 1: validate the external source payload at the ingress boundary.
-        source_ingress_dto = PurrIngressV010.model_validate(adapted_payload)
-    except ValidationError as exc:
-        raise SourceValidationError(
-            "PuRR ingress DTO validation failed.",
-            source_type="purr",
-            source_version=source_version,
-            details={"errors": exc.errors(include_url=False)},
-            cause=exc,
-        ) from exc
+        :param dto: Enriched, fully-validated ingress DTO.
+        :param reset_methods: Pre-built reset method objects from :meth:`assemble`.
+        :param default_reset_method: Default reset method identifier.
+        :returns: Tuple of qubit data for canonical assembly.
+        """
+        return _build_qubits(
+            quantum_devices=dto.quantum_devices,
+            error_mitigation=dto.error_mitigation,
+            build_operation_builder=self.build_operation_builder,
+            extra_operations=self._extra_operations,
+            reset_methods=reset_methods,
+            default_reset_method=default_reset_method,
+        )
 
-    validate_purr_ingress_graph(source_ingress_dto)
+    def build_channels(self, *, dto: PurrIngressV010) -> tuple[ChannelData, ...]:
+        """Build logical channel data from the enriched ingress DTO.
 
-    # Stage 2: apply compiler-owned enrichment used for canonical assembly.
-    if target_data is None:
-        target_data = TargetData()
-    ingress_payload = _inject_target_data_fields(adapted_payload, target_data)
-    ingress_payload = _inject_supported_reset_methods(ingress_payload)
-    ingress_payload = _inject_native_waveform_shapes(
-        ingress_payload, native_waveform_shapes
-    )
-    ingress_payload.setdefault(
-        "supported_acquire_modes",
-        source_ingress_dto.supported_acquire_modes or supported_acquire_modes,
-    )
+        :param dto: Enriched, fully-validated ingress DTO.
+        :returns: Tuple of channel data for canonical assembly.
+        """
+        return _build_channels(
+            quantum_devices=dto.quantum_devices,
+            physical_channels=dto.physical_channels,
+        )
 
-    try:
-        enriched_ingress_dto = PurrIngressV010.model_validate(ingress_payload)
-    except ValidationError as exc:
-        raise SourceValidationError(
-            "Compiler enrichment produced an invalid PuRR ingress payload.",
-            source_type="purr",
-            source_version=source_version,
-            details={"errors": exc.errors(include_url=False)},
-            cause=exc,
-        ) from exc
+    def build_couplings(self, *, dto: PurrIngressV010) -> tuple[QubitCouplingData, ...]:
+        """Build qubit coupling data from the enriched ingress DTO.
 
-    return _materialise_canonical_top_level(
-        dto=enriched_ingress_dto,
-        source_version=source_version,
-        operation_builder_type=operation_builder_type,
-        extra_operations=extra_operations,
-    )
+        :param dto: Enriched, fully-validated ingress DTO.
+        :returns: Tuple of coupling data for canonical assembly.
+        """
+        return _build_couplings(
+            qubit_direction_couplings=dto.qubit_direction_couplings,
+            quantum_devices=dto.quantum_devices,
+        )
+
+    def assemble(
+        self,
+        *,
+        dto: PurrIngressV010,
+        source_version: str,
+    ) -> CanonicalSystemData:
+        """Assemble canonical system data from the enriched ingress DTO.
+
+        Calls :meth:`build_qubits`, :meth:`build_channels`, and
+        :meth:`build_couplings`. Override to substitute a different output
+        model or to add top-level fields (e.g. an extended hardware model).
+
+        :param dto: Enriched, fully-validated ingress DTO.
+        :param source_version: Source contract version, written to metadata.
+        :returns: Assembled canonical system data.
+        """
+        external_resources = ExternalResourceRegistry()
+        acquire_modes, default_acquire_mode = _build_acquire_modes(
+            dto.supported_acquire_modes,
+            dto.default_acquire_mode,
+        )
+        reset_methods, default_reset_method = _build_reset_methods(
+            dto.supported_reset_methods,
+            dto.default_reset_method,
+            dto.passive_reset_time,
+        )
+        return CanonicalSystemData(
+            calibration_id=dto.calibration_id,
+            acquire_limit=_build_acquire_limit(dto.repeat_limit),
+            acquire_modes=acquire_modes,
+            default_acquire_mode=default_acquire_mode,
+            reset_methods=reset_methods,
+            default_reset_method=default_reset_method,
+            oscillators=_build_oscillators(dto.basebands, external_resources),
+            ports=_build_ports(dto.physical_channels, external_resources),
+            channels=self.build_channels(dto=dto),
+            qubits=self.build_qubits(
+                dto=dto,
+                reset_methods=reset_methods,
+                default_reset_method=default_reset_method,
+            ),
+            couplings=self.build_couplings(dto=dto),
+            external_resources=external_resources.to_tuple(),
+            metadata=(
+                AttributeEntry(key="materialiser_source_type", value="purr"),
+                AttributeEntry(key="materialiser_source_version", value=source_version),
+                AttributeEntry(
+                    key="materialiser_status",
+                    value="experimental_partial_mapping",
+                ),
+            ),
+        )
+
+    def materialise(
+        self,
+        *,
+        adapted_payload: dict[str, Any],
+        source_version: str,
+        strict_version_check: bool = True,
+    ) -> CanonicalSystemData:
+        """Run the full PuRR materialisation pipeline.
+
+        Orchestrates all pipeline stages. Boundary validation is non-bypassable;
+        subclass customisation is via :meth:`prepare_ingress`, :meth:`build_qubits`,
+        :meth:`build_channels`, :meth:`build_couplings`, and :meth:`assemble`.
+
+        :param adapted_payload: Pre-adapted (boundary-normalised) PuRR payload.
+            Callers are responsible for running the source-specific adapter before
+            invoking this method; passing a raw jsonpickle payload will fail at
+            ingress DTO validation with a confusing error.
+        :param source_version: Source contract version.
+        :param strict_version_check: When ``True`` (default), raises
+            :class:`~qat.experimental.system_data.materialisers.errors.UnsupportedSourceVersionError`
+            if ``source_version`` is not in :data:`_SUPPORTED_PURR_SOURCE_VERSIONS`.
+            Set to ``False`` to attempt materialisation with an unrecognised version;
+            DTO validation may still fail if the payload shape is incompatible.
+        :returns: Materialised canonical system data.
+        :raises UnsupportedSourceVersionError: If ``strict_version_check`` is ``True``
+            and the source version is not supported.
+        :raises SourceValidationError: If DTO or graph validation fails.
+        """
+        if strict_version_check and source_version not in _SUPPORTED_PURR_SOURCE_VERSIONS:
+            raise UnsupportedSourceVersionError.for_version(
+                source_type="purr",
+                source_version=source_version,
+                supported_versions=_SUPPORTED_PURR_SOURCE_VERSIONS,
+            )
+
+        try:
+            source_ingress_dto = PurrIngressV010.model_validate(adapted_payload)
+        except ValidationError as exc:
+            raise SourceValidationError(
+                "PuRR ingress DTO validation failed.",
+                source_type="purr",
+                source_version=source_version,
+                details={"errors": exc.errors(include_url=False)},
+                cause=exc,
+            ) from exc
+
+        validate_purr_ingress_graph(source_ingress_dto)
+
+        enriched_payload = self.prepare_ingress(
+            adapted_payload=adapted_payload,
+            source_ingress_dto=source_ingress_dto,
+        )
+
+        try:
+            enriched_dto = PurrIngressV010.model_validate(enriched_payload)
+        except ValidationError as exc:
+            raise SourceValidationError(
+                "PuRR payload could not be prepared for materialisation.",
+                source_type="purr",
+                source_version=source_version,
+                details={"errors": exc.errors(include_url=False)},
+                cause=exc,
+            ) from exc
+
+        return self.assemble(dto=enriched_dto, source_version=source_version)
