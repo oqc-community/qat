@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.passes.pass_ordering module &mdash; qat-compiler 3.0.0.post333.dev20260824090642 documentation</title>
+  <title>qat.experimental.passes.pass_ordering module &mdash; qat-compiler 3.0.0.post335.dev20260824120834 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -735,12 +735,15 @@ execution.</p>
 <span class="sig-name descname"><span class="pre">validate_pass_ordering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">passes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.passes.pass_ordering.validate_pass_ordering" title="Link to this definition"></a></dt>
 <dd><p>Verify that the ordering constraints declared by <code class="docutils literal notranslate"><span class="pre">passes</span></code> are satisfied.</p>
 <p>Only passes that inherit <a class="reference internal" href="#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a> carry constraints; every other pass
-is skipped. Two families of constraint are checked, in listing order:</p>
+is skipped. Constraints are evaluated against the <strong>first occurrence</strong> of each pass
+type, so a pass may appear again later (for example as a trailing clean-up stage)
+without violating its own <a class="reference internal" href="#qat.experimental.passes.pass_ordering.OrderedPass.runs_before" title="qat.experimental.passes.pass_ordering.OrderedPass.runs_before"><code class="xref py py-meth docutils literal notranslate"><span class="pre">runs_before()</span></code></a> constraint. Two families
+of constraint are checked:</p>
 <ul class="simple">
 <li><p>For every pass declaring <a class="reference internal" href="#qat.experimental.passes.pass_ordering.OrderedPass.runs_before" title="qat.experimental.passes.pass_ordering.OrderedPass.runs_before"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OrderedPass.runs_before()</span></code></a>, each referenced pass
-class that also appears in <code class="docutils literal notranslate"><span class="pre">passes</span></code> must appear at a later position.</p></li>
+class that also appears in <code class="docutils literal notranslate"><span class="pre">passes</span></code> must first appear at a later position.</p></li>
 <li><p>For every pass declaring <a class="reference internal" href="#qat.experimental.passes.pass_ordering.OrderedPass.required_predecessors" title="qat.experimental.passes.pass_ordering.OrderedPass.required_predecessors"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OrderedPass.required_predecessors()</span></code></a>, each
-referenced pass class must appear in <code class="docutils literal notranslate"><span class="pre">passes</span></code> at an earlier position.</p></li>
+referenced pass class must first appear in <code class="docutils literal notranslate"><span class="pre">passes</span></code> at an earlier position.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

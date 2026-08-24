@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.pipeline module
+=========================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.pipeline
+   :members:
+   :undoc-members:
+   :show-inheritance:
