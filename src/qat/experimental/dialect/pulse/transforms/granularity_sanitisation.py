@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 import numpy as np
 from xdsl.context import Context
@@ -17,6 +18,7 @@ from xdsl.pattern_rewriter import (
 from qat.experimental.dialect.pulse.ir import ConstantOp
 from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, TimeAttr
 from qat.experimental.dialect.pulse.ir.types import TimeType, WaveformType
+from qat.experimental.passes.pass_ordering import OrderedPass
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
 _COMPARISON_TOLERANCE = 1e-10
@@ -143,12 +145,31 @@ class GranularitySanitisation(RewritePattern):
 
 
 @dataclass(frozen=True)
-class ApplyGranularitySanitisation(ModulePass):
+class ApplyGranularitySanitisation(OrderedPass, ModulePass):
     """Apply granularity sanitisation."""
 
     name = "apply-granularity-sanitisation"
 
     constraints: PulseLevelConstraints
+
+    _runs_before: ClassVar[frozenset[type[ModulePass]] | None] = None
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        # Illegal, sub-granularity times must be rounded up before waveforms are sampled
+        # and before the timeline is normalised, so both passes see realisable durations.
+        # Imported lazily to avoid a circular import at module load.
+        if ApplyGranularitySanitisation._runs_before is None:
+            from qat.experimental.dialect.pulse.transforms.timeline_normalization import (
+                TimelineNormalization,
+            )
+            from qat.experimental.dialect.pulse.transforms.waveform_evaluation import (
+                EvaluateWaveformsAsSamples,
+            )
+
+            ApplyGranularitySanitisation._runs_before = frozenset(
+                {EvaluateWaveformsAsSamples, TimelineNormalization}
+            )
+        return ApplyGranularitySanitisation._runs_before
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         walker = PatternRewriteWalker(

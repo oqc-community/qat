@@ -81,6 +81,11 @@ class TestValidatePassOrdering:
         with pytest.raises(VerifyException, match="must run before 'evaluate'"):
             validate_pass_ordering([_EvaluatePass(), _FoldPass()])
 
+    def test_duplicate_pass_after_target_is_accepted_as_cleanup(self):
+        # 'fold' runs before 'evaluate' but may reappear afterwards as a clean-up stage;
+        # only its first occurrence is checked, so the trailing copy is not a violation.
+        validate_pass_ordering([_FoldPass(), _EvaluatePass(), _FoldPass()])
+
     def test_correct_required_predecessor_order_is_accepted(self):
         validate_pass_ordering([_FoldPass(), _RequireFoldPass()])
 

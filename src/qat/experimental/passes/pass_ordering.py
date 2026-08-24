@@ -59,12 +59,15 @@ def validate_pass_ordering(passes: Sequence[ModulePass]) -> None:
     """Verify that the ordering constraints declared by ``passes`` are satisfied.
 
     Only passes that inherit :class:`OrderedPass` carry constraints; every other pass
-    is skipped. Two families of constraint are checked, in listing order:
+    is skipped. Constraints are evaluated against the **first occurrence** of each pass
+    type, so a pass may appear again later (for example as a trailing clean-up stage)
+    without violating its own :meth:`~OrderedPass.runs_before` constraint. Two families
+    of constraint are checked:
 
     * For every pass declaring :meth:`OrderedPass.runs_before`, each referenced pass
-      class that also appears in ``passes`` must appear at a later position.
+      class that also appears in ``passes`` must first appear at a later position.
     * For every pass declaring :meth:`OrderedPass.required_predecessors`, each
-      referenced pass class must appear in ``passes`` at an earlier position.
+      referenced pass class must first appear in ``passes`` at an earlier position.
 
     :param passes: The passes in the exact order they will be applied.
     :raises VerifyException: If any declared constraint is violated. The message
@@ -72,10 +75,15 @@ def validate_pass_ordering(passes: Sequence[ModulePass]) -> None:
     """
 
     positions: dict[type[ModulePass], int] = {}
+    first_occurrence: dict[type[ModulePass], ModulePass] = {}
     for index, pass_ in enumerate(passes):
-        positions.setdefault(type(pass_), index)
+        pass_type = type(pass_)
+        if pass_type not in positions:
+            positions[pass_type] = index
+            first_occurrence[pass_type] = pass_
 
-    for index, pass_ in enumerate(passes):
+    for pass_type, index in positions.items():
+        pass_ = first_occurrence[pass_type]
         if not isinstance(pass_, OrderedPass):
             continue
 
