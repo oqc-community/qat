@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.results.ir.attributes module &mdash; qat-compiler 3.0.0.post335.dev20260824120834 documentation</title>
+  <title>qat.experimental.dialect.results.ir.attributes module &mdash; qat-compiler 3.0.0.post336.dev20260825135446 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -729,6 +729,109 @@ the record being post-selected out of the results collection.</p></li>
 <dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.post_select_predicate'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordFieldAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordFieldAttr</span></code></a></p>
+<p>Models a field in a record in the results dialect, to be used by records and
+collections of records.</p>
+<p>Contains a key and a type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> – The key of the entry in the record.</p></li>
+<li><p><strong>type</strong> – The type of the entry in the record.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initializes the RecordFieldAttr with the given key and type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.params.key"></span><strong>key</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.params.key">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></span>) – The key of the entry in the record.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.params.type_"></span><strong>type_</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.params.type_">¶</a> – The type of the entry in the record.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.key">
+<span class="sig-name descname"><span class="pre">key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.key" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.record_field'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;xdsl.irdl.attributes._ParameterDef</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr.type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RecordSchemaAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr" title="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordSchemaAttr</span></code></a></p>
+<p>Models the schema of a record in the results dialect, to be used by records and
+collections of records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>fields</strong> – An array of record field attributes, which individually define the key and
+type of each field in the record.</p>
+</dd>
+</dl>
+<p>Initializes the RecordSchemaAttr with the given fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.params.fields"></span><strong>fields</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.params.fields">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordFieldAttr</span></code></a>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordFieldAttr</span></code></a>]</span>) – An array of record field attributes, which individually define the
+key and type of each field in the record.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.as_dict">
+<span class="sig-name descname"><span class="pre">as_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.as_dict" title="Link to this definition"></a></dt>
+<dd><p>Return the schema as a dictionary mapping keys to types.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">TypeAttribute</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.dialect.results.ir.attributes.RecordFieldAttr" title="qat.experimental.dialect.results.ir.attributes.RecordFieldAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordFieldAttr</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.get_irdl_definition">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_irdl_definition</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.get_irdl_definition" title="Link to this definition"></a></dt>
+<dd><p>Get the IRDL attribute definition.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'results.record_schema'</span></em><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.results.ir.attributes.RecordSchemaAttr.verify" title="Link to this definition"></a></dt>
+<dd><p>Verify that there are no duplicate keys in the schema.</p>
 </dd></dl>
 
 </dd></dl>
