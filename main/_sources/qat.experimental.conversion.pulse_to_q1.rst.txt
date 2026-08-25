@@ -14,5 +14,6 @@ Submodules
 
    qat.experimental.conversion.pulse_to_q1.passes
    qat.experimental.conversion.pulse_to_q1.phase
+   qat.experimental.conversion.pulse_to_q1.pre_q1_ir
    qat.experimental.conversion.pulse_to_q1.rewrite_patterns
    qat.experimental.conversion.pulse_to_q1.sequence_outlining

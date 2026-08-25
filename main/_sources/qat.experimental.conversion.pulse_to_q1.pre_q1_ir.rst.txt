@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.pre\_q1\_ir module
+============================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.pre_q1_ir
+   :members:
+   :undoc-members:
+   :show-inheritance:

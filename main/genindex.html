@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post336.dev20260825135446 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post337.dev20260825152213 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -523,6 +523,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.html">qat.experimental.conversion.pulse_to_q1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html">qat.experimental.conversion.pulse_to_q1.passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.phase.html">qat.experimental.conversion.pulse_to_q1.phase module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html">qat.experimental.conversion.pulse_to_q1.pre_q1_ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html">qat.experimental.conversion.pulse_to_q1.rewrite_patterns module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html">qat.experimental.conversion.pulse_to_q1.sequence_outlining module</a></li>
 </ul>
@@ -1356,6 +1357,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.ir.html#qat.backend.qblox.ir.SequenceBuilder.acquire_weighed">acquire_weighed() (SequenceBuilder method)</a>, <a href="qat.purr.backends.qblox.ir.html#qat.purr.backends.qblox.ir.SequenceBuilder.acquire_weighed">[1]</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.AcquireAnalysisStack">AcquireAnalysisStack (class in qat.experimental.conversion.pulse_to_q1.passes)</a>
+</li>
       <li><a href="qat.executables.html#qat.executables.AcquireData">AcquireData (class in qat.executables)</a>
 </li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.AcquireDefinitionData">AcquireDefinitionData (class in qat.experimental.system_data.canonical.schema)</a>
@@ -1453,7 +1456,11 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.acquisition_result">acquisition_result (AcquireOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.acquisition_result">[1]</a>
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.acquisition_result">(PreQ1AcquireOp attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionAttr">AcquisitionAttr (class in qat.experimental.dialect.q1_sequence)</a>
 
       <ul>
@@ -2056,6 +2063,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.apply">(PulseToQ1LoweringPass method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.Q1OutliningPass.apply">(Q1OutliningPass method)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply">(Q1PreAcquireTransformationPass method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass.apply">(Q1PulseLegalisationPass method)</a>
 </li>
@@ -4250,10 +4259,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.instrument.base.html#qat.instrument.base.CompositeInstrument.components">components (CompositeInstrument property)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor">CompositeExecutor (class in qat.purr.backends.qblox.execution.executor)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.instrument.base.html#qat.instrument.base.CompositeInstrument">CompositeInstrument (class in qat.instrument.base)</a>
 
       <ul>
@@ -5028,9 +5037,11 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.InstructionBuilder.cswap">cswap() (InstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.InstructionBuilder.cswap">[1]</a>
 </li>
-      <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line.params.ctx">ctx (qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line parameter)</a>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply.params.ctx">ctx (qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply parameter)</a>
 
       <ul>
+        <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line.params.ctx">(qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line parameter)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.emit.params.ctx">(qat.experimental.dialect.q1.Q1asmTarget.emit parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.emit.params.ctx">(qat.experimental.dialect.q1.target.Q1asmTarget.emit parameter)</a>
@@ -6189,7 +6200,11 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.PlayRsRsImmOp.duration">(PlayRsRsImmOp property)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRsRsImmOp.duration">[1]</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.duration">(PreQ1AcquireOp attribute)</a>
+</li>
         <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Pulse.duration">(Pulse property)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.params.duration">(qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.params.duration">(qat.experimental.dialect.pulse.ir.AcquireOp parameter)</a>
 </li>
@@ -7370,6 +7385,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.integrations.features.html#qat.purr.integrations.features.OpenPulseFeatures.for_hardware">for_hardware() (OpenPulseFeatures method)</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.AcquireAnalysisStack.for_op_indexes">for_op_indexes (AcquireAnalysisStack attribute)</a>
+</li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.AcquireAnalysisStack.for_op_number_repeats">for_op_number_repeats (AcquireAnalysisStack attribute)</a>
+</li>
       <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.CreateOp.for_record">for_record() (CreateOp class method)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateOp.for_record">[1]</a>
 </li>
       <li><a href="qat.experimental.system_data.materialisers.errors.html#qat.experimental.system_data.materialisers.errors.UnsupportedSourceError.for_source">for_source() (UnsupportedSourceError class method)</a>
@@ -7531,7 +7550,11 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PhaseShiftOp.frame">(PhaseShiftOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PhaseShiftOp.frame">[1]</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.frame">(PreQ1AcquireOp attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.frame">(PulseOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PulseOp.frame">[1]</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.params.frame">(qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.params.frame">(qat.experimental.dialect.pulse.ir.AcquireOp parameter)</a>
 </li>
@@ -7593,7 +7616,11 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.frontend.importer.pulse.builder.html#qat.experimental.frontend.importer.pulse.builder.PulseKernelBuilder.synchronize.params.frame_names">frame_names (qat.experimental.frontend.importer.pulse.builder.PulseKernelBuilder.synchronize parameter)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.frame_result">frame_result (AcquireOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.frame_result">[1]</a>
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.frame_result">(PreQ1AcquireOp attribute)</a>
 </li>
+      </ul></li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.frame_to_operations">frame_to_operations (FrameLineageAnalysis attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.frame_to_port">frame_to_port (FrameLineageAnalysis attribute)</a>
@@ -8510,6 +8537,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.PlayRsRsImmOp.get_irdl_definition">(PlayRsRsImmOp class method)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRsRsImmOp.get_irdl_definition">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.PostSelectOp.get_irdl_definition">(PostSelectOp class method)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.get_irdl_definition">[1]</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.get_irdl_definition">(PreQ1AcquireOp class method)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.ProvenanceInfoAttr.get_irdl_definition">(ProvenanceInfoAttr class method)</a>, <a href="qat.experimental.dialect.q1.ir.attrs.html#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.get_irdl_definition">[1]</a>
 </li>
@@ -10665,6 +10694,10 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="getting_started/post_processing_pipeline.html#qat.model.post_processing.MLDiscriminateParams.label">(MLDiscriminateParams attribute)</a>, <a href="qat.model.post_processing.html#qat.model.post_processing.MLDiscriminateParams.label">[1]</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.label">(PreQ1AcquireOp attribute)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.params.label">(qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp parameter)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.params.label">(qat.experimental.dialect.pulse.ir.AcquireOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.params.label">(qat.experimental.dialect.pulse.ir.ops.AcquireOp parameter)</a>
@@ -12123,13 +12156,13 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.LowerArithIntegerConstantToMoveOp.match_and_rewrite">(LowerArithIntegerConstantToMoveOp method)</a>
 </li>
-        <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteAcquireOp.match_and_rewrite">(RewriteAcquireOp method)</a>
-</li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteCreateFrameOp.match_and_rewrite">(RewriteCreateFrameOp method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseSetOp.match_and_rewrite">(RewritePhaseSetOp method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseShiftOp.match_and_rewrite">(RewritePhaseShiftOp method)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp.match_and_rewrite">(RewritePreQ1AcquireOp method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePulseOp.match_and_rewrite">(RewritePulseOp method)</a>
 </li>
@@ -13864,6 +13897,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.phase.html#module-qat.experimental.conversion.pulse_to_q1.phase">qat.experimental.conversion.pulse_to_q1.phase</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#module-qat.experimental.conversion.pulse_to_q1.pre_q1_ir">qat.experimental.conversion.pulse_to_q1.pre_q1_ir</a>
+</li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#module-qat.experimental.conversion.pulse_to_q1.rewrite_patterns">qat.experimental.conversion.pulse_to_q1.rewrite_patterns</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#module-qat.experimental.conversion.pulse_to_q1.sequence_outlining">qat.experimental.conversion.pulse_to_q1.sequence_outlining</a>
@@ -15276,6 +15311,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.results.ir.attributes.html#qat.experimental.dialect.results.ir.attributes.PostSelectPredicateAttr.name">(PostSelectPredicateAttr attribute)</a>, <a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.PostSelectPredicateAttr.name">[1]</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.name">(PreQ1AcquireOp attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.ProvenanceInfoAttr.name">(ProvenanceInfoAttr attribute)</a>, <a href="qat.experimental.dialect.q1.ir.attrs.html#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.name">(PulseOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PulseOp.name">[1]</a>
@@ -15285,6 +15322,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.name">(Q1asmTarget attribute)</a>, <a href="qat.experimental.dialect.q1.target.html#qat.experimental.dialect.q1.target.Q1asmTarget.name">[1]</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.Q1OutliningPass.name">(Q1OutliningPass attribute)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.name">(Q1PreAcquireTransformationPass attribute)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass.name">(Q1PulseLegalisationPass attribute)</a>
 </li>
@@ -15807,6 +15846,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.qblox.constants.html#qat.purr.backends.qblox.constants.Constants.NUMBER_OF_SEQUENCERS_QRM">NUMBER_OF_SEQUENCERS_QRM (Constants attribute)</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.number_runs">number_runs (PreQ1AcquireOp attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.params.number_runs">(qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.experimental.waveforms.numerical.html#qat.experimental.waveforms.numerical.numerical_derivative">numerical_derivative() (in module qat.experimental.waveforms.numerical)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.NumericArrayData">NumericArrayData (class in qat.experimental.dialect.pulse.ir)</a>
@@ -15899,6 +15944,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationPredicateClauseData.op">(OperationPredicateClauseData attribute)</a>
 </li>
         <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationUnaryExprData.op">(OperationUnaryExprData attribute)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply.params.op">(qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.utils.html#qat.experimental.dialect.pulse.utils.extract_frequency_hz.params.op">(qat.experimental.dialect.pulse.utils.extract_frequency_hz parameter)</a>
 </li>
@@ -17381,6 +17428,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.pipelines.purr.sweep.html#qat.pipelines.purr.sweep.CompileSweepPipeline.params.preprocessing_pipeline">(qat.pipelines.purr.sweep.CompileSweepPipeline parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp">PreQ1AcquireOp (class in qat.experimental.conversion.pulse_to_q1.pre_q1_ir)</a>
+</li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.ModeData.preselect_disallowed_states">preselect_disallowed_states (ModeData attribute)</a>
 
       <ul>
@@ -18419,6 +18468,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.Q1OutliningPass">Q1OutliningPass (class in qat.experimental.conversion.pulse_to_q1.sequence_outlining)</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass">Q1PreAcquireTransformationPass (class in qat.experimental.conversion.pulse_to_q1.passes)</a>
+</li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass">Q1PulseLegalisationPass (class in qat.experimental.conversion.pulse_to_q1.passes)</a>
 </li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass">Q1PulseValidationPass (class in qat.experimental.conversion.pulse_to_q1.passes)</a>
@@ -18971,6 +19022,13 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.conversion.pulse_to_q1.phase.html#module-qat.experimental.conversion.pulse_to_q1.phase">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.conversion.pulse_to_q1.pre_q1_ir
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#module-qat.experimental.conversion.pulse_to_q1.pre_q1_ir">module</a>
 </li>
       </ul></li>
       <li>
@@ -20345,6 +20403,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.decompositions.pulses.html#module-qat.middleend.decompositions.pulses">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.middleend.default
 
@@ -20352,8 +20412,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.default.html#module-qat.middleend.default">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.middleend.fallthrough
 
@@ -23378,13 +23436,13 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.VariableInjector.revert">(VariableInjector method)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteAcquireOp">RewriteAcquireOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
-</li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteCreateFrameOp">RewriteCreateFrameOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
 </li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseSetOp">RewritePhaseSetOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
 </li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePhaseShiftOp">RewritePhaseShiftOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
+</li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp">RewritePreQ1AcquireOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
 </li>
       <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePulseOp">RewritePulseOp (class in qat.experimental.conversion.pulse_to_q1.rewrite_patterns)</a>
 </li>
@@ -24958,14 +25016,14 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI16Imm">(class in qat.experimental.dialect.q1.ir.imm_desc)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.SI32Imm">SI32Imm (class in qat.experimental.dialect.q1)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.imm_desc.html#qat.experimental.dialect.q1.ir.imm_desc.SI32Imm">(class in qat.experimental.dialect.q1.ir.imm_desc)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.SimpleAcquire">SimpleAcquire (class in qat.purr.backends.utilities)</a>
 </li>
       <li><a href="qat.runtime.simple.html#qat.runtime.simple.SimpleRuntime">SimpleRuntime (class in qat.runtime.simple)</a>
@@ -25500,6 +25558,12 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.StopRsOp">(class in qat.experimental.dialect.q1.ir.ops)</a>
+</li>
+      </ul></li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.store_idx">store_idx (PreQ1AcquireOp attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.params.store_idx">(qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp parameter)</a>
 </li>
       </ul></li>
       <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.StoreOp">StoreOp (class in qat.experimental.dialect.results.ir)</a>
@@ -26558,6 +26622,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.PlayRsRsImmOp.traits">(PlayRsRsImmOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.PlayRsRsImmOp.traits">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.PostSelectOp.traits">(PostSelectOp attribute)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.traits">[1]</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.traits">(PreQ1AcquireOp attribute)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.traits">(PulseOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PulseOp.traits">[1]</a>
 </li>
@@ -27745,6 +27811,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.PostSelectOp.verify_">(PostSelectOp method)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.PostSelectOp.verify_">[1]</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.verify_">(PreQ1AcquireOp method)</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseOp.verify_">(PulseOp method)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PulseOp.verify_">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.ReduceOp.verify_">(ReduceOp method)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ReduceOp.verify_">[1]</a>
@@ -28224,20 +28292,24 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WeightAttr.weight_name">(WeightAttr attribute)</a>, <a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr.weight_name">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WeightAttr">WeightAttr (class in qat.experimental.dialect.q1_sequence)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr">(class in qat.experimental.dialect.q1_sequence.ir.attrs)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.AcquireDefinitionData.weights">weights (AcquireDefinitionData attribute)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.weights">(AcquireOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.weights">[1]</a>
 </li>
         <li><a href="qat.model.device.html#qat.model.device.CalibratableAcquire.weights">(CalibratableAcquire attribute)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.weights">(PreQ1AcquireOp attribute)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.params.weights">(qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.params.weights">(qat.experimental.dialect.pulse.ir.AcquireOp parameter)</a>
 </li>
