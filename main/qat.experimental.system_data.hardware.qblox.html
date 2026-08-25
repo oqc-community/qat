@@ -1,0 +1,1426 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qat.experimental.system_data.hardware.qblox module &mdash; qat-compiler 3.0.0.post338.dev20260825162757 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx_paramlinks.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=c4370934"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="qat.experimental.system_data.hardware.qblox_config module" href="qat.experimental.system_data.hardware.qblox_config.html" />
+    <link rel="prev" title="qat.experimental.system_data.hardware.base module" href="qat.experimental.system_data.hardware.base.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            qat-compiler
+              <img src="_static/qat-logo.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started/index.html">Getting started with QAT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/first_program.html">Executing your first program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/hardware_models.html">Hardware models &amp; target data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/input.html">Supported input to the compiler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/pipelines.html">Pipelines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/qat_config.html">QAT Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/compilation.html">Compilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/execution.html">Execution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/post_processing_pipeline.html">Readout Post-Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/shot_selection.html">Shot Selection (Pre &amp; Post)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started/simulators.html">Using QAT with simulators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/custom_pipeline.html">Creating custom pipelines in QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/qiskit.html">Using the Qiskit simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/rtcs.html">Using the real-time chip simulator in new QAT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/target_data.html">TargetData Demo</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">src</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qat.html">qat package</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="qat.backend.html">qat.backend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.passes.html">qat.backend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.purr.html">qat.backend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.analysis.html">qat.backend.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.lowering.html">qat.backend.passes.purr.lowering module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.transform.html">qat.backend.passes.purr.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.passes.purr.validation.html">qat.backend.passes.purr.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.analysis.html">qat.backend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.lowering.html">qat.backend.passes.lowering module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.passes.validation.html">qat.backend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.qblox.html">qat.backend.qblox package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.config.html">qat.backend.qblox.config package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.helpers.html">qat.backend.qblox.config.helpers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.config.specification.html">qat.backend.qblox.config.specification module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.passes.html">qat.backend.qblox.passes package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.qblox.passes.analysis.html">qat.backend.qblox.passes.analysis module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.acquisition.html">qat.backend.qblox.acquisition module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.codegen.html">qat.backend.qblox.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.execution.html">qat.backend.qblox.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.ir.html">qat.backend.qblox.ir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.target_data.html">qat.backend.qblox.target_data module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.qblox.visualisation.html">qat.backend.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform.html">qat.backend.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.codegen.html">qat.backend.waveform.codegen module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform.executable.html">qat.backend.waveform.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.waveform_v1.html">qat.backend.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.purr.html">qat.backend.waveform_v1.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.backend.waveform_v1.purr.codegen.html">qat.backend.waveform_v1.purr.codegen module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.backend.waveform_v1.executable.html">qat.backend.waveform_v1.executable module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.base.html">qat.backend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.codegen_base.html">qat.backend.codegen_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.fallthrough.html">qat.backend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.backend.graph.html">qat.backend.graph module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.core.html">qat.core package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.config.html">qat.core.config package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.configure.html">qat.core.config.configure module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.descriptions.html">qat.core.config.descriptions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.session.html">qat.core.config.session module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.config.validators.html">qat.core.config.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipelines.html">qat.core.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.configurable.html">qat.core.pipelines.configurable module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.core.pipelines.factory.html">qat.core.pipelines.factory module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.metrics_base.html">qat.core.metrics_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pass_base.html">qat.core.pass_base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.pipeline.html">qat.core.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.qat.html">qat.core.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.core.result_base.html">qat.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.engines.html">qat.engines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.qblox.html">qat.engines.qblox package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.dummy.html">qat.engines.qblox.dummy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.execution.html">qat.engines.qblox.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.qblox.live.html">qat.engines.qblox.live module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform.html">qat.engines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform.echo.html">qat.engines.waveform.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.waveform_v1.html">qat.engines.waveform_v1 package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.engines.waveform_v1.echo.html">qat.engines.waveform_v1.echo module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.model.html">qat.engines.model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.native.html">qat.engines.native module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.engines.zero.html">qat.engines.zero module</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="qat.experimental.html">qat.experimental package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.analysis.html">qat.experimental.analysis package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.analysis.post_processing.html">qat.experimental.analysis.post_processing module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.conversion.html">qat.experimental.conversion package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.html">qat.experimental.conversion.pulse_to_q1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html">qat.experimental.conversion.pulse_to_q1.passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.phase.html">qat.experimental.conversion.pulse_to_q1.phase module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html">qat.experimental.conversion.pulse_to_q1.pre_q1_ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html">qat.experimental.conversion.pulse_to_q1.rewrite_patterns module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html">qat.experimental.conversion.pulse_to_q1.sequence_outlining module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.naming.html">qat.experimental.dialect.common.naming module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.region.html">qat.experimental.dialect.common.region module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.ssa.html">qat.experimental.dialect.common.ssa module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.pulse.html">qat.experimental.dialect.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.utils.html">qat.experimental.dialect.pulse.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1.html">qat.experimental.dialect.q1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.ir.html">qat.experimental.dialect.q1.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.transforms.html">qat.experimental.dialect.q1.transforms package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.errors.html">qat.experimental.dialect.q1.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1.target.html">qat.experimental.dialect.q1.target module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_cf.html">qat.experimental.dialect.q1_cf package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.ir.html">qat.experimental.dialect.q1_cf.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_cf.transforms.html">qat.experimental.dialect.q1_cf.transforms package</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_scf.html">qat.experimental.dialect.q1_scf package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.ir.html">qat.experimental.dialect.q1_scf.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.html">qat.experimental.dialect.q1_scf.transforms package</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html">qat.experimental.dialect.q1_sequence package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.html">qat.experimental.dialect.q1_sequence.ir package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.target.html">qat.experimental.dialect.q1_sequence.target module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.results.html">qat.experimental.dialect.results package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.results.ir.html">qat.experimental.dialect.results.ir package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.frontend.html">qat.experimental.frontend package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.frontend.importer.html">qat.experimental.frontend.importer package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.pulse.html">qat.experimental.frontend.importer.pulse package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.base.html">qat.experimental.frontend.importer.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.frontend.importer.environment.html">qat.experimental.frontend.importer.environment module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.passes.html">qat.experimental.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.passes.pass_ordering.html">qat.experimental.passes.pass_ordering module</a></li>
+</ul>
+</li>
+<li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul class="current">
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.canonical.html">qat.experimental.system_data.canonical package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html">qat.experimental.system_data.canonical.schema module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.circuit.html">qat.experimental.system_data.circuit package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.circuit.qubits.html">qat.experimental.system_data.circuit.qubits module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.circuit.topology.html">qat.experimental.system_data.circuit.topology module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.derived.html">qat.experimental.system_data.derived package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.derived.interface.html">qat.experimental.system_data.derived.interface module</a></li>
+</ul>
+</li>
+<li class="toctree-l5 current"><a class="reference internal" href="qat.experimental.system_data.hardware.html">qat.experimental.system_data.hardware package</a><ul class="current">
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.base.html">qat.experimental.system_data.hardware.base module</a></li>
+<li class="toctree-l6 current"><a class="current reference internal" href="#">qat.experimental.system_data.hardware.qblox module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html">qat.experimental.system_data.hardware.qblox_config module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.materialisers.html">qat.experimental.system_data.materialisers package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.echo.html">qat.experimental.system_data.materialisers.echo package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.model.html">qat.experimental.system_data.materialisers.model package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.operations.html">qat.experimental.system_data.materialisers.operations package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.purr.html">qat.experimental.system_data.materialisers.purr package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.boundary.html">qat.experimental.system_data.materialisers.boundary module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.builder.html">qat.experimental.system_data.materialisers.builder module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.descriptor_resolution.html">qat.experimental.system_data.materialisers.descriptor_resolution module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.errors.html">qat.experimental.system_data.materialisers.errors module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.plugin_loader.html">qat.experimental.system_data.materialisers.plugin_loader module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.plugins.html">qat.experimental.system_data.materialisers.plugins module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.materialisers.types.html">qat.experimental.system_data.materialisers.types module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.pulse.html">qat.experimental.system_data.pulse package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.utils.html">qat.experimental.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.utils.logging.html">qat.experimental.utils.logging module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.waveforms.html">qat.experimental.waveforms package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.waveforms.shapes.html">qat.experimental.waveforms.shapes package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.base.html">qat.experimental.waveforms.shapes.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.blackman.html">qat.experimental.waveforms.shapes.blackman module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.exceptions.html">qat.experimental.waveforms.shapes.exceptions module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.gaussian.html">qat.experimental.waveforms.shapes.gaussian module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.gaussian_square.html">qat.experimental.waveforms.shapes.gaussian_square module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.rounded_square.html">qat.experimental.waveforms.shapes.rounded_square module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.sech.html">qat.experimental.waveforms.shapes.sech module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.setup_hold.html">qat.experimental.waveforms.shapes.setup_hold module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.sinusoidal.html">qat.experimental.waveforms.shapes.sinusoidal module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.soft_square.html">qat.experimental.waveforms.shapes.soft_square module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.square.html">qat.experimental.waveforms.shapes.square module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.waveforms.shapes.validators.html">qat.experimental.waveforms.shapes.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.waveforms.evaluate.html">qat.experimental.waveforms.evaluate module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.waveforms.numerical.html">qat.experimental.waveforms.numerical module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.converters.html">qat.frontend.converters package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.converters.purr.html">qat.frontend.converters.purr module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.parsers.html">qat.frontend.parsers package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qasm.html">qat.frontend.parsers.qasm package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.base.html">qat.frontend.parsers.qasm.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm2.html">qat.frontend.parsers.qasm.qasm2 module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.parsers.qasm.qasm3.html">qat.frontend.parsers.qasm.qasm3 module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.parsers.qir.html">qat.frontend.parsers.qir module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.passes.html">qat.frontend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.purr.html">qat.frontend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.frontend.passes.purr.transform.html">qat.frontend.passes.purr.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.analysis.html">qat.frontend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.passes.transform.html">qat.frontend.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.purr.html">qat.frontend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.frontend.purr.purr.html">qat.frontend.purr.purr module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.auto.html">qat.frontend.auto module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.base.html">qat.frontend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.builder.html">qat.frontend.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.circuit_builder.html">qat.frontend.circuit_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.custom.html">qat.frontend.custom module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.fallthrough.html">qat.frontend.fallthrough module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qasm.html">qat.frontend.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qat_ir.html">qat.frontend.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.qir.html">qat.frontend.qir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.frontend.register.html">qat.frontend.register module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.instrument.html">qat.instrument package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.instrument.base.html">qat.instrument.base module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.integrations.html">qat.integrations package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.features.html">qat.integrations.features module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.integrations.tket.html">qat.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.ir.html">qat.ir package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.gates.html">qat.ir.gates package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.base.html">qat.ir.gates.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_1q.html">qat.ir.gates.gates_1q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.gates_2q.html">qat.ir.gates.gates_2q module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.native.html">qat.ir.gates.native module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.ir.gates.operation.html">qat.ir.gates.operation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.builder_factory.html">qat.ir.builder_factory module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.conversion.html">qat.ir.conversion module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_basetypes.html">qat.ir.instruction_basetypes module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instruction_builder.html">qat.ir.instruction_builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.instructions.html">qat.ir.instructions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.lowered.html">qat.ir.lowered module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.measure.html">qat.ir.measure module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.pulse_channel.html">qat.ir.pulse_channel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.qat_ir.html">qat.ir.qat_ir module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.utils.html">qat.ir.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.ir.waveforms.html">qat.ir.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.middleend.html">qat.middleend package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.decompositions.html">qat.middleend.decompositions package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.base.html">qat.middleend.decompositions.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.gates.html">qat.middleend.decompositions.gates module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.decompositions.pulses.html">qat.middleend.decompositions.pulses module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.passes.html">qat.middleend.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.gates.html">qat.middleend.passes.gates package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.transform.html">qat.middleend.passes.gates.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.gates.validation.html">qat.middleend.passes.gates.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.purr.html">qat.middleend.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.purr.analysis.html">qat.middleend.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.purr.transform.html">qat.middleend.passes.purr.transform module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.middleend.passes.purr.validation.html">qat.middleend.passes.purr.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.analysis.html">qat.middleend.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.transform.html">qat.middleend.passes.transform module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.passes.validation.html">qat.middleend.passes.validation module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.purr.html">qat.middleend.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.middleend.purr.default.html">qat.middleend.purr.default module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.base.html">qat.middleend.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.default.html">qat.middleend.default module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.middleend.fallthrough.html">qat.middleend.fallthrough module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.model.html">qat.model package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.loaders.html">qat.model.loaders package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.purr.html">qat.model.loaders.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.base.html">qat.model.loaders.purr.base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.echo.html">qat.model.loaders.purr.echo module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.file.html">qat.model.loaders.purr.file module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.lucy.html">qat.model.loaders.purr.lucy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qblox.html">qat.model.loaders.purr.qblox module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.qiskit.html">qat.model.loaders.purr.qiskit module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.model.loaders.purr.rtcs.html">qat.model.loaders.purr.rtcs module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.base.html">qat.model.loaders.base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.cache.html">qat.model.loaders.cache module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.converted.html">qat.model.loaders.converted module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.file.html">qat.model.loaders.file module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.lucy.html">qat.model.loaders.lucy module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.qblox.html">qat.model.loaders.qblox module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.model.loaders.update.html">qat.model.loaders.update module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.builder.html">qat.model.builder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.convert_purr.html">qat.model.convert_purr module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.device.html">qat.model.device module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.error_mitigation.html">qat.model.error_mitigation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.hardware_model.html">qat.model.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.post_processing.html">qat.model.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.target_data.html">qat.model.target_data module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.model.validators.html">qat.model.validators module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.pipelines.html">qat.pipelines package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.legacy.html">qat.pipelines.legacy package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.base.html">qat.pipelines.legacy.base package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.base.compile.html">qat.pipelines.legacy.base.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.base.execute.html">qat.pipelines.legacy.base.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.base.full.html">qat.pipelines.legacy.base.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.echo.html">qat.pipelines.legacy.echo package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.echo.compile.html">qat.pipelines.legacy.echo.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.echo.execute.html">qat.pipelines.legacy.echo.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.echo.full.html">qat.pipelines.legacy.echo.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.qblox.html">qat.pipelines.legacy.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qblox.compile.html">qat.pipelines.legacy.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qblox.full.html">qat.pipelines.legacy.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.qiskit.html">qat.pipelines.legacy.qiskit package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qiskit.compile.html">qat.pipelines.legacy.qiskit.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qiskit.execute.html">qat.pipelines.legacy.qiskit.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.qiskit.full.html">qat.pipelines.legacy.qiskit.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.legacy.rtcs.html">qat.pipelines.legacy.rtcs package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.rtcs.compile.html">qat.pipelines.legacy.rtcs.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.legacy.rtcs.full.html">qat.pipelines.legacy.rtcs.full module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.purr.html">qat.pipelines.purr package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.qblox.html">qat.pipelines.purr.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.compile.html">qat.pipelines.purr.qblox.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.execute.html">qat.pipelines.purr.qblox.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.qblox.full.html">qat.pipelines.purr.qblox.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.sweep.html">qat.pipelines.purr.sweep package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.compile.html">qat.pipelines.purr.sweep.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.execute.html">qat.pipelines.purr.sweep.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.flattener.html">qat.pipelines.purr.sweep.flattener module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.sweep.passes.html">qat.pipelines.purr.sweep.passes module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.html">qat.pipelines.purr.waveform_v1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.compile.html">qat.pipelines.purr.waveform_v1.compile module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.execute.html">qat.pipelines.purr.waveform_v1.execute module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.pipelines.purr.waveform_v1.full.html">qat.pipelines.purr.waveform_v1.full module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.waveform.html">qat.pipelines.waveform package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.compile.html">qat.pipelines.waveform.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.execute.html">qat.pipelines.waveform.execute module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.pipelines.waveform.full.html">qat.pipelines.waveform.full module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.base.html">qat.pipelines.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.cache.html">qat.pipelines.cache module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.echo.html">qat.pipelines.echo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.pipeline.html">qat.pipelines.pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.qiskit.html">qat.pipelines.qiskit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.rtcs.html">qat.pipelines.rtcs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.pipelines.updateable.html">qat.pipelines.updateable module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.purr.html">qat.purr package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.backends.html">qat.purr.backends package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.calibrations.html">qat.purr.backends.calibrations package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.calibrations.remote.html">qat.purr.backends.calibrations.remote module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qblox.html">qat.purr.backends.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.execution.html">qat.purr.backends.qblox.execution package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.acquisition.html">qat.purr.backends.qblox.acquisition module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.analysis_passes.html">qat.purr.backends.qblox.analysis_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen.html">qat.purr.backends.qblox.codegen module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.codegen_base.html">qat.purr.backends.qblox.codegen_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.config.html">qat.purr.backends.qblox.config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.constants.html">qat.purr.backends.qblox.constants module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.device.html">qat.purr.backends.qblox.device module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.dummy.html">qat.purr.backends.qblox.dummy module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.graph.html">qat.purr.backends.qblox.graph module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.ir.html">qat.purr.backends.qblox.ir module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.live.html">qat.purr.backends.qblox.live module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.loader.html">qat.purr.backends.qblox.loader module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.model_base.html">qat.purr.backends.qblox.model_base module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.transform_passes.html">qat.purr.backends.qblox.transform_passes module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.backends.qblox.visualisation.html">qat.purr.backends.qblox.visualisation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.echo.html">qat.purr.backends.echo module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live.html">qat.purr.backends.live module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.live_devices.html">qat.purr.backends.live_devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.qiskit_simulator.html">qat.purr.backends.qiskit_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.realtime_chip_simulator.html">qat.purr.backends.realtime_chip_simulator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.utilities.html">qat.purr.backends.utilities module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.backends.verification.html">qat.purr.backends.verification module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.compiler.html">qat.purr.compiler package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.error_mitigation.html">qat.purr.compiler.error_mitigation package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.error_mitigation.readout_mitigation.html">qat.purr.compiler.error_mitigation.readout_mitigation module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.experimental.html">qat.purr.compiler.experimental package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.purr.compiler.experimental.frontends.html">qat.purr.compiler.experimental.frontends module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.builders.html">qat.purr.compiler.builders module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.caches.html">qat.purr.compiler.caches module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.devices.html">qat.purr.compiler.devices module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.emitter.html">qat.purr.compiler.emitter module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.execution.html">qat.purr.compiler.execution module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.frontends.html">qat.purr.compiler.frontends module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.hardware_models.html">qat.purr.compiler.hardware_models module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.instructions.html">qat.purr.compiler.instructions module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.interrupt.html">qat.purr.compiler.interrupt module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.metrics.html">qat.purr.compiler.metrics module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.optimisers.html">qat.purr.compiler.optimisers module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.runtime.html">qat.purr.compiler.runtime module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.transform_passes.html">qat.purr.compiler.transform_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.validation_passes.html">qat.purr.compiler.validation_passes module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.compiler.waveforms.html">qat.purr.compiler.waveforms module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.core.html">qat.purr.core package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.metrics_base.html">qat.purr.core.metrics_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.pass_base.html">qat.purr.core.pass_base module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.core.result_base.html">qat.purr.core.result_base module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.integrations.html">qat.purr.integrations package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.features.html">qat.purr.integrations.features module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qasm.html">qat.purr.integrations.qasm module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qir.html">qat.purr.integrations.qir module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.qiskit.html">qat.purr.integrations.qiskit module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.integrations.tket.html">qat.purr.integrations.tket module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.utils.html">qat.purr.utils package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.benchmarking.html">qat.purr.utils.benchmarking module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logger.html">qat.purr.utils.logger module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.logging_utils.html">qat.purr.utils.logging_utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.purr.utils.serializer.html">qat.purr.utils.serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qat.html">qat.purr.qat module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.purr.qatconfig.html">qat.purr.qatconfig module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.runtime.html">qat.runtime package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.passes.html">qat.runtime.passes package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.purr.html">qat.runtime.passes.purr package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.purr.analysis.html">qat.runtime.passes.purr.analysis module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.runtime.passes.purr.transform.html">qat.runtime.passes.purr.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.analysis.html">qat.runtime.passes.analysis module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.runtime.passes.transform.html">qat.runtime.passes.transform module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.aggregator.html">qat.runtime.aggregator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.base.html">qat.runtime.base module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.connection.html">qat.runtime.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.exceptions.html">qat.runtime.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.expressions.html">qat.runtime.expressions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.legacy.html">qat.runtime.legacy module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.post_processing.html">qat.runtime.post_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_pipeline.html">qat.runtime.results_pipeline module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.results_processing.html">qat.runtime.results_processing module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.runtime.simple.html">qat.runtime.simple module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.utils.html">qat.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.graphs.html">qat.utils.graphs module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.hardware_model.html">qat.utils.hardware_model module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.piny.html">qat.utils.piny module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.pydantic.html">qat.utils.pydantic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.qasm.html">qat.utils.qasm module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.state_tensors.html">qat.utils.state_tensors module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.units.html">qat.utils.units module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.uuid.html">qat.utils.uuid module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.utils.waveform.html">qat.utils.waveform module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qat.executables.html">qat.executables module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.extensions.html">qat.extensions module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="coc.html">Code of Conduct</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contribute.html">Contributing to QAT</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">qat-compiler</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">src</a></li>
+          <li class="breadcrumb-item"><a href="qat.html">qat package</a></li>
+          <li class="breadcrumb-item"><a href="qat.experimental.html">qat.experimental package</a></li>
+          <li class="breadcrumb-item"><a href="qat.experimental.system_data.html">qat.experimental.system_data package</a></li>
+          <li class="breadcrumb-item"><a href="qat.experimental.system_data.hardware.html">qat.experimental.system_data.hardware package</a></li>
+      <li class="breadcrumb-item active">qat.experimental.system_data.hardware.qblox module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/qat.experimental.system_data.hardware.qblox.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+
+  <section id="module-qat.experimental.system_data.hardware.qblox">
+<span id="qat-experimental-system-data-hardware-qblox-module"></span><h1>qat.experimental.system_data.hardware.qblox module<a class="headerlink" href="#module-qat.experimental.system_data.hardware.qblox" title="Link to this heading"></a></h1>
+<p>Qblox-specific derived view of canonical system data.</p>
+<p>This module describes the configuration of Qblox hardware with a single data
+structure that mirrors the physical RF chain of a Qblox Cluster. Qblox modules
+are control hardware devices which can control many qubits and perform readout
+depending on the module type. Each tone generated by the module is called a
+generator (aka physical port). A generator is a subsection of the module (often
+a sequencer + local oscillator). The generator is responsible for control of a
+single mode of a qubit and can be mapped to a <code class="docutils literal notranslate"><span class="pre">frame</span></code>. This configuration
+dictates the boundaries of the generated tone and is used for legalisation and
+for lowering the pulse dialect to the Q1asm dialect (Qblox IR).</p>
+<p>As an example, a single output tone is produced by combining a local oscillator with a
+sequencer’s NCO
+(e.g. an LO at 4.4 GHz mixed with an NCO at 240 MHz yields a 4.64 GHz output). Each such
+tone-generation unit is captured as a <code class="xref py py-class docutils literal notranslate">
+<span class="pre">Generator</span></code> bound to a physical port. The <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView" title="qat.experimental.system_data.hardware.qblox.QbloxHardwareView"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxHardwareView</span></code></a> ties the generators
+together into a derived view of
+<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a>.</p>
+<p>The model follows the hardware building blocks documented by Qblox (see, for example, the
+<a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/modules/qrm_rf.html">QRM-RF architecture</a>): a Cluster is
+populated with modules (<code class="docutils literal notranslate"><span class="pre">QCM</span></code>, <code class="docutils literal notranslate"><span class="pre">QCM-RF</span></code>, <code class="docutils literal notranslate"><span class="pre">QRM</span></code>, <code class="docutils literal notranslate"><span class="pre">QRM-RF</span></code>, <code class="docutils literal notranslate"><span class="pre">QRC</span></code>); each module
+exposes one or more RF ports; and each port is fed by a set of sequencers and, on RF
+modules, one or more local oscillators.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.MODULE_SPECS">
+<span class="sig-name descname"><span class="pre">MODULE_SPECS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType" title="qat.experimental.system_data.hardware.qblox.QbloxModuleType"><span class="pre">QbloxModuleType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec" title="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec"><span class="pre">QbloxModuleSpec</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">mappingproxy({&lt;QbloxModuleType.QCM:</span> <span class="pre">'QCM'&gt;:</span> <span class="pre">QbloxModuleSpec(module_type=&lt;QbloxModuleType.QCM:</span> <span class="pre">'QCM'&gt;,</span> <span class="pre">number_of_control_sequencers=6,</span> <span class="pre">number_of_readout_sequencers=0,</span> <span class="pre">number_of_outputs=4,</span> <span class="pre">number_of_inputs=0,</span> <span class="pre">max_binned_acquisitions=None,</span> <span class="pre">scope_sample_size_range=None),</span> <span class="pre">&lt;QbloxModuleType.QCM_RF:</span> <span class="pre">'QCM-RF'&gt;:</span> <span class="pre">QbloxModuleSpec(module_type=&lt;QbloxModuleType.QCM_RF:</span> <span class="pre">'QCM-RF'&gt;,</span> <span class="pre">number_of_control_sequencers=6,</span> <span class="pre">number_of_readout_sequencers=0,</span> <span class="pre">number_of_outputs=2,</span> <span class="pre">number_of_inputs=0,</span> <span class="pre">max_binned_acquisitions=None,</span> <span class="pre">scope_sample_size_range=None),</span> <span class="pre">&lt;QbloxModuleType.QRM:</span> <span class="pre">'QRM'&gt;:</span> <span class="pre">QbloxModuleSpec(module_type=&lt;QbloxModuleType.QRM:</span> <span class="pre">'QRM'&gt;,</span> <span class="pre">number_of_control_sequencers=0,</span> <span class="pre">number_of_readout_sequencers=6,</span> <span class="pre">number_of_outputs=2,</span> <span class="pre">number_of_inputs=2,</span> <span class="pre">max_binned_acquisitions=3000000,</span> <span class="pre">scope_sample_size_range=(4,</span> <span class="pre">16384)),</span> <span class="pre">&lt;QbloxModuleType.QRM_RF:</span> <span class="pre">'QRM-RF'&gt;:</span> <span class="pre">QbloxModuleSpec(module_type=&lt;QbloxModuleType.QRM_RF:</span> <span class="pre">'QRM-RF'&gt;,</span> <span class="pre">number_of_control_sequencers=0,</span> <span class="pre">number_of_readout_sequencers=6,</span> <span class="pre">number_of_outputs=1,</span> <span class="pre">number_of_inputs=1,</span> <span class="pre">max_binned_acquisitions=3000000,</span> <span class="pre">scope_sample_size_range=(4,</span> <span class="pre">16384)),</span> <span class="pre">&lt;QbloxModuleType.QRC:</span> <span class="pre">'QRC'&gt;:</span> <span class="pre">QbloxModuleSpec(module_type=&lt;QbloxModuleType.QRC:</span> <span class="pre">'QRC'&gt;,</span> <span class="pre">number_of_control_sequencers=4,</span> <span class="pre">number_of_readout_sequencers=8,</span> <span class="pre">number_of_outputs=6,</span> <span class="pre">number_of_inputs=2,</span> <span class="pre">max_binned_acquisitions=7000000,</span> <span class="pre">scope_sample_size_range=(4,</span> <span class="pre">16384))})</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.MODULE_SPECS" title="Link to this definition"></a></dt>
+<dd><p>Static specifications keyed by module type. These replace the per-module <code class="docutils literal notranslate"><span class="pre">*Description</span></code>
+models from <code class="docutils literal notranslate"><span class="pre">qat.backend.qblox.target_data</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QBloxLocalOscillator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.LocalOscillator" title="qat.experimental.system_data.hardware.base.LocalOscillator"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalOscillator</span></code></a></p>
+<p>A Qblox local oscillator.</p>
+<p>A single instance is shared across generators when their sequencers map onto the same
+oscillator (as on <code class="docutils literal notranslate"><span class="pre">QRM-RF</span></code>), so sharing is implied by the generator wiring rather than
+an explicit flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>enable</strong> – Whether the local oscillator is enabled.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator.enable">
+<span class="sig-name descname"><span class="pre">enable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator.enable" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator.frequency">
+<span class="sig-name descname"><span class="pre">frequency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator.frequency" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator.id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QBloxReadoutSequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_values=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_values=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_sync=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">awg_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_switch_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">square_weight_acquire=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold_acquire_config=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer" title="qat.experimental.system_data.hardware.qblox.QBloxSequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">QBloxSequencer</span></code></a></p>
+<p>A Qblox sequencer that additionally acquires and processes the returning signal.</p>
+<p>In addition to the control-side NCO/AWG configuration inherited from
+<a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer" title="qat.experimental.system_data.hardware.qblox.QBloxSequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">QBloxSequencer</span></code></a>, a readout sequencer carries the acquisition configuration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>square_weight_acquire</strong> – Non-weighed (square) acquisition configuration.</p></li>
+<li><p><strong>acquire_config</strong> – General acquisition configuration.</p></li>
+<li><p><strong>threshold_acquire_config</strong> – Thresholded acquisition configuration.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.acquire_config">
+<span class="sig-name descname"><span class="pre">acquire_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.AcquireConfig" title="qat.experimental.system_data.hardware.qblox_config.AcquireConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquireConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.acquire_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.awg_config">
+<span class="sig-name descname"><span class="pre">awg_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.AwgConfig" title="qat.experimental.system_data.hardware.qblox_config.AwgConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AwgConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.awg_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.create" title="Link to this definition"></a></dt>
+<dd><p>Build a readout sequencer identified by its index within the module.</p>
+<p>In addition to the control-side configuration resolved by
+<a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.create" title="qat.experimental.system_data.hardware.qblox.QBloxSequencer.create"><code class="xref py py-meth docutils literal notranslate"><span class="pre">QBloxSequencer.create()</span></code></a>, the acquisition configuration is populated from the
+legacy <code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code> payload. Defaults are used for any value that is absent.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.create.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.create.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Zero-based sequencer index within its module.</p></li>
+<li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.create.params.sequencer_payload"></span><strong>sequencer_payload</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.create.params.sequencer_payload">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional legacy <code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code> payload.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer" title="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">QBloxReadoutSequencer</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A readout sequencer with the resolved configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.enable_sync">
+<span class="sig-name descname"><span class="pre">enable_sync</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.enable_sync" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.kind">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.kind" title="Link to this definition"></a></dt>
+<dd><p>Return the hardware-specific sequencer kind.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.marker_switch_config">
+<span class="sig-name descname"><span class="pre">marker_switch_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.MarkerSwitchConfig" title="qat.experimental.system_data.hardware.qblox_config.MarkerSwitchConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkerSwitchConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.marker_switch_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.max_values">
+<span class="sig-name descname"><span class="pre">max_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.max_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.min_values">
+<span class="sig-name descname"><span class="pre">min_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.min_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.nco_config">
+<span class="sig-name descname"><span class="pre">nco_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.NcoConfig" title="qat.experimental.system_data.hardware.qblox_config.NcoConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">NcoConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.nco_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.square_weight_acquire">
+<span class="sig-name descname"><span class="pre">square_weight_acquire</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.SquareWeightAcq" title="qat.experimental.system_data.hardware.qblox_config.SquareWeightAcq"><code class="xref py py-class docutils literal notranslate"><span class="pre">SquareWeightAcq</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.square_weight_acquire" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.threshold_acquire_config">
+<span class="sig-name descname"><span class="pre">threshold_acquire_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.ThresholdedAcqConfig" title="qat.experimental.system_data.hardware.qblox_config.ThresholdedAcqConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ThresholdedAcqConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxReadoutSequencer.threshold_acquire_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QBloxSequencer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fields=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_values=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_values=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_sync=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">awg_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_switch_config=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code></a></p>
+<p>A Qblox sequencer: the digital side of the RF chain that drives an output tone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enable_sync</strong> – Whether the sequencer participates in party-line synchronisation.</p></li>
+<li><p><strong>nco_config</strong> – Numerically controlled oscillator configuration.</p></li>
+<li><p><strong>awg_config</strong> – Arbitrary waveform generator configuration.</p></li>
+<li><p><strong>marker_switch_config</strong> – Marker override / RF switch configuration.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.awg_config">
+<span class="sig-name descname"><span class="pre">awg_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.AwgConfig" title="qat.experimental.system_data.hardware.qblox_config.AwgConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">AwgConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.awg_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.create">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_payload</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.create" title="Link to this definition"></a></dt>
+<dd><p>Build a sequencer identified by its index within the module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.create.params.index"></span><strong>index</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.create.params.index">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Zero-based sequencer index within its module.</p></li>
+<li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.create.params.sequencer_payload"></span><strong>sequencer_payload</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.create.params.sequencer_payload">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional legacy <code class="docutils literal notranslate"><span class="pre">SequencerConfig</span></code> payload used to
+populate the sync, NCO, AWG and marker configuration. Defaults are used for any
+value that is absent.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer" title="qat.experimental.system_data.hardware.qblox.QBloxSequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">QBloxSequencer</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A sequencer of this class with the resolved configuration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.enable_sync">
+<span class="sig-name descname"><span class="pre">enable_sync</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.enable_sync" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.fields">
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.fields" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.kind">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">kind</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.kind" title="Link to this definition"></a></dt>
+<dd><p>Return the hardware-specific sequencer kind.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.marker_switch_config">
+<span class="sig-name descname"><span class="pre">marker_switch_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.MarkerSwitchConfig" title="qat.experimental.system_data.hardware.qblox_config.MarkerSwitchConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkerSwitchConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.marker_switch_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.max_values">
+<span class="sig-name descname"><span class="pre">max_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.max_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.min_values">
+<span class="sig-name descname"><span class="pre">min_values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.min_values" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QBloxSequencer.nco_config">
+<span class="sig-name descname"><span class="pre">nco_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.NcoConfig" title="qat.experimental.system_data.hardware.qblox_config.NcoConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">NcoConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QBloxSequencer.nco_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxControlGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencers=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_oscillators=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_id=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_shaping_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_signal_config=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Generator" title="qat.experimental.system_data.hardware.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a></p>
+<p>A single-frequency tone generator: one sequencer paired with its connected LO.</p>
+<p>A generator is the smallest tone-producing subsection of a module. It combines exactly
+one sequencer with the local oscillator connected to its output path to synthesise a
+single output tone. Baseband generators have no local oscillator.</p>
+<p>The inherited <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencers" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencers"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sequencers</span></code></a> and <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillators" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillators"><code class="xref py py-attr docutils literal notranslate"><span class="pre">local_oscillators</span></code></a> tuples always hold at
+most one sequencer and one local oscillator respectively; the <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencer" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sequencer</span></code></a> and
+<a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillator" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillator"><code class="xref py py-attr docutils literal notranslate"><span class="pre">local_oscillator</span></code></a> properties give convenient singular access.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_id</strong> – Zero-based physical output the generator’s tone is routed to (e.g. <code class="docutils literal notranslate"><span class="pre">0</span></code>
+for <code class="docutils literal notranslate"><span class="pre">out0</span></code>), derived from the sequencer connection.</p></li>
+<li><p><strong>mixer_config</strong> – Mixer correction (imbalance/phase) derived from the channel.</p></li>
+<li><p><strong>pulse_shaping_config</strong> – Output pulse-shaping (FIR/exponential overshoot) config.</p></li>
+<li><p><strong>output_signal_config</strong> – Output attenuation and DC offset configuration.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillator">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_oscillator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.LocalOscillator" title="qat.experimental.system_data.hardware.base.LocalOscillator"><span class="pre">LocalOscillator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillator" title="Link to this definition"></a></dt>
+<dd><p>The local oscillator connected to this generator, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for baseband.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillators">
+<span class="sig-name descname"><span class="pre">local_oscillators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.LocalOscillator" title="qat.experimental.system_data.hardware.base.LocalOscillator"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalOscillator</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.local_oscillators" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.mixer_config">
+<span class="sig-name descname"><span class="pre">mixer_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.MixerConfig" title="qat.experimental.system_data.hardware.qblox_config.MixerConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.mixer_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.output_id">
+<span class="sig-name descname"><span class="pre">output_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.output_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.output_signal_config">
+<span class="sig-name descname"><span class="pre">output_signal_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.OutputSignalConfig" title="qat.experimental.system_data.hardware.qblox_config.OutputSignalConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">OutputSignalConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.output_signal_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.port_id">
+<span class="sig-name descname"><span class="pre">port_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.port_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.pulse_shaping_config">
+<span class="sig-name descname"><span class="pre">pulse_shaping_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.PulseShapingConfig" title="qat.experimental.system_data.hardware.qblox_config.PulseShapingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseShapingConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.pulse_shaping_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sample_time">
+<span class="sig-name descname"><span class="pre">sample_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sample_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sequencer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><span class="pre">Sequencer</span></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencer" title="Link to this definition"></a></dt>
+<dd><p>The single sequencer driving this generator.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencers">
+<span class="sig-name descname"><span class="pre">sequencers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator.sequencers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxHardwareView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquire_limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.HardwareViewInterface" title="qat.experimental.system_data.hardware.base.HardwareViewInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">HardwareViewInterface</span></code></a></p>
+<p>A Qblox-specific derived view of canonical system data.</p>
+<p>The view makes every module in the Cluster visible via <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.modules" title="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.modules"><code class="xref py py-attr docutils literal notranslate"><span class="pre">modules</span></code></a>. Each module
+holds the single-frequency <code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxGenerator</span></code> subsections that make up its RF
+chain. The flattened <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.generators" title="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.generators"><code class="xref py py-attr docutils literal notranslate"><span class="pre">generators</span></code></a> view aggregates the generators of every module
+to satisfy the <a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.HardwareViewInterface" title="qat.experimental.system_data.hardware.base.HardwareViewInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">HardwareViewInterface</span></code></a>
+contract.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>acquire_limit</strong> – Maximum number of acquisitions allowed in a single execution batch,
+drawn from the canonical system data.</p></li>
+<li><p><strong>modules</strong> – The Cluster modules, each carrying its own tone generators.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.acquire_limit">
+<span class="sig-name descname"><span class="pre">acquire_limit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.acquire_limit" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.derive">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.derive" title="Link to this definition"></a></dt>
+<dd><p>Build a Qblox hardware view from canonical system data.</p>
+<p>The canonical data is produced by materialising a Qblox (purr) calibration. Every
+value is derived from that data rather than hardcoded:</p>
+<ul class="simple">
+<li><p>The module type is resolved from the external resource <code class="docutils literal notranslate"><span class="pre">object_type</span></code> or parsed
+from the port/oscillator identifiers (e.g. <code class="docutils literal notranslate"><span class="pre">QCM-RF</span></code>); a <code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code> is
+raised if it cannot be determined.</p></li>
+<li><p>The Cluster slot is read from the port’s <code class="docutils literal notranslate"><span class="pre">baseband</span></code> attributes; a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code> is raised if it cannot be determined.</p></li>
+<li><p>Ports are grouped into physical modules by <code class="docutils literal notranslate"><span class="pre">(instrument_id,</span> <span class="pre">slot)</span></code>.</p></li>
+<li><p>Each canonical channel becomes a <code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxGenerator</span></code>: a sequencer (readout if
+the port supports acquisition, otherwise control) paired with the channel’s local
+oscillator. Sequencers are routed to outputs using the module default, i.e. each
+output receives a contiguous block of the module’s sequencers (on a QCM-RF,
+sequencers 1-3 drive the first output / LO and 4-6 the second).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.derive.params.parent"></span><strong>parent</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.derive.params.parent">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a></span>) – The canonical system data to derive from.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView" title="qat.experimental.system_data.hardware.qblox.QbloxHardwareView"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxHardwareView</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A populated <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView" title="qat.experimental.system_data.hardware.qblox.QbloxHardwareView"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxHardwareView</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.generators">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator"><span class="pre">QbloxControlGenerator</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.generators" title="Link to this definition"></a></dt>
+<dd><p>All single-frequency generators across every module.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.generators_by_port">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generators_by_port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator"><span class="pre">QbloxControlGenerator</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.generators_by_port" title="Link to this definition"></a></dt>
+<dd><p>Map each port identifier to the generators that output on it.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.modules">
+<span class="sig-name descname"><span class="pre">modules</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModule" title="qat.experimental.system_data.hardware.qblox.QbloxModule"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModule</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.modules" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">resource_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slot_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_oscillators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A Qblox Cluster module and the tone generators it contains.</p>
+<p>A module is a physical card in the Cluster (e.g. a <code class="docutils literal notranslate"><span class="pre">QRM-RF</span></code>). It owns a set of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxGenerator</span></code> subsections, each of which produces a single frequency, together
+with the local oscillators shared across those generators. The module type and slot are
+derived from the canonical system data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>resource_id</strong> – Identifier of the module derived from the canonical data.</p></li>
+<li><p><strong>module_type</strong> – The resolved module type, or <code class="docutils literal notranslate"><span class="pre">None</span></code> if it could not be determined.</p></li>
+<li><p><strong>spec</strong> – The static capability specification for the module.</p></li>
+<li><p><strong>sequencers</strong> – The full fixed set of sequencers the module provides, built from
+<a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.spec" title="qat.experimental.system_data.hardware.qblox.QbloxModule.spec"><code class="xref py py-attr docutils literal notranslate"><span class="pre">spec</span></code></a> (control sequencers followed by readout sequencers).</p></li>
+<li><p><strong>generators</strong> – The single-frequency tone generators hosted by this module. Each
+generator maps one of the module’s <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.sequencers" title="qat.experimental.system_data.hardware.qblox.QbloxModule.sequencers"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sequencers</span></code></a> onto a local oscillator.</p></li>
+<li><p><strong>local_oscillators</strong> – The distinct local oscillators used across the generators.</p></li>
+<li><p><strong>slot_idx</strong> – The Cluster slot the module occupies.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.generators">
+<span class="sig-name descname"><span class="pre">generators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxControlGenerator</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.generators" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.local_oscillators">
+<span class="sig-name descname"><span class="pre">local_oscillators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator" title="qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator"><code class="xref py py-class docutils literal notranslate"><span class="pre">QBloxLocalOscillator</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.local_oscillators" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.module_type">
+<span class="sig-name descname"><span class="pre">module_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType" title="qat.experimental.system_data.hardware.qblox.QbloxModuleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModuleType</span></code></a> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.module_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.resource_id">
+<span class="sig-name descname"><span class="pre">resource_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.resource_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.sequencers">
+<span class="sig-name descname"><span class="pre">sequencers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.sequencers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.slot_idx">
+<span class="sig-name descname"><span class="pre">slot_idx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.slot_idx" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModule.spec">
+<span class="sig-name descname"><span class="pre">spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec" title="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModuleSpec</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModule.spec" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxModuleSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_control_sequencers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_readout_sequencers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_binned_acquisitions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope_sample_size_range</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Static description of a Qblox module’s RF chain capabilities.</p>
+<p>This captures the invariant limits of a module type (previously spread across the
+<code class="docutils literal notranslate"><span class="pre">*Description</span></code> models in <code class="docutils literal notranslate"><span class="pre">qat.backend.qblox.target_data</span></code>) grouped by the physical
+structure they describe.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Whether a module up/down-converts (is “RF”) is <em>not</em> stored as a flag: it is
+implied by the module’s output frequency range. Likewise, whether a local oscillator
+is shared is implied by the generators mapping the same
+<a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator" title="qat.experimental.system_data.hardware.qblox.QBloxLocalOscillator"><code class="xref py py-class docutils literal notranslate"><span class="pre">QBloxLocalOscillator</span></code></a> onto multiple sequencers.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>module_type</strong> – The module type this spec describes, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for an unresolved
+module.</p></li>
+<li><p><strong>number_of_control_sequencers</strong> – Number of sequencers dedicated to control tones.</p></li>
+<li><p><strong>number_of_readout_sequencers</strong> – Number of sequencers capable of acquisition.</p></li>
+<li><p><strong>number_of_outputs</strong> – Number of physical output ports.</p></li>
+<li><p><strong>number_of_inputs</strong> – Number of physical input ports.</p></li>
+<li><p><strong>max_binned_acquisitions</strong> – Maximum number of binned acquisitions the module can
+store, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for control-only modules.</p></li>
+<li><p><strong>scope_sample_size_range</strong> – Inclusive scope-acquisition trace sample-size bounds, or
+<code class="docutils literal notranslate"><span class="pre">None</span></code> for control-only modules.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.build_sequencers">
+<span class="sig-name descname"><span class="pre">build_sequencers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.build_sequencers" title="Link to this definition"></a></dt>
+<dd><p>Build the full fixed sequencer set for a module of this type.</p>
+<p>When a legacy <code class="docutils literal notranslate"><span class="pre">QbloxConfig</span></code> payload is supplied, each sequencer is configured from
+the matching <code class="docutils literal notranslate"><span class="pre">sequencers[index]</span></code> entry (NCO, AWG, marker and, for readout
+sequencers, acquisition settings). Missing entries fall back to defaults.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.build_sequencers.params.config"></span><strong>config</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.build_sequencers.params.config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]]</span>) – Optional legacy <code class="docutils literal notranslate"><span class="pre">QbloxConfig</span></code> payload for the module.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code></a>, <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The control sequencers followed by the readout sequencers, each indexed
+contiguously from zero.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.max_binned_acquisitions">
+<span class="sig-name descname"><span class="pre">max_binned_acquisitions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.max_binned_acquisitions" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.module_type">
+<span class="sig-name descname"><span class="pre">module_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType" title="qat.experimental.system_data.hardware.qblox.QbloxModuleType"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModuleType</span></code></a> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.module_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_control_sequencers">
+<span class="sig-name descname"><span class="pre">number_of_control_sequencers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_control_sequencers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_inputs">
+<span class="sig-name descname"><span class="pre">number_of_inputs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_inputs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_outputs">
+<span class="sig-name descname"><span class="pre">number_of_outputs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_outputs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_readout_sequencers">
+<span class="sig-name descname"><span class="pre">number_of_readout_sequencers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.number_of_readout_sequencers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.scope_sample_size_range">
+<span class="sig-name descname"><span class="pre">scope_sample_size_range</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]</span> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.scope_sample_size_range" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxModuleType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>The Qblox Cluster module types supported by this view.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>QCM</strong> – Baseband Qubit Control Module.</p></li>
+<li><p><strong>QCM_RF</strong> – RF Qubit Control Module.</p></li>
+<li><p><strong>QRM</strong> – Baseband Qubit Readout Module.</p></li>
+<li><p><strong>QRM_RF</strong> – RF Qubit Readout Module.</p></li>
+<li><p><strong>QRC</strong> – RF Qubit Readout and Control Module.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleType.QCM">
+<span class="sig-name descname"><span class="pre">QCM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QCM'</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType.QCM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleType.QCM_RF">
+<span class="sig-name descname"><span class="pre">QCM_RF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QCM-RF'</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType.QCM_RF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleType.QRC">
+<span class="sig-name descname"><span class="pre">QRC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QRC'</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType.QRC" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleType.QRM">
+<span class="sig-name descname"><span class="pre">QRM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QRM'</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType.QRM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxModuleType.QRM_RF">
+<span class="sig-name descname"><span class="pre">QRM_RF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QRM-RF'</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxModuleType.QRM_RF" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxReadoutGenerator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencers=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_oscillators=()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_id=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_id=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mixer_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse_shaping_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_signal_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_signal_config=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scope_acquire_config=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Generator" title="qat.experimental.system_data.hardware.base.Generator"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generator</span></code></a></p>
+<p>A single-frequency tone generator that also acquires the returning signal.</p>
+<p>Like <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxControlGenerator" title="qat.experimental.system_data.hardware.qblox.QbloxControlGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxControlGenerator</span></code></a>, it combines exactly one sequencer with the local
+oscillator connected to its output path to synthesise a single output tone, and
+additionally acquires and processes the returning signal on an input path.</p>
+<p>The inherited <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencers" title="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencers"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sequencers</span></code></a> and <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillators" title="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillators"><code class="xref py py-attr docutils literal notranslate"><span class="pre">local_oscillators</span></code></a> tuples always hold at
+most one sequencer and one local oscillator respectively; the <a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencer" title="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sequencer</span></code></a> and
+<a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillator" title="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillator"><code class="xref py py-attr docutils literal notranslate"><span class="pre">local_oscillator</span></code></a> properties give convenient singular access.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_id</strong> – Zero-based physical output the generator’s tone is routed to (e.g. <code class="docutils literal notranslate"><span class="pre">0</span></code>
+for <code class="docutils literal notranslate"><span class="pre">out0</span></code>), derived from the sequencer connection.</p></li>
+<li><p><strong>mixer_config</strong> – Mixer correction (imbalance/phase) derived from the channel.</p></li>
+<li><p><strong>pulse_shaping_config</strong> – Output pulse-shaping (FIR/exponential overshoot) config.</p></li>
+<li><p><strong>output_signal_config</strong> – Output attenuation and DC offset configuration.</p></li>
+<li><p><strong>input_id</strong> – Zero-based physical input the generator acquires from (e.g. <code class="docutils literal notranslate"><span class="pre">0</span></code> for
+<code class="docutils literal notranslate"><span class="pre">in0</span></code>), derived from the sequencer acquisition connection. The input shares its
+local oscillator with an output, so it defaults to the generator’s <code class="docutils literal notranslate"><span class="pre">output_id</span></code>.</p></li>
+<li><p><strong>input_signal_config</strong> – Input attenuation/gain and DC offset configuration.</p></li>
+<li><p><strong>scope_acquire_config</strong> – Scope acquisition configuration.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.input_id">
+<span class="sig-name descname"><span class="pre">input_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.input_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.input_signal_config">
+<span class="sig-name descname"><span class="pre">input_signal_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.InputSignalConfig" title="qat.experimental.system_data.hardware.qblox_config.InputSignalConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">InputSignalConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.input_signal_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillator">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">local_oscillator</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.LocalOscillator" title="qat.experimental.system_data.hardware.base.LocalOscillator"><span class="pre">LocalOscillator</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillator" title="Link to this definition"></a></dt>
+<dd><p>The local oscillator connected to this generator, or <code class="docutils literal notranslate"><span class="pre">None</span></code> for baseband.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillators">
+<span class="sig-name descname"><span class="pre">local_oscillators</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.LocalOscillator" title="qat.experimental.system_data.hardware.base.LocalOscillator"><code class="xref py py-class docutils literal notranslate"><span class="pre">LocalOscillator</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.local_oscillators" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.mixer_config">
+<span class="sig-name descname"><span class="pre">mixer_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.MixerConfig" title="qat.experimental.system_data.hardware.qblox_config.MixerConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">MixerConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.mixer_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.output_id">
+<span class="sig-name descname"><span class="pre">output_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.output_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.output_signal_config">
+<span class="sig-name descname"><span class="pre">output_signal_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.OutputSignalConfig" title="qat.experimental.system_data.hardware.qblox_config.OutputSignalConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">OutputSignalConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.output_signal_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.port_id">
+<span class="sig-name descname"><span class="pre">port_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.port_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.pulse_shaping_config">
+<span class="sig-name descname"><span class="pre">pulse_shaping_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.PulseShapingConfig" title="qat.experimental.system_data.hardware.qblox_config.PulseShapingConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseShapingConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.pulse_shaping_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sample_time">
+<span class="sig-name descname"><span class="pre">sample_time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sample_time" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.scope_acquire_config">
+<span class="sig-name descname"><span class="pre">scope_acquire_config</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html#qat.experimental.system_data.hardware.qblox_config.ScopeAcquireConfig" title="qat.experimental.system_data.hardware.qblox_config.ScopeAcquireConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScopeAcquireConfig</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.scope_acquire_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sequencer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><span class="pre">Sequencer</span></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencer" title="Link to this definition"></a></dt>
+<dd><p>The single sequencer driving this generator.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencers">
+<span class="sig-name descname"><span class="pre">sequencers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="qat.experimental.system_data.hardware.base.html#qat.experimental.system_data.hardware.base.Sequencer" title="qat.experimental.system_data.hardware.base.Sequencer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequencer</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxReadoutGenerator.sequencers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="qat.experimental.system_data.hardware.base.html" class="btn btn-neutral float-left" title="qat.experimental.system_data.hardware.base module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.experimental.system_data.hardware.qblox_config.html" class="btn btn-neutral float-right" title="qat.experimental.system_data.hardware.qblox_config module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Oxford Quantum Circuits Ltd.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    <span class="fa fa-book"> Other Versions</span>
+    v: main
+    <span class="fa fa-caret-down"></span>
+  </span>
+  <div class="rst-other-versions">
+    <dl>
+      <dt>Tags</dt>
+      <dd><a href="../1.0.0/index.html">1.0.0</a></dd>
+      <dd><a href="../1.1.0/index.html">1.1.0</a></dd>
+      <dd><a href="../1.1.1/index.html">1.1.1</a></dd>
+      <dd><a href="../1.2.0/index.html">1.2.0</a></dd>
+      <dd><a href="../2.0.0/index.html">2.0.0</a></dd>
+      <dd><a href="../2.0.1/index.html">2.0.1</a></dd>
+      <dd><a href="../2.0.2/index.html">2.0.2</a></dd>
+      <dd><a href="../2.0.3/index.html">2.0.3</a></dd>
+      <dd><a href="../2.1.0/index.html">2.1.0</a></dd>
+      <dd><a href="../2.2.0/index.html">2.2.0</a></dd>
+      <dd><a href="../2.2.1/index.html">2.2.1</a></dd>
+      <dd><a href="../2.3.0/index.html">2.3.0</a></dd>
+      <dd><a href="../2.4.0/index.html">2.4.0</a></dd>
+      <dd><a href="../2.4.1/index.html">2.4.1</a></dd>
+      <dd><a href="../2.4.2/index.html">2.4.2</a></dd>
+      <dd><a href="../2.5.0/index.html">2.5.0</a></dd>
+      <dd><a href="../2.5.1/index.html">2.5.1</a></dd>
+      <dd><a href="../2.6.0/index.html">2.6.0</a></dd>
+      <dd><a href="../2.7.0/index.html">2.7.0</a></dd>
+      <dd><a href="../3.0.0/index.html">3.0.0</a></dd>
+    </dl>
+    <dl>
+      <dt>Branches</dt>
+      <dd><a href="qat.experimental.system_data.hardware.qblox.html">main</a></dd>
+    </dl>
+  </div>
+</div><script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
