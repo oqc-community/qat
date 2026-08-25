@@ -10,8 +10,15 @@ from math import ceil
 import numpy as np
 from xdsl.context import Context
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import ArrayAttr, IndexType, IntegerAttr, IntegerType, ModuleOp
-from xdsl.ir import Operation, SSAValue
+from xdsl.dialects.builtin import (
+    ArrayAttr,
+    IndexType,
+    IntegerAttr,
+    IntegerType,
+    ModuleOp,
+    UnrealizedConversionCastOp,
+)
+from xdsl.ir import Operation
 from xdsl.irdl import IRDLOperation
 from xdsl.passes import ModulePass
 from xdsl.pattern_rewriter import (
@@ -24,8 +31,8 @@ from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
+from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.dialect.pulse.ir import (
-    AcquireOp,
     AmplitudeAttr,
     ConstantOp,
     CreateFrameOp,
@@ -43,6 +50,8 @@ from qat.experimental.dialect.pulse.ir.ops import extract_constant_scalar
 from qat.experimental.dialect.pulse.units import TIME_UNIT_EXPONENTS, TimeUnits
 from qat.experimental.dialect.pulse.utils import require_constant_operand
 from qat.experimental.dialect.q1 import (
+    AcquireWeightedImmRsRsRsImmOp,
+    IntRegisterType,
     MoveImmRdOp,
     PlayImmImmImmOp,
     SetAwgOffsImmImmOp,
@@ -51,12 +60,8 @@ from qat.experimental.dialect.q1 import (
     WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, ProvenanceInfoAttr
-from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, SU32Imm, UI5Imm, UI24Imm
-from qat.experimental.dialect.q1.ir.ops import (
-    AcquireImmImmImmOp,
-    AcquireWeightedImmImmImmImmImmOp,
-)
-from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
+from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, SU32Imm, UI5Imm
+from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp
 from qat.experimental.dialect.q1_sequence import SequenceOp, find_enclosing_sequence
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_acquisition,
@@ -241,7 +246,7 @@ class RewriteWaitOp(RewritePattern):
 class RewritePhaseSetOp(RewritePattern):
     """Match ``pulse.phase_set`` and delegate stage policy to ``rewrite_callable``.
 
-    The same matcher is used in legalisatiKon and lowering. The callable decides whether the
+    The same matcher is used in legalisation and lowering. The callable decides whether the
     rewrite remains in Pulse or emits Q1 instructions.
     """
 
@@ -449,68 +454,109 @@ class RewriteStopContinuousWaveformOp(RewritePattern):
         rewriter.replace_op(op, [q1_stop], new_results=[op.frame])
 
 
-class RewriteAcquireOp(RewritePattern):
-    """Lower :class:`AcquireOp` to a Q1 acquire instruction.
+class RewritePreQ1AcquireOp(RewritePattern):
+    """Lower :class:`PreQ1AcquireOp` to a Q1 acquire instruction.
 
-    Emits :class:`AcquireImmImmImmOp` when no weights are specified, or
-    :class:`AcquireWeightedImmImmImmImmImmOp` when a :class:`WeightsAttr` is present.
-    Acquisitions and weights are registered on the enclosing :class:`SequenceOp` and
-    assigned hardware indices in encounter order.
+    * :class:`AcquireImmRsImmOp` when no integration weights are present.
+    * :class:`AcquireWeightedImmRsRsRsImmOp` when a :class:`WeightsAttr` is present.
+
+    The acquisition, and any integration weights, are registered on the enclosing
+    :class:`SequenceOp` and assigned hardware indices in encounter order. Q1 requires the
+    bin and weight indices to be supplied in registers, so index values are materialised as
+    ``builtin.unrealized_conversion_cast`` results typed as unallocated integer registers;
+    a later register-allocation pass assigns concrete Q1 GPRs.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
         self.target_data = target_data
 
     @op_type_rewrite_pattern
-    def match_and_rewrite(self, op: AcquireOp, rewriter: PatternRewriter) -> None:
+    def match_and_rewrite(self, op: PreQ1AcquireOp, rewriter: PatternRewriter) -> None:
+        """Lower a single ``pre_q1_pulse.acquire`` op to Q1 acquire instructions.
+
+        :param op: The ``pre_q1_pulse.acquire`` op to lower.
+        :param rewriter: The pattern rewriter used to mutate the IR.
+        :raises NotImplementedError: If the acquisition result is consumed downstream;
+            lowering of ``pulse.acquire`` result consumers is not yet supported.
+        """
+        # TODO: Support lowering of pulse.acquire acquisition_result consumers
+        # (e.g. pulse.integrate). Once supported, replace the guard below with proper
+        # lowering logic. Post COMPILER-1369 work.
+        if op.acquisition_result.uses:
+            raise NotImplementedError(
+                "pre_q1_pulse.acquire acquisition_result consumers are not yet supported"
+            )
+        debug_info = _make_debug_info(op)
+
+        # Ops that replace ``op``, emitted in order: index casts first, then the acquire.
+        new_ops: list[Operation] = []
         sequencer = find_enclosing_sequence(op)
+
+        current_no_acquires = len(sequencer.acquisitions)
+
         acq_name = (
             op.label.data
             if op.label is not None
-            else op.frame.type.port.data.replace("/", "_")
+            else op.frame.type.port.data.replace("/", "_") + f"_{current_no_acquires}"
         )
-        num_bins, bin_idx = self._get_bin_info(sequencer)
-        if isinstance(bin_idx, SSAValue):
-            raise NotImplementedError(
-                "Dynamic bin indices are not supported for pulse.acquire"
-            )
-        duration_ns = self._get_ns_duration(op)
+
+        num_bins = op.number_runs.data
         acq_idx = self._register_acquisition(sequencer, acq_name, num_bins)
+
+        # The store index is an ``index``-typed SSA value computed upstream. Q1 acquires
+        # take the bin in a register, so cast it to an unallocated integer register and let
+        # register allocation assign a concrete GPR later.
+        cast_start_idx_op = UnrealizedConversionCastOp.get(
+            [op.store_idx],
+            [IntRegisterType.unallocated()],
+        )
+        new_ops.append(cast_start_idx_op)
+        start_idx = cast_start_idx_op.results[0]
+
+        duration_ns = self._get_ns_duration(op)
         # TODO(COMPILER-1349): Write ``duration_ns`` as the integration length into the
         # ``SequencerDataAttr`` on the enclosing ``SequenceOp`` once that attribute is
         # defined (pending the physical Qblox system data PR).
-        debug_info = _make_debug_info(op)
         if isinstance(weights_attr := op.weights, WeightsAttr):
             weights_data = weights_attr.weights.data
             weight_index_i = self._register_weight(sequencer, weights_data.real)
             weight_index_q = self._register_weight(sequencer, weights_data.imag)
-            new_acquire_op = AcquireWeightedImmImmImmImmImmOp(
+
+            # QBloxs forces use of resister which seems wasteful.
+            # Change static indexs to register values
+            casted_weight_ops = []
+            for weight_index in [weight_index_i, weight_index_q]:
+                const_weight_index = ArithConstantOp.from_int_and_width(
+                    weight_index, IndexType()
+                )
+                cast_const_weight_index_op = UnrealizedConversionCastOp.get(
+                    [const_weight_index.result],
+                    [IntRegisterType.unallocated()],
+                )
+                new_ops.extend([const_weight_index, cast_const_weight_index_op])
+                casted_weight_ops.append(cast_const_weight_index_op)
+
+            new_acquire_op = AcquireWeightedImmRsRsRsImmOp(
                 UI5Imm(acq_idx),
-                UI24Imm(bin_idx),
-                UI5Imm(weight_index_i),
-                UI5Imm(weight_index_q),
+                start_idx,
+                casted_weight_ops[0].results[0],
+                casted_weight_ops[1].results[0],
                 DurationImm(duration_ns),
             ).with_debug_info(debug_info)
         else:
-            assert weights_attr is None
-            new_acquire_op = AcquireImmImmImmOp(
-                UI5Imm(acq_idx), UI24Imm(bin_idx), DurationImm(duration_ns)
+            new_acquire_op = AcquireImmRsImmOp(
+                UI5Imm(acq_idx), start_idx, DurationImm(duration_ns)
             ).with_debug_info(debug_info)
-
-        # TODO: Support lowering of pulse.acquire acquisition_result
-        # consumers (e.g. pulse.integrate). Once supported, replace the check below
-        # with proper lowering logic. Post COMPILER-1369 work.
-        if op.acquisition_result.uses:
-            raise NotImplementedError(
-                "pulse.acquire acquisition_result consumers are not yet supported"
-            )
-        rewriter.replace_op(op, new_acquire_op, new_results=[op.frame, None])
+        new_ops.append(new_acquire_op)
+        rewriter.replace_op(op, new_ops, new_results=[op.frame, None])
         return
 
-    def _get_ns_duration(self, op: AcquireOp) -> int:
+    def _get_ns_duration(self, op: PreQ1AcquireOp) -> int:
         """Get the duration of the acquisition in nanoseconds.
 
-        :param op: The ``pulse.acquire`` operation to extract from.
+        TODO: Change this to ps as apart of COMPILER-1388.
+
+        :param op: The ``pre_q1_pulse.acquire`` operation to extract from.
         :returns: Duration in nanoseconds as an integer.
         :raises PassFailedException: If the duration operand is not a constant or its
             attribute is not a ``TimeAttr``.
@@ -523,19 +569,6 @@ class RewriteAcquireOp(RewritePattern):
             TIME_UNIT_EXPONENTS[unit] - TIME_UNIT_EXPONENTS[TimeUnits.NANOSECOND]
         )
         return round(ns)
-
-    def _get_bin_info(self, sequence_op: SequenceOp) -> tuple[int, int | SSAValue]:
-        """Get the number of bins and the next available bin index for the given sequencer.
-
-        :returns: Tuple of (num_bins, next_bin_index).
-        """
-        # TODO(COMPILER-1387): Replace hard-coded num_bins / bin_idx with values derived
-        # from a dedicated acquisition-binding analysis pass that counts shots per AcquireOp
-        # and allocates a per-acquire bin-counter register for the repeat loop
-        # (analogous to BindingPass / _legalise_bound in the legacy stack).
-        num_bins = sequence_op.properties.get("num_runs", 1)
-        bin_idx = sequence_op.properties.get("next_bin_index", 0)
-        return num_bins, bin_idx
 
     def _register_weight(self, sequence_op: SequenceOp, weights_data: np.ndarray) -> int:
         """Register a new weight in the target data and return its index.
@@ -609,9 +642,10 @@ def create_pulse_to_q1_lowering_patterns(
 ) -> tuple[RewritePattern, ...]:
     """Create the rewrite set used by the lowering stage.
 
-    Phase entries are configured with ``PhaseLowering``. ``RewriteAcquireOp`` fully
-    lowers ``pulse.acquire`` to Q1 acquire instructions. All other entries are scaffold
-    patterns that preserve IR shape pending their dedicated lowering implementations.
+    Phase entries are configured with ``PhaseLowering``. ``RewritePreQ1AcquireOp`` fully
+    lowers ``pre_q1_pulse.acquire`` to Q1 acquire instructions. All other entries are
+    scaffold patterns that preserve IR shape pending their dedicated lowering
+    implementations.
 
     :param target_data: QBlox target description. When omitted, the repository
         default is used.
@@ -629,5 +663,5 @@ def create_pulse_to_q1_lowering_patterns(
         RewritePulseOp(resolved_target_data),
         RewriteStartContinuousWaveformOp(resolved_target_data),
         RewriteStopContinuousWaveformOp(resolved_target_data),
-        RewriteAcquireOp(resolved_target_data),
+        RewritePreQ1AcquireOp(resolved_target_data),
     )

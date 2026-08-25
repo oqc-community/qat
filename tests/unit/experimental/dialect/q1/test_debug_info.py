@@ -10,7 +10,8 @@ Covers:
 
 import numpy as np
 from xdsl.context import Context
-from xdsl.dialects.builtin import ModuleOp, StringAttr
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import IndexType, ModuleOp, StringAttr
 from xdsl.ir import Operation
 
 from qat.backend.qblox.target_data import TARGET_DATA
@@ -18,8 +19,8 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
     PulseToQ1LoweringPass,
     Q1PulseLegalisationPass,
 )
+from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.dialect.pulse.ir import (
-    AcquireOp,
     AmplitudeAttr,
     AmplitudeType,
     ConstantOp,
@@ -37,7 +38,7 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
-    AcquireImmImmImmOp,
+    AcquireImmRsImmOp,
     EmissionContext,
     PlayImmImmImmOp,
     ProvenanceInfoAttr,
@@ -139,13 +140,14 @@ class TestDebugInfoAutoAttach:
     def test_acquire_op(self):
         freq, frame = _frame("q0/measure")
         duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
-        acquire = AcquireOp(frame, duration, weights=None)
+        const_op = ArithConstantOp.from_int_and_width(1, IndexType())
+        acquire = PreQ1AcquireOp(frame, duration, const_op, 1)
         module = _sequence_module(freq, frame, duration, acquire, channel_id="q0_measure")
         _run_q1_pipeline(module)
         [acq_op] = [
-            op for op in _sequence_body_ops(module) if isinstance(op, AcquireImmImmImmOp)
+            op for op in _sequence_body_ops(module) if isinstance(op, AcquireImmRsImmOp)
         ]
-        self._assert_provenance(acq_op, "pulse.acquire", "q0_measure")
+        self._assert_provenance(acq_op, acquire.name, "q0_measure")
 
     def test_start_continuous_waveform_op(self):
         amp = ConstantOp(AmplitudeAttr(0.5 + 0.25j), AmplitudeType())

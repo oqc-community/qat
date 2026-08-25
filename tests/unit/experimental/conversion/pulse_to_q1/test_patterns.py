@@ -19,7 +19,7 @@ from xdsl.dialects.builtin import (
     i1,
     i64,
 )
-from xdsl.ir import Operation
+from xdsl.ir import Operation, SSAValue
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
 from xdsl.pattern_rewriter import PatternRewriteWalker
 from xdsl.utils.exceptions import PassFailedException, VerifyException
@@ -29,12 +29,13 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
     PulseToQ1LoweringPass,
     Q1PulseLegalisationPass,
 )
+from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     LowerArithIntegerConstantToMoveOp,
-    RewriteAcquireOp,
     RewriteCreateFrameOp,
     RewritePhaseSetOp,
     RewritePhaseShiftOp,
+    RewritePreQ1AcquireOp,
     RewritePulseOp,
     RewriteStartContinuousWaveformOp,
     RewriteStopContinuousWaveformOp,
@@ -45,7 +46,6 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     create_pulse_to_q1_lowering_patterns,
 )
 from qat.experimental.dialect.pulse.ir import (
-    AcquireOp,
     AddOp,
     AmplitudeAttr,
     AmplitudeType,
@@ -70,8 +70,7 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
-    AcquireImmImmImmOp,
-    AcquireWeightedImmImmImmImmImmOp,
+    AcquireWeightedImmRsRsRsImmOp,
     AddRsImmRdOp,
     CmpRsImmOp,
     JaeImmOp,
@@ -90,7 +89,7 @@ from qat.experimental.dialect.q1 import (
     SubRsImmRdOp,
     WaitImmOp,
 )
-from qat.experimental.dialect.q1.ir.ops import UpdParamImmOp
+from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp, UpdParamImmOp
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import make_dense_floats
@@ -143,7 +142,7 @@ def test_lowering_pattern_factory_returns_ten_patterns():
     assert isinstance(patterns[6], RewritePulseOp)
     assert isinstance(patterns[7], RewriteStartContinuousWaveformOp)
     assert isinstance(patterns[8], RewriteStopContinuousWaveformOp)
-    assert isinstance(patterns[9], RewriteAcquireOp)
+    assert isinstance(patterns[9], RewritePreQ1AcquireOp)
 
 
 def test_legalisation_pattern_factory_returns_two_patterns():
@@ -441,25 +440,47 @@ def test_rewrite_phase_shift_op_lowers_dynamic_radian_phase():
     assert any(isinstance(op, UpdParamImmOp) for op in body_ops)
 
 
-class TestRewriteAcquireOp:
-    """Tests for ``RewriteAcquireOp``: lowering ``pulse.acquire`` to the appropriate Q1
-    acquire-family op (``AcquireImmImmImmOp`` for square-weight acquisitions,
-    ``AcquireWeightedImmImmImmImmImmOp`` for custom-weight acquisitions).
+def _traced_register_int(value: SSAValue) -> int:
+    """Resolve a Q1 register operand back to the integer it was materialised from.
 
-    Each test verifies the emitted op type, immediate field values (acq_idx, bin_idx,
-    weight indices, duration), and the resulting acquisitions/weights table entries on
-    the enclosing ``SequenceOp``.
+    Bin and weight indices are supplied to Q1 acquires in registers, materialised as an
+    ``unrealized_conversion_cast`` of an integer source. Depending on whether the source
+    constant was lowered by ``LowerArithIntegerConstantToMoveOp``, that source is either a
+    ``q1.ir.move`` immediate or the original ``arith.constant``; this unwraps either chain
+    and returns the underlying integer.
+    """
+    cast_op = value.owner
+    assert isinstance(cast_op, UnrealizedConversionCastOp)
+    source_op = cast_op.operands[0].owner
+    if isinstance(source_op, MoveImmRdOp):
+        return source_op.imm.data
+    assert isinstance(source_op, ArithConstantOp)
+    return source_op.value.value.data
+
+
+class TestRewritePreQ1AcquireOp:
+    """Tests for ``RewritePreQ1AcquireOp``: lowering ``pre_q1_pulse.acquire`` to the
+    appropriate Q1 acquire-family op (``AcquireImmRsImmOp`` for square-weight acquisitions,
+    ``AcquireWeightedImmRsRsRsImmOp`` for custom-weight acquisitions).
+
+    Q1 supplies bin and weight indices in registers, so the lowered ops carry those indices
+    as register operands materialised from ``unrealized_conversion_cast`` of an
+    ``arith.constant``; ``_traced_register_int`` unwraps them for assertions. Each test
+    verifies the emitted op type, immediate/register field values (acq_idx, bin_idx, weight
+    indices, duration), and the resulting acquisitions/weights table entries on the
+    enclosing ``SequenceOp``.
     """
 
     @staticmethod
     def _run(
         *acquire_params: tuple[WeightsAttr | None, int, str],
+        override_label=None,
     ) -> tuple[SequenceOp, list]:
-        """Build a module from ``acquire_params``, apply ``PulseToQ1LoweringPass``, and
-        return the lowered ``SequenceOp`` together with all Q1 acquire ops found in its
-        body.
+        """Build a module of ``pre_q1_pulse.acquire`` ops from ``acquire_params``, apply
+        ``PulseToQ1LoweringPass``, and return the lowered ``SequenceOp`` together with all
+        Q1 acquire ops found in its body.
 
-        :param acquire_params: One entry per ``AcquireOp`` to emit, each a triple of
+        :param acquire_params: One entry per ``PreQ1AcquireOp`` to emit, each a triple of
             ``(weights, duration_ns, channel_id)`` where ``duration_ns`` is an integer
             number of nanoseconds, reflecting the IR state after the duration
             unit-normalisation pass.
@@ -467,58 +488,65 @@ class TestRewriteAcquireOp:
             the original program order.
         """
         ops = []
-        channel_id = None
         for weights, duration_ns, channel_id in acquire_params:
             freq, frame = _frame(channel_id)
             duration = ConstantOp(TimeAttr(duration_ns, TimeUnits.NANOSECOND))
-            acquire = AcquireOp(frame, duration, weights=weights)
-            ops.extend([freq, frame, duration, acquire])
+            store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+            acquire = PreQ1AcquireOp(
+                frame=frame,
+                duration=duration,
+                store_idx=store_idx,
+                number_runs=1,
+                weights=weights,
+                label=override_label,
+            )
+            ops.extend([freq, frame, duration, store_idx, acquire])
         module = _sequence_module(*ops, channel_id="seq_0")
         PulseToQ1LoweringPass().apply(Context(), module)
         [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         q1_acq_ops = [
             op
             for op in seq.body.block.ops
-            if isinstance(op, AcquireImmImmImmOp | AcquireWeightedImmImmImmImmImmOp)
+            if isinstance(op, AcquireImmRsImmOp | AcquireWeightedImmRsRsRsImmOp)
         ]
         return seq, q1_acq_ops
 
     def test_single_unweighted(self):
-        """Single unweighted acquire lowers to AcquireImmImmImmOp with correct acq_idx,
+        """Single unweighted acquire lowers to AcquireImmRsImmOp with correct acq_idx,
         bin_idx and duration, and registers one acquisition table entry."""
         seq, acq_ops = self._run((None, 1000, "q0/measure"))
 
-        assert len([op for op in seq.body.block.ops if isinstance(op, AcquireOp)]) == 0
+        assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
         [op] = acq_ops
-        assert isinstance(op, AcquireImmImmImmOp)
+        assert isinstance(op, AcquireImmRsImmOp)
         assert op.acq_idx.data == 0
-        assert op.bin_idx.data == 0
+        assert _traced_register_int(op.bin_idx) == 0
         assert op.duration.data == 1000  # 1e-6 s → 1000 ns
 
         [entry] = seq.acquisitions
-        assert entry.acquisition_name.data == "q0_measure"
+        assert entry.acquisition_name.data == "q0_measure_0"
         assert entry.index.data == 0
         assert entry.num_bins.data == 1
 
     def test_single_weighted(self):
-        """Single weighted acquire lowers to AcquireWeightedImmImmImmImmImmOp with correct
+        """Single weighted acquire lowers to AcquireWeightedImmRsRsRsImmOp with correct
         acq_idx, bin_idx, weight_idx0/1 and duration, and registers one acquisition and two
         weight table entries."""
         seq, acq_ops = self._run(
             (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000, "q0/measure")
         )
 
-        assert len([op for op in seq.body.block.ops if isinstance(op, AcquireOp)]) == 0
+        assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
         [op] = acq_ops
-        assert isinstance(op, AcquireWeightedImmImmImmImmImmOp)
+        assert isinstance(op, AcquireWeightedImmRsRsRsImmOp)
         assert op.acq_idx.data == 0
-        assert op.bin_idx.data == 0
-        assert op.weight_idx0.data == 0
-        assert op.weight_idx1.data == 1
+        assert _traced_register_int(op.bin_idx) == 0
+        assert _traced_register_int(op.weight_idx0) == 0
+        assert _traced_register_int(op.weight_idx1) == 1
         assert op.duration.data == 1000  # 1e-6 s → 1000 ns
 
         [acq_entry] = seq.acquisitions
-        assert acq_entry.acquisition_name.data == "q0_measure"
+        assert acq_entry.acquisition_name.data == "q0_measure_0"
         assert acq_entry.index.data == 0
         assert acq_entry.num_bins.data == 1
 
@@ -529,55 +557,55 @@ class TestRewriteAcquireOp:
         assert [w.index.data for w in seq.weights] == [0, 1]
 
     def test_two_unweighted_different_frames(self):
-        """Two unweighted acquires on different frames lower to AcquireImmImmImmOp with
+        """Two unweighted acquires on different frames lower to AcquireImmRsImmOp with
         distinct acq_idx and duration values and two acquisition table entries."""
         seq, acq_ops = self._run(
             (None, 1000, "q0/measure"),
             (None, 2000, "q1/measure"),
         )
 
-        assert len([op for op in seq.body.block.ops if isinstance(op, AcquireOp)]) == 0
+        assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
         assert len(acq_ops) == 2
-        assert all(isinstance(op, AcquireImmImmImmOp) for op in acq_ops)
+        assert all(isinstance(op, AcquireImmRsImmOp) for op in acq_ops)
         assert acq_ops[0].acq_idx.data == 0
-        assert acq_ops[0].bin_idx.data == 0
+        assert _traced_register_int(acq_ops[0].bin_idx) == 0
         assert acq_ops[0].duration.data == 1000
         assert acq_ops[1].acq_idx.data == 1
-        assert acq_ops[1].bin_idx.data == 0
+        assert _traced_register_int(acq_ops[1].bin_idx) == 0
         assert acq_ops[1].duration.data == 2000
 
         assert [a.acquisition_name.data for a in seq.acquisitions] == [
-            "q0_measure",
-            "q1_measure",
+            "q0_measure_0",
+            "q1_measure_1",
         ]
         assert [a.index.data for a in seq.acquisitions] == [0, 1]
 
     def test_two_weighted_different_frames(self):
         """Two weighted acquires on different frames lower to
-        AcquireWeightedImmImmImmImmImmOp with consecutive acq_idx and weight_idx values,
+        AcquireWeightedImmRsRsRsImmOp with consecutive acq_idx and weight_idx values,
         correct durations, and four weight table entries."""
         seq, acq_ops = self._run(
             (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000, "q0/measure"),
             (WeightsAttr(np.array([1.0 + 0.0j, 0.0 + 1.0j])), 800, "q1/measure"),
         )
 
-        assert len([op for op in seq.body.block.ops if isinstance(op, AcquireOp)]) == 0
+        assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
         assert len(acq_ops) == 2
-        assert all(isinstance(op, AcquireWeightedImmImmImmImmImmOp) for op in acq_ops)
+        assert all(isinstance(op, AcquireWeightedImmRsRsRsImmOp) for op in acq_ops)
         assert acq_ops[0].acq_idx.data == 0
-        assert acq_ops[0].bin_idx.data == 0
-        assert acq_ops[0].weight_idx0.data == 0
-        assert acq_ops[0].weight_idx1.data == 1
+        assert _traced_register_int(acq_ops[0].bin_idx) == 0
+        assert _traced_register_int(acq_ops[0].weight_idx0) == 0
+        assert _traced_register_int(acq_ops[0].weight_idx1) == 1
         assert acq_ops[0].duration.data == 1000
         assert acq_ops[1].acq_idx.data == 1
-        assert acq_ops[1].bin_idx.data == 0
-        assert acq_ops[1].weight_idx0.data == 2
-        assert acq_ops[1].weight_idx1.data == 3
+        assert _traced_register_int(acq_ops[1].bin_idx) == 0
+        assert _traced_register_int(acq_ops[1].weight_idx0) == 2
+        assert _traced_register_int(acq_ops[1].weight_idx1) == 3
         assert acq_ops[1].duration.data == 800
 
         assert [a.acquisition_name.data for a in seq.acquisitions] == [
-            "q0_measure",
-            "q1_measure",
+            "q0_measure_0",
+            "q1_measure_1",
         ]
         assert [w.weight_name.data for w in seq.weights] == [
             "53874763",
@@ -586,6 +614,44 @@ class TestRewriteAcquireOp:
             "29743b86",
         ]
         assert [w.index.data for w in seq.weights] == [0, 1, 2, 3]
+
+    def test_two_unweighted_same_frames(self):
+        ops = []
+        freq, frame = _frame()
+        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+        ops.extend([freq, frame, duration, store_idx])
+
+        for _ in range(2):
+            acquire = PreQ1AcquireOp(
+                frame=frame,
+                duration=duration,
+                store_idx=store_idx,
+                number_runs=1000,
+            )
+            ops.append(acquire)
+
+        module = _sequence_module(*ops, channel_id="seq_0")
+        PulseToQ1LoweringPass().apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        acq_ops = [
+            op
+            for op in seq.body.block.ops
+            if isinstance(op, AcquireImmRsImmOp | AcquireWeightedImmRsRsRsImmOp)
+        ]
+
+        assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
+        assert len(acq_ops) == 2
+
+        assert acq_ops[0].acq_idx.data == 0
+        assert acq_ops[1].acq_idx.data == 1
+
+        assert [a.acquisition_name.data for a in seq.acquisitions] == [
+            "q0_drive_0",
+            "q0_drive_1",
+        ]
+        assert [a.index.data for a in seq.acquisitions] == [0, 1]
 
     @pytest.mark.parametrize(
         "time_attr, expected_ns",
@@ -601,26 +667,42 @@ class TestRewriteAcquireOp:
         nanoseconds in the emitted Q1 acquire op."""
         freq, frame = _frame("q0/measure")
         duration = ConstantOp(time_attr)
-        acquire = AcquireOp(frame, duration, weights=None)
-        module = _sequence_module(freq, frame, duration, acquire, channel_id="q0/measure")
+        store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+        acquire = PreQ1AcquireOp(
+            frame=frame,
+            duration=duration,
+            store_idx=store_idx,
+            number_runs=1,
+            weights=None,
+        )
+        module = _sequence_module(
+            freq, frame, duration, store_idx, acquire, channel_id="q0/measure"
+        )
 
         PulseToQ1LoweringPass().apply(Context(), module)
 
         [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
-        [op] = [op for op in seq.body.block.ops if isinstance(op, AcquireImmImmImmOp)]
+        [op] = [op for op in seq.body.block.ops if isinstance(op, AcquireImmRsImmOp)]
         assert op.duration.data == expected_ns
 
     def test_acquisition_result_consumer_raises(self):
-        """If anything consumes the acquisition_result SSA value of a pulse.acquire op,
-        lowering raises NotImplementedError because that path is not yet implemented."""
+        """If anything consumes the acquisition_result SSA value of a pre_q1_pulse.acquire
+        op, lowering raises NotImplementedError because that path is not yet implemented."""
         freq, frame = _frame("q0/measure")
         duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
-        acquire = AcquireOp(frame, duration, weights=None)
+        store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+        acquire = PreQ1AcquireOp(
+            frame=frame,
+            duration=duration,
+            store_idx=store_idx,
+            number_runs=1,
+            weights=None,
+        )
         # Attach a use to the acquisition_result via pulse.integrate — any use
         # is sufficient to trigger the guard.
         integrate = IntegrateOp(acquire.acquisition_result)
         module = _sequence_module(
-            freq, frame, duration, acquire, integrate, channel_id="q0/measure"
+            freq, frame, duration, store_idx, acquire, integrate, channel_id="q0/measure"
         )
 
         with pytest.raises(NotImplementedError, match="acquisition_result consumers"):
@@ -633,12 +715,13 @@ class TestRewriteAcquireOp:
             self._run(
                 (None, 1000, "q0/measure"),
                 (None, 1000, "q0/measure"),
+                override_label="q0_acquire",
             )
 
     def test_acq_table_overflow_raises(self):
         """Registering a 33rd distinct acquisition on the same sequencer exceeds the
         hardware table limit of 32 entries (acq_idx 0–31) and raises VerifyException."""
-        pattern = RewriteAcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
         seq = SequenceOp("test", [StopOp()])
         for i in range(32):
             pattern._register_acquisition(seq, f"acq_{i}", num_bins=1)
@@ -648,7 +731,7 @@ class TestRewriteAcquireOp:
     def test_weight_table_overflow_raises(self):
         """Registering a 33rd weight on the same sequencer exceeds the hardware table limit
         of 32 entries (indices 0–31) and raises VerifyException."""
-        pattern = RewriteAcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
         seq = SequenceOp("test", [StopOp()])
         for i in range(32):
             pattern._register_weight(seq, np.full(4, i / 33))
@@ -658,7 +741,7 @@ class TestRewriteAcquireOp:
     def test_duplicate_weight_payload_returns_existing_index(self):
         """Registering the same weight payload twice returns the existing index without
         adding a duplicate entry to the weight table."""
-        pattern = RewriteAcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
         seq = SequenceOp("test", [StopOp()])
         coeffs = np.ones(4)
         first_index = pattern._register_weight(seq, coeffs)
@@ -666,31 +749,23 @@ class TestRewriteAcquireOp:
         assert second_index == first_index
         assert len(seq.weights) == 1
 
-    def test_dynamic_bin_idx_raises(self, mocker):
-        """If _get_bin_info returns an SSAValue as bin_idx, NotImplementedError is raised
-        because register-based bin indexing is not yet wired up in the lowering pass."""
-        freq, frame = _frame("q0/measure")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
-        acquire = AcquireOp(frame, duration, weights=None)
-        module = _sequence_module(freq, frame, duration, acquire, channel_id="q0/measure")
-
-        # Use the duration op result as a stand-in for a future bin-counter register.
-        mocker.patch.object(
-            RewriteAcquireOp,
-            "_get_bin_info",
-            return_value=(8192, duration.results[0]),
-        )
-
-        with pytest.raises(NotImplementedError, match="Dynamic bin indices"):
-            PulseToQ1LoweringPass().apply(Context(), module)
-
     def test_label_used_as_acquisition_name(self):
-        """When a label is provided on pulse.acquire, it should be used as the acquisition
-        name in the table rather than the frame channel_id."""
+        """When a label is provided on pre_q1_pulse.acquire, it should be used as the
+        acquisition name in the table rather than the frame channel_id."""
         freq, frame = _frame("q0/measure")
         duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
-        acquire = AcquireOp(frame, duration, weights=None, label="my_readout")
-        module = _sequence_module(freq, frame, duration, acquire, channel_id="q0/measure")
+        store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+        acquire = PreQ1AcquireOp(
+            frame=frame,
+            duration=duration,
+            store_idx=store_idx,
+            number_runs=1,
+            weights=None,
+            label="my_readout",
+        )
+        module = _sequence_module(
+            freq, frame, duration, store_idx, acquire, channel_id="q0/measure"
+        )
 
         PulseToQ1LoweringPass().apply(Context(), module)
 
@@ -699,17 +774,24 @@ class TestRewriteAcquireOp:
         assert entry.acquisition_name.data == "my_readout"
 
     def test_acquire_outside_sequence_op_raises(self):
-        """pulse.acquire with no SequenceOp ancestor raises ValueError.
+        """pre_q1_pulse.acquire with no SequenceOp ancestor raises ValueError.
 
         The PatternRewriter is not touched before the error fires, so None is passed as a
         stand-in.
         """
         freq, frame = _frame("q0/measure")
         duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
-        acquire = AcquireOp(frame, duration, weights=None)
+        store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+        acquire = PreQ1AcquireOp(
+            frame=frame,
+            duration=duration,
+            store_idx=store_idx,
+            number_runs=1,
+            weights=None,
+        )
         # acquire is a standalone op with no SequenceOp ancestor
 
-        pattern = RewriteAcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
         with pytest.raises(ValueError, match="No SequenceOp found in the parent chain"):
             pattern.match_and_rewrite(acquire, None)
 
