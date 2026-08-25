@@ -1158,8 +1158,8 @@ class TestLowerArithIntegerConstantToMoveOp:
     def test_out_of_range_integer_raises(self):
         """A value outside the 32-bit SU32Imm range raises ``PassFailedException``.
 
-        A 64-bit loop bound that does not fit in the Q1 move-immediate field cannot
-        be lowered and must be caught early.
+        A 64-bit loop bound that does not fit in the Q1 move-immediate field cannot be
+        lowered and must be caught early.
         """
         const = ArithConstantOp(IntegerAttr(2**33, i64))
         cast = UnrealizedConversionCastOp(

@@ -59,8 +59,8 @@ from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 class PulsePipelineManager:
     """Builds pulse-level IR pipelines from a hardware constraint view.
 
-    :param constraints: Hardware-derived pulse-level constraints (timing granularity,
-        per-port sample times, native waveform shapes).
+    :param constraints: Hardware-derived pulse-level constraints (timing granularity, per-
+        port sample times, native waveform shapes).
     """
 
     def __init__(self, constraints: PulseLevelConstraints) -> None:

@@ -19,9 +19,12 @@ The dialect is centered around collections of results:
   grouping them together in a single structure.
 * :class:`RecordType` represents the entire results of a single shot with dictionary-like
   semantics, allowing each piece of data to be stored by a string key.
-* :class:`ResultsCollectionType` allows us to represent a collection of results, enabling
-  dynamic addition of records, such as adding results from a single shot after each shot
-  completes.
+* :class:`ResultsCollectionType` allows us to represent a collection of results. Results are
+  stored and referenced by two identifiers; an integer index (which e.g. represents the shot)
+  and a string key (which e.g. represents the result name). Conceptually, we can think of
+  this as a dictionary of arrays, or as list of dictionaries. The actual data type is not
+  specified to be index-major or key-major. This allows us to support flexible results
+  acquisition.
 
 The types are not specific to any particular result data type, and allow us to store
 arbitrary types of data (e.g. signals, bits, integers, IQ values). Along with operations to
@@ -61,37 +64,38 @@ to map those post-processing instructions:
 
 from xdsl.ir import Dialect
 
-from .attributes import IntegerStatePredicateAttr, PostSelectPredicateAttr
+from .attributes import (
+    IntegerStatePredicateAttr,
+    PostSelectPredicateAttr,
+    RecordFieldAttr,
+    RecordSchemaAttr,
+)
 from .ops import (
-    AddRecordOp,
-    CreateRecordOp,
-    CreateResultsArrayOp,
-    CreateResultsCollectionOp,
+    CreateOp,
     ExtractOp,
     GroupEntriesOp,
     MapOp,
     PostSelectOp,
     ReduceOp,
+    StoreOp,
     YieldOp,
 )
 from .types import RecordType, ResultsArrayType, ResultsCollectionType
 
 _ops = [
-    AddRecordOp,
-    CreateRecordOp,
-    CreateResultsArrayOp,
-    CreateResultsCollectionOp,
+    CreateOp,
     ExtractOp,
     GroupEntriesOp,
     MapOp,
     PostSelectOp,
     ReduceOp,
+    StoreOp,
     YieldOp,
 ]
 
 _types = [RecordType, ResultsArrayType, ResultsCollectionType]
 
-_attributes = [IntegerStatePredicateAttr]
+_attributes = [IntegerStatePredicateAttr, RecordFieldAttr, RecordSchemaAttr]
 
 Results = Dialect("results", _ops, _types + _attributes)
 

@@ -320,8 +320,8 @@ class TestRuntimePostSelection:
     def test_mixed_methods_apply_global_and_mask(self, function_seed):
         """AND-mask holds when qubits use different post-processing methods.
 
-        q0 (3-state ML) disallows {8, 9}; q1 (2-state ML) disallows {7, 8, 9};
-        union {7, 8, 9} → 7 retained.
+        q0 (3-state ML) disallows {8, 9}; q1 (2-state ML) disallows {7, 8, 9}; union {7, 8,
+        9} → 7 retained.
         """
         shots = 10
         methods = {0: _three_state_ml_method(), 1: _two_state_ml_method_state1_disallowed()}
@@ -351,7 +351,7 @@ class TestResultsFormat:
     """Results-format semantics of the compiled instruction chain."""
 
     def test_raw_format_contains_discriminate(self):
-        """raw() with ML post-processing and post-selection disabled emits Discriminate."""
+        """Raw() with ML post-processing and post-selection disabled emits Discriminate."""
         model = _lucy_model(1, _two_state_ml_method())
         _, executable = _compile_pipeline(
             _QASM_1Q, model, _compiler_config(10, post_selection=False)
@@ -385,7 +385,7 @@ class TestResultsFormat:
         assert post_select.output_variable is not None
 
     def test_multistate_binary_compiles(self):
-        """binary() with three all-allowed states compiles without error (advisory)."""
+        """Binary() with three all-allowed states compiles without error (advisory)."""
         model = _lucy_model(1, _three_state_ml_method_all_allowed())
         _, executable = _compile_pipeline(
             _QASM_1Q,

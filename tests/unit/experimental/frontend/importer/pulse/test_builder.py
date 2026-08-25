@@ -4,7 +4,8 @@
 
 import numpy as np
 import pytest
-from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp, IndexCastOp
+from xdsl.dialects.builtin import IntAttr
 from xdsl.interpreters.scf import scf
 
 from qat.experimental.dialect.pulse.ir import (
@@ -31,9 +32,12 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.ir.ops import KernelOp
 from qat.experimental.dialect.results.ir import (
-    AddRecordOp,
-    CreateRecordOp,
-    CreateResultsCollectionOp,
+    CreateOp,
+    RecordFieldAttr,
+    RecordSchemaAttr,
+    RecordType,
+    ResultsCollectionType,
+    StoreOp,
 )
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
 
@@ -62,7 +66,8 @@ def _pulse_constant_value(ssa_value):
 
 def _assert_no_repeat_epilogue(kernel: KernelOp):
     body_ops = _kernel_body(kernel)
-    assert isinstance(body_ops[-2], CreateRecordOp)
+    assert isinstance(body_ops[-2], CreateOp)
+    assert isinstance(body_ops[-2].result.type, RecordType)
     assert isinstance(body_ops[-1], ReturnOp)
     assert list(body_ops[-1].arguments) == [body_ops[-2].result]
 
@@ -169,7 +174,11 @@ class TestPulseKernelBuilderOperations:
         assert acquire_op.weights is None
         assert acquire_op.label is not None
         assert acquire_op.label.data == "m0"
-        record_op = _ops_of_type(kernel, CreateRecordOp)[0]
+        record_op = next(
+            op
+            for op in _ops_of_type(kernel, CreateOp)
+            if isinstance(op.result.type, RecordType)
+        )
         assert list(record_op.values) == [acquire_op.acquisition_result]
         _assert_no_repeat_epilogue(kernel)
 
@@ -188,7 +197,11 @@ class TestPulseKernelBuilderOperations:
         assert list(acquire_op.weights.weights.data) == pytest.approx(weights)
         assert acquire_op.label is not None
         assert acquire_op.label.data == "m0"
-        record_op = _ops_of_type(kernel, CreateRecordOp)[0]
+        record_op = next(
+            op
+            for op in _ops_of_type(kernel, CreateOp)
+            if isinstance(op.result.type, RecordType)
+        )
         assert list(record_op.values) == [acquire_op.acquisition_result]
         _assert_no_repeat_epilogue(kernel)
 
@@ -202,10 +215,15 @@ class TestPulseKernelBuilderOperations:
             .finalize()
         )
 
-        [acquire_op] = _ops_of_type(kernel, AcquireOp)
+        acquire_ops = _ops_of_type(kernel, AcquireOp)
+        acquire_op = next(op for op in acquire_ops if op.label and op.label.data == "m0")
         [integrate_op] = _ops_of_type(kernel, IntegrateOp)
         assert integrate_op.acquisition is acquire_op.acquisition_result
-        record_op = _ops_of_type(kernel, CreateRecordOp)[0]
+        record_op = next(
+            op
+            for op in _ops_of_type(kernel, CreateOp)
+            if isinstance(op.result.type, RecordType)
+        )
         assert list(record_op.values) == [integrate_op.result]
         _assert_no_repeat_epilogue(kernel)
 
@@ -448,7 +466,8 @@ class TestPulseKernelBuilderWithRepeats:
         assert isinstance(body_ops[0], ArithConstantOp)
         assert isinstance(body_ops[1], ArithConstantOp)
         assert isinstance(body_ops[2], ArithConstantOp)
-        assert isinstance(body_ops[3], CreateResultsCollectionOp)
+        assert isinstance(body_ops[3], CreateOp)
+        assert isinstance(body_ops[3].result.type, ResultsCollectionType)
         assert isinstance(body_ops[4], scf.ForOp)
         assert isinstance(body_ops[5], ReturnOp)
 
@@ -458,12 +477,54 @@ class TestPulseKernelBuilderWithRepeats:
 
         loop = body_ops[4]
         loop_body_ops = list(loop.body.block.ops)
-        assert isinstance(loop_body_ops[-3], CreateRecordOp)
-        assert isinstance(loop_body_ops[-2], AddRecordOp)
+        assert isinstance(loop_body_ops[-4], CreateOp)
+        assert isinstance(loop_body_ops[-4].result.type, RecordType)
+        assert isinstance(loop_body_ops[-3], IndexCastOp)
+        assert isinstance(loop_body_ops[-2], StoreOp)
         assert isinstance(loop_body_ops[-1], scf.YieldOp)
-        assert loop_body_ops[-2].collection is loop.body.block.args[1]
-        assert loop_body_ops[-2].record is loop_body_ops[-3].result
+        assert loop_body_ops[-2].container is loop.body.block.args[1]
+        assert loop_body_ops[-2].value is loop_body_ops[-4].result
+        assert loop_body_ops[-2].index is loop_body_ops[-3].result
+        assert body_ops[3].result.type.schema == loop_body_ops[-4].result.type.schema
+        assert body_ops[3].result.type.size == IntAttr(4)
+        assert loop.body.block.args[1].type == body_ops[3].result.type
         assert list(body_ops[5].arguments) == [loop.results[0]]
+
+    def test_repeats_with_acquires_builds_expected_collection_schema(self):
+        """Repeat mode should materialize a concrete collection schema from acquires."""
+        kernel = (
+            PulseKernelBuilder("test", shots=3)
+            .create_frame("q0/measure", 8.8e9, "port0")
+            .acquire("q0/measure", "m0", 1e-6, integrate=False)
+            .acquire("q0/measure", "m1", 1e-6, integrate=True)
+            .finalize()
+        )
+
+        acquire_ops = _ops_of_type(kernel, AcquireOp)
+        acquire_op = next(op for op in acquire_ops if op.label and op.label.data == "m0")
+        [integrate_op] = _ops_of_type(kernel, IntegrateOp)
+
+        body_ops = _kernel_body(kernel)
+        collection_op = body_ops[3]
+        assert isinstance(collection_op, CreateOp)
+        assert isinstance(collection_op.result.type, ResultsCollectionType)
+
+        loop = body_ops[4]
+        loop_body_ops = list(loop.body.block.ops)
+        record_op = loop_body_ops[-4]
+        assert isinstance(record_op, CreateOp)
+        assert isinstance(record_op.result.type, RecordType)
+
+        expected_schema = RecordSchemaAttr(
+            [
+                RecordFieldAttr("m0", acquire_op.acquisition_result.type),
+                RecordFieldAttr("m1", integrate_op.result.type),
+            ]
+        )
+
+        assert collection_op.result.type.schema == expected_schema
+        assert collection_op.result.type.size == IntAttr(3)
+        assert record_op.result.type.schema == expected_schema
 
 
 class TestPulseKernelBuilderErrors:

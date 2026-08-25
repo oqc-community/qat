@@ -24,8 +24,7 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.ir.ops import KernelOp
 from qat.experimental.dialect.results.ir import (
-    CreateRecordOp,
-    CreateResultsArrayOp,
+    CreateOp,
     ExtractOp,
     MapOp,
     RecordType,
@@ -180,7 +179,8 @@ class PurrImporter:
             raise NotImplementedError("Sweep instructions are not yet supported.")
 
         kernel = self._build_kernel(analysis)
-        main = self._build_main(analysis)
+        kernel_collection_type = kernel.function_type.outputs.data[0]
+        main = self._build_main(analysis, kernel_collection_type)
         return ModuleOp(ops=[kernel, main])
 
     def _build_kernel(self, analysis: _PurrAnalysis) -> KernelOp:
@@ -194,15 +194,19 @@ class PurrImporter:
             self.translate(instruction, builder)
         return builder.finalize()
 
-    def _build_main(self, analysis: _PurrAnalysis) -> func.FuncOp:
+    def _build_main(
+        self,
+        analysis: _PurrAnalysis,
+        kernel_collection_type: ResultsCollectionType,
+    ) -> func.FuncOp:
         """Build the main function that calls the kernel and maps results."""
         entry_block = Block()
-        main = func.FuncOp("main", ((), (ResultsCollectionType(),)), Region(entry_block))
-        call = CallKernelOp(_KERNEL_NAME, [], [ResultsCollectionType()])
+        call = CallKernelOp(_KERNEL_NAME, [], [kernel_collection_type])
         entry_block.add_ops([call])
         collection = call.result[0]
         map_op = self._build_results_map(collection, analysis)
         entry_block.add_ops([map_op, func.ReturnOp(map_op.result)])
+        main = func.FuncOp("main", ((), (map_op.result.type,)), Region(entry_block))
         return main
 
     def _initialise_builder(
@@ -260,15 +264,19 @@ class PurrImporter:
 
     def _build_results_map(self, collection: SSAValue, analysis: _PurrAnalysis) -> MapOp:
         """Build a results.map operation that applies record-level post-processing."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[RecordType(collection.type.schema)])
         record = body.args[0]
         ssa_map = self._build_acquisition_value_map(body, record, analysis)
         self._add_assign_results(body, ssa_map, analysis)
         record_value = self._build_return_record(body, ssa_map, analysis)
+        result_collection_type = ResultsCollectionType(
+            record_value.type.schema,
+            collection.type.size,
+        )
 
         # Yield the record to the map operation
         body.add_op(YieldOp(record_value))
-        return MapOp(collection, body)
+        return MapOp(collection, body, result_collection_type)
 
     def _build_acquisition_value_map(
         self,
@@ -299,9 +307,7 @@ class PurrImporter:
                     "mode INTEGRATOR."
                 )
 
-            extract_op = ExtractOp(
-                record, key, self._get_acquisition_type(analysis.acquisition_types[key])
-            )
+            extract_op = ExtractOp.value_from_record(record, key)
             body.add_op(extract_op)
             value = extract_op.result
             for pp in analysis.post_processing[key]:
@@ -317,7 +323,7 @@ class PurrImporter:
         ssa_map: dict[str, SSAValue],
         analysis: _PurrAnalysis,
     ) -> None:
-        """Materialize assign instructions into results arrays in the map body."""
+        """Materialize assign instructions into tuple values in the map body."""
         for assign in analysis.assigns:
             assign_vars = self._resolve_assign_values(assign, ssa_map)
             if not isinstance(assign.value, list):
@@ -325,7 +331,7 @@ class PurrImporter:
                 ssa_map[assign.name] = assign_vars[0]
                 continue
 
-            operation = CreateResultsArrayOp(assign_vars)
+            operation = CreateOp.for_tuple(assign_vars)
             ssa_map[assign.name] = operation.result
             body.add_op(operation)
 
@@ -366,7 +372,7 @@ class PurrImporter:
                 "Return variables must be a subset of the post-processing results."
             )
         values = [ssa_map[key] for key in returns]
-        operation = CreateRecordOp(returns, values)
+        operation = CreateOp.for_record(returns, values)
         body.add_op(operation)
         return operation.result
 

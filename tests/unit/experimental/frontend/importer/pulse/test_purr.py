@@ -5,7 +5,7 @@
 import numpy as np
 import pytest
 from xdsl.dialects import func
-from xdsl.dialects.builtin import ModuleOp
+from xdsl.dialects.builtin import ModuleOp, TupleType
 from xdsl.interpreters.scf import scf
 from xdsl.ir import Operation
 
@@ -37,12 +37,7 @@ from qat.experimental.dialect.pulse.ir.attributes import (
     RealThresholdPolicyAttr,
     SampledWaveformAttr,
 )
-from qat.experimental.dialect.results.ir import (
-    CreateRecordOp,
-    CreateResultsArrayOp,
-    ExtractOp,
-    MapOp,
-)
+from qat.experimental.dialect.results.ir import CreateOp, ExtractOp, MapOp, RecordType
 from qat.experimental.frontend.importer.pulse.purr import PurrImporter
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -89,6 +84,19 @@ def _ops(module: ModuleOp):
 
 def _ops_of_type(module: ModuleOp, op_type):
     return [op for op in _ops(module) if isinstance(op, op_type)]
+
+
+def _record_create_ops(module: Operation) -> list[CreateOp]:
+    return [
+        op
+        for op in _ops_of_type(module, CreateOp)
+        if isinstance(op.result.type, RecordType)
+    ]
+
+
+def _record_keys(create_record: CreateOp) -> tuple[str, ...]:
+    schema = create_record.result.type.schema
+    return tuple(field.key.data for field in schema.fields.data)
 
 
 def _has_parent_of_type(op: Operation, parent_type: type[Operation]):
@@ -571,8 +579,8 @@ class TestPurrImporterReturns:
         map_ops = _ops_of_type(module, MapOp)
         assert len(map_ops) == 1
 
-        [create_record] = _ops_of_type(map_ops[0], CreateRecordOp)
-        assert tuple(key.data for key in create_record.keys.data) == (
+        [create_record] = _record_create_ops(map_ops[0])
+        assert _record_keys(create_record) == (
             "measurement1",
             "measurement2",
         )
@@ -593,8 +601,8 @@ class TestPurrImporterReturns:
         map_ops = _ops_of_type(module, MapOp)
         assert len(map_ops) == 1
 
-        [create_record] = _ops_of_type(map_ops[0], CreateRecordOp)
-        assert tuple(key.data for key in create_record.keys.data) == (
+        [create_record] = _record_create_ops(map_ops[0])
+        assert _record_keys(create_record) == (
             "measurement1",
             "measurement3",
         )
@@ -630,14 +638,13 @@ class TestPurrImporterAssign:
         map_ops = _ops_of_type(module, MapOp)
         assert len(map_ops) == 1
 
-        [create_record] = _ops_of_type(map_ops[0], CreateRecordOp)
-        assert "my_list" in tuple(key.data for key in create_record.keys.data)
-
-        my_list_index = next(
-            i for i, key in enumerate(create_record.keys.data) if key.data == "my_list"
-        )
+        [create_record] = _record_create_ops(map_ops[0])
+        keys = _record_keys(create_record)
+        assert "my_list" in keys
+        my_list_index = keys.index("my_list")
         my_list_value = create_record.values[my_list_index]
-        assert isinstance(my_list_value.owner, CreateResultsArrayOp)
+        assert isinstance(my_list_value.owner, CreateOp)
+        assert isinstance(my_list_value.owner.result.type, TupleType)
         assert len(my_list_value.owner.values) == 2
         assert isinstance(my_list_value.owner.values[0].owner, ExtractOp)
         assert my_list_value.owner.values[0].owner.key.data == "measurement1"
@@ -655,9 +662,9 @@ class TestPurrImporterAssign:
         imp = PurrImporter()
         module = imp.build(builder)
         [map_op] = _ops_of_type(module, MapOp)
-        [create_record] = _ops_of_type(map_op, CreateRecordOp)
+        [create_record] = _record_create_ops(map_op)
 
-        keys = tuple(key.data for key in create_record.keys.data)
+        keys = _record_keys(create_record)
         assert "measurement2" in keys
         assert "measurement_alias" in keys
 
@@ -678,9 +685,9 @@ class TestPurrImporterAssign:
         imp = PurrImporter()
         module = imp.build(builder)
         [map_op] = _ops_of_type(module, MapOp)
-        [create_record] = _ops_of_type(map_op, CreateRecordOp)
+        [create_record] = _record_create_ops(map_op)
 
-        keys = tuple(key.data for key in create_record.keys.data)
+        keys = _record_keys(create_record)
         assert "measurement2" in keys
         assert "measurement_alias" in keys
 
@@ -1124,7 +1131,31 @@ class TestPurrImporterModuleStructure:
         assert isinstance(return_op, func.ReturnOp)
 
         assert map_op.value is call_op.result[0]
+        assert main.function_type.outputs.data[0] == map_op.result.type
         assert tuple(return_op.operands) == (map_op.result,)
+
+    def test_main_signature_tracks_map_output_schema(self, builder, hw):
+        """Main return type should follow the mapped collection, not the kernel output."""
+
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement1"))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement2"))
+        builder.add(Return(["measurement1"]))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        main = next(
+            op
+            for op in module.body.block.ops
+            if isinstance(op, func.FuncOp) and op.sym_name.data == "main"
+        )
+        call_op, map_op, _return_op = list(main.body.block.ops)
+
+        assert isinstance(call_op, CallKernelOp)
+        assert isinstance(map_op, MapOp)
+        assert call_op.result[0].type != map_op.result.type
+        assert main.function_type.outputs.data[0] == map_op.result.type
 
     def test_quantum_ops_are_nested_in_kernel_loop(self, builder, hw):
         """Checks that repeated quantum ops are emitted in the kernel loop, not in main."""

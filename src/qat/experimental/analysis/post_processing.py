@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from functools import singledispatchmethod
 
 from compiler_config.config import InlineResultsProcessing
+from xdsl.dialects.builtin import TupleType
 from xdsl.ir import Operation, SSAValue, TypeAttribute
 from xdsl.utils.exceptions import PassFailedException
 
@@ -26,13 +27,13 @@ from qat.experimental.dialect.pulse.ir import (
     RealThresholdPolicyAttr,
 )
 from qat.experimental.dialect.results.ir import (
-    CreateRecordOp,
-    CreateResultsArrayOp,
+    CreateOp,
     ExtractOp,
     GroupEntriesOp,
     IntegerStatePredicateAttr,
     MapOp,
     PostSelectOp,
+    RecordType,
     ReduceOp,
     YieldOp,
 )
@@ -235,12 +236,16 @@ class _MeasurementAliasTracker:
 
     @process_operation.register
     def _process_extract(self, op: ExtractOp):
-        """Process the :class:`ExtractOp` operation, translating it to the runtime
-        representation and updating the internal state of the tracker.
+        """Process a :class:`ExtractOp` from a record.
 
-        Extracting it tracks the measurement alias to the SSA value for subsequent
-        operations.
+        Extracting from a record tracks the measurement alias to the SSA value for
+        subsequent operations.
         """
+        if not isinstance(op.container.type, RecordType):
+            raise PassFailedException(
+                f"Unsupported ExtractOp {op} in results processing chain."
+            )
+
         measurement_alias = op.key.data
 
         if measurement_alias in self._key_to_value:
@@ -316,44 +321,55 @@ class _MeasurementAliasTracker:
         self._post_processing_steps[measurement_alias].append(equalise_instr)
 
     @process_operation.register
-    def _process_create_results_array(self, op: CreateResultsArrayOp):
-        """Process the :class:`CreateResultsArrayOp` operation, translating it to the
-        runtime representation and updating the internal state of the tracker.
+    def _process_create(self, op: CreateOp):
+        """Process a :class:`CreateOp` used for tuple and record materialisation.
 
-        Doing so creates an array with an unknown alias; we can look ahead to see if this
-        operation is used within a :class:`CreateRecordOp` to determine the alias, or assign
-        it a temporary alias if it's used in another :class:`CreateResultsArrayOp`.
-
-        The result of this operation is to make an assign instruction.
+        For tuple creation this emits runtime assign operations. For record creation this
+        updates the returned aliases.
         """
 
-        # TODO: any renaming of measurement alias must make use of an assign.
+        if isinstance(op.result.type, TupleType):
+            self._process_create_tuple(op)
+            return
 
+        if isinstance(op.result.type, RecordType):
+            self._process_create_record(op)
+            return
+
+        raise PassFailedException(
+            f"Unsupported CreateOp result type {op.result.type} in results "
+            f"processing chain."
+        )
+
+    def _process_create_tuple(self, op: CreateOp):
+        """Process tuple creation and translate it into an assign instruction."""
+
+        # TODO: any renaming of measurement alias must make use of an assign.
         self._check_result_only_has_single_use(op.result)
         uses = list(op.result.uses)
 
         alias = None
         if len(uses) == 1:
             use = uses[0]
-            if isinstance(use.operation, CreateRecordOp):
-                alias = use.operation.keys.data[use.index].data
+            if isinstance(use.operation, CreateOp) and isinstance(
+                use.operation.result.type, RecordType
+            ):
+                schema = use.operation.result.type.schema
+                alias = schema.fields.data[use.index].key.data
         alias = alias or f"_temp_{hash(op)}"
 
-        # Get the alias for each SSA value
         aliases = [self._get_measurement_alias(value) for value in op.values]
         if any(a is None for a in aliases):
             raise PassFailedException(
-                "CreateResultsArrayOp contains values that are not associated with "
+                "CreateOp.for_tuple contains values that are not associated with "
                 "measurement aliases."
             )
 
         self._track_measurement_alias(op.result, alias)
         self._assigns.append(Assign(name=alias, value=aliases))
 
-    @process_operation.register
-    def _process_create_record(self, op: CreateRecordOp):
-        """Process the :class:`CreateRecordOp` operation, translating it to the runtime
-        representation and updating the internal state of the tracker.
+    def _process_create_record(self, op: CreateOp):
+        """Process record creation and update returned aliases.
 
         If the record created is used by the :class:`YieldOp` operation, then this is the
         dictionary that is returned by the results processing. Otherwise, it's used by the
@@ -364,11 +380,13 @@ class _MeasurementAliasTracker:
         self._check_result_only_has_single_use(op.result)
         if self._returns:
             raise PassFailedException(
-                "Multiple CreateRecordOps found in the results processing chain, which is "
+                "Multiple record CreateOps found in the results processing chain, which is "
                 "not supported."
             )
 
-        self._returns.update([key.data for key in op.keys])
+        self._returns.update(
+            [field.key.data for field in op.result.type.schema.fields.data]
+        )
 
     @process_operation.register
     def _process_group_entries(self, op: GroupEntriesOp):

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import BoolAttr, FloatAttr, IndexType, f64
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp, IndexCastOp
+from xdsl.dialects.builtin import BoolAttr, FloatAttr, IndexType, IntAttr, f64, i32
 from xdsl.interpreters.scf import scf
 from xdsl.ir import Block, Operation, Region, SSAValue
 
@@ -36,11 +36,10 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.ir.ops import KernelOp
 from qat.experimental.dialect.results.ir import (
-    AddRecordOp,
-    CreateRecordOp,
-    CreateResultsCollectionOp,
+    CreateOp,
     RecordType,
     ResultsCollectionType,
+    StoreOp,
 )
 from qat.experimental.frontend.importer.environment import EnvironmentTracker
 
@@ -640,6 +639,8 @@ class PulseKernelBuilder:
 
         record_op = self._create_record_op()
         self._add_ops(record_op)
+        record_schema = record_op.result.type.schema
+        record_type = RecordType(record_schema)
 
         if self._num_shots is None:
             return_op = ReturnOp(record_op.result)
@@ -648,24 +649,29 @@ class PulseKernelBuilder:
                 self._name,
                 (
                     (),
-                    (RecordType(),),
+                    (record_type,),
                 ),
                 Region(self._pulse_block),
             )
 
+        collection_type = ResultsCollectionType(record_schema, IntAttr(self._num_shots))
+
         # Add an induction variable and results collection iteration argument to the block
         self._pulse_block.insert_arg(IndexType(), 0)
-        self._pulse_block.insert_arg(ResultsCollectionType(), 1)
+        self._pulse_block.insert_arg(collection_type, 1)
 
-        add_record_op = AddRecordOp(self._pulse_block.args[1], record_op.result)
-        yield_op = scf.YieldOp(add_record_op.result)
-        self._add_ops(add_record_op, yield_op)
+        cast_index_op = IndexCastOp(self._pulse_block.args[0], i32)
+        store_record_op = StoreOp.record_in_collection(
+            self._pulse_block.args[1], cast_index_op.result, record_op.result
+        )
+        yield_op = scf.YieldOp(store_record_op.result)
+        self._add_ops(cast_index_op, store_record_op, yield_op)
 
         index_type = IndexType()
         lb = ArithConstantOp.from_int_and_width(0, index_type)
         ub = ArithConstantOp.from_int_and_width(self._num_shots, index_type)
         increment = ArithConstantOp.from_int_and_width(1, index_type)
-        record_collection_op = CreateResultsCollectionOp()
+        record_collection_op = CreateOp.for_empty_collection(record_schema, self._num_shots)
         loop = scf.ForOp(
             lb,
             ub,
@@ -679,7 +685,7 @@ class PulseKernelBuilder:
             self._name,
             (
                 (),
-                (ResultsCollectionType(),),
+                (collection_type,),
             ),
             Region(block),
         )
@@ -726,4 +732,4 @@ class PulseKernelBuilder:
 
         items = list(self._acquires.items())
         acquire_names, acquire_values = zip(*items, strict=False) if items else ([], [])
-        return CreateRecordOp(acquire_names, acquire_values)
+        return CreateOp.for_record(acquire_names, acquire_values)

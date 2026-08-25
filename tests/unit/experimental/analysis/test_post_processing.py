@@ -5,8 +5,8 @@ runtime."""
 
 import pytest
 from xdsl.dialects import func
-from xdsl.dialects.builtin import ModuleOp, i32
-from xdsl.ir import Block, Operation, Region, SSAValue
+from xdsl.dialects.builtin import IntAttr, ModuleOp, i32
+from xdsl.ir import Block, Operation, Region, SSAValue, TypeAttribute
 from xdsl.irdl import (
     IRDLOperation,
     irdl_attr_definition,
@@ -14,7 +14,7 @@ from xdsl.irdl import (
     operand_def,
     result_def,
 )
-from xdsl.utils.exceptions import PassFailedException
+from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.experimental.analysis.post_processing import extract_post_processing_instructions
 from qat.experimental.dialect.pulse.ir import (
@@ -28,13 +28,14 @@ from qat.experimental.dialect.pulse.ir import (
     RealThresholdPolicyAttr,
 )
 from qat.experimental.dialect.results.ir import (
-    CreateRecordOp,
-    CreateResultsArrayOp,
+    CreateOp,
     ExtractOp,
     GroupEntriesOp,
     IntegerStatePredicateAttr,
     MapOp,
     PostSelectOp,
+    RecordFieldAttr,
+    RecordSchemaAttr,
     ReduceOp,
     YieldOp,
 )
@@ -52,8 +53,9 @@ class _MockCollectionOp(IRDLOperation):
     name = "test.post_processing_mock_collection"
     res = result_def(ResultsCollectionType)
 
-    def __init__(self) -> None:
-        super().__init__(result_types=[ResultsCollectionType()])
+    def __init__(self, schema: RecordSchemaAttr | None = None) -> None:
+        schema = schema if schema is not None else RecordSchemaAttr([])
+        super().__init__(result_types=[ResultsCollectionType(schema, IntAttr(1000))])
 
 
 @irdl_op_definition
@@ -94,6 +96,25 @@ def _build_module(*fn_ops: Operation) -> ModuleOp:
     return ModuleOp([func.FuncOp("main", ((), ()), Region(Block(list(fn_ops))))])
 
 
+def _record_type_for(
+    *keys: str,
+    type_overrides: dict[str, TypeAttribute] | None = None,
+) -> RecordType:
+    field_types: dict[str, TypeAttribute] = {key: IQResultType() for key in keys}
+    if type_overrides:
+        field_types.update(type_overrides)
+
+    fields = [RecordFieldAttr(key, type_) for key, type_ in field_types.items()]
+    return RecordType(RecordSchemaAttr(fields))
+
+
+def _make_map_op(collection: SSAValue, body: Block) -> MapOp:
+    yield_op = body.ops.last
+    assert isinstance(yield_op, YieldOp)
+    result_type = ResultsCollectionType(yield_op.record.type.schema, collection.type.size)
+    return MapOp(collection, body, result_type)
+
+
 def _make_two_acquire_fn() -> tuple[func.FuncOp, EqualiseAttr, EqualiseAttr, float, float]:
     """Builds a FuncOp containing a two-acquire MapOp pipeline with equalise, discriminate,
     and a post-select on the first acquire.
@@ -106,19 +127,19 @@ def _make_two_acquire_fn() -> tuple[func.FuncOp, EqualiseAttr, EqualiseAttr, flo
     threshold1 = 0.5
     threshold2 = -0.3
 
-    body = Block(arg_types=[RecordType()])
+    body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
     record_arg = body.args[0]
-    ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-    ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
+    ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+    ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
     eq1 = EqualiseOp(ext1.result, eq_attr1)
     eq2 = EqualiseOp(ext2.result, eq_attr2)
     disc1 = DiscriminateOp(eq1.result, RealThresholdPolicyAttr(threshold1))
     disc2 = DiscriminateOp(eq2.result, RealThresholdPolicyAttr(threshold2))
-    rec = CreateRecordOp(["acquire1", "acquire2"], [disc1.result, disc2.result])
+    rec = CreateOp.for_record(["acquire1", "acquire2"], [disc1.result, disc2.result])
     body.add_ops([ext1, ext2, eq1, eq2, disc1, disc2, rec, YieldOp(rec.result)])
 
     collection = _MockCollectionOp()
-    map_op = MapOp(collection.res, body)
+    map_op = _make_map_op(collection.res, body)
     post_select = PostSelectOp(map_op.result, IntegerStatePredicateAttr("acquire1", [1]))
     fn = func.FuncOp(
         "main",
@@ -191,15 +212,15 @@ class TestExtractPostProcessingErrorHandling:
     def test_unsupported_operation_in_map_op_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains an
         unsupported operation."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
         mock_op = _MockTransformOp(ext1.result)
-        rec = CreateRecordOp(["acquire1"], [mock_op.res])
+        rec = CreateOp.for_record(["acquire1"], [mock_op.res])
         body.add_ops([ext1, mock_op, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         with pytest.raises(PassFailedException, match="Unsupported operation"):
@@ -208,17 +229,17 @@ class TestExtractPostProcessingErrorHandling:
     def test_result_with_multiple_uses_in_map_op_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains a
         result with multiple uses."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
         eq_attr = EqualiseAttr(1 + 0j, 0 + 0j, 0 + 0j)
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
         eq1 = EqualiseOp(ext1.result, eq_attr)
         eq2 = EqualiseOp(ext1.result, eq_attr)  # second use of ext1.result
-        rec = CreateRecordOp(["acquire1"], [eq1.result])
+        rec = CreateOp.for_record(["acquire1"], [eq1.result])
         body.add_ops([ext1, eq1, eq2, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         with pytest.raises(PassFailedException, match="multiple uses"):
@@ -227,31 +248,50 @@ class TestExtractPostProcessingErrorHandling:
     def test_unsupported_type_from_extract_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains an
         extract operation that returns an unsupported type."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(
+            arg_types=[_record_type_for("acquire1", type_overrides={"acquire1": i32})]
+        )
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", i32)
-        rec = CreateRecordOp(["acquire1"], [ext1.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        rec = CreateOp.for_record(["acquire1"], [ext1.result])
         body.add_ops([ext1, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         with pytest.raises(PassFailedException, match="Unsupported SSA type"):
             extract_post_processing_instructions(module, (1000,))
 
+    def test_extract_from_non_record_container_raises(self):
+        """Tests that the analysis raises a PassFailedException when an ExtractOp does not
+        extract from a record container."""
+        body = Block(arg_types=[_record_type_for("acquire1")])
+        record_arg = body.args[0]
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        bad_extract = ExtractOp(ext1.result, IQResultType(), key="acquire1")
+        rec = CreateOp.for_record(["acquire1"], [bad_extract.result])
+        body.add_ops([ext1, bad_extract, rec, YieldOp(rec.result)])
+
+        collection = _MockCollectionOp()
+        map_op = _make_map_op(collection.res, body)
+        module = _build_module(collection, map_op, func.ReturnOp())
+
+        with pytest.raises(PassFailedException, match="Unsupported ExtractOp"):
+            extract_post_processing_instructions(module, (1000,))
+
     def test_multiple_extracts_with_same_alias_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains
         multiple extract operations with the same alias."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire1", IQResultType())  # duplicate alias
-        rec = CreateRecordOp(["acquire1", "acquire1b"], [ext1.result, ext2.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire1")  # duplicate alias
+        rec = CreateOp.for_record(["acquire1", "acquire1b"], [ext1.result, ext2.result])
         body.add_ops([ext1, ext2, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         with pytest.raises(PassFailedException, match="Multiple ExtractOps"):
@@ -260,15 +300,15 @@ class TestExtractPostProcessingErrorHandling:
     def test_unsupported_discrimination_policy_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains a
         discrimination operation with an unsupported policy."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
         disc_op = DiscriminateOp(ext1.result, _MockDiscriminatorPolicyAttr())
-        rec = CreateRecordOp(["acquire1"], [disc_op.result])
+        rec = CreateOp.for_record(["acquire1"], [disc_op.result])
         body.add_ops([ext1, disc_op, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         with pytest.raises(PassFailedException, match="Unsupported policy"):
@@ -277,71 +317,57 @@ class TestExtractPostProcessingErrorHandling:
     def test_multiple_create_record_ops_in_map_op_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains
         multiple create record operations."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
-        rec1 = CreateRecordOp(["acquire1"], [ext1.result])
-        rec2 = CreateRecordOp(["acquire2"], [ext2.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
+        rec1 = CreateOp.for_record(["acquire1"], [ext1.result])
+        rec2 = CreateOp.for_record(["acquire2"], [ext2.result])
         body.add_ops([ext1, ext2, rec1, rec2, YieldOp(rec2.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
-        with pytest.raises(PassFailedException, match="Multiple CreateRecordOps"):
+        with pytest.raises(PassFailedException, match="Multiple record CreateOps"):
             extract_post_processing_instructions(module, (1000,))
 
     def test_group_entries_with_non_existent_aliases_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains a
         group entries operation with non-existent aliases."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        rec = CreateRecordOp(["acquire1"], [ext1.result])
-        group_op = GroupEntriesOp(rec.result, ["nonexistent1", "nonexistent2"], "grouped")
-        body.add_ops([ext1, rec, group_op, YieldOp(group_op.result)])
-
-        collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
-        module = _build_module(collection, map_op, func.ReturnOp())
-
-        with pytest.raises(PassFailedException, match="not in the returns"):
-            extract_post_processing_instructions(module, (1000,))
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        rec = CreateOp.for_record(["acquire1"], [ext1.result])
+        with pytest.raises(VerifyException, match="All keys to group must exist"):
+            GroupEntriesOp(rec.result, ["nonexistent1", "nonexistent2"], "grouped")
 
     def test_reduce_entries_with_non_existent_aliases_raises(self):
         """Tests that the analysis raises a PassFailedException when the MapOp contains a
         reduce entries operation with non-existent aliases."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        rec = CreateRecordOp(["acquire1"], [ext1.result])
-        reduce_op = ReduceOp(rec.result, ["nonexistent"])
-        body.add_ops([ext1, rec, reduce_op, YieldOp(reduce_op.result)])
-
-        collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
-        module = _build_module(collection, map_op, func.ReturnOp())
-
-        with pytest.raises(PassFailedException, match="not in the returns"):
-            extract_post_processing_instructions(module, (1000,))
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        rec = CreateOp.for_record(["acquire1"], [ext1.result])
+        with pytest.raises(VerifyException, match="All keys to retain must exist"):
+            ReduceOp(rec.result, ["nonexistent"])
 
     def test_multiple_map_ops_in_module_raises(self):
         """Tests that the analysis raises a PassFailedException when the module contains
         multiple MapOps."""
-        body1 = Block(arg_types=[RecordType()])
-        ext1 = ExtractOp(body1.args[0], "a", IQResultType())
-        rec1 = CreateRecordOp(["a"], [ext1.result])
+        body1 = Block(arg_types=[_record_type_for("a")])
+        ext1 = ExtractOp.value_from_record(body1.args[0], "a")
+        rec1 = CreateOp.for_record(["a"], [ext1.result])
         body1.add_ops([ext1, rec1, YieldOp(rec1.result)])
 
-        body2 = Block(arg_types=[RecordType()])
-        ext2 = ExtractOp(body2.args[0], "b", IQResultType())
-        rec2 = CreateRecordOp(["b"], [ext2.result])
+        body2 = Block(arg_types=[_record_type_for("b")])
+        ext2 = ExtractOp.value_from_record(body2.args[0], "b")
+        rec2 = CreateOp.for_record(["b"], [ext2.result])
         body2.add_ops([ext2, rec2, YieldOp(rec2.result)])
 
         collection = _MockCollectionOp()
-        map_op1 = MapOp(collection.res, body1)
-        map_op2 = MapOp(map_op1.result, body2)
+        map_op1 = _make_map_op(collection.res, body1)
+        map_op2 = _make_map_op(map_op1.result, body2)
         module = _build_module(collection, map_op1, map_op2, func.ReturnOp())
 
         with pytest.raises(PassFailedException, match="Multiple MapOps"):
@@ -367,16 +393,16 @@ class TestExtractPostProcessingSpecialCases:
         eq_attr = EqualiseAttr(1 + 0j, 0 + 0j, 0 + 0j)
         threshold = 0.5
 
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
         eq1 = EqualiseOp(ext1.result, eq_attr)
         disc1 = DiscriminateOp(eq1.result, RealThresholdPolicyAttr(threshold))
-        rec = CreateRecordOp(["acquire1"], [disc1.result])
+        rec = CreateOp.for_record(["acquire1"], [disc1.result])
         body.add_ops([ext1, eq1, disc1, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -403,16 +429,16 @@ class TestExtractPostProcessingSpecialCases:
             p_min=p_min,
         )
 
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
         eq1 = EqualiseOp(ext1.result, eq_attr)
         disc1 = DiscriminateOp(eq1.result, ml_policy)
-        rec = CreateRecordOp(["acquire1"], [disc1.result])
+        rec = CreateOp.for_record(["acquire1"], [disc1.result])
         body.add_ops([ext1, eq1, disc1, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -435,16 +461,16 @@ class TestExtractPostProcessingSpecialCases:
 
     def test_create_results_array_creates_assign(self):
         """Tests that the analysis correctly handles a create results array operation."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
-        arr_op = CreateResultsArrayOp([ext1.result, ext2.result])
-        rec = CreateRecordOp(["grouped"], [arr_op.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
+        arr_op = CreateOp.for_tuple([ext1.result, ext2.result])
+        rec = CreateOp.for_record(["grouped"], [arr_op.result])
         body.add_ops([ext1, ext2, arr_op, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -455,22 +481,22 @@ class TestExtractPostProcessingSpecialCases:
     def test_create_nested_results_arrays_creates_multiple_assigns(self):
         """Tests that the analysis correctly handles a create nested results array
         operation."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("a", "b", "c", "d")])
         record_arg = body.args[0]
-        ext_a = ExtractOp(record_arg, "a", IQResultType())
-        ext_b = ExtractOp(record_arg, "b", IQResultType())
-        ext_c = ExtractOp(record_arg, "c", IQResultType())
-        ext_d = ExtractOp(record_arg, "d", IQResultType())
-        arr1 = CreateResultsArrayOp([ext_a.result, ext_b.result])
-        arr2 = CreateResultsArrayOp([ext_c.result, ext_d.result])
-        arr3 = CreateResultsArrayOp([arr1.result, arr2.result])
-        rec = CreateRecordOp(["nested"], [arr3.result])
+        ext_a = ExtractOp.value_from_record(record_arg, "a")
+        ext_b = ExtractOp.value_from_record(record_arg, "b")
+        ext_c = ExtractOp.value_from_record(record_arg, "c")
+        ext_d = ExtractOp.value_from_record(record_arg, "d")
+        arr1 = CreateOp.for_tuple([ext_a.result, ext_b.result])
+        arr2 = CreateOp.for_tuple([ext_c.result, ext_d.result])
+        arr3 = CreateOp.for_tuple([arr1.result, arr2.result])
+        rec = CreateOp.for_record(["nested"], [arr3.result])
         body.add_ops(
             [ext_a, ext_b, ext_c, ext_d, arr1, arr2, arr3, rec, YieldOp(rec.result)]
         )
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -483,16 +509,16 @@ class TestExtractPostProcessingSpecialCases:
 
     def test_group_entries_creates_assign(self):
         """Tests that the analysis correctly handles a group entries operation."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
-        rec = CreateRecordOp(["acquire1", "acquire2"], [ext1.result, ext2.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
+        rec = CreateOp.for_record(["acquire1", "acquire2"], [ext1.result, ext2.result])
         group_op = GroupEntriesOp(rec.result, ["acquire1", "acquire2"], "grouped")
         body.add_ops([ext1, ext2, rec, group_op, YieldOp(group_op.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -502,16 +528,16 @@ class TestExtractPostProcessingSpecialCases:
 
     def test_reduce_entries_limits_return_variables(self):
         """Tests that the analysis correctly handles a reduce entries operation."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
-        rec = CreateRecordOp(["acquire1", "acquire2"], [ext1.result, ext2.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
+        rec = CreateOp.for_record(["acquire1", "acquire2"], [ext1.result, ext2.result])
         reduce_op = ReduceOp(rec.result, ["acquire1"])
         body.add_ops([ext1, ext2, rec, reduce_op, YieldOp(reduce_op.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -521,15 +547,15 @@ class TestExtractPostProcessingSpecialCases:
     def test_create_record_with_not_all_entries_gives_reduced_returns(self):
         """Tests that the analysis correctly handles a create record operation with not all
         entries."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
-        rec = CreateRecordOp(["acquire1"], [ext1.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
+        rec = CreateOp.for_record(["acquire1"], [ext1.result])
         body.add_ops([ext1, ext2, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -579,14 +605,21 @@ class TestExtractPostProcessingSpecialCases:
     def test_extract_with_acquisition_type_gives_raw_acquire_mode(self):
         """Tests that the analysis correctly handles an extract operation with an
         acquisition type."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(
+            arg_types=[
+                _record_type_for(
+                    "acquire1",
+                    type_overrides={"acquire1": AcquisitionType()},
+                )
+            ]
+        )
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", AcquisitionType())
-        rec = CreateRecordOp(["acquire1"], [ext1.result])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        rec = CreateOp.for_record(["acquire1"], [ext1.result])
         body.add_ops([ext1, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
@@ -596,16 +629,16 @@ class TestExtractPostProcessingSpecialCases:
     def test_create_results_array_with_no_use_gives_assign_with_random_name(self):
         """Tests that the analysis correctly handles a create results array operation with
         no uses, giving an assign with a random name."""
-        body = Block(arg_types=[RecordType()])
+        body = Block(arg_types=[_record_type_for("acquire1", "acquire2")])
         record_arg = body.args[0]
-        ext1 = ExtractOp(record_arg, "acquire1", IQResultType())
-        ext2 = ExtractOp(record_arg, "acquire2", IQResultType())
-        arr_op = CreateResultsArrayOp([ext1.result, ext2.result])
-        rec = CreateRecordOp([], [])
+        ext1 = ExtractOp.value_from_record(record_arg, "acquire1")
+        ext2 = ExtractOp.value_from_record(record_arg, "acquire2")
+        arr_op = CreateOp.for_tuple([ext1.result, ext2.result])
+        rec = CreateOp.for_record([], [])
         body.add_ops([ext1, ext2, arr_op, rec, YieldOp(rec.result)])
 
         collection = _MockCollectionOp()
-        map_op = MapOp(collection.res, body)
+        map_op = _make_map_op(collection.res, body)
         module = _build_module(collection, map_op, func.ReturnOp())
 
         result = extract_post_processing_instructions(module, (1000,))
