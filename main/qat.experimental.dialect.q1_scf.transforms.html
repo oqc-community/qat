@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_scf.transforms package &mdash; qat-compiler 3.0.0.post338.dev20260825162757 documentation</title>
+  <title>qat.experimental.dialect.q1_scf.transforms package &mdash; qat-compiler 3.0.0.post339.dev20260826100210 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.experimental.dialect.q1_scf.transforms.lower_to_cf module" href="qat.experimental.dialect.q1_scf.transforms.lower_to_cf.html" />
+    <link rel="next" title="qat.experimental.dialect.q1_scf.transforms.lower_scf module" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html" />
     <link rel="prev" title="qat.experimental.dialect.q1_scf.ir.ops module" href="qat.experimental.dialect.q1_scf.ir.ops.html" /> 
 </head>
 
@@ -671,6 +671,29 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html">qat.experimental.dialect.q1_scf.transforms.lower_scf module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#motivation">Motivation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#for-loops">For loops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#stubs">Stubs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.ForLowering"><code class="docutils literal notranslate"><span class="pre">ForLowering</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.ForLowering.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">ForLowering.match_and_rewrite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.IfLowering"><code class="docutils literal notranslate"><span class="pre">IfLowering</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.IfLowering.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">IfLowering.match_and_rewrite()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass"><code class="docutils literal notranslate"><span class="pre">LowerScfToQ1ScfPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass.apply"><code class="docutils literal notranslate"><span class="pre">LowerScfToQ1ScfPass.apply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass.name"><code class="docutils literal notranslate"><span class="pre">LowerScfToQ1ScfPass.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.WhileLowering"><code class="docutils literal notranslate"><span class="pre">WhileLowering</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html#qat.experimental.dialect.q1_scf.transforms.lower_scf.WhileLowering.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">WhileLowering.match_and_rewrite()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_to_cf.html">qat.experimental.dialect.q1_scf.transforms.lower_to_cf module</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_to_cf.html#qat.experimental.dialect.q1_scf.transforms.lower_to_cf.ForLowering"><code class="docutils literal notranslate"><span class="pre">ForLowering</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_scf.transforms.lower_to_cf.html#qat.experimental.dialect.q1_scf.transforms.lower_to_cf.ForLowering.match_and_rewrite"><code class="docutils literal notranslate"><span class="pre">ForLowering.match_and_rewrite()</span></code></a></li>
@@ -702,7 +725,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.experimental.dialect.q1_scf.ir.ops.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.q1_scf.ir.ops module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.experimental.dialect.q1_scf.transforms.lower_to_cf.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.q1_scf.transforms.lower_to_cf module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.experimental.dialect.q1_scf.transforms.lower_scf.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.q1_scf.transforms.lower_scf module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

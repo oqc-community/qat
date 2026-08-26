@@ -12,4 +12,5 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   qat.experimental.dialect.q1_scf.transforms.lower_scf
    qat.experimental.dialect.q1_scf.transforms.lower_to_cf
