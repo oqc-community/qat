@@ -68,6 +68,11 @@ class Waveform(AbstractWaveform):
     :param scale_factor: Additional multiplicative scaling
         applied independently of ``amp``, defaults to ``1.0``.
 
+    .. image:: /_images/waveform/waveform_generic.png
+        :alt: Annotated Waveform diagram showing amp, width, phase, drag and scale_factor.
+        :align: center
+        :width: 700px
+
     See :meth:`sample` for the full mathematical formula.
     """
 
@@ -219,6 +224,11 @@ class SquareWaveform(Waveform):
 
     The envelope is uniform across the entire ``width``.
 
+    .. image:: /_images/waveform/square_waveform.png
+        :alt: Annotated SquareWaveform comparison showing different widths.
+        :align: center
+        :width: 700px
+
     :param width: Duration of the waveform in seconds.
     :param amp: Amplitude pre-factor to the envelope in Hz.
     :param phase: Phase rotation in radians.
@@ -243,6 +253,11 @@ class SoftSquareWaveform(Waveform):
        \bigr]
 
     where :math:`w` = ``width`` and :math:`r` = ``rise``.
+
+    .. image:: /_images/waveform/soft_square_waveform.png
+        :alt: Annotated SoftSquareWaveform comparison showing rise differences.
+        :align: center
+        :width: 700px
 
     Edge sharpness depends on ``rise``; very small values can
     introduce discontinuities at the truncation boundary.
@@ -274,6 +289,11 @@ class SofterSquareWaveform(Waveform):
     which is then min/max normalised to :math:`[0, 1]`.
     Here :math:`\sigma` = ``std_dev`` and :math:`r` = ``rise``.
 
+    .. image:: /_images/waveform/softer_square_waveform.png
+        :alt: Annotated SofterSquareWaveform comparison showing std_dev and rise differences.
+        :align: center
+        :width: 700px
+
     :param std_dev: Width of the flat-top region in seconds. The
         ``tanh`` transitions are placed at ``±std_dev / 2``.
     :param rise: Edge rise/fall scale in seconds. The ``tanh``
@@ -304,6 +324,11 @@ class ExtraSoftSquareWaveform(Waveform):
     Identical to :class:`SofterSquareWaveform` but with a
     ``2×rise`` inset instead of ``1×rise``.
 
+    .. image:: /_images/waveform/extra_soft_square_waveform.png
+        :alt: Annotated ExtraSoftSquareWaveform comparison showing std_dev and rise differences.
+        :align: center
+        :width: 700px
+
     :param std_dev: Width of the flat-top region in seconds. The
         ``tanh`` transitions are placed at ``±std_dev / 2``.
     :param rise: Edge rise/fall scale in seconds. A larger value
@@ -330,6 +355,11 @@ class GaussianWaveform(Waveform):
 
     where :math:`k = \text{width} \times \text{rise}`.
 
+    .. image:: /_images/waveform/gaussian_waveform.png
+        :alt: Annotated GaussianWaveform envelope showing width and rise scaling.
+        :align: center
+        :width: 700px
+
     :param rise: Dimensionless shape parameter. A larger ``rise``
         spreads the Gaussian; a smaller ``rise`` narrows it.
     :param width: Duration of the waveform in seconds.
@@ -352,6 +382,11 @@ class SofterGaussianWaveform(Waveform):
     :math:`k = \text{width} \times \text{rise}`) but subtracts the
     edge value and rescales, ensuring the pulse is exactly zero at
     the edges and peaks at 1.
+
+    .. image:: /_images/waveform/softer_gaussian_waveform.png
+        :alt: Annotated SofterGaussianWaveform comparison showing rise differences.
+        :align: center
+        :width: 700px
 
     :param rise: Dimensionless shape parameter.
     :param width: Duration of the waveform in seconds.
@@ -385,6 +420,11 @@ class BlackmanWaveform(Waveform):
     See original paper `Blackman & Tukey (1958)
     <https://doi.org/10.1002/j.1538-7305.1958.tb03874.x>`_.
 
+    .. image:: /_images/waveform/blackman_waveform.png
+        :alt: Annotated BlackmanWaveform comparison showing different widths.
+        :align: center
+        :width: 700px
+
     :param width: Duration of the waveform in seconds.
     :param amp: Amplitude pre-factor to the envelope in Hz.
     :param phase: Phase rotation in radians.
@@ -402,6 +442,11 @@ class SetupHoldWaveform(Waveform):
 
     The setup section occupies the first ``rise`` seconds of the pulse;
     the hold section occupies the remainder (``width - rise`` seconds).
+
+    .. image:: /_images/waveform/setup_hold_waveform.png
+        :alt: Annotated SetupHoldWaveform comparison showing setup duration and amplitude differences.
+        :align: center
+        :width: 700px
 
     :param rise: Duration of the high-amplitude setup section in
         seconds.
@@ -437,6 +482,11 @@ class RoundedSquareWaveform(Waveform):
     :math:`w` = ``width``, and :math:`c` is a normalisation
     constant.
 
+    .. image:: /_images/waveform/rounded_square_waveform.png
+        :alt: Annotated RoundedSquareWaveform comparison showing rise and std_dev differences.
+        :align: center
+        :width: 700px
+
     :param rise: Steepness of the ``erf`` transition in seconds.
         Smaller values give a sharper step; larger values give a
         more gradual transition.
@@ -469,6 +519,12 @@ class GaussianSquareWaveform(Waveform):
     where :math:`s` = ``square_width`` and :math:`\sigma` =
     ``std_dev``. When ``zero_at_edges`` is ``True`` the envelope
     is offset and rescaled to be zero at the outermost samples.
+
+    .. image:: /_images/waveform/gaussian_square_waveform.png
+        :alt: Annotated GaussianSquareWaveform comparison showing square width and edge softness differences.
+        :align: center
+        :width: 700px
+
     See `Sheldon et al. (2016)
     <https://doi.org/10.1103/PhysRevA.93.060302>`_ for use in
     cross-resonance gates.
@@ -548,6 +604,11 @@ class GaussianZeroEdgeWaveform(Waveform):
 
     ensuring :math:`f(\pm w/2) = 0` and :math:`f(0) = 1`.
 
+    .. image:: /_images/waveform/gaussian_zero_edge_waveform.png
+        :alt: Annotated GaussianZeroEdgeWaveform comparison with and without zero_at_edges normalisation.
+        :align: center
+        :width: 700px
+
     :param std_dev: Standard deviation of the Gaussian in seconds.
     :param zero_at_edges: When ``True``, the Gaussian is offset
         and rescaled so that it is exactly zero at
@@ -574,6 +635,11 @@ class CosWaveform(Waveform):
     where :math:`f` = ``frequency`` and :math:`\varphi` =
     ``internal_phase``.
 
+    .. image:: /_images/waveform/cos_waveform.png
+        :alt: Annotated CosWaveform comparison showing frequency and internal phase differences.
+        :align: center
+        :width: 700px
+
     :param frequency: Oscillation frequency in Hz.
     :param internal_phase: Phase offset applied inside the cosine
         argument in radians. Shifts the cosine in phase without
@@ -598,6 +664,11 @@ class SinWaveform(Waveform):
 
     where :math:`f` = ``frequency`` and :math:`\varphi` =
     ``internal_phase``.
+
+    .. image:: /_images/waveform/sin_waveform.png
+        :alt: Annotated SinWaveform comparison showing frequency and internal phase differences.
+        :align: center
+        :width: 700px
 
     :param frequency: Oscillation frequency in Hz.
     :param internal_phase: Internal phase offset in radians.
@@ -630,6 +701,11 @@ class SechWaveform(Waveform):
     Fourier transform (up to scaling), making it self-similar in
     time and frequency. See `Rosen & Zener (1932)
     <https://doi.org/10.1103/PhysRev.40.502>`_.
+
+    .. image:: /_images/waveform/sech_waveform.png
+        :alt: Annotated SechWaveform comparison showing different std_dev widths.
+        :align: center
+        :width: 700px
 
     :param std_dev: Width parameter :math:`\sigma` of the sech
         pulse in seconds.

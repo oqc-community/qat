@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Unit tests for :class:`~qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass`.
+"""Unit tests for
+:class:`~qat.experimental.dialect.q1_scf.transforms.lower_scf.LowerScfToQ1ScfPass`.
 
 Covers ``scf.for`` lowering, rejection of unsupported configurations, and stub
 behaviour for ``scf.if`` and ``scf.while``.
@@ -59,7 +60,8 @@ def _make_shots_loop(lb: int, ub: int, step: int) -> SequenceOp:
 
 
 def _lower(seq: SequenceOp) -> Block:
-    """Run :class:`LowerScfToQ1ScfPass` on *seq*, verify the result, and return the entry block."""
+    """Run :class:`LowerScfToQ1ScfPass` on *seq*, verify the result, and return the entry
+    block."""
     module = ModuleOp([seq])
     LowerScfToQ1ScfPass().apply(None, module)
     module.verify()
@@ -364,7 +366,7 @@ class TestForLowering:
         assert move_ops[0].imm.data == expected_count
 
     def test_step_one_emits_not_add_without_multiply(self):
-        """step=1 emits only NOT + ADD (lb+count+1 as immediate); no multiply op."""
+        """Step=1 emits only NOT + ADD (lb+count+1 as immediate); no multiply op."""
         lb_op = ArithConstantOp.from_int_and_width(3, IndexType())
         ub_op = ArithConstantOp.from_int_and_width(8, IndexType())
         step_op = ArithConstantOp.from_int_and_width(1, IndexType())

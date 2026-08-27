@@ -581,9 +581,9 @@ class TestRewritePreQ1AcquireOp:
         assert [a.index.data for a in seq.acquisitions] == [0, 1]
 
     def test_two_weighted_different_frames(self):
-        """Two weighted acquires on different frames lower to
-        AcquireWeightedImmRsRsRsImmOp with consecutive acq_idx and weight_idx values,
-        correct durations, and four weight table entries."""
+        """Two weighted acquires on different frames lower to AcquireWeightedImmRsRsRsImmOp
+        with consecutive acq_idx and weight_idx values, correct durations, and four weight
+        table entries."""
         seq, acq_ops = self._run(
             (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000, "q0/measure"),
             (WeightsAttr(np.array([1.0 + 0.0j, 0.0 + 1.0j])), 800, "q1/measure"),
