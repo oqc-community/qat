@@ -387,6 +387,8 @@ the sidelobe level.</p>
 <p>The Blackman window offers excellent spectral leakage
 suppression. Only <code class="docutils literal notranslate"><span class="pre">width</span></code> (inherited) controls the shape.
 See original paper <a class="reference external" href="https://doi.org/10.1002/j.1538-7305.1958.tb03874.x">Blackman &amp; Tukey (1958)</a>.</p>
+<a class="reference internal image-reference" href="_images/waveform/blackman_waveform.png"><img alt="Annotated BlackmanWaveform comparison showing different widths." class="align-center" src="_images/waveform/blackman_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -425,6 +427,8 @@ validated to form a valid model.</p>
 \[f(t) = \cos(2\pi\,f\,t + \varphi)\]</div>
 <p>where <span class="math notranslate nohighlight">\(f\)</span> = <code class="docutils literal notranslate"><span class="pre">frequency</span></code> and <span class="math notranslate nohighlight">\(\varphi\)</span> =
 <code class="docutils literal notranslate"><span class="pre">internal_phase</span></code>.</p>
+<a class="reference internal image-reference" href="_images/waveform/cos_waveform.png"><img alt="Annotated CosWaveform comparison showing frequency and internal phase differences." class="align-center" src="_images/waveform/cos_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -527,6 +531,8 @@ validated to form a valid model.</p>
 <p>which is then min/max normalised to <span class="math notranslate nohighlight">\([0, 1]\)</span>.
 Identical to <a class="reference internal" href="#qat.ir.waveforms.SofterSquareWaveform" title="qat.ir.waveforms.SofterSquareWaveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">SofterSquareWaveform</span></code></a> but with a
 <code class="docutils literal notranslate"><span class="pre">2×rise</span></code> inset instead of <code class="docutils literal notranslate"><span class="pre">1×rise</span></code>.</p>
+<a class="reference internal image-reference" href="_images/waveform/extra_soft_square_waveform.png"><img alt="Annotated ExtraSoftSquareWaveform comparison showing std_dev and rise differences." class="align-center" src="_images/waveform/extra_soft_square_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -574,8 +580,10 @@ e^{-(t - s/2)^{2}/(2\sigma^{2})} &amp; t &gt; s/2
 \end{cases}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(s\)</span> = <code class="docutils literal notranslate"><span class="pre">square_width</span></code> and <span class="math notranslate nohighlight">\(\sigma\)</span> =
 <code class="docutils literal notranslate"><span class="pre">std_dev</span></code>. When <code class="docutils literal notranslate"><span class="pre">zero_at_edges</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> the envelope
-is offset and rescaled to be zero at the outermost samples.
-See <a class="reference external" href="https://doi.org/10.1103/PhysRevA.93.060302">Sheldon et al. (2016)</a> for use in
+is offset and rescaled to be zero at the outermost samples.</p>
+<a class="reference internal image-reference" href="_images/waveform/gaussian_square_waveform.png"><img alt="Annotated GaussianSquareWaveform comparison showing square width and edge softness differences." class="align-center" src="_images/waveform/gaussian_square_waveform.png" style="width: 700px;" />
+</a>
+<p>See <a class="reference external" href="https://doi.org/10.1103/PhysRevA.93.060302">Sheldon et al. (2016)</a> for use in
 cross-resonance gates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -622,6 +630,8 @@ validated to form a valid model.</p>
 <div class="math notranslate nohighlight">
 \[f(t) = e^{-(t / k)^{2}}\]</div>
 <p>where <span class="math notranslate nohighlight">\(k = \text{width} \times \text{rise}\)</span>.</p>
+<a class="reference internal image-reference" href="_images/waveform/gaussian_waveform.png"><img alt="Annotated GaussianWaveform envelope showing width and rise scaling." class="align-center" src="_images/waveform/gaussian_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -665,6 +675,8 @@ validated to form a valid model.</p>
 <div class="math notranslate nohighlight">
 \[f(t) = \frac{g(t) - g(w/2)}{1 - g(w/2)}\]</div>
 <p>ensuring <span class="math notranslate nohighlight">\(f(\pm w/2) = 0\)</span> and <span class="math notranslate nohighlight">\(f(0) = 1\)</span>.</p>
+<a class="reference internal image-reference" href="_images/waveform/gaussian_zero_edge_waveform.png"><img alt="Annotated GaussianZeroEdgeWaveform comparison with and without zero_at_edges normalisation." class="align-center" src="_images/waveform/gaussian_zero_edge_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -763,6 +775,8 @@ validated to form a valid model.</p>
 <span class="math notranslate nohighlight">\(x_2 = (w + \sigma)/2\)</span>, <span class="math notranslate nohighlight">\(r\)</span> = <code class="docutils literal notranslate"><span class="pre">rise</span></code>,
 <span class="math notranslate nohighlight">\(w\)</span> = <code class="docutils literal notranslate"><span class="pre">width</span></code>, and <span class="math notranslate nohighlight">\(c\)</span> is a normalisation
 constant.</p>
+<a class="reference internal image-reference" href="_images/waveform/rounded_square_waveform.png"><img alt="Annotated RoundedSquareWaveform comparison showing rise and std_dev differences." class="align-center" src="_images/waveform/rounded_square_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -854,6 +868,8 @@ validated to form a valid model.</p>
 <p>The sech pulse has the desirable property of being its own
 Fourier transform (up to scaling), making it self-similar in
 time and frequency. See <a class="reference external" href="https://doi.org/10.1103/PhysRev.40.502">Rosen &amp; Zener (1932)</a>.</p>
+<a class="reference internal image-reference" href="_images/waveform/sech_waveform.png"><img alt="Annotated SechWaveform comparison showing different std_dev widths." class="align-center" src="_images/waveform/sech_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -898,6 +914,8 @@ validated to form a valid model.</p>
 followed by a lower-amplitude <em>hold</em> portion.</p>
 <p>The setup section occupies the first <code class="docutils literal notranslate"><span class="pre">rise</span></code> seconds of the pulse;
 the hold section occupies the remainder (<code class="docutils literal notranslate"><span class="pre">width</span> <span class="pre">-</span> <span class="pre">rise</span></code> seconds).</p>
+<a class="reference internal image-reference" href="_images/waveform/setup_hold_waveform.png"><img alt="Annotated SetupHoldWaveform comparison showing setup duration and amplitude differences." class="align-center" src="_images/waveform/setup_hold_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -940,6 +958,8 @@ validated to form a valid model.</p>
 \[f(t) = \sin(2\pi\,f\,t + \varphi)\]</div>
 <p>where <span class="math notranslate nohighlight">\(f\)</span> = <code class="docutils literal notranslate"><span class="pre">frequency</span></code> and <span class="math notranslate nohighlight">\(\varphi\)</span> =
 <code class="docutils literal notranslate"><span class="pre">internal_phase</span></code>.</p>
+<a class="reference internal image-reference" href="_images/waveform/sin_waveform.png"><img alt="Annotated SinWaveform comparison showing frequency and internal phase differences." class="align-center" src="_images/waveform/sin_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -988,6 +1008,8 @@ validated to form a valid model.</p>
 - \tanh\!\bigl(\tfrac{t - (w-r)/2}{r}\bigr)
 \bigr]\]</div>
 <p>where <span class="math notranslate nohighlight">\(w\)</span> = <code class="docutils literal notranslate"><span class="pre">width</span></code> and <span class="math notranslate nohighlight">\(r\)</span> = <code class="docutils literal notranslate"><span class="pre">rise</span></code>.</p>
+<a class="reference internal image-reference" href="_images/waveform/soft_square_waveform.png"><img alt="Annotated SoftSquareWaveform comparison showing rise differences." class="align-center" src="_images/waveform/soft_square_waveform.png" style="width: 700px;" />
+</a>
 <p>Edge sharpness depends on <code class="docutils literal notranslate"><span class="pre">rise</span></code>; very small values can
 introduce discontinuities at the truncation boundary.</p>
 <dl class="field-list simple">
@@ -1033,6 +1055,8 @@ validated to form a valid model.</p>
 <span class="math notranslate nohighlight">\(k = \text{width} \times \text{rise}\)</span>) but subtracts the
 edge value and rescales, ensuring the pulse is exactly zero at
 the edges and peaks at 1.</p>
+<a class="reference internal image-reference" href="_images/waveform/softer_gaussian_waveform.png"><img alt="Annotated SofterGaussianWaveform comparison showing rise differences." class="align-center" src="_images/waveform/softer_gaussian_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1074,6 +1098,8 @@ validated to form a valid model.</p>
      - \tanh\!\bigl(\tfrac{t - \sigma/2 + r}{r}\bigr)\]</div>
 <p>which is then min/max normalised to <span class="math notranslate nohighlight">\([0, 1]\)</span>.
 Here <span class="math notranslate nohighlight">\(\sigma\)</span> = <code class="docutils literal notranslate"><span class="pre">std_dev</span></code> and <span class="math notranslate nohighlight">\(r\)</span> = <code class="docutils literal notranslate"><span class="pre">rise</span></code>.</p>
+<a class="reference internal image-reference" href="_images/waveform/softer_square_waveform.png"><img alt="Annotated SofterSquareWaveform comparison showing std_dev and rise differences." class="align-center" src="_images/waveform/softer_square_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1114,6 +1140,8 @@ validated to form a valid model.</p>
 <dd><p>Bases: <a class="reference internal" href="#qat.ir.waveforms.Waveform" title="qat.ir.waveforms.Waveform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waveform</span></code></a></p>
 <p>A flat (rectangular) pulse.</p>
 <p>The envelope is uniform across the entire <code class="docutils literal notranslate"><span class="pre">width</span></code>.</p>
+<a class="reference internal image-reference" href="_images/waveform/square_waveform.png"><img alt="Annotated SquareWaveform comparison showing different widths." class="align-center" src="_images/waveform/square_waveform.png" style="width: 700px;" />
+</a>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1178,6 +1206,8 @@ applied independently of <code class="docutils literal notranslate"><span class=
 </ul>
 </dd>
 </dl>
+<a class="reference internal image-reference" href="_images/waveform/waveform_generic.png"><img alt="Annotated Waveform diagram showing amp, width, phase, drag and scale_factor." class="align-center" src="_images/waveform/waveform_generic.png" style="width: 700px;" />
+</a>
 <p>See <a class="reference internal" href="#qat.ir.waveforms.Waveform.sample" title="qat.ir.waveforms.Waveform.sample"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sample()</span></code></a> for the full mathematical formula.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
