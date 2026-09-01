@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.frontend.importer.pulse.purr module &mdash; qat-compiler 3.0.0.post344.dev20260901110159 documentation</title>
+  <title>qat.experimental.frontend.importer.pulse.purr module &mdash; qat-compiler 3.0.0.post345.dev20260901154520 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.experimental.frontend.importer.base module" href="qat.experimental.frontend.importer.base.html" />
-    <link rel="prev" title="qat.experimental.frontend.importer.pulse.builder module" href="qat.experimental.frontend.importer.pulse.builder.html" /> 
+    <link rel="prev" title="qat.experimental.frontend.importer.pulse.post_processing module" href="qat.experimental.frontend.importer.pulse.post_processing.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -269,6 +269,7 @@
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.pulse.html">qat.experimental.system_data.pulse package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.constraints.html">qat.experimental.system_data.pulse.constraints module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.pulse.post_processing.html">qat.experimental.system_data.pulse.post_processing module</a></li>
 </ul>
 </li>
 </ul>
@@ -670,7 +671,7 @@
 <span id="qat-experimental-frontend-importer-pulse-purr-module"></span><h1>qat.experimental.frontend.importer.pulse.purr module<a class="headerlink" href="#module-qat.experimental.frontend.importer.pulse.purr" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.frontend.importer.pulse.purr.PurrImporter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PurrImporter</span></span><a class="headerlink" href="#qat.experimental.frontend.importer.pulse.purr.PurrImporter" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PurrImporter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">post_selection_builder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.frontend.importer.pulse.purr.PurrImporter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Takes a PuRR builder and produces a module representing that program.</p>
 <p>From a high-level, the module consists of two objects:</p>
@@ -688,13 +689,27 @@ results processing operations happen, and collecting unique pulse channels (fram
 This allows us to structure the program in a way that does not necessarily map onto the
 builder in a linear fashion, but instead allows us to produce the structure described
 above.</p>
+<p>Initialise the importer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.frontend.importer.pulse.purr.PurrImporter.params.post_selection_builder"></span><strong>post_selection_builder</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.frontend.importer.pulse.purr.PurrImporter.params.post_selection_builder">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.experimental.frontend.importer.pulse.post_processing.html#qat.experimental.frontend.importer.pulse.post_processing.PostSelectionBuilder" title="qat.experimental.frontend.importer.pulse.post_processing.PostSelectionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectionBuilder</span></code></a>]</span>) – Optional post-selection builder. When provided
+and enabled, a <a class="reference internal" href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.PostSelectOp" title="qat.experimental.dialect.results.ir.PostSelectOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostSelectOp</span></code></a>
+is inserted after the results map in the main function, filtering shots
+whose discriminated states are disallowed. Pass
+<code class="docutils literal notranslate"><span class="pre">PostSelectionBuilder(PostProcessing.derive(system_data),</span>
+<span class="pre">enabled=config.post_selection)</span></code> at the call site.</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.frontend.importer.pulse.purr.PurrImporter.build">
 <span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">purr_ir</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.frontend.importer.pulse.purr.PurrImporter.build" title="Link to this definition"></a></dt>
 <dd><p>Translate <em>purr_ir</em> into a module containing a kernel and a main function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span></p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.frontend.importer.pulse.purr.PurrImporter.build.params.purr_ir"></span><strong>purr_ir</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.frontend.importer.pulse.purr.PurrImporter.build.params.purr_ir">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder" title="qat.purr.compiler.builders.QuantumInstructionBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code></a></span>) – The purr IR to translate.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -718,7 +733,7 @@ above.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.experimental.frontend.importer.pulse.builder.html" class="btn btn-neutral float-left" title="qat.experimental.frontend.importer.pulse.builder module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.experimental.frontend.importer.pulse.post_processing.html" class="btn btn-neutral float-left" title="qat.experimental.frontend.importer.pulse.post_processing module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.experimental.frontend.importer.base.html" class="btn btn-neutral float-right" title="qat.experimental.frontend.importer.base module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
