@@ -37,8 +37,18 @@ from qat.experimental.dialect.pulse.ir.attributes import (
     RealThresholdPolicyAttr,
     SampledWaveformAttr,
 )
-from qat.experimental.dialect.results.ir import CreateOp, ExtractOp, MapOp, RecordType
+from qat.experimental.dialect.results.ir import (
+    CreateOp,
+    ExtractOp,
+    MapOp,
+    PostSelectOp,
+    RecordType,
+)
+from qat.experimental.frontend.importer.pulse.post_processing import PostSelectionBuilder
 from qat.experimental.frontend.importer.pulse.purr import PurrImporter
+from qat.experimental.system_data.pulse.post_processing import (
+    PostProcessing as PostSelectionData,
+)
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
@@ -1228,3 +1238,126 @@ class TestPurrImporterModuleStructure:
         imp = PurrImporter()
         with pytest.raises(ValueError, match="Unsupported shape"):
             imp.build(builder)
+
+
+class TestPurrImporterPostSelection:
+    """Tests that post-selection is correctly applied when a PostSelectionBuilder is
+    provided to the importer."""
+
+    def _make_builder_with_acquire(
+        self, hw, output_variable: str = "meas0"
+    ) -> QuantumInstructionBuilder:
+        """Returns a builder with a single INTEGRATOR acquire on qubit 0."""
+        builder = QuantumInstructionBuilder(hw)
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable=output_variable
+            )
+        )
+        builder.add(
+            PostProcessing(
+                builder.instructions[-1],
+                process=PostProcessType.DISCRIMINATE,
+                args=[0.0],
+            )
+        )
+        return builder
+
+    def _post_selection_builder(
+        self,
+        hw,
+        enabled: bool = True,
+        disallowed_states: frozenset[int] = frozenset({-1}),
+    ) -> PostSelectionBuilder:
+        ch = hw.get_qubit(0).get_acquire_channel()
+        pp = PostSelectionData(
+            channel_to_disallowed_states={ch.full_id(): set(disallowed_states)},
+            known_channel_ids=frozenset({ch.full_id()}),
+        )
+        return PostSelectionBuilder(pp, enabled=enabled)
+
+    def _main_ops(self, module: ModuleOp) -> list:
+        main = next(
+            op
+            for op in module.body.block.ops
+            if isinstance(op, func.FuncOp) and op.sym_name.data == "main"
+        )
+        return list(main.body.block.ops)
+
+    def test_no_post_selection_builder_emits_no_post_select_op(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        module = PurrImporter().build(builder)
+        assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
+
+    def test_disabled_builder_emits_no_post_select_op(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        psb = self._post_selection_builder(hw, enabled=False)
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
+
+    def test_no_disallowed_states_emits_no_post_select_op(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        psb = self._post_selection_builder(hw, disallowed_states=frozenset())
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
+
+    def test_enabled_with_disallowed_states_emits_post_select_op(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        psb = self._post_selection_builder(hw, enabled=True)
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        assert any(isinstance(op, PostSelectOp) for op in _ops(module))
+
+    def test_post_select_op_appears_after_map_op_in_main(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        psb = self._post_selection_builder(hw, enabled=True)
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        main_ops = self._main_ops(module)
+        op_types = [type(op) for op in main_ops]
+        assert MapOp in op_types
+        assert PostSelectOp in op_types
+        assert op_types.index(MapOp) < op_types.index(PostSelectOp)
+
+    def test_post_select_op_predicate_key_matches_output_variable(self, hw):
+        builder = self._make_builder_with_acquire(hw, output_variable="meas0")
+        psb = self._post_selection_builder(hw, enabled=True)
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        post_select_ops = _ops_of_type(module, PostSelectOp)
+        assert len(post_select_ops) == 1
+        predicate_keys = [p.key.data for p in post_select_ops[0].predicates.data]
+        assert "meas0" in predicate_keys
+
+    def test_post_select_op_predicate_disallowed_states_match(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        psb = self._post_selection_builder(hw, disallowed_states=frozenset({-1, -2}))
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        post_select_ops = _ops_of_type(module, PostSelectOp)
+        assert len(post_select_ops) == 1
+        predicate = post_select_ops[0].predicates.data[0]
+        assert {s.data for s in predicate.disallowed_values.data} == {-1, -2}
+
+    def test_return_op_uses_post_select_result_when_present(self, hw):
+        builder = self._make_builder_with_acquire(hw)
+        psb = self._post_selection_builder(hw, enabled=True)
+        module = PurrImporter(post_selection_builder=psb).build(builder)
+        main_ops = self._main_ops(module)
+        return_op = next(op for op in main_ops if isinstance(op, func.ReturnOp))
+        post_select_op = next(op for op in main_ops if isinstance(op, PostSelectOp))
+        assert return_op.operands[0] is post_select_op.result
+
+    def test_unrelated_channel_produces_no_post_select_op(self, hw):
+        """A PostSelectionBuilder whose disallowed states are for a different channel than
+        the one acquired should not emit a PostSelectOp.
+
+        A warning is expected because the acquired channel ID is not known to the post-
+        processing data.
+        """
+        builder = self._make_builder_with_acquire(hw)
+        pp = PostSelectionData(
+            channel_to_disallowed_states={"some_other_channel_id": {-1}},
+            known_channel_ids=frozenset({"some_other_channel_id"}),
+        )
+        psb = PostSelectionBuilder(pp, enabled=True)
+        with pytest.warns(UserWarning, match="Unmatched channels"):
+            module = PurrImporter(post_selection_builder=psb).build(builder)
+        assert not any(isinstance(op, PostSelectOp) for op in _ops(module))

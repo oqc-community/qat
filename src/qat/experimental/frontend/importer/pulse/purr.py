@@ -27,11 +27,13 @@ from qat.experimental.dialect.results.ir import (
     CreateOp,
     ExtractOp,
     MapOp,
+    PostSelectOp,
     RecordType,
     ResultsCollectionType,
     YieldOp,
 )
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
+from qat.experimental.frontend.importer.pulse.post_processing import PostSelectionBuilder
 from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
 from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
 from qat.experimental.waveforms.shapes.rounded_square import RoundedSquareWaveformShape
@@ -168,19 +170,41 @@ class PurrImporter:
     above.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        post_selection_builder: PostSelectionBuilder | None = None,
+    ) -> None:
+        """Initialise the importer.
+
+        :param post_selection_builder: Optional post-selection builder. When provided
+            and enabled, a :class:`~qat.experimental.dialect.results.ir.PostSelectOp`
+            is inserted after the results map in the main function, filtering shots
+            whose discriminated states are disallowed. Pass
+            ``PostSelectionBuilder(PostProcessing.derive(system_data),
+            enabled=config.post_selection)`` at the call site.
+        """
         self._waveform_index = 0
+        self._post_selection_builder = post_selection_builder
+        self._label_to_channel: dict[str, str] = {}
 
-    def build(self, purr_ir: QuantumInstructionBuilder) -> ModuleOp:
-        """Translate *purr_ir* into a module containing a kernel and a main function."""
+    def build(
+        self,
+        purr_ir: QuantumInstructionBuilder,
+    ) -> ModuleOp:
+        """Translate *purr_ir* into a module containing a kernel and a main function.
 
+        :param purr_ir: The purr IR to translate.
+        """
+        self._label_to_channel = {}
         analysis = _PurrAnalysis.from_builder(purr_ir)
         if analysis.sweeps:
             raise NotImplementedError("Sweep instructions are not yet supported.")
 
         kernel = self._build_kernel(analysis)
         kernel_collection_type = kernel.function_type.outputs.data[0]
-        main = self._build_main(analysis, kernel_collection_type)
+        main = self._build_main(
+            analysis, kernel_collection_type, self._post_selection_builder
+        )
         return ModuleOp(ops=[kernel, main])
 
     def _build_kernel(self, analysis: _PurrAnalysis) -> KernelOp:
@@ -198,16 +222,64 @@ class PurrImporter:
         self,
         analysis: _PurrAnalysis,
         kernel_collection_type: ResultsCollectionType,
+        post_selection_builder: PostSelectionBuilder | None = None,
     ) -> func.FuncOp:
-        """Build the main function that calls the kernel and maps results."""
+        """Build the main function that calls the kernel and maps results.
+
+        The function structure is:
+
+        1. :class:`~qat.experimental.dialect.pulse.ir.CallKernelOp` — executes the
+           pulse kernel, returning a raw IQ results collection.
+        2. :class:`~qat.experimental.dialect.results.ir.MapOp` — discriminates each
+           raw IQ record into integer state labels.
+        3. :class:`~qat.experimental.dialect.results.ir.PostSelectOp` — (optional)
+           discards shots whose discriminated states are disallowed. Only emitted when
+           *post_selection_builder* is provided, enabled, and at least one acquire
+           channel has disallowed states in the system data.
+        4. :class:`~xdsl.dialects.func.ReturnOp` — returns the final collection.
+
+        :param analysis: Analysed purr program.
+        :param kernel_collection_type: The result type of the kernel, used to type the
+            :class:`~qat.experimental.dialect.pulse.ir.CallKernelOp`.
+        :param post_selection_builder: Optional post-selection builder.
+        """
         entry_block = Block()
         call = CallKernelOp(_KERNEL_NAME, [], [kernel_collection_type])
         entry_block.add_ops([call])
         collection = call.result[0]
         map_op = self._build_results_map(collection, analysis)
-        entry_block.add_ops([map_op, func.ReturnOp(map_op.result)])
-        main = func.FuncOp("main", ((), (map_op.result.type,)), Region(entry_block))
+
+        ops = [map_op]
+        final_result = self._build_post_selection(post_selection_builder, ops)
+        ops.append(func.ReturnOp(final_result))
+        entry_block.add_ops(ops)
+        main = func.FuncOp("main", ((), (final_result.type,)), Region(entry_block))
         return main
+
+    def _build_post_selection(
+        self,
+        post_selection_builder: PostSelectionBuilder | None,
+        ops: list,
+    ) -> SSAValue:
+        """Optionally append a :class:`~qat.experimental.dialect.results.ir.PostSelectOp` to
+        *ops* and return the SSA value that should be wired to the return op.
+
+        :param post_selection_builder: Optional post-selection builder.
+        :param ops: ``ops[0]`` must be the :class:`~qat.experimental.dialect.results.ir.MapOp`.
+        :returns: The SSA value to pass to ``func.ReturnOp``.
+        """
+        if post_selection_builder is not None:
+            post_select = post_selection_builder.apply(
+                ops[0].result, self._label_to_channel
+            )
+            if isinstance(post_select, PostSelectOp):
+                ops.append(post_select)
+                final_result = post_select.result
+            else:
+                final_result = ops[0].result
+        else:
+            final_result = ops[0].result
+        return final_result
 
     def _initialise_builder(
         self,
@@ -701,6 +773,7 @@ class PurrImporter:
     @translate.register
     def _(self, value: Acquire, builder: PulseKernelBuilder) -> None:
         frame_name = self._frame_key(value.quantum_targets[0])
+        self._label_to_channel[value.output_variable] = frame_name
         weights = None
         if value.filter is not None:
             if not isinstance(value.filter, CustomPulse):
