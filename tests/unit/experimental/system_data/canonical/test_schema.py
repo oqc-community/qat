@@ -23,6 +23,7 @@ from qat.experimental.system_data.canonical.schema import (
     ModeData,
     OperationBinaryExprData,
     OperationData,
+    OperationModeReferenceData,
     OperationNamedConstantData,
     OperationParameterRefData,
     OperationVariantData,
@@ -72,10 +73,16 @@ SCHEMA_CASES = [
         PulseOperationStepData,
         {"mode_id": "mode0", "waveform_definition": "wf0"},
     ),
-    (SyncOperationStepData, {"mode_ids": frozenset({"mode0"})}),
+    (
+        SyncOperationStepData,
+        {"mode_refs": frozenset({OperationModeReferenceData(mode_id="mode0")})},
+    ),
     (
         PhaseSetOperationStepData,
-        {"mode_id": "mode0", "phase": OperationParameterRefData(parameter="theta")},
+        {
+            "mode_ref": OperationModeReferenceData(mode_id="mode0"),
+            "phase": OperationParameterRefData(parameter="theta"),
+        },
     ),
     (OperationData, {"id": "op0"}),
     (
@@ -214,13 +221,15 @@ def test_canonical_system_data_accepts_nested_records():
                 when=None,
                 operation_steps=(
                     PhaseSetOperationStepData(
-                        mode_id="mode0",
+                        mode_ref=OperationModeReferenceData(mode_id="mode0"),
                         phase=OperationParameterRefData(parameter="theta"),
                     ),
                     PulseOperationStepData(mode_id="mode0", waveform_definition="wf0"),
                     AcquireOperationStepData(mode_id="mode0", acquire_definition="acq0"),
                     DelayOperationStepData(mode_id="mode0", duration=20_000),
-                    SyncOperationStepData(mode_ids=frozenset({"mode0"})),
+                    SyncOperationStepData(
+                        mode_refs=frozenset({OperationModeReferenceData(mode_id="mode0")})
+                    ),
                 ),
             ),
         ),
@@ -265,10 +274,9 @@ def test_canonical_system_data_accepts_nested_records():
     assert system_data.channels[0].port_id == "p0"
     assert system_data.channels[0].oscillator_reference == "osc0"
     assert system_data.qubits[0].modes[0].waveform_definitions[0].id == "wf0"
-    assert (
-        system_data.qubits[0].operations[0].variants[0].operation_steps[0].mode_id
-        == "mode0"
-    )
+    assert system_data.qubits[0].operations[0].variants[0].operation_steps[
+        0
+    ].mode_ref == OperationModeReferenceData(mode_id="mode0")
     assert system_data.qubits[0].modes[0].post_process_method is not None
     assert system_data.qubits[0].modes[0].post_process_method.method == "max_likelihood"
     assert system_data.qubits[0].modes[0].preselect_disallowed_states == frozenset({1})
@@ -365,42 +373,40 @@ def test_delay_operation_step_data_accepts_symbolic_expression_duration():
 def test_phase_shift_step_data_basic_construction():
     """PhaseShiftOperationStepData can be constructed with required fields."""
     step = PhaseShiftOperationStepData(
-        mode_id="drive",
+        mode_ref=OperationModeReferenceData(mode_id="drive"),
         phase=OperationNamedConstantData(name="pi"),
     )
-    assert step.mode_id == "drive"
-    assert step.qubit_id is None
+    assert step.mode_ref == OperationModeReferenceData(mode_id="drive")
 
 
 def test_phase_shift_step_data_qubit_id_defaults_to_none():
     """qubit_id defaults to None (same-qubit reference)."""
     step = PhaseShiftOperationStepData(
-        mode_id="drive",
+        mode_ref=OperationModeReferenceData(mode_id="drive"),
         phase=OperationBinaryExprData(
             op="div", left=OperationNamedConstantData(name="pi"), right=2
         ),
     )
-    assert step.qubit_id is None
+    assert step.mode_ref.qubit_id is None
 
 
 def test_phase_shift_step_data_accepts_cross_qubit_id():
     """qubit_id can be set to reference a mode on a different qubit."""
     step = PhaseShiftOperationStepData(
-        mode_id="q0.cross_resonance",
+        mode_ref=OperationModeReferenceData(mode_id="q0.cross_resonance", qubit_id="q1"),
         phase=OperationNamedConstantData(name="pi"),
-        qubit_id="q1",
     )
-    assert step.qubit_id == "q1"
+    assert step.mode_ref.qubit_id == "q1"
 
 
 def test_phase_shift_step_data_is_frozen():
     """PhaseShiftOperationStepData instances are immutable."""
     step = PhaseShiftOperationStepData(
-        mode_id="drive",
+        mode_ref=OperationModeReferenceData(mode_id="drive"),
         phase=OperationNamedConstantData(name="pi"),
     )
     with pytest.raises(FrozenInstanceError):
-        step.mode_id = "other"  # type: ignore[misc]
+        step.mode_ref = OperationModeReferenceData(mode_id="other")  # type: ignore[misc]
 
 
 # ── ErrorOperationStepData ────────────────────────────────────────────────────

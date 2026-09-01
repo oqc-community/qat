@@ -52,6 +52,7 @@ from qat.experimental.system_data.canonical.schema import (
     OperationCapabilityPredicateData,
     OperationComparisonPredicateData,
     OperationData,
+    OperationModeReferenceData,
     OperationNamedConstantData,
     OperationParameterData,
     OperationParameterRefData,
@@ -323,20 +324,28 @@ def make_rz_gate(
     )
     _theta_ref = OperationParameterRefData(parameter="theta")
 
-    steps: list = [PhaseShiftOperationStepData(mode_id="drive", phase=_theta_ref)]
+    steps: list = [
+        PhaseShiftOperationStepData(
+            mode_ref=OperationModeReferenceData(mode_id="drive"), phase=_theta_ref
+        )
+    ]
     for target_id in coupled_qubit_ids:
         steps.append(
             PhaseShiftOperationStepData(
-                mode_id=f"{target_id}.cross_resonance_cancellation",
+                mode_ref=OperationModeReferenceData(
+                    mode_id=f"{target_id}.cross_resonance_cancellation"
+                ),
                 phase=_theta_ref,
             )
         )
         if own_qubit_id is not None:
             steps.append(
                 PhaseShiftOperationStepData(
-                    mode_id=f"{own_qubit_id}.cross_resonance",
+                    mode_ref=OperationModeReferenceData(
+                        mode_id=f"{own_qubit_id}.cross_resonance",
+                        qubit_id=target_id,
+                    ),
                     phase=_theta_ref,
-                    qubit_id=target_id,
                 )
             )
 
@@ -736,7 +745,14 @@ def make_zx_operation(
     :param own_qubit_id: Identifier of the owning control qubit (e.g. ``"q0"``).
     """
     _theta_ref = OperationParameterRefData(parameter="theta")
-    cr_mode = f"{target_qubit_id}.cross_resonance"
+    cr_mode = OperationModeReferenceData(
+        qubit_id=own_qubit_id,
+        mode_id=f"{target_qubit_id}.cross_resonance",
+    )
+    cancellation_mode = OperationModeReferenceData(
+        qubit_id=target_qubit_id,
+        mode_id=f"{own_qubit_id}.cross_resonance_cancellation",
+    )
 
     def _zx_variant(
         when_value: Any,
@@ -751,12 +767,14 @@ def make_zx_operation(
                 tolerance=_RADIAN_ISCLOSE_TOLERANCE,
             ),
             operation_steps=(
-                SyncOperationStepData(mode_ids=frozenset({cr_mode})),
-                PulseOperationStepData(mode_id=cr_mode, waveform_definition=waveform),
+                SyncOperationStepData(mode_refs=frozenset({cr_mode, cancellation_mode})),
+                PulseOperationStepData(
+                    mode_id=cr_mode.mode_id, waveform_definition=waveform
+                ),
                 OperationReferenceStepData(
                     operation_id=cancellation_op_id, qubit_id=target_qubit_id
                 ),
-                SyncOperationStepData(mode_ids=frozenset({cr_mode})),
+                SyncOperationStepData(mode_refs=frozenset({cr_mode, cancellation_mode})),
             ),
         )
 

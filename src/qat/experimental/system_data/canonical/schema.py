@@ -549,15 +549,29 @@ class PulseOperationStepData:
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
+class OperationModeReferenceData:
+    """Reference to a mode owned by a qubit.
+
+    :ivar mode_id: Referenced mode identifier.
+    :ivar qubit_id: Optional qubit identifier for cross-qubit mode references.
+        When ``None`` the mode belongs to the qubit that owns the operation.
+    """
+
+    mode_id: str
+    qubit_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
 class SyncOperationStepData:
     """Single synchronization step in an operation expansion.
 
-    A step links an operation to a set of modes for synchronization.
+    A step links an operation to a set of modes for synchronization. Modes may belong to the
+    qubit owning the operation or to other qubits.
 
-    :ivar mode_ids: Referenced mode identifiers.
+    :ivar mode_refs: Referenced mode and owning-qubit pairs.
     """
 
-    mode_ids: frozenset[str]
+    mode_refs: frozenset[OperationModeReferenceData]
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -569,19 +583,15 @@ class PhaseShiftOperationStepData:
 
     When applied to the ``drive`` mode the runtime is expected to propagate the frame
     shift to all associated cross-resonance and cross-resonance-cancellation modes via
-    the accompanying ``qubit_id``-qualified steps in the same variant (one per coupled
-    qubit).
+    accompanying cross-qubit mode references in the same variant (one per coupled qubit).
 
-    :ivar mode_id: The mode whose reference frame is shifted.
+    :ivar mode_ref: The mode whose reference frame is shifted.
     :ivar phase: Symbolic phase value in radians as a numeric symbolic value.
         Non-numeric types (``str``, ``bool``) are excluded.
-    :ivar qubit_id: Optional qubit identifier for cross-qubit mode references.
-        When ``None`` the mode belongs to the same qubit that owns the operation.
     """
 
-    mode_id: str
+    mode_ref: OperationModeReferenceData
     phase: NumericSymbolicValueData
-    qubit_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -592,16 +602,13 @@ class PhaseSetOperationStepData:
     hardware implementation sets the frame offset on the specified mode to the supplied
     value.
 
-    :ivar mode_id: The mode whose reference frame is set.
+    :ivar mode_ref: The mode whose reference frame is set.
     :ivar phase: Symbolic phase value in radians as a numeric symbolic value.
         Non-numeric types (``str``, ``bool``) are excluded.
-    :ivar qubit_id: Optional qubit identifier for cross-qubit mode references.
-        When ``None`` the mode belongs to the same qubit that owns the operation.
     """
 
-    mode_id: str
+    mode_ref: OperationModeReferenceData
     phase: NumericSymbolicValueData
-    qubit_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

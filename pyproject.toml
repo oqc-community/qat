@@ -167,6 +167,13 @@ html_theme_options.navigation_depth = 6
 html_theme_options.includehidden = true
 html_theme_options.titles_only = false
 
+# This is not consistent across the code base, should we set it to true?
+[tool.docformatter]
+blank = false
+in-place = true
+wrap-summaries = 92
+wrap-descriptions = 92
+
 [tool.ruff]
 # Explicit set of rules for linting and formatting
 line-length = 92

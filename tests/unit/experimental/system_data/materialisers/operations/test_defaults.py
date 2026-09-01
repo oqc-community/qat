@@ -12,6 +12,7 @@ from qat.experimental.system_data.canonical.schema import (
     OperationCapabilityPredicateData,
     OperationComparisonPredicateData,
     OperationData,
+    OperationModeReferenceData,
     OperationNamedConstantData,
     OperationPredicateClauseData,
     OperationReferenceStepData,
@@ -328,8 +329,7 @@ class TestRzGate:
         PhaseShiftOperationStepData."""
         (step,) = op.variants[0].operation_steps
         assert isinstance(step, PhaseShiftOperationStepData)
-        assert step.mode_id == "drive"
-        assert step.qubit_id is None
+        assert step.mode_ref == OperationModeReferenceData(mode_id="drive")
 
     def test_has_optional_theta_defaulting_to_pi(self, op):
         """Verify that rz has a single optional theta parameter whose default value is π."""
@@ -344,20 +344,23 @@ class TestRzGate:
         """Verify that rz with one coupled qubit includes drive, CRC, and cross-qubit CR
         phase shifts."""
         drive, crc, cr = op_coupled.variants[0].operation_steps
-        assert isinstance(drive, PhaseShiftOperationStepData) and drive.mode_id == "drive"
+        assert isinstance(drive, PhaseShiftOperationStepData)
+        assert drive.mode_ref == OperationModeReferenceData(mode_id="drive")
         assert isinstance(crc, PhaseShiftOperationStepData)
-        assert crc.mode_id == "q1.cross_resonance_cancellation"
-        assert crc.qubit_id is None
+        assert crc.mode_ref == OperationModeReferenceData(
+            mode_id="q1.cross_resonance_cancellation"
+        )
         assert isinstance(cr, PhaseShiftOperationStepData)
-        assert cr.mode_id == "q0.cross_resonance"
-        assert cr.qubit_id == "q1"
+        assert cr.mode_ref == OperationModeReferenceData(
+            mode_id="q0.cross_resonance", qubit_id="q1"
+        )
 
     def test_two_coupled_qubits_step_count(self, op_two_coupled):
         """Verify that rz with two coupled qubits emits 5 steps: drive + 2×(CRC + CR)."""
         # drive + 2*(CRC + CR) = 5 steps
         steps = op_two_coupled.variants[0].operation_steps
         assert len(steps) == 5
-        assert steps[0].mode_id == "drive"
+        assert steps[0].mode_ref == OperationModeReferenceData(mode_id="drive")
 
     def test_all_steps_are_phase_shifts(self, op_two_coupled):
         """Verify that every step in a topology-aware rz variant is a
@@ -371,7 +374,9 @@ class TestRzGate:
         steps = op_no_own_id.variants[0].operation_steps
         # drive + CRC only (no cross-qubit CR without own_qubit_id)
         assert len(steps) == 2
-        assert steps[1].mode_id == "q1.cross_resonance_cancellation"
+        assert steps[1].mode_ref == OperationModeReferenceData(
+            mode_id="q1.cross_resonance_cancellation"
+        )
 
 
 # ── Rx gate ───────────────────────────────────────────────────────────────────
@@ -760,7 +765,14 @@ class TestZxOperation:
         """Verify the π/4 variant: sync → CR pulse → cancellation-tone reference → sync."""
         sync_pre, pulse, cancel_ref, sync_post = op.variants[0].operation_steps
         assert isinstance(sync_pre, SyncOperationStepData)
-        assert "q1.cross_resonance" in sync_pre.mode_ids
+        assert sync_pre.mode_refs == frozenset(
+            {
+                OperationModeReferenceData(mode_id="q1.cross_resonance", qubit_id="q0"),
+                OperationModeReferenceData(
+                    mode_id="q0.cross_resonance_cancellation", qubit_id="q1"
+                ),
+            }
+        )
         assert isinstance(pulse, PulseOperationStepData)
         assert pulse.mode_id == "q1.cross_resonance"
         assert pulse.waveform_definition == "zx_pi_4"
@@ -768,6 +780,7 @@ class TestZxOperation:
         assert cancel_ref.operation_id == "zx_pi_4_cancellation_q0"
         assert cancel_ref.qubit_id == "q1"
         assert isinstance(sync_post, SyncOperationStepData)
+        assert sync_post.mode_refs == sync_pre.mode_refs
 
     def test_neg_pi_4_variant_uses_neg_waveform(self, op):
         """Verify that the −π/4 variant references the zx_neg_pi_4 waveform and matching
@@ -1075,10 +1088,16 @@ class TestDefaultOperations:
         """Verify that the rz operation in a coupled set contains drive, CRC, and cross-
         qubit CR modes."""
         z_gate = next(op for op in ops_coupled if op.id == "rz")
-        mode_ids = [s.mode_id for s in z_gate.variants[0].operation_steps]
-        assert "drive" in mode_ids
-        assert "q1.cross_resonance_cancellation" in mode_ids
-        assert "q0.cross_resonance" in mode_ids
+        mode_refs = [s.mode_ref for s in z_gate.variants[0].operation_steps]
+        assert OperationModeReferenceData(mode_id="drive") in mode_refs
+        assert (
+            OperationModeReferenceData(mode_id="q1.cross_resonance_cancellation")
+            in mode_refs
+        )
+        assert (
+            OperationModeReferenceData(mode_id="q0.cross_resonance", qubit_id="q1")
+            in mode_refs
+        )
 
     def test_as_target_adds_cancellation_ops(self, ops_as_target):
         """Verify that control_qubit_ids appends the expected ZX cancellation-tone

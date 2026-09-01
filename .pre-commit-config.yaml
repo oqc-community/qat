@@ -72,7 +72,8 @@ repos:
     rev: v1.7.7
     hooks:
       - id: docformatter
-        args: ["--in-place", "--wrap-summaries=92", "--wrap-descriptions=92", "--recursive", "."]
+        additional_dependencies: [tomli]
+        args: [--config, ./pyproject.toml]
         files: \.(py)$
   # Python linting and formatting using Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
