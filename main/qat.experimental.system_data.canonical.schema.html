@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.canonical.schema module &mdash; qat-compiler 3.0.0.post343.dev20260901084530 documentation</title>
+  <title>qat.experimental.system_data.canonical.schema module &mdash; qat-compiler 3.0.0.post344.dev20260901110159 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1427,6 +1427,32 @@ operations.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationModeReferenceData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationModeReferenceData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationModeReferenceData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reference to a mode owned by a qubit.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode_id</strong> – Referenced mode identifier.</p></li>
+<li><p><strong>qubit_id</strong> – Optional qubit identifier for cross-qubit mode references.
+When <code class="docutils literal notranslate"><span class="pre">None</span></code> the mode belongs to the qubit that owns the operation.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationModeReferenceData.mode_id">
+<span class="sig-name descname"><span class="pre">mode_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationModeReferenceData.mode_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationModeReferenceData.qubit_id">
+<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationModeReferenceData.qubit_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.OperationNamedConstantData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OperationNamedConstantData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -1690,7 +1716,7 @@ channels and optionally links to the external resource that implements it.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseSetOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseSetOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Virtual phase-set step applied to a mode’s reference frame.</p>
 <p>No physical pulse is emitted. This step represents an absolute phase update: the
@@ -1699,17 +1725,15 @@ value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mode_id</strong> – The mode whose reference frame is set.</p></li>
+<li><p><strong>mode_ref</strong> – The mode whose reference frame is set.</p></li>
 <li><p><strong>phase</strong> – Symbolic phase value in radians as a numeric symbolic value.
 Non-numeric types (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>) are excluded.</p></li>
-<li><p><strong>qubit_id</strong> – Optional qubit identifier for cross-qubit mode references.
-When <code class="docutils literal notranslate"><span class="pre">None</span></code> the mode belongs to the same qubit that owns the operation.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.mode_id">
-<span class="sig-name descname"><span class="pre">mode_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.mode_id" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.mode_ref">
+<span class="sig-name descname"><span class="pre">mode_ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationModeReferenceData" title="qat.experimental.system_data.canonical.schema.OperationModeReferenceData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationModeReferenceData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.mode_ref" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -1717,48 +1741,35 @@ When <code class="docutils literal notranslate"><span class="pre">None</span></c
 <span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.phase" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.qubit_id">
-<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseSetOperationStepData.qubit_id" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShiftOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseShiftOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_ref</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Virtual phase-shift step applied to a mode’s reference frame.</p>
 <p>No physical pulse is emitted. This step represents a virtual Z rotation: the
 hardware implementation tracks the shift as a frame offset on the specified mode.</p>
 <p>When applied to the <code class="docutils literal notranslate"><span class="pre">drive</span></code> mode the runtime is expected to propagate the frame
 shift to all associated cross-resonance and cross-resonance-cancellation modes via
-the accompanying <code class="docutils literal notranslate"><span class="pre">qubit_id</span></code>-qualified steps in the same variant (one per coupled
-qubit).</p>
+accompanying cross-qubit mode references in the same variant (one per coupled qubit).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>mode_id</strong> – The mode whose reference frame is shifted.</p></li>
+<li><p><strong>mode_ref</strong> – The mode whose reference frame is shifted.</p></li>
 <li><p><strong>phase</strong> – Symbolic phase value in radians as a numeric symbolic value.
 Non-numeric types (<code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>) are excluded.</p></li>
-<li><p><strong>qubit_id</strong> – Optional qubit identifier for cross-qubit mode references.
-When <code class="docutils literal notranslate"><span class="pre">None</span></code> the mode belongs to the same qubit that owns the operation.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.mode_id">
-<span class="sig-name descname"><span class="pre">mode_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.mode_id" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.mode_ref">
+<span class="sig-name descname"><span class="pre">mode_ref</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationModeReferenceData" title="qat.experimental.system_data.canonical.schema.OperationModeReferenceData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationModeReferenceData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.mode_ref" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.phase">
 <span class="sig-name descname"><span class="pre">phase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationParameterRefData" title="qat.experimental.system_data.canonical.schema.OperationParameterRefData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationParameterRefData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationNamedConstantData" title="qat.experimental.system_data.canonical.schema.OperationNamedConstantData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationNamedConstantData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationUnaryExprData" title="qat.experimental.system_data.canonical.schema.OperationUnaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationUnaryExprData</span></code></a> <span class="pre">|</span> <a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationBinaryExprData" title="qat.experimental.system_data.canonical.schema.OperationBinaryExprData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationBinaryExprData</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.phase" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.qubit_id">
-<span class="sig-name descname"><span class="pre">qubit_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.PhaseShiftOperationStepData.qubit_id" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2035,18 +2046,19 @@ default parameter values).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.SyncOperationStepData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SyncOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.SyncOperationStepData" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SyncOperationStepData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_refs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.SyncOperationStepData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Single synchronization step in an operation expansion.</p>
-<p>A step links an operation to a set of modes for synchronization.</p>
+<p>A step links an operation to a set of modes for synchronization. Modes may belong to the
+qubit owning the operation or to other qubits.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>mode_ids</strong> – Referenced mode identifiers.</p>
+<dd class="field-odd"><p><strong>mode_refs</strong> – Referenced mode and owning-qubit pairs.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.SyncOperationStepData.mode_ids">
-<span class="sig-name descname"><span class="pre">mode_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.SyncOperationStepData.mode_ids" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.canonical.schema.SyncOperationStepData.mode_refs">
+<span class="sig-name descname"><span class="pre">mode_refs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.canonical.schema.OperationModeReferenceData" title="qat.experimental.system_data.canonical.schema.OperationModeReferenceData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationModeReferenceData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.canonical.schema.SyncOperationStepData.mode_refs" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
