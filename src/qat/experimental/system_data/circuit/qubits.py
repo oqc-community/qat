@@ -10,9 +10,17 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 from qat.experimental.system_data.canonical.schema import (
+    AcquireOperationStepData,
     CanonicalSystemData,
+    DelayOperationStepData,
+    ErrorOperationStepData,
     OperationData,
+    OperationReferenceStepData,
+    PulseOperationStepData,
+    QubitData,
     ReadoutProbabilityData,
+    SyncOperationStepData,
+    WaveformData,
 )
 from qat.experimental.system_data.derived.interface import DerivedViewInterface
 
@@ -41,25 +49,126 @@ def _measurement_fidelity_from_readout(
     return sum(e.probability for e in diagonal) / len(diagonal) if diagonal else None
 
 
-def _flatten_operation_ids(operation: OperationData) -> tuple[str, ...]:
-    """Recursively collect ids of leaf operations within an operation tree, depth-first.
+def _resolve_waveform_width(step: PulseOperationStepData, qubit: QubitData) -> int | None:
+    """Return the waveform width in picoseconds for a pulse step, or ``None`` if
+    unresolvable."""
+    waveform_def = step.waveform_definition
+    if isinstance(waveform_def, WaveformData):
+        return waveform_def.width
+    mode = next((m for m in qubit.modes if m.id == step.mode_id), None)
+    if mode is None:
+        return None
+    waveform = next((w for w in mode.waveform_definitions if w.id == waveform_def), None)
+    return waveform.width if waveform is not None else None
 
-    Walks the ``operation_steps`` of each variant. Any step that is itself an
-    :class:`~qat.experimental.system_data.canonical.schema.OperationData` is recursed
-    into. A node is considered a leaf when none of its steps are ``OperationData``;
-    at that point its ``id`` is collected.
 
-    :param operation: Root operation to flatten.
-    :returns: Tuple of leaf operation ids in depth-first traversal order.
+def _pulse_duration_modes(
+    operation: OperationData,
+    qubit: QubitData,
+    qubit_by_id: dict[str, QubitData],
+    _visited: frozenset[tuple[str, str]],
+) -> dict[tuple[str, str], int] | None:
+    """Accumulate per-mode durations for the default variant; ``None`` if unresolvable.
+
+    Keys are ``(qubit_id, mode_id)`` so that identically-named modes on different
+    qubits remain distinct. :class:`SyncOperationStepData` aligns all named modes
+    on the current qubit to the same value (barrier semantics).
     """
-    all_steps = [step for variant in operation.variants for step in variant.operation_steps]
-    nested_ops = [s for s in all_steps if isinstance(s, OperationData)]
-    if not nested_ops:
-        return (operation.id,)
-    ids: list[str] = []
-    for nested in nested_ops:
-        ids.extend(_flatten_operation_ids(nested))
-    return tuple(ids)
+    key = (qubit.id, operation.id)
+    if key in _visited:
+        return None
+    default_variant = next((v for v in operation.variants if v.when is None), None)
+    if default_variant is None:
+        return None
+    visited = _visited | {key}
+    modes: dict[tuple[str, str], int] = {}
+    for step in default_variant.operation_steps:
+        match step:
+            case PulseOperationStepData() as pulse_step:
+                width = _resolve_waveform_width(pulse_step, qubit)
+                if width is None:
+                    return None
+                mk = (qubit.id, pulse_step.mode_id)
+                modes[mk] = modes.get(mk, 0) + width
+            case DelayOperationStepData() as delay_step:
+                duration = delay_step.duration
+                # Only integral int/float durations are statically resolvable; bools and
+                # fractional picosecond values (which cannot occur physically) are not.
+                if (
+                    isinstance(duration, bool)
+                    or not isinstance(duration, int | float)
+                    or (isinstance(duration, float) and not duration.is_integer())
+                ):
+                    return None
+                mk = (qubit.id, delay_step.mode_id)
+                modes[mk] = modes.get(mk, 0) + int(duration)
+            case SyncOperationStepData() as sync_step:
+                # Each mode_ref carries an optional qubit_id; default to the current qubit.
+                mks = [
+                    (ref.qubit_id if ref.qubit_id else qubit.id, ref.mode_id)
+                    for ref in sync_step.mode_refs
+                ]
+                synced = max((modes.get(mk, 0) for mk in mks), default=0)
+                for mk in mks:
+                    modes[mk] = synced
+            case OperationReferenceStepData() as ref_step:
+                target_qubit = (
+                    qubit_by_id.get(ref_step.qubit_id) if ref_step.qubit_id else qubit
+                )
+                if target_qubit is None:
+                    return None
+                ref_op = next(
+                    (o for o in target_qubit.operations if o.id == ref_step.operation_id),
+                    None,
+                )
+                if ref_op is None:
+                    return None
+                sub = _pulse_duration_modes(ref_op, target_qubit, qubit_by_id, visited)
+                if sub is None:
+                    return None
+                for mk, d in sub.items():
+                    modes[mk] = modes.get(mk, 0) + d
+            case OperationData() as operation_step:
+                sub = _pulse_duration_modes(operation_step, qubit, qubit_by_id, visited)
+                if sub is None:
+                    return None
+                for mk, d in sub.items():
+                    modes[mk] = modes.get(mk, 0) + d
+            case ErrorOperationStepData():
+                return None
+            case AcquireOperationStepData():
+                # Acquisition timing is not yet modelled; treat as unresolvable.
+                return None
+            case _:
+                pass
+    return modes
+
+
+def _pulse_duration_for_operation(
+    operation: OperationData,
+    qubit: QubitData,
+    qubit_by_id: dict[str, QubitData],
+) -> int | None:
+    """Resolve the pulse duration of the default variant; ``None`` if unresolvable.
+
+    Per-mode durations are accumulated independently; sync barriers align the named
+    modes to the same value. The total is the maximum across all modes, which correctly
+    models parallel execution on different modes or qubits.
+
+    Only the unconditional variant (``when=None``) is considered. Virtual steps
+    (phase shifts, phase sets) contribute zero. :class:`ErrorOperationStepData` and
+    :class:`AcquireOperationStepData` (acquisition timing is not yet modelled), along
+    with any missing references, propagate ``None``.
+
+    :param operation: Root operation to evaluate.
+    :param qubit: Qubit that owns the operation.
+    :param qubit_by_id: All qubits in the system, keyed by id.
+    :returns: Total pulse duration in picoseconds, or ``None``.
+    """
+    modes = _pulse_duration_modes(operation, qubit, qubit_by_id, frozenset())
+    if modes is None:
+        return None
+    return max(modes.values(), default=0)
 
 
 @dataclass(frozen=True)
@@ -69,13 +178,13 @@ class OperationSet:
     :ivar operation_type: Identifiers of the operations supported on this qubit.
     :ivar fidelity: Optional per-gate fidelity mapping. Stubbed as ``None`` until
         the schema exposes per-operation fidelity data.
-    :ivar duration: Optional per-gate duration mapping in picoseconds. Stubbed as
-        ``None`` until the schema exposes per-operation duration data.
+    :ivar duration: Per-gate duration in picoseconds, keyed by operation id.
+        ``None`` for individual entries when the duration cannot be statically resolved.
     """
 
     operation_type: tuple[str, ...]
     fidelity: Mapping[str, float | None] | None = None
-    duration: Mapping[str, float | None] | None = None
+    duration: Mapping[str, int | None] | None = None
 
 
 @dataclass(frozen=True)
@@ -144,7 +253,8 @@ class QubitView(DerivedViewInterface[CanonicalSystemData]):
         :returns: :class:`QubitView` restricted to the given qubit ids.
         """
         selected = cls._select_qubits(parent, qubit_ids)
-        qubits = cls._unpack_qubit_properties(selected)
+        qubit_by_id = {q.id: q for q in parent.qubits}
+        qubits = cls._unpack_qubit_properties(selected, qubit_by_id)
         position_by_id = {qid: i for i, qid in enumerate(qubits)}
         interactions = cls._unpack_interactions(parent, position_by_id)
         return cls(
@@ -179,10 +289,14 @@ class QubitView(DerivedViewInterface[CanonicalSystemData]):
         return {q.id: q for q in parent.qubits if q.id in qubit_ids}
 
     @staticmethod
-    def _unpack_qubit_properties(selected: dict) -> dict[str, QubitProperties]:
+    def _unpack_qubit_properties(
+        selected: dict,
+        qubit_by_id: dict[str, QubitData],
+    ) -> dict[str, QubitProperties]:
         """Unpacks per-qubit properties from the selected canonical qubit records.
 
         :param selected: Canonical qubit records keyed by id.
+        :param qubit_by_id: All qubits in the system, used to resolve cross-qubit references.
         :returns: Dict of :class:`QubitProperties` keyed by qubit id.
         """
         return {
@@ -190,10 +304,15 @@ class QubitView(DerivedViewInterface[CanonicalSystemData]):
                 index=qubit.index,
                 supported_operations=OperationSet(
                     operation_type=tuple(
-                        op_id
-                        for operation in qubit.operations
-                        for op_id in _flatten_operation_ids(operation)
-                    )
+                        op.id for op in qubit.operations if op.interface == "public"
+                    ),
+                    duration=MappingProxyType(
+                        {
+                            op.id: _pulse_duration_for_operation(op, qubit, qubit_by_id)
+                            for op in qubit.operations
+                            if op.interface == "public"
+                        }
+                    ),
                 ),
                 measurement_fidelity=_measurement_fidelity_from_readout(
                     qubit.readout_probability
