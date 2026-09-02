@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from xdsl.dialects.builtin import (
     DYNAMIC_INDEX,
     ArrayAttr,
+    IndexType,
     IntAttr,
     IntegerType,
     StringAttr,
@@ -347,7 +348,7 @@ class StoreOp(IRDLOperation):
       type must match the array element type. No ``key`` property.
 
     :ivar container: The container operand to write into.
-    :ivar index: The integer index operand identifying the element/shot to overwrite.
+    :ivar index: The integer-or-index operand identifying the element/shot to overwrite.
     :ivar value: The value operand to write.
     :ivar key: Optional key selector used only for keyed collection value stores.
     :ivar result: The updated container value. Must match ``container`` type.
@@ -356,7 +357,7 @@ class StoreOp(IRDLOperation):
     name = "results.store"
 
     container = operand_def(AnyOf((ResultsCollectionType, ResultsArrayType)))
-    index = operand_def(IntegerType)
+    index = operand_def(AnyOf((IntegerType, IndexType)))
     value = operand_def()
     key = opt_prop_def(StringAttr)
     result = result_def()
@@ -364,7 +365,7 @@ class StoreOp(IRDLOperation):
     def __init__(
         self,
         container: SSAValue | Operation,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
         value: SSAValue | Operation,
         key: str | StringAttr | None = None,
     ):
@@ -376,7 +377,9 @@ class StoreOp(IRDLOperation):
         :param key: Optional key for storing a value by key in a collection.
         """
         container_ssa = SSAValue.get(container)
-        index_ssa = SSAValue.get(index, type=IntegerType)
+        index_ssa = SSAValue.get(index)
+        if not isinstance(index_ssa.type, IntegerType | IndexType):
+            raise TypeError("Index must be of type IntegerType or IndexType for StoreOp.")
         value_ssa = SSAValue.get(value)
         key_attr = StringAttr(key) if isinstance(key, str) else key
         return super().__init__(
@@ -389,7 +392,7 @@ class StoreOp(IRDLOperation):
     def value_in_array(
         cls,
         array: SSAValue[ResultsArrayType] | Operation,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
         value: SSAValue | Operation,
     ) -> "StoreOp":
         """Store a value into an array at ``index``.
@@ -404,7 +407,7 @@ class StoreOp(IRDLOperation):
     def record_in_collection(
         cls,
         collection: SSAValue[ResultsCollectionType] | Operation,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
         record: SSAValue[RecordType] | Operation,
     ) -> "StoreOp":
         """Store a full record into a collection at ``index``.
@@ -419,7 +422,7 @@ class StoreOp(IRDLOperation):
     def value_in_collection(
         cls,
         collection: SSAValue[ResultsCollectionType] | Operation,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
         key: str | StringAttr,
         value: SSAValue | Operation,
     ) -> "StoreOp":
@@ -744,7 +747,7 @@ class ExtractOp(IRDLOperation):
     name = "results.extract"
 
     container = operand_def(AnyOf((RecordType, ResultsArrayType, ResultsCollectionType)))
-    index = opt_operand_def(IntegerType)
+    index = opt_operand_def(AnyOf((IntegerType, IndexType)))
     key = opt_prop_def(StringAttr)
     result = result_def()
 
@@ -753,7 +756,7 @@ class ExtractOp(IRDLOperation):
         container: SSAValue | Operation,
         result_type: TypeAttribute,
         key: str | StringAttr | None = None,
-        index: SSAValue[IntegerType] | Operation | None = None,
+        index: SSAValue | Operation | None = None,
     ):
         """Initializes the ExtractOp with explicit selectors and result type.
 
@@ -765,7 +768,11 @@ class ExtractOp(IRDLOperation):
 
         container_ssa = SSAValue.get(container)
         key_attr = StringAttr(key) if isinstance(key, str) else key
-        index_ssa = SSAValue.get(index, type=IntegerType) if index is not None else None
+        index_ssa = SSAValue.get(index) if index is not None else None
+        if index_ssa is not None and not isinstance(
+            index_ssa.type, IntegerType | IndexType
+        ):
+            raise TypeError("Index must be of type IntegerType or IndexType for ExtractOp.")
 
         return super().__init__(
             operands=[container_ssa, index_ssa],
@@ -793,7 +800,7 @@ class ExtractOp(IRDLOperation):
     def value_from_array(
         cls,
         array: SSAValue[ResultsArrayType] | Operation,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
     ) -> "ExtractOp":
         """Extract an element value from an array by index."""
         array_ssa = SSAValue.get(array, type=ResultsArrayType)
@@ -803,7 +810,7 @@ class ExtractOp(IRDLOperation):
     def record_from_collection(
         cls,
         collection: SSAValue[ResultsCollectionType] | Operation,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
     ) -> "ExtractOp":
         """Extract a full record from a collection by index."""
         collection_ssa = SSAValue.get(collection, type=ResultsCollectionType)
@@ -831,7 +838,7 @@ class ExtractOp(IRDLOperation):
         cls,
         collection: SSAValue[ResultsCollectionType] | Operation,
         key: str | StringAttr,
-        index: SSAValue[IntegerType] | Operation,
+        index: SSAValue | Operation,
     ) -> "ExtractOp":
         """Extract a field value from a collection by key and index."""
         collection_ssa = SSAValue.get(collection, type=ResultsCollectionType)

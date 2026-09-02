@@ -4,7 +4,15 @@
 
 import pytest
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import DYNAMIC_INDEX, IntAttr, StringAttr, TupleType, i32, i64
+from xdsl.dialects.builtin import (
+    DYNAMIC_INDEX,
+    IndexType,
+    IntAttr,
+    StringAttr,
+    TupleType,
+    i32,
+    i64,
+)
 from xdsl.ir import Block, Region, TypeAttribute
 from xdsl.irdl import (
     IRDLOperation,
@@ -467,6 +475,14 @@ class TestStoreOp:
         op = StoreOp(array.res, index.result, value.result)
         op.verify()
 
+    def test_store_value_in_array_passes_with_index_type_index(self):
+        array = _MockArrayOp(i32, IntAttr(1))
+        index = ArithConstantOp.from_int_and_width(0, IndexType())
+        value = ArithConstantOp.from_int_and_width(1, i32)
+
+        op = StoreOp(array.res, index.result, value.result)
+        op.verify()
+
     def test_store_record_in_collection_fails_when_key_is_set(self):
         schema = RecordSchemaAttr([RecordFieldAttr("a", i32)])
         collection = _MockCollectionOp(schema=schema)
@@ -543,6 +559,15 @@ class TestExtractOp:
     def test_value_from_array_factory_initialization(self):
         array = _MockArrayOp(i32, IntAttr(2))
         index = ArithConstantOp.from_int_and_width(0, i32)
+
+        op = ExtractOp.value_from_array(array.res, index.result)
+        op.verify()
+
+        assert op.result.type == i32
+
+    def test_value_from_array_factory_initialization_with_index_type_index(self):
+        array = _MockArrayOp(i32, IntAttr(2))
+        index = ArithConstantOp.from_int_and_width(0, IndexType())
 
         op = ExtractOp.value_from_array(array.res, index.result)
         op.verify()
