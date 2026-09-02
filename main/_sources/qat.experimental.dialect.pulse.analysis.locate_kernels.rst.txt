@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.analysis.locate\_kernels module
+==============================================================
+
+.. automodule:: qat.experimental.dialect.pulse.analysis.locate_kernels
+   :members:
+   :undoc-members:
+   :show-inheritance:

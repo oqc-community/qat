@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse.lower\_kernels\_to\_arrays module
+===================================================================
+
+.. automodule:: qat.experimental.conversion.pulse.lower_kernels_to_arrays
+   :members:
+   :undoc-members:
+   :show-inheritance:

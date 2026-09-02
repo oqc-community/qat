@@ -1,0 +1,7 @@
+qat.experimental.dialect.results.transforms.convert\_collections\_to\_arrays module
+===================================================================================
+
+.. automodule:: qat.experimental.dialect.results.transforms.convert_collections_to_arrays
+   :members:
+   :undoc-members:
+   :show-inheritance:
