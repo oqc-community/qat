@@ -497,7 +497,7 @@ class PurrImporter:
     @staticmethod
     def _frame_key(quantum_target: PulseChannel) -> str:
         """Return the unique frame identifier for a pulse channel."""
-        return quantum_target.full_id()
+        return quantum_target.partial_id()
 
     def _resolve_numeric(self, value) -> float | int | complex:
         """Resolve a numeric-like value, rejecting unresolved runtime variables."""

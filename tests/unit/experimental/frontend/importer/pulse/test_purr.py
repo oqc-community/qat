@@ -226,9 +226,9 @@ class TestPurrImporterFrameTracking:
         module = imp.build(builder)
         assert len(_ops_of_type(module, CreateFrameOp)) == 2
 
-    def test_get_frame_key_uses_full_id(self, hw):
+    def test_get_frame_key_uses_partial_id(self, hw):
         ch = hw.get_qubit(0).get_drive_channel()
-        assert PurrImporter._frame_key(ch) == ch.full_id()
+        assert PurrImporter._frame_key(ch) == ch.partial_id()
 
     def test_chain_of_phase_shifts_threads_through_frame_results(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -1272,8 +1272,8 @@ class TestPurrImporterPostSelection:
     ) -> PostSelectionBuilder:
         ch = hw.get_qubit(0).get_acquire_channel()
         pp = PostSelectionData(
-            channel_to_disallowed_states={ch.full_id(): set(disallowed_states)},
-            known_channel_ids=frozenset({ch.full_id()}),
+            channel_to_disallowed_states={ch.partial_id(): set(disallowed_states)},
+            known_channel_ids=frozenset({ch.partial_id()}),
         )
         return PostSelectionBuilder(pp, enabled=enabled)
 
