@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post352.dev20260904102440 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post353.dev20260904163140 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -1627,6 +1627,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.QatFile.add_meta">add_meta() (QatFile method)</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.add_node">add_node() (FrameLineage method)</a>
+</li>
       <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveHardwareModel.add_physical_baseband">add_physical_baseband() (LiveHardwareModel method)</a>
 
       <ul>
@@ -2376,6 +2378,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.IterBound.astype">astype() (IterBound method)</a>, <a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.IterBound.astype">[1]</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.attach">attach() (FrameLineageAnalysis method)</a>
 </li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.AttConfig">AttConfig (class in qat.backend.qblox.config.specification)</a>
 
@@ -3147,6 +3151,8 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.dialect.q1_scf.html#qat.experimental.dialect.q1_scf.WhileOp.before_region">before_region (WhileOp attribute)</a>, <a href="qat.experimental.dialect.q1_scf.ir.ops.html#qat.experimental.dialect.q1_scf.ir.ops.WhileOp.before_region">[1]</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.begin_lineage">begin_lineage() (FrameLineageAnalysis method)</a>
+</li>
       <li><a href="qat.utils.waveform.html#qat.utils.waveform.DragGaussianFunction.beta">beta (DragGaussianFunction attribute)</a>
 
       <ul>
@@ -3649,6 +3655,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.qblox.analysis_passes.html#qat.purr.backends.qblox.analysis_passes.CFGResult">(class in qat.purr.backends.qblox.analysis_passes)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameNode.chain">chain() (FrameNode method)</a>
+</li>
       <li><a href="qat.purr.compiler.instructions.html#qat.purr.compiler.instructions.Acquire.channel">channel (Acquire property)</a>
 
       <ul>
@@ -4311,10 +4319,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction">(class in qat.utils.waveform)</a>
 </li>
       </ul></li>
-      <li><a href="qat.model.device.html#qat.model.device.Component">Component (class in qat.model.device)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="qat.model.device.html#qat.model.device.Component">Component (class in qat.model.device)</a>
+</li>
       <li><a href="qat.instrument.base.html#qat.instrument.base.CompositeInstrument.components">components (CompositeInstrument property)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor">CompositeExecutor (class in qat.purr.backends.qblox.execution.executor)</a>
@@ -7654,7 +7662,7 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AcquireOp.frame">frame (AcquireOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.AcquireOp.frame">[1]</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.frame">(FrameLineage attribute)</a>
+        <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.frame">(FrameLineage property)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PhaseOp.frame">(PhaseOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.PhaseOp.frame">[1]</a>
 </li>
@@ -7733,16 +7741,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html#qat.experimental.conversion.pulse_to_q1.pre_q1_ir.PreQ1AcquireOp.frame_result">(PreQ1AcquireOp attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.frame_to_operations">frame_to_operations (FrameLineageAnalysis attribute)</a>
-</li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.frame_to_port">frame_to_port (FrameLineageAnalysis attribute)</a>
-
-      <ul>
-        <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState.frame_to_port">(OutliningState attribute)</a>
-</li>
-      </ul></li>
-      <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState.frame_to_sequence">frame_to_sequence (OutliningState attribute)</a>
-</li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.FrameCanonicalizationPatternsTrait">FrameCanonicalizationPatternsTrait (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
@@ -7754,6 +7752,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis">FrameLineageAnalysis (class in qat.experimental.dialect.pulse.transforms.partition_by_frame)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineagePass">FrameLineagePass (class in qat.experimental.dialect.pulse.transforms.partition_by_frame)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameNode">FrameNode (class in qat.experimental.dialect.pulse.transforms.partition_by_frame)</a>
 </li>
       <li><a href="qat.integrations.features.html#qat.integrations.features.OpenPulseFeatures.frames">frames (OpenPulseFeatures attribute)</a>
 
@@ -11116,6 +11116,10 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.LifetimePass">LifetimePass (class in qat.backend.passes.purr.analysis)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.lineage_for_frame">lineage_for_frame() (FrameLineageAnalysis method)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.lineage_for_result">lineage_for_result() (FrameLineageAnalysis method)</a>
 </li>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.params.linear">linear (qat.model.error_mitigation.ReadoutMitigation parameter)</a>
 
@@ -16320,11 +16324,9 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationReferenceStepData">OperationReferenceStepData (class in qat.experimental.system_data.canonical.schema)</a>
 </li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.operations">operations (FrameLineage attribute)</a>
+      <li><a href="qat.experimental.system_data.materialisers.builder.html#qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.with_qubit.params.operations">operations (qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.with_qubit parameter)</a>
 
       <ul>
-        <li><a href="qat.experimental.system_data.materialisers.builder.html#qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.with_qubit.params.operations">(qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.with_qubit parameter)</a>
-</li>
         <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.QubitData.operations">(QubitData attribute)</a>
 </li>
       </ul></li>
@@ -16346,8 +16348,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.OperatorInfo">OperatorInfo (class in qat.purr.backends.realtime_chip_simulator)</a>
 </li>
-      <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops.params.ops">ops (qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops parameter)</a>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.ops">ops (FrameLineage property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops.params.ops">(qat.experimental.frontend.importer.base.BaseLinearImporter.update_frames_from_ops parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.optimize">optimize() (AbstractQbloxLiveEngine method)</a>
 
       <ul>
@@ -17567,8 +17573,6 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.CreateFrameOp.port">port (CreateFrameOp property)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CreateFrameOp.port">[1]</a>
 
       <ul>
-        <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.port">(FrameLineage attribute)</a>
-</li>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.FrameType.port">(FrameType attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.FrameType.port">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.ProvenanceInfoAttr.port">(ProvenanceInfoAttr attribute)</a>, <a href="qat.experimental.dialect.q1.ir.attrs.html#qat.experimental.dialect.q1.ir.attrs.ProvenanceInfoAttr.port">[1]</a>
@@ -17584,6 +17588,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.frontend.importer.pulse.builder.html#qat.experimental.frontend.importer.pulse.builder.PulseKernelBuilder.create_frame.params.port">(qat.experimental.frontend.importer.pulse.builder.PulseKernelBuilder.create_frame parameter)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.port_counts">port_counts (FrameLineageAnalysis property)</a>
+</li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.ChannelData.port_id">port_id (ChannelData attribute)</a>
 
       <ul>
@@ -17599,8 +17605,6 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints.port_sample_times_seconds">port_sample_times_seconds (PulseLevelConstraints property)</a>
-</li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.port_to_frames">port_to_frames (FrameLineageAnalysis attribute)</a>
 </li>
       <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PortConstraints">PortConstraints (class in qat.experimental.system_data.pulse.constraints)</a>
 </li>
@@ -23690,10 +23694,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.WaitOp.result">(WaitOp attribute)</a>, <a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.WaitOp.result">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.integrations.tket.html#qat.purr.integrations.tket.TketToQatIRConverter.convert.params.result_format">result_format (qat.purr.integrations.tket.TketToQatIRConverter.convert parameter)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.ir.measure.html#qat.ir.measure.PostProcessing.result_needed">result_needed (PostProcessing attribute)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.AddOp.params.result_type">result_type (qat.experimental.dialect.pulse.ir.AddOp parameter)</a>
@@ -24024,9 +24028,11 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.waveforms.shapes.setup_hold.html#qat.experimental.waveforms.shapes.setup_hold.SetupHoldWaveformShape.rise_location">(SetupHoldWaveformShape attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.root">root (FrozenDict attribute)</a>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameNode.root">root (FrameNode property)</a>
 
       <ul>
+        <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenDict.root">(FrozenDict attribute)</a>
+</li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.FrozenSet.root">(FrozenSet attribute)</a>
 </li>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydDictBase.root">(PydDictBase attribute)</a>
@@ -24036,6 +24042,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.root">(PydSetBase attribute)</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.root_node">root_node (FrameLineage property)</a>
+</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSQubit.rotating_frame_frequency">rotating_frame_frequency (RTCSQubit property)</a>
 </li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.rotation">rotation (Acquire attribute)</a>
@@ -27927,8 +27935,6 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.StoreOp.value_in_collection">value_in_collection() (StoreOp class method)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.StoreOp.value_in_collection">[1]</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.value_in_unit">value_in_unit() (TimeAttr method)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.TimeAttr.value_in_unit">[1]</a>
-</li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.value_to_frame">value_to_frame (FrameLineageAnalysis attribute)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>

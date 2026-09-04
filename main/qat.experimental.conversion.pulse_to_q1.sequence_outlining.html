@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.sequence_outlining module &mdash; qat-compiler 3.0.0.post352.dev20260904102440 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.sequence_outlining module &mdash; qat-compiler 3.0.0.post353.dev20260904163140 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -678,7 +678,7 @@
 <p>Q1 sequence outlining pass: partitions a Pulse entry block into per-frame sequence envelopes.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OutliningState</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_to_port=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_to_sequence=&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OutliningState</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>State carried by Pulse-to-Q1 outlining.</p>
 <p>This state records the sequence scaffolding introduced during the first stage of Pulse-
@@ -692,16 +692,6 @@ QbloxProgram model, with one emitted sequence for each logical frame partition.<
 </ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState.frame_to_port">
-<span class="sig-name descname"><span class="pre">frame_to_port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState.frame_to_port" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState.frame_to_sequence">
-<span class="sig-name descname"><span class="pre">frame_to_sequence</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.sequence_outlining.OutliningState.frame_to_sequence" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="py class">
