@@ -281,6 +281,137 @@ def test_materialise_helper_functions_and_version_error_paths(monkeypatch):
         )
 
 
+def test_split_combined_readout_channels_splits_top_level_macq():
+    node = {
+        "pulse_channels": {
+            "macq": {"pulse_channel": {"id": "R0.macq"}},
+            "drive": {"pulse_channel": {"id": "Q0.drive"}},
+        }
+    }
+
+    result = purr_materialise._split_combined_readout_channels(node)
+
+    pulse_channels = result["pulse_channels"]
+    assert "macq" not in pulse_channels
+    assert pulse_channels["measure"] == {"pulse_channel": {"id": "R0.macq"}}
+    assert pulse_channels["acquire"] == {"pulse_channel": {"id": "R0.macq"}}
+    # Unrelated channels are preserved untouched.
+    assert pulse_channels["drive"] == {"pulse_channel": {"id": "Q0.drive"}}
+
+
+def test_split_combined_readout_channels_recurses_into_nested_structures():
+    node = {
+        "quantum_devices": {
+            "Q0": {
+                "id": "Q0",
+                "measure_device": {
+                    "pulse_channels": {"macq": {"pulse_channel": {"id": "R0.macq"}}}
+                },
+            }
+        },
+        "resonators": [{"pulse_channels": {"macq": {"pulse_channel": {"id": "R1.macq"}}}}],
+    }
+
+    result = purr_materialise._split_combined_readout_channels(node)
+
+    inline_channels = result["quantum_devices"]["Q0"]["measure_device"]["pulse_channels"]
+    assert set(inline_channels) == {"measure", "acquire"}
+
+    list_channels = result["resonators"][0]["pulse_channels"]
+    assert set(list_channels) == {"measure", "acquire"}
+
+
+def test_split_combined_readout_channels_leaves_untouched_and_does_not_mutate():
+    node = {
+        "pulse_channels": {"measure": {"id": "m"}, "acquire": {"id": "a"}},
+        "scalar": 7,
+        "list": [1, "two", 3.0],
+    }
+    original = {
+        "pulse_channels": {"measure": {"id": "m"}, "acquire": {"id": "a"}},
+        "scalar": 7,
+        "list": [1, "two", 3.0],
+    }
+
+    result = purr_materialise._split_combined_readout_channels(node)
+
+    # Resonators without a combined ``macq`` channel are left untouched.
+    assert result["pulse_channels"] == {"measure": {"id": "m"}, "acquire": {"id": "a"}}
+    assert result["scalar"] == 7
+    assert result["list"] == [1, "two", 3.0]
+    # Non-dict/list scalars pass straight through.
+    assert purr_materialise._split_combined_readout_channels("bad") == "bad"
+    assert purr_materialise._split_combined_readout_channels(5) == 5
+    # The input node is not mutated.
+    assert node == original
+
+
+def test_split_combined_readout_channels_preserves_existing_measure_and_acquire():
+    node = {
+        "pulse_channels": {
+            "macq": {"id": "macq"},
+            "measure": {"id": "existing-measure"},
+        }
+    }
+
+    result = purr_materialise._split_combined_readout_channels(node)
+
+    pulse_channels = result["pulse_channels"]
+    assert "macq" not in pulse_channels
+    # Existing role channels win over the split (``setdefault`` semantics).
+    assert pulse_channels["measure"] == {"id": "existing-measure"}
+    assert pulse_channels["acquire"] == {"id": "macq"}
+
+
+def test_prepare_ingress_splits_combined_readout_channels():
+    payload = _base_payload() | {
+        "quantum_devices": {
+            "Q0": {
+                "id": "Q0",
+                "index": 0,
+                "pulse_channels": {
+                    "drive": {
+                        "pulse_channel": {
+                            "id": "Q0.drive",
+                            "physical_channel": {"id": "p_q0"},
+                            "frequency": 5e9,
+                        }
+                    }
+                },
+            },
+            "R0": {
+                "id": "R0",
+                "pulse_channels": {
+                    "macq": {
+                        "pulse_channel": {
+                            "id": "R0.macq",
+                            "physical_channel": {"id": "p_r0"},
+                            "frequency": 6e9,
+                        }
+                    }
+                },
+            },
+        },
+        "physical_channels": {
+            "p_q0": {"id": "p_q0", "sample_time": 1e-9, "acquire_allowed": False},
+            "p_r0": {"id": "p_r0", "sample_time": 1e-9, "acquire_allowed": True},
+        },
+        "basebands": {"bb0": {"frequency": 5e9}},
+    }
+    dto = PurrIngressV010.model_validate(payload)
+
+    enriched = purr_materialise.PurrMaterialiserV010().prepare_ingress(
+        adapted_payload=payload,
+        source_ingress_dto=dto,
+    )
+
+    resonator_channels = enriched["quantum_devices"]["R0"]["pulse_channels"]
+    assert "macq" not in resonator_channels
+    assert set(resonator_channels) == {"measure", "acquire"}
+    # The drive channel on the qubit is unaffected by the split.
+    assert set(enriched["quantum_devices"]["Q0"]["pulse_channels"]) == {"drive"}
+
+
 def test_materialiser_preserves_explicit_empty_configuration_lists():
     materialiser = purr_materialise.PurrMaterialiserV010(
         supported_acquire_modes=[],

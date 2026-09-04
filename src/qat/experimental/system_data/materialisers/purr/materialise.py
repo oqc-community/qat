@@ -81,6 +81,14 @@ _SUPPORTED_PURR_SOURCE_VERSIONS = ("0.1.0",)
 _RESET_DEFAULT_ORDER = ("passive", "ddrop")
 
 
+# QBlox hardware models expose readout as a single combined "macq" pulse channel that
+# carries both the measure and acquire pulse channels.  We normalise the payload by
+# splitting the channels (see ``_split_combined_readout_channels``).
+_QBLOX_COMBINED_READOUT_RENAMES: dict[str, list[str]] = {
+    "macq": ["measure", "acquire"],
+}
+
+
 def _is_qubit_device_payload(device_payload: dict[str, Any]) -> bool:
     """Return True when a device payload structurally represents a qubit.
 
@@ -233,6 +241,43 @@ def _inject_native_waveform_shapes(
     return payload
 
 
+def _split_combined_readout_channels(node: Any) -> Any:
+    """Split QBlox combined ``macq`` readout channels into ``measure``/``acquire``.
+
+    QBlox hardware models combines the ``acquire`` and ``measure`` pulse channels into
+    a single ``macq`` readout channel, to match hardware requirements. To keep
+    materialise consistent we need to split these channels to match the schemas
+    data structure.
+
+    The transform is applied recursively so it catches the resonator wherever PuRR reads
+    it: both as a top-level ``quantum_devices`` entry and as an inline ``measure_device``
+    on a qubit (which PuRR resolves in preference to the top-level copy).  Resonators
+    without a combined ``macq`` channel are left untouched, and the input is not mutated.
+    """
+    if isinstance(node, list):
+        return [_split_combined_readout_channels(item) for item in node]
+    if not isinstance(node, dict):
+        return node
+
+    new_node = {key: _split_combined_readout_channels(value) for key, value in node.items()}
+
+    pulse_channels = new_node.get("pulse_channels")
+    if isinstance(pulse_channels, dict):
+        for old_macq_key, new_keys in _QBLOX_COMBINED_READOUT_RENAMES.items():
+            macq_view = pulse_channels.get(old_macq_key)
+            if isinstance(macq_view, dict):
+                new_channels = {
+                    key: value
+                    for key, value in pulse_channels.items()
+                    if key != old_macq_key
+                }
+                # Both roles reference the same physical readout channel.
+                for new_key in new_keys:
+                    new_channels.setdefault(new_key, macq_view)
+                new_node["pulse_channels"] = new_channels
+    return new_node
+
+
 class PurrMaterialiserV010:
     """Template-method materialiser for PuRR v0.1.0 source payloads.
 
@@ -291,6 +336,8 @@ class PurrMaterialiserV010:
                 source_ingress_dto.supported_acquire_modes or self._supported_acquire_modes
             ),
         )
+        # TODO: COMPILER-1441 - Move this function to a better location such as ``adapter.py``
+        payload = _split_combined_readout_channels(payload)
         return payload
 
     def build_operation_builder(
