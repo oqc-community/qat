@@ -13,6 +13,7 @@ from xdsl.passes import ModulePass
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.dialect.pulse.ir import CreateFrameOp
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
+    FrameLineage,
     FrameLineageAnalysis,
     build_frame_lineage_analysis,
 )
@@ -48,7 +49,6 @@ def _normalize_sequence_symbol(channel_token: str) -> str:
     return symbol
 
 
-@dataclass
 class OutliningState:
     """State carried by Pulse-to-Q1 outlining.
 
@@ -60,11 +60,11 @@ class OutliningState:
     :ivar frame_to_sequence: Emitted sequence symbol keyed by frame id.
     """
 
-    frame_to_port: dict[str, str] = field(default_factory=dict)
-    frame_to_sequence: dict[str, str] = field(default_factory=dict)
+    def __init__(self) -> None:
+        self.frame_to_port: dict[str, str] = {}
+        self.frame_to_sequence: dict[str, str] = {}
 
 
-@dataclass
 class _SymbolAllocator:
     """Allocate stable outlined-sequence symbols for a frame partition.
 
@@ -84,18 +84,24 @@ class _SymbolAllocator:
         current outline run, used to detect normalisation collisions.
     """
 
-    symbol_counts: dict[str, int]
-    used_sequence_symbols: set[str] = field(default_factory=set)
+    def __init__(
+        self,
+        symbol_counts: dict[str, int],
+        used_sequence_symbols: set[str] | None = None,
+    ) -> None:
+        self.symbol_counts = symbol_counts
+        self.used_sequence_symbols = (
+            used_sequence_symbols if used_sequence_symbols is not None else set()
+        )
 
     def allocate(
         self,
         frame_id: str,
-        frame: SSAValue,
-        analysis: FrameLineageAnalysis,
+        lineage: FrameLineage,
     ) -> tuple[str, str]:
         """Return the physical channel token and emitted sequence symbol."""
 
-        channel_token = analysis.frame_to_port[frame]
+        channel_token = lineage.port
         sequence_symbol = frame_id
         if self.symbol_counts[channel_token] == 1:
             normalized_symbol = _normalize_sequence_symbol(channel_token)
@@ -115,7 +121,8 @@ def _partition_dependency_closure(
     ``FrameLineageAnalysis`` identifies the operations that belong to a frame
     lineage. This helper expands that membership to include any entry-block
     definitions required to clone the lineage into a self-contained sequence
-    body.
+    body, including constants and other ops captured as free variables inside
+    nested regions.
     """
 
     needed_ops: set[Operation] = set()
@@ -125,10 +132,13 @@ def _partition_dependency_closure(
         if op in needed_ops:
             continue
         needed_ops.add(op)
-        for operand in op.operands:
-            defining_op = op_by_result.get(operand)
-            if defining_op is not None and defining_op not in needed_ops:
-                pending_ops.append(defining_op)
+        # op.walk() includes op itself, so this also covers op's own operands as well as
+        # free variables captured by any nested regions.
+        for nested_op in op.walk():
+            for operand in nested_op.operands:
+                defining_op = op_by_result.get(operand)
+                if defining_op is not None and defining_op not in needed_ops:
+                    pending_ops.append(defining_op)
     return needed_ops
 
 
@@ -179,17 +189,14 @@ class Q1OutliningPass(ModulePass):
     def _sequence_op_for_partition(
         self,
         frame_id: str,
-        frame: SSAValue,
-        analysis: FrameLineageAnalysis,
+        lineage: FrameLineage,
         sequence_body: list[Operation],
         symbol_allocator: _SymbolAllocator,
     ) -> tuple[SequenceOp, str, str]:
         """Construct one outlined sequence together with its recorded metadata.
 
         :param frame_id: Synthetic frame label used for fallback naming.
-        :param frame: Root SSA value for the logical frame partition.
-        :param analysis: Frame-lineage analysis for the enclosing module. This provides the
-            lineage membership and physical-port metadata.
+        :param lineage: Frame lineage for this partition; supplies port metadata.
         :param sequence_body: Cloned operations to place in the sequence body. The body
             already contains the lineage ops plus any cloned definitions required to make
             the envelope self-contained.
@@ -198,12 +205,14 @@ class Q1OutliningPass(ModulePass):
             sequence symbol.
         """
 
-        if not any(isinstance(op, CreateFrameOp) for op in sequence_body):
+        if not any(
+            isinstance(nested, CreateFrameOp)
+            for op in sequence_body
+            for nested in op.walk()
+        ):
             raise ValueError(f"Partition {frame_id} does not contain pulse.create_frame.")
 
-        channel_token, sequence_symbol = symbol_allocator.allocate(
-            frame_id, frame, analysis
-        )
+        channel_token, sequence_symbol = symbol_allocator.allocate(frame_id, lineage)
         sequence_ops = [
             SetMrkImmOp(UI4Imm(_MARKER_BITMASK)),
             *sequence_body,
@@ -226,10 +235,8 @@ class Q1OutliningPass(ModulePass):
         :returns: Triple of emitted SequenceOp list, frame→port mapping, and
                   frame→sequence symbol mapping.
         """
-        symbol_counts: dict[str, int] = {}
-        for symbol in analysis.frame_to_port.values():
-            symbol_counts[symbol] = symbol_counts.get(symbol, 0) + 1
-        n_frames = len(analysis.frame_to_operations)
+        symbol_counts = analysis.port_counts
+        n_frames = len(analysis.lineages)
         reserved = {f"frame_{i}" for i in range(n_frames)}
         symbol_allocator = _SymbolAllocator(symbol_counts, reserved)
 
@@ -240,20 +247,17 @@ class Q1OutliningPass(ModulePass):
         sequences: list[SequenceOp] = []
         frame_to_port: dict[str, str] = {}
         frame_to_sequence: dict[str, str] = {}
-        for frame_index, (frame, lineage_ops) in enumerate(
-            analysis.frame_to_operations.items()
-        ):
+        for frame_index, lineage in enumerate(analysis.lineages):
             # TODO - Reuse a frame's optional identifier once: COMPILER-1379
             frame_id = f"frame_{frame_index}"
             sequence_body = _build_partition_sequence_body(
                 entry_block_ops,
-                lineage_ops,
+                lineage.ops,
                 op_by_result,
             )
             sequence_op, channel_token, sequence_symbol = self._sequence_op_for_partition(
                 frame_id,
-                frame,
-                analysis,
+                lineage,
                 sequence_body,
                 symbol_allocator,
             )

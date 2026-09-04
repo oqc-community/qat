@@ -7,8 +7,9 @@ identity. This allows later passes to reason about lineages without losing the h
 facing port metadata attached to each frame.
 """
 
-from collections import defaultdict
-from collections.abc import Mapping
+from __future__ import annotations
+
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 
 from xdsl.context import Context
@@ -17,53 +18,137 @@ from xdsl.ir import Operation, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.experimental.dialect.pulse.ir import CreateFrameOp, FrameType, SynchronizeOp
+from qat.experimental.dialect.pulse.ir import CreateFrameOp, FrameType
 from qat.experimental.dialect.pulse.utils import pulse_entry_block
 
 
-@dataclass
+class FrameNode:
+    """One operation in a frame-lineage chain.
+
+    :ivar op: The operation at this position in the chain.
+    :ivar parent: The predecessor node; ``None`` for the root.
+    """
+
+    def __init__(self, op: Operation, parent: FrameNode | None) -> None:
+        self.op = op
+        self.parent = parent
+
+    def chain(self) -> Iterator[FrameNode]:
+        """Yield this node and each ancestor in order, ending at the root."""
+        node: FrameNode | None = self
+        while node is not None:
+            yield node
+            node = node.parent
+
+    @property
+    def root(self) -> FrameNode:
+        """The root node (the ``CreateFrameOp`` node)."""
+        *_, last = self.chain()
+        return last
+
+
 class FrameLineage:
-    """Operations associated with one logical frame lineage.
+    """Full lineage of a single ``pulse.create_frame``, including all related operations.
 
-    A lineage is rooted at one `pulse.create_frame` result and collects the
-    operations that remain associated with that frame through the entry block.
-
-    :ivar frame: ``pulse.create_frame`` result representing this lineage.
-    :ivar port: Physical-port token carried by ``FrameType``.
-    :ivar operations: Operations associated with this lineage, in entry-block
-        encounter order.
+    :ivar create_frame: Root ``CreateFrameOp``.
+    :ivar port: Physical-port token from ``CreateFrameOp``.
+    :ivar related_ops: Ordered chain of :class:`FrameNode` objects, one per entry-block
+        op that interacts with this lineage. Each node's parent is the preceding node,
+        so walking the chain yields the full lineage history from any point.
     """
 
-    frame: SSAValue
-    port: str
-    operations: list[Operation] = field(default_factory=list)
+    def __init__(
+        self,
+        create_frame: CreateFrameOp,
+        port: str,
+        related_ops: list[FrameNode] | None = None,
+    ) -> None:
+        self.create_frame = create_frame
+        self.port = port
+        self.related_ops = related_ops if related_ops is not None else []
+
+    @property
+    def frame(self) -> SSAValue:
+        """Shorthand for ``create_frame.result``."""
+        return self.create_frame.result
+
+    @property
+    def root_node(self) -> FrameNode | None:
+        """The root :class:`FrameNode`; its ``op`` is ``create_frame``.
+
+        ``None`` if
+        ``related_ops`` is empty.
+        """
+        if not self.related_ops:
+            return None
+        return self.related_ops[0].root
+
+    @property
+    def ops(self) -> tuple[Operation, ...]:
+        """Ops from :attr:`related_ops` in encounter order."""
+        return tuple(n.op for n in self.related_ops)
+
+    def add_node(self, op: Operation) -> None:
+        """Append a FrameNode for op unless the tail already records it."""
+        if not self.related_ops:
+            self.related_ops.append(FrameNode(op=op, parent=None))
+            return
+        if self.related_ops[-1].op is not op:
+            self.related_ops.append(FrameNode(op=op, parent=self.related_ops[-1]))
 
 
-@dataclass
 class FrameLineageAnalysis:
-    """Frame-lineage analysis for Pulse IR.
+    """Module-level frame-lineage analysis; one :class:`FrameLineage` per ``CreateFrameOp``.
 
-    The analysis separates logical frame identity from physical port identity. The former
-    drives partitioning. The latter is preserved as metadata for subsequent lowering stages.
+    Value ownership is tracked centrally in this object, so resolving a value to its
+    owning lineage and attaching a new usage are both O(1) operations rather than scans
+    over ``lineages``.
 
-    :ivar frame_to_operations: Ordered operations per lineage frame. This records the
-        lineage membership in the entry block, not a ready-made sequence body. A lowering
-        pass may still need to clone supporting definitions before materialising a
-        ``q1_sequence.sequence`` envelope.
-    :ivar frame_to_port: Physical port metadata per lineage frame.
-    :ivar port_to_frames: Lineage frames grouped by physical port.
-    :ivar value_to_frame: Lineage frame associated with each frame SSA value.
+    :ivar lineages: All discovered lineages in encounter order.
     """
 
-    frame_to_operations: Mapping[SSAValue, tuple[Operation, ...]]
-    frame_to_port: Mapping[SSAValue, str]
-    port_to_frames: Mapping[str, tuple[SSAValue, ...]]
-    value_to_frame: Mapping[SSAValue, SSAValue]
+    def __init__(self, lineages: list[FrameLineage] | None = None) -> None:
+        self.lineages = lineages if lineages is not None else []
+        self._owner: dict[SSAValue, FrameLineage] = {}
+
+    @property
+    def port_counts(self) -> dict[str, int]:
+        """Return the number of lineages sharing each port token."""
+        counts: dict[str, int] = {}
+        for lineage in self.lineages:
+            counts[lineage.port] = counts.get(lineage.port, 0) + 1
+        return counts
+
+    def lineage_for_frame(self, frame: SSAValue) -> FrameLineage | None:
+        """Return the :class:`FrameLineage` whose root value is ``frame``, or ``None``."""
+        lineage = self._owner.get(frame)
+        return lineage if lineage is not None and lineage.frame is frame else None
+
+    def lineage_for_result(self, value: SSAValue) -> FrameLineage | None:
+        """Return the :class:`FrameLineage` that owns ``value``, or ``None``."""
+        return self._owner.get(value)
+
+    def begin_lineage(self, create_frame: CreateFrameOp, node: FrameNode) -> FrameLineage:
+        """Start a new lineage rooted at ``create_frame``, seeded with ``node``."""
+        lineage = FrameLineage(
+            create_frame=create_frame, port=create_frame.port.data, related_ops=[node]
+        )
+        self.lineages.append(lineage)
+        self._owner[create_frame.result] = lineage
+        return lineage
+
+    def attach(
+        self, entry_op: Operation, lineage: FrameLineage, result: SSAValue | None = None
+    ) -> None:
+        """Record ``entry_op``'s use of ``lineage``, optionally claiming ``result``."""
+        lineage.add_node(entry_op)
+        if result is not None:
+            self._owner[result] = lineage
 
 
-@dataclass
 class _LineageState:
-    analysis: FrameLineageAnalysis | None = None
+    def __init__(self) -> None:
+        self.analysis: FrameLineageAnalysis | None = None
 
 
 def build_frame_lineage_analysis(module: ModuleOp) -> FrameLineageAnalysis:
@@ -72,96 +157,71 @@ def build_frame_lineage_analysis(module: ModuleOp) -> FrameLineageAnalysis:
     The partition key is the logical frame identity rooted at
     ``pulse.create_frame``. Physical port identity is retained as metadata so
     later lowering stages can recover the hardware-facing view without
-    collapsing distinct logical frames. Region-bearing entry operations are
-    rejected because the analysis currently runs on a flat instruction stream.
+    collapsing distinct logical frames.
+
+    Region-bearing entry operations are traversed recursively: a ``CreateFrameOp``
+    inside a nested region starts a new lineage with the enclosing entry-block op
+    as its representative; references to outer frame values append a new node to
+    those lineages.
 
     :param module: Module containing pulse operations.
-    :returns: Frame-lineage analysis maps.
+    :returns: Frame-lineage analysis.
     :raises PassFailedException: If frame lineage cannot be resolved.
     """
+    analysis = FrameLineageAnalysis()
 
-    lineages: dict[SSAValue, FrameLineage] = {}
-    frame_of_value: dict[SSAValue, SSAValue] = {}
-
-    for op in pulse_entry_block(module).ops:
-        if op.regions:
-            raise PassFailedException(
-                "Frame partitioning currently requires region-free entry blocks and "
-                "does not yet inspect nested regions."
-            )
-
-        frame_operands = [
-            operand for operand in op.operands if isinstance(operand.type, FrameType)
-        ]
-        frame_results = [
-            result for result in op.results if isinstance(result.type, FrameType)
-        ]
+    def _visit_op(op: Operation, representative: Operation | None) -> None:
+        entry_op = representative or op
 
         if isinstance(op, CreateFrameOp):
-            frame_of_value[op.result] = op.result
-            lineages[op.result] = FrameLineage(
-                frame=op.result,
-                port=op.port.data,
-                operations=[op],
-            )
-            continue
+            root = FrameNode(op=op, parent=None)
+            node = root if entry_op is op else FrameNode(op=entry_op, parent=root)
+            analysis.begin_lineage(op, node)
+            return
 
+        if op.regions:
+            for region in op.regions:
+                for block in region.blocks:
+                    for inner_op in block.ops:
+                        _visit_op(inner_op, representative=entry_op)
+            return
+
+        frame_operands = [o for o in op.operands if isinstance(o.type, FrameType)]
         if not frame_operands:
-            continue
+            return
 
-        frames = [frame_of_value.get(operand) for operand in frame_operands]
-        if any(frame is None for frame in frames):
+        # Resolve every operand before mutating anything; bail out (or raise) if any
+        # operand's lineage is not yet known.
+        resolved: list[FrameLineage] = []
+        for operand in frame_operands:
+            lineage = analysis.lineage_for_result(operand)
+            if lineage is None:
+                if representative is None:
+                    raise PassFailedException(
+                        f"Unbound frame operand encountered in operation {op.name}."
+                    )
+                return
+            resolved.append(lineage)
+
+        frame_results = [r for r in op.results if isinstance(r.type, FrameType)]
+        if frame_results and len(frame_results) != len(frame_operands):
             raise PassFailedException(
-                f"Unbound frame operand encountered in operation {op.name}."
+                f"Cannot map frame results for multi-frame operation {op.name}."
             )
-        resolved_frames = [frame for frame in frames if frame is not None]
 
-        ordered_unique_frames: list[SSAValue] = []
-        for frame in resolved_frames:
-            if frame not in ordered_unique_frames:
-                ordered_unique_frames.append(frame)
-        for frame in ordered_unique_frames:
-            lineages[frame].operations.append(op)
+        # All validation is complete; attach usage and claim results one value at a time.
+        if frame_results:
+            for lineage, result in zip(resolved, frame_results, strict=True):
+                analysis.attach(entry_op, lineage, result)
+        else:
+            for lineage in resolved:
+                analysis.attach(entry_op, lineage)
 
-        if not frame_results:
-            continue
+    entry_block = pulse_entry_block(module)
+    for op in entry_block.ops:
+        _visit_op(op, representative=None)
 
-        if isinstance(op, SynchronizeOp):
-            if len(frame_results) != len(frame_operands):
-                raise PassFailedException(
-                    "pulse.sync must have one frame result per frame operand."
-                )
-            for result, frame in zip(frame_results, resolved_frames, strict=True):
-                frame_of_value[result] = frame
-            continue
-
-        if len(ordered_unique_frames) == 1:
-            for result in frame_results:
-                frame_of_value[result] = ordered_unique_frames[0]
-            continue
-
-        if len(frame_results) == len(resolved_frames):
-            for result, frame in zip(frame_results, resolved_frames, strict=True):
-                frame_of_value[result] = frame
-            continue
-
-        raise PassFailedException(
-            f"Cannot map frame results for multi-frame operation {op.name}."
-        )
-
-    frame_to_port = {frame: lineage.port for frame, lineage in lineages.items()}
-    port_to_frames: dict[str, list[SSAValue]] = defaultdict(list)
-    for frame, port in frame_to_port.items():
-        port_to_frames[port].append(frame)
-
-    return FrameLineageAnalysis(
-        frame_to_operations={
-            frame: tuple(lineage.operations) for frame, lineage in lineages.items()
-        },
-        frame_to_port=frame_to_port,
-        port_to_frames={port: tuple(frames) for port, frames in port_to_frames.items()},
-        value_to_frame=dict(frame_of_value),
-    )
+    return analysis
 
 
 @dataclass(frozen=True)
@@ -174,7 +234,6 @@ class FrameLineagePass(ModulePass):
     @property
     def analysis(self) -> FrameLineageAnalysis | None:
         """Return the most recent frame-lineage analysis computed by this pass."""
-
         return self.state.analysis
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:

@@ -622,17 +622,15 @@ def create_legalisation_patterns() -> tuple[RewritePattern, ...]:
     return (
         RewritePhaseSetOp(
             TARGET_DATA,
-            rewrite_callable=lambda op,
-            rewriter,
-            _target_data,
-            _debug_info=None: canonicalise(op, rewriter),
+            rewrite_callable=lambda op, rewriter, _target_data, _debug_info=None: (
+                canonicalise(op, rewriter)
+            ),
         ),
         RewritePhaseShiftOp(
             TARGET_DATA,
-            rewrite_callable=lambda op,
-            rewriter,
-            _target_data,
-            _debug_info=None: canonicalise(op, rewriter),
+            rewrite_callable=lambda op, rewriter, _target_data, _debug_info=None: (
+                canonicalise(op, rewriter)
+            ),
         ),
     )
 

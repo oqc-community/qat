@@ -570,8 +570,7 @@ class TestPulseToQ1AcquireLowering:
     """Full-pipeline lowering of ``pulse.acquire`` to Q1 acquire instructions.
 
     The pipeline (``Q1PreAcquireTransformationPass`` -> ``Q1OutliningPass`` ->
-    ``PulseToQ1LoweringPass``) currently only supports acquisitions outside of an
-    ``scf.for`` loop. A loop-enclosed acquisition is rejected during outlining.
+    ``PulseToQ1LoweringPass``) is used to validate end-to-end acquire lowering.
     """
 
     @staticmethod
@@ -639,8 +638,11 @@ class TestPulseToQ1AcquireLowering:
         assert len(acquisitions) == 1
         assert acquisitions[0].acquisition_name.data == "custom_acq"
 
-    def test_raises_when_acquire_inside_loop(self):
+    def test_loop_enclosed_acquire_outlining_succeeds(self):
+        """Verify that a ``CreateFrameOp`` inside a loop is outlined without error."""
         module = _create_acquire_module(1000, "q0/readout", [1000])
         Q1PreAcquireTransformationPass().apply(Context(), module)
-        with pytest.raises(PassFailedException, match="region-free entry blocks"):
-            Q1OutliningPass(target_data=TARGET_DATA).apply(Context(), module)
+        Q1OutliningPass(target_data=TARGET_DATA).apply(Context(), module)
+
+        sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        assert len(sequences) == 1

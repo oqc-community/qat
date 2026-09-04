@@ -6,6 +6,7 @@ from xdsl.context import Context
 from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp, StringAttr
 from xdsl.ir import Block, Region
+from xdsl.irdl import IRDLOperation, irdl_op_definition, region_def
 
 from qat.backend.qblox.target_data import QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import (
@@ -13,9 +14,18 @@ from qat.experimental.conversion.pulse_to_q1.sequence_outlining import (
     _normalize_sequence_symbol,
     _SymbolAllocator,
 )
-from qat.experimental.dialect.pulse.ir import ConstantOp, CreateFrameOp, FrequencyAttr
+from qat.experimental.dialect.pulse.ir import (
+    ConstantOp,
+    CreateFrameOp,
+    FrequencyAttr,
+    MaxTimeOp,
+    TimeAttr,
+    WaitOp,
+)
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
+    FrameLineage,
     FrameLineageAnalysis,
+    FrameNode,
 )
 from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp
 from qat.experimental.dialect.q1_sequence import SequenceOp
@@ -23,6 +33,17 @@ from qat.experimental.dialect.q1_sequence import SequenceOp
 
 def _module_with_main(ops) -> ModuleOp:
     return ModuleOp([func.FuncOp("main", ((), ()), Region(Block(ops)))])
+
+
+@irdl_op_definition
+class _ContainerOp(IRDLOperation):
+    """Region-bearing op used in tests to simulate SCF structures."""
+
+    name = "test.container"
+    body = region_def()
+
+    def __init__(self, body: Region):
+        super().__init__(regions=[body])
 
 
 def _frame(frequency: float, channel_id: str) -> tuple[ConstantOp, CreateFrameOp]:
@@ -131,14 +152,158 @@ class TestPulseToQ1SequenceOutlining:
     def test_emit_sequence_ops_rejects_partition_not_starting_with_create_frame(self):
         """Verify that malformed frame partitions are rejected during sequence emission."""
         freq, frame = _frame(4.8e9, "q0.drive")
-        malformed = FrameLineageAnalysis(
-            frame_to_operations={frame.result: (func.ReturnOp(),)},
-            frame_to_port={frame.result: "q0.drive"},
-            port_to_frames={"q0.drive": (frame.result,)},
-            value_to_frame={frame.result: frame.result},
+        malformed_root = FrameNode(op=frame, parent=None)
+        malformed_lin = FrameLineage(
+            create_frame=frame,
+            port="q0.drive",
+            related_ops=[FrameNode(op=func.ReturnOp(), parent=malformed_root)],
         )
+        malformed = FrameLineageAnalysis(lineages=[malformed_lin])
         with pytest.raises(ValueError, match="does not contain pulse.create_frame"):
             Q1OutliningPass()._emit_sequence_ops(ModuleOp([]), malformed)
+
+    def test_scf_container_with_frame_op_is_included_in_sequence(self):
+        """Verify that a region-bearing op referencing a frame is placed in its outlined
+        sequence."""
+        freq, frame_op = _frame(4.8e9, "q0.drive")
+        duration = ConstantOp(TimeAttr(16e-9))
+        wait = WaitOp(frame_op, duration)
+        container = _ContainerOp(Region(Block([wait])))
+        module = _module_with_main([freq, frame_op, duration, container, func.ReturnOp()])
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        body_ops = list(seq.body.block.ops)
+        assert any(isinstance(op, _ContainerOp) for op in body_ops)
+        assert any(isinstance(op, CreateFrameOp) for op in body_ops)
+        assert isinstance(seq.body.block.first_op, SetMrkImmOp)
+        assert isinstance(seq.body.block.last_op, StopOp)
+
+    def test_outer_constant_free_var_in_container_body_is_pulled_in(self):
+        """Verify that entry-block constants used as free variables inside a nested region
+        are included in the outlined sequence."""
+        freq, frame_op = _frame(4.8e9, "q0.drive")
+        duration = ConstantOp(TimeAttr(16e-9))
+        wait = WaitOp(frame_op, duration)
+        container = _ContainerOp(Region(Block([wait])))
+        module = _module_with_main([freq, frame_op, duration, container, func.ReturnOp()])
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        body_ops = list(seq.body.block.ops)
+        # duration is a free variable in the container body, not a direct operand.
+        assert any(
+            isinstance(op, ConstantOp) and op.value == duration.value for op in body_ops
+        )
+
+    def test_nested_region_bearing_ops_are_captured_transitively(self):
+        """Verify that a frame referenced inside a doubly-nested region causes the outermost
+        container to be included in the sequence."""
+        freq, frame_op = _frame(4.8e9, "q0.drive")
+        duration = ConstantOp(TimeAttr(16e-9))
+        wait = WaitOp(frame_op, duration)
+        inner = _ContainerOp(Region(Block([wait])))
+        outer = _ContainerOp(Region(Block([inner])))
+        module = _module_with_main([freq, frame_op, duration, outer, func.ReturnOp()])
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        body_ops = list(seq.body.block.ops)
+        assert any(isinstance(op, _ContainerOp) for op in body_ops)
+        assert any(isinstance(op, CreateFrameOp) for op in body_ops)
+
+    def test_unused_constant_is_not_pulled_into_sequence(self):
+        """Verify that a constant not referenced by any lineage is excluded from the
+        outlined sequence."""
+        freq, frame_op = _frame(4.8e9, "q0.drive")
+        duration = ConstantOp(TimeAttr(16e-9))
+        wait = WaitOp(frame_op, duration)
+        unused = ConstantOp(TimeAttr(32e-9))
+        module = _module_with_main(
+            [freq, frame_op, duration, wait, unused, func.ReturnOp()]
+        )
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        body_ops = list(seq.body.block.ops)
+        assert not any(
+            isinstance(op, ConstantOp) and op.value == unused.value for op in body_ops
+        )
+
+    def test_constant_shared_by_two_lineages_is_cloned_into_both_sequences(self):
+        """Verify that a duration constant shared by two frame lineages is cloned into each
+        outlined sequence body, keeping each sequence self-contained."""
+        f0_freq, f0 = _frame(4.8e9, "q0.drive")
+        f1_freq, f1 = _frame(5.2e9, "q1.drive")
+        duration = ConstantOp(TimeAttr(16e-9))
+        wait_0 = WaitOp(f0, duration)
+        wait_1 = WaitOp(f1, duration)
+        module = _module_with_main(
+            [f0_freq, f0, f1_freq, f1, duration, wait_0, wait_1, func.ReturnOp()]
+        )
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        assert len(sequences) == 2
+        for seq in sequences:
+            body_ops = list(seq.body.block.ops)
+            assert any(
+                isinstance(op, ConstantOp) and op.value == duration.value for op in body_ops
+            )
+
+    def test_chain_of_dependencies_are_all_pulled_into_sequence(self):
+        """Verify that a multi-level dependency chain feeding a lineage op is pulled in
+        transitively, not just its immediate operand."""
+        freq, frame_op = _frame(4.8e9, "q0.drive")
+        time_0 = ConstantOp(TimeAttr(16e-9))
+        time_1 = ConstantOp(TimeAttr(32e-9))
+        combined = MaxTimeOp(time_0, time_1)
+        wait = WaitOp(frame_op, combined)
+        module = _module_with_main(
+            [freq, frame_op, time_0, time_1, combined, wait, func.ReturnOp()]
+        )
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        body_ops = list(seq.body.block.ops)
+        assert any(
+            isinstance(op, ConstantOp) and op.value == time_0.value for op in body_ops
+        )
+        assert any(
+            isinstance(op, ConstantOp) and op.value == time_1.value for op in body_ops
+        )
+        assert any(isinstance(op, MaxTimeOp) for op in body_ops)
+
+    def test_nested_create_frame_op_is_outlined_into_self_contained_sequence(self):
+        """Verify that a CreateFrameOp created inside a nested region is still outlined into
+        its own self-contained sequence."""
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame_op = CreateFrameOp(freq, StringAttr("q0.drive"))
+        container = _ContainerOp(Region(Block([freq, frame_op])))
+        module = _module_with_main([container, func.ReturnOp()])
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        assert seq.channel_id.data == "q0.drive"
+        body_ops = list(seq.body.block.ops)
+        assert any(isinstance(op, _ContainerOp) for op in body_ops)
+        assert any(
+            isinstance(nested, CreateFrameOp) for op in body_ops for nested in op.walk()
+        )
 
 
 class TestNormalizeSequenceSymbol:
@@ -173,32 +338,16 @@ class TestSequenceSymbolAllocator:
         freq_0, frame_0 = _frame(4.8e9, "q0/drive")
         freq_1, frame_1 = _frame(5.2e9, "q0_drive")
 
-        analysis = FrameLineageAnalysis(
-            frame_to_operations={
-                frame_0.result: (frame_0,),
-                frame_1.result: (frame_1,),
-            },
-            frame_to_port={
-                frame_0.result: "q0/drive",
-                frame_1.result: "q0_drive",
-            },
-            port_to_frames={
-                "q0/drive": (frame_0.result,),
-                "q0_drive": (frame_1.result,),
-            },
-            value_to_frame={
-                frame_0.result: frame_0.result,
-                frame_1.result: frame_1.result,
-            },
-        )
+        lin_0 = FrameLineage(create_frame=frame_0, port="q0/drive")
+        lin_1 = FrameLineage(create_frame=frame_1, port="q0_drive")
         reserved = {"frame_0", "frame_1"}
         allocator = _SymbolAllocator(
             symbol_counts={"q0/drive": 1, "q0_drive": 1},
             used_sequence_symbols=reserved,
         )
 
-        _, sym_0 = allocator.allocate("frame_0", frame_0.result, analysis)
-        _, sym_1 = allocator.allocate("frame_1", frame_1.result, analysis)
+        _, sym_0 = allocator.allocate("frame_0", lin_0)
+        _, sym_1 = allocator.allocate("frame_1", lin_1)
 
         assert sym_0 == "q0_drive"
         assert sym_1 == "frame_1"
@@ -215,32 +364,16 @@ class TestSequenceSymbolAllocator:
         freq_0, frame_0 = _frame(4.8e9, "frame_1")
         freq_1, frame_1 = _frame(5.2e9, "q1/drive")
 
-        analysis = FrameLineageAnalysis(
-            frame_to_operations={
-                frame_0.result: (frame_0,),
-                frame_1.result: (frame_1,),
-            },
-            frame_to_port={
-                frame_0.result: "frame_1",
-                frame_1.result: "q1/drive",
-            },
-            port_to_frames={
-                "frame_1": (frame_0.result,),
-                "q1/drive": (frame_1.result,),
-            },
-            value_to_frame={
-                frame_0.result: frame_0.result,
-                frame_1.result: frame_1.result,
-            },
-        )
+        lin_0 = FrameLineage(create_frame=frame_0, port="frame_1")
+        lin_1 = FrameLineage(create_frame=frame_1, port="q1/drive")
         reserved = {"frame_0", "frame_1"}
         allocator = _SymbolAllocator(
             symbol_counts={"frame_1": 1, "q1/drive": 1},
             used_sequence_symbols=reserved,
         )
 
-        _, sym_0 = allocator.allocate("frame_0", frame_0.result, analysis)
-        _, sym_1 = allocator.allocate("frame_1", frame_1.result, analysis)
+        _, sym_0 = allocator.allocate("frame_0", lin_0)
+        _, sym_1 = allocator.allocate("frame_1", lin_1)
 
         assert sym_0 == "frame_0"
         assert sym_1 == "q1_drive"
