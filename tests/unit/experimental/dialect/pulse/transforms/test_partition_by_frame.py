@@ -26,6 +26,7 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineage,
+    FrameLineageAnalysis,
     FrameLineagePass,
     FrameNode,
     build_frame_lineage_analysis,
@@ -119,6 +120,20 @@ class TestFrameLineage:
 
 
 class TestFrameLineageAnalysis:
+    def test_constructs_preassembled_lineages_with_derived_indexes(self):
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0/drive"))
+        lineage = FrameLineage(
+            create_frame=frame,
+            port="q0/drive",
+            related_ops=[FrameNode(op=frame, parent=None)],
+        )
+
+        analysis = FrameLineageAnalysis.from_lineages([lineage])
+
+        assert analysis.lineage_for_frame(frame.result) is lineage
+        assert analysis.shared_ops == ()
+
     def test_partitions_by_frame_identity_not_port(self):
         """Verify that logical frame identity, not port identity, defines partitions."""
         freq_0 = ConstantOp(FrequencyAttr(4.8e9))
@@ -175,16 +190,21 @@ class TestFrameLineageAnalysis:
             )
         )
 
-        assert [n.op for n in analysis.lineage_for_frame(frame_0.result).related_ops] == [
+        lin_0 = analysis.lineage_for_frame(frame_0.result)
+        lin_1 = analysis.lineage_for_frame(frame_1.result)
+        assert lin_0 is not None
+        assert lin_1 is not None
+        assert [n.op for n in lin_0.related_ops] == [
             frame_0,
             sync,
             wait_0,
         ]
-        assert [n.op for n in analysis.lineage_for_frame(frame_1.result).related_ops] == [
+        assert [n.op for n in lin_1.related_ops] == [
             frame_1,
             sync,
             wait_1,
         ]
+        assert analysis.shared_ops == (sync,)
 
     def test_acquire_remains_in_same_partition(self):
         """Verify that acquisition and subsequent pulse use remain in one lineage."""
@@ -356,6 +376,7 @@ class TestFrameLineageAnalysis:
             frame_1,
             container,
         ]
+        assert analysis.shared_ops == (container,)
 
     def test_frame_operand_without_frame_result_keeps_partition(self):
         """Verify that frame-consuming side effects remain attached to their lineage."""

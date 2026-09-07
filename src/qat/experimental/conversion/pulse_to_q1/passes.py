@@ -17,6 +17,7 @@ from xdsl.pattern_rewriter import GreedyRewritePatternApplier, PatternRewriteWal
 from xdsl.rewriter import Rewriter
 from xdsl.utils.exceptions import PassFailedException
 
+# TODO: Migrate this lowering boundary to QbloxTargetDescription.
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (

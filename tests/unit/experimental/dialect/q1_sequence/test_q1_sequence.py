@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from xdsl.dialects.builtin import ModuleOp
 
@@ -18,10 +18,35 @@ class TestDialectRegistration:
             "q1_sequence.waveform",
             "q1_sequence.weight",
             "q1_sequence.acquisition",
+            "q1_sequence.acquisition_path_connection",
+            "q1_sequence.connection",
+            "q1_sequence.direction_kind",
+            "q1_sequence.nco_config",
+            "q1_sequence.awg_config",
+            "q1_sequence.unweighted_acquisition_config",
+            "q1_sequence.thresholded_acq_config",
+            "q1_sequence.acquire_config",
+            "q1_sequence.marker_override_config",
+            "q1_sequence.sequencer_config",
+            "q1_sequence.mixer_correction_config",
+            "q1_sequence.real_time_predistortion_config",
+            "q1_sequence.sequencer_path",
+            "q1_sequence.output_signal_config",
+            "q1_sequence.input_signal_config",
+            "q1_sequence.scope_acquire_config",
+            "q1_sequence.local_oscillator_config",
+            "q1_sequence.output_config",
+            "q1_sequence.output_path_connection",
+            "q1_sequence.input_config",
+            "q1_sequence.module_config",
+            "q1_sequence.module_kind",
             "q1_sequence.waveform_table_index",
             "q1_sequence.weight_table_index",
             "q1_sequence.acq_table_index",
             "q1_sequence.bin_count_imm",
+            "q1_sequence.integration_length_imm",
+            "q1_sequence.slot_index",
+            "q1_sequence.sequencer_index",
         }
 
     def test_sequence_in_module(self):

@@ -13,6 +13,8 @@ Validation rules
   one; ``max_blocks`` either ``-1`` or at least one; ``min_blocks <= max_blocks`` when
   bounded.
 * **Oscillators** -- ``frequency`` strictly positive.
+* **Identity** -- top-level resource identifiers must be unique.
+* **External resources** -- port and oscillator external-resource references must resolve.
 * **Channels** -- ``frequency`` non-negative; ``port_id`` and ``oscillator_reference``
   must resolve to declared resources.
 * **Modes** -- ``channel_id`` must resolve to a declared channel; nested waveform and
@@ -129,6 +131,43 @@ def _validate_acquire_limit(canonical: CanonicalSystemData) -> None:
         )
 
 
+def _validate_unique_ids(canonical: CanonicalSystemData) -> None:
+    """Require unique identifiers within every top-level resource collection."""
+    for collection_name, values in (
+        ("external_resources", canonical.external_resources),
+        ("oscillators", canonical.oscillators),
+        ("ports", canonical.ports),
+        ("channels", canonical.channels),
+        ("qubits", canonical.qubits),
+    ):
+        seen: set[str] = set()
+        for position, value in enumerate(values):
+            if value.id in seen:
+                _raise_consistency_error(
+                    f"Canonical {collection_name} contains duplicate identifier.",
+                    path=f"$.{collection_name}[{position}].id",
+                    details={"id": value.id},
+                )
+            seen.add(value.id)
+
+
+def _validate_external_resource_references(canonical: CanonicalSystemData) -> None:
+    """Validate port and oscillator references to external resources."""
+    resource_ids = frozenset(resource.id for resource in canonical.external_resources)
+    for collection_name, values in (
+        ("ports", canonical.ports),
+        ("oscillators", canonical.oscillators),
+    ):
+        for value in values:
+            resource_id = value.external_resource_id
+            if resource_id is not None and resource_id not in resource_ids:
+                _raise_consistency_error(
+                    f"Canonical {collection_name[:-1]} references unknown external resource.",
+                    path=f"$.{collection_name}[{value.id}].external_resource_id",
+                    details={"external_resource_id": resource_id},
+                )
+
+
 def _validate_ports(canonical: CanonicalSystemData) -> None:
     """Validate port timing and block granularity constraints."""
     for port in canonical.ports:
@@ -181,7 +220,6 @@ def _validate_oscillators(canonical: CanonicalSystemData) -> None:
 
 def _validate_channel(
     channel: ChannelData,
-    *,
     port_ids: frozenset[str],
     oscillator_ids: frozenset[str],
 ) -> None:
@@ -212,7 +250,6 @@ def _validate_channel(
 
 def _validate_channels(
     canonical: CanonicalSystemData,
-    *,
     port_ids: frozenset[str],
     oscillator_ids: frozenset[str],
 ) -> None:
@@ -221,7 +258,7 @@ def _validate_channels(
         _validate_channel(channel, port_ids=port_ids, oscillator_ids=oscillator_ids)
 
 
-def _validate_waveform(*, waveform: WaveformData, path_root: str) -> None:
+def _validate_waveform(waveform: WaveformData, path_root: str) -> None:
     """Validate waveform timing and numeric bounds.
 
     Extra parameters are designed to be extensible for additions to future waveforms, and
@@ -252,7 +289,6 @@ def _validate_waveform(*, waveform: WaveformData, path_root: str) -> None:
 
 
 def _validate_acquire_definition(
-    *,
     acquire: AcquireDefinitionData,
     path_root: str,
 ) -> None:
@@ -281,7 +317,6 @@ def _validate_acquire_definition(
 
 
 def _validate_max_likelihood_method(
-    *,
     method: MaxLikelihoodMethodData,
     path: str,
 ) -> None:
@@ -330,7 +365,6 @@ def _validate_max_likelihood_method(
 
 
 def _validate_post_process_method(
-    *,
     method: LinearMapToRealMethodData | MaxLikelihoodMethodData,
     path_root: str,
 ) -> None:
@@ -350,7 +384,6 @@ def _validate_post_process_method(
 
 
 def _validate_mode(
-    *,
     qubit: QubitData,
     mode: ModeData,
     channel_ids: frozenset[str],
@@ -375,7 +408,6 @@ def _validate_mode(
 
 
 def _validate_readout_probability(
-    *,
     qubit: QubitData,
     readout_probability: ReadoutProbabilityData,
 ) -> None:
@@ -409,7 +441,6 @@ def _validate_readout_probability(
 
 def _validate_qubits(
     canonical: CanonicalSystemData,
-    *,
     channel_ids: frozenset[str],
 ) -> None:
     """Validate each qubit's modes and readout probabilities."""
@@ -425,7 +456,6 @@ def _validate_qubits(
 
 def _validate_couplings(
     canonical: CanonicalSystemData,
-    *,
     qubit_ids: frozenset[str],
 ) -> None:
     """Validate coupling references against declared qubits."""
@@ -489,6 +519,8 @@ def validate(model: CanonicalSystemData) -> None:
     """
     _validate_top_level_collections(model)
     _validate_acquire_limit(model)
+    _validate_unique_ids(model)
+    _validate_external_resource_references(model)
     _validate_ports(model)
     _validate_oscillators(model)
 

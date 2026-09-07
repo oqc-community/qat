@@ -20,6 +20,7 @@ from xdsl.dialects.builtin import UnrealizedConversionCastOp
 from xdsl.pattern_rewriter import PatternRewriter
 from xdsl.utils.exceptions import PassFailedException
 
+# TODO: Migrate this lowering boundary to QbloxTargetDescription.
 from qat.backend.qblox.target_data import QbloxTargetData
 from qat.experimental.dialect.pulse.ir import (
     ConstantOp,

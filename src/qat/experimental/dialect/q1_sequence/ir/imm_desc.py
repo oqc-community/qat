@@ -10,8 +10,10 @@ Out-of-range values fail at construction time, before they can land in the IR.
 from typing import ClassVar
 
 from xdsl.irdl import irdl_attr_definition
+from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1.ir.imm_desc import Q1Imm
+from qat.experimental.system_data.hardware.qblox.models import QbloxAddress
 
 
 @irdl_attr_definition
@@ -67,3 +69,44 @@ class BinCountImm(Q1Imm):
     name = "q1_sequence.bin_count_imm"
     _MIN: ClassVar[int] = 0
     _MAX: ClassVar[int] = 7_000_000
+
+
+@irdl_attr_definition
+class IntegrationLengthImm(Q1Imm):
+    """Square-weight acquisition integration length in samples: ``[4, 2**24 - 4]``.
+
+    The number of ADC samples the sequencer integrates for an unweighted acquisition,
+    measured at the readout sequencer sample rate. This maps to the QCoDeS
+    ``sequencer.integration_length_acq`` parameter. Hardware requires a multiple of 4
+    samples.
+    """
+
+    name = "q1_sequence.integration_length_imm"
+    _MIN: ClassVar[int] = 4
+    _MAX: ClassVar[int] = (1 << 24) - 4
+
+    @classmethod
+    def _validate(cls, value: int) -> None:
+        super()._validate(value)
+        if value % 4 != 0:
+            raise VerifyException(
+                f"IntegrationLengthImm value must be a multiple of 4, got {value}"
+            )
+
+
+@irdl_attr_definition
+class SlotIndexAttr(Q1Imm):
+    """Index of a module in a Qblox Cluster chassis: ``[1, 20]``."""
+
+    name = "q1_sequence.slot_index"
+    _MIN: ClassVar[int] = QbloxAddress.MIN_SLOT
+    _MAX: ClassVar[int] = QbloxAddress.MAX_SLOT
+
+
+@irdl_attr_definition
+class SequencerIndexAttr(Q1Imm):
+    """Index of a sequencer within a Qblox module: ``[0, 11]``."""
+
+    name = "q1_sequence.sequencer_index"
+    _MIN: ClassVar[int] = 0
+    _MAX: ClassVar[int] = 11

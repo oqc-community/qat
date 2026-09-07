@@ -2,6 +2,8 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Unit tests for canonical system data validation (model/validation.py)."""
 
+from dataclasses import replace
+
 import pytest
 
 from qat.experimental.system_data.canonical.schema import (
@@ -9,6 +11,7 @@ from qat.experimental.system_data.canonical.schema import (
     AttributeEntry,
     CanonicalSystemData,
     ChannelData,
+    ExternalResourceData,
     LinearMapToRealMethodData,
     MaxLikelihoodDiscriminateParams,
     MaxLikelihoodMethodData,
@@ -56,6 +59,62 @@ def _with_mode(
 
 def test_valid_minimal_passes():
     validate(_minimal())  # must not raise
+
+
+@pytest.mark.parametrize(
+    ("field", "duplicate"),
+    [
+        (
+            "external_resources",
+            ExternalResourceData(id="resource0"),
+        ),
+        (
+            "oscillators",
+            OscillatorData(id="osc0", frequency=5_000_000_000),
+        ),
+        (
+            "ports",
+            PortData(id="p0", sample_time=1000),
+        ),
+        (
+            "channels",
+            ChannelData(id="ch0", port_id="p0", frequency=5_000_000_000),
+        ),
+        (
+            "qubits",
+            QubitData(id="q0", index=1),
+        ),
+    ],
+)
+def test_duplicate_top_level_resource_id_raises(field, duplicate):
+    model = _minimal()
+    values = getattr(model, field)
+    if field == "external_resources":
+        values = (duplicate, duplicate)
+    else:
+        values = (*values, duplicate)
+    model = replace(model, **{field: values})
+
+    with pytest.raises(MaterialisationConsistencyError, match="duplicate identifier"):
+        validate(model)
+
+
+@pytest.mark.parametrize("collection", ["ports", "oscillators"])
+def test_unknown_external_resource_reference_raises(collection):
+    model = _minimal()
+    replacement = (
+        PortData(id="p0", sample_time=1000, external_resource_id="missing")
+        if collection == "ports"
+        else OscillatorData(
+            id="osc0",
+            frequency=5_000_000_000,
+            external_resource_id="missing",
+        )
+    )
+    model = replace(model, **{collection: (replacement,)})
+
+    with pytest.raises(MaterialisationConsistencyError, match="unknown external resource"):
+        validate(model)
 
 
 def test_no_qubits_raises():

@@ -107,6 +107,7 @@ def test_with_oscillator():
 def test_with_oscillator_optional_resource():
     canonical = (
         CanonicalSystemDataBuilder()
+        .with_external_resource("r0")
         .with_oscillator("osc0", 5_000_000_000, external_resource_id="r0")
         .with_port("p0", 1000)
         .with_channel("ch0", "p0", 5_000_000_000, oscillator_reference="osc0")

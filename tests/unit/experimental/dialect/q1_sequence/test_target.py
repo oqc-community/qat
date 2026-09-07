@@ -106,10 +106,10 @@ class TestEmitModule:
         result = emit_module(module)
         assert result == {}
 
-    def test_ignores_non_sequence_ops(self):
+    def test_rejects_non_sequence_ops(self):
         module = ModuleOp([NopOp(), SequenceOp("drive", [StopOp()])])
-        result = emit_module(module)
-        assert set(result.keys()) == {"drive"}
+        with pytest.raises(TypeError, match="top-level SequenceOps"):
+            emit_module(module)
 
     def test_sequences_with_data(self):
         wf = make_waveform("wf0", 0, [0.5])

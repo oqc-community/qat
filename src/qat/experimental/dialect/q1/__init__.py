@@ -199,6 +199,15 @@ from qat.experimental.dialect.q1.ir.reg_desc import (
 )
 from qat.experimental.dialect.q1.target import Q1asmTarget, emit_program
 
+ACQUISITION_OP_TYPES = (
+    AcquireImmImmImmOp,
+    AcquireImmRsImmOp,
+    AcquireTtlImmImmImmImmOp,
+    AcquireTtlImmRsImmImmOp,
+    AcquireWeightedImmImmImmImmImmOp,
+    AcquireWeightedImmRsRsRsImmOp,
+)
+
 Q1 = Dialect(
     "q1",
     [

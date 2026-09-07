@@ -7,6 +7,7 @@ from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp, StringAttr
 from xdsl.ir import Block, Region
 from xdsl.irdl import IRDLOperation, irdl_op_definition, region_def
+from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.qblox.target_data import QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import (
@@ -106,6 +107,7 @@ class TestPulseToQ1SequenceOutlining:
 
         [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         assert seq.channel_id.data == "q0_drive"
+        assert seq.port_id.data == "q0/drive"
         assert pass_instance.state.frame_to_port == {"frame_0": "q0/drive"}
         assert pass_instance.state.frame_to_sequence == {"frame_0": "q0_drive"}
 
@@ -121,6 +123,7 @@ class TestPulseToQ1SequenceOutlining:
         sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         assert len(sequences) == 2
         assert [seq.channel_id.data for seq in sequences] == ["frame_0", "frame_1"]
+        assert [seq.port_id.data for seq in sequences] == ["shared.port", "shared.port"]
         assert pass_instance.state.frame_to_port == {
             "frame_0": "shared.port",
             "frame_1": "shared.port",
@@ -158,7 +161,7 @@ class TestPulseToQ1SequenceOutlining:
             port="q0.drive",
             related_ops=[FrameNode(op=func.ReturnOp(), parent=malformed_root)],
         )
-        malformed = FrameLineageAnalysis(lineages=[malformed_lin])
+        malformed = FrameLineageAnalysis.from_lineages([malformed_lin])
         with pytest.raises(ValueError, match="does not contain pulse.create_frame"):
             Q1OutliningPass()._emit_sequence_ops(ModuleOp([]), malformed)
 
@@ -304,6 +307,16 @@ class TestPulseToQ1SequenceOutlining:
         assert any(
             isinstance(nested, CreateFrameOp) for op in body_ops for nested in op.walk()
         )
+
+    def test_operation_shared_by_two_lineages_is_rejected(self):
+        """A cross-lineage operation cannot be duplicated into independent sequences."""
+        f0_freq, f0 = _frame(4.8e9, "q0.drive")
+        f1_freq, f1 = _frame(5.2e9, "q1.drive")
+        container = _ContainerOp(Region(Block([f0_freq, f0, f1_freq, f1])))
+        module = _module_with_main([container, func.ReturnOp()])
+
+        with pytest.raises(PassFailedException, match="spans multiple frame lineages"):
+            Q1OutliningPass().apply(Context(), module)
 
 
 class TestNormalizeSequenceSymbol:

@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 
-import json
 from dataclasses import dataclass
 from io import StringIO
+from json import dump
 from typing import IO, Any
 
 from xdsl.context import Context
@@ -78,11 +78,15 @@ def emit_module(
 
     result: dict[str, dict[str, Any]] = {}
     for op in module.body.block.ops:
-        if isinstance(op, SequenceOp):
-            cid = op.channel_id.data
-            if cid in result:
-                raise ValueError(f"Duplicate channel_id '{cid}' in module")
-            result[cid] = emit_sequence(op)
+        if not isinstance(op, SequenceOp):
+            raise TypeError(
+                "Q1 sequence emission requires top-level SequenceOps; "
+                f"found {type(op).__name__}"
+            )
+        cid = op.channel_id.data
+        if cid in result:
+            raise ValueError(f"Duplicate channel_id '{cid}' in module")
+        result[cid] = emit_sequence(op)
     return result
 
 
@@ -99,4 +103,4 @@ class Q1SequenceTarget(Target):
         """
 
         result = emit_module(module)
-        json.dump(result, output)
+        dump(result, output)

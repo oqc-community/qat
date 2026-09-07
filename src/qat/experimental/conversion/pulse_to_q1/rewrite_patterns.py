@@ -29,6 +29,7 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
+# TODO: Migrate this lowering boundary to QbloxTargetDescription.
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
@@ -131,11 +132,11 @@ def _get_enclosing_port(op: Operation) -> str | None:
     """Return the channel port token of the ``q1_sequence.sequence`` that contains *op*.
 
     After outlining, pulse ops live inside a ``SequenceOp`` body region. Walking up
-    through the block → region → parent-op chain retrieves the sequence's ``sym_name``,
+    through the block → region → parent-op chain retrieves the sequence's ``channel_id``,
     which is the normalised channel token (e.g. ``"q0_drive"``).
 
     :param op: The operation whose enclosing sequence is to be found.
-    :returns: The ``sym_name`` data string, or ``None`` if *op* is not inside a
+    :returns: The ``channel_id`` data string, or ``None`` if *op* is not inside a
         ``SequenceOp``.
     """
     region = op.parent_region()
@@ -144,7 +145,7 @@ def _get_enclosing_port(op: Operation) -> str | None:
     parent = region.parent
     if not isinstance(parent, SequenceOp):
         return None
-    return parent.sym_name.data
+    return parent.channel_id.data
 
 
 def _make_debug_info(op: IRDLOperation) -> DebugInfoAttr | None:

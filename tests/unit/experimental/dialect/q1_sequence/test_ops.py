@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import pytest
-from xdsl.dialects.builtin import ArrayAttr, StringAttr
+from xdsl.dialects.builtin import ArrayAttr, ModuleOp, StringAttr
 from xdsl.ir import Block, Region
 from xdsl.utils.exceptions import VerifyException
 
@@ -13,21 +13,91 @@ from qat.experimental.dialect.q1_cf import (
     UnaryPredicateBranchOp,
 )
 from qat.experimental.dialect.q1_scf import ForOp, YieldOp
-from qat.experimental.dialect.q1_sequence import SequenceOp, find_enclosing_sequence
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    AcquisitionPathConnectionAttr,
+    ConnectionAttr,
+    InputConfigAttr,
+    LocalOscillatorConfigAttr,
+    MixerCorrectionConfigAttr,
+    ModuleConfigAttr,
+    OutputConfigAttr,
+    OutputPathConnectionAttr,
+    SequencerConfigAttr,
     make_acquisition,
+    make_sequencer_config,
     make_waveform,
     make_weight,
 )
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
+from qat.experimental.system_data.hardware.qblox.models import (
+    DirectionKind,
+    QbloxModuleKind,
+    SignalPath,
+)
+
+
+def _module_config(
+    slot_idx: int = 1,
+    kind: QbloxModuleKind = QbloxModuleKind.qrm_rf,
+    outputs: list[OutputConfigAttr] | None = None,
+    inputs: list[InputConfigAttr] | None = None,
+    local_oscillators: list[LocalOscillatorConfigAttr] | None = None,
+) -> ModuleConfigAttr:
+    return ModuleConfigAttr(
+        slot_idx,
+        "cluster0",
+        kind,
+        outputs or [],
+        inputs or [],
+        local_oscillators or [],
+    )
 
 
 class TestSequenceOpConstruction:
     def test_minimal(self):
         seq = SequenceOp("ch0", [StopOp()])
         assert seq.channel_id.data == "ch0"
+        assert "channel_id" in seq.attributes
+        assert "sym_name" not in seq.attributes
+        assert seq.port_id.data == "ch0"
         assert len(seq.waveforms) == 0
         assert len(seq.weights) == 0
         assert len(seq.acquisitions) == 0
+        assert seq.slot_idx is None
+        assert seq.seq_idx is None
+        assert seq.sequencer_config is None
+        assert seq.module_config is None
+
+    def test_with_distinct_port_id(self):
+        seq = SequenceOp("ch0", [StopOp()], port_id="Q0/drive")
+
+        assert seq.channel_id.data == "ch0"
+        assert seq.port_id.data == "Q0/drive"
+
+    def test_port_id_is_not_inferred_from_sequencer_config(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            sequencer_config=SequencerConfigAttr(port_id="Q0/drive"),
+        )
+
+        assert seq.port_id.data == "ch0"
+
+    def test_with_physical_allocation_and_config(self):
+        module_config = _module_config()
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=2,
+            sequencer_config=make_sequencer_config(integration_length=1024),
+            module_config=module_config,
+        )
+        assert seq.slot_idx.data == 1
+        assert seq.seq_idx.data == 2
+        assert seq.sequencer_config.integration_length.data == 1024
+        assert seq.module_config == module_config
 
     def test_with_body_ops(self):
         seq = SequenceOp("ch0", [NopOp(), StopOp()])
@@ -81,6 +151,369 @@ class TestSequenceOpVerify:
         seq = SequenceOp("", [StopOp()])
         with pytest.raises(VerifyException, match="channel_id must be non-empty"):
             seq.verify_()
+
+    def test_empty_port_id(self):
+        seq = SequenceOp("ch0", [StopOp()], port_id="")
+        with pytest.raises(VerifyException, match="port_id must be non-empty"):
+            seq.verify_()
+
+    def test_partial_physical_allocation_fails(self):
+        seq = SequenceOp("ch0", [StopOp()], slot_idx=1)
+        with pytest.raises(VerifyException, match="must be set together"):
+            seq.verify_()
+
+    def test_duplicate_physical_allocation_fails(self):
+        seq0 = SequenceOp(
+            "ch0", [StopOp()], instrument_id="cluster0", slot_idx=1, seq_idx=0
+        )
+        seq1 = SequenceOp(
+            "ch1", [StopOp()], instrument_id="cluster0", slot_idx=1, seq_idx=0
+        )
+        ModuleOp([seq0, seq1])
+        with pytest.raises(VerifyException, match="Duplicate physical allocation"):
+            seq0.verify_()
+
+    def test_shared_module_requires_consistent_configuration(self):
+        seq0 = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            module_config=_module_config(kind=QbloxModuleKind.qrm),
+        )
+        seq1 = SequenceOp(
+            "ch1",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=1,
+            module_config=_module_config(kind=QbloxModuleKind.qrm_rf),
+        )
+        ModuleOp([seq0, seq1])
+
+        with pytest.raises(VerifyException, match="conflicting module configurations"):
+            seq0.verify_()
+
+    def test_module_kind_limits_sequencer_index(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=6,
+            module_config=_module_config(kind=QbloxModuleKind.qcm),
+        )
+        with pytest.raises(VerifyException, match="invalid for qcm"):
+            seq.verify_()
+
+    def test_acquisition_config_requires_readout_sequencer(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=make_sequencer_config(integration_length=1024),
+            module_config=_module_config(kind=QbloxModuleKind.qcm),
+        )
+        with pytest.raises(VerifyException, match="acquisition-capable sequencer"):
+            seq.verify_()
+
+    def test_acquisition_table_requires_readout_sequencer(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            acquisitions=ArrayAttr([make_acquisition("acq0", 0, 1)]),
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            module_config=_module_config(kind=QbloxModuleKind.qcm),
+        )
+
+        with pytest.raises(VerifyException, match="acquisition-capable sequencer"):
+            seq.verify_()
+
+    def test_acquisition_enabled_requires_readout_sequencer(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(acquisition_enabled=True),
+            module_config=_module_config(kind=QbloxModuleKind.qcm),
+        )
+
+        with pytest.raises(VerifyException, match="acquisition-capable sequencer"):
+            seq.verify_()
+
+    def test_valid_readout_allocation(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=5,
+            sequencer_config=make_sequencer_config(integration_length=1024),
+            module_config=_module_config(),
+        )
+        seq.verify_()
+
+    def test_module_acquisition_tables_respect_memory_limit(self):
+        module_config = _module_config(kind=QbloxModuleKind.qrm)
+        seq0 = SequenceOp(
+            "ch0",
+            [StopOp()],
+            acquisitions=ArrayAttr([make_acquisition("acq0", 0, 1_500_001)]),
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            module_config=module_config,
+        )
+        seq1 = SequenceOp(
+            "ch1",
+            [StopOp()],
+            acquisitions=ArrayAttr([make_acquisition("acq1", 0, 1_500_000)]),
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=1,
+            module_config=module_config,
+        )
+        ModuleOp([seq0, seq1])
+
+        with pytest.raises(VerifyException, match="3000000-bin module limit"):
+            seq0.verify_()
+
+    def test_module_rejects_unsupported_mixer_correction(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                mixer=MixerCorrectionConfigAttr(phase_offset=0.0, gain_ratio=1.0)
+            ),
+            module_config=_module_config(kind=QbloxModuleKind.qrc),
+        )
+
+        with pytest.raises(VerifyException, match="does not support mixer correction"):
+            seq.verify_()
+
+    def test_valid_connections_against_module_lanes(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                output_path_connections=[OutputPathConnectionAttr(0, SignalPath.iq)],
+                acquisition_path_connections=[
+                    AcquisitionPathConnectionAttr(0, SignalPath.iq)
+                ],
+                local_oscillator_id="lo0",
+            ),
+            module_config=_module_config(
+                outputs=[OutputConfigAttr(0)],
+                inputs=[InputConfigAttr(0)],
+                local_oscillators=[LocalOscillatorConfigAttr("lo0", 6_000_000_000)],
+            ),
+        )
+        seq.verify_()
+
+    @pytest.mark.parametrize(
+        ("config", "expected"),
+        [
+            pytest.param(
+                SequencerConfigAttr(
+                    output_path_connections=[OutputPathConnectionAttr(0, SignalPath.iq)]
+                ),
+                "output 0 is absent",
+                id="unconfigured-output",
+            ),
+            pytest.param(
+                SequencerConfigAttr(
+                    acquisition_path_connections=[
+                        AcquisitionPathConnectionAttr(0, SignalPath.iq)
+                    ]
+                ),
+                "input 0 is absent",
+                id="unconfigured-input",
+            ),
+            pytest.param(
+                SequencerConfigAttr(local_oscillator_id="lo0"),
+                "unknown local oscillator",
+                id="unknown-oscillator",
+            ),
+        ],
+    )
+    def test_connections_must_exist_in_module_configuration(self, config, expected):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=config,
+            module_config=_module_config(),
+        )
+        with pytest.raises(VerifyException, match=expected):
+            seq.verify_()
+
+    def test_qrc_sequencer_cannot_drive_unreachable_output(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=1,
+            sequencer_config=SequencerConfigAttr(
+                output_path_connections=[OutputPathConnectionAttr(2, SignalPath.iq)]
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc, outputs=[OutputConfigAttr(2)]
+            ),
+        )
+        with pytest.raises(VerifyException, match="cannot drive output 2"):
+            seq.verify_()
+
+    def test_qrc_waveform_only_sequencer_cannot_configure_acquisition_connection(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=8,
+            sequencer_config=SequencerConfigAttr(
+                output_path_connections=[OutputPathConnectionAttr(2, SignalPath.iq)],
+                acquisition_path_connections=[
+                    AcquisitionPathConnectionAttr(0, SignalPath.iq)
+                ],
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc,
+                outputs=[OutputConfigAttr(2)],
+                inputs=[InputConfigAttr(0)],
+            ),
+        )
+        with pytest.raises(VerifyException, match="acquisition-capable sequencer"):
+            seq.verify_()
+
+    def test_qrc_waveform_only_sequencer_cannot_use_bulk_input_connection(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=8,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.input, [0])]
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc, inputs=[InputConfigAttr(0)]
+            ),
+        )
+        with pytest.raises(VerifyException, match="acquisition-capable sequencer"):
+            seq.verify_()
+
+    def test_qrc_connection_obeys_output_reachability(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=8,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.output, [0])]
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc, outputs=[OutputConfigAttr(0)]
+            ),
+        )
+        with pytest.raises(VerifyException, match="cannot drive connection output"):
+            seq.verify_()
+
+    @pytest.mark.parametrize(
+        ("kind", "expected"),
+        [
+            (DirectionKind.output, "unconfigured outputs"),
+            (DirectionKind.input, "unconfigured inputs"),
+            (DirectionKind.io, "unconfigured outputs"),
+        ],
+    )
+    def test_connection_requires_configured_module_lanes(self, kind, expected):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(connections=[ConnectionAttr(kind, [0])]),
+            module_config=_module_config(kind=QbloxModuleKind.qrm),
+        )
+
+        with pytest.raises(VerifyException, match=expected):
+            seq.verify_()
+
+    def test_optional_properties_are_omitted_when_absent(self):
+        seq = SequenceOp("ch0", [StopOp()])
+        assert "instrument_id" not in seq.properties
+        assert "slot_idx" not in seq.properties
+        assert "seq_idx" not in seq.properties
+        assert "sequencer_config" not in seq.properties
+        assert "module_config" not in seq.properties
+
+    def test_module_config_must_match_physical_allocation(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            module_config=_module_config(slot_idx=2),
+        )
+
+        with pytest.raises(VerifyException, match="does not match"):
+            seq.verify_()
+
+    def test_module_config_requires_physical_allocation(self):
+        seq = SequenceOp("ch0", [StopOp()], module_config=_module_config())
+
+        with pytest.raises(VerifyException, match="requires instrument_id"):
+            seq.verify_()
+
+    def test_port_id_must_match_sequencer_config_without_module_config(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            port_id="physical-a",
+            sequencer_config=SequencerConfigAttr(port_id="physical-b"),
+        )
+
+        with pytest.raises(VerifyException, match="port_id conflicts"):
+            seq.verify_()
+
+    def test_duplicate_allocation_fails_without_module_config(self):
+        first = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+        )
+        second = SequenceOp(
+            "ch1",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+        )
+        ModuleOp([first, second])
+
+        with pytest.raises(VerifyException, match="Duplicate physical allocation"):
+            first.verify_()
 
     def test_duplicate_waveform_indices_fail(self):
         wf0 = make_waveform("a", 0, [0.1])

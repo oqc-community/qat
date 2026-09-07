@@ -9,7 +9,9 @@ from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.ir import Operation, SSAValue
 from xdsl.passes import ModulePass
+from xdsl.utils.exceptions import PassFailedException
 
+# TODO: Remove this unused target dependency with the QbloxTargetDescription migration.
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.dialect.pulse.ir import CreateFrameOp
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
@@ -218,7 +220,11 @@ class Q1OutliningPass(ModulePass):
             *sequence_body,
             StopOp(),
         ]
-        return SequenceOp(sequence_symbol, sequence_ops), channel_token, sequence_symbol
+        return (
+            SequenceOp(sequence_symbol, sequence_ops, port_id=channel_token),
+            channel_token,
+            sequence_symbol,
+        )
 
     def _emit_sequence_ops(
         self, module: ModuleOp, analysis: FrameLineageAnalysis
@@ -235,6 +241,12 @@ class Q1OutliningPass(ModulePass):
         :returns: Triple of emitted SequenceOp list, frame→port mapping, and
                   frame→sequence symbol mapping.
         """
+        if shared_ops := analysis.shared_ops:
+            shared_op = shared_ops[0]
+            raise PassFailedException(
+                f"{shared_op.name} spans multiple frame lineages and cannot be outlined "
+                "into independent Q1 sequences"
+            )
         symbol_counts = analysis.port_counts
         n_frames = len(analysis.lineages)
         reserved = {f"frame_{i}" for i in range(n_frames)}

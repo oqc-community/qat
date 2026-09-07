@@ -9,7 +9,7 @@ facing port metadata attached to each frame.
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 
 from xdsl.context import Context
@@ -100,16 +100,35 @@ class FrameLineage:
 class FrameLineageAnalysis:
     """Module-level frame-lineage analysis; one :class:`FrameLineage` per ``CreateFrameOp``.
 
-    Value ownership is tracked centrally in this object, so resolving a value to its
-    owning lineage and attaching a new usage are both O(1) operations rather than scans
-    over ``lineages``.
+    Value ownership and operation membership are tracked centrally in this object.
+    Operations may intentionally belong to multiple lineages, for example when a
+    synchronization coordinates several frames. Consumers that require independent
+    partitions can inspect :attr:`shared_ops` without reconstructing membership from the
+    lineages.
 
     :ivar lineages: All discovered lineages in encounter order.
     """
 
-    def __init__(self, lineages: list[FrameLineage] | None = None) -> None:
-        self.lineages = lineages if lineages is not None else []
+    def __init__(self) -> None:
+        self.lineages: list[FrameLineage] = []
         self._owner: dict[SSAValue, FrameLineage] = {}
+        self._lineages_by_op: dict[Operation, list[FrameLineage]] = {}
+
+    @classmethod
+    def from_lineages(cls, lineages: Iterable[FrameLineage]) -> FrameLineageAnalysis:
+        """Construct an analysis from previously assembled lineages.
+
+        Normal analysis construction uses :meth:`begin_lineage` and :meth:`attach`.
+        This factory is useful when a caller already owns complete lineage records.
+
+        :param lineages: Complete lineages to register in encounter order.
+        :returns: An analysis containing ``lineages`` and their derived indexes.
+        """
+
+        analysis = cls()
+        for lineage in lineages:
+            analysis._register_lineage(lineage)
+        return analysis
 
     @property
     def port_counts(self) -> dict[str, int]:
@@ -118,6 +137,13 @@ class FrameLineageAnalysis:
         for lineage in self.lineages:
             counts[lineage.port] = counts.get(lineage.port, 0) + 1
         return counts
+
+    @property
+    def shared_ops(self) -> tuple[Operation, ...]:
+        """Return operations attached to more than one lineage, in encounter order."""
+        return tuple(
+            op for op, lineages in self._lineages_by_op.items() if len(lineages) > 1
+        )
 
     def lineage_for_frame(self, frame: SSAValue) -> FrameLineage | None:
         """Return the :class:`FrameLineage` whose root value is ``frame``, or ``None``."""
@@ -133,8 +159,7 @@ class FrameLineageAnalysis:
         lineage = FrameLineage(
             create_frame=create_frame, port=create_frame.port.data, related_ops=[node]
         )
-        self.lineages.append(lineage)
-        self._owner[create_frame.result] = lineage
+        self._register_lineage(lineage)
         return lineage
 
     def attach(
@@ -142,8 +167,20 @@ class FrameLineageAnalysis:
     ) -> None:
         """Record ``entry_op``'s use of ``lineage``, optionally claiming ``result``."""
         lineage.add_node(entry_op)
+        self._record_op_membership(entry_op, lineage)
         if result is not None:
             self._owner[result] = lineage
+
+    def _record_op_membership(self, op: Operation, lineage: FrameLineage) -> None:
+        lineages = self._lineages_by_op.setdefault(op, [])
+        if lineage not in lineages:
+            lineages.append(lineage)
+
+    def _register_lineage(self, lineage: FrameLineage) -> None:
+        self.lineages.append(lineage)
+        self._owner[lineage.frame] = lineage
+        for op in lineage.ops:
+            self._record_op_membership(op, lineage)
 
 
 class _LineageState:
