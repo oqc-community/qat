@@ -735,15 +735,28 @@ class TestPurrImporterUnsupportedInstructions:
     @pytest.mark.parametrize(
         "type_", [PostProcessType.MEAN, PostProcessType.DOWN_CONVERT, PostProcessType.MUL]
     )
-    def test_post_processing_raises(self, builder, hw, type_):
+    def test_post_processing_is_ignored(self, builder, hw, type_):
         ch = hw.get_qubit(0).get_acquire_channel()
         acq = Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR)
         builder.add(acq)
 
         builder.add(PostProcessing(acq, process=type_))
         imp = PurrImporter()
-        with pytest.raises(ValueError, match="Unsupported post-processing type"):
-            imp.build(builder)
+        module = imp.build(builder)
+
+        map_ops = _ops_of_type(module, MapOp)
+        assert len(map_ops) == 1
+        assert len(_ops_of_type(module, EqualiseOp)) == 0
+        assert len(_ops_of_type(module, DiscriminateOp)) == 0
+
+        map_body_ops = list(map_ops[0].body.block.ops)
+        body_post_processing_ops = [
+            op
+            for op in map_body_ops
+            if isinstance(op, ExtractOp | EqualiseOp | DiscriminateOp)
+        ]
+        assert len(body_post_processing_ops) == 1
+        assert isinstance(body_post_processing_ops[0], ExtractOp)
 
     def test_sweep_raises(self, builder):
         builder.add(Sweep())

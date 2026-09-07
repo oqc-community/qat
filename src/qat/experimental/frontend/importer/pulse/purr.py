@@ -11,7 +11,7 @@ from functools import singledispatchmethod
 import numpy as np
 from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp
-from xdsl.ir import Attribute, Block, Operation, Region, SSAValue
+from xdsl.ir import Attribute, Block, Region, SSAValue
 
 from qat.experimental.dialect.pulse.ir import (
     AcquisitionType,
@@ -34,6 +34,7 @@ from qat.experimental.dialect.results.ir import (
 )
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
 from qat.experimental.frontend.importer.pulse.post_processing import PostSelectionBuilder
+from qat.experimental.utils.logging import get_logger
 from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
 from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
 from qat.experimental.waveforms.shapes.rounded_square import RoundedSquareWaveformShape
@@ -66,6 +67,8 @@ from qat.purr.compiler.instructions import (
 )
 
 _KERNEL_NAME = "program"
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -383,8 +386,11 @@ class PurrImporter:
             body.add_op(extract_op)
             value = extract_op.result
             for pp in analysis.post_processing[key]:
-                operation, value = self._convert_post_processing(pp, value)
-                body.add_op(operation)
+                new_op = self._convert_post_processing(pp, value)
+                if new_op is None:
+                    continue
+                body.add_op(new_op)
+                value = new_op.result
             ssa_map[key] = value
 
         return ssa_map
@@ -462,8 +468,8 @@ class PurrImporter:
     @staticmethod
     def _convert_post_processing(
         instruction: PostProcessing, value: SSAValue
-    ) -> tuple[Operation, SSAValue]:
-        """Convert one post-processing step into an IR operation and output SSA value."""
+    ) -> EqualiseOp | DiscriminateOp | None:
+        """Convert one post-processing step into an IR operation, or None if unsupported."""
         match instruction.process:
             case PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL:
                 args = instruction.args
@@ -478,7 +484,6 @@ class PurrImporter:
                     translation=np.real(args[1]),
                 )
                 op = EqualiseOp(value, affine_attr)
-                result = op.result
             case PostProcessType.DISCRIMINATE:
                 if len(instruction.args) != 1:
                     raise ValueError(
@@ -488,11 +493,14 @@ class PurrImporter:
                     value,
                     RealThresholdPolicyAttr(threshold=instruction.args[0]),
                 )
-                result = op.result
             case _:
-                raise ValueError(f"Unsupported post-processing type {instruction.process}.")
+                logger.warning(
+                    "Post-processing type %s is unsupported by the PuRR importer and will be ignored.",
+                    instruction.process,
+                )
+                return None
 
-        return op, result
+        return op
 
     @staticmethod
     def _frame_key(quantum_target: PulseChannel) -> str:
