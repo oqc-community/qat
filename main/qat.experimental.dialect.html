@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect package &mdash; qat-compiler 3.0.0.post355.dev20260907141941 documentation</title>
+  <title>qat.experimental.dialect package &mdash; qat-compiler 3.0.0.post356.dev20260907145244 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -191,6 +191,7 @@
 </li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">qat.experimental.dialect package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html">qat.experimental.dialect.common.attribute_converters module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.naming.html">qat.experimental.dialect.common.naming module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.region.html">qat.experimental.dialect.common.region module</a></li>
@@ -272,9 +273,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.hardware.html">qat.experimental.system_data.hardware package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.base.html">qat.experimental.system_data.hardware.base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.html">qat.experimental.system_data.hardware.qblox module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html">qat.experimental.system_data.hardware.qblox_config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.html">qat.experimental.system_data.hardware.qblox package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.materialisers.html">qat.experimental.system_data.materialisers package</a><ul>
@@ -696,6 +695,16 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.common.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html">qat.experimental.dialect.common.attribute_converters module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_array"><code class="docutils literal notranslate"><span class="pre">as_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_bool"><code class="docutils literal notranslate"><span class="pre">as_bool()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_float"><code class="docutils literal notranslate"><span class="pre">as_float()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_int"><code class="docutils literal notranslate"><span class="pre">as_int()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_int_array"><code class="docutils literal notranslate"><span class="pre">as_int_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_optional"><code class="docutils literal notranslate"><span class="pre">as_optional()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html#qat.experimental.dialect.common.attribute_converters.as_string"><code class="docutils literal notranslate"><span class="pre">as_string()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html#qat.experimental.dialect.common.cfg.SuccessorOperandsTrait"><code class="docutils literal notranslate"><span class="pre">SuccessorOperandsTrait</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html#qat.experimental.dialect.common.cfg.block_predecessors"><code class="docutils literal notranslate"><span class="pre">block_predecessors()</span></code></a></li>
@@ -3245,8 +3254,38 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionAttr.num_bins"><code class="docutils literal notranslate"><span class="pre">AcquisitionAttr.num_bins</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionPathConnectionAttr"><code class="docutils literal notranslate"><span class="pre">AcquisitionPathConnectionAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionPathConnectionAttr.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">AcquisitionPathConnectionAttr.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionPathConnectionAttr.input_id"><code class="docutils literal notranslate"><span class="pre">AcquisitionPathConnectionAttr.input_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionPathConnectionAttr.name"><code class="docutils literal notranslate"><span class="pre">AcquisitionPathConnectionAttr.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionPathConnectionAttr.path"><code class="docutils literal notranslate"><span class="pre">AcquisitionPathConnectionAttr.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.AcquisitionPathConnectionAttr.verify"><code class="docutils literal notranslate"><span class="pre">AcquisitionPathConnectionAttr.verify()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.BinCountImm"><code class="docutils literal notranslate"><span class="pre">BinCountImm</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.BinCountImm.name"><code class="docutils literal notranslate"><span class="pre">BinCountImm.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr.connection"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr.connection</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr.direction"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr.direction</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr.name"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr.port_ids"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr.port_ids</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.ConnectionAttr.verify"><code class="docutils literal notranslate"><span class="pre">ConnectionAttr.verify()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.DirectionKindAttr"><code class="docutils literal notranslate"><span class="pre">DirectionKindAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.DirectionKindAttr.enum_type"><code class="docutils literal notranslate"><span class="pre">DirectionKindAttr.enum_type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.DirectionKindAttr.name"><code class="docutils literal notranslate"><span class="pre">DirectionKindAttr.name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.OutputPathConnectionAttr"><code class="docutils literal notranslate"><span class="pre">OutputPathConnectionAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.OutputPathConnectionAttr.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">OutputPathConnectionAttr.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.OutputPathConnectionAttr.name"><code class="docutils literal notranslate"><span class="pre">OutputPathConnectionAttr.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.OutputPathConnectionAttr.output_id"><code class="docutils literal notranslate"><span class="pre">OutputPathConnectionAttr.output_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.OutputPathConnectionAttr.path"><code class="docutils literal notranslate"><span class="pre">OutputPathConnectionAttr.path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.OutputPathConnectionAttr.verify"><code class="docutils literal notranslate"><span class="pre">OutputPathConnectionAttr.verify()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.Q1SequenceTarget"><code class="docutils literal notranslate"><span class="pre">Q1SequenceTarget</span></code></a><ul>
@@ -3259,12 +3298,22 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.body"><code class="docutils literal notranslate"><span class="pre">SequenceOp.body</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.channel_id"><code class="docutils literal notranslate"><span class="pre">SequenceOp.channel_id</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">SequenceOp.get_irdl_definition()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.instrument_id"><code class="docutils literal notranslate"><span class="pre">SequenceOp.instrument_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.module_config"><code class="docutils literal notranslate"><span class="pre">SequenceOp.module_config</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.name"><code class="docutils literal notranslate"><span class="pre">SequenceOp.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.sym_name"><code class="docutils literal notranslate"><span class="pre">SequenceOp.sym_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.port_id"><code class="docutils literal notranslate"><span class="pre">SequenceOp.port_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.seq_idx"><code class="docutils literal notranslate"><span class="pre">SequenceOp.seq_idx</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.sequencer_config"><code class="docutils literal notranslate"><span class="pre">SequenceOp.sequencer_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.slot_idx"><code class="docutils literal notranslate"><span class="pre">SequenceOp.slot_idx</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.traits"><code class="docutils literal notranslate"><span class="pre">SequenceOp.traits</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.verify_"><code class="docutils literal notranslate"><span class="pre">SequenceOp.verify_()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.waveforms"><code class="docutils literal notranslate"><span class="pre">SequenceOp.waveforms</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SequenceOp.weights"><code class="docutils literal notranslate"><span class="pre">SequenceOp.weights</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SignalPathAttr"><code class="docutils literal notranslate"><span class="pre">SignalPathAttr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SignalPathAttr.enum_type"><code class="docutils literal notranslate"><span class="pre">SignalPathAttr.enum_type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.SignalPathAttr.name"><code class="docutils literal notranslate"><span class="pre">SignalPathAttr.name</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WaveformAttr"><code class="docutils literal notranslate"><span class="pre">WaveformAttr</span></code></a><ul>

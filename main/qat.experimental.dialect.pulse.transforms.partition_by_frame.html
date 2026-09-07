@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.partition_by_frame module &mdash; qat-compiler 3.0.0.post355.dev20260907141941 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.partition_by_frame module &mdash; qat-compiler 3.0.0.post356.dev20260907145244 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -190,6 +190,7 @@
 </li>
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html">qat.experimental.dialect.common.attribute_converters module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.naming.html">qat.experimental.dialect.common.naming module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.region.html">qat.experimental.dialect.common.region module</a></li>
@@ -271,9 +272,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.hardware.html">qat.experimental.system_data.hardware package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.base.html">qat.experimental.system_data.hardware.base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.html">qat.experimental.system_data.hardware.qblox module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html">qat.experimental.system_data.hardware.qblox_config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.html">qat.experimental.system_data.hardware.qblox package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.materialisers.html">qat.experimental.system_data.materialisers package</a><ul>
@@ -747,12 +746,14 @@ so walking the chain yields the full lineage history from any point.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameLineageAnalysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lineages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrameLineageAnalysis</span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Module-level frame-lineage analysis; one <a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameLineage</span></code></a> per <code class="docutils literal notranslate"><span class="pre">CreateFrameOp</span></code>.</p>
-<p>Value ownership is tracked centrally in this object, so resolving a value to its
-owning lineage and attaching a new usage are both O(1) operations rather than scans
-over <code class="docutils literal notranslate"><span class="pre">lineages</span></code>.</p>
+<p>Value ownership and operation membership are tracked centrally in this object.
+Operations may intentionally belong to multiple lineages, for example when a
+synchronization coordinates several frames. Consumers that require independent
+partitions can inspect <a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.shared_ops" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.shared_ops"><code class="xref py py-attr docutils literal notranslate"><span class="pre">shared_ops</span></code></a> without reconstructing membership from the
+lineages.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>lineages</strong> – All discovered lineages in encounter order.</p>
@@ -776,6 +777,25 @@ over <code class="docutils literal notranslate"><span class="pre">lineages</span
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameLineage</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.from_lineages">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_lineages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lineages</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.from_lineages" title="Link to this definition"></a></dt>
+<dd><p>Construct an analysis from previously assembled lineages.</p>
+<p>Normal analysis construction uses <a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.begin_lineage" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.begin_lineage"><code class="xref py py-meth docutils literal notranslate"><span class="pre">begin_lineage()</span></code></a> and <a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.attach" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.attach"><code class="xref py py-meth docutils literal notranslate"><span class="pre">attach()</span></code></a>.
+This factory is useful when a caller already owns complete lineage records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.from_lineages.params.lineages"></span><strong>lineages</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.from_lineages.params.lineages">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code>[<a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameLineage</span></code></a>]</span>) – Complete lineages to register in encounter order.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis" title="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameLineageAnalysis</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An analysis containing <code class="docutils literal notranslate"><span class="pre">lineages</span></code> and their derived indexes.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -806,6 +826,12 @@ over <code class="docutils literal notranslate"><span class="pre">lineages</span
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.port_counts">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">port_counts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.port_counts" title="Link to this definition"></a></dt>
 <dd><p>Return the number of lineages sharing each port token.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.shared_ops">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shared_ops</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Operation</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.shared_ops" title="Link to this definition"></a></dt>
+<dd><p>Return operations attached to more than one lineage, in encounter order.</p>
 </dd></dl>
 
 </dd></dl>

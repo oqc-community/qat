@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1_sequence.ir.ops module &mdash; qat-compiler 3.0.0.post355.dev20260907141941 documentation</title>
+  <title>qat.experimental.dialect.q1_sequence.ir.ops module &mdash; qat-compiler 3.0.0.post356.dev20260907145244 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -190,6 +190,7 @@
 </li>
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.dialect.html">qat.experimental.dialect package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.dialect.common.html">qat.experimental.dialect.common package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.attribute_converters.html">qat.experimental.dialect.common.attribute_converters module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.cfg.html">qat.experimental.dialect.common.cfg module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.naming.html">qat.experimental.dialect.common.naming module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.common.region.html">qat.experimental.dialect.common.region module</a></li>
@@ -271,9 +272,7 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.hardware.html">qat.experimental.system_data.hardware package</a><ul>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.base.html">qat.experimental.system_data.hardware.base module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.html">qat.experimental.system_data.hardware.qblox module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox_config.html">qat.experimental.system_data.hardware.qblox_config module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.html">qat.experimental.system_data.hardware.qblox package</a></li>
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.materialisers.html">qat.experimental.system_data.materialisers package</a><ul>
@@ -694,7 +693,7 @@
 <span id="qat-experimental-dialect-q1-sequence-ir-ops-module"></span><h1>qat.experimental.dialect.q1_sequence.ir.ops module<a class="headerlink" href="#module-qat.experimental.dialect.q1_sequence.ir.ops" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequenceOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequenceOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">program</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveforms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisitions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">slot_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seq_idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp" title="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceOp</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">IRDLOperation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">_IRNode</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A sequence op represents the payload for a single Sequencer/PPU in a Qblox
 instrument. The body region holds Q1 assembly ops across one or more blocks, each
@@ -703,15 +702,26 @@ terminated by an <code class="docutils literal notranslate"><span class="pre">Is
 linearised to a single block before emission, since <code class="docutils literal notranslate"><span class="pre">emit_sequence</span></code> lowers via
 <code class="docutils literal notranslate"><span class="pre">q1.emit_program</span></code> which requires all ops to be <code class="docutils literal notranslate"><span class="pre">AssemblyPrintable</span></code> (<code class="docutils literal notranslate"><span class="pre">q1_cf</span></code>
 terminators are not). Data table attributes (waveforms, weights, acquisitions) are
-static lookup tables referenced by instruction indices.</p>
+static lookup tables referenced by instruction indices. <code class="docutils literal notranslate"><span class="pre">instrument_id</span></code>, <code class="docutils literal notranslate"><span class="pre">slot_idx</span></code>
+and <code class="docutils literal notranslate"><span class="pre">seq_idx</span></code> identify the physical allocation. <code class="docutils literal notranslate"><span class="pre">sequencer_config</span></code> owns the digital
+configuration and connections, while <code class="docutils literal notranslate"><span class="pre">module_config</span></code> owns the authoritative analogue
+configuration of the physical module.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.sym_name"></span><strong>sym_name</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.sym_name">¶</a> – Channel/sequencer identifier (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Q0_drive&quot;</span></code>).</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.body"></span><strong>body</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.body">¶</a> – Region of Q1 instruction ops, one or more blocks.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.channel_id"></span><strong>channel_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.channel_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code></span>) – Stable identifier for the emitted sequencer program.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.program"></span><strong>program</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.program">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">Region</span></code></span>) – Q1 instruction operations or a region containing one or more blocks.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.port_id"></span><strong>port_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.port_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Canonical port identifier (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;Q0/drive&quot;</span></code>). Defaults to
+<code class="docutils literal notranslate"><span class="pre">channel_id</span></code> for an unbound sequence.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.waveforms"></span><strong>waveforms</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.waveforms">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.WaveformAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaveformAttr</span></code></a>]]</span>) – Waveform data table entries.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.weights"></span><strong>weights</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.weights">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">WeightAttr</span></code></a>]]</span>) – Weight data table entries.</p></li>
 <li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.acquisitions"></span><strong>acquisitions</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.acquisitions">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ArrayAttr</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.AcquisitionAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.AcquisitionAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquisitionAttr</span></code></a>]]</span>) – Acquisition data table entries.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.instrument_id"></span><strong>instrument_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.instrument_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">StringAttr</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Physical Cluster instrument, absent until hardware binding.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.slot_idx"></span><strong>slot_idx</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.slot_idx">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.imm_desc.html#qat.experimental.dialect.q1_sequence.ir.imm_desc.SlotIndexAttr" title="qat.experimental.dialect.q1_sequence.ir.imm_desc.SlotIndexAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">SlotIndexAttr</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Physical Cluster slot, absent until hardware binding.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.seq_idx"></span><strong>seq_idx</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.seq_idx">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.imm_desc.html#qat.experimental.dialect.q1_sequence.ir.imm_desc.SequencerIndexAttr" title="qat.experimental.dialect.q1_sequence.ir.imm_desc.SequencerIndexAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerIndexAttr</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – Physical sequencer index, absent until hardware binding.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.sequencer_config"></span><strong>sequencer_config</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.sequencer_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.SequencerConfigAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.SequencerConfigAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerConfigAttr</span></code></a>]</span>) – Per-sequencer configuration and connections, absent until
+resolved.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.module_config"></span><strong>module_config</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.params.module_config">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.ModuleConfigAttr" title="qat.experimental.dialect.q1_sequence.ir.attrs.ModuleConfigAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleConfigAttr</span></code></a>]</span>) – Analogue module configuration, absent until hardware binding.</p></li>
 </ul>
 </dd>
 </dl>
@@ -733,10 +743,10 @@ static lookup tables referenced by instruction indices.</p>
 <dd><p>Access a non-variadic construct which appears before any variadic arguments.</p>
 </dd></dl>
 
-<dl class="py property">
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.channel_id">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">channel_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">StringAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.channel_id" title="Link to this definition"></a></dt>
-<dd><p>Alias for <cite>sym_name</cite>, the channel identifier.</p>
+<span class="sig-name descname"><span class="pre">channel_id</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.channel_id" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation attribute.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -746,15 +756,33 @@ static lookup tables referenced by instruction indices.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.instrument_id">
+<span class="sig-name descname"><span class="pre">instrument_id</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.instrument_id" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an optional operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.location">
 <span class="sig-name descname"><span class="pre">location</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">LocationAttr</span></em><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.location" title="Link to this definition"></a></dt>
 <dd><p>The source location attached to this operation.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.module_config">
+<span class="sig-name descname"><span class="pre">module_config</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.module_config" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an optional operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1_sequence.sequence'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.name" title="Link to this definition"></a></dt>
 <dd><p>The operation name. Should be a static member of the class</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.port_id">
+<span class="sig-name descname"><span class="pre">port_id</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.port_id" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an operation attribute.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -766,9 +794,21 @@ thus cannot be discarded by transformations.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.sym_name">
-<span class="sig-name descname"><span class="pre">sym_name</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.sym_name" title="Link to this definition"></a></dt>
-<dd><p>Accessor for an operation attribute.</p>
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.seq_idx">
+<span class="sig-name descname"><span class="pre">seq_idx</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.seq_idx" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an optional operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.sequencer_config">
+<span class="sig-name descname"><span class="pre">sequencer_config</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.sequencer_config" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an optional operation property.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.slot_idx">
+<span class="sig-name descname"><span class="pre">slot_idx</span></span><a class="headerlink" href="#qat.experimental.dialect.q1_sequence.ir.ops.SequenceOp.slot_idx" title="Link to this definition"></a></dt>
+<dd><p>Accessor for an optional operation property.</p>
 </dd></dl>
 
 <dl class="py attribute">
