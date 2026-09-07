@@ -1,0 +1,7 @@
+qat.experimental.middleend.middleend module
+===========================================
+
+.. automodule:: qat.experimental.middleend.middleend
+   :members:
+   :undoc-members:
+   :show-inheritance:

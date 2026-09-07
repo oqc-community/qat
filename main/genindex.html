@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post353.dev20260904163140 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post354.dev20260907103651 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -519,6 +519,13 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.analysis.post_processing.html">qat.experimental.analysis.post_processing module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.backend.html">qat.experimental.backend package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.backend.qblox.html">qat.experimental.backend.qblox package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.backend.html">qat.experimental.backend.qblox.backend module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.conversion.html">qat.experimental.conversion package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.conversion.pulse.html">qat.experimental.conversion.pulse package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse.lower_kernels_to_arrays.html">qat.experimental.conversion.pulse.lower_kernels_to_arrays module</a></li>
@@ -589,8 +596,17 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.frontend.purr.html">qat.experimental.frontend.purr module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.middleend.html">qat.experimental.middleend package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.middleend.middleend.html">qat.experimental.middleend.middleend module</a></li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.passes.html">qat.experimental.passes package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.passes.pass_ordering.html">qat.experimental.passes.pass_ordering module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.pipelines.html">qat.experimental.pipelines package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.pipelines.compile.html">qat.experimental.pipelines.compile module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.pipelines.execute.html">qat.experimental.pipelines.execute module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
@@ -4319,10 +4335,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.waveform.html#qat.utils.waveform.ComplexFunction">(class in qat.utils.waveform)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.device.html#qat.model.device.Component">Component (class in qat.model.device)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.instrument.base.html#qat.instrument.base.CompositeInstrument.components">components (CompositeInstrument property)</a>
 </li>
       <li><a href="qat.purr.backends.qblox.execution.executor.html#qat.purr.backends.qblox.execution.executor.CompositeExecutor">CompositeExecutor (class in qat.purr.backends.qblox.execution.executor)</a>
@@ -4365,6 +4381,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.core.pipelines.configurable.html#qat.core.pipelines.configurable.ConfigurablePipeline.params.config">(qat.core.pipelines.configurable.ConfigurablePipeline parameter)</a>
 </li>
         <li><a href="qat.core.pipelines.factory.html#qat.core.pipelines.factory.PipelineFactory.params.config">(qat.core.pipelines.factory.PipelineFactory parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline.params.config">(qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline.params.config">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline parameter)</a>
 </li>
         <li><a href="qat.experimental.system_data.hardware.qblox.html#qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.build_sequencers.params.config">(qat.experimental.system_data.hardware.qblox.QbloxModuleSpec.build_sequencers parameter)</a>
 </li>
@@ -6506,6 +6526,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.middleend.base.html#qat.middleend.base.CustomMiddleend.emit">(CustomMiddleend method)</a>
 </li>
+        <li><a href="qat.experimental.backend.qblox.backend.html#qat.experimental.backend.qblox.backend.ExperimentalQbloxBackend.emit">(ExperimentalQbloxBackend method)</a>
+</li>
         <li><a href="qat.backend.fallthrough.html#qat.backend.fallthrough.FallthroughBackend.emit">(FallthroughBackend method)</a>
 </li>
         <li><a href="qat.frontend.fallthrough.html#qat.frontend.fallthrough.FallthroughFrontend.emit">(FallthroughFrontend method)</a>
@@ -6515,6 +6537,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.compiler.emitter.html#qat.purr.compiler.emitter.InstructionEmitter.emit">(InstructionEmitter method)</a>
 </li>
         <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.JsonHandler.emit">(JsonHandler method)</a>
+</li>
+        <li><a href="qat.experimental.middleend.middleend.html#qat.experimental.middleend.middleend.PulseLevelMiddleend.emit">(PulseLevelMiddleend method)</a>
 </li>
         <li><a href="qat.experimental.frontend.purr.html#qat.experimental.frontend.purr.PurrFrontend.emit">(PurrFrontend method)</a>, <a href="qat.frontend.purr.html#qat.frontend.purr.PurrFrontend.emit">[1]</a>, <a href="qat.frontend.purr.purr.html#qat.frontend.purr.purr.PurrFrontend.emit">[2]</a>
 </li>
@@ -6681,6 +6705,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.core.pipelines.configurable.html#qat.core.pipelines.configurable.ConfigurablePipeline.params.engine">(qat.core.pipelines.configurable.ConfigurablePipeline parameter)</a>
 </li>
         <li><a href="qat.core.pipelines.factory.html#qat.core.pipelines.factory.PipelineFactory.params.engine">(qat.core.pipelines.factory.PipelineFactory parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline.params.engine">(qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline.params.engine">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline parameter)</a>
 </li>
         <li><a href="qat.pipelines.legacy.base.compile.html#qat.pipelines.legacy.base.compile.LegacyCompilePipeline.params.engine">(qat.pipelines.legacy.base.compile.LegacyCompilePipeline parameter)</a>
 </li>
@@ -7116,6 +7144,16 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.conversion.pulse.lower_kernels_to_arrays.html#qat.experimental.conversion.pulse.lower_kernels_to_arrays.expand_call_site.params.expansion">expansion (qat.experimental.conversion.pulse.lower_kernels_to_arrays.expand_call_site parameter)</a>
 </li>
       <li><a href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationCapabilityPredicateData.expected">expected (OperationCapabilityPredicateData attribute)</a>
+</li>
+      <li><a href="qat.experimental.backend.qblox.backend.html#qat.experimental.backend.qblox.backend.ExperimentalQbloxBackend">ExperimentalQbloxBackend (class in qat.experimental.backend.qblox.backend)</a>
+</li>
+      <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline">ExperimentalQbloxCompilePipeline (class in qat.experimental.pipelines.compile)</a>
+</li>
+      <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipelineConfig">ExperimentalQbloxCompilePipelineConfig (class in qat.experimental.pipelines.compile)</a>
+</li>
+      <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline">ExperimentalQbloxExecutePipeline (class in qat.experimental.pipelines.execute)</a>
+</li>
+      <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig">ExperimentalQbloxExecutePipelineConfig (class in qat.experimental.pipelines.execute)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.exponent_map">exponent_map (qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter parameter)</a>
 </li>
@@ -8899,6 +8937,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.core.config.configure.html#qat.core.config.configure.get_qatconfig">get_qatconfig() (in module qat.core.config.configure)</a>
 </li>
+      <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.get_qblox_results_pipeline">get_qblox_results_pipeline() (in module qat.experimental.pipelines.execute)</a>
+</li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_quantum_device">get_quantum_device() (QuantumHardwareModel method)</a>
 </li>
       <li><a href="qat.purr.compiler.hardware_models.html#qat.purr.compiler.hardware_models.QuantumHardwareModel.get_qubit">get_qubit() (QuantumHardwareModel method)</a>
@@ -9119,6 +9159,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.FrequencyUnits.HERTZ">HERTZ (FrequencyUnits attribute)</a>
 </li>
+      <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig.host">host (ExperimentalQbloxExecutePipelineConfig attribute)</a>
+
+      <ul>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig.params.host">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig parameter)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -9775,10 +9821,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.WeightAttr.index">(WeightAttr attribute)</a>, <a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.WeightAttr.index">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.IntRegisterType.index_by_name">index_by_name() (IntRegisterType class method)</a>, <a href="qat.experimental.dialect.q1.ir.reg_desc.html#qat.experimental.dialect.q1.ir.reg_desc.IntRegisterType.index_by_name">[1]</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.model.hardware_model.html#qat.model.hardware_model.PhysicalHardwareModel.index_of_qubit">index_of_qubit() (PhysicalHardwareModel method)</a>
 </li>
       <li><a href="qat.runtime.passes.purr.transform.html#qat.runtime.passes.purr.transform.QiskitErrorMitigation.index_pattern">index_pattern (QiskitErrorMitigation attribute)</a>
@@ -10165,6 +10211,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.core.pass_base.html#qat.core.pass_base.PassModel.run.params.ir">(qat.core.pass_base.PassModel.run parameter)</a>
 </li>
         <li><a href="qat.experimental.frontend.importer.base.html#qat.experimental.frontend.importer.base.BaseLinearImporter.build.params.ir">(qat.experimental.frontend.importer.base.BaseLinearImporter.build parameter)</a>
+</li>
+        <li><a href="qat.experimental.middleend.middleend.html#qat.experimental.middleend.middleend.PulseLevelMiddleend.emit.params.ir">(qat.experimental.middleend.middleend.PulseLevelMiddleend.emit parameter)</a>
 </li>
         <li><a href="qat.frontend.passes.transform.html#qat.frontend.passes.transform.PostProcessingSanitisation.run.params.ir">(qat.frontend.passes.transform.PostProcessingSanitisation.run parameter)</a>
 </li>
@@ -11269,6 +11317,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.core.pipelines.configurable.html#qat.core.pipelines.configurable.ConfigurablePipeline.params.loader">(qat.core.pipelines.configurable.ConfigurablePipeline parameter)</a>
 </li>
         <li><a href="qat.core.pipelines.factory.html#qat.core.pipelines.factory.PipelineFactory.params.loader">(qat.core.pipelines.factory.PipelineFactory parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline.params.loader">(qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline.params.loader">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline parameter)</a>
 </li>
         <li><a href="qat.pipelines.legacy.base.compile.html#qat.pipelines.legacy.base.compile.LegacyCompilePipeline.params.loader">(qat.pipelines.legacy.base.compile.LegacyCompilePipeline parameter)</a>
 </li>
@@ -13194,7 +13246,15 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.core.pipelines.factory.html#qat.core.pipelines.factory.PipelineFactory.params.model">(qat.core.pipelines.factory.PipelineFactory parameter)</a>
 </li>
+        <li><a href="qat.experimental.backend.qblox.backend.html#qat.experimental.backend.qblox.backend.ExperimentalQbloxBackend.params.model">(qat.experimental.backend.qblox.backend.ExperimentalQbloxBackend parameter)</a>, <a href="qat.experimental.backend.qblox.backend.html#qat.experimental.backend.qblox.backend.ExperimentalQbloxBackend.params.model">[1]</a>
+</li>
         <li><a href="qat.experimental.frontend.purr.html#qat.experimental.frontend.purr.PurrFrontend.params.model">(qat.experimental.frontend.purr.PurrFrontend parameter)</a>
+</li>
+        <li><a href="qat.experimental.middleend.middleend.html#qat.experimental.middleend.middleend.PulseLevelMiddleend.params.model">(qat.experimental.middleend.middleend.PulseLevelMiddleend parameter)</a>, <a href="qat.experimental.middleend.middleend.html#qat.experimental.middleend.middleend.PulseLevelMiddleend.params.model">[1]</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline.params.model">(qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline.params.model">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline parameter)</a>
 </li>
         <li><a href="qat.experimental.system_data.materialisers.model.validation.html#qat.experimental.system_data.materialisers.model.validation.validate.params.model">(qat.experimental.system_data.materialisers.model.validation.validate parameter)</a>
 </li>
@@ -13521,6 +13581,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.executables.html#qat.executables.Executable.model_config">(Executable attribute)</a>
 </li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ExecutePipelineDescription.model_config">(ExecutePipelineDescription attribute)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipelineConfig.model_config">(ExperimentalQbloxCompilePipelineConfig attribute)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig.model_config">(ExperimentalQbloxExecutePipelineConfig attribute)</a>
 </li>
         <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.ExpOvershoot0Config.model_config">(ExpOvershoot0Config attribute)</a>
 </li>
@@ -14109,6 +14173,12 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.analysis.post_processing.html#module-qat.experimental.analysis.post_processing">qat.experimental.analysis.post_processing</a>
 </li>
+        <li><a href="qat.experimental.backend.html#module-qat.experimental.backend">qat.experimental.backend</a>
+</li>
+        <li><a href="qat.experimental.backend.qblox.html#module-qat.experimental.backend.qblox">qat.experimental.backend.qblox</a>
+</li>
+        <li><a href="qat.experimental.backend.qblox.backend.html#module-qat.experimental.backend.qblox.backend">qat.experimental.backend.qblox.backend</a>
+</li>
         <li><a href="qat.experimental.conversion.html#module-qat.experimental.conversion">qat.experimental.conversion</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse.html#module-qat.experimental.conversion.pulse">qat.experimental.conversion.pulse</a>
@@ -14275,9 +14345,19 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.frontend.purr.html#module-qat.experimental.frontend.purr">qat.experimental.frontend.purr</a>
 </li>
+        <li><a href="qat.experimental.middleend.html#module-qat.experimental.middleend">qat.experimental.middleend</a>
+</li>
+        <li><a href="qat.experimental.middleend.middleend.html#module-qat.experimental.middleend.middleend">qat.experimental.middleend.middleend</a>
+</li>
         <li><a href="qat.experimental.passes.html#module-qat.experimental.passes">qat.experimental.passes</a>
 </li>
         <li><a href="qat.experimental.passes.pass_ordering.html#module-qat.experimental.passes.pass_ordering">qat.experimental.passes.pass_ordering</a>
+</li>
+        <li><a href="qat.experimental.pipelines.html#module-qat.experimental.pipelines">qat.experimental.pipelines</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#module-qat.experimental.pipelines.compile">qat.experimental.pipelines.compile</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#module-qat.experimental.pipelines.execute">qat.experimental.pipelines.execute</a>
 </li>
         <li><a href="qat.experimental.system_data.html#module-qat.experimental.system_data">qat.experimental.system_data</a>
 </li>
@@ -15267,6 +15347,10 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.core.config.descriptions.html#qat.core.config.descriptions.ExecutePipelineDescription.name">(ExecutePipelineDescription attribute)</a>
 </li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipelineConfig.name">(ExperimentalQbloxCompilePipelineConfig attribute)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig.name">(ExperimentalQbloxExecutePipelineConfig attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.ExtractOp.name">(ExtractOp attribute)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.ExtractOp.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.FbAcqIqIdImmImmOp.name">(FbAcqIqIdImmImmOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.FbAcqIqIdImmImmOp.name">[1]</a>
@@ -15606,6 +15690,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.frontend.importer.environment.html#qat.experimental.frontend.importer.environment.EnvironmentTracker.set_by_name.params.name">(qat.experimental.frontend.importer.environment.EnvironmentTracker.set_by_name parameter)</a>
 </li>
         <li><a href="qat.experimental.frontend.importer.pulse.builder.html#qat.experimental.frontend.importer.pulse.builder.PulseKernelBuilder.params.name">(qat.experimental.frontend.importer.pulse.builder.PulseKernelBuilder parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipelineConfig.params.name">(qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipelineConfig parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig.params.name">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipelineConfig parameter)</a>
 </li>
         <li><a href="qat.model.loaders.cache.html#qat.model.loaders.cache.CacheAccessLoader.params.name">(qat.model.loaders.cache.CacheAccessLoader parameter)</a>
 </li>
@@ -18596,6 +18684,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.system_data.pulse.constraints.html#qat.experimental.system_data.pulse.constraints.PulseLevelConstraints">PulseLevelConstraints (class in qat.experimental.system_data.pulse.constraints)</a>
 </li>
+      <li><a href="qat.experimental.middleend.middleend.html#qat.experimental.middleend.middleend.PulseLevelMiddleend">PulseLevelMiddleend (class in qat.experimental.middleend.middleend)</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.PulseNumericTypedAttr">PulseNumericTypedAttr (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
@@ -19337,6 +19427,27 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.backend
+
+      <ul>
+        <li><a href="qat.experimental.backend.html#module-qat.experimental.backend">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.backend.qblox
+
+      <ul>
+        <li><a href="qat.experimental.backend.qblox.html#module-qat.experimental.backend.qblox">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.backend.qblox.backend
+
+      <ul>
+        <li><a href="qat.experimental.backend.qblox.backend.html#module-qat.experimental.backend.qblox.backend">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.conversion
 
       <ul>
@@ -19918,6 +20029,20 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.middleend
+
+      <ul>
+        <li><a href="qat.experimental.middleend.html#module-qat.experimental.middleend">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.middleend.middleend
+
+      <ul>
+        <li><a href="qat.experimental.middleend.middleend.html#module-qat.experimental.middleend.middleend">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.passes
 
       <ul>
@@ -19929,6 +20054,27 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.passes.pass_ordering.html#module-qat.experimental.passes.pass_ordering">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.pipelines
+
+      <ul>
+        <li><a href="qat.experimental.pipelines.html#module-qat.experimental.pipelines">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.pipelines.compile
+
+      <ul>
+        <li><a href="qat.experimental.pipelines.compile.html#module-qat.experimental.pipelines.compile">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.pipelines.execute
+
+      <ul>
+        <li><a href="qat.experimental.pipelines.execute.html#module-qat.experimental.pipelines.execute">module</a>
 </li>
       </ul></li>
       <li>
@@ -20778,6 +20924,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.utils.html#module-qat.ir.utils">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.ir.waveforms
 
@@ -20806,8 +20954,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.middleend.decompositions.html#module-qat.middleend.decompositions">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.middleend.decompositions.base
 
@@ -26378,6 +26524,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStartContinuousWaveformOp.params.target_data">(qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStartContinuousWaveformOp parameter)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStopContinuousWaveformOp.params.target_data">(qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteStopContinuousWaveformOp parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline.params.target_data">(qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline parameter)</a>
+</li>
+        <li><a href="qat.experimental.pipelines.execute.html#qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline.params.target_data">(qat.experimental.pipelines.execute.ExperimentalQbloxExecutePipeline parameter)</a>
 </li>
         <li><a href="qat.middleend.passes.purr.transform.html#qat.middleend.passes.purr.transform.BatchedShots.params.target_data">(qat.middleend.passes.purr.transform.BatchedShots parameter)</a>
 </li>

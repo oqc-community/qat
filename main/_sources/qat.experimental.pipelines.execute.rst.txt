@@ -1,0 +1,7 @@
+qat.experimental.pipelines.execute module
+=========================================
+
+.. automodule:: qat.experimental.pipelines.execute
+   :members:
+   :undoc-members:
+   :show-inheritance:
