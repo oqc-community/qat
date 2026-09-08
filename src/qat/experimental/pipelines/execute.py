@@ -1,21 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Experimental M1 execute pipeline (COMPILER-1416 / 1417 / 1418).
+"""Experimental Qblox execute pipeline.
+
+.. note:: Related work (TODOs)
+
+        * COMPILER-1417: Ensure QBlox payloads are compatible with the bSLAM specification.
+        * COMPILER-1418: Expand bSLAM zero-engine integration testing.
 
 Executes compiled QBlox programs on a live Qblox cluster using
 :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData` as the hardware
 model.
-
-.. warning::
-
-    Experimental. ``qat.experimental.runtime.results_pipeline.get_qblox_results_pipeline``
-    (COMPILER-1416) is not yet merged into the pinned ``qat-compiler`` dependency — it only
-    exists on an open PR. Until it lands, this module builds an equivalent results pipeline
-    locally from the same production passes it composes
-    (:mod:`qat.runtime.passes.transform`), which do not depend on the legacy
-    ``QuantumHardwareModel`` for the steps used here. Replace the local
-    :func:`get_qblox_results_pipeline` stand-in with the production implementation once
-    COMPILER-1416 is merged.
 
 As with the compile pipeline, there is no ``BaseModelLoader`` for ``CanonicalSystemData``,
 so this pipeline must be instantiated directly rather than wired up via qatconfig::
@@ -32,13 +26,10 @@ so this pipeline must be instantiated directly rather than wired up via qatconfi
 """
 
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
-from qat.core.pass_base import PassManager
 from qat.engines import NativeEngine
 from qat.engines.qblox.execution import QbloxEngine
 from qat.engines.qblox.live import QbloxLeafInstrument
-
-# TODO(COMPILER-1416): Import get_qblox_results_pipeline once it is merged
-# from qat.experimental.runtime.results_pipeline import get_qblox_results_pipeline
+from qat.experimental.runtime.results_pipeline import get_qblox_results_pipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.utils.logging import get_logger
 from qat.pipelines.pipeline import ExecutePipeline
@@ -47,14 +38,6 @@ from qat.runtime import SimpleRuntime
 from qat.runtime.aggregator import QBloxAggregator
 
 log = get_logger(__name__)
-
-
-# TODO(COMPILER-1416): Replace this stand-in with an import of get_qblox_results_pipeline
-# once it is merged.
-def get_qblox_results_pipeline() -> PassManager:
-    """Stand-in for ``get_qblox_results_pipeline`` (COMPILER-1416, not yet merged)."""
-
-    return PassManager()
 
 
 class ExperimentalQbloxExecutePipelineConfig(PipelineConfig):

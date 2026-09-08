@@ -11,11 +11,13 @@ from qat.experimental.pipelines.execute import (
     ExperimentalQbloxExecutePipeline,
     ExperimentalQbloxExecutePipelineConfig,
 )
+from qat.experimental.runtime.results_pipeline import get_qblox_results_pipeline
 from qat.pipelines.pipeline import ExecutePipeline
 from qat.runtime import SimpleRuntime
 from qat.runtime.aggregator import QBloxAggregator
 
 pytest_plugins = ("tests.unit.experimental.utils.canonical",)
+pytestmark = pytest.mark.qblox
 
 
 class TestExperimentalQbloxExecutePipeline:
@@ -83,10 +85,18 @@ class TestExperimentalQbloxExecutePipeline:
         assert isinstance(pipeline.engine, QbloxEngine)
         assert pipeline.engine.instrument.address == config.host
 
-    # TODO(COMPILER-1416): Replace this skipped contract test with the production pass pipeline.
-    @pytest.mark.skip(
-        reason="COMPILER-1416: dedicated experimental Qblox results pipeline is not available"
-    )
-    def test_results_pipeline_processes_qblox_acquisitions(self):
-        """The execute pipeline should use the dedicated Qblox results pipeline."""
-        raise AssertionError("Implement when COMPILER-1416 is complete")
+    def test_results_pipeline_processes_qblox_acquisitions(self, canonical_model):
+        """The execute pipeline uses the production Qblox results pipeline."""
+        pipeline = ExperimentalQbloxExecutePipeline._build_pipeline(
+            config=ExperimentalQbloxExecutePipelineConfig(host="127.0.0.1"),
+            model=canonical_model,
+            target_data=None,
+        )
+
+        expected_pipeline = get_qblox_results_pipeline()
+        actual_passes = [
+            type(pass_._pass) for pass_ in pipeline.runtime.results_pipeline.passes
+        ]
+        expected_passes = [type(pass_._pass) for pass_ in expected_pipeline.passes]
+
+        assert actual_passes == expected_passes

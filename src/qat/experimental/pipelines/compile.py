@@ -1,9 +1,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Experimental M1 compile pipeline (COMPILER-1409 / COMPILER-1421 / COMPILER-1422).
+"""Experimental Qblox compile pipeline.
 
-Wires together the experimental frontend, middleend, and backend for the M1 QBlox target,
-using a :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`
+.. note:: Related work (TODOs)
+
+    - COMPILER-1421: Experimental pulse-level middleend.
+    - COMPILER-1422: Experimental QBlox backend.
+
+Wires together the experimental frontend, middleend, and backend for the experimental Qblox
+target, using a
+:class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`
 instance rather than the legacy ``QuantumHardwareModel``/``PhysicalHardwareModel`` used by
 production pipelines such as :class:`~qat.pipelines.purr.qblox.compile.QbloxCompilePipeline1`.
 
@@ -27,10 +33,10 @@ directly instead::
 
     Experimental. :meth:`compile` will raise ``NotImplementedError`` at the backend stage
     until COMPILER-1422 (QBlox code generation from the new IR stack) is implemented. The
-    frontend (COMPILER-1409) and middleend (COMPILER-1421 pulse-level passes) already run
+    frontend and middleend (COMPILER-1421 pulse-level passes) already run
     against real components. The ``program`` passed to ``compile`` must be a
     ``QuantumInstructionBuilder`` (PuRR IR) — the experimental frontend only exposes the
-    PuRR importer, per COMPILER-1409's acceptance criteria.
+    PuRR importer.
 """
 
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
@@ -53,7 +59,8 @@ class ExperimentalQbloxCompilePipelineConfig(PipelineConfig):
 
 class ExperimentalQbloxCompilePipeline(UpdateablePipeline):
     # TODO(COMPILER-1443): Replace with new pipeline infrastructure.
-    """Compiles programs for M1 using the experimental frontend/middleend/backend stack.
+    """Compiles programs for the experimental Qblox target using the frontend, middleend,
+    and backend stack.
 
     .. warning::
 

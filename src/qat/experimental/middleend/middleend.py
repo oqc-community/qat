@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Experimental pulse-level middleend for the M1 QBlox pipeline.
+"""Experimental pulse-level middleend for the Qblox pipeline.
 
 TODO(COMPILER-1421): Update as part of the implementation of the experimental pulse-level
 middleend.
