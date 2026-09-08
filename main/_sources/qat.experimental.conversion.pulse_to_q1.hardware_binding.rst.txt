@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.hardware\_binding module
+==================================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.hardware_binding
+   :members:
+   :undoc-members:
+   :show-inheritance:

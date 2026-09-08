@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_d97b57ec0d4bb7de_ops_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-09-07 15:41 +0000
+            created at 2026-09-08 03:33 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -97,7 +97,7 @@
     <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="key">from</span> <span class="nam">xdsl</span><span class="op">.</span><span class="nam">utils</span><span class="op">.</span><span class="nam">exceptions</span> <span class="key">import</span> <span class="nam">VerifyException</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">dialect</span><span class="op">.</span><span class="nam">q1</span><span class="op">.</span><span class="nam">ir</span><span class="op">.</span><span class="nam">imm_desc</span> <span class="key">import</span> <span class="nam">Q1Imm</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">system_data</span><span class="op">.</span><span class="nam">hardware</span><span class="op">.</span><span class="nam">qblox</span><span class="op">.</span><span class="nam">models</span> <span class="key">import</span> <span class="nam">QbloxAddress</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">system_data</span><span class="op">.</span><span class="nam">hardware</span><span class="op">.</span><span class="nam">qblox</span><span class="op">.</span><span class="nam">target</span> <span class="key">import</span> <span class="nam">DEFAULT_QBLOX_TARGET</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="op">@</span><span class="nam">irdl_attr_definition</span>&nbsp;</span><span class="r"></span></p>
@@ -183,8 +183,8 @@
     <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="str">"""Index of a module in a Qblox Cluster chassis: ``[1, 20]``."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="nam">name</span> <span class="op">=</span> <span class="str">"q1_sequence.slot_index"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">    <span class="nam">_MIN</span><span class="op">:</span> <span class="nam">ClassVar</span><span class="op">[</span><span class="nam">int</span><span class="op">]</span> <span class="op">=</span> <span class="nam">QbloxAddress</span><span class="op">.</span><span class="nam">MIN_SLOT</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">    <span class="nam">_MAX</span><span class="op">:</span> <span class="nam">ClassVar</span><span class="op">[</span><span class="nam">int</span><span class="op">]</span> <span class="op">=</span> <span class="nam">QbloxAddress</span><span class="op">.</span><span class="nam">MAX_SLOT</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">    <span class="nam">_MIN</span><span class="op">:</span> <span class="nam">ClassVar</span><span class="op">[</span><span class="nam">int</span><span class="op">]</span> <span class="op">=</span> <span class="nam">DEFAULT_QBLOX_TARGET</span><span class="op">.</span><span class="nam">min_module_slot</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">    <span class="nam">_MAX</span><span class="op">:</span> <span class="nam">ClassVar</span><span class="op">[</span><span class="nam">int</span><span class="op">]</span> <span class="op">=</span> <span class="nam">DEFAULT_QBLOX_TARGET</span><span class="op">.</span><span class="nam">max_module_slot</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t"><span class="op">@</span><span class="nam">irdl_attr_definition</span>&nbsp;</span><span class="r"></span></p>
@@ -203,7 +203,7 @@
             <a class="nav" href="z_d97b57ec0d4bb7de_ops_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-09-07 15:41 +0000
+            created at 2026-09-08 03:33 +0000
         </p>
     </div>
 </footer>

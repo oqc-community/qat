@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.hardware.qblox.target module &mdash; qat-compiler 3.0.0.post357.dev20260907153038 documentation</title>
+  <title>qat.experimental.system_data.hardware.qblox.target module &mdash; qat-compiler 3.0.0.post358.dev20260908032331 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -179,6 +179,8 @@
 </ul>
 </li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.html">qat.experimental.conversion.pulse_to_q1 package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.qblox_configuration.html">qat.experimental.conversion.pulse_to_q1.qblox_configuration package</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.hardware_binding.html">qat.experimental.conversion.pulse_to_q1.hardware_binding module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html">qat.experimental.conversion.pulse_to_q1.passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.phase.html">qat.experimental.conversion.pulse_to_q1.phase module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html">qat.experimental.conversion.pulse_to_q1.pre_q1_ir module</a></li>
@@ -703,7 +705,7 @@ configuration.</p>
 </ul>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ModuleSpec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModuleSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_channel_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_channel_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_count=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_memory_bins=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supports_mixer_correction=True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ModuleSpec" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ModuleSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_count</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_channel_map</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_channel_map=&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_count=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_memory_bins=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supports_mixer_correction=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_rf=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ModuleSpec" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Physical sequencer bank and channel map of one Qblox module kind.</p>
 <dl class="py attribute">
@@ -720,6 +722,16 @@ configuration.</p>
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ModuleSpec.input_count">
 <span class="sig-name descname"><span class="pre">input_count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ModuleSpec.input_count" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ModuleSpec.is_rf">
+<span class="sig-name descname"><span class="pre">is_rf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ModuleSpec.is_rf" title="Link to this definition"></a></dt>
+<dd><p>Whether the module carries an RF front end.</p>
+<p>An RF module exposes one logical I/O port per RF chain and derives its I and Q lanes
+internally, so a connection may name only one port index. Mirrors
+<code class="docutils literal notranslate"><span class="pre">qblox_instruments.types.TypeHandle.is_rf_type</span></code>, which covers QCM-RF, QRM-RF, and
+QRC. The driver’s <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> property delegates to that classification.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ModuleSpec.kind">
@@ -937,7 +949,7 @@ configuration.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxTargetDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1asm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_specs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxTargetDescription</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q1asm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module_specs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_module_slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_module_slot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Immutable Qblox target specification and typed query boundary.</p>
 <dl class="py method">
@@ -951,9 +963,19 @@ configuration.</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.max_module_slot">
+<span class="sig-name descname"><span class="pre">max_module_slot</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.max_module_slot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.min_module_slot">
+<span class="sig-name descname"><span class="pre">min_module_slot</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.min_module_slot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.module">
-<span class="sig-name descname"><span class="pre">module</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.module" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.module_spec">
+<span class="sig-name descname"><span class="pre">module_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.module_spec" title="Link to this definition"></a></dt>
 <dd><p>Return the target specification for <code class="docutils literal notranslate"><span class="pre">kind</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -1021,6 +1043,23 @@ configuration.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.validate_module_location">
+<span class="sig-name descname"><span class="pre">validate_module_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.validate_module_location" title="Link to this definition"></a></dt>
+<dd><p>Validate that a module location is representable by this target.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.validate_module_location.params.location"></span><strong>location</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.target.QbloxTargetDescription.validate_module_location.params.location">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleLocation" title="qat.experimental.system_data.hardware.qblox.models.QbloxModuleLocation"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModuleLocation</span></code></a></span>) – Physical instrument and slot occupied by a module.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the slot falls outside the target’s Cluster chassis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1057,7 +1096,7 @@ configuration.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.SequencerTarget">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequencerTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.SequencerTarget" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequencerTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequencer_spec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_channels</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_channels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.SequencerTarget" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Module-bound view of one physical Q1 sequencer.</p>
 <dl class="py attribute">
@@ -1076,8 +1115,8 @@ configuration.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.SequencerTarget.spec">
-<span class="sig-name descname"><span class="pre">spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec" title="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1SequencerSpec</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.SequencerTarget.spec" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.SequencerTarget.sequencer_spec">
+<span class="sig-name descname"><span class="pre">sequencer_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec" title="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1SequencerSpec</span></code></a></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.SequencerTarget.sequencer_spec" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.qblox\_configuration.allocation module
+================================================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.qblox_configuration.allocation
+   :members:
+   :undoc-members:
+   :show-inheritance:
