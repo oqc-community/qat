@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.pulse.post_processing module &mdash; qat-compiler 3.0.0.post360.dev20260908075312 documentation</title>
+  <title>qat.experimental.system_data.pulse.post_processing module &mdash; qat-compiler 3.0.0.post361.dev20260908153852 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -698,91 +698,158 @@
   <section id="module-qat.experimental.system_data.pulse.post_processing">
 <span id="qat-experimental-system-data-pulse-post-processing-module"></span><h1>qat.experimental.system_data.pulse.post_processing module<a class="headerlink" href="#module-qat.experimental.system_data.pulse.post_processing" title="Link to this heading"></a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessing">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_disallowed_states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_channel_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.DiscriminateData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiscriminateData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">noise_est</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_centroids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Post-selection configuration derived from a <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code>.</p>
-<p>Provides a mapping from logical channel identifier to the set of integer
-state labels that should be discarded during post-selection. Only channels whose mode
-has at least one disallowed state are included.</p>
+<p>The max-likelihood payload a channel is calibrated with.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>noise_est</strong> – Global Gaussian noise variance used in likelihood evaluation.</p></li>
+<li><p><strong>p_min</strong> – Minimum normalised likelihood required for acceptance. When non-zero, a
+shot whose winning likelihood falls below it is emitted as
+<a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.UNMAPPED_STATE_LABEL" title="qat.experimental.system_data.pulse.post_processing.UNMAPPED_STATE_LABEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">UNMAPPED_STATE_LABEL</span></code></a>.</p></li>
+<li><p><strong>state_centroids</strong> – The calibrated IQ-plane centroids, in calibration order. A
+discriminator labels a shot by the <strong>position</strong> of the centroid it is nearest.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.DiscriminateData.noise_est">
+<span class="sig-name descname"><span class="pre">noise_est</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData.noise_est" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.DiscriminateData.p_min">
+<span class="sig-name descname"><span class="pre">p_min</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData.p_min" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.DiscriminateData.state_centroids">
+<span class="sig-name descname"><span class="pre">state_centroids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">complex</span></code><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData.state_centroids" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PostProcessingView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_disallowed_states</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">known_channel_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_to_discriminate_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Post-processing configuration derived from a <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code>.</p>
+<p>A discriminator only assigns an IQ value to its nearest calibrated centroid,
+labelling centroids by their position in calibration order; it carries no notion
+of which outcomes are wanted.
+The calibrated integer keys, which encode exactly that, are resolved here into the
+emitted labels post-selection must discard.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>channel_to_disallowed_states</strong> – Mapping from logical channel identifier
-(<code class="docutils literal notranslate"><span class="pre">mode.channel_id</span></code> in the canonical schema) to the set of integer state
-labels that should be post-selected out.</p></li>
+(<code class="docutils literal notranslate"><span class="pre">mode.channel_id</span></code> in the canonical schema) to the set of <strong>emitted state
+labels</strong> that should be post-processed out. These are positions in the
+<code class="docutils literal notranslate"><span class="pre">channel_to_discriminate_data</span></code> centroid ordering, not the calibrated keys they
+were derived from, plus <a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.UNMAPPED_STATE_LABEL" title="qat.experimental.system_data.pulse.post_processing.UNMAPPED_STATE_LABEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">UNMAPPED_STATE_LABEL</span></code></a> when <code class="docutils literal notranslate"><span class="pre">p_min</span></code> is non-zero.
+Channels with nothing to discard are omitted.</p></li>
+<li><p><strong>channel_to_discriminate_data</strong> – Mapping from logical channel identifier
+(<code class="docutils literal notranslate"><span class="pre">mode.channel_id</span></code> in the canonical schema) to the single
+<a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData" title="qat.experimental.system_data.pulse.post_processing.DiscriminateData"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateData</span></code></a> calibrated for that channel. Present for every channel
+carrying a max-likelihood calibration, independently of whether that channel has
+anything to post-select out.</p></li>
 <li><p><strong>known_channel_ids</strong> – All channel IDs present in the canonical system data.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.channel_to_disallowed_states">
-<span class="sig-name descname"><span class="pre">channel_to_disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.channel_to_disallowed_states" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.channel_to_disallowed_states">
+<span class="sig-name descname"><span class="pre">channel_to_disallowed_states</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code><span class="pre">]]</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.channel_to_disallowed_states" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.channel_to_discriminate_data">
+<span class="sig-name descname"><span class="pre">channel_to_discriminate_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">,</span> <a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.DiscriminateData" title="qat.experimental.system_data.pulse.post_processing.DiscriminateData"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateData</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.channel_to_discriminate_data" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.derive">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.derive" title="Link to this definition"></a></dt>
-<dd><p>Builds the post-selection configuration from a canonical hardware model.</p>
-<p>Walks all qubits and their modes and collects disallowed integer state labels
-keyed directly by <code class="docutils literal notranslate"><span class="pre">mode.channel_id</span></code>. Channels with no disallowed states are
-omitted.</p>
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">derive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive" title="Link to this definition"></a></dt>
+<dd><p>Builds the post-processing configuration from a canonical hardware model.</p>
+<p>Walks all qubits and their modes, keyed directly by <code class="docutils literal notranslate"><span class="pre">mode.channel_id</span></code>. Several
+modes may share a channel, and a channel resolves to exactly one max-likelihood
+method: modes sharing a channel must carry structurally identical calibration,
+otherwise there is no basis for choosing between them and this raises. Disallowed
+labels are aligned with the centroid ordering they index into.</p>
+<p>Channels with no max-likelihood calibration are absent from both mappings, as
+there is nothing to discriminate against. Every channel that <em>does</em> carry a
+calibration gets a discriminate payload, whether or not it has anything to
+post-select out; only <a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.channel_to_disallowed_states" title="qat.experimental.system_data.pulse.post_processing.PostProcessingView.channel_to_disallowed_states"><code class="xref py py-attr docutils literal notranslate"><span class="pre">channel_to_disallowed_states</span></code></a> additionally omits
+channels whose disallowed-label set is empty.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.derive.params.parent"></span><strong>parent</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.derive.params.parent">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a></span>) – The canonical hardware model to derive post-selection from.</p>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive.params.parent"></span><strong>parent</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.derive.params.parent">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a></span>) – The canonical hardware model to derive post-processing from.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing" title="qat.experimental.system_data.pulse.post_processing.PostProcessing"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessing</span></code></a></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView" title="qat.experimental.system_data.pulse.post_processing.PostProcessingView"><code class="xref py py-class docutils literal notranslate"><span class="pre">PostProcessingView</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The derived post-selection configuration for the system.</p>
+<dd class="field-odd"><p>The derived post-processing configuration for the system.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If modes sharing a channel carry different max-likelihood
+methods.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.disallowed_states_for_channel">
-<span class="sig-name descname"><span class="pre">disallowed_states_for_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.disallowed_states_for_channel" title="Link to this definition"></a></dt>
-<dd><p>Returns the disallowed integer state labels for a given logical channel.</p>
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.disallowed_states_for_channel">
+<span class="sig-name descname"><span class="pre">disallowed_states_for_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.disallowed_states_for_channel" title="Link to this definition"></a></dt>
+<dd><p>Returns the disallowed emitted state labels for a given logical channel.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.disallowed_states_for_channel.params.channel_id"></span><strong>channel_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.disallowed_states_for_channel.params.channel_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The logical channel identifier to look up.</p>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.disallowed_states_for_channel.params.channel_id"></span><strong>channel_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.disallowed_states_for_channel.params.channel_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The logical channel identifier to look up.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The set of disallowed integer state labels, or an empty set if the channel
-has no disallowed states.</p>
+<dd class="field-odd"><p>The set of disallowed state labels, or an empty set if the channel has
+nothing to post-select out.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.known_channel_ids">
-<span class="sig-name descname"><span class="pre">known_channel_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.known_channel_ids" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.known_channel_ids">
+<span class="sig-name descname"><span class="pre">known_channel_ids</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.known_channel_ids" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.unmatched_channels">
-<span class="sig-name descname"><span class="pre">unmatched_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.unmatched_channels" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.unmatched_channels">
+<span class="sig-name descname"><span class="pre">unmatched_channels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">channel_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.unmatched_channels" title="Link to this definition"></a></dt>
 <dd><p>Return the channel IDs that are not known to the system data at all.</p>
 <p>A channel is considered <em>unmatched</em> only when it is entirely absent from the
-canonical system data (i.e. not in <a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.known_channel_ids" title="qat.experimental.system_data.pulse.post_processing.PostProcessing.known_channel_ids"><code class="xref py py-attr docutils literal notranslate"><span class="pre">known_channel_ids</span></code></a>).</p>
+canonical system data (i.e. not in <a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.known_channel_ids" title="qat.experimental.system_data.pulse.post_processing.PostProcessingView.known_channel_ids"><code class="xref py py-attr docutils literal notranslate"><span class="pre">known_channel_ids</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.pulse.post_processing.PostProcessing.unmatched_channels.params.channel_ids"></span><strong>channel_ids</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.unmatched_channels.params.channel_ids">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The logical channel identifiers to check.</p>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.pulse.post_processing.PostProcessingView.unmatched_channels.params.channel_ids"></span><strong>channel_ids</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.unmatched_channels.params.channel_ids">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – The logical channel identifiers to check.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of channel IDs from <em>channel_ids</em> that are absent from
-<a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessing.known_channel_ids" title="qat.experimental.system_data.pulse.post_processing.PostProcessing.known_channel_ids"><code class="xref py py-attr docutils literal notranslate"><span class="pre">known_channel_ids</span></code></a>. Empty if all are present.</p>
+<a class="reference internal" href="#qat.experimental.system_data.pulse.post_processing.PostProcessingView.known_channel_ids" title="qat.experimental.system_data.pulse.post_processing.PostProcessingView.known_channel_ids"><code class="xref py py-attr docutils literal notranslate"><span class="pre">known_channel_ids</span></code></a>. Empty if all are present.</p>
 </dd>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="qat.experimental.system_data.pulse.post_processing.UNMAPPED_STATE_LABEL">
+<span class="sig-name descname"><span class="pre">UNMAPPED_STATE_LABEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#qat.experimental.system_data.pulse.post_processing.UNMAPPED_STATE_LABEL" title="Link to this definition"></a></dt>
+<dd><p>The state label a maximum-likelihood discriminator emits when the winning normalised
+likelihood falls below <code class="docutils literal notranslate"><span class="pre">p_min</span></code>, i.e. when no centroid can be assigned confidently.</p>
 </dd></dl>
 
 </section>
