@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
+import re
+
 import pytest
 from xdsl.dialects.builtin import (
     ArrayAttr,
@@ -367,8 +369,8 @@ class TestSequencerConfigAttr:
                 "distinct",
             ),
             (
-                lambda: ConnectionAttr(DirectionKind.input, [0, 1]),
-                "exactly one",
+                lambda: ConnectionAttr(DirectionKind.input, [0, 1, 2]),
+                "at most two",
             ),
             (
                 lambda: ConnectionAttr(DirectionKind.output, [0, 1, 2]),
@@ -482,7 +484,7 @@ class TestModuleConfigAttr:
         )
         assert config.slot_idx.data == 7
         assert config.kind.data is QbloxModuleKind.qrm_rf
-        assert DEFAULT_QBLOX_TARGET.module(config.kind.data).output_count == 1
+        assert DEFAULT_QBLOX_TARGET.module_spec(config.kind.data).output_count == 1
         assert config.outputs.data[0].output_id.data == 0
         assert config.inputs.data[0].input_id.data == 0
 
@@ -606,9 +608,9 @@ class TestModuleConfigAttr:
 class TestModuleSpecs:
     @pytest.mark.parametrize("kind", list(QbloxModuleKind))
     def test_spec_registered_for_every_module_kind(self, kind):
-        spec = DEFAULT_QBLOX_TARGET.module(kind)
-        assert spec.kind is kind
-        assert spec.sequencer_count == len(spec.sequencers)
+        module_spec = DEFAULT_QBLOX_TARGET.module_spec(kind)
+        assert module_spec.kind is kind
+        assert module_spec.sequencer_count == len(module_spec.sequencers)
 
     @pytest.mark.parametrize(
         ("kind", "control", "readout"),
@@ -624,6 +626,66 @@ class TestModuleSpecs:
         ],
     )
     def test_sequencer_types_follow_hardware_layout(self, kind, control, readout):
-        spec = DEFAULT_QBLOX_TARGET.module(kind)
-        assert list(spec.sequencer_indices(Q1SequencerType.control)) == control
-        assert list(spec.sequencer_indices(Q1SequencerType.readout)) == readout
+        module_spec = DEFAULT_QBLOX_TARGET.module_spec(kind)
+        assert list(module_spec.sequencer_indices(Q1SequencerType.control)) == control
+        assert list(module_spec.sequencer_indices(Q1SequencerType.readout)) == readout
+
+
+class TestIoConnectionLanes:
+    """Qblox ``ioX_Y`` drives and acquires on every lane it names."""
+
+    @pytest.mark.parametrize(
+        ("direction", "port_ids", "outputs", "inputs"),
+        [
+            (DirectionKind.output, [0, 1], (0, 1), ()),
+            (DirectionKind.input, [1], (), (1,)),
+            (DirectionKind.input, [0, 1], (), (0, 1)),
+            (DirectionKind.io, [0, 1], (0, 1), (0, 1)),
+            (DirectionKind.io, [2], (2,), (2,)),
+        ],
+    )
+    def test_connection_lanes_follow_their_direction(
+        self, direction, port_ids, outputs, inputs
+    ):
+        connection = ConnectionAttr(direction, port_ids)
+
+        assert connection.output_ids == outputs
+        assert connection.input_ids == inputs
+
+    def test_io_lanes_do_not_collide_with_unrelated_lanes(self):
+        config = SequencerConfigAttr(
+            connections=[
+                ConnectionAttr(DirectionKind.io, [0, 1]),
+                ConnectionAttr(DirectionKind.output, [2]),
+                ConnectionAttr(DirectionKind.input, [3]),
+            ]
+        )
+
+        config.verify()
+
+    @pytest.mark.parametrize(
+        ("other", "expected"),
+        [
+            (
+                ConnectionAttr(DirectionKind.output, [0]),
+                "overlapping output connections: [0]",
+            ),
+            (
+                ConnectionAttr(DirectionKind.output, [1]),
+                "overlapping output connections: [1]",
+            ),
+            (
+                ConnectionAttr(DirectionKind.input, [0]),
+                "overlapping input connections: [0]",
+            ),
+            (
+                ConnectionAttr(DirectionKind.input, [1]),
+                "overlapping input connections: [1]",
+            ),
+        ],
+    )
+    def test_io_lanes_collide_with_either_direction_of_every_lane(self, other, expected):
+        with pytest.raises(VerifyException, match=re.escape(expected)):
+            SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.io, [0, 1]), other]
+            )

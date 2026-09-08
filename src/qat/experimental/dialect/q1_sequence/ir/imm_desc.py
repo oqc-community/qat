@@ -13,7 +13,7 @@ from xdsl.irdl import irdl_attr_definition
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1.ir.imm_desc import Q1Imm
-from qat.experimental.system_data.hardware.qblox.models import QbloxAddress
+from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
 
 
 @irdl_attr_definition
@@ -99,8 +99,8 @@ class SlotIndexAttr(Q1Imm):
     """Index of a module in a Qblox Cluster chassis: ``[1, 20]``."""
 
     name = "q1_sequence.slot_index"
-    _MIN: ClassVar[int] = QbloxAddress.MIN_SLOT
-    _MAX: ClassVar[int] = QbloxAddress.MAX_SLOT
+    _MIN: ClassVar[int] = DEFAULT_QBLOX_TARGET.min_module_slot
+    _MAX: ClassVar[int] = DEFAULT_QBLOX_TARGET.max_module_slot
 
 
 @irdl_attr_definition

@@ -14,8 +14,8 @@ from qat.experimental.system_data.canonical.schema import (
 )
 from qat.experimental.system_data.hardware.qblox.models import (
     PortReference,
-    QbloxAddress,
     QbloxModuleKind,
+    QbloxModuleLocation,
 )
 from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
@@ -28,7 +28,7 @@ def _reference(
 ) -> PortReference:
     return PortReference(
         kind=kind,
-        module_address=QbloxAddress(instrument_id, slot_idx),
+        module_location=QbloxModuleLocation(instrument_id, slot_idx),
         oscillator_id=oscillator_id,
     )
 
@@ -106,15 +106,15 @@ def test_derives_representative_module_kinds(name, kind):
 
     assert view.acquire_limit == 100
     assert len(view.modules) == 1
-    address = QbloxAddress("cluster", 2)
-    module = view.modules[address]
+    module_location = QbloxModuleLocation("cluster", 2)
+    module = view.modules[module_location]
     assert module.kind is kind
-    assert module.address.instrument_id == "cluster"
-    assert module.address.slot == 2
+    assert module.location.instrument_id == "cluster"
+    assert module.location.slot == 2
     assert module.ports[0].port_id == "canonical-port"
     assert module.oscillators[0].oscillator_id == "canonical-oscillator"
     binding = module.channel_bindings[0]
-    assert view.modules[address] is module
+    assert view.modules[module_location] is module
     assert view.port_bindings["canonical-port"] is module.ports[0]
     assert view.oscillator_bindings["canonical-oscillator"] is module.oscillators[0]
     assert view.channel_bindings["channel"] is binding
@@ -128,7 +128,7 @@ def test_derives_representative_module_kinds(name, kind):
         )
     )
     with pytest.raises(TypeError):
-        view.modules[address] = module
+        view.modules[module_location] = module
     assert binding.channel_id == "channel"
     assert binding.port_id == "canonical-port"
     assert binding.port_resource_id == f"A-CH-{name}-2"
@@ -139,9 +139,9 @@ def test_derives_representative_module_kinds(name, kind):
     assert binding.scale == 0.75 + 0.25j
     assert binding.imbalance == 0.9
     assert binding.phase_offset == 0.125
-    assert binding.module_address is module.address
-    assert binding.module_address.instrument_id == "cluster"
-    assert binding.module_address.slot == 2
+    assert binding.module_location is module.location
+    assert binding.module_location.instrument_id == "cluster"
+    assert binding.module_location.slot == 2
     assert module.ports[0].block_size == 1
     assert module.ports[0].min_blocks == 1
     assert module.ports[0].max_blocks == -1
@@ -276,7 +276,7 @@ def test_typed_reference_is_authoritative_over_resource_object_type():
         )
     )
 
-    assert view.modules[QbloxAddress("cluster", 2)].kind is QbloxModuleKind.qcm
+    assert view.modules[QbloxModuleLocation("cluster", 2)].kind is QbloxModuleKind.qcm
 
 
 def test_typed_reference_is_authoritative_over_port_identifier():
@@ -295,7 +295,7 @@ def test_typed_reference_is_authoritative_over_port_identifier():
         )
     )
 
-    assert view.modules[QbloxAddress("cluster", 2)].kind is QbloxModuleKind.qcm
+    assert view.modules[QbloxModuleLocation("cluster", 2)].kind is QbloxModuleKind.qcm
 
 
 @pytest.mark.parametrize(
@@ -305,7 +305,7 @@ def test_typed_reference_is_authoritative_over_port_identifier():
         ("A-CH-QCM-2", "A-LO-0-QCM-3"),
     ],
 )
-def test_typed_address_is_authoritative_over_resource_identifiers(
+def test_typed_module_location_is_authoritative_over_resource_identifiers(
     port_resource_id, oscillator_resource_id
 ):
     canonical = _canonical()
@@ -338,7 +338,7 @@ def test_typed_address_is_authoritative_over_resource_identifiers(
         )
     )
 
-    assert QbloxAddress("cluster", 2) in view.modules
+    assert QbloxModuleLocation("cluster", 2) in view.modules
 
 
 def test_projects_custom_resource_identifiers():
@@ -383,7 +383,7 @@ def test_projects_custom_resource_identifiers():
         )
     )
 
-    assert QbloxAddress("cluster", 2) in view.modules
+    assert QbloxModuleLocation("cluster", 2) in view.modules
 
 
 def test_rejects_missing_oscillator_join_and_cross_module_use():

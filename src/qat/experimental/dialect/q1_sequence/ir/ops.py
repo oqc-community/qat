@@ -29,7 +29,6 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
     SequencerIndexAttr,
     SlotIndexAttr,
 )
-from qat.experimental.system_data.hardware.qblox.models import DirectionKind
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
     Q1SequencerFeature,
@@ -268,7 +267,7 @@ class SequenceOp(IRDLOperation):
         if module_config is None:
             return
 
-        module_spec = DEFAULT_QBLOX_TARGET.module(module_config.kind.data)
+        module_spec = DEFAULT_QBLOX_TARGET.module_spec(module_config.kind.data)
         if self.seq_idx.data >= module_spec.sequencer_count:
             raise VerifyException(
                 f"Sequencer index {self.seq_idx.data} is invalid for "
@@ -293,8 +292,7 @@ class SequenceOp(IRDLOperation):
                 else ()
             )
             uses_acquisition = uses_acquisition or any(
-                connection.direction.data in {DirectionKind.input, DirectionKind.io}
-                for connection in connections
+                connection.input_ids for connection in connections
             )
             uses_acquisition = uses_acquisition or (
                 isinstance(self.sequencer_config.acquisition_path_connections, ArrayAttr)
@@ -349,47 +347,39 @@ class SequenceOp(IRDLOperation):
             config.connections if isinstance(config.connections, ArrayAttr) else ()
         )
         for connection in connections:
-            if connection.direction.data in {
-                DirectionKind.output,
-                DirectionKind.io,
-            }:
-                missing_outputs = {
-                    port_id.data
-                    for port_id in connection.port_ids
-                    if port_id.data not in configured_outputs
-                }
-                if missing_outputs:
-                    raise VerifyException(
-                        f"SequenceOp connection references unconfigured outputs "
-                        f"{sorted(missing_outputs)}"
-                    )
-                unreachable_outputs = {
-                    port_id.data
-                    for port_id in connection.port_ids
-                    if seq_idx
-                    not in DEFAULT_QBLOX_TARGET.output_sequencers(
-                        module_config.kind.data, port_id.data
-                    )
-                }
-                if unreachable_outputs:
-                    raise VerifyException(
-                        f"{module_config.kind.data.value} sequencer {seq_idx} cannot "
-                        f"drive connection outputs {sorted(unreachable_outputs)}"
-                    )
-            if connection.direction.data in {
-                DirectionKind.input,
-                DirectionKind.io,
-            }:
-                missing_inputs = {
-                    port_id.data
-                    for port_id in connection.port_ids
-                    if port_id.data not in configured_inputs
-                }
-                if missing_inputs:
-                    raise VerifyException(
-                        f"SequenceOp connection references unconfigured inputs "
-                        f"{sorted(missing_inputs)}"
-                    )
+            missing_outputs = {
+                output_id
+                for output_id in connection.output_ids
+                if output_id not in configured_outputs
+            }
+            if missing_outputs:
+                raise VerifyException(
+                    f"SequenceOp connection references unconfigured outputs "
+                    f"{sorted(missing_outputs)}"
+                )
+            unreachable_outputs = {
+                output_id
+                for output_id in connection.output_ids
+                if seq_idx
+                not in DEFAULT_QBLOX_TARGET.output_sequencers(
+                    module_config.kind.data, output_id
+                )
+            }
+            if unreachable_outputs:
+                raise VerifyException(
+                    f"{module_config.kind.data.value} sequencer {seq_idx} cannot "
+                    f"drive connection outputs {sorted(unreachable_outputs)}"
+                )
+            missing_inputs = {
+                input_id
+                for input_id in connection.input_ids
+                if input_id not in configured_inputs
+            }
+            if missing_inputs:
+                raise VerifyException(
+                    f"SequenceOp connection references unconfigured inputs "
+                    f"{sorted(missing_inputs)}"
+                )
         output_path_connections = (
             config.output_path_connections
             if isinstance(config.output_path_connections, ArrayAttr)

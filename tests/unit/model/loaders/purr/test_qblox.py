@@ -1,11 +1,49 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import pytest
+
+from qat.experimental.system_data.materialisers.purr.decoder import (
+    decode_jsonpickle_payload,
+)
 
 from tests.unit.backend.qblox.utils import create_parameters
 
 test_parameters = create_parameters(["model", "dummy_config", "qubit_count", "allocation"])
+
+
+def test_pydantic_qblox_configuration_decodes_to_source_fields():
+    """Keep stable Qblox consumers compatible with Pydantic-v2 calibration state."""
+
+    decoded = decode_jsonpickle_payload(
+        {
+            "py/object": "qat.backend.qblox.config.specification.QbloxConfig",
+            "py/state": {
+                "__dict__": {
+                    "slot_idx": None,
+                    "module": {
+                        "py/object": "qat.backend.qblox.config.specification.ModuleConfig",
+                        "py/state": {
+                            "__dict__": {"lo": {"out0_in0_en": True}},
+                            "__pydantic_extra__": None,
+                            "__pydantic_fields_set__": {"py/set": ["lo"]},
+                            "__pydantic_private__": None,
+                        },
+                    },
+                    "sequencers": {},
+                },
+                "__pydantic_extra__": None,
+                "__pydantic_fields_set__": {"py/set": ["module", "sequencers"]},
+                "__pydantic_private__": None,
+            },
+        }
+    )
+
+    assert decoded == {
+        "slot_idx": None,
+        "module": {"lo": {"out0_in0_en": True}},
+        "sequencers": {},
+    }
 
 
 @pytest.mark.parametrize(

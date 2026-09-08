@@ -29,12 +29,13 @@ from qat.experimental.system_data.canonical.schema import (
 from qat.experimental.system_data.derived.interface import DerivedViewInterface
 from qat.experimental.system_data.hardware.qblox.models import (
     PortReference,
-    QbloxAddress,
     QbloxChannelBinding,
+    QbloxModuleLocation,
     QbloxModuleView,
     QbloxOscillatorBinding,
     QbloxPortBinding,
 )
+from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,16 +56,18 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
     layers.
 
     :param acquire_limit: Canonical runtime acquisition limit.
-    :param modules: Installed modules indexed by physical address.
+    :param modules: Installed modules indexed by physical location.
     """
 
     acquire_limit: int
-    modules: frozendict[QbloxAddress, QbloxModuleView] = field(default_factory=frozendict)
+    modules: frozendict[QbloxModuleLocation, QbloxModuleView] = field(
+        default_factory=frozendict
+    )
 
     def __init__(
         self,
         acquire_limit: int,
-        modules: Mapping[QbloxAddress, QbloxModuleView] = frozendict(),
+        modules: Mapping[QbloxModuleLocation, QbloxModuleView] = frozendict(),
     ) -> None:
         """Create an immutable view from already-projected module records."""
 
@@ -77,8 +80,8 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
 
         return frozendict(
             (binding.port_id, binding)
-            for module in self.modules.values()
-            for binding in module.ports
+            for module_view in self.modules.values()
+            for binding in module_view.ports
         )
 
     @cached_property
@@ -87,8 +90,8 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
 
         return frozendict(
             (binding.oscillator_id, binding)
-            for module in self.modules.values()
-            for binding in module.oscillators
+            for module_view in self.modules.values()
+            for binding in module_view.oscillators
         )
 
     @cached_property
@@ -97,37 +100,43 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
 
         return frozendict(
             (binding.channel_id, binding)
-            for module in self.modules.values()
-            for binding in module.channel_bindings
+            for module_view in self.modules.values()
+            for binding in module_view.channel_bindings
         )
 
     @classmethod
-    def derive(cls, parent: CanonicalSystemData, **kwargs: Any) -> QbloxHardwareView:
+    def derive(
+        cls, canonical_data: CanonicalSystemData, **kwargs: Any
+    ) -> QbloxHardwareView:
         """Project typed Qblox extensions from validated canonical system data.
 
-        :param parent: Canonical system data produced by a validating materialiser.
+        :param canonical_data: Canonical system data produced by a validating materialiser.
         :param kwargs: Unused derived-view compatibility arguments.
         :returns: An immutable module-oriented projection.
         """
 
         del kwargs
-        return _derive_hardware_view(parent)
+        return _derive_hardware_view(canonical_data)
 
 
-def _derive_hardware_view(parent: CanonicalSystemData) -> QbloxHardwareView:
+def _derive_hardware_view(canonical_data: CanonicalSystemData) -> QbloxHardwareView:
     """Group typed canonical bindings into physical modules.
 
-    :param parent: Validated canonical system data.
+    :param canonical_data: Validated canonical system data.
     :returns: A detached immutable hardware view.
     """
 
-    resources = {resource.id: resource for resource in parent.external_resources}
-    oscillators = {oscillator.id: oscillator for oscillator in parent.oscillators}
+    resources_by_id = {
+        resource.id: resource for resource in canonical_data.external_resources
+    }
+    oscillators_by_id = {
+        oscillator.id: oscillator for oscillator in canonical_data.oscillators
+    }
     projections: list[_PortProjection] = []
-    for port in parent.ports:
+    for port in canonical_data.ports:
         if port.external_resource_id is None:
             continue
-        resource = resources.get(port.external_resource_id)
+        resource = resources_by_id.get(port.external_resource_id)
         if resource is None:
             continue
         reference = _port_reference(resource)
@@ -141,66 +150,69 @@ def _derive_hardware_view(parent: CanonicalSystemData) -> QbloxHardwareView:
             )
     projection_by_port = {projection.port.id: projection for projection in projections}
 
-    oscillator_modules: dict[str, QbloxAddress] = {}
+    oscillator_modules: dict[str, QbloxModuleLocation] = {}
     for projection in projections:
+        DEFAULT_QBLOX_TARGET.validate_module_location(projection.reference.module_location)
         if oscillator_id := projection.reference.oscillator_id:
-            if oscillator_id not in oscillators:
+            if oscillator_id not in oscillators_by_id:
                 raise ValueError(
                     f"Qblox port references missing oscillator {oscillator_id!r}"
                 )
             _register_oscillator_module(
                 oscillator_modules,
                 oscillator_id,
-                projection.reference.module_address,
+                projection.reference.module_location,
             )
 
-    channels_by_module: dict[QbloxAddress, list[QbloxChannelBinding]] = defaultdict(list)
-    for channel in parent.channels:
+    channels_by_module: dict[QbloxModuleLocation, list[QbloxChannelBinding]] = defaultdict(
+        list
+    )
+    for channel in canonical_data.channels:
         projection = projection_by_port.get(channel.port_id)
         if projection is None:
             continue
         oscillator = None
         if channel.oscillator_reference is not None:
-            oscillator = oscillators.get(channel.oscillator_reference)
+            oscillator = oscillators_by_id.get(channel.oscillator_reference)
             if oscillator is None:
                 raise ValueError(
                     "Qblox channel references missing oscillator "
                     f"{channel.oscillator_reference!r}"
                 )
-        address = projection.reference.module_address
+        module_location = projection.reference.module_location
         if oscillator is not None:
             _register_oscillator_module(
                 oscillator_modules,
                 oscillator.id,
-                address,
+                module_location,
             )
-        channels_by_module[address].append(
+        channels_by_module[module_location].append(
             _channel_binding(
                 channel,
                 projection,
                 oscillator,
-                resources,
+                resources_by_id,
             )
         )
 
-    ports_by_module: dict[QbloxAddress, list[_PortProjection]] = defaultdict(list)
+    ports_by_module: dict[QbloxModuleLocation, list[_PortProjection]] = defaultdict(list)
     for projection in projections:
-        ports_by_module[projection.reference.module_address].append(projection)
+        ports_by_module[projection.reference.module_location].append(projection)
 
     modules = frozendict(
         (
-            address,
+            module_location,
             _build_module(
-                address,
+                module_location,
                 module_ports,
-                oscillators,
-                resources,
-                channels_by_module[address],
+                oscillators_by_id,
+                resources_by_id,
+                channels_by_module[module_location],
             ),
         )
-        for address, module_ports in ports_by_module.items()
+        for module_location, module_ports in ports_by_module.items()
     )
-    return QbloxHardwareView(parent.acquire_limit, modules)
+    return QbloxHardwareView(canonical_data.acquire_limit, modules)
 
 
 def _port_reference(resource: ExternalResourceData) -> PortReference | None:
@@ -211,55 +223,55 @@ def _port_reference(resource: ExternalResourceData) -> PortReference | None:
     :raises ValueError: If the explicit ``qblox`` extension is duplicate or malformed.
     """
 
-    values = [
+    matching_values = [
         attribute.value for attribute in resource.attributes if attribute.key == "qblox"
     ]
-    if not values:
+    if not matching_values:
         return None
-    if len(values) > 1:
+    if len(matching_values) > 1:
         raise ValueError(
             f"External resource {resource.id!r} has duplicate 'qblox' attributes"
         )
-    if not isinstance(values[0], PortReference):
+    if not isinstance(matching_values[0], PortReference):
         raise ValueError(
             f"External resource {resource.id!r} has an invalid materialised Qblox reference"
         )
-    return values[0]
+    return matching_values[0]
 
 
 def _register_oscillator_module(
-    oscillator_modules: dict[str, QbloxAddress],
+    oscillator_modules: dict[str, QbloxModuleLocation],
     oscillator_id: str,
-    address: QbloxAddress,
+    module_location: QbloxModuleLocation,
 ) -> None:
     """Record module ownership and reject one oscillator spanning multiple modules.
 
     :param oscillator_modules: Accumulated oscillator-to-module ownership.
     :param oscillator_id: Canonical local-oscillator identifier.
-    :param address: Module using the oscillator.
+    :param module_location: Module using the oscillator.
     :raises ValueError: If another module already owns the oscillator.
     """
 
-    previous = oscillator_modules.setdefault(oscillator_id, address)
-    if previous != address:
+    previous = oscillator_modules.setdefault(oscillator_id, module_location)
+    if previous != module_location:
         raise ValueError(
             f"Oscillator {oscillator_id!r} is used across inconsistent modules"
         )
 
 
 def _build_module(
-    address: QbloxAddress,
+    module_location: QbloxModuleLocation,
     projections: list[_PortProjection],
-    oscillators: Mapping[str, OscillatorData],
-    resources: Mapping[str, ExternalResourceData],
+    oscillators_by_id: Mapping[str, OscillatorData],
+    resources_by_id: Mapping[str, ExternalResourceData],
     channel_bindings: list[QbloxChannelBinding],
 ) -> QbloxModuleView:
-    """Build one module from ports sharing a physical address.
+    """Build one module from ports sharing a physical location.
 
-    :param address: Shared physical module address.
-    :param projections: Canonical ports carrying that address.
-    :param oscillators: Canonical oscillators indexed by identifier.
-    :param resources: Canonical external resources indexed by identifier.
+    :param module_location: Shared physical module location.
+    :param projections: Canonical ports carrying that location.
+    :param oscillators_by_id: Canonical oscillators indexed by identifier.
+    :param resources_by_id: Canonical external resources indexed by identifier.
     :param channel_bindings: Calibrated channels routed through the module.
     :returns: An immutable module projection.
     :raises ValueError: If grouped ports disagree on module kind or oscillator binding.
@@ -268,7 +280,7 @@ def _build_module(
     projections = sorted(projections, key=lambda projection: projection.port.id)
     kinds = {projection.reference.kind for projection in projections}
     if len(kinds) != 1:
-        raise ValueError(f"Ports at {address!r} have inconsistent module kinds")
+        raise ValueError(f"Ports at {module_location!r} have inconsistent module kinds")
 
     port_bindings: list[QbloxPortBinding] = []
     oscillator_ids: list[str] = []
@@ -302,10 +314,10 @@ def _build_module(
 
     return QbloxModuleView(
         kind=kinds.pop(),
-        address=address,
+        location=module_location,
         ports=tuple(port_bindings),
         oscillators=tuple(
-            _oscillator_binding(oscillators[oscillator_id], resources)
+            _oscillator_binding(oscillators_by_id[oscillator_id], resources_by_id)
             for oscillator_id in dict.fromkeys(oscillator_ids)
         ),
         channel_bindings=tuple(channel_bindings),
@@ -316,19 +328,19 @@ def _channel_binding(
     channel: ChannelData,
     projection: _PortProjection,
     oscillator: OscillatorData | None,
-    resources: Mapping[str, ExternalResourceData],
+    resources_by_id: Mapping[str, ExternalResourceData],
 ) -> QbloxChannelBinding:
     """Copy one canonical channel into a detached module binding.
 
     :param channel: Canonical calibrated channel.
     :param projection: Port and module identity joined by the channel.
     :param oscillator: Referenced local oscillator, when present.
-    :param resources: Canonical external resources indexed by identifier.
+    :param resources_by_id: Canonical external resources indexed by identifier.
     :returns: A dependency-neutral channel binding.
     """
 
     oscillator_binding = (
-        _oscillator_binding(oscillator, resources) if oscillator is not None else None
+        _oscillator_binding(oscillator, resources_by_id) if oscillator is not None else None
     )
     return QbloxChannelBinding(
         channel_id=channel.id,
@@ -347,25 +359,25 @@ def _channel_binding(
         scale=channel.scale,
         imbalance=channel.imbalance,
         phase_offset=channel.phase_offset,
-        module_address=projection.reference.module_address,
+        module_location=projection.reference.module_location,
     )
 
 
 def _oscillator_binding(
     oscillator: OscillatorData,
-    resources: Mapping[str, ExternalResourceData],
+    resources_by_id: Mapping[str, ExternalResourceData],
 ) -> QbloxOscillatorBinding:
     """Copy a canonical oscillator and its external-resource identity.
 
     :param oscillator: Canonical local oscillator.
-    :param resources: Canonical external resources indexed by identifier.
+    :param resources_by_id: Canonical external resources indexed by identifier.
     :returns: A detached local-oscillator binding.
     :raises ValueError: If the oscillator has no valid external-resource join.
     """
 
     if oscillator.external_resource_id is None:
         raise ValueError(f"Oscillator {oscillator.id!r} has no external-resource join")
-    resource = resources.get(oscillator.external_resource_id)
+    resource = resources_by_id.get(oscillator.external_resource_id)
     if resource is None:
         raise ValueError(
             f"Oscillator {oscillator.id!r} references missing external resource "

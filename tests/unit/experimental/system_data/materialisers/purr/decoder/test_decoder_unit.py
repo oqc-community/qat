@@ -45,6 +45,36 @@ def test_decode_jsonpickle_payload_handles_supported_markers_and_references():
     assert decoded["container"][1]["name"] == "shared"
 
 
+def test_decode_jsonpickle_payload_unwraps_pydantic_model_state():
+    payload = {
+        "py/object": "qat.backend.qblox.config.specification.QbloxConfig",
+        "py/state": {
+            "__dict__": {
+                "slot_idx": None,
+                "module": {
+                    "py/object": "qat.backend.qblox.config.specification.ModuleConfig",
+                    "py/state": {
+                        "__dict__": {"marker_inverts": {}, "scope_acq": None},
+                        "__pydantic_extra__": None,
+                        "__pydantic_fields_set__": {"py/set": []},
+                        "__pydantic_private__": None,
+                    },
+                },
+                "sequencers": {},
+            },
+            "__pydantic_extra__": None,
+            "__pydantic_fields_set__": {"py/set": ["module", "sequencers"]},
+            "__pydantic_private__": None,
+        },
+    }
+
+    assert decode_jsonpickle_payload(payload) == {
+        "slot_idx": None,
+        "module": {"marker_inverts": {}, "scope_acq": None},
+        "sequencers": {},
+    }
+
+
 @pytest.mark.parametrize(
     "payload, msg",
     [

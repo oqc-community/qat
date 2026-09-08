@@ -62,6 +62,7 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
     AcqTableIndex,
     BinCountImm,
     IntegrationLengthImm,
+    SequencerIndexAttr,
     SlotIndexAttr,
     WaveformTableIndex,
     WeightTableIndex,
@@ -70,6 +71,8 @@ from qat.experimental.system_data.hardware.qblox.models import (
     DirectionKind,
     QbloxModuleKind,
     SignalPath,
+    connection_input_ids,
+    connection_output_ids,
 )
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
@@ -522,22 +525,26 @@ class InputSignalConfigAttr(ConfigAttr):
 class ScopeAcquireConfigAttr(ConfigAttr):
     """Trace acquisition configuration of one physical input.
 
-    :param select_sequencer_to_scope_memory: Whether the acquisition is written to the
-        module's scope memory.
+    :param sequencer_select: Index of the sequencer whose acquisitions the module writes
+        into its scope memory when using sequencer trigger mode. Qblox exposes this as a
+        sequencer id rather than a per-sequencer flag, so the identity of the selection is
+        preserved here instead of being reduced to a boolean.
     :param enable_average_mode: Whether scope acquisition averaging is enabled.
     """
 
     name = "q1_sequence.scope_acquire_config"
 
-    select_sequencer_to_scope_memory: OptionalBool = param_def(converter=as_bool)
+    sequencer_select: SequencerIndexAttr | NoneAttr = param_def(converter=as_optional)
     enable_average_mode: OptionalBool = param_def(converter=as_bool)
 
     def __init__(
         self,
-        select_sequencer_to_scope_memory: BoolAttr | bool | None = None,
+        sequencer_select: SequencerIndexAttr | int | None = None,
         enable_average_mode: BoolAttr | bool | None = None,
     ):
-        super().__init__(select_sequencer_to_scope_memory, enable_average_mode)
+        if isinstance(sequencer_select, int) and not isinstance(sequencer_select, bool):
+            sequencer_select = SequencerIndexAttr(sequencer_select)
+        super().__init__(sequencer_select, enable_average_mode)
 
 
 @irdl_attr_definition
@@ -646,6 +653,10 @@ class DirectionKindAttr(EnumAttribute[DirectionKind], SpacedOpaqueSyntaxAttribut
 class ConnectionAttr(ParametrizedAttribute):
     """One connection string accepted by the Qblox sequencer connection API.
 
+    A connection names one I/O port for real mode or an I and a Q port for complex mode, in
+    every direction. Which combinations a module kind accepts is verified against the target
+    description rather than here.
+
     :param direction: Whether the connection carries output, input, or bidirectional data.
     :param port_ids: Ordered I/O ports connected to the sequencer I/Q paths.
     """
@@ -677,10 +688,8 @@ class ConnectionAttr(ParametrizedAttribute):
             raise VerifyException("ConnectionAttr port_ids must be non-negative")
         if len(ids) != len(set(ids)):
             raise VerifyException("ConnectionAttr port_ids must be distinct")
-        if self.direction.data is DirectionKind.input and len(ids) != 1:
-            raise VerifyException("Input connections require exactly one port_id")
-        if self.direction.data is not DirectionKind.input and len(ids) > 2:
-            raise VerifyException("Output and I/O connections support at most two port_ids")
+        if len(ids) > 2:
+            raise VerifyException("Connections support at most two port_ids")
 
     @property
     def connection(self) -> str:
@@ -688,6 +697,30 @@ class ConnectionAttr(ParametrizedAttribute):
 
         return self.direction.data.value + "_".join(
             str(port_id.data) for port_id in self.port_ids
+        )
+
+    @property
+    def output_ids(self) -> tuple[int, ...]:
+        """Return the physical outputs this connection drives.
+
+        An ``ioX_Y`` connection drives every listed lane; see
+        :func:`~qat.experimental.system_data.hardware.qblox.models.connection_output_ids`.
+        """
+
+        return connection_output_ids(
+            self.direction.data, [port_id.data for port_id in self.port_ids]
+        )
+
+    @property
+    def input_ids(self) -> tuple[int, ...]:
+        """Return the physical inputs this connection acquires from.
+
+        An ``ioX_Y`` connection acquires on every listed lane; see
+        :func:`~qat.experimental.system_data.hardware.qblox.models.connection_input_ids`.
+        """
+
+        return connection_input_ids(
+            self.direction.data, [port_id.data for port_id in self.port_ids]
         )
 
 
@@ -974,21 +1007,18 @@ class SequencerConfigAttr(ConfigAttr):
         occupied_outputs: set[int] = set()
         occupied_inputs: set[int] = set()
         for connection in connections:
-            port_ids = {port_id.data for port_id in connection.port_ids}
-            if connection.direction.data in {DirectionKind.output, DirectionKind.io}:
-                if overlap := occupied_outputs & port_ids:
-                    raise VerifyException(
-                        "SequencerConfigAttr has overlapping output connections: "
-                        f"{sorted(overlap)}"
-                    )
-                occupied_outputs.update(port_ids)
-            if connection.direction.data in {DirectionKind.input, DirectionKind.io}:
-                if overlap := occupied_inputs & port_ids:
-                    raise VerifyException(
-                        "SequencerConfigAttr has overlapping input connections: "
-                        f"{sorted(overlap)}"
-                    )
-                occupied_inputs.update(port_ids)
+            if overlap := occupied_outputs.intersection(connection.output_ids):
+                raise VerifyException(
+                    "SequencerConfigAttr has overlapping output connections: "
+                    f"{sorted(overlap)}"
+                )
+            occupied_outputs.update(connection.output_ids)
+            if overlap := occupied_inputs.intersection(connection.input_ids):
+                raise VerifyException(
+                    "SequencerConfigAttr has overlapping input connections: "
+                    f"{sorted(overlap)}"
+                )
+            occupied_inputs.update(connection.input_ids)
         output_path_connections = (
             [connection.output_id.data for connection in self.output_path_connections]
             if isinstance(self.output_path_connections, ArrayAttr)
@@ -1097,7 +1127,7 @@ class ModuleConfigAttr(ConfigAttr):
         if not self.instrument_id.data:
             raise VerifyException("ModuleConfigAttr instrument_id must be non-empty")
 
-        spec = DEFAULT_QBLOX_TARGET.module(self.kind.data)
+        module_spec = DEFAULT_QBLOX_TARGET.module_spec(self.kind.data)
         oscillator_ids = [
             oscillator.oscillator_id.data for oscillator in self.local_oscillators
         ]
@@ -1108,12 +1138,12 @@ class ModuleConfigAttr(ConfigAttr):
             (
                 "output_id",
                 [output.output_id.data for output in self.outputs],
-                spec.output_count,
+                module_spec.output_count,
             ),
             (
                 "input_id",
                 [config_input.input_id.data for config_input in self.inputs],
-                spec.input_count,
+                module_spec.input_count,
             ),
         ):
             if len(lane_ids) != len(set(lane_ids)):

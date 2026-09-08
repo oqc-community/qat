@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
+import re
+
 import pytest
 from xdsl.dialects.builtin import ArrayAttr, ModuleOp, StringAttr
 from xdsl.ir import Block, Region
@@ -652,3 +654,87 @@ class TestFindEnclosingSequence:
         nop = NopOp()
         with pytest.raises(ValueError, match="No SequenceOp found in the parent chain"):
             find_enclosing_sequence(nop)
+
+
+class TestIoConnectionDirections:
+    """Qblox ``ioX_Y`` drives and acquires on both named lanes."""
+
+    def test_io_connection_binds_both_lanes_in_both_directions(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.io, [0, 1])],
+                local_oscillator_id="lo0",
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrm,
+                outputs=[OutputConfigAttr(0), OutputConfigAttr(1)],
+                inputs=[InputConfigAttr(0), InputConfigAttr(1)],
+                local_oscillators=[LocalOscillatorConfigAttr("lo0", 6_000_000_000)],
+            ),
+        )
+
+        seq.verify_()
+
+    @pytest.mark.parametrize(
+        ("outputs", "inputs", "expected"),
+        [
+            (
+                [OutputConfigAttr(1)],
+                [InputConfigAttr(0), InputConfigAttr(1)],
+                "unconfigured outputs [0]",
+            ),
+            (
+                [OutputConfigAttr(0), OutputConfigAttr(1)],
+                [InputConfigAttr(0)],
+                "unconfigured inputs [1]",
+            ),
+        ],
+    )
+    def test_io_lanes_are_checked_against_their_own_direction(
+        self, outputs, inputs, expected
+    ):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.io, [0, 1])],
+                local_oscillator_id="lo0",
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrm,
+                outputs=outputs,
+                inputs=inputs,
+                local_oscillators=[LocalOscillatorConfigAttr("lo0", 6_000_000_000)],
+            ),
+        )
+
+        with pytest.raises(VerifyException, match=re.escape(expected)):
+            seq.verify_()
+
+    def test_an_io_connection_requires_an_acquisition_capable_sequencer(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=8,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.io, [0, 1])],
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc,
+                outputs=[OutputConfigAttr(0), OutputConfigAttr(1)],
+                inputs=[InputConfigAttr(0), InputConfigAttr(1)],
+            ),
+        )
+
+        with pytest.raises(VerifyException, match="acquisition-capable sequencer"):
+            seq.verify_()

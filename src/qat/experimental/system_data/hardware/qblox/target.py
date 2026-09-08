@@ -20,7 +20,10 @@ from enum import Enum
 
 from frozendict import frozendict
 
-from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.hardware.qblox.models import (
+    QbloxModuleKind,
+    QbloxModuleLocation,
+)
 
 
 class Q1SequencerType(str, Enum):
@@ -111,6 +114,14 @@ class ModuleSpec:
     marker_count: int = 0
     acquisition_memory_bins: int | None = None
     supports_mixer_correction: bool = True
+    is_rf: bool = False
+    """Whether the module carries an RF front end.
+
+    An RF module exposes one logical I/O port per RF chain and derives its I and Q lanes
+    internally, so a connection may name only one port index. Mirrors
+    ``qblox_instruments.types.TypeHandle.is_rf_type``, which covers QCM-RF, QRM-RF, and
+    QRC. The driver's :class:`Module` property delegates to that classification.
+    """
 
     def __post_init__(self) -> None:
         if not isinstance(self.sequencers, tuple):
@@ -176,7 +187,7 @@ class SequencerTarget:
     """Module-bound view of one physical Q1 sequencer."""
 
     index: int
-    spec: Q1SequencerSpec
+    sequencer_spec: Q1SequencerSpec
     output_channels: tuple[int, ...]
     input_channels: tuple[int, ...]
 
@@ -188,6 +199,8 @@ class QbloxTargetDescription:
     q1asm: Q1AsmSpec
     sequencer_specs: frozendict[Q1SequencerType, Q1SequencerSpec]
     module_specs: frozendict[QbloxModuleKind, ModuleSpec]
+    min_module_slot: int = 1
+    max_module_slot: int = 20
 
     def __post_init__(self) -> None:
         if not isinstance(self.sequencer_specs, frozendict) or not isinstance(
@@ -196,14 +209,34 @@ class QbloxTargetDescription:
             raise TypeError("Target specification maps must be immutable frozendict values")
         if set(self.sequencer_specs) != set(Q1SequencerType):
             raise ValueError("Target description must define every Q1 sequencer type")
-        if any(type_ is not spec.type for type_, spec in self.sequencer_specs.items()):
+        if any(
+            type_ is not sequencer_spec.type
+            for type_, sequencer_spec in self.sequencer_specs.items()
+        ):
             raise ValueError("Sequencer specification keys must match their types")
         if set(self.module_specs) != set(QbloxModuleKind):
             raise ValueError("Target description must define every Qblox module kind")
-        if any(kind is not spec.kind for kind, spec in self.module_specs.items()):
+        if any(
+            kind is not module_spec.kind for kind, module_spec in self.module_specs.items()
+        ):
             raise ValueError("Module specification keys must match their kinds")
+        if self.min_module_slot < 1 or self.max_module_slot < self.min_module_slot:
+            raise ValueError("Target module slot range is invalid")
 
-    def module(self, kind: QbloxModuleKind) -> ModuleSpec:
+    def validate_module_location(self, location: QbloxModuleLocation) -> None:
+        """Validate that a module location is representable by this target.
+
+        :param location: Physical instrument and slot occupied by a module.
+        :raises ValueError: If the slot falls outside the target's Cluster chassis.
+        """
+
+        if not self.min_module_slot <= location.slot <= self.max_module_slot:
+            raise ValueError(
+                f"Qblox module slot must be in "
+                f"[{self.min_module_slot}, {self.max_module_slot}], got {location.slot}"
+            )
+
+    def module_spec(self, kind: QbloxModuleKind) -> ModuleSpec:
         """Return the target specification for ``kind``."""
 
         return self.module_specs[kind]
@@ -216,20 +249,20 @@ class QbloxTargetDescription:
     def sequencer(self, kind: QbloxModuleKind, index: int) -> SequencerTarget:
         """Return the module-bound target view of a physical sequencer."""
 
-        module = self.module(kind)
-        if index < 0 or index >= module.sequencer_count:
+        module_spec = self.module_spec(kind)
+        if index < 0 or index >= module_spec.sequencer_count:
             raise ValueError(f"Sequencer index {index} is invalid for {kind.value}")
         return SequencerTarget(
             index=index,
-            spec=self.sequencer_spec(module.sequencers[index]),
+            sequencer_spec=self.sequencer_spec(module_spec.sequencers[index]),
             output_channels=tuple(
                 channel
-                for channel, indices in module.output_channel_map.items()
+                for channel, indices in module_spec.output_channel_map.items()
                 if index in indices
             ),
             input_channels=tuple(
                 channel
-                for channel, indices in module.input_channel_map.items()
+                for channel, indices in module_spec.input_channel_map.items()
                 if index in indices
             ),
         )
@@ -242,13 +275,13 @@ class QbloxTargetDescription:
     ) -> bool:
         """Return whether a physical sequencer provides ``feature``."""
 
-        return self.sequencer(kind, index).spec.supports(feature)
+        return self.sequencer(kind, index).sequencer_spec.supports(feature)
 
     def output_sequencers(self, kind: QbloxModuleKind, output: int) -> tuple[int, ...]:
         """Return sequencers routable to a physical output channel."""
 
         try:
-            return self.module(kind).output_channel_map[output]
+            return self.module_spec(kind).output_channel_map[output]
         except KeyError as error:
             raise ValueError(
                 f"Output channel out{output} is invalid for {kind.value}"
@@ -258,7 +291,7 @@ class QbloxTargetDescription:
         """Return sequencers routable from a physical input channel."""
 
         try:
-            return self.module(kind).input_channel_map[input_]
+            return self.module_spec(kind).input_channel_map[input_]
         except KeyError as error:
             raise ValueError(
                 f"Input channel in{input_} is invalid for {kind.value}"
@@ -298,6 +331,7 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
             ),
             QbloxModuleKind.qcm_rf: ModuleSpec(
                 kind=QbloxModuleKind.qcm_rf,
+                is_rf=True,
                 sequencers=_SIX_CONTROL,
                 output_count=2,
                 input_count=0,
@@ -322,6 +356,7 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
             ),
             QbloxModuleKind.qrm_rf: ModuleSpec(
                 kind=QbloxModuleKind.qrm_rf,
+                is_rf=True,
                 sequencers=_SIX_READOUT,
                 output_count=1,
                 input_count=1,
@@ -332,6 +367,7 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
             ),
             QbloxModuleKind.qrc: ModuleSpec(
                 kind=QbloxModuleKind.qrc,
+                is_rf=True,
                 sequencers=(_READOUT,) * 8 + (_CONTROL,) * 4,
                 output_count=6,
                 input_count=2,

@@ -9,9 +9,9 @@ records are immutable so a derived view can be shared safely between compiler pa
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
-from typing import ClassVar
 
 
 class QbloxModuleKind(str, Enum):
@@ -79,16 +79,53 @@ class DirectionKind(str, Enum):
     io = "io"
 
 
-@dataclass(frozen=True, slots=True)
-class QbloxAddress:
-    """Physical address of a module in an instrument.
+def connection_output_ids(
+    direction: DirectionKind, port_ids: Sequence[int]
+) -> tuple[int, ...]:
+    """Return the physical outputs a single sequencer connection drives.
 
-    :param instrument_id: Canonical identifier of the containing Cluster.
-    :param slot: One-based physical Cluster slot in the inclusive range ``[1, 20]``.
+    The Qblox driver decodes ``<direction><I>[_<Q>]`` by applying the direction to *every*
+    listed lane: ``out`` binds the waveform generator, ``in`` binds the acquisition path,
+    and ``io`` binds both. A single lane puts the sequencer in real mode and two lanes put
+    it in complex mode, so ``io0_1`` drives outputs 0 and 1 *and* acquires on inputs 0 and
+    1. See ``qblox_instruments.qcodes_drivers.sequencer.Sequencer.validate_connections``.
+
+    :param direction: Direction prefix of the connection.
+    :param port_ids: Ordered I/O ports the connection binds.
+    :returns: The physical outputs the connection drives, in the supplied order.
     """
 
-    MIN_SLOT: ClassVar[int] = 1
-    MAX_SLOT: ClassVar[int] = 20
+    if direction is DirectionKind.input:
+        return ()
+    return tuple(port_ids)
+
+
+def connection_input_ids(
+    direction: DirectionKind, port_ids: Sequence[int]
+) -> tuple[int, ...]:
+    """Return the physical inputs a single sequencer connection acquires from.
+
+    Mirrors :func:`connection_output_ids`: ``in`` and ``io`` bind the acquisition path of
+    every listed lane, while ``out`` binds none.
+
+    :param direction: Direction prefix of the connection.
+    :param port_ids: Ordered I/O ports the connection binds.
+    :returns: The physical inputs the connection acquires from, in the supplied order.
+    """
+
+    if direction is DirectionKind.output:
+        return ()
+    return tuple(port_ids)
+
+
+@dataclass(frozen=True, slots=True)
+class QbloxModuleLocation:
+    """Physical location of a module within a Qblox instrument.
+
+    :param instrument_id: Canonical identifier of the containing Cluster.
+    :param slot: One-based physical Cluster slot. Target-specific range validation is
+        performed by :class:`QbloxTargetDescription`.
+    """
 
     instrument_id: str
     slot: int
@@ -96,15 +133,8 @@ class QbloxAddress:
     def __post_init__(self) -> None:
         if not isinstance(self.instrument_id, str) or not self.instrument_id.strip():
             raise ValueError("Qblox instrument id must be non-empty")
-        if (
-            isinstance(self.slot, bool)
-            or not isinstance(self.slot, int)
-            or not self.MIN_SLOT <= self.slot <= self.MAX_SLOT
-        ):
-            raise ValueError(
-                f"Qblox module slot must be an integer in "
-                f"[{self.MIN_SLOT}, {self.MAX_SLOT}]"
-            )
+        if isinstance(self.slot, bool) or not isinstance(self.slot, int) or self.slot < 1:
+            raise ValueError("Qblox module slot must be a positive integer")
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -115,12 +145,12 @@ class PortReference:
     group canonical ports without interpreting legacy configuration payloads.
 
     :param kind: Installed module kind.
-    :param module_address: Physical instrument and module slot.
+    :param module_location: Physical instrument and module slot.
     :param oscillator_id: Canonical oscillator referenced by the source port, if any.
     """
 
     kind: QbloxModuleKind
-    module_address: QbloxAddress
+    module_location: QbloxModuleLocation
     oscillator_id: str | None = None
 
     def __post_init__(self) -> None:
@@ -186,7 +216,7 @@ class QbloxChannelBinding:
     :ivar scale: Calibrated complex channel scale.
     :ivar imbalance: Calibrated IQ gain imbalance.
     :ivar phase_offset: Calibrated IQ phase offset in radians.
-    :ivar module_address: Physical module address resolved from the port.
+    :ivar module_location: Physical module location resolved from the port.
     """
 
     channel_id: str
@@ -199,7 +229,7 @@ class QbloxChannelBinding:
     scale: complex
     imbalance: float
     phase_offset: float
-    module_address: QbloxAddress
+    module_location: QbloxModuleLocation
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
@@ -210,14 +240,14 @@ class QbloxModuleView:
     defaults, or selecting a sequencer. Those concerns belong to later stack layers.
 
     :ivar kind: Installed module kind.
-    :ivar address: Instrument and slot occupied by the module.
+    :ivar location: Instrument and slot occupied by the module.
     :ivar ports: Canonical ports attached to the module.
     :ivar oscillators: Local oscillators used by those ports and channels.
     :ivar channel_bindings: Calibrated logical channels routed through the module.
     """
 
     kind: QbloxModuleKind
-    address: QbloxAddress
+    location: QbloxModuleLocation
     ports: tuple[QbloxPortBinding, ...] = ()
     oscillators: tuple[QbloxOscillatorBinding, ...] = ()
     channel_bindings: tuple[QbloxChannelBinding, ...] = ()

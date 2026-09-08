@@ -8,7 +8,10 @@ from dataclasses import replace
 import pytest
 from frozendict import frozendict
 
-from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.hardware.qblox.models import (
+    QbloxModuleKind,
+    QbloxModuleLocation,
+)
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
     ModuleSpec,
@@ -29,14 +32,14 @@ from qat.experimental.system_data.hardware.qblox.target import (
     ],
 )
 def test_module_queries_cover_all_kinds(kind, sequencers, outputs, inputs, readout):
-    module = DEFAULT_QBLOX_TARGET.module(kind)
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(kind)
 
-    assert module.sequencer_count == sequencers
-    assert module.output_count == outputs
-    assert module.input_count == inputs
-    assert module.sequencer_indices(Q1SequencerType.readout) == readout
+    assert module_spec.sequencer_count == sequencers
+    assert module_spec.output_count == outputs
+    assert module_spec.input_count == inputs
+    assert module_spec.sequencer_indices(Q1SequencerType.readout) == readout
     if kind is QbloxModuleKind.qrc:
-        assert module.acquisition_memory_bins == 7_000_000
+        assert module_spec.acquisition_memory_bins == 7_000_000
 
 
 def test_routing_and_sequencer_types_come_from_target_description():
@@ -51,12 +54,26 @@ def test_routing_and_sequencer_types_come_from_target_description():
     assert DEFAULT_QBLOX_TARGET.input_sequencers(QbloxModuleKind.qrc, 0) == tuple(range(8))
     readout = DEFAULT_QBLOX_TARGET.sequencer(QbloxModuleKind.qrc, 7)
     control = DEFAULT_QBLOX_TARGET.sequencer(QbloxModuleKind.qrc, 8)
-    assert readout.spec.type is Q1SequencerType.readout
-    assert readout.spec.supports(Q1SequencerFeature.awg)
-    assert readout.spec.supports(Q1SequencerFeature.acquisition)
-    assert control.spec.type is Q1SequencerType.control
-    assert control.spec.supports(Q1SequencerFeature.awg)
-    assert not control.spec.supports(Q1SequencerFeature.acquisition)
+    assert readout.sequencer_spec.type is Q1SequencerType.readout
+    assert readout.sequencer_spec.supports(Q1SequencerFeature.awg)
+    assert readout.sequencer_spec.supports(Q1SequencerFeature.acquisition)
+    assert control.sequencer_spec.type is Q1SequencerType.control
+    assert control.sequencer_spec.supports(Q1SequencerFeature.awg)
+    assert not control.sequencer_spec.supports(Q1SequencerFeature.acquisition)
+
+
+@pytest.mark.parametrize(
+    ("kind", "is_rf"),
+    [
+        (QbloxModuleKind.qcm, False),
+        (QbloxModuleKind.qcm_rf, True),
+        (QbloxModuleKind.qrm, False),
+        (QbloxModuleKind.qrm_rf, True),
+        (QbloxModuleKind.qrc, True),
+    ],
+)
+def test_rf_classification_matches_qblox_driver(kind, is_rf):
+    assert DEFAULT_QBLOX_TARGET.module_spec(kind).is_rf is is_rf
 
 
 def test_target_rejects_illegal_indices():
@@ -66,6 +83,11 @@ def test_target_rejects_illegal_indices():
         DEFAULT_QBLOX_TARGET.output_sequencers(QbloxModuleKind.qrc, 6)
     with pytest.raises(ValueError, match="Input channel in2"):
         DEFAULT_QBLOX_TARGET.input_sequencers(QbloxModuleKind.qrc, 2)
+
+
+def test_target_rejects_module_locations_outside_the_cluster():
+    with pytest.raises(ValueError, match=r"module slot must be in \[1, 20\]"):
+        DEFAULT_QBLOX_TARGET.validate_module_location(QbloxModuleLocation("cluster", 21))
 
 
 @pytest.mark.parametrize(
@@ -79,11 +101,11 @@ def test_target_rejects_illegal_indices():
     ],
 )
 def test_module_and_sequencer_limits(kind, supports_mixer_correction):
-    module = DEFAULT_QBLOX_TARGET.module(kind)
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(kind)
     control = DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control)
     readout = DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout)
 
-    assert module.supports_mixer_correction is supports_mixer_correction
+    assert module_spec.supports_mixer_correction is supports_mixer_correction
     assert (
         control.nco_min_frequency_hz,
         control.nco_max_frequency_hz,
@@ -146,17 +168,17 @@ def test_readout_sequencer_uses_readout_specification():
 
     sequencer = target.sequencer(QbloxModuleKind.qrm, 0)
     assert (
-        sequencer.spec.nco_min_frequency_hz,
-        sequencer.spec.nco_max_frequency_hz,
+        sequencer.sequencer_spec.nco_min_frequency_hz,
+        sequencer.sequencer_spec.nco_max_frequency_hz,
     ) == (-400_000_000.0, 400_000_000.0)
-    assert sequencer.spec.waveform_sample_capacity == 8192
+    assert sequencer.sequencer_spec.waveform_sample_capacity == 8192
 
 
 def test_module_channel_map_is_immutable():
-    module = DEFAULT_QBLOX_TARGET.module(QbloxModuleKind.qcm)
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm)
 
     with pytest.raises(TypeError):
-        module.output_channel_map[0] = ()
+        module_spec.output_channel_map[0] = ()
 
 
 def test_module_rejects_control_sequencer_on_input_channel_map():

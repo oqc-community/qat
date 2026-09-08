@@ -10,6 +10,10 @@ from qat.experimental.system_data.canonical.schema import (
     OscillatorData,
     PortData,
 )
+from qat.experimental.system_data.materialisers.errors import MaterialisationIntegrityError
+from qat.experimental.system_data.materialisers.purr.extensions.qblox import (
+    decode_qblox_port_attributes,
+)
 from qat.experimental.system_data.materialisers.purr.materialisers.common import (
     _as_complex,
     _as_float,
@@ -54,11 +58,43 @@ def _register_external_resource_from_payload(
         for key, value in payload.items()
         if key not in {"id", "instrument_id", "instrument_type"}
     }
+    if fallback_type == "port":
+        qblox_attributes = _qblox_port_attributes(payload, resource_id)
+        if qblox_attributes is not None:
+            attributes.pop("baseband", None)
+            attributes.update(qblox_attributes)
     return registry.register(
         resource_id=resource_id,
         object_type=object_type,
         attributes=attributes,
     )
+
+
+def _qblox_port_attributes(
+    payload: dict[str, Any], resource_id: str
+) -> dict[str, Any] | None:
+    """Materialise the typed Qblox extensions of one physical-channel payload.
+
+    Qblox owns its own source syntax, so this hook delegates the whole decoding to the
+    Qblox materialiser. Physical channels of other targets return ``None`` and keep their
+    source attributes unchanged.
+
+    :param payload: Decoded PuRR physical-channel payload.
+    :param resource_id: Canonical external-resource identifier of the channel.
+    :returns: Typed attributes to attach, or ``None`` for a non-Qblox channel.
+    :raises MaterialisationIntegrityError: If Qblox metadata in the payload is malformed.
+    """
+
+    try:
+        return decode_qblox_port_attributes(payload)
+    except ValueError as error:
+        raise MaterialisationIntegrityError(
+            "PuRR Qblox physical-channel metadata is malformed.",
+            source_type="purr",
+            path=f"$.physical_channels.{resource_id}",
+            details={"reason": str(error)},
+            cause=error,
+        ) from error
 
 
 def _iter_device_pulse_views(quantum_devices: dict[str, Any]):

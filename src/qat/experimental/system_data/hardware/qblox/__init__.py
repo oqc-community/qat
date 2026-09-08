@@ -4,8 +4,8 @@
 
 from qat.experimental.system_data.hardware.qblox.models import (
     PortReference,
-    QbloxAddress,
     QbloxModuleKind,
+    QbloxModuleLocation,
 )
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
@@ -15,7 +15,7 @@ from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
 __all__ = [
     "DEFAULT_QBLOX_TARGET",
-    "QbloxAddress",
+    "QbloxModuleLocation",
     "QbloxHardwareView",
     "QbloxModuleKind",
     "PortReference",

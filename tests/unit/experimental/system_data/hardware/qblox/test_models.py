@@ -5,8 +5,8 @@ import pytest
 
 from qat.experimental.system_data.hardware.qblox.models import (
     PortReference,
-    QbloxAddress,
     QbloxModuleKind,
+    QbloxModuleLocation,
 )
 
 
@@ -47,16 +47,15 @@ def test_module_kind_name_requires_string():
 @pytest.mark.parametrize(
     ("factory", "expected"),
     [
-        (lambda: QbloxAddress("", 1), "instrument id"),
-        (lambda: QbloxAddress(1, 1), "instrument id"),
-        (lambda: QbloxAddress("cluster", True), "module slot"),
-        (lambda: QbloxAddress("cluster", "1"), "module slot"),
-        (lambda: QbloxAddress("cluster", 0), "module slot"),
-        (lambda: QbloxAddress("cluster", 21), "module slot"),
+        (lambda: QbloxModuleLocation("", 1), "instrument id"),
+        (lambda: QbloxModuleLocation(1, 1), "instrument id"),
+        (lambda: QbloxModuleLocation("cluster", True), "module slot"),
+        (lambda: QbloxModuleLocation("cluster", "1"), "module slot"),
+        (lambda: QbloxModuleLocation("cluster", 0), "module slot"),
         (
             lambda: PortReference(
                 kind=QbloxModuleKind.qcm,
-                module_address=QbloxAddress("cluster", 1),
+                module_location=QbloxModuleLocation("cluster", 1),
                 oscillator_id="",
             ),
             "oscillator id",

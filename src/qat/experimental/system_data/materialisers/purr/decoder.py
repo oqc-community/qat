@@ -97,6 +97,14 @@ class PurrJsonpickleDecoder:
             details=details,
         )
 
+    def _decode_object_state(self, node: dict[str, Any], path: str) -> Any:
+        """Decode object state, unwrapping Pydantic v2 model fields."""
+
+        state = node["py/state"]
+        if isinstance(state, dict) and "__pydantic_fields_set__" in state:
+            state = state["__dict__"]
+        return self._decode_node(state, path=f"{path}.py/state")
+
     def _decode_numpy_scalar(
         self, node: dict[str, Any], *, path: str
     ) -> float | int | complex:
@@ -447,7 +455,7 @@ class PurrJsonpickleDecoder:
             return decoded
 
         if "py/state" in node:
-            decoded = self._decode_node(node["py/state"], path=f"{path}.py/state")
+            decoded = self._decode_object_state(node, path=path)
             self._register_obj_ref(node=node, decoded=decoded, path=path)
             return decoded
 
