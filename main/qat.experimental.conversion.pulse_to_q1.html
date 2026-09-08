@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1 package &mdash; qat-compiler 3.0.0.post358.dev20260908032331 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1 package &mdash; qat-compiler 3.0.0.post359.dev20260908045536 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -169,6 +169,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.backend.html">qat.experimental.backend package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.backend.qblox.html">qat.experimental.backend.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.backend.html">qat.experimental.backend.qblox.backend module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.pre_emission_verification.html">qat.experimental.backend.qblox.pre_emission_verification module</a></li>
 </ul>
 </li>
 </ul>
@@ -741,29 +742,43 @@
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.AcquireAnalysisStack.for_op_number_repeats"><code class="docutils literal notranslate"><span class="pre">AcquireAnalysisStack.for_op_number_repeats</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.BoundDeadFrameEliminationPass"><code class="docutils literal notranslate"><span class="pre">BoundDeadFrameEliminationPass</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.BoundDeadFrameEliminationPass.apply"><code class="docutils literal notranslate"><span class="pre">BoundDeadFrameEliminationPass.apply()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.BoundDeadFrameEliminationPass.name"><code class="docutils literal notranslate"><span class="pre">BoundDeadFrameEliminationPass.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.BoundDeadFrameEliminationPass.required_predecessors"><code class="docutils literal notranslate"><span class="pre">BoundDeadFrameEliminationPass.required_predecessors()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass"><code class="docutils literal notranslate"><span class="pre">PulseToQ1LoweringPass</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.apply"><code class="docutils literal notranslate"><span class="pre">PulseToQ1LoweringPass.apply()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.name"><code class="docutils literal notranslate"><span class="pre">PulseToQ1LoweringPass.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.required_predecessors"><code class="docutils literal notranslate"><span class="pre">PulseToQ1LoweringPass.required_predecessors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.runs_before"><code class="docutils literal notranslate"><span class="pre">PulseToQ1LoweringPass.runs_before()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.target_data"><code class="docutils literal notranslate"><span class="pre">PulseToQ1LoweringPass.target_data</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass"><code class="docutils literal notranslate"><span class="pre">Q1PreAcquireTransformationPass</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply"><code class="docutils literal notranslate"><span class="pre">Q1PreAcquireTransformationPass.apply()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.name"><code class="docutils literal notranslate"><span class="pre">Q1PreAcquireTransformationPass.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.required_predecessors"><code class="docutils literal notranslate"><span class="pre">Q1PreAcquireTransformationPass.required_predecessors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.runs_before"><code class="docutils literal notranslate"><span class="pre">Q1PreAcquireTransformationPass.runs_before()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass"><code class="docutils literal notranslate"><span class="pre">Q1PulseLegalisationPass</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass.apply"><code class="docutils literal notranslate"><span class="pre">Q1PulseLegalisationPass.apply()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass.name"><code class="docutils literal notranslate"><span class="pre">Q1PulseLegalisationPass.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass.required_predecessors"><code class="docutils literal notranslate"><span class="pre">Q1PulseLegalisationPass.required_predecessors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseLegalisationPass.runs_before"><code class="docutils literal notranslate"><span class="pre">Q1PulseLegalisationPass.runs_before()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass"><code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass.apply"><code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass.apply()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass.name"><code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass.required_predecessors"><code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass.required_predecessors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass.runs_before"><code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass.runs_before()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass.target_data"><code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass.target_data</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.create_default_pulse_to_q1_pipeline"><code class="docutils literal notranslate"><span class="pre">create_default_pulse_to_q1_pipeline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.create_qblox_configured_q1_pipeline"><code class="docutils literal notranslate"><span class="pre">create_qblox_configured_q1_pipeline()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.phase.html">qat.experimental.conversion.pulse_to_q1.phase module</a><ul>

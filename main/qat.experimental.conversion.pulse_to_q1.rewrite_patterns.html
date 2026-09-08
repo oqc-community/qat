@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post358.dev20260908032331 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post359.dev20260908045536 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -169,6 +169,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.backend.html">qat.experimental.backend package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.backend.qblox.html">qat.experimental.backend.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.backend.html">qat.experimental.backend.qblox.backend module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.pre_emission_verification.html">qat.experimental.backend.qblox.pre_emission_verification module</a></li>
 </ul>
 </li>
 </ul>
@@ -810,9 +811,9 @@ rewrite remains in Pulse or emits Q1 instructions.</p>
 </ul>
 <p>The acquisition, and any integration weights, are registered on the enclosing
 <code class="xref py py-class docutils literal notranslate"><span class="pre">SequenceOp</span></code> and assigned hardware indices in encounter order. Q1 requires the
-bin and weight indices to be supplied in registers, so index values are materialised as
-<code class="docutils literal notranslate"><span class="pre">builtin.unrealized_conversion_cast</span></code> results typed as unallocated integer registers;
-a later register-allocation pass assigns concrete Q1 GPRs.</p>
+bin and weight indices to be supplied in registers. Bin indices retain their upstream
+value, while static weight indices are materialised directly as Q1 moves to unallocated
+integer registers; a later register-allocation pass assigns concrete Q1 GPRs.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp.match_and_rewrite">
 <span class="sig-name descname"><span class="pre">match_and_rewrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewriter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PatternRewriter</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewritePreQ1AcquireOp.match_and_rewrite" title="Link to this definition"></a></dt>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.phase module &mdash; qat-compiler 3.0.0.post358.dev20260908032331 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.phase module &mdash; qat-compiler 3.0.0.post359.dev20260908045536 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -169,6 +169,7 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.backend.html">qat.experimental.backend package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.backend.qblox.html">qat.experimental.backend.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.backend.html">qat.experimental.backend.qblox.backend module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.pre_emission_verification.html">qat.experimental.backend.qblox.pre_emission_verification module</a></li>
 </ul>
 </li>
 </ul>
@@ -694,13 +695,13 @@
 <span id="qat-experimental-conversion-pulse-to-q1-phase-module"></span><h1>qat.experimental.conversion.pulse_to_q1.phase module<a class="headerlink" href="#module-qat.experimental.conversion.pulse_to_q1.phase" title="Link to this heading"></a></h1>
 <p>Phase rewrite strategies for the Pulse-to-Q1 conversion.</p>
 <p><code class="docutils literal notranslate"><span class="pre">PhaseLegalisation</span></code> canonicalises constant <code class="docutils literal notranslate"><span class="pre">pulse.phase</span></code> operands into the
-<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2π)</span></code> range. Dynamic operands are rewritten with
-<code class="docutils literal notranslate"><span class="pre">builtin.unrealized_conversion_cast</span></code> to an unallocated integer register.
-This cast is a staged type bridge. It does not define numeric conversion.</p>
-<p><code class="docutils literal notranslate"><span class="pre">PhaseLowering</span></code> consumes canonical constants and casted dynamic operands.
-The constant path converts radians to degrees, then to NCO phase steps.
-The dynamic path expects an integer register already interpreted as NCO phase
-steps and normalises it into the valid sequencer interval.</p>
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2π)</span></code> range.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PhaseLowering</span></code> consumes canonical constants and converts radians to degrees,
+then to NCO phase steps.</p>
+<p>Dynamic phase operands are unsupported: Q1 phase instructions only accept an
+immediate operand, so there is no numeric radians-to-steps runtime conversion for
+a dynamic value. <code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass</span></code> rejects a dynamic <code class="docutils literal notranslate"><span class="pre">pulse.phase_set</span></code> or
+<code class="docutils literal notranslate"><span class="pre">pulse.phase_shift</span></code> operand upstream of both stages.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.phase.PhaseLegalisation">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PhaseLegalisation</span></span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.phase.PhaseLegalisation" title="Link to this definition"></a></dt>
@@ -709,10 +710,8 @@ steps and normalises it into the valid sequencer interval.</p>
 operand to the <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">2π)</span></code> radian range and replaces the op with an equivalent Pulse op
 carrying the normalised constant.</p>
 <p>The stage stays within the Pulse dialect. Constant operand finiteness is enforced
-upstream by <code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass</span></code>.</p>
-<p>Dynamic operands are rewritten with <code class="docutils literal notranslate"><span class="pre">builtin.unrealized_conversion_cast</span></code>
-into an unallocated integer register. This is a staged typing contract.
-It is not a numeric radians-to-steps conversion.</p>
+upstream by <code class="docutils literal notranslate"><span class="pre">Q1PulseValidationPass</span></code>, which also rejects a dynamic phase operand
+before this stage runs.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -721,10 +720,9 @@ It is not a numeric radians-to-steps conversion.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Callable strategy for the lowering stage.</p>
 <p>Lowering is distinct from legalisation. Canonical Pulse constants map to immediate Q1
-phase instructions. Dynamic operands map to register Q1 phase instructions with modulo-
-loop normalisation.</p>
-<p>Constant conversion from radians is lossy. Values are quantised into sequencer NCO
-phase-step space prior to emission.</p>
+phase instructions.</p>
+<p>Conversion from radians is lossy. Values are quantised into sequencer NCO phase-step
+space prior to emission.</p>
 </dd></dl>
 
 </section>
