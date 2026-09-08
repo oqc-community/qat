@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.backend.qblox.backend module &mdash; qat-compiler 3.0.0.post359.dev20260908045536 documentation</title>
+  <title>qat.experimental.backend.qblox.backend module &mdash; qat-compiler 3.0.0.post360.dev20260908075312 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -258,6 +258,10 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.pipelines.html">qat.experimental.pipelines package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.pipelines.compile.html">qat.experimental.pipelines.compile module</a></li>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.pipelines.execute.html">qat.experimental.pipelines.execute module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.runtime.html">qat.experimental.runtime package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.runtime.results_pipeline.html">qat.experimental.runtime.results_pipeline module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
@@ -693,14 +697,14 @@
 
   <section id="module-qat.experimental.backend.qblox.backend">
 <span id="qat-experimental-backend-qblox-backend-module"></span><h1>qat.experimental.backend.qblox.backend module<a class="headerlink" href="#module-qat.experimental.backend.qblox.backend" title="Link to this heading"></a></h1>
-<p>Experimental QBlox backend stub for the M1 pipeline.</p>
-<p>TODO(COMPILER-1422): Implement the experimental QBlox backend for the M1 pipeline.
+<p>Experimental QBlox backend stub for the experimental pipeline.</p>
+<p>TODO(COMPILER-1422): Implement the experimental QBlox backend.
 TODO(COMPILER-1443): Replace with new pipeline infrastructure.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>Q1 lowering and QBlox code generation from the new pulse/Q1 IR stack are not yet
-implemented — COMPILER-1422 (“Write an experimental Qblox Backend pipeline to compile
-for M1”) is still In Progress as of Sprint 36. This class exists so
+implemented — COMPILER-1422 (“Write an experimental Qblox Backend pipeline”) is still
+In Progress as of Sprint 36. This class exists so
 <a class="reference internal" href="qat.experimental.pipelines.compile.html#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline" title="qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExperimentalQbloxCompilePipeline</span></code></a>
 has a concrete, structurally-correct backend slot to swap the real implementation into
 once it lands, rather than leaving the pipeline unbuildable in the meantime.</p>

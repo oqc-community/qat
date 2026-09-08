@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.pipelines.execute module &mdash; qat-compiler 3.0.0.post359.dev20260908045536 documentation</title>
+  <title>qat.experimental.pipelines.execute module &mdash; qat-compiler 3.0.0.post360.dev20260908075312 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -22,7 +22,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qat.experimental.system_data package" href="qat.experimental.system_data.html" />
+    <link rel="next" title="qat.experimental.runtime package" href="qat.experimental.runtime.html" />
     <link rel="prev" title="qat.experimental.pipelines.compile module" href="qat.experimental.pipelines.compile.html" /> 
 </head>
 
@@ -258,6 +258,10 @@
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.pipelines.html">qat.experimental.pipelines package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.pipelines.compile.html">qat.experimental.pipelines.compile module</a></li>
 <li class="toctree-l5 current"><a class="current reference internal" href="#">qat.experimental.pipelines.execute module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.runtime.html">qat.experimental.runtime package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.runtime.results_pipeline.html">qat.experimental.runtime.results_pipeline module</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul>
@@ -692,21 +696,18 @@
 
   <section id="module-qat.experimental.pipelines.execute">
 <span id="qat-experimental-pipelines-execute-module"></span><h1>qat.experimental.pipelines.execute module<a class="headerlink" href="#module-qat.experimental.pipelines.execute" title="Link to this heading"></a></h1>
-<p>Experimental M1 execute pipeline (COMPILER-1416 / 1417 / 1418).</p>
+<p>Experimental Qblox execute pipeline.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Related work (TODOs)</p>
+<ul class="simple">
+<li><p>COMPILER-1417: Ensure QBlox payloads are compatible with the bSLAM specification.</p></li>
+<li><p>COMPILER-1418: Expand bSLAM zero-engine integration testing.</p></li>
+</ul>
+</div>
 <p>Executes compiled QBlox programs on a live Qblox cluster using
 <a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a> as the hardware
 model.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Experimental. <code class="docutils literal notranslate"><span class="pre">qat.experimental.runtime.results_pipeline.get_qblox_results_pipeline</span></code>
-(COMPILER-1416) is not yet merged into the pinned <code class="docutils literal notranslate"><span class="pre">qat-compiler</span></code> dependency — it only
-exists on an open PR. Until it lands, this module builds an equivalent results pipeline
-locally from the same production passes it composes
-(<a class="reference internal" href="qat.runtime.passes.transform.html#module-qat.runtime.passes.transform" title="qat.runtime.passes.transform"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qat.runtime.passes.transform</span></code></a>), which do not depend on the legacy
-<code class="docutils literal notranslate"><span class="pre">QuantumHardwareModel</span></code> for the steps used here. Replace the local
-<a class="reference internal" href="#qat.experimental.pipelines.execute.get_qblox_results_pipeline" title="qat.experimental.pipelines.execute.get_qblox_results_pipeline"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_qblox_results_pipeline()</span></code></a> stand-in with the production implementation once
-COMPILER-1416 is merged.</p>
-</div>
 <p>As with the compile pipeline, there is no <code class="docutils literal notranslate"><span class="pre">BaseModelLoader</span></code> for <code class="docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code>,
 so this pipeline must be instantiated directly rather than wired up via qatconfig:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">qat.experimental.pipelines.execute</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
@@ -784,17 +785,6 @@ validated to form a valid model.</p>
 
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="qat.experimental.pipelines.execute.get_qblox_results_pipeline">
-<span class="sig-name descname"><span class="pre">get_qblox_results_pipeline</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.pipelines.execute.get_qblox_results_pipeline" title="Link to this definition"></a></dt>
-<dd><p>Stand-in for <code class="docutils literal notranslate"><span class="pre">get_qblox_results_pipeline</span></code> (COMPILER-1416, not yet merged).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.PassManager" title="qat.core.pass_base.PassManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 
 
@@ -803,7 +793,7 @@ validated to form a valid model.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="qat.experimental.pipelines.compile.html" class="btn btn-neutral float-left" title="qat.experimental.pipelines.compile module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="qat.experimental.system_data.html" class="btn btn-neutral float-right" title="qat.experimental.system_data package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="qat.experimental.runtime.html" class="btn btn-neutral float-right" title="qat.experimental.runtime package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

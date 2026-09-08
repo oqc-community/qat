@@ -20,6 +20,7 @@ Subpackages
    qat.experimental.middleend
    qat.experimental.passes
    qat.experimental.pipelines
+   qat.experimental.runtime
    qat.experimental.system_data
    qat.experimental.utils
    qat.experimental.waveforms
