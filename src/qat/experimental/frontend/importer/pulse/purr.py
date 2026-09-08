@@ -33,7 +33,7 @@ from qat.experimental.dialect.results.ir import (
     YieldOp,
 )
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
-from qat.experimental.frontend.importer.pulse.post_processing import PostSelectionBuilder
+from qat.experimental.frontend.importer.pulse.post_processing import PostProcessingFactory
 from qat.experimental.utils.logging import get_logger
 from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
 from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
@@ -175,19 +175,26 @@ class PurrImporter:
 
     def __init__(
         self,
-        post_selection_builder: PostSelectionBuilder | None = None,
+        post_processing_factory: PostProcessingFactory | None = None,
     ) -> None:
         """Initialise the importer.
 
-        :param post_selection_builder: Optional post-selection builder. When provided
-            and enabled, a :class:`~qat.experimental.dialect.results.ir.PostSelectOp`
-            is inserted after the results map in the main function, filtering shots
-            whose discriminated states are disallowed. Pass
-            ``PostSelectionBuilder(PostProcessing.derive(system_data),
-            enabled=config.post_selection)`` at the call site.
+        :param post_processing_factory: Optional post-processing factory. When provided,
+            it supplies both stages of results post-processing:
+
+            * each post-processing chain that does not already discriminate is
+              terminated with a
+              :class:`~qat.experimental.dialect.pulse.ir.DiscriminateOp` carrying the
+              calibrated policy of the channel associated with the acquisition;
+            * a :class:`~qat.experimental.dialect.results.ir.PostSelectOp` is inserted
+              after the results map in the main function, filtering shots whose
+              discriminated states are disallowed.
+
+            Pass ``PostProcessingFactory(PostProcessingView.derive(system_data),
+            post_selection_enabled=config.post_selection)`` at the call site.
         """
         self._waveform_index = 0
-        self._post_selection_builder = post_selection_builder
+        self._post_processing_factory = post_processing_factory
         self._label_to_channel: dict[str, str] = {}
 
     def build(
@@ -206,7 +213,7 @@ class PurrImporter:
         kernel = self._build_kernel(analysis)
         kernel_collection_type = kernel.function_type.outputs.data[0]
         main = self._build_main(
-            analysis, kernel_collection_type, self._post_selection_builder
+            analysis, kernel_collection_type, self._post_processing_factory
         )
         return ModuleOp(ops=[kernel, main])
 
@@ -225,7 +232,7 @@ class PurrImporter:
         self,
         analysis: _PurrAnalysis,
         kernel_collection_type: ResultsCollectionType,
-        post_selection_builder: PostSelectionBuilder | None = None,
+        post_processing_factory: PostProcessingFactory | None = None,
     ) -> func.FuncOp:
         """Build the main function that calls the kernel and maps results.
 
@@ -237,14 +244,14 @@ class PurrImporter:
            raw IQ record into integer state labels.
         3. :class:`~qat.experimental.dialect.results.ir.PostSelectOp` — (optional)
            discards shots whose discriminated states are disallowed. Only emitted when
-           *post_selection_builder* is provided, enabled, and at least one acquire
-           channel has disallowed states in the system data.
+           *post_processing_factory* is provided, post-selection is enabled, and at least
+           one acquire channel has disallowed states in the system data.
         4. :class:`~xdsl.dialects.func.ReturnOp` — returns the final collection.
 
         :param analysis: Analysed purr program.
         :param kernel_collection_type: The result type of the kernel, used to type the
             :class:`~qat.experimental.dialect.pulse.ir.CallKernelOp`.
-        :param post_selection_builder: Optional post-selection builder.
+        :param post_processing_factory: Optional post-processing factory.
         """
         entry_block = Block()
         call = CallKernelOp(_KERNEL_NAME, [], [kernel_collection_type])
@@ -253,7 +260,7 @@ class PurrImporter:
         map_op = self._build_results_map(collection, analysis)
 
         ops = [map_op]
-        final_result = self._build_post_selection(post_selection_builder, ops)
+        final_result = self._build_post_selection(post_processing_factory, ops)
         ops.append(func.ReturnOp(final_result))
         entry_block.add_ops(ops)
         main = func.FuncOp("main", ((), (final_result.type,)), Region(entry_block))
@@ -261,18 +268,18 @@ class PurrImporter:
 
     def _build_post_selection(
         self,
-        post_selection_builder: PostSelectionBuilder | None,
+        post_processing_factory: PostProcessingFactory | None,
         ops: list,
     ) -> SSAValue:
         """Optionally append a :class:`~qat.experimental.dialect.results.ir.PostSelectOp` to
         *ops* and return the SSA value that should be wired to the return op.
 
-        :param post_selection_builder: Optional post-selection builder.
+        :param post_processing_factory: Optional post-processing factory.
         :param ops: ``ops[0]`` must be the :class:`~qat.experimental.dialect.results.ir.MapOp`.
         :returns: The SSA value to pass to ``func.ReturnOp``.
         """
-        if post_selection_builder is not None:
-            post_select = post_selection_builder.apply(
+        if post_processing_factory is not None:
+            post_select = post_processing_factory.post_select(
                 ops[0].result, self._label_to_channel
             )
             if isinstance(post_select, PostSelectOp):
@@ -391,9 +398,43 @@ class PurrImporter:
                     continue
                 body.add_op(new_op)
                 value = new_op.result
-            ssa_map[key] = value
+            ssa_map[key] = self._append_discriminate(body, key, value)
 
         return ssa_map
+
+    def _append_discriminate(
+        self,
+        body: Block,
+        key: str,
+        value: SSAValue,
+    ) -> SSAValue:
+        """Terminate a post-processing chain with a calibrated discriminate operation.
+
+        Discrimination is only appended to an equalised IQ value. Anything else is left
+        untouched: a chain with no imported post-processing ends at the raw
+        :class:`~qat.experimental.dialect.results.ir.ExtractOp`, and a chain that purr
+        already discriminated ends at a
+        :class:`~qat.experimental.dialect.pulse.ir.DiscriminateOp`. The chain is also left
+        alone when the acquisition's channel has no max-likelihood calibration in the
+        system data.
+
+        :param body: The map body to append the operation to.
+        :param key: The acquire output-variable name identifying the chain.
+        :param value: The SSA value produced by the end of the chain.
+        :returns: The discriminated SSA value, or *value* unchanged.
+        """
+        if self._post_processing_factory is None:
+            return value
+        if not isinstance(value.owner, EqualiseOp):
+            return value
+
+        policy = self._post_processing_factory.policy_for(self._label_to_channel.get(key))
+        if policy is None:
+            return value
+
+        operation = DiscriminateOp(value, policy)
+        body.add_op(operation)
+        return operation.result
 
     def _add_assign_results(
         self,

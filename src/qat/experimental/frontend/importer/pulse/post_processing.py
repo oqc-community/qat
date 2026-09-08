@@ -4,41 +4,69 @@ import warnings
 
 from xdsl.ir import SSAValue
 
+from qat.experimental.dialect.pulse.ir import (
+    DiscriminatorPolicyAttr,
+    MaximumLikelihoodPolicyAttr,
+)
 from qat.experimental.dialect.results.ir import PostSelectOp, ResultsCollectionType
 from qat.experimental.dialect.results.ir.attributes import IntegerStatePredicateAttr
-from qat.experimental.system_data.pulse.post_processing import PostProcessing
+from qat.experimental.system_data.pulse.post_processing import PostProcessingView
 
 
-class PostSelectionBuilder:
-    """Applies post-selection to the :class:`ResultsCollectionType` output of a kernel.
+class PostProcessingFactory:
+    """Creates the results post-processing IR described by a derived
+    :class:`PostProcessingView`.
 
-    Derives post-selection predicates from a :class:`PostProcessing` view and wraps the
-    discriminated results collection with a :class:`PostSelectOp` for each acquire key
-    that has disallowed integer states.
-
-    Acquire keys are resolved to disallowed states via the ``label_to_channel`` mapping
-    passed to :meth:`apply`, which maps each acquire output-variable name to the logical
-    channel identifier (``mode.channel_id``) of the frame it was acquired on.
+    * **Discrimination**, applied per acquisition inside the results map, turning an IQ
+      value into an integer state label by picking that channel's nearest calibrated
+      centroid.
+    * **Post-selection**, applied once to the whole discriminated collection, discarding
+      shots whose emitted state labels are disallowed for their channel.
 
     :param post_processing: Derived post-processing view.
-    :param enabled: Whether post-selection is enabled. When ``False``, :meth:`apply`
-        returns the passed collection unchanged without emitting a :class:`PostSelectOp`.
+    :param post_selection_enabled: Whether post-selection is enabled. When ``False``,
+        :meth:`post_select` returns the passed collection unchanged.
     """
 
     def __init__(
         self,
-        post_processing: PostProcessing,
-        enabled: bool = True,
+        post_processing: PostProcessingView,
+        post_selection_enabled: bool = True,
     ):
-        """Initialise the post-selection builder.
+        """Initialise the post-processing factory.
 
         :param post_processing: Derived post-processing view.
-        :param enabled: Whether post-selection is enabled. Defaults to ``True``.
+        :param post_selection_enabled: Whether post-selection is enabled. Defaults to
+            ``True``.
         """
         self._post_processing = post_processing
-        self._enabled = enabled
+        self._post_selection_enabled = post_selection_enabled
 
-    def apply(
+    def policy_for(self, channel_id: str | None) -> DiscriminatorPolicyAttr | None:
+        """Resolve the discrimination policy calibrated for a logical channel.
+
+        :param channel_id: The logical channel identifier (``mode.channel_id``) the
+            acquisition was made on, or ``None`` if it could not be resolved.
+        :returns: A :class:`MaximumLikelihoodPolicyAttr` built from the channel's
+            calibration, or ``None`` when the channel has no max-likelihood calibration.
+        """
+        if channel_id is None:
+            return None
+
+        entry = self._post_processing.channel_to_discriminate_data.get(channel_id)
+        if entry is None:
+            return None
+
+        if not entry.state_centroids:
+            return None
+
+        return MaximumLikelihoodPolicyAttr(
+            list(entry.state_centroids),
+            noise_estimate=entry.noise_est,
+            p_min=entry.p_min,
+        )
+
+    def post_select(
         self,
         collection: SSAValue[ResultsCollectionType],
         label_to_channel: dict[str, str],
@@ -54,14 +82,14 @@ class PostSelectionBuilder:
             no disallowed states. Otherwise a :class:`PostSelectOp` wrapping the filtered
             collection.
         """
-        if not self._enabled:
+        if not self._post_selection_enabled:
             return collection
         return _build_post_select_op(collection, self._post_processing, label_to_channel)
 
 
 def _build_post_select_op(
     collection: SSAValue[ResultsCollectionType],
-    post_processing: PostProcessing,
+    post_processing: PostProcessingView,
     label_to_channel: dict[str, str],
 ) -> SSAValue[ResultsCollectionType] | PostSelectOp:
     """Build a :class:`PostSelectOp` wrapping a discriminated results collection.

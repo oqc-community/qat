@@ -14,10 +14,10 @@ from xdsl.dialects.builtin import ModuleOp
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
 from qat.core.result_base import ResultManager
-from qat.experimental.frontend.importer.pulse.post_processing import PostSelectionBuilder
+from qat.experimental.frontend.importer.pulse.post_processing import PostProcessingFactory
 from qat.experimental.frontend.importer.pulse.purr import PurrImporter
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
-from qat.experimental.system_data.pulse.post_processing import PostProcessing
+from qat.experimental.system_data.pulse.post_processing import PostProcessingView
 from qat.frontend.base import BaseFrontend
 from qat.middleend.passes.purr.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.purr.transform import (
@@ -174,12 +174,14 @@ class PurrFrontend(BaseFrontend):
                     "is enabled."
                 )
 
-            pp_derived_view = PostProcessing.derive(self.model)
-            post_selection_builder = PostSelectionBuilder(pp_derived_view, enabled=True)
+            pp_derived_view = PostProcessingView.derive(self.model)
+            post_processing_factory = PostProcessingFactory(
+                pp_derived_view, post_selection_enabled=True
+            )
         else:
-            post_selection_builder = None
+            post_processing_factory = None
 
-        return PurrImporter(post_selection_builder).build(src)
+        return PurrImporter(post_processing_factory).build(src)
 
     def check_and_return_source(self, src: Any) -> QuantumInstructionBuilder | bool:
         """Validate that the source can be processed by this frontend.

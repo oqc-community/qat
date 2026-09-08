@@ -264,7 +264,9 @@ def test_post_selection_enabled_with_canonical_model(builder, canonical_model_fr
     post_select_ops = [op for op in module.walk() if isinstance(op, PostSelectOp)]
     assert len(post_select_ops) == 1
     predicate = post_select_ops[0].predicates.data[0]
-    assert {s.data for s in predicate.disallowed_values.data} == {-1}
+    # The echo model calibrates its disallowed state second, so the discriminator emits
+    # it as label 1; predicates carry emitted labels, not the calibrated key.
+    assert {s.data for s in predicate.disallowed_values.data} == {1}
 
 
 def test_post_selection_disabled_with_canonical_model(builder, canonical_model_from_echo):

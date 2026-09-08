@@ -34,6 +34,7 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
 )
 from qat.experimental.dialect.pulse.ir.attributes import (
+    MaximumLikelihoodPolicyAttr,
     RealThresholdPolicyAttr,
     SampledWaveformAttr,
 )
@@ -44,10 +45,11 @@ from qat.experimental.dialect.results.ir import (
     PostSelectOp,
     RecordType,
 )
-from qat.experimental.frontend.importer.pulse.post_processing import PostSelectionBuilder
+from qat.experimental.frontend.importer.pulse.post_processing import PostProcessingFactory
 from qat.experimental.frontend.importer.pulse.purr import PurrImporter
 from qat.experimental.system_data.pulse.post_processing import (
-    PostProcessing as PostSelectionData,
+    DiscriminateData,
+    PostProcessingView,
 )
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
@@ -1254,7 +1256,7 @@ class TestPurrImporterModuleStructure:
 
 
 class TestPurrImporterPostSelection:
-    """Tests that post-selection is correctly applied when a PostSelectionBuilder is
+    """Tests that post-selection is correctly applied when a PostProcessingFactory is
     provided to the importer."""
 
     def _make_builder_with_acquire(
@@ -1277,18 +1279,19 @@ class TestPurrImporterPostSelection:
         )
         return builder
 
-    def _post_selection_builder(
+    def _post_processing_factory(
         self,
         hw,
         enabled: bool = True,
         disallowed_states: frozenset[int] = frozenset({-1}),
-    ) -> PostSelectionBuilder:
+    ) -> PostProcessingFactory:
         ch = hw.get_qubit(0).get_acquire_channel()
-        pp = PostSelectionData(
+        pp = PostProcessingView(
             channel_to_disallowed_states={ch.partial_id(): set(disallowed_states)},
             known_channel_ids=frozenset({ch.partial_id()}),
+            channel_to_discriminate_data={},
         )
-        return PostSelectionBuilder(pp, enabled=enabled)
+        return PostProcessingFactory(pp, post_selection_enabled=enabled)
 
     def _main_ops(self, module: ModuleOp) -> list:
         main = next(
@@ -1298,33 +1301,33 @@ class TestPurrImporterPostSelection:
         )
         return list(main.body.block.ops)
 
-    def test_no_post_selection_builder_emits_no_post_select_op(self, hw):
+    def test_no_post_processing_factory_emits_no_post_select_op(self, hw):
         builder = self._make_builder_with_acquire(hw)
         module = PurrImporter().build(builder)
         assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
 
     def test_disabled_builder_emits_no_post_select_op(self, hw):
         builder = self._make_builder_with_acquire(hw)
-        psb = self._post_selection_builder(hw, enabled=False)
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, enabled=False)
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
 
     def test_no_disallowed_states_emits_no_post_select_op(self, hw):
         builder = self._make_builder_with_acquire(hw)
-        psb = self._post_selection_builder(hw, disallowed_states=frozenset())
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, disallowed_states=frozenset())
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
 
     def test_enabled_with_disallowed_states_emits_post_select_op(self, hw):
         builder = self._make_builder_with_acquire(hw)
-        psb = self._post_selection_builder(hw, enabled=True)
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, enabled=True)
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         assert any(isinstance(op, PostSelectOp) for op in _ops(module))
 
     def test_post_select_op_appears_after_map_op_in_main(self, hw):
         builder = self._make_builder_with_acquire(hw)
-        psb = self._post_selection_builder(hw, enabled=True)
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, enabled=True)
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         main_ops = self._main_ops(module)
         op_types = [type(op) for op in main_ops]
         assert MapOp in op_types
@@ -1333,8 +1336,8 @@ class TestPurrImporterPostSelection:
 
     def test_post_select_op_predicate_key_matches_output_variable(self, hw):
         builder = self._make_builder_with_acquire(hw, output_variable="meas0")
-        psb = self._post_selection_builder(hw, enabled=True)
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, enabled=True)
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         post_select_ops = _ops_of_type(module, PostSelectOp)
         assert len(post_select_ops) == 1
         predicate_keys = [p.key.data for p in post_select_ops[0].predicates.data]
@@ -1342,8 +1345,8 @@ class TestPurrImporterPostSelection:
 
     def test_post_select_op_predicate_disallowed_states_match(self, hw):
         builder = self._make_builder_with_acquire(hw)
-        psb = self._post_selection_builder(hw, disallowed_states=frozenset({-1, -2}))
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, disallowed_states=frozenset({-1, -2}))
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         post_select_ops = _ops_of_type(module, PostSelectOp)
         assert len(post_select_ops) == 1
         predicate = post_select_ops[0].predicates.data[0]
@@ -1351,26 +1354,203 @@ class TestPurrImporterPostSelection:
 
     def test_return_op_uses_post_select_result_when_present(self, hw):
         builder = self._make_builder_with_acquire(hw)
-        psb = self._post_selection_builder(hw, enabled=True)
-        module = PurrImporter(post_selection_builder=psb).build(builder)
+        ppf = self._post_processing_factory(hw, enabled=True)
+        module = PurrImporter(post_processing_factory=ppf).build(builder)
         main_ops = self._main_ops(module)
         return_op = next(op for op in main_ops if isinstance(op, func.ReturnOp))
         post_select_op = next(op for op in main_ops if isinstance(op, PostSelectOp))
         assert return_op.operands[0] is post_select_op.result
 
     def test_unrelated_channel_produces_no_post_select_op(self, hw):
-        """A PostSelectionBuilder whose disallowed states are for a different channel than
+        """A PostProcessingFactory whose disallowed states are for a different channel than
         the one acquired should not emit a PostSelectOp.
 
         A warning is expected because the acquired channel ID is not known to the post-
         processing data.
         """
         builder = self._make_builder_with_acquire(hw)
-        pp = PostSelectionData(
+        pp = PostProcessingView(
             channel_to_disallowed_states={"some_other_channel_id": {-1}},
             known_channel_ids=frozenset({"some_other_channel_id"}),
+            channel_to_discriminate_data={},
         )
-        psb = PostSelectionBuilder(pp, enabled=True)
+        ppf = PostProcessingFactory(pp, post_selection_enabled=True)
         with pytest.warns(UserWarning, match="Unmatched channels"):
-            module = PurrImporter(post_selection_builder=psb).build(builder)
+            module = PurrImporter(post_processing_factory=ppf).build(builder)
         assert not any(isinstance(op, PostSelectOp) for op in _ops(module))
+
+
+class TestPurrImporterDiscrimination:
+    """Tests that system-data discrimination information is appended to the acquisition
+    chain."""
+
+    STATES = (1 + 0j, -1 + 0j, 0 + 1j)
+
+    def _make_builder(
+        self,
+        hw,
+        output_variable: str = "meas0",
+        discriminate_threshold: float | None = None,
+    ) -> QuantumInstructionBuilder:
+        """Returns a builder with an INTEGRATOR acquire and a down-conversion step.
+
+        ``discriminate_threshold`` optionally appends a PuRR ``DISCRIMINATE`` step, which
+        models a builder that already discriminates for itself.
+        """
+        builder = QuantumInstructionBuilder(hw)
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(
+            Acquire(
+                ch, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable=output_variable
+            )
+        )
+        acquire = builder.instructions[-1]
+        builder.add(
+            PostProcessing(
+                acquire,
+                process=PostProcessType.LINEAR_MAP_COMPLEX_TO_REAL,
+                args=[1 + 0j, 0 + 0j],
+            )
+        )
+        if discriminate_threshold is not None:
+            builder.add(
+                PostProcessing(
+                    acquire,
+                    process=PostProcessType.DISCRIMINATE,
+                    args=[discriminate_threshold],
+                )
+            )
+        return builder
+
+    def _post_processing_factory(
+        self,
+        hw,
+        states=None,
+        noise_est: float = 0.5,
+        p_min: float = 0.2,
+        channel_id: str | None = None,
+    ) -> PostProcessingFactory:
+        ch = hw.get_qubit(0).get_acquire_channel()
+        key = ch.partial_id() if channel_id is None else channel_id
+        pp = PostProcessingView(
+            channel_to_disallowed_states={},
+            known_channel_ids=frozenset({key}),
+            channel_to_discriminate_data={
+                key: DiscriminateData(
+                    noise_est=noise_est,
+                    p_min=p_min,
+                    state_centroids=self.STATES if states is None else states,
+                )
+            },
+        )
+        return PostProcessingFactory(pp, post_selection_enabled=False)
+
+    def _discriminate_ops(self, module: ModuleOp) -> list[DiscriminateOp]:
+        return _ops_of_type(module, DiscriminateOp)
+
+    def test_no_post_processing_factory_emits_no_discriminate_op(self, hw):
+        module = PurrImporter().build(self._make_builder(hw))
+        assert self._discriminate_ops(module) == []
+
+    def test_calibrated_channel_emits_a_single_discriminate_op(self, hw):
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw))
+        ops = self._discriminate_ops(module)
+        assert len(ops) == 1
+        assert isinstance(ops[0].policy, MaximumLikelihoodPolicyAttr)
+
+    def test_uncalibrated_channel_emits_no_discriminate_op(self, hw):
+        ppf = self._post_processing_factory(hw, channel_id="some_other_channel_id")
+        module = PurrImporter(post_processing_factory=ppf).build(self._make_builder(hw))
+        assert self._discriminate_ops(module) == []
+
+    def test_empty_post_processing_chain_emits_no_discriminate_op(self, hw):
+        """An acquisition with no PuRR post-processing is left untouched."""
+        builder = QuantumInstructionBuilder(hw)
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(builder)
+        assert self._discriminate_ops(module) == []
+
+    @pytest.mark.parametrize(
+        "process",
+        [PostProcessType.MEAN, PostProcessType.DOWN_CONVERT, PostProcessType.MUL],
+    )
+    def test_chain_of_only_unsupported_steps_emits_no_discriminate_op(self, hw, process):
+        """An ignored step must not turn discrimination on.
+
+        Unsupported post-processing types are skipped by the importer, so the chain emits no
+        operations and the value is still the raw acquisition. Discriminating there would
+        use centroids calibrated in the equalised frame against unequalised IQ.
+        """
+        builder = QuantumInstructionBuilder(hw)
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
+        builder.add(PostProcessing(builder.instructions[-1], process=process))
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(builder)
+        assert self._discriminate_ops(module) == []
+
+    def test_discriminate_consumes_the_equalise_result(self, hw):
+        """Discrimination is applied to the equalised value, not the raw acquisition."""
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw))
+        ops = self._discriminate_ops(module)
+        assert len(ops) == 1
+        assert isinstance(ops[0].value.owner, EqualiseOp)
+
+    def test_purr_discriminate_suppresses_the_calibrated_one(self, hw):
+        """A builder that already discriminates must not be discriminated twice."""
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw, discriminate_threshold=0.0))
+        ops = self._discriminate_ops(module)
+        assert len(ops) == 1
+        assert isinstance(ops[0].policy, RealThresholdPolicyAttr)
+
+    def test_state_centers_match_the_calibration_in_order(self, hw):
+        """Centroids are positional: their order is the state labels 0..n-1."""
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw))
+        policy = self._discriminate_ops(module)[0].policy
+        assert [c.data for c in policy.state_centers] == list(self.STATES)
+
+    def test_noise_estimate_and_p_min_reach_the_emitted_op(self, hw):
+        ppf = self._post_processing_factory(hw, noise_est=0.25, p_min=0.75)
+        module = PurrImporter(post_processing_factory=ppf).build(self._make_builder(hw))
+        policy = self._discriminate_ops(module)[0].policy
+        assert policy.noise_estimate.data == pytest.approx(0.25)
+        assert policy.p_min.data == pytest.approx(0.75)
+
+    def test_discriminate_op_is_nested_in_the_map_body(self, hw):
+        """Discrimination is a per-shot transformation, so it belongs inside the map."""
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw))
+        assert _has_parent_of_type(self._discriminate_ops(module)[0], MapOp)
+
+    def test_discriminate_op_consumes_the_purr_chain_result(self, hw):
+        """The calibrated op is appended to the end of the PuRR chain, not spliced in."""
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw))
+        equalise_ops = _ops_of_type(module, EqualiseOp)
+        assert len(equalise_ops) == 1
+        assert self._discriminate_ops(module)[0].operands[0] is equalise_ops[0].result
+
+    def test_record_is_built_from_the_discriminated_value(self, hw):
+        """The returned record must carry the discriminated state, not the raw IQ value."""
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(self._make_builder(hw))
+        discriminate_op = self._discriminate_ops(module)[0]
+        create_op = next(
+            op for op in _record_create_ops(module) if _has_parent_of_type(op, MapOp)
+        )
+        assert discriminate_op.result in list(create_op.operands)
