@@ -268,6 +268,8 @@ class QrcDescription(ReadoutModuleDescription, ControlModuleDescription):
     max_binned_acquisitions: PositiveInt = 7_000_000
 
 
+# TODO(COMPILER-1440): Project these compiler-visible capabilities into a typed DLTI target
+# description once xDSL provides, or QAT supplies, a stable query boundary.
 class QbloxTargetData(TargetData):
     """Taxonomy of constants for Qblox electronics.
 

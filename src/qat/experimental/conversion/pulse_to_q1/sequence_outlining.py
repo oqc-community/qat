@@ -2,8 +2,8 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Q1 sequence outlining pass: partitions a Pulse entry block into per-frame sequence envelopes."""
 
-import re
 from dataclasses import dataclass, field
+from re import compile
 
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
@@ -21,10 +21,11 @@ from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
 )
 from qat.experimental.dialect.pulse.utils import pulse_entry_block
 from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp, UI4Imm
-from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.passes.pass_ordering import OrderedPass
 
-_NON_SYMBOL_CHARS = re.compile(r"[^0-9A-Za-z_$.]")
-_MULTI_UNDERSCORE = re.compile(r"_+")
+_NON_SYMBOL_CHARS = compile(r"[^0-9A-Za-z_$.]")
+_MULTI_UNDERSCORE = compile(r"_+")
 
 # The bitmask has four bits; in binary, we want it to be 0011 which "opens" both output
 # paths for the RF modules. This is equivalent to 3 in decimal.
@@ -146,8 +147,9 @@ def _partition_dependency_closure(
 
 def _build_partition_sequence_body(
     entry_block_ops: list[Operation],
-    lineage_ops: tuple[Operation, ...],
+    lineage: FrameLineage,
     op_by_result: dict[SSAValue, Operation],
+    owning_lineage: dict[Operation, FrameLineage],
 ) -> list[Operation]:
     """Build the cloned body for one outlined sequence.
 
@@ -156,13 +158,20 @@ def _build_partition_sequence_body(
     sequence body remains valid on its own.
     """
 
-    needed_ops = _partition_dependency_closure(lineage_ops, op_by_result)
+    needed_ops = _partition_dependency_closure(lineage.ops, op_by_result)
+    for op in needed_ops:
+        dependency_owner = owning_lineage.get(op)
+        if dependency_owner is not None and dependency_owner is not lineage:
+            raise PassFailedException(
+                f"{op.name} is owned by another frame lineage and cannot be cloned as "
+                "a dependency"
+            )
     value_mapper: dict[SSAValue, SSAValue] = {}
     return [op.clone(value_mapper) for op in entry_block_ops if op in needed_ops]
 
 
 @dataclass(frozen=True)
-class Q1OutliningPass(ModulePass):
+class Q1OutliningPass(OrderedPass, ModulePass):
     """Outline one q1_sequence per logical Pulse frame.
 
     This pass partitions the Pulse instruction stream by logical frame lineage
@@ -186,6 +195,7 @@ class Q1OutliningPass(ModulePass):
 
     name = "pulse-to-q1-outlining"
     target_data: QbloxTargetData = field(default=TARGET_DATA)
+
     state: OutliningState = field(default_factory=OutliningState, init=False)
 
     def _sequence_op_for_partition(
@@ -247,6 +257,11 @@ class Q1OutliningPass(ModulePass):
                 f"{shared_op.name} spans multiple frame lineages and cannot be outlined "
                 "into independent Q1 sequences"
             )
+        owning_lineage = {
+            lineage_op: lineage
+            for lineage in analysis.lineages
+            for lineage_op in lineage.ops
+        }
         symbol_counts = analysis.port_counts
         n_frames = len(analysis.lineages)
         reserved = {f"frame_{i}" for i in range(n_frames)}
@@ -264,8 +279,9 @@ class Q1OutliningPass(ModulePass):
             frame_id = f"frame_{frame_index}"
             sequence_body = _build_partition_sequence_body(
                 entry_block_ops,
-                lineage.ops,
+                lineage,
                 op_by_result,
+                owning_lineage,
             )
             sequence_op, channel_token, sequence_symbol = self._sequence_op_for_partition(
                 frame_id,

@@ -68,6 +68,7 @@ from qat.experimental.dialect.q1 import (
 from qat.experimental.dialect.q1.ir.imm_desc import SI16Imm, SU32Imm
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_scf.ir.ops import ForOp, YieldOp
+from qat.experimental.passes.pass_ordering import OrderedPass
 
 
 def _get_static_integer(value: SSAValue) -> int | None:
@@ -252,7 +253,7 @@ class IfLowering(RewritePattern):
         )
 
 
-class LowerScfToQ1ScfPass(ModulePass):
+class LowerScfToQ1ScfPass(OrderedPass, ModulePass):
     """Lower every ``scf`` operation in the module to its ``q1_scf`` equivalent.
 
     Currently only ``scf.for`` is fully implemented.  ``scf.if`` and ``scf.while``

@@ -87,7 +87,9 @@ from qat.experimental.dialect.q1_cf import (
     UnaryPredicate,
     UnaryPredicateBranchOp,
 )
-from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.passes.pass_ordering import OrderedPass
 
 # Taken-edge conditional jump for each unary predicate. Emitted after a
 # ``test rs, rs`` that sets the zero and sign flags from the tested register.
@@ -530,10 +532,13 @@ def _linearise_sequence(seq: SequenceOp) -> None:
     install_single_block(seq.body, _assemble_as_single_block(layout))
 
 
-class LineariseQ1CfToQ1Pass(ModulePass):
+class LineariseQ1CfToQ1Pass(OrderedPass, ModulePass):
     """Lower every ``q1_cf`` CFG in the module to a single flat ``q1`` block."""
 
     name = "linearise-q1-cf-to-q1"
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LowerQ1ScfToQ1CfPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         for seq in [child for child in op.walk() if isinstance(child, SequenceOp)]:

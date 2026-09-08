@@ -69,6 +69,8 @@ from qat.experimental.dialect.q1_scf.ir.ops import (
     WhileOp,
     YieldOp,
 )
+from qat.experimental.dialect.q1_scf.transforms.lower_scf import LowerScfToQ1ScfPass
+from qat.experimental.passes.pass_ordering import OrderedPass
 
 
 def _conditional_branch(
@@ -336,10 +338,13 @@ class ForLowering(RewritePattern):
         rewriter.replace_op(op, [], continuation.args)
 
 
-class LowerQ1ScfToQ1CfPass(ModulePass):
+class LowerQ1ScfToQ1CfPass(OrderedPass, ModulePass):
     """Lower every ``q1_scf`` container in the module to a ``q1_cf`` block CFG."""
 
     name = "lower-q1-scf-to-q1-cf"
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LowerScfToQ1ScfPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         """Run lowering in a fixed inside-out order across structured forms.

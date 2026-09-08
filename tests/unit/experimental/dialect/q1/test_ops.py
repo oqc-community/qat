@@ -320,7 +320,6 @@ class TestIFormat:
     _STOP_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
     _BRANCH_TRAITS = (HasRegisterConstraintsTrait,)
     _PARAM_TRAITS = (HasRegisterConstraintsTrait,)
-    _PURE_RT_TRAITS = (Pure(), HasRegisterConstraintsTrait)
     _OPS_TABLE = [
         (StopImmOp, "stop", _STOP_TRAITS, {"status": "imm"}),
         (JmpImmOp, "jmp", _BRANCH_TRAITS, {"address": "imm"}),
@@ -342,8 +341,8 @@ class TestIFormat:
         (SetFreqImmOp, "set_freq", _PARAM_TRAITS, {"nco_freq": "imm"}),
         (SetPhImmOp, "set_ph", _PARAM_TRAITS, {"nco_po": "imm"}),
         (SetPhDeltaImmOp, "set_ph_delta", _PARAM_TRAITS, {"nco_delta_po": "imm"}),
-        (WaitImmOp, "wait", _PURE_RT_TRAITS, {"duration": "imm"}),
-        (WaitSyncImmOp, "wait_sync", _PURE_RT_TRAITS, {"duration": "imm"}),
+        (WaitImmOp, "wait", _PARAM_TRAITS, {"duration": "imm"}),
+        (WaitSyncImmOp, "wait_sync", _PARAM_TRAITS, {"duration": "imm"}),
         (UpdParamImmOp, "upd_param", _PARAM_TRAITS, {"duration": "imm"}),
         (LatchRstImmOp, "latch_rst", _PARAM_TRAITS, {"duration": "imm"}),
     ]
@@ -368,7 +367,6 @@ class TestRsFormat:
     _STOP_TRAITS = (IsTerminator, HasRegisterConstraintsTrait)
     _BRANCH_TRAITS = (HasRegisterConstraintsTrait,)
     _PARAM_TRAITS = (HasRegisterConstraintsTrait,)
-    _PURE_RT_TRAITS = (Pure(), HasRegisterConstraintsTrait)
     _OPS_TABLE = [
         (StopRsOp, "stop", _STOP_TRAITS, {"status": "rs"}),
         (JmpRsOp, "jmp", _BRANCH_TRAITS, {"address": "rs"}),
@@ -390,8 +388,8 @@ class TestRsFormat:
         (SetFreqRsOp, "set_freq", _PARAM_TRAITS, {"nco_freq": "rs"}),
         (SetPhRsOp, "set_ph", _PARAM_TRAITS, {"nco_po": "rs"}),
         (SetPhDeltaRsOp, "set_ph_delta", _PARAM_TRAITS, {"nco_delta_po": "rs"}),
-        (WaitRsOp, "wait", _PURE_RT_TRAITS, {"duration": "rs"}),
-        (WaitSyncRsOp, "wait_sync", _PURE_RT_TRAITS, {"duration": "rs"}),
+        (WaitRsOp, "wait", _PARAM_TRAITS, {"duration": "rs"}),
+        (WaitSyncRsOp, "wait_sync", _PARAM_TRAITS, {"duration": "rs"}),
         (LatchRstRsOp, "latch_rst", _PARAM_TRAITS, {"duration": "rs"}),
     ]
 
@@ -423,7 +421,7 @@ class TestIIFormat:
         (FbAcqTbValidImmImmOp, "fb_acq_tb_valid", {"tb_valid": "imm1", "duration": "imm2"}),
     ]
     _TRAITS_BY_OP = {
-        WaitTriggerImmImmOp: (Pure(), HasRegisterConstraintsTrait),
+        WaitTriggerImmImmOp: (HasRegisterConstraintsTrait,),
     }
 
     @pytest.mark.parametrize("comment", COMMENT_INPUTS)
@@ -506,7 +504,7 @@ class TestRsRsFormat:
         (WaitTriggerRsRsOp, "wait_trigger", {"trig_addr": "rs1", "duration": "rs2"}),
     ]
     _TRAITS_BY_OP = {
-        WaitTriggerRsRsOp: (Pure(), HasRegisterConstraintsTrait),
+        WaitTriggerRsRsOp: (HasRegisterConstraintsTrait,),
     }
 
     @pytest.mark.parametrize("comment", COMMENT_INPUTS)

@@ -221,6 +221,10 @@ class SequenceOp(IRDLOperation):
             )
 
         if self.instrument_id is None or self.slot_idx is None or self.seq_idx is None:
+            if self.module_config is not None or self.sequencer_config is not None:
+                raise VerifyException(
+                    "SequenceOp configuration requires a complete physical allocation"
+                )
             return
 
         module_config = self.module_config

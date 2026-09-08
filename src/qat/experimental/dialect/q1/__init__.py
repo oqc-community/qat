@@ -352,12 +352,7 @@ Q1 = Dialect(
         UpdParamImmOp,
         PlayImmImmImmOp,
         PlayRsRsImmOp,
-        AcquireImmImmImmOp,
-        AcquireImmRsImmOp,
-        AcquireWeightedImmImmImmImmImmOp,
-        AcquireWeightedImmRsRsRsImmOp,
-        AcquireTtlImmImmImmImmOp,
-        AcquireTtlImmRsImmImmOp,
+        *ACQUISITION_OP_TYPES,
     ],
     [
         LabelAttr,
@@ -384,6 +379,7 @@ Q1 = Dialect(
 )
 
 __all__ = [
+    "ACQUISITION_OP_TYPES",
     "AcquireImmImmImmOp",
     "AcquireImmRsImmOp",
     "AcquireTtlImmImmImmImmOp",

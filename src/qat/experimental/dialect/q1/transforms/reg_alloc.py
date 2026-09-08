@@ -21,7 +21,9 @@ from qat.experimental.dialect.q1.ir.reg_desc import (
     Q1RegisterType,
     Registers,
 )
-from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.passes.pass_ordering import OrderedPass
 
 
 @dataclass
@@ -98,7 +100,7 @@ class Q1LinearScanAllocator(BlockNaiveAllocator):
         self.allocate_block(sequence.body.blocks[0])
 
 
-class LinearScanRegisterAllocationPass(ModulePass):
+class LinearScanRegisterAllocationPass(OrderedPass, ModulePass):
     """A pass that applies linear scan register allocation to all sequences in a module.
 
     It applies register allocation individually to each :class:`SequenceOp` defined
@@ -113,6 +115,9 @@ class LinearScanRegisterAllocationPass(ModulePass):
     """
 
     name = "q1-lin-scan-reg-alloc"
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LineariseQ1CfToQ1Pass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         for sequence in (s for s in op.walk() if isinstance(s, SequenceOp)):

@@ -2,23 +2,31 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Pass and pipeline definitions for the Pulse-to-Q1 conversion."""
 
-import math
 from dataclasses import dataclass, field
+from math import isclose, isfinite
 
-import numpy as np
+from numpy import prod
 from xdsl.context import Context
-from xdsl.dialects import scf
 from xdsl.dialects.arith import AddiOp, ConstantOp as ArithConstantOp, MuliOp
 from xdsl.dialects.builtin import IndexType, IntAttr, ModuleOp
+from xdsl.dialects.scf import ForOp
 from xdsl.ir import SSAValue
 from xdsl.irdl import IRDLOperation
 from xdsl.passes import ModulePass, PassPipeline
 from xdsl.pattern_rewriter import GreedyRewritePatternApplier, PatternRewriteWalker
 from xdsl.rewriter import Rewriter
+from xdsl.transforms.dead_code_elimination import DeadCodeElimination
+from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
 # TODO: Migrate this lowering boundary to QbloxTargetDescription.
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
+from qat.experimental.backend.qblox.pre_emission_verification import (
+    QbloxPreEmissionVerificationPass,
+)
+from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
+    QbloxHardwareBindingPass,
+)
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     create_legalisation_patterns,
@@ -27,10 +35,12 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
+    AmplitudeAttr,
     ConstantOp,
     CreateFrameOp,
     PhaseSetOp,
     PhaseShiftOp,
+    StartContinuousWaveformOp,
     WaitOp,
 )
 from qat.experimental.dialect.pulse.utils import (
@@ -38,18 +48,28 @@ from qat.experimental.dialect.pulse.utils import (
     extract_phase_radians,
     extract_time_seconds,
 )
-from qat.experimental.passes.pass_ordering import OrderedPassPipeline
+from qat.experimental.dialect.q1.transforms.reg_alloc import (
+    LinearScanRegisterAllocationPass,
+)
+from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
+from qat.experimental.dialect.q1_scf.transforms.lower_scf import LowerScfToQ1ScfPass
+from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.passes.pass_ordering import OrderedPass, OrderedPassPipeline
+from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 
 _TIME_ROUNDING_TOLERANCE_NS = 1e-3
 
 
 @dataclass(frozen=True)
-class Q1PulseValidationPass(ModulePass):
+class Q1PulseValidationPass(OrderedPass, ModulePass):
     """Validate QBlox-specific pre-conditions on constant Pulse operands.
 
-    Enforces hardware constraints that cannot be expressed as Pulse dialect
-    invariants, ahead of the legalisation and lowering stages. Only constant
-    operands are checked. Dynamic operands are deferred without error.
+    Enforces hardware constraints that cannot be expressed as Pulse dialect invariants,
+    ahead of legalisation and lowering. Dynamic waits, frame frequencies, continuous
+    amplitudes, and phase operands are rejected because no Q1 lowering exists for them:
+    Q1 phase instructions only accept an immediate, so a dynamic phase would require a
+    real radians-to-NCO-steps runtime conversion that does not exist.
 
     The following constraints are enforced:
 
@@ -62,20 +82,28 @@ class Q1PulseValidationPass(ModulePass):
     name = "q1-pulse-validation"
     target_data: QbloxTargetData = field(default=TARGET_DATA)
 
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1OutliningPass})
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1PulseLegalisationPass})
+
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         for pulse_op in op.walk():
             if isinstance(pulse_op, WaitOp):
                 self._validate_wait(pulse_op)
             elif isinstance(pulse_op, CreateFrameOp):
                 self._validate_create_frame(pulse_op)
+            elif isinstance(pulse_op, StartContinuousWaveformOp):
+                self._validate_amplitude(pulse_op)
             elif isinstance(pulse_op, PhaseSetOp | PhaseShiftOp):
                 self._validate_phase(pulse_op)
 
     def _validate_wait(self, op: WaitOp) -> None:
         if not isinstance(op.duration.owner, ConstantOp):
-            return
+            raise PassFailedException("Dynamic pulse.wait duration is not supported.")
         seconds = extract_time_seconds(op)
-        if not math.isfinite(seconds):
+        if not isfinite(seconds):
             raise PassFailedException(f"{op.name} time must be finite. Got {seconds}.")
         if seconds < 0:
             raise PassFailedException(
@@ -89,9 +117,7 @@ class Q1PulseValidationPass(ModulePass):
             )
 
         ns_int = round(ns_float)
-        if not math.isclose(
-            ns_float, ns_int, abs_tol=_TIME_ROUNDING_TOLERANCE_NS, rel_tol=0
-        ):
+        if not isclose(ns_float, ns_int, abs_tol=_TIME_ROUNDING_TOLERANCE_NS, rel_tol=0):
             raise PassFailedException(
                 "pulse.wait duration must map to integer nanoseconds within tolerance. "
                 f"Got {ns_float} ns."
@@ -99,23 +125,42 @@ class Q1PulseValidationPass(ModulePass):
 
     def _validate_create_frame(self, op: CreateFrameOp) -> None:
         if not isinstance(op.frequency.owner, ConstantOp):
-            return
+            raise PassFailedException(
+                "Dynamic pulse.create_frame frequency is not supported."
+            )
         frequency_hz = extract_frequency_hz(op)
-        if not math.isfinite(frequency_hz):
+        if not isfinite(frequency_hz):
             raise PassFailedException(
                 f"{op.name} frequency must be finite. Got {frequency_hz}."
             )
 
     def _validate_phase(self, op: PhaseSetOp | PhaseShiftOp) -> None:
         if not isinstance(op.phase.owner, ConstantOp):
-            return
+            raise PassFailedException(f"Dynamic {op.name} phase is not supported.")
         radians = extract_phase_radians(op)
-        if not math.isfinite(radians):
+        if not isfinite(radians):
             raise PassFailedException(f"{op.name} phase must be finite. Got {radians}.")
+
+    @staticmethod
+    def _validate_amplitude(op: StartContinuousWaveformOp) -> None:
+        if not isinstance(op.amplitude.owner, ConstantOp):
+            raise PassFailedException(
+                "Dynamic pulse.start_continuous_waveform amplitude is not supported."
+            )
+        amplitude = op.amplitude.owner.value
+        if not isinstance(amplitude, AmplitudeAttr):
+            raise PassFailedException(
+                "pulse.start_continuous_waveform expects a pulse.amplitude constant."
+            )
+        value = amplitude.literal_value
+        if not isfinite(value.real) or not isfinite(value.imag):
+            raise PassFailedException(
+                f"pulse.start_continuous_waveform amplitude must be finite. Got {value}."
+            )
 
 
 @dataclass(frozen=True)
-class Q1PulseLegalisationPass(ModulePass):
+class Q1PulseLegalisationPass(OrderedPass, ModulePass):
     """Apply Pulse phase legalisation before Pulse-to-Q1 lowering.
 
     This stage applies the legalisation pattern set to Pulse-level operands after
@@ -124,6 +169,12 @@ class Q1PulseLegalisationPass(ModulePass):
     """
 
     name = "q1-pulse-legalisation"
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1PulseValidationPass})
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1PreAcquireTransformationPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         PatternRewriteWalker(
@@ -150,7 +201,7 @@ class AcquireAnalysisStack:
 
 
 @dataclass(frozen=True)
-class Q1PreAcquireTransformationPass(ModulePass):
+class Q1PreAcquireTransformationPass(OrderedPass, ModulePass):
     """Lower ``pulse.acquire`` to :class:`PreQ1AcquireOp` with QBlox acquisition context.
 
     QBlox acquires need a result store index (bin) and a repetition count, neither of which
@@ -170,6 +221,12 @@ class Q1PreAcquireTransformationPass(ModulePass):
 
     name = "acquire-pre-q1-transformation"
 
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1PulseLegalisationPass})
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({QbloxHardwareBindingPass})
+
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         """Run the transformation over ``op`` in place.
 
@@ -181,7 +238,7 @@ class Q1PreAcquireTransformationPass(ModulePass):
         )
 
     @staticmethod
-    def _on_enter(op: scf.ForOp, for_data: AcquireAnalysisStack) -> AcquireAnalysisStack:
+    def _on_enter(op: ForOp, for_data: AcquireAnalysisStack) -> AcquireAnalysisStack:
         """Push loop state when entering an ``scf.for``.
 
         :param op: The ``scf.for`` operation being entered.
@@ -280,7 +337,7 @@ class Q1PreAcquireTransformationPass(ModulePass):
                 frame=acquire_op.frame,
                 duration=acquire_op.duration,
                 store_idx=store_idx,
-                number_runs=IntAttr(int(np.prod(for_data.for_op_number_repeats))),
+                number_runs=IntAttr(int(prod(for_data.for_op_number_repeats))),
                 weights=acquire_op.weights,
                 label=acquire_op.label,
             )
@@ -296,7 +353,7 @@ class Q1PreAcquireTransformationPass(ModulePass):
         :param for_data: The loop-nest analysis state, maintained across the walk.
         :returns: The analysis state after visiting ``op`` and its children.
         """
-        if isinstance(op, scf.ForOp):
+        if isinstance(op, ForOp):
             for_data = self._on_enter(op, for_data)
 
         for region in op.regions:
@@ -311,13 +368,13 @@ class Q1PreAcquireTransformationPass(ModulePass):
                     else:
                         self._walk_op(child_op, for_data)
 
-        if isinstance(op, scf.ForOp):
+        if isinstance(op, ForOp):
             for_data = self._on_exit(for_data)
         return for_data
 
 
 @dataclass(frozen=True)
-class PulseToQ1LoweringPass(ModulePass):
+class PulseToQ1LoweringPass(OrderedPass, ModulePass):
     """Apply the Pulse-to-Q1 rewrite stage inside outlined sequences.
 
     ``Q1OutliningPass`` first isolates one logical sequence envelope for each
@@ -329,6 +386,12 @@ class PulseToQ1LoweringPass(ModulePass):
     name = "pulse-to-q1-lowering"
     target_data: QbloxTargetData = field(default=TARGET_DATA)
 
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1PreAcquireTransformationPass, QbloxHardwareBindingPass})
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LowerScfToQ1ScfPass})
+
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         PatternRewriteWalker(
             GreedyRewritePatternApplier(
@@ -338,30 +401,76 @@ class PulseToQ1LoweringPass(ModulePass):
         ).rewrite_module(op)
 
 
-def create_default_pulse_to_q1_pipeline(
-    target_data: QbloxTargetData = TARGET_DATA,
-) -> PassPipeline:
-    """Create the default pass pipeline for Pulse-to-Q1 conversion.
+@dataclass(frozen=True)
+class BoundDeadFrameEliminationPass(OrderedPass, ModulePass):
+    """Erase frame metadata after binding and lowering have consumed it.
 
-    The pipeline has five stages. ``Q1OutliningPass`` partitions the Pulse program
-    into per-frame ``q1_sequence.sequence`` envelopes. ``Q1PulseValidationPass``
-    enforces QBlox-specific constant operand constraints. ``Q1PulseLegalisationPass``
-    canonicalises phase operands in the Pulse dialect. ``Q1PreAcquireTransformationPass``
-    transforms acquires into a pre-lowering form that legalises the instruction ready
-    for lowering. ``PulseToQ1LoweringPass`` completes the conversion within those
-    sequences.
-
-    :param target_data: QBlox target description passed to outlining, validation,
-        and lowering stages.
-    :returns: Pass pipeline for the default Pulse-to-Q1 conversion flow.
+    This deliberately runs after :class:`PulseToQ1LoweringPass` rather than marking
+    ``pulse.create_frame`` globally pure. Frames identify physical channels during outlining
+    and binding, including channels with no timed instructions, so generic Pulse
+    canonicalization must preserve them until that information has been captured.
     """
 
+    name = "bound-dead-frame-elimination"
+
+    # TODO(COMPILER-1281): Replace this cleanup with general dead-frame elimination.
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({PulseToQ1LoweringPass})
+
+    def apply(self, ctx: Context, op: ModuleOp) -> None:
+        for sequence in (nested for nested in op.walk() if isinstance(nested, SequenceOp)):
+            frames = [
+                nested for nested in sequence.walk() if isinstance(nested, CreateFrameOp)
+            ]
+            for frame in frames:
+                if frame.result.uses:
+                    continue
+                Rewriter.erase_op(frame)
+
+
+def create_qblox_configured_q1_pipeline(
+    canonical_data: CanonicalSystemData,
+    target_data: QbloxTargetData = TARGET_DATA,
+) -> PassPipeline:
+    """Create the Pulse-to-emission-ready configured Qblox Q1 conversion pipeline.
+
+    This is a Q1 conversion/configuration pipeline only: it assumes the input module has
+    already been through Pulse-level preprocessing (see
+    :meth:`~qat.experimental.dialect.pulse.transforms.pipeline.PulsePipelineManager.build_default_pipeline`).
+    Callers that need both stages (for example
+    :func:`qat.experimental.backend.qblox.codegen.compile_qblox_program`) are responsible
+    for invoking Pulse preprocessing themselves before applying this pipeline.
+
+    Binding runs after Pulse validation, legalisation, and acquisition preparation while
+    ``pulse.create_frame`` still carries generator-selection metadata.
+    :class:`~xdsl.transforms.reconcile_unrealized_casts.ReconcileUnrealizedCastsPass` runs
+    after all lowering (including the arith integer constant to ``q1.ir.move`` rewrite
+    applied by :class:`PulseToQ1LoweringPass`) has substituted the values that made the
+    index-to-Q1-register bridging casts identity casts, and before register allocation,
+    which requires the module to be free of ``builtin.unrealized_conversion_cast``.
+
+    :param canonical_data: Canonical hardware data used for physical binding.
+    :param target_data: Qblox target description used by conversion stages.
+    :returns: Ordered pipeline ending in strict Qblox pre-emission verification.
+    """
+
+    # TODO(COMPILER-1440): Resolve target capabilities from a typed DLTI description attached
+    # to the IR instead of passing QbloxTargetData separately through conversion stages.
     return OrderedPassPipeline(
         (
             Q1OutliningPass(target_data=target_data),
             Q1PulseValidationPass(target_data=target_data),
             Q1PulseLegalisationPass(),
             Q1PreAcquireTransformationPass(),
+            QbloxHardwareBindingPass(canonical_data),
             PulseToQ1LoweringPass(target_data=target_data),
+            BoundDeadFrameEliminationPass(),
+            DeadCodeElimination(),
+            LowerScfToQ1ScfPass(),
+            LowerQ1ScfToQ1CfPass(),
+            LineariseQ1CfToQ1Pass(),
+            ReconcileUnrealizedCastsPass(),
+            LinearScanRegisterAllocationPass(),
+            QbloxPreEmissionVerificationPass(),
         )
     )

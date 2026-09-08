@@ -467,6 +467,29 @@ class TestSequenceOpVerify:
         assert "sequencer_config" not in seq.properties
         assert "module_config" not in seq.properties
 
+    @pytest.mark.parametrize(
+        ("configuration", "message"),
+        [
+            pytest.param(
+                {"sequencer_config": SequencerConfigAttr()},
+                "complete physical allocation",
+                id="sequencer-configuration",
+            ),
+            pytest.param(
+                {"module_config": _module_config()},
+                "module_config requires instrument_id, slot_idx and seq_idx",
+                id="module-configuration",
+            ),
+        ],
+    )
+    def test_detached_configuration_requires_physical_allocation(
+        self, configuration, message
+    ):
+        seq = SequenceOp("ch0", [StopOp()], **configuration)
+
+        with pytest.raises(VerifyException, match=message):
+            seq.verify_()
+
     def test_module_config_must_match_physical_allocation(self):
         seq = SequenceOp(
             "ch0",

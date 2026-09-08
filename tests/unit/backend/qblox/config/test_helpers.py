@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 from dataclasses import dataclass
 
@@ -149,6 +149,99 @@ class LoTestValues:
     qcm_rf_lo_freqs = rng.choice(np.linspace(2e9, 18e9), size=num_points)
     qrm_rf_lo_freqs = rng.choice(np.linspace(2e9, 18e9), size=num_points)
     qrc_lo_freqs = rng.choice(np.arange(500e6, 10.1e9 + 100e6, 100e6), size=num_points)
+
+
+class TestQbloxConfigHelper:
+    def test_configure_sequencer_applies_non_default_values(self, mocker):
+        sequencer_config = SequencerConfig(
+            connection={"bulk_value": ["out0", "in0"]},
+            nco={
+                "freq": 100e6,
+                "prop_delay_comp_en": True,
+                "prop_delay_comp": 4,
+                "phase_offs": 90.0,
+            },
+            awg={
+                "mod_en": True,
+                "gain_path0": 0.5,
+                "gain_path1": 0.25,
+                "offset_path0": 0.1,
+                "offset_path1": 0.2,
+                "cont_mode_en_path0": True,
+                "cont_mode_en_path1": True,
+                "cont_mode_waveform_idx_path0": 1,
+                "cont_mode_waveform_idx_path1": 2,
+            },
+            mixer={"phase_offset": 12.5, "gain_ratio": 1.1},
+            demod_en_acq=True,
+            square_weight_acq={"integration_length": 16},
+            thresholded_acq={
+                "rotation": 45.0,
+                "threshold": 0.5,
+                "trigger_en": True,
+                "trigger_address": 1,
+                "trigger_invert": True,
+            },
+        )
+        sequencer = mocker.Mock()
+
+        QrmRfConfigHelper(sequencer_config=sequencer_config).configure_sequencer(sequencer)
+
+        sequencer.connect_sequencer.assert_called_once_with("out0", "in0")
+        sequencer.nco_freq.assert_called_once_with(100e6)
+        sequencer.nco_prop_delay_comp_en.assert_called_once_with(True)
+        sequencer.nco_prop_delay_comp.assert_called_once_with(4)
+        sequencer.nco_phase_offs.assert_called_once_with(90.0)
+        sequencer.mod_en_awg.assert_called_once_with(True)
+        sequencer.gain_awg_path0.assert_called_once_with(0.5)
+        sequencer.gain_awg_path1.assert_called_once_with(0.25)
+        sequencer.offset_awg_path0.assert_called_once_with(0.1)
+        sequencer.offset_awg_path1.assert_called_once_with(0.2)
+        assert sequencer.cont_mode_en_awg_path0.call_count == 2
+        assert sequencer.cont_mode_en_awg_path1.call_count == 2
+        assert sequencer.cont_mode_waveform_idx_awg_path0.call_count == 2
+        assert sequencer.cont_mode_waveform_idx_awg_path1.call_count == 2
+        sequencer.mixer_corr_phase_offset_degree.assert_called_once_with(12.5)
+        sequencer.mixer_corr_gain_ratio.assert_called_once_with(1.1)
+        sequencer.demod_en_acq.assert_called_once_with(True)
+        sequencer.integration_length_acq.assert_called_once_with(16)
+        sequencer.thresholded_acq_rotation.assert_called_once_with(45.0)
+        sequencer.thresholded_acq_threshold.assert_called_once_with(0.5)
+        sequencer.thresholded_acq_trigger_en.assert_called_once_with(True)
+        sequencer.thresholded_acq_trigger_address.assert_called_once_with(1)
+        sequencer.thresholded_acq_trigger_invert.assert_called_once_with(True)
+
+    @pytest.mark.parametrize(
+        ("connection", "disconnect_count", "connect_count"),
+        [
+            pytest.param(None, 0, 0, id="existing-connection"),
+            pytest.param("out0", 2, 1, id="temporary-connection"),
+        ],
+    )
+    def test_calibrate_mixer(self, mocker, connection, disconnect_count, connect_count):
+        module = mocker.Mock()
+        sequencer = mocker.Mock()
+        sequencer.seq_idx = 2
+        sequencer.mixer_corr_phase_offset_degree.return_value = 12.5
+        sequencer.mixer_corr_gain_ratio.return_value = 1.1
+        offset_config = object()
+        helper = QrmRfConfigHelper()
+        mocker.patch.object(
+            helper,
+            "calibrate_lo_leakage",
+            return_value=offset_config,
+        )
+
+        actual_offset, mixer_configs = helper.calibrate_mixer(module, sequencer, connection)
+
+        assert actual_offset is offset_config
+        assert mixer_configs[2].phase_offset == 12.5
+        assert mixer_configs[2].gain_ratio == 1.1
+        assert module.disconnect_outputs.call_count == disconnect_count
+        assert sequencer.connect_sequencer.call_count == connect_count
+        sequencer.sideband_cal.assert_called_once_with()
+        sequencer.arm_sequencer.assert_called_once_with()
+        sequencer.start_sequencer.assert_called_once_with()
 
 
 @pytest.mark.parametrize("qblox_instrument", [None], indirect=True)

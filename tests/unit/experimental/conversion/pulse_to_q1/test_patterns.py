@@ -22,10 +22,12 @@ from xdsl.dialects.builtin import (
 from xdsl.ir import Operation, SSAValue
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
 from xdsl.pattern_rewriter import PatternRewriteWalker
+from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.passes import (
+    BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
     Q1PulseLegalisationPass,
 )
@@ -41,6 +43,7 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     RewriteStopContinuousWaveformOp,
     RewriteSynchronizeOp,
     RewriteWaitOp,
+    _get_enclosing_port,
     _register_waveform,
     create_legalisation_patterns,
     create_pulse_to_q1_lowering_patterns,
@@ -64,6 +67,7 @@ from qat.experimental.dialect.pulse.ir import (
     StopContinuousWaveformOp,
     SynchronizeOp,
     TimeAttr,
+    TimeType,
     WaitOp,
     WaveformType,
     WeightsAttr,
@@ -71,28 +75,22 @@ from qat.experimental.dialect.pulse.ir import (
 from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
     AcquireWeightedImmRsRsRsImmOp,
-    AddRsImmRdOp,
-    CmpRsImmOp,
-    JaeImmOp,
-    JbImmOp,
-    JgeImmOp,
-    JlImmOp,
-    LabelOp,
     MoveImmRdOp,
     PlayImmImmImmOp,
     SetAwgOffsImmImmOp,
     SetPhDeltaImmOp,
-    SetPhDeltaRsOp,
     SetPhImmOp,
-    SetPhRsOp,
     StopOp,
-    SubRsImmRdOp,
     WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp, UpdParamImmOp
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
-from qat.experimental.dialect.q1_sequence import SequenceOp
-from qat.experimental.dialect.q1_sequence.ir.attrs import make_dense_floats
+from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    NcoConfigAttr,
+    SequencerConfigAttr,
+    make_dense_floats,
+)
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 
 
 @irdl_op_definition
@@ -102,6 +100,15 @@ class _DynamicPhaseSourceOp(IRDLOperation):
 
     def __init__(self):
         super().__init__(result_types=[PhaseType()])
+
+
+@irdl_op_definition
+class _DynamicTimeSourceOp(IRDLOperation):
+    name = "test.dynamic_time_source"
+    result = result_def(TimeType)
+
+    def __init__(self):
+        super().__init__(result_types=[TimeType()])
 
 
 def _sequence_module(*ops, channel_id: str = "q0_drive") -> ModuleOp:
@@ -171,6 +178,34 @@ def test_rewrite_synchronize_op_is_noop_skeleton():
     assert any(isinstance(op, SynchronizeOp) for op in body_ops)
 
 
+def test_bound_dead_frame_elimination_removes_only_unreferenced_metadata():
+    """Post-lowering cleanup erases unused frame metadata without affecting live frames.
+
+    ``pulse.sync`` is a deliberate no-op skeleton pending COMPILER-1343, so it is left
+    untouched by lowering and keeps referencing its frames: that is what makes ``frame_0``
+    and ``frame_1`` genuinely live. ``frame_2`` has no consumer at all and is genuinely
+    dead.
+    """
+    freq_0, frame_0 = _frame("q0/drive")
+    freq_1, frame_1 = _frame("q1/drive")
+    freq_2, frame_2 = _frame("q2/drive")
+    sync = SynchronizeOp(frame_0, frame_1)
+    module = _sequence_module(freq_0, frame_0, freq_1, frame_1, freq_2, frame_2, sync)
+
+    PulseToQ1LoweringPass().apply(Context(), module)
+    BoundDeadFrameEliminationPass().apply(Context(), module)
+    DeadCodeElimination().apply(Context(), module)
+
+    body_ops = _sequence_body_ops(module)
+    live_frames = [op for op in body_ops if isinstance(op, CreateFrameOp)]
+    assert {frame.port.data for frame in live_frames} == {"q0/drive", "q1/drive"}
+    assert freq_0 in body_ops
+    assert freq_1 in body_ops
+    assert freq_2 not in body_ops
+    # pulse.sync is left untouched (COMPILER-1343), which is what kept its frames alive.
+    assert any(isinstance(op, SynchronizeOp) for op in body_ops)
+
+
 def test_rewrite_wait_op_lowers_short_wait():
     """A short wait lowers to a single ``q1.wait`` with the requested duration."""
     freq, frame = _frame()
@@ -184,6 +219,36 @@ def test_rewrite_wait_op_lowers_short_wait():
     assert not any(isinstance(op, WaitOp) for op in body_ops)
     wait_ops = [op for op in body_ops if isinstance(op, WaitImmOp)]
     assert [op.duration.data for op in wait_ops] == [16]
+
+
+def test_rewrite_wait_op_aligns_to_sequencer_grid():
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(5e-9))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    _run_q1_pipeline(module)
+
+    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+    assert [op.duration.data for op in wait_ops] == [8]
+
+
+def test_rewrite_wait_op_leaves_dynamic_duration():
+    freq, frame = _frame()
+    duration = _DynamicTimeSourceOp()
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PulseToQ1LoweringPass().apply(Context(), module)
+
+    assert wait in _sequence_body_ops(module)
+
+
+def test_enclosing_port_ignores_non_sequence_parent():
+    operation = StopOp()
+    ModuleOp([operation])
+
+    assert _get_enclosing_port(operation) is None
 
 
 def test_rewrite_wait_op_chains_long_wait():
@@ -400,55 +465,39 @@ def test_rewrite_phase_shift_op_wraps_wide_radian_range_to_valid_nco_steps(
     assert set_ph_delta.imm.data == expected_steps
 
 
-def test_rewrite_phase_set_op_lowers_dynamic_radian_phase():
-    """Dynamic pulse.phase_set in radians lowers through register conversion and modulo
-    loops."""
+def test_rejects_phase_set_op_with_dynamic_radian_phase():
+    """Dynamic pulse.phase_set has no runtime numeric conversion to Q1 NCO phase steps, so
+    legalisation rejects it rather than bridging it to a register."""
     freq, frame = _frame()
     dynamic_phase = _DynamicPhaseSourceOp()
     phase_set = PhaseSetOp(frame, dynamic_phase)
     module = _sequence_module(freq, frame, dynamic_phase, phase_set)
-    _run_q1_pipeline(module)
 
-    body_ops = _sequence_body_ops(module)
-    assert not any(isinstance(op, PhaseSetOp) for op in body_ops)
-    assert any(isinstance(op, UnrealizedConversionCastOp) for op in body_ops)
-    assert any(isinstance(op, SetPhRsOp) for op in body_ops)
-    assert any(isinstance(op, UpdParamImmOp) for op in body_ops)
-    assert any(isinstance(op, CmpRsImmOp) for op in body_ops)
-    assert any(isinstance(op, JgeImmOp) for op in body_ops)
-    assert any(isinstance(op, JlImmOp) for op in body_ops)
-    assert any(isinstance(op, JbImmOp) for op in body_ops)
-    assert any(isinstance(op, JaeImmOp) for op in body_ops)
-    assert any(isinstance(op, AddRsImmRdOp) for op in body_ops)
-    assert any(isinstance(op, SubRsImmRdOp) for op in body_ops)
-    assert len([op for op in body_ops if isinstance(op, LabelOp)]) >= 3
+    with pytest.raises(PassFailedException, match="requires constant phase"):
+        _run_q1_pipeline(module)
 
 
-def test_rewrite_phase_shift_op_lowers_dynamic_radian_phase():
-    """Dynamic pulse.phase_shift in radians lowers through register conversion and modulo
-    loops."""
+def test_rejects_phase_shift_op_with_dynamic_radian_phase():
+    """Dynamic pulse.phase_shift has no runtime numeric conversion to Q1 NCO phase steps, so
+    legalisation rejects it rather than bridging it to a register."""
     freq, frame = _frame()
     dynamic_phase = _DynamicPhaseSourceOp()
     phase_shift = PhaseShiftOp(frame, dynamic_phase)
     module = _sequence_module(freq, frame, dynamic_phase, phase_shift)
-    _run_q1_pipeline(module)
 
-    body_ops = _sequence_body_ops(module)
-    assert not any(isinstance(op, PhaseShiftOp) for op in body_ops)
-    assert any(isinstance(op, UnrealizedConversionCastOp) for op in body_ops)
-    assert any(isinstance(op, SetPhDeltaRsOp) for op in body_ops)
-    assert any(isinstance(op, UpdParamImmOp) for op in body_ops)
+    with pytest.raises(PassFailedException, match="requires constant phase"):
+        _run_q1_pipeline(module)
 
 
 def _traced_register_int(value: SSAValue) -> int:
     """Resolve a Q1 register operand back to the integer it was materialised from.
 
-    Bin and weight indices are supplied to Q1 acquires in registers, materialised as an
-    ``unrealized_conversion_cast`` of an integer source. Depending on whether the source
-    constant was lowered by ``LowerArithIntegerConstantToMoveOp``, that source is either a
-    ``q1.ir.move`` immediate or the original ``arith.constant``; this unwraps either chain
-    and returns the underlying integer.
+    Bin and weight indices are supplied to Q1 acquires in registers. Static weight indices
+    are direct ``q1.ir.move`` immediates, while bin indices may still be an
+    ``unrealized_conversion_cast`` of an integer source. This unwraps either chain.
     """
+    if isinstance(value.owner, MoveImmRdOp):
+        return value.owner.imm.data
     cast_op = value.owner
     assert isinstance(cast_op, UnrealizedConversionCastOp)
     source_op = cast_op.operands[0].owner
@@ -464,8 +513,8 @@ class TestRewritePreQ1AcquireOp:
     ``AcquireWeightedImmRsRsRsImmOp`` for custom-weight acquisitions).
 
     Q1 supplies bin and weight indices in registers, so the lowered ops carry those indices
-    as register operands materialised from ``unrealized_conversion_cast`` of an
-    ``arith.constant``; ``_traced_register_int`` unwraps them for assertions. Each test
+    as register operands materialised from static integer values; ``_traced_register_int``
+    unwraps them for assertions. Each test
     verifies the emitted op type, immediate/register field values (acq_idx, bin_idx, weight
     indices, duration), and the resulting acquisitions/weights table entries on the
     enclosing ``SequenceOp``.
@@ -475,6 +524,8 @@ class TestRewritePreQ1AcquireOp:
     def _run(
         *acquire_params: tuple[WeightsAttr | None, int, str],
         override_label=None,
+        sequencer_config: SequencerConfigAttr | None = None,
+        target_data=TARGET_DATA,
     ) -> tuple[SequenceOp, list]:
         """Build a module of ``pre_q1_pulse.acquire`` ops from ``acquire_params``, apply
         ``PulseToQ1LoweringPass``, and return the lowered ``SequenceOp`` together with all
@@ -502,7 +553,10 @@ class TestRewritePreQ1AcquireOp:
             )
             ops.extend([freq, frame, duration, store_idx, acquire])
         module = _sequence_module(*ops, channel_id="seq_0")
-        PulseToQ1LoweringPass().apply(Context(), module)
+        [sequence] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        if sequencer_config is not None:
+            sequence.properties["sequencer_config"] = sequencer_config
+        PulseToQ1LoweringPass(target_data=target_data).apply(Context(), module)
         [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         q1_acq_ops = [
             op
@@ -527,6 +581,85 @@ class TestRewritePreQ1AcquireOp:
         assert entry.acquisition_name.data == "q0_measure_0"
         assert entry.index.data == 0
         assert entry.num_bins.data == 1
+        assert seq.sequencer_config.integration_length.data == 1000
+        assert isinstance(seq.sequencer_config.integration_length.data, int)
+
+    def test_unweighted_preserves_existing_sequencer_config(self):
+        nco = NcoConfigAttr(phase_offs=12.0)
+        config = SequencerConfigAttr(port_id="q0/measure", nco=nco)
+
+        seq, _ = self._run(
+            (None, 1000, "q0/measure"),
+            sequencer_config=config,
+        )
+
+        assert seq.sequencer_config.nco == nco
+        assert seq.sequencer_config.port_id.data == "q0/measure"
+        assert seq.sequencer_config.integration_length.data == 1000
+
+    def test_unweighted_integration_length_uses_readout_sample_rate(self):
+        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+            update={"sample_rate": 500_000_000}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"READOUT_SEQUENCER_DATA": readout_data}
+        )
+
+        seq, [op] = self._run(
+            (None, 16, "q0/measure"),
+            target_data=target_data,
+        )
+
+        assert op.duration.data == 16
+        assert seq.sequencer_config.integration_length.data == 8
+
+    def test_unweighted_rejects_misaligned_integration_length(self):
+        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+            update={"sample_rate": 500_000_000}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"READOUT_SEQUENCER_DATA": readout_data}
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match=(
+                "Acquisition duration 12 ns spans 6 samples.*"
+                "integration length must be a multiple of 4 samples"
+            ),
+        ):
+            self._run(
+                (None, 12, "q0/measure"),
+                target_data=target_data,
+            )
+
+    def test_unweighted_rejects_fractional_sample_count(self):
+        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+            update={"sample_rate": 750_000_000}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"READOUT_SEQUENCER_DATA": readout_data}
+        )
+
+        with pytest.raises(PassFailedException, match="integer number of samples"):
+            self._run(
+                (None, 10, "q0/measure"),
+                target_data=target_data,
+            )
+
+    def test_unweighted_rejects_non_integer_sample_rate(self):
+        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+            update={"sample_rate": 500_000_000.5}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"READOUT_SEQUENCER_DATA": readout_data}
+        )
+
+        with pytest.raises(PassFailedException, match="sample rate must be an integer"):
+            self._run(
+                (None, 16, "q0/measure"),
+                target_data=target_data,
+            )
 
     def test_single_weighted(self):
         """Single weighted acquire lowers to AcquireWeightedImmRsRsRsImmOp with correct
@@ -549,6 +682,9 @@ class TestRewritePreQ1AcquireOp:
         assert acq_entry.acquisition_name.data == "q0_measure_0"
         assert acq_entry.index.data == 0
         assert acq_entry.num_bins.data == 1
+        # A weighted acquisition derives its length from the weight arrays, so no
+        # square-weight integration length is recorded.
+        assert seq.sequencer_config is None
 
         assert [w.weight_name.data for w in seq.weights] == [
             "53874763",
@@ -558,10 +694,14 @@ class TestRewritePreQ1AcquireOp:
 
     def test_two_unweighted_different_frames(self):
         """Two unweighted acquires on different frames lower to AcquireImmRsImmOp with
-        distinct acq_idx and duration values and two acquisition table entries."""
+        distinct acq_idx values and two acquisition table entries.
+
+        Both share one
+        integration length, as a sequencer exposes a single ``integration_length_acq``.
+        """
         seq, acq_ops = self._run(
             (None, 1000, "q0/measure"),
-            (None, 2000, "q1/measure"),
+            (None, 1000, "q1/measure"),
         )
 
         assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
@@ -572,13 +712,14 @@ class TestRewritePreQ1AcquireOp:
         assert acq_ops[0].duration.data == 1000
         assert acq_ops[1].acq_idx.data == 1
         assert _traced_register_int(acq_ops[1].bin_idx) == 0
-        assert acq_ops[1].duration.data == 2000
+        assert acq_ops[1].duration.data == 1000
 
         assert [a.acquisition_name.data for a in seq.acquisitions] == [
             "q0_measure_0",
             "q1_measure_1",
         ]
         assert [a.index.data for a in seq.acquisitions] == [0, 1]
+        assert seq.sequencer_config.integration_length.data == 1000
 
     def test_two_weighted_different_frames(self):
         """Two weighted acquires on different frames lower to AcquireWeightedImmRsRsRsImmOp
@@ -652,6 +793,18 @@ class TestRewritePreQ1AcquireOp:
             "q0_drive_1",
         ]
         assert [a.index.data for a in seq.acquisitions] == [0, 1]
+
+    def test_conflicting_integration_lengths_raise(self):
+        """Two square-weight acquires of different durations on one sequence demand two
+        integration lengths, which a single ``integration_length_acq`` cannot provide."""
+        with pytest.raises(
+            PassFailedException,
+            match="Conflicting square-weight integration lengths",
+        ):
+            self._run(
+                (None, 1000, "q0/measure"),
+                (None, 2000, "q1/measure"),
+            )
 
     @pytest.mark.parametrize(
         "time_attr, expected_ns",

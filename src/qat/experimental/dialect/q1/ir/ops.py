@@ -2970,7 +2970,7 @@ class WaitImmOp(ImmOperation[DurationImm]):
 
     name = "q1.i.wait"
 
-    traits = traits_def(Pure())
+    traits = traits_def()
 
     @property
     def duration(self):
@@ -2985,7 +2985,7 @@ class WaitRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.wait"
 
-    traits = traits_def(Pure())
+    traits = traits_def()
 
     @property
     def duration(self):
@@ -3003,7 +3003,7 @@ class WaitTriggerImmImmOp(ImmImmOperation[UI4Imm, DurationImm]):
 
     name = "q1.ii.wait_trigger"
 
-    traits = traits_def(Pure())
+    traits = traits_def()
 
     @property
     def trig_addr(self):
@@ -3027,7 +3027,7 @@ class WaitTriggerRsRsOp(RsRsOperation[IntRegisterType]):
 
     name = "q1.rr.wait_trigger"
 
-    traits = traits_def(Pure())
+    traits = traits_def()
 
     @property
     def trig_addr(self):
@@ -3051,7 +3051,7 @@ class WaitSyncImmOp(ImmOperation[DurationImm]):
 
     name = "q1.i.wait_sync"
 
-    traits = traits_def(Pure())
+    traits = traits_def()
 
     @property
     def duration(self):
@@ -3069,7 +3069,7 @@ class WaitSyncRsOp(RsOperation[IntRegisterType]):
 
     name = "q1.r.wait_sync"
 
-    traits = traits_def(Pure())
+    traits = traits_def()
 
     @property
     def duration(self):

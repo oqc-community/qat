@@ -2,12 +2,12 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Rewrite patterns for the Pulse-to-Q1 phase legalisation and lowering stages."""
 
-import hashlib
 from collections import defaultdict
 from collections.abc import Callable
+from hashlib import md5
 from math import ceil
 
-import numpy as np
+from numpy import ndarray
 from xdsl.context import Context
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
@@ -63,12 +63,14 @@ from qat.experimental.dialect.q1 import (
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, ProvenanceInfoAttr
 from qat.experimental.dialect.q1.ir.imm_desc import DurationImm, SU32Imm, UI5Imm
 from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp
-from qat.experimental.dialect.q1_sequence import SequenceOp, find_enclosing_sequence
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    SequencerConfigAttr,
+    UnweightedAcquireConfigAttr,
     make_acquisition,
     make_waveform,
     make_weight,
 )
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
 
 
 class LowerArithIntegerConstantToMoveOp(ModulePass, RewritePattern):
@@ -463,13 +465,14 @@ class RewritePreQ1AcquireOp(RewritePattern):
 
     The acquisition, and any integration weights, are registered on the enclosing
     :class:`SequenceOp` and assigned hardware indices in encounter order. Q1 requires the
-    bin and weight indices to be supplied in registers, so index values are materialised as
-    ``builtin.unrealized_conversion_cast`` results typed as unallocated integer registers;
-    a later register-allocation pass assigns concrete Q1 GPRs.
+    bin and weight indices to be supplied in registers. Bin indices retain their upstream
+    value, while static weight indices are materialised directly as Q1 moves to unallocated
+    integer registers; a later register-allocation pass assigns concrete Q1 GPRs.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
         self.target_data = target_data
+        self.square_weight_lengths: dict[SequenceOp, int] = {}
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: PreQ1AcquireOp, rewriter: PatternRewriter) -> None:
@@ -491,9 +494,9 @@ class RewritePreQ1AcquireOp(RewritePattern):
 
         # Ops that replace ``op``, emitted in order: index casts first, then the acquire.
         new_ops: list[Operation] = []
-        sequencer = find_enclosing_sequence(op)
+        sequence_op = find_enclosing_sequence(op)
 
-        current_no_acquires = len(sequencer.acquisitions)
+        current_no_acquires = len(sequence_op.acquisitions)
 
         acq_name = (
             op.label.data
@@ -502,7 +505,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
         )
 
         num_bins = op.number_runs.data
-        acq_idx = self._register_acquisition(sequencer, acq_name, num_bins)
+        acq_idx = self._register_acquisition(sequence_op, acq_name, num_bins)
 
         # The store index is an ``index``-typed SSA value computed upstream. Q1 acquires
         # take the bin in a register, so cast it to an unallocated integer register and let
@@ -515,36 +518,47 @@ class RewritePreQ1AcquireOp(RewritePattern):
         start_idx = cast_start_idx_op.results[0]
 
         duration_ns = self._get_ns_duration(op)
-        # TODO(COMPILER-1349): Write ``duration_ns`` as the integration length into the
-        # ``SequencerDataAttr`` on the enclosing ``SequenceOp`` once that attribute is
-        # defined (pending the physical Qblox system data PR).
         if isinstance(weights_attr := op.weights, WeightsAttr):
             weights_data = weights_attr.weights.data
-            weight_index_i = self._register_weight(sequencer, weights_data.real)
-            weight_index_q = self._register_weight(sequencer, weights_data.imag)
+            weight_index_i = self._register_weight(sequence_op, weights_data.real)
+            weight_index_q = self._register_weight(sequence_op, weights_data.imag)
 
-            # QBloxs forces use of resister which seems wasteful.
-            # Change static indexs to register values
-            casted_weight_ops = []
+            weight_index_ops = []
             for weight_index in [weight_index_i, weight_index_q]:
-                const_weight_index = ArithConstantOp.from_int_and_width(
-                    weight_index, IndexType()
+                weight_index_op = MoveImmRdOp(
+                    SU32Imm(weight_index), IntRegisterType.unallocated()
                 )
-                cast_const_weight_index_op = UnrealizedConversionCastOp.get(
-                    [const_weight_index.result],
-                    [IntRegisterType.unallocated()],
-                )
-                new_ops.extend([const_weight_index, cast_const_weight_index_op])
-                casted_weight_ops.append(cast_const_weight_index_op)
+                new_ops.append(weight_index_op)
+                weight_index_ops.append(weight_index_op)
 
             new_acquire_op = AcquireWeightedImmRsRsRsImmOp(
                 UI5Imm(acq_idx),
                 start_idx,
-                casted_weight_ops[0].results[0],
-                casted_weight_ops[1].results[0],
+                weight_index_ops[0].rd,
+                weight_index_ops[1].rd,
                 DurationImm(duration_ns),
             ).with_debug_info(debug_info)
         else:
+            integration_length = self._get_integration_length_samples(duration_ns)
+            # An unweighted acquisition integrates over its full duration. Weighted
+            # acquisitions derive their length from the weight arrays instead. A sequencer
+            # exposes a single integration_length_acq, so a second, differing length is an
+            # unsupported program rather than a reconfiguration.
+            program_length = self.square_weight_lengths.get(sequence_op)
+            if program_length is not None and program_length != integration_length:
+                raise PassFailedException(
+                    f"Conflicting square-weight integration lengths on sequence"
+                    f" '{sequence_op.channel_id.data}':"
+                    f" {program_length} and {integration_length}"
+                )
+            self.square_weight_lengths[sequence_op] = integration_length
+            existing = sequence_op.sequencer_config
+            square_weight = UnweightedAcquireConfigAttr(integration_length)
+            sequence_op.properties["sequencer_config"] = (
+                SequencerConfigAttr(unweighted_acquire=square_weight)
+                if existing is None
+                else existing.with_unweighted_acquire(square_weight)
+            )
             new_acquire_op = AcquireImmRsImmOp(
                 UI5Imm(acq_idx), start_idx, DurationImm(duration_ns)
             ).with_debug_info(debug_info)
@@ -571,7 +585,42 @@ class RewritePreQ1AcquireOp(RewritePattern):
         )
         return round(ns)
 
-    def _register_weight(self, sequence_op: SequenceOp, weights_data: np.ndarray) -> int:
+    def _get_integration_length_samples(self, duration_ns: int) -> int:
+        """Convert an acquisition duration to readout sequencer samples.
+
+        The sequencer ``grid_time`` constrains instruction timing in nanoseconds; it is not
+        the integration-length alignment once the readout sample rate differs from 1 GHz.
+        The sample count is therefore checked against the readout sequencer's acquisition
+        integration constraint after conversion.
+
+        :param duration_ns: Acquisition duration in nanoseconds.
+        :returns: Number of samples at the target readout sequencer sample rate.
+        :raises PassFailedException: If the duration does not span an integer number of
+            samples or the resulting integration length is not hardware-aligned.
+        """
+
+        readout_data = self.target_data.READOUT_SEQUENCER_DATA
+        sample_rate = int(readout_data.sample_rate)
+        if sample_rate != readout_data.sample_rate:
+            raise PassFailedException(
+                "Readout sequencer sample rate must be an integer number of samples/s."
+            )
+        sample_count, remainder = divmod(duration_ns * sample_rate, 1_000_000_000)
+        if remainder:
+            raise PassFailedException(
+                f"Acquisition duration {duration_ns} ns does not span an integer number "
+                f"of samples at {sample_rate} samples/s."
+            )
+        alignment = readout_data.min_acq_integration_length
+        if sample_count % alignment:
+            raise PassFailedException(
+                f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
+                f"{sample_rate} samples/s, but the integration length must be a multiple "
+                f"of {alignment} samples."
+            )
+        return int(sample_count)
+
+    def _register_weight(self, sequence_op: SequenceOp, weights_data: ndarray) -> int:
         """Register a new weight in the target data and return its index.
 
         :param sequence_op: The enclosing ``SequenceOp`` to register the weight in.
@@ -579,7 +628,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
         :returns: Index of the registered weight.
         """
         weight_list = weights_data.tolist()
-        name = hashlib.md5(str(weight_list).encode(), usedforsecurity=False).hexdigest()[:8]
+        name = md5(str(weight_list).encode(), usedforsecurity=False).hexdigest()[:8]
         for i, entry in enumerate(sequence_op.weights):
             if entry.weight_name.data == name:
                 return i

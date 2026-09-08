@@ -18,15 +18,18 @@ from xdsl.dialects.builtin import (
 from xdsl.ir import Block, BlockArgument, Region
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
 from xdsl.printer import Printer
+from xdsl.transforms.dead_code_elimination import DeadCodeElimination
+from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.passes import (
+    BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
     Q1PreAcquireTransformationPass,
     Q1PulseLegalisationPass,
     Q1PulseValidationPass,
-    create_default_pulse_to_q1_pipeline,
+    create_qblox_configured_q1_pipeline,
 )
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
@@ -34,6 +37,8 @@ from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
     AcquisitionType,
     AdvancesTimeTrait,
+    AmplitudeAttr,
+    AmplitudeType,
     ConstantOp,
     CreateFrameOp,
     FrameType,
@@ -43,6 +48,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseSetOp,
     PhaseShiftOp,
     PhaseType,
+    StartContinuousWaveformOp,
     TimeAttr,
     WaitOp,
     WeightsAttr,
@@ -53,11 +59,19 @@ from qat.experimental.dialect.q1 import (
     AcquireWeightedImmRsRsRsImmOp,
     DurationImm,
     IntRegisterType,
-    SetMrkImmOp,
+    MoveImmRdOp,
     StopOp,
     UI5Imm,
 )
 from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.system_data.canonical.schema import (
+    AttributeEntry,
+    CanonicalSystemData,
+    ChannelData,
+    ExternalResourceData,
+    OscillatorData,
+    PortData,
+)
 
 
 def _module_with_main(ops) -> ModuleOp:
@@ -82,6 +96,15 @@ class _DynamicFrequencySourceOp(IRDLOperation):
         super().__init__(result_types=[FrequencyType()])
 
 
+@irdl_op_definition
+class _DynamicAmplitudeSourceOp(IRDLOperation):
+    name = "test.dynamic_amplitude_source"
+    result = result_def(AmplitudeType)
+
+    def __init__(self):
+        super().__init__(result_types=[AmplitudeType()])
+
+
 def _sequence_module(*ops, channel_id="q0_drive") -> ModuleOp:
     return ModuleOp([SequenceOp(channel_id, [*ops, StopOp()])])
 
@@ -96,33 +119,75 @@ def _sequence_body_ops(module: ModuleOp) -> list:
     return list(seq.body.block.ops)
 
 
-def test_default_pulse_to_q1_pipeline_runs_outlining_pass():
-    """Verify that the default pipeline outlines one sequence per frame."""
-    freq = ConstantOp(FrequencyAttr(4.8e9))
-    frame = CreateFrameOp(freq, StringAttr("q0.drive"))
-    module = _module_with_main([freq, frame, func.ReturnOp()])
+def _canonical_data() -> CanonicalSystemData:
+    resource = ExternalResourceData(
+        id="module",
+        object_type="QCM-RF",
+        attributes=(
+            AttributeEntry(
+                key="baseband",
+                value={
+                    "instrument_id": "cluster0",
+                    "slot_idx": 2,
+                    "config": {
+                        "sequencers": {"0": {"connection": {"bulk_value": ["out0"]}}}
+                    },
+                },
+            ),
+        ),
+    )
+    return CanonicalSystemData(
+        ports=(
+            PortData(
+                id="q0.drive",
+                sample_time=1000,
+                block_size=4,
+                min_blocks=1,
+                max_blocks=-1,
+                external_resource_id=resource.id,
+            ),
+        ),
+        oscillators=(
+            OscillatorData(
+                id="lo0",
+                frequency=4_600_000_000,
+                external_resource_id="lo-resource",
+            ),
+        ),
+        channels=(
+            ChannelData(
+                id="q0.drive.channel",
+                port_id="q0.drive",
+                frequency=4_800_000_000,
+                oscillator_reference="lo0",
+            ),
+        ),
+        external_resources=(
+            resource,
+            ExternalResourceData(id="lo-resource", object_type="oscillator"),
+        ),
+    )
 
-    pipeline = create_default_pulse_to_q1_pipeline()
-    pipeline.apply(Context(), module)
 
-    [seq] = list(module.body.block.ops)
-    assert isinstance(seq, SequenceOp)
-    assert seq.channel_id.data == "q0.drive"
-    assert isinstance(seq.body.block.first_op, SetMrkImmOp)
-    assert seq.body.block.first_op.mrk.data == 3
-    assert isinstance(seq.body.block.last_op, StopOp)
+def test_configured_q1_pipeline_has_defensive_pass_order():
+    pipeline = create_qblox_configured_q1_pipeline(_canonical_data())
 
-
-def test_default_pulse_to_q1_pipeline_includes_all_passes():
-    """Verify that the default pipeline contains all four stages."""
-    pipeline = create_default_pulse_to_q1_pipeline()
-
-    assert len(pipeline.passes) == 5
-    assert isinstance(pipeline.passes[0], Q1OutliningPass)
-    assert isinstance(pipeline.passes[1], Q1PulseValidationPass)
-    assert isinstance(pipeline.passes[2], Q1PulseLegalisationPass)
-    assert isinstance(pipeline.passes[3], Q1PreAcquireTransformationPass)
-    assert isinstance(pipeline.passes[4], PulseToQ1LoweringPass)
+    assert [pass_.name for pass_ in pipeline.passes] == [
+        "pulse-to-q1-outlining",
+        "q1-pulse-validation",
+        "q1-pulse-legalisation",
+        "acquire-pre-q1-transformation",
+        "qblox-hardware-binding",
+        "pulse-to-q1-lowering",
+        "bound-dead-frame-elimination",
+        "dce",
+        "lower-scf-to-q1-scf",
+        "lower-q1-scf-to-q1-cf",
+        "linearise-q1-cf-to-q1",
+        "reconcile-unrealized-casts",
+        "q1-lin-scan-reg-alloc",
+        "qblox-pre-emission-verification",
+    ]
 
 
 class TestQ1PulseValidationPass:
@@ -178,7 +243,7 @@ class TestQ1PulseValidationPass:
         with pytest.raises(PassFailedException, match="smaller than one nanosecond"):
             self._run(_sequence_module(freq, frame, time, wait))
 
-    def test_accepts_dynamic_wait_duration(self):
+    def test_rejects_dynamic_wait_duration(self):
         from qat.experimental.dialect.pulse.ir import TimeType
 
         @irdl_op_definition
@@ -192,7 +257,8 @@ class TestQ1PulseValidationPass:
         freq, frame = _frame()
         dynamic_time = _DynamicTimeSourceOp()
         wait = WaitOp(frame, dynamic_time)
-        self._run(_sequence_module(freq, frame, dynamic_time, wait))
+        with pytest.raises(PassFailedException, match="Dynamic pulse.wait"):
+            self._run(_sequence_module(freq, frame, dynamic_time, wait))
 
     @pytest.mark.parametrize("frequency", [math.inf, -math.inf, math.nan])
     def test_rejects_non_finite_frame_frequency(self, frequency: float):
@@ -201,7 +267,7 @@ class TestQ1PulseValidationPass:
         with pytest.raises(PassFailedException, match="frequency must be finite"):
             self._run(_sequence_module(freq_const, frame))
 
-    def test_accepts_dynamic_frame_frequency(self):
+    def test_rejects_dynamic_frame_frequency(self):
         @irdl_op_definition
         class _DynamicFreqSourceOp(IRDLOperation):
             name = "test.dynamic_freq_source_val"
@@ -212,7 +278,25 @@ class TestQ1PulseValidationPass:
 
         dynamic_freq = _DynamicFreqSourceOp()
         frame = CreateFrameOp(dynamic_freq, StringAttr("q0/drive"))
-        self._run(_sequence_module(dynamic_freq, frame))
+        with pytest.raises(PassFailedException, match="Dynamic pulse.create_frame"):
+            self._run(_sequence_module(dynamic_freq, frame))
+
+    def test_rejects_dynamic_continuous_amplitude(self):
+        frequency, frame = _frame()
+        amplitude = _DynamicAmplitudeSourceOp()
+        start = StartContinuousWaveformOp(frame, amplitude)
+        with pytest.raises(
+            PassFailedException, match="Dynamic pulse.start_continuous_waveform"
+        ):
+            self._run(_sequence_module(frequency, frame, amplitude, start))
+
+    @pytest.mark.parametrize("amplitude_value", [math.inf, -math.inf, math.nan])
+    def test_rejects_non_finite_continuous_amplitude(self, amplitude_value):
+        frequency, frame = _frame()
+        amplitude = ConstantOp(AmplitudeAttr(amplitude_value))
+        start = StartContinuousWaveformOp(frame, amplitude)
+        with pytest.raises(PassFailedException, match="amplitude must be finite"):
+            self._run(_sequence_module(frequency, frame, amplitude, start))
 
     @pytest.mark.parametrize("phase_value", [math.inf, -math.inf, math.nan])
     def test_rejects_non_finite_phase_set(self, phase_value: float):
@@ -262,6 +346,20 @@ class TestQ1PulseValidationPass:
         phase_shift = PhaseShiftOp(frame, phase)
         self._run(_sequence_module(freq, frame, phase, phase_shift))
 
+    def test_rejects_dynamic_phase_set(self):
+        freq, frame = _frame()
+        dynamic_phase = _DynamicPhaseSourceOp()
+        phase_set = PhaseSetOp(frame, dynamic_phase)
+        with pytest.raises(PassFailedException, match="Dynamic pulse.phase_set"):
+            self._run(_sequence_module(freq, frame, dynamic_phase, phase_set))
+
+    def test_rejects_dynamic_phase_shift(self):
+        freq, frame = _frame()
+        dynamic_phase = _DynamicPhaseSourceOp()
+        phase_shift = PhaseShiftOp(frame, dynamic_phase)
+        with pytest.raises(PassFailedException, match="Dynamic pulse.phase_shift"):
+            self._run(_sequence_module(freq, frame, dynamic_phase, phase_shift))
+
 
 class TestQ1PulseLegalisationPass:
     def _run(self, module: ModuleOp) -> None:
@@ -282,25 +380,27 @@ class TestQ1PulseLegalisationPass:
         ):
             self._run(_sequence_module(freq, frame, malformed_phase, phase_set))
 
-    def test_passes_through_dynamic_phase_set(self):
+    def test_rejects_dynamic_phase_set(self):
+        """Dynamic phase has no runtime numeric conversion to Q1 NCO phase steps, so
+        legalisation requires a constant phase operand rather than bridging it to a
+        register."""
         freq, frame = _frame()
         dynamic_phase = _DynamicPhaseSourceOp()
         phase_set = PhaseSetOp(frame, dynamic_phase)
         module = _sequence_module(freq, frame, dynamic_phase, phase_set)
-        self._run(module)
-        body_ops = _sequence_body_ops(module)
-        assert any(isinstance(op, UnrealizedConversionCastOp) for op in body_ops)
-        assert any(isinstance(op, PhaseSetOp) for op in body_ops)
+        with pytest.raises(PassFailedException, match="requires constant phase"):
+            self._run(module)
 
-    def test_passes_through_dynamic_phase_shift(self):
+    def test_rejects_dynamic_phase_shift(self):
+        """Dynamic phase has no runtime numeric conversion to Q1 NCO phase steps, so
+        legalisation requires a constant phase operand rather than bridging it to a
+        register."""
         freq, frame = _frame()
         dynamic_phase = _DynamicPhaseSourceOp()
         phase_shift = PhaseShiftOp(frame, dynamic_phase)
         module = _sequence_module(freq, frame, dynamic_phase, phase_shift)
-        self._run(module)
-        body_ops = _sequence_body_ops(module)
-        assert any(isinstance(op, UnrealizedConversionCastOp) for op in body_ops)
-        assert any(isinstance(op, PhaseShiftOp) for op in body_ops)
+        with pytest.raises(PassFailedException, match="requires constant phase"):
+            self._run(module)
 
     def test_passes_through_dynamic_frame_frequency(self):
         dynamic_freq = _DynamicFrequencySourceOp()
@@ -566,6 +666,22 @@ class TestPreQ1AcquireOp:
         assert "pre_q1_pulse.acquire" in stream.getvalue()
 
 
+def test_bound_dead_frame_elimination_preserves_sequence_allocation():
+    frequency, frame = _frame()
+    sequence = SequenceOp("unused-channel", [frequency, frame, StopOp()])
+    module = ModuleOp([sequence])
+
+    BoundDeadFrameEliminationPass().apply(Context(), module)
+
+    assert list(module.body.block.ops) == [sequence]
+    assert not any(isinstance(op, CreateFrameOp) for op in sequence.walk())
+    assert any(isinstance(op, ConstantOp) for op in sequence.walk())
+
+    DeadCodeElimination().apply(Context(), module)
+
+    assert not any(isinstance(op, ConstantOp) for op in sequence.walk())
+
+
 class TestPulseToQ1AcquireLowering:
     """Full-pipeline lowering of ``pulse.acquire`` to Q1 acquire instructions.
 
@@ -599,6 +715,27 @@ class TestPulseToQ1AcquireLowering:
         # The bin index is supplied via a register materialised by a conversion cast.
         assert isinstance(acquire.bin_idx.type, IntRegisterType)
         assert isinstance(acquire.bin_idx.owner, UnrealizedConversionCastOp)
+
+    def test_reconcile_unrealized_casts_removes_identity_bin_index_cast(self):
+        """The index-to-Q1-register cast bridging an acquire's bin index becomes an identity
+        cast once ``LowerArithIntegerConstantToMoveOp`` (applied inside
+        ``PulseToQ1LoweringPass``) substitutes the constant store index with a
+        ``q1.ir.move`` of the same unallocated register type.
+
+        The upstream
+        ``ReconcileUnrealizedCastsPass`` then removes it without any bespoke pass.
+        """
+        module = _create_acquire_module(1000, "q0/readout", [])
+        sequence = self._lower(module)
+        [acquire] = [op for op in sequence.walk() if isinstance(op, AcquireImmRsImmOp)]
+        cast = acquire.bin_idx.owner
+        assert isinstance(cast, UnrealizedConversionCastOp)
+        assert cast.inputs.types == cast.outputs.types
+
+        ReconcileUnrealizedCastsPass().apply(Context(), module)
+
+        assert not any(isinstance(op, UnrealizedConversionCastOp) for op in sequence.walk())
+        assert isinstance(acquire.bin_idx.owner, MoveImmRdOp)
 
     def test_unweighted_acquire_registers_acquisition(self):
         module = _create_acquire_module(1000, "q0/readout", [])

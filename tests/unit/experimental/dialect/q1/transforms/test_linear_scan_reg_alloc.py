@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 import pytest
 from xdsl.context import Context
-from xdsl.dialects.builtin import IntAttr, ModuleOp, NoneAttr
+from xdsl.dialects.builtin import IntAttr, ModuleOp, NoneAttr, UnrealizedConversionCastOp
 from xdsl.ir import Block, Operation, Region, SSAValue
 from xdsl.irdl import irdl_op_definition, operand_def, result_def
 from xdsl.utils.exceptions import DiagnosticException
@@ -153,6 +153,17 @@ class TestLinearAllocatorOnSequence:
             match="Q1LinearScanAllocator does not support SequenceOps with more than one block.",
         ):
             allocator.allocate_sequence(sequence_op)
+
+    def test_preserves_cast_between_distinct_fixed_registers(self):
+        producer = _MockProducerOp.create(result_types=[Registers.R1])
+        cast = UnrealizedConversionCastOp.get([producer.result], [Registers.R2])
+        consumer = _MockConsumerOp(cast.results[0])
+        module = ModuleOp([SequenceOp("test", [producer, cast, consumer])])
+
+        LinearScanRegisterAllocationPass().apply(Context(), module)
+
+        assert cast.parent is not None
+        assert consumer.operand is cast.results[0]
 
 
 class TestLinearOpList:

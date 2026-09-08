@@ -6,7 +6,7 @@ from xdsl.context import Context
 from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp, StringAttr
 from xdsl.ir import Block, Region
-from xdsl.irdl import IRDLOperation, irdl_op_definition, region_def
+from xdsl.irdl import IRDLOperation, irdl_op_definition, region_def, result_def
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.qblox.target_data import QbloxTargetData
@@ -21,6 +21,7 @@ from qat.experimental.dialect.pulse.ir import (
     FrequencyAttr,
     MaxTimeOp,
     TimeAttr,
+    TimeType,
     WaitOp,
 )
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
@@ -47,6 +48,18 @@ class _ContainerOp(IRDLOperation):
         super().__init__(regions=[body])
 
 
+@irdl_op_definition
+class _ResultContainerOp(IRDLOperation):
+    """Region-bearing op with a scalar result used to test dependency ownership."""
+
+    name = "test.result_container"
+    body = region_def()
+    result = result_def(TimeType)
+
+    def __init__(self, body: Region):
+        super().__init__(regions=[body], result_types=[TimeType()])
+
+
 def _frame(frequency: float, channel_id: str) -> tuple[ConstantOp, CreateFrameOp]:
     freq = ConstantOp(FrequencyAttr(frequency))
     return freq, CreateFrameOp(freq, StringAttr(channel_id))
@@ -64,6 +77,7 @@ class TestPulseToQ1SequenceOutlining:
         [seq] = list(module.body.block.ops)
         assert isinstance(seq, SequenceOp)
         assert seq.channel_id.data == "q0.drive"
+        assert seq.port_id.data == "q0.drive"
         assert isinstance(seq.body.block.first_op, SetMrkImmOp)
         assert seq.body.block.first_op.mrk.data == 3
         assert any(isinstance(op, CreateFrameOp) for op in seq.body.block.ops)
@@ -81,6 +95,7 @@ class TestPulseToQ1SequenceOutlining:
 
         sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         assert [seq.channel_id.data for seq in sequences] == ["q0.drive", "q1.drive"]
+        assert [seq.port_id.data for seq in sequences] == ["q0.drive", "q1.drive"]
         assert all(isinstance(seq.body.block.first_op, SetMrkImmOp) for seq in sequences)
         assert all(seq.body.block.first_op.mrk.data == 3 for seq in sequences)
         assert all(
@@ -316,6 +331,17 @@ class TestPulseToQ1SequenceOutlining:
         module = _module_with_main([container, func.ReturnOp()])
 
         with pytest.raises(PassFailedException, match="spans multiple frame lineages"):
+            Q1OutliningPass().apply(Context(), module)
+
+    def test_dependency_owned_by_another_lineage_is_rejected(self):
+        """A region containing one lineage cannot feed a different sequence."""
+        f0_freq, f0 = _frame(4.8e9, "q0.drive")
+        f1_freq, f1 = _frame(5.2e9, "q1.drive")
+        producer = _ResultContainerOp(Region(Block([f1_freq, f1])))
+        wait = WaitOp(f0, producer.result)
+        module = _module_with_main([f0_freq, f0, producer, wait, func.ReturnOp()])
+
+        with pytest.raises(PassFailedException, match="owned by another frame lineage"):
             Q1OutliningPass().apply(Context(), module)
 
 
