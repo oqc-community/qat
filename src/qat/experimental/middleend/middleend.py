@@ -39,7 +39,7 @@ class PulseLevelMiddleend(BaseMiddleend):
 
     def __init__(self, model: CanonicalSystemData):
         super().__init__(model=model)
-        self._pipeline = PulsePipelineManager.from_canonical_data(
+        self._pulse_pipeline = PulsePipelineManager.from_canonical_data(
             model
         ).build_default_pipeline()
 
@@ -49,13 +49,20 @@ class PulseLevelMiddleend(BaseMiddleend):
         res_mgr: ResultManager | None = None,
         met_mgr: MetricsManager | None = None,
         compiler_config: CompilerConfig | None = None,
+        context: Context | None = None,
         **kwargs,
     ) -> ModuleOp:
         """Apply the pulse-level pass pipeline to *ir* in place.
 
+        :param res_mgr: Collection of analysis results with caching and aggregation
+            capabilities, defaults to None.
+        :param met_mgr: Stores useful intermediary metrics that are generated during
+            compilation, defaults to None.
+        :param compiler_config: Compiler settings, defaults to None.
+        :param context: xdsl context used to aid pass pipelines.
         :param ir: The pulse-level IR emitted by the frontend.
         :returns: The same :class:`ModuleOp`, mutated by the pass pipeline.
         """
-
-        self._pipeline.apply(Context(), ir)
+        context = Context() if context is None else context
+        self._pulse_pipeline.apply(context, ir)
         return ir

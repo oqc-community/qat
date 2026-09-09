@@ -6,6 +6,9 @@ from __future__ import annotations
 
 from xdsl.passes import PassPipeline
 
+from qat.experimental.conversion.pulse.lower_kernels_to_arrays import (
+    LowerKernelsToResultsArrays,
+)
 from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
 from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
@@ -98,6 +101,7 @@ def test_pipeline_manager_produces_correct_pass_order():
         EvaluateWaveformsAsSamples,
         TimelineNormalization,
         ApplySquashContiguousOptimizations,
+        LowerKernelsToResultsArrays,
         OrderedCanonicalizePass,
     ]
 
@@ -139,6 +143,7 @@ def test_pipeline_manager_from_canonical_data_builds_valid_pipeline():
         EvaluateWaveformsAsSamples,
         TimelineNormalization,
         ApplySquashContiguousOptimizations,
+        LowerKernelsToResultsArrays,
         OrderedCanonicalizePass,
     ]
 
@@ -152,4 +157,18 @@ def test_pipeline_manager_reuses_canonicalize_as_cleanup():
         for index, p in enumerate(pipeline.passes)
         if isinstance(p, OrderedCanonicalizePass)
     ]
-    assert canonicalize_positions == [0, 5]
+    assert canonicalize_positions == [0, 6]
+
+
+def test_pipeline_manager_lowers_kernels_before_final_cleanup():
+    manager = PulsePipelineManager(constraints=_constraints())
+    pipeline = manager.build_default_pipeline()
+
+    pass_types = [type(p) for p in pipeline.passes]
+    lowering_index = pass_types.index(LowerKernelsToResultsArrays)
+
+    # Kernel lowering must run after the core pulse passes and immediately before the
+    # final constant-propagation cleanup.
+    assert pass_types[lowering_index - 1] is ApplySquashContiguousOptimizations
+    assert pass_types[lowering_index + 1] is OrderedCanonicalizePass
+    assert lowering_index == len(pass_types) - 2

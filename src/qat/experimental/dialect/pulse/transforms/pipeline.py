@@ -26,7 +26,10 @@ The default pipeline runs the following passes, in order:
    symbolic time-expression analysis.
 5. :class:`~qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations`
    — merge adjacent wait and phase operations.
-6. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
+6. :class:`~qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays`
+   — rewrite each kernel signature from ``ResultsCollectionType`` values to
+   ``ResultsArrayType`` values and update all call sites to match the expanded signature.
+7. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
    — a final canonicalization pass that folds any constants left behind by the earlier
    passes and removes the resulting no-ops.
 
@@ -38,6 +41,9 @@ time.
 
 from __future__ import annotations
 
+from qat.experimental.conversion.pulse.lower_kernels_to_arrays import (
+    LowerKernelsToResultsArrays,
+)
 from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
 from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
@@ -92,6 +98,7 @@ class PulsePipelineManager:
                 EvaluateWaveformsAsSamples(constraints=self.constraints),
                 TimelineNormalization(),
                 ApplySquashContiguousOptimizations(),
+                LowerKernelsToResultsArrays(),
                 OrderedCanonicalizePass(),
             )
         )
