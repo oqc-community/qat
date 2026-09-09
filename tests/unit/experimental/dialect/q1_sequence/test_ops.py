@@ -459,6 +459,46 @@ class TestSequenceOpVerify:
         with pytest.raises(VerifyException, match=expected):
             seq.verify_()
 
+    def test_disabled_output_requires_configured_module_lane(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(disabled_outputs=[1]),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrm,
+                outputs=[OutputConfigAttr(0)],
+            ),
+        )
+
+        with pytest.raises(
+            VerifyException,
+            match=r"disabled outputs reference unconfigured outputs \[1\]",
+        ):
+            seq.verify_()
+
+    def test_disabled_output_obeys_sequencer_reachability(self):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(disabled_outputs=[3]),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc,
+                outputs=[OutputConfigAttr(3)],
+            ),
+        )
+
+        with pytest.raises(
+            VerifyException,
+            match=r"qrc sequencer 0 cannot configure disabled outputs \[3\]",
+        ):
+            seq.verify_()
+
     def test_optional_properties_are_omitted_when_absent(self):
         seq = SequenceOp("ch0", [StopOp()])
         assert "instrument_id" not in seq.properties

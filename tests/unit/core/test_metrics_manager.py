@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 import pytest
 from compiler_config.config import MetricsType
 
@@ -55,3 +55,54 @@ class TestMetricsManager:
                 assert met_mgr_2.get_metric(metric) == records[metric]
             else:
                 assert met_mgr_2.get_metric(metric) == met_mgr_1.get_metric(metric)
+
+    @pytest.mark.parametrize(
+        ("overwrite", "circuit_enabled"),
+        [
+            pytest.param(False, True, id="extend"),
+            pytest.param(True, False, id="overwrite"),
+        ],
+    )
+    def test_enable_metrics(self, overwrite, circuit_enabled):
+        met_mgr = MetricsManager(MetricsType.OptimizedCircuit)
+
+        met_mgr.enable(MetricsType.OptimizedInstructionCount, overwrite=overwrite)
+
+        assert met_mgr.are_enabled(MetricsType.OptimizedCircuit) is circuit_enabled
+        assert met_mgr.are_enabled(MetricsType.OptimizedInstructionCount)
+
+    def test_enable_ignores_none(self):
+        met_mgr = MetricsManager(MetricsType.OptimizedCircuit)
+
+        met_mgr.enable(None)
+
+        assert met_mgr.enabled_metrics == MetricsType.OptimizedCircuit
+
+    def test_enable_metrics_defaults_none_to_experimental(self):
+        met_mgr = MetricsManager(None)
+
+        met_mgr.enable_metrics(None)
+
+        assert met_mgr.enabled_metrics == MetricsType.Experimental
+
+    def test_disabled_manager_does_not_record_metrics(self):
+        met_mgr = MetricsManager(None)
+
+        met_mgr.record_metric(MetricsType.OptimizedCircuit, "ignored")
+
+        assert not met_mgr.are_enabled(MetricsType.OptimizedCircuit)
+        assert met_mgr.optimized_circuit is None
+
+    def test_as_dict_excludes_enabled_metrics(self):
+        met_mgr = MetricsManager(MetricsType.OptimizedCircuit)
+        met_mgr.record_metric(MetricsType.OptimizedCircuit, "OPENQASM 2.0;")
+
+        assert met_mgr.as_dict() == {
+            "optimized_circuit": "OPENQASM 2.0;",
+            "optimized_instruction_count": None,
+            "physical_qubit_indices": None,
+        }
+
+    def test_merge_rejects_incompatible_type(self):
+        with pytest.raises(TypeError, match="other must be of type MetricsManager"):
+            MetricsManager().merge(object())

@@ -384,6 +384,34 @@ class SequenceOp(IRDLOperation):
                     f"SequenceOp connection references unconfigured inputs "
                     f"{sorted(missing_inputs)}"
                 )
+        disabled_outputs = (
+            config.disabled_outputs
+            if isinstance(config.disabled_outputs, ArrayAttr)
+            else ()
+        )
+        missing_disabled_outputs = {
+            output_id.data
+            for output_id in disabled_outputs
+            if output_id.data not in configured_outputs
+        }
+        if missing_disabled_outputs:
+            raise VerifyException(
+                "SequenceOp disabled outputs reference unconfigured outputs "
+                f"{sorted(missing_disabled_outputs)}"
+            )
+        unreachable_disabled_outputs = {
+            output_id.data
+            for output_id in disabled_outputs
+            if seq_idx
+            not in DEFAULT_QBLOX_TARGET.output_sequencers(
+                module_config.kind.data, output_id.data
+            )
+        }
+        if unreachable_disabled_outputs:
+            raise VerifyException(
+                f"{module_config.kind.data.value} sequencer {seq_idx} cannot configure "
+                f"disabled outputs {sorted(unreachable_disabled_outputs)}"
+            )
         output_path_connections = (
             config.output_path_connections
             if isinstance(config.output_path_connections, ArrayAttr)

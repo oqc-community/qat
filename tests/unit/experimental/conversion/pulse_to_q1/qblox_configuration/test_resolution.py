@@ -59,6 +59,10 @@ def test_absent_source_values_stay_absent():
     assert isinstance(config.unweighted_acquire, NoneAttr)
     assert isinstance(config.acquire, NoneAttr)
     assert isinstance(config.thresholded_acquire, NoneAttr)
+    assert list(config.output_path_connections) == []
+    assert list(config.acquisition_path_connections) == []
+    assert list(config.disabled_outputs) == []
+    assert list(config.disabled_acquisition_paths) == []
     output = binding.module_config.outputs.data[0]
     assert isinstance(output.output_signal, NoneAttr)
     assert isinstance(output.pulse_shaping, NoneAttr)

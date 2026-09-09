@@ -480,22 +480,18 @@ def _sequencer_config(
         connections=[
             ConnectionAttr(entry.direction, entry.port_ids)
             for entry in connection.connections
-        ]
-        or None,
+        ],
         output_path_connections=[
             OutputPathConnectionAttr(entry.output_id, entry.path)
             for entry in connection.output_path_connections
-        ]
-        or None,
+        ],
         acquisition_path_connections=[
             AcquisitionPathConnectionAttr(entry.input_id, entry.path)
             for entry in connection.acquisition_path_connections
-        ]
-        or None,
+        ],
         acquisition_enabled=connection.acquisition_enabled,
-        disabled_outputs=sorted(connection.disabled_outputs) or None,
-        disabled_acquisition_paths=_sorted_paths(connection.disabled_acquisition_paths)
-        or None,
+        disabled_outputs=sorted(connection.disabled_outputs),
+        disabled_acquisition_paths=_sorted_paths(connection.disabled_acquisition_paths),
         acquisition_disabled=connection.acquisition_disabled,
         local_oscillator_id=channel_binding.oscillator_id,
         enable_sync=_boolean(values, "sync_en", origin),

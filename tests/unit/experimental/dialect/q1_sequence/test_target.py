@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import json
 from io import StringIO
@@ -7,15 +7,153 @@ from io import StringIO
 import pytest
 from xdsl.context import Context
 from xdsl.dialects.builtin import ArrayAttr, ModuleOp
+from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1 import NopOp, StopOp, emit_program
 from qat.experimental.dialect.q1_sequence import Q1SequenceTarget, SequenceOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    AcquireConfigAttr,
+    AcquisitionPathConnectionAttr,
+    AwgConfigAttr,
+    ConnectionAttr,
+    InputConfigAttr,
+    InputSignalConfigAttr,
+    LocalOscillatorConfigAttr,
+    ModuleConfigAttr,
+    NcoConfigAttr,
+    OutputConfigAttr,
+    OutputPathConnectionAttr,
+    ScopeAcquireConfigAttr,
+    SequencerConfigAttr,
+    ThresholdedAcquireConfigAttr,
+    UnweightedAcquireConfigAttr,
     make_acquisition,
     make_waveform,
     make_weight,
 )
-from qat.experimental.dialect.q1_sequence.target import emit_module, emit_sequence
+from qat.experimental.dialect.q1_sequence.target import (
+    emit_config,
+    emit_module,
+    emit_sequence,
+)
+from qat.experimental.system_data.hardware.qblox.models import (
+    DirectionKind,
+    QbloxModuleKind,
+    SignalPath,
+)
+
+
+class TestEmitConfig:
+    def test_recursively_emits_sequencer_configuration(self):
+        config = SequencerConfigAttr(
+            port_id="q0.readout",
+            carrier_frequency=6.2e9,
+            connections=[
+                ConnectionAttr(DirectionKind.output, [0, 1]),
+                ConnectionAttr(DirectionKind.input, [0]),
+            ],
+            output_path_connections=[
+                OutputPathConnectionAttr(0, SignalPath.i),
+                OutputPathConnectionAttr(1, SignalPath.q),
+            ],
+            acquisition_path_connections=[
+                AcquisitionPathConnectionAttr(0, SignalPath.i),
+            ],
+            acquisition_enabled=True,
+            disabled_outputs=[2],
+            disabled_acquisition_paths=[SignalPath.q],
+            acquisition_disabled=False,
+            local_oscillator_id="lo0",
+            enable_sync=True,
+            nco=NcoConfigAttr(frequency=200e6, prop_delay_comp_en=True),
+            awg=AwgConfigAttr(gain_path0=0.8, offset_path1=-0.01),
+            unweighted_acquire=UnweightedAcquireConfigAttr(16),
+            acquire=AcquireConfigAttr(auto_bin_incr_en=True, demod_en_acq=True),
+            thresholded_acquire=ThresholdedAcquireConfigAttr(rotation=45.0, threshold=0.25),
+        )
+
+        emitted = emit_config(config)
+
+        assert emitted["connections"] == [
+            {"direction": "out", "port_ids": [0, 1]},
+            {"direction": "in", "port_ids": [0]},
+        ]
+        assert emitted["output_path_connections"] == [
+            {"output_id": 0, "path": "I"},
+            {"output_id": 1, "path": "Q"},
+        ]
+        assert emitted["acquisition_path_connections"] == [{"input_id": 0, "path": "I"}]
+        assert emitted["nco"] == {
+            "frequency": 200e6,
+            "phase_offs": None,
+            "prop_delay_comp": None,
+            "prop_delay_comp_en": True,
+        }
+        assert emitted["awg"]["offset_path1"] == -0.01
+        assert emitted["unweighted_acquire"] == {"integration_length": 16}
+        assert emitted["acquire"]["demod_en_acq"] is True
+        assert emitted["thresholded_acquire"]["rotation"] == 45.0
+
+    def test_emits_current_module_schema_and_canonical_lane_order(self):
+        config = ModuleConfigAttr(
+            2,
+            "cluster0",
+            QbloxModuleKind.qrm,
+            outputs=[OutputConfigAttr(1), OutputConfigAttr(0)],
+            inputs=[
+                InputConfigAttr(
+                    1,
+                    InputSignalConfigAttr(gain=6.0),
+                    ScopeAcquireConfigAttr(sequencer_select=2, enable_average_mode=False),
+                ),
+                InputConfigAttr(0),
+            ],
+            local_oscillators=[
+                LocalOscillatorConfigAttr("lo1", 5_000_000_000),
+                LocalOscillatorConfigAttr("lo0", 4_000_000_000),
+            ],
+        )
+
+        emitted = emit_config(config)
+
+        assert emitted["instrument_id"] == "cluster0"
+        assert emitted["slot_idx"] == 2
+        assert emitted["kind"] == "qrm"
+        assert [output["output_id"] for output in emitted["outputs"]] == [0, 1]
+        assert [module_input["input_id"] for module_input in emitted["inputs"]] == [0, 1]
+        assert [
+            oscillator["oscillator_id"] for oscillator in emitted["local_oscillators"]
+        ] == ["lo0", "lo1"]
+        assert emitted["inputs"][1]["scope_acquire"] == {
+            "sequencer_select": 2,
+            "enable_average_mode": False,
+        }
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "connections",
+            "output_path_connections",
+            "acquisition_path_connections",
+            "disabled_outputs",
+            "disabled_acquisition_paths",
+        ],
+    )
+    def test_rejects_unresolved_sequencer_configuration(self, field):
+        resolved = {
+            "connections": [],
+            "output_path_connections": [],
+            "acquisition_path_connections": [],
+            "disabled_outputs": [],
+            "disabled_acquisition_paths": [],
+        }
+        resolved[field] = None
+
+        with pytest.raises(
+            VerifyException,
+            match=rf"SequencerConfigAttr\.{field} must be resolved before emission",
+        ):
+            emit_config(SequencerConfigAttr(**resolved))
 
 
 class TestEmitProgram:
