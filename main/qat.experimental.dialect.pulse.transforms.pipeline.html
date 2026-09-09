@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.pipeline module &mdash; qat-compiler 3.0.0.post362.dev20260909005049 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.pipeline module &mdash; qat-compiler 3.0.0.post363.dev20260909123045 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -723,6 +723,9 @@ into explicit <a class="reference internal" href="qat.experimental.dialect.pulse
 symbolic time-expression analysis.</p></li>
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations" title="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApplySquashContiguousOptimizations</span></code></a>
 — merge adjacent wait and phase operations.</p></li>
+<li><p><a class="reference internal" href="qat.experimental.conversion.pulse.lower_kernels_to_arrays.html#qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays" title="qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays"><code class="xref py py-class docutils literal notranslate"><span class="pre">LowerKernelsToResultsArrays</span></code></a>
+— rewrite each kernel signature from <code class="docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code> values to
+<code class="docutils literal notranslate"><span class="pre">ResultsArrayType</span></code> values and update all call sites to match the expanded signature.</p></li>
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass" title="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedCanonicalizePass</span></code></a>
 — a final canonicalization pass that folds any constants left behind by the earlier
 passes and removes the resulting no-ops.</p></li>
