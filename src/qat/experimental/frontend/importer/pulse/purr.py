@@ -6,20 +6,18 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from dataclasses import dataclass, field
-from functools import singledispatchmethod
+from functools import cached_property, singledispatchmethod
 
 import numpy as np
 from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp
-from xdsl.ir import Attribute, Block, Region, SSAValue
+from xdsl.ir import Block, Region, SSAValue
 
 from qat.experimental.dialect.pulse.ir import (
-    AcquisitionType,
     CallKernelOp,
     DiscriminateOp,
     EqualiseAttr,
     EqualiseOp,
-    IQResultType,
     RealThresholdPolicyAttr,
 )
 from qat.experimental.dialect.pulse.ir.ops import KernelOp
@@ -43,7 +41,7 @@ from qat.experimental.waveforms.shapes.setup_hold import SetupHoldWaveformShape
 from qat.experimental.waveforms.shapes.sinusoidal import SinusoidalWaveformShape
 from qat.experimental.waveforms.shapes.soft_square import SoftSquareWaveformShape
 from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.devices import PulseChannel, PulseShapeType
+from qat.purr.compiler.devices import ChannelType, PulseChannel, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
     AcquireMode,
@@ -67,6 +65,9 @@ from qat.purr.compiler.instructions import (
 )
 
 _KERNEL_NAME = "program"
+_ACQUIRE_SUFFIX = "acquire"
+_PULSE_SUFFIX = "measure"
+_MACQ_SUFFIX = f".{ChannelType.macq.name}"
 
 logger = get_logger(__name__)
 
@@ -152,6 +153,38 @@ class _PurrAnalysis:
         return analysis
 
 
+class _PulseAndAcquireFrames:
+    """Stores a pair of frames that correspond to a legacy pulse channel.
+
+    Typically, legacy pulse channels only have a single corresponding frame. However,
+    macq pulse channels deal with both acquisition and pulsing, and allow them to happen
+    simultaneously through implicit timing rules (a pulse followed by an acquisition plays
+    them at the same time).
+
+    If only one frame is provided, this takes the ``_pulse_frame`` slot, and the properties
+    will resolve to that for both ``pulse_frame`` and ``acquire_frame``.
+    """
+
+    def __init__(self, pulse_frame: str, acquire_frame: str | None = None):
+        self._pulse_frame = pulse_frame
+        self._acquire_frame = acquire_frame
+
+    @property
+    def pulse_frame(self) -> str:
+        return self._pulse_frame
+
+    @cached_property
+    def acquire_frame(self) -> str:
+        return self._acquire_frame if self._acquire_frame is not None else self._pulse_frame
+
+    @cached_property
+    def all_frames(self) -> tuple[str, ...]:
+        frames = [
+            frame for frame in (self._pulse_frame, self._acquire_frame) if frame is not None
+        ]
+        return tuple(frames)
+
+
 class PurrImporter:
     """Takes a PuRR builder and produces a module representing that program.
 
@@ -196,6 +229,7 @@ class PurrImporter:
         self._waveform_index = 0
         self._post_processing_factory = post_processing_factory
         self._label_to_channel: dict[str, str] = {}
+        self._channel_frames_by_id: dict[str, _PulseAndAcquireFrames] = {}
 
     def build(
         self,
@@ -206,6 +240,7 @@ class PurrImporter:
         :param purr_ir: The purr IR to translate.
         """
         self._label_to_channel = {}
+        self._channel_frames_by_id = {}
         analysis = _PurrAnalysis.from_builder(purr_ir)
         if analysis.sweeps:
             raise NotImplementedError("Sweep instructions are not yet supported.")
@@ -301,14 +336,13 @@ class PurrImporter:
 
         builder = PulseKernelBuilder(_KERNEL_NAME, shots=shots)
         for channel in pulse_channels:
-            frame_name = self._frame_key(channel)
-            if frame_name in frequency_updates:
-                frequency = frequency_updates[frame_name]
-            else:
-                frequency = float(self._resolve_numeric(channel.frequency))
-            builder.create_frame(
-                self._frame_key(channel), frequency, channel.physical_channel_id
-            )
+            frame_keys = self._frame_keys(channel)
+            for frame_name in frame_keys.all_frames:
+                frequency = frequency_updates.get(
+                    frame_name,
+                    float(self._resolve_numeric(channel.frequency)),
+                )
+                builder.create_frame(frame_name, frequency, channel.physical_channel_id)
         return builder
 
     def _resolve_device_updates(self, analysis: _PurrAnalysis) -> dict[str, float]:
@@ -337,10 +371,10 @@ class PurrImporter:
                     "Variable resolution is not yet supported in the device update."
                 )
 
-            fid = self._frame_key(purr_device)
-            if fid in frequency_updates:
-                raise ValueError(f"Multiple frequency updates for pulse channel {fid}.")
-            frequency_updates[fid] = float(purr_value)
+            for fid in self._frame_keys(purr_device).all_frames:
+                if fid in frequency_updates:
+                    raise ValueError(f"Multiple frequency updates for pulse channel {fid}.")
+                frequency_updates[fid] = float(purr_value)
 
         return frequency_updates
 
@@ -496,17 +530,6 @@ class PurrImporter:
         return operation.result
 
     @staticmethod
-    def _get_acquisition_type(acquire_mode: AcquireMode) -> Attribute:
-        """Map an acquire mode to its corresponding result attribute type."""
-        if acquire_mode == AcquireMode.INTEGRATOR:
-            return IQResultType()
-        if acquire_mode == AcquireMode.SCOPE:
-            raise NotImplementedError(
-                "Scope mode is not yet supported by the PurrImporter."
-            )
-        return AcquisitionType()
-
-    @staticmethod
     def _convert_post_processing(
         instruction: PostProcessing, value: SSAValue
     ) -> EqualiseOp | DiscriminateOp | None:
@@ -543,10 +566,28 @@ class PurrImporter:
 
         return op
 
-    @staticmethod
-    def _frame_key(quantum_target: PulseChannel) -> str:
-        """Return the unique frame identifier for a pulse channel."""
-        return quantum_target.partial_id()
+    def _frame_keys(self, quantum_target: PulseChannel) -> _PulseAndAcquireFrames:
+        """Return the unique frame identifiers for a pulse channel.
+
+        PuRR pulse channels with a macq type are treated as two frames; otherwise a single
+        default frame is used.
+        """
+
+        pulse_channel_id = quantum_target.partial_id()
+        if pulse_channel_id in self._channel_frames_by_id:
+            return self._channel_frames_by_id[pulse_channel_id]
+
+        if pulse_channel_id.endswith(_MACQ_SUFFIX):
+            base_id = pulse_channel_id.removesuffix(_MACQ_SUFFIX)
+            frame_keys = _PulseAndAcquireFrames(
+                f"{base_id}.{_PULSE_SUFFIX}",
+                f"{base_id}.{_ACQUIRE_SUFFIX}",
+            )
+        else:
+            frame_keys = _PulseAndAcquireFrames(pulse_channel_id, None)
+
+        self._channel_frames_by_id[pulse_channel_id] = frame_keys
+        return frame_keys
 
     def _resolve_numeric(self, value) -> float | int | complex:
         """Resolve a numeric-like value, rejecting unresolved runtime variables."""
@@ -776,41 +817,45 @@ class PurrImporter:
     @translate.register
     def _(self, value: PhaseSet, builder: PulseKernelBuilder) -> None:
         for target in value.quantum_targets:
-            builder.phase_set(
-                self._frame_key(target), float(self._resolve_numeric(value.phase))
-            )
+            for frame_id in self._frame_keys(target).all_frames:
+                builder.phase_set(frame_id, float(self._resolve_numeric(value.phase)))
 
     @translate.register
     def _(self, value: PhaseReset, builder: PulseKernelBuilder) -> None:
         for target in value.quantum_targets:
-            builder.phase_set(self._frame_key(target), 0.0)
+            for frame_id in self._frame_keys(target).all_frames:
+                builder.phase_set(frame_id, 0.0)
 
     @translate.register
     def _(self, value: PhaseShift, builder: PulseKernelBuilder) -> None:
         for target in value.quantum_targets:
-            builder.phase_shift(
-                self._frame_key(target), float(self._resolve_numeric(value.phase))
-            )
+            for frame_id in self._frame_keys(target).all_frames:
+                builder.phase_shift(frame_id, float(self._resolve_numeric(value.phase)))
 
     @translate.register
     def _(self, value: Delay, builder: PulseKernelBuilder) -> None:
         for target in value.quantum_targets:
-            builder.wait(self._frame_key(target), float(self._resolve_numeric(value.time)))
+            for frame_id in self._frame_keys(target).all_frames:
+                builder.wait(frame_id, float(self._resolve_numeric(value.time)))
 
     @translate.register
     def _(self, value: Synchronize, builder: PulseKernelBuilder) -> None:
-        frame_names = [self._frame_key(target) for target in value.quantum_targets]
+        frame_names = [
+            frame_id
+            for target in value.quantum_targets
+            for frame_id in self._frame_keys(target).all_frames
+        ]
         builder.synchronize(*frame_names)
 
     @translate.register
     def _(self, value: Pulse, builder: PulseKernelBuilder) -> None:
-        frame_name = self._frame_key(value.quantum_targets[0])
+        frame_name = self._frame_keys(value.quantum_targets[0]).pulse_frame
         waveform_name = self._create_waveform(value, builder)
         builder.pulse(frame_name, waveform_name)
 
     @translate.register
     def _(self, value: CustomPulse, builder: PulseKernelBuilder) -> None:
-        frame_name = self._frame_key(value.quantum_targets[0])
+        frame_name = self._frame_keys(value.quantum_targets[0]).pulse_frame
         waveform_name = self._get_waveform_name()
         builder.create_custom_waveform(
             waveform_name,
@@ -821,7 +866,7 @@ class PurrImporter:
 
     @translate.register
     def _(self, value: Acquire, builder: PulseKernelBuilder) -> None:
-        frame_name = self._frame_key(value.quantum_targets[0])
+        frame_name = self._frame_keys(value.quantum_targets[0]).acquire_frame
         self._label_to_channel[value.output_variable] = frame_name
         weights = None
         if value.filter is not None:
@@ -837,6 +882,8 @@ class PurrImporter:
                 "Scope mode is not yet supported by the PurrImporter."
             )
 
+        if value.delay:
+            builder.wait(frame_name, self._resolve_numeric(value.delay))
         builder.acquire(
             frame_name,
             value.output_variable,

@@ -15,7 +15,13 @@ from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.interpreters.scf import scf
 
-from qat.experimental.dialect.pulse.ir import KernelOp, WaitOp
+from qat.experimental.dialect.pulse.ir import (
+    AcquireOp,
+    CreateFrameOp,
+    KernelOp,
+    PulseOp,
+    WaitOp,
+)
 from qat.experimental.dialect.results.ir.ops import PostSelectOp
 from qat.experimental.frontend.purr import PurrFrontend
 from qat.experimental.system_data.canonical.schema import (
@@ -24,6 +30,8 @@ from qat.experimental.system_data.canonical.schema import (
 )
 from qat.experimental.system_data.materialisers.boundary import materialise
 from qat.model.loaders.purr import EchoModelLoader
+from qat.purr.compiler.devices import ChannelType, PulseShapeType
+from qat.purr.compiler.instructions import Acquire, Pulse
 
 
 @pytest.fixture
@@ -191,6 +199,50 @@ def test_passive_reset_time_falls_back_to_builder_model(builder, canonical_model
     )
 
 
+def test_passive_reset_time_ignores_non_passive_and_missing_duration_attribute(
+    builder, canonical_model_from_echo
+):
+    """Frontend falls back when passive reset metadata does not include duration.
+
+    This also validates that non-passive reset methods are skipped while searching for
+    passive reset metadata.
+    """
+
+    [passive_reset] = [
+        reset
+        for reset in canonical_model_from_echo.reset_methods
+        if reset.type == "passive"
+    ]
+    non_passive_reset = replace(
+        passive_reset,
+        type="active",
+        operation_name="active_reset",
+        attributes=(),
+    )
+    passive_without_duration = replace(
+        passive_reset,
+        attributes=tuple(
+            replace(attribute, key="duration_missing")
+            if attribute.key == "duration"
+            else attribute
+            for attribute in passive_reset.attributes
+        ),
+    )
+    frontend_model = replace(
+        canonical_model_from_echo,
+        reset_methods=(non_passive_reset, passive_without_duration),
+        default_reset_method=None,
+    )
+
+    frontend = PurrFrontend(model=frontend_model)
+    module = frontend.emit(builder)
+
+    assert any(
+        duration == pytest.approx(builder.model.default_repetition_period)
+        for duration in _wait_durations(module)
+    )
+
+
 @pytest.mark.parametrize("src", [None, 123, "not-an-instruction-builder", object()])
 def test_check_and_return_returns_false_for_non_ib(src):
     """Tests that the ``check_and_return`` method returns ``False`` for a non-
@@ -326,3 +378,28 @@ def test_default_compiler_config_has_post_selection_disabled(builder):
     assert len(post_select_ops) == 0, (
         "Expected no PostSelectOp with default post-selection disabled"
     )
+
+
+def test_macq_pulse_and_acquire_use_two_distinct_frames_in_frontend_emit():
+    """A macq channel should emit split measure/acquire frames in frontend output."""
+
+    model = EchoModelLoader(qubit_count=1).load()
+    resonator = model.get_qubit(0).measure_device
+    resonator.create_pulse_channel(ChannelType.macq, frequency=8.5e9)
+    macq = resonator.get_pulse_channel(ChannelType.macq)
+
+    canonical_model = materialise(source_payload=loads(model.get_calibration()))
+
+    program = model.create_builder()
+    program.add(Pulse(macq, PulseShapeType.SQUARE, width=80e-9, amp=0.4))
+    program.add(Acquire(macq, time=1e-6, output_variable="measurement"))
+
+    module = PurrFrontend(model=canonical_model, run_purr_pipeline=False).emit(program)
+
+    [pulse] = _ops_of_type(module, PulseOp)
+    [acquire] = _ops_of_type(module, AcquireOp)
+    [create_measure, create_acquire] = _ops_of_type(module, CreateFrameOp)
+
+    assert pulse.frame is create_measure.result
+    assert acquire.frame is create_acquire.result
+    assert pulse.frame is not acquire.frame

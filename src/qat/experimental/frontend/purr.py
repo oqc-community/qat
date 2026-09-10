@@ -21,8 +21,8 @@ from qat.experimental.system_data.pulse.post_processing import PostProcessingVie
 from qat.frontend.base import BaseFrontend
 from qat.middleend.passes.purr.analysis import ActivePulseChannelAnalysis
 from qat.middleend.passes.purr.transform import (
-    AcquireSanitisation,
     EndOfTaskResetSanitisation,
+    InactivePulseChannelSanitisation,
     InitialPhaseResetSanitisation,
     RepeatSanitisation,
     ResetsToDelays,
@@ -81,7 +81,9 @@ def _build_pass_manager(
         | ActivePulseChannelAnalysis(hardware_model)
         | RepeatSanitisation(hardware_model, target_data)
         | ReturnSanitisation()
-        | AcquireSanitisation()
+        # This next pass is cheating and should be replaced with an xDSL
+        # ``dead_frame_elimination`` pass (COMPILER-1281)
+        | InactivePulseChannelSanitisation()
         | InitialPhaseResetSanitisation()
         | EndOfTaskResetSanitisation()
         | ResetsToDelays(target_data)

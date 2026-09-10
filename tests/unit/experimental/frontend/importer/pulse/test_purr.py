@@ -54,7 +54,7 @@ from qat.experimental.system_data.pulse.post_processing import (
 from qat.ir.instruction_basetypes import AcquireMode
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.compiler.builders import QuantumInstructionBuilder
-from qat.purr.compiler.devices import PulseShapeType
+from qat.purr.compiler.devices import ChannelType, PulseShapeType
 from qat.purr.compiler.instructions import (
     Acquire,
     Assign,
@@ -129,6 +129,12 @@ def _has_function_parent(op: Operation):
 
 def _has_kernel_parent(op: Operation):
     return _has_parent_of_type(op, KernelOp)
+
+
+def _make_macq_channel(hw):
+    resonator = hw.get_qubit(0).measure_device
+    resonator.create_pulse_channel(ChannelType.macq, frequency=8.5e9)
+    return resonator.get_pulse_channel(ChannelType.macq)
 
 
 class TestPurrImporterPhase:
@@ -228,10 +234,6 @@ class TestPurrImporterFrameTracking:
         module = imp.build(builder)
         assert len(_ops_of_type(module, CreateFrameOp)) == 2
 
-    def test_get_frame_key_uses_partial_id(self, hw):
-        ch = hw.get_qubit(0).get_drive_channel()
-        assert PurrImporter._frame_key(ch) == ch.partial_id()
-
     def test_chain_of_phase_shifts_threads_through_frame_results(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(PhaseShift(ch, 0.1))
@@ -278,6 +280,123 @@ class TestPurrImporterFrameTracking:
         [pulse] = _ops_of_type(module, PulseOp)
         assert wait.frame is shift.result
         assert pulse.frame is wait.result
+
+
+class TestPurrImporterMacqFrames:
+    def test_macq_pulse_only_uses_measure_frame(self, builder, hw):
+        ch = _make_macq_channel(hw)
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=80e-9, amp=0.4))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [pulse] = _ops_of_type(module, PulseOp)
+        [create_measure, create_acquire] = _ops_of_type(module, CreateFrameOp)
+        assert pulse.frame is create_measure.result
+        assert pulse.frame is not create_acquire.result
+        assert (
+            imp._frame_keys(ch).pulse_frame
+            == f"{ch.partial_id().removesuffix('.macq')}.measure"
+        )
+        assert (
+            imp._frame_keys(ch).acquire_frame
+            == f"{ch.partial_id().removesuffix('.macq')}.acquire"
+        )
+
+    def test_macq_acquire_only_uses_acquire_frame(self, builder, hw):
+        ch = _make_macq_channel(hw)
+        builder.add(Acquire(ch, time=1e-6))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [acquire] = _ops_of_type(module, AcquireOp)
+        [create_measure, create_acquire] = _ops_of_type(module, CreateFrameOp)
+        assert acquire.frame is create_acquire.result
+        assert acquire.frame is not create_measure.result
+        assert (
+            imp._frame_keys(ch).pulse_frame
+            == f"{ch.partial_id().removesuffix('.macq')}.measure"
+        )
+        assert (
+            imp._frame_keys(ch).acquire_frame
+            == f"{ch.partial_id().removesuffix('.macq')}.acquire"
+        )
+
+    def test_macq_acquire_with_delay_inserts_wait_on_acquire_frame(self, builder, hw):
+        ch = _make_macq_channel(hw)
+        builder.add(Acquire(ch, time=1e-6, delay=220e-9))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        wait_ops = _ops_of_type(module, WaitOp)
+        [acquire] = _ops_of_type(module, AcquireOp)
+        [create_measure, create_acquire] = _ops_of_type(module, CreateFrameOp)
+        [wait] = [op for op in wait_ops if op.frame is create_acquire.result]
+
+        assert wait.frame is create_acquire.result
+        assert wait.frame is not create_measure.result
+        assert acquire.frame is wait.result
+        kernel_ops = [op for op in _ops(module) if _has_kernel_parent(op)]
+        assert kernel_ops.index(wait) < kernel_ops.index(acquire)
+        assert all(op.frame is not create_measure.result for op in wait_ops)
+        assert wait.duration.owner.value.value.data == pytest.approx(220e-9)
+
+    def test_macq_delay_threads_to_both_frames(self, builder, hw):
+        ch = _make_macq_channel(hw)
+        builder.add(Delay(ch, 320e-9))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        wait_ops = _ops_of_type(module, WaitOp)
+        assert len(wait_ops) == 2
+        assert len({op.frame for op in wait_ops}) == 2
+        assert imp._frame_keys(ch).all_frames == (
+            f"{ch.partial_id().removesuffix('.macq')}.measure",
+            f"{ch.partial_id().removesuffix('.macq')}.acquire",
+        )
+
+    def test_macq_sync_includes_both_frames(self, builder, hw):
+        ch = _make_macq_channel(hw)
+        builder.add(Synchronize(ch))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [sync] = _ops_of_type(module, SynchronizeOp)
+        assert len(sync.frames) == 2
+        assert len(set(sync.frames)) == 2
+        assert imp._frame_keys(ch).all_frames == (
+            f"{ch.partial_id().removesuffix('.macq')}.measure",
+            f"{ch.partial_id().removesuffix('.macq')}.acquire",
+        )
+
+    @pytest.mark.parametrize(
+        ("instruction_factory", "op_type"),
+        [
+            (lambda ch: PhaseShift(ch, 0.5), PhaseShiftOp),
+            (lambda ch: PhaseSet(ch, 0.5), PhaseSetOp),
+            (lambda ch: PhaseReset(ch), PhaseSetOp),
+        ],
+    )
+    def test_macq_phase_ops_thread_to_both_frames(
+        self, builder, hw, instruction_factory, op_type
+    ):
+        ch = _make_macq_channel(hw)
+        builder.add(instruction_factory(ch))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        ops = _ops_of_type(module, op_type)
+        assert len(ops) == 2
+        assert len({op.frame for op in ops}) == 2
+        assert imp._frame_keys(ch).all_frames == (
+            f"{ch.partial_id().removesuffix('.macq')}.measure",
+            f"{ch.partial_id().removesuffix('.macq')}.acquire",
+        )
 
 
 class TestPurrImporterAcquire:
@@ -1055,6 +1174,22 @@ class TestPurrImporterDeviceUpdate:
         # Subsequent phase shift threads through the new frame.
         shifts = _ops_of_type(module, PhaseShiftOp)
         assert shifts[0].frame is create_frame_ops[0].result
+
+    def test_macq_frequency_update_applies_to_measure_and_acquire_frames(self, builder, hw):
+        ch = _make_macq_channel(hw)
+        builder.add(DeviceUpdate(ch, "frequency", 6e9))
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=80e-9, amp=0.4))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement"))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        create_frame_ops = _ops_of_type(module, CreateFrameOp)
+        assert len(create_frame_ops) == 2
+        for frame_op in create_frame_ops:
+            frequency = frame_op.frequency.owner
+            assert isinstance(frequency, ConstantOp)
+            assert frequency.value.value.data == pytest.approx(6e9)
 
     def test_unsupported_attribute_raises(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
