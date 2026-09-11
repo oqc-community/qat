@@ -24,10 +24,12 @@ from qat.purr.backends.qblox.device import (
 )
 from qat.purr.backends.qblox.dummy import DummyQbloxControlHardware
 from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
+from qat.purr.backends.qblox.transport import close_cluster
 from qat.purr.utils.logger import get_default_logger
 from qat.utils.uuid import temporary_uuid_seed, uuid4
 
 log = get_default_logger()
+
 
 DUMMY_CONFIG = {
     1: ClusterType.CLUSTER_QCM,
@@ -41,28 +43,38 @@ DUMMY_CONFIG = {
 }
 
 
-def random_resource(type: ClusterType, name: str, address: str = None):
-    cluster = Cluster(
-        name=name,
-        identifier=address,
-        dummy_cfg=None if address else DUMMY_CONFIG,
-    )
-    qcm_type = type in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
-    qrm_type = type in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
-    rf_type = type in [ClusterType.CLUSTER_QCM_RF, ClusterType.CLUSTER_QRM_RF]
-    modules = list(
-        cluster.get_connected_modules(
-            filter_fn=lambda mod: (
-                mod.is_qcm_type == qcm_type
-                and mod.is_qrm_type == qrm_type
-                and mod.is_rf_type == rf_type
-            )
-        ).values()
-    )
-    module = np.random.choice(modules)
-    sequencer = np.random.choice(module.sequencers)
+@pytest.fixture()
+def random_resource():
+    clusters: list[Cluster] = []
 
-    return module, sequencer
+    def _random_resource(cluster_type: ClusterType, name: str, address: str | None = None):
+        cluster = Cluster(
+            name=name,
+            identifier=address,
+            dummy_cfg=None if address else DUMMY_CONFIG,
+        )
+        clusters.append(cluster)
+        qcm_type = cluster_type in [ClusterType.CLUSTER_QCM, ClusterType.CLUSTER_QCM_RF]
+        qrm_type = cluster_type in [ClusterType.CLUSTER_QRM, ClusterType.CLUSTER_QRM_RF]
+        rf_type = cluster_type in [ClusterType.CLUSTER_QCM_RF, ClusterType.CLUSTER_QRM_RF]
+        modules = list(
+            cluster.get_connected_modules(
+                filter_fn=lambda mod: (
+                    mod.is_qcm_type == qcm_type
+                    and mod.is_qrm_type == qrm_type
+                    and mod.is_rf_type == rf_type
+                )
+            ).values()
+        )
+        module = np.random.choice(modules)
+        sequencer = np.random.choice(module.sequencers)
+
+        return module, sequencer
+
+    yield _random_resource
+
+    for cluster in clusters:
+        close_cluster(cluster)
 
 
 @dataclass
@@ -91,7 +103,7 @@ class ClusterSetup:
 
             return qcmrf_slot, qrmrf_slot
         finally:
-            cluster.close()
+            close_cluster(cluster)
 
     def configure(
         self, model: QbloxLiveHardwareModel, qcmrf_slot=None, qrmrf_slot=None

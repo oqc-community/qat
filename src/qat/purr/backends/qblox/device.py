@@ -22,6 +22,7 @@ from qat.purr.backends.qblox.config import (
     QrmRfConfigHelper,
 )
 from qat.purr.backends.qblox.constants import Constants
+from qat.purr.backends.qblox.transport import close_cluster
 from qat.purr.backends.qblox.visualisation import plot_packages, plot_playback
 from qat.purr.compiler.devices import (
     ChannelType,
@@ -196,11 +197,11 @@ class QbloxControlHardware(ControlHardware):
     def disconnect(self):
         if self._driver is not None:
             try:
-                self._driver.close()
+                close_cluster(self._driver)
                 self._driver = None
                 self._modules.clear()
                 self.is_connected = False
-            except BaseException as e:
+            except Exception as e:  # noqa: BLE001 - teardown must not raise
                 log.warning(
                     f"Failed to close instrument ID: {self.id} at: {self.address}\n{str(e)}"
                 )

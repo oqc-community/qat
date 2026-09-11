@@ -20,6 +20,7 @@ from qat.backend.qblox.config.helpers import (
 )
 from qat.backend.qblox.execution import QbloxProgram
 from qat.backend.qblox.target_data import TARGET_DATA
+from qat.engines.qblox.transport import close_cluster
 from qat.instrument.base import CompositeInstrument, LeafInstrument
 from qat.purr.compiler.devices import ChannelType
 from qat.purr.utils.logger import get_default_logger
@@ -116,7 +117,7 @@ class QbloxLeafInstrument(LeafInstrument):
     def disconnect(self):
         if self._driver is not None:
             try:
-                self._driver.close()
+                close_cluster(self._driver)
                 self._driver = None
                 self._modules.clear()
                 self.is_connected = False

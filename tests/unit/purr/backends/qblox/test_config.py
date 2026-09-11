@@ -18,8 +18,6 @@ from qat.purr.backends.qblox.config import (
 from qat.purr.backends.qblox.constants import Constants
 from qat.utils.uuid import temporary_uuid_seed, uuid4
 
-from tests.unit.purr.backends.qblox.conftest import random_resource
-
 
 class TestQbloxConfigMixin:
     @staticmethod
@@ -95,7 +93,14 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("i_offset", mixer_values.qcm_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qcm_q_offsets)
     def test_qcm_mixer_config(
-        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
+        self,
+        request,
+        phase_offset,
+        gain_ratio,
+        i_offset,
+        q_offset,
+        function_seed,
+        random_resource,
     ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
@@ -119,7 +124,14 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("i_offset", mixer_values.qcm_rf_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qcm_rf_q_offsets)
     def test_qcm_rf_mixer_config(
-        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
+        self,
+        request,
+        phase_offset,
+        gain_ratio,
+        i_offset,
+        q_offset,
+        function_seed,
+        random_resource,
     ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
@@ -144,7 +156,14 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("i_offset", mixer_values.qrm_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qrm_q_offsets)
     def test_qrm_mixer_config(
-        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
+        self,
+        request,
+        phase_offset,
+        gain_ratio,
+        i_offset,
+        q_offset,
+        function_seed,
+        random_resource,
     ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
@@ -168,7 +187,14 @@ class TestMixerConfig(TestQbloxConfigMixin):
     @pytest.mark.parametrize("i_offset", mixer_values.qrm_rf_i_offsets)
     @pytest.mark.parametrize("q_offset", mixer_values.qrm_rf_q_offsets)
     def test_qrm_rf_mixer_config(
-        self, request, phase_offset, gain_ratio, i_offset, q_offset, function_seed
+        self,
+        request,
+        phase_offset,
+        gain_ratio,
+        i_offset,
+        q_offset,
+        function_seed,
+        random_resource,
     ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
@@ -216,7 +242,7 @@ class TestAcqConfig(TestQbloxConfigMixin):
     acq_values = AcqTestValues()
 
     @pytest.mark.parametrize("int_length", acq_values.int_lengths)
-    def test_qrm_rf_square_acq(self, request, int_length, function_seed):
+    def test_qrm_rf_square_acq(self, request, int_length, function_seed, random_resource):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
@@ -237,7 +263,9 @@ class TestAcqConfig(TestQbloxConfigMixin):
 
     @pytest.mark.parametrize("rotation", acq_values.rotations)
     @pytest.mark.parametrize("threshold", acq_values.thresholds)
-    def test_qrm_rf_thresholded_acq(self, request, rotation, threshold, function_seed):
+    def test_qrm_rf_thresholded_acq(
+        self, request, rotation, threshold, function_seed, random_resource
+    ):
         module_config = ModuleConfig()
         sequencer_config = SequencerConfig()
 
