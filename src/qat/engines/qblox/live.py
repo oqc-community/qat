@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from collections import defaultdict
 from dataclasses import asdict
+from math import ceil
 
 from qblox_instruments import Cluster
 from qblox_instruments.qcodes_drivers.module import Module
@@ -41,6 +42,7 @@ class QbloxLeafInstrument(LeafInstrument):
         self._driver: Cluster = None
         self._modules: dict[Module, bool] = {}
         self._id2seq: dict[str, Sequencer] = {}
+        self._timeout_seconds: float = None
 
     def _reset_modules(self):
         # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
@@ -126,6 +128,7 @@ class QbloxLeafInstrument(LeafInstrument):
     def setup(self, program: QbloxProgram):
         try:
             self._id2seq.clear()
+            self._timeout_seconds = program.timeout_seconds
             self._reset_modules()
             for pkg in program.packages.values():
                 self.configure(pkg)
@@ -137,6 +140,12 @@ class QbloxLeafInstrument(LeafInstrument):
     def playback(self):
         if not any(self._id2seq):
             raise ValueError("No allocations found. Install packages and configure first")
+
+        if self._timeout_seconds is None:
+            raise ValueError("Execution timeout not set")
+
+        timeout_minutes = ceil(self._timeout_seconds / 60)
+        log.debug(f"Will use a playback timeout of {timeout_minutes} minutes")
 
         results: dict[str, list[Acquisition]] = defaultdict(list)
         try:
@@ -154,10 +163,9 @@ class QbloxLeafInstrument(LeafInstrument):
                     status_obj = sequencer.get_sequencer_status()
                     log.debug(f"Sequencer status - {sequencer}: {status_obj}")
                     if acquisitions := sequencer.get_acquisitions():
-                        # TODO - 60 min tops, make it dynamic by involving flow-aware timeline duration
-                        # Only wait if you sequencer is expected to have acquisitions
+                        # Only wait if the sequencer is expected to have acquisitions.
                         # TODO - Precise expectation of acquisitions should come from higher up
-                        sequencer.get_acquisition_status(timeout=60)
+                        sequencer.get_acquisition_status(timeout=timeout_minutes)
 
                     for name in acquisitions:
                         sequencer.store_scope_acquisition(name)

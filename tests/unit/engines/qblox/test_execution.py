@@ -3,10 +3,13 @@
 
 import numpy as np
 import pytest
+from pydantic import ValidationError
 
 from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
-from qat.backend.qblox.target_data import QRM_DATA
+from qat.backend.qblox.execution import DEFAULT_TIMEOUT_SECONDS, QbloxProgram
+from qat.backend.qblox.target_data import QRM_DATA, TARGET_DATA
+from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
@@ -437,3 +440,96 @@ class TestExecutionSuite:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == expected_shape
             assert results[f"Q{index}"].dtype == expected_dtype
+
+
+def _make_program(**kwargs) -> QbloxProgram:
+    return QbloxProgram(
+        packages={},
+        driver_version=TARGET_DATA.driver_version,
+        fw_version=TARGET_DATA.fw_version,
+        **kwargs,
+    )
+
+
+class TestQbloxProgramTimeout:
+    """Tests for the temporary, semi-automatic Qblox acquisition timeout (COMPILER-1457).
+
+    The timeout is a stop-gap until COMPILER-1455 infers a theoretical execution-duration
+    bound and COMPILER-1456 propagates it into the Qblox execution path.
+    """
+
+    def test_default_is_twenty_minutes_in_seconds(self):
+        assert DEFAULT_TIMEOUT_SECONDS == 20 * 60 == 1200
+        assert _make_program().timeout_seconds == 1200
+
+    def test_timeout_survives_serialization_roundtrip(self):
+        program = _make_program(timeout_seconds=1234)
+        blob = program.model_dump_json()
+        # The field name carries the unit explicitly, so there is no ambiguity.
+        assert "timeout_seconds" in blob
+
+        restored = QbloxProgram.model_validate_json(blob)
+        assert restored.timeout_seconds == 1234
+
+    def test_maac_can_override_with_positive_estimate(self):
+        program = _make_program()
+        program.timeout_seconds = 300
+        assert program.timeout_seconds == 300
+
+    @pytest.mark.parametrize("invalid", [0, -1, -0.5])
+    def test_invalid_override_is_rejected(self, invalid):
+        program = _make_program()
+        with pytest.raises(ValidationError):
+            program.timeout_seconds = invalid
+        # The compiler-generated default is preserved after a rejected override.
+        assert program.timeout_seconds == DEFAULT_TIMEOUT_SECONDS
+
+
+class TestSetupStashesTimeout:
+    def test_setup_stashes_program_timeout_on_instrument(self):
+        instrument = QbloxLeafInstrument("test", "test")
+        instrument.setup(_make_program(timeout_seconds=345))
+        assert instrument._timeout_seconds == 345
+
+
+@pytest.mark.parametrize(
+    "qblox_model,qblox_instrument,qubit_count",
+    create_parameters(["model", "instrument", "qubit_count"], [0]),
+    indirect=["qblox_model", "qblox_instrument"],
+)
+class TestDriverTimeoutConversion:
+    """The seconds-to-minutes conversion must happen only at the driver call site and round
+    up so the requested timeout is never shortened."""
+
+    @pytest.mark.parametrize(
+        "timeout_seconds,expected_minutes",
+        [
+            (DEFAULT_TIMEOUT_SECONDS, 20),  # 1200s -> 20 minutes exactly
+            (1201, 21),  # rounds up rather than truncating
+            (600, 10),
+        ],
+    )
+    def test_playback_converts_seconds_to_whole_minutes(
+        self,
+        qblox_model,
+        qblox_instrument,
+        qubit_count,
+        timeout_seconds,
+        expected_minutes,
+        mocker,
+    ):
+        spy = mocker.Mock(return_value=True)
+        for module in qblox_instrument.driver.get_connected_modules().values():
+            for sequencer in module.sequencers:
+                mocker.patch.object(sequencer, "get_acquisition_status", spy)
+
+        builder = measure_acquire(qblox_model, list(range(qubit_count)))
+        executable = do_emit(qblox_model, QbloxBackend1, builder)
+        for program in executable.programs:
+            program.timeout_seconds = timeout_seconds
+
+        do_execute(qblox_model, qblox_instrument, executable)
+
+        assert spy.call_count >= 1
+        for call in spy.call_args_list:
+            assert call.kwargs["timeout"] == expected_minutes

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 from collections import defaultdict
 from contextlib import ExitStack, contextmanager
@@ -20,7 +20,7 @@ from qat.backend.passes.purr.analysis import (
 )
 from qat.backend.passes.purr.transform import ScopePeeling
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
-from qat.backend.qblox.execution import QbloxPackage, QbloxProgram
+from qat.backend.qblox.execution import DEFAULT_TIMEOUT_SECONDS, QbloxPackage, QbloxProgram
 from qat.backend.qblox.ir import Opcode, SequenceBuilder
 from qat.backend.qblox.passes.analysis import (
     AllocationManager,
@@ -987,6 +987,9 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
                 packages=packages,
                 driver_version=TARGET_DATA.driver_version,
                 fw_version=TARGET_DATA.fw_version,
+                # TODO(COMPILER-1455, COMPILER-1456): Temporary static default. Replace
+                # with the inferred theoretical execution-duration bound once available.
+                timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
             )
         finally:
             self.allocations.clear()
