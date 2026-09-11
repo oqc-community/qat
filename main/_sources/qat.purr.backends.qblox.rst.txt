@@ -34,4 +34,5 @@ Submodules
    qat.purr.backends.qblox.loader
    qat.purr.backends.qblox.model_base
    qat.purr.backends.qblox.transform_passes
+   qat.purr.backends.qblox.transport
    qat.purr.backends.qblox.visualisation
