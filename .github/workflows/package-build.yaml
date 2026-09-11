@@ -186,7 +186,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           codebase: stable
-          pytest-args: "-n auto --cov"
+          pytest-args: "-n auto --cov --cov-config=.coveragerc-stable"
 
   experimental-unit-tests:
     name: Experimental Unit Tests
