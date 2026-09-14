@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.pipelines.compile module &mdash; qat-compiler 3.0.0.post367.dev20260911155112 documentation</title>
+  <title>qat.experimental.pipelines.compile module &mdash; qat-compiler 3.0.0.post368.dev20260914045630 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -170,8 +170,9 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.backend.html">qat.experimental.backend package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.backend.qblox.html">qat.experimental.backend.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.backend.html">qat.experimental.backend.qblox.backend module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.payload.html">qat.experimental.backend.qblox.payload module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.codegen.html">qat.experimental.backend.qblox.codegen module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.pre_emission_verification.html">qat.experimental.backend.qblox.pre_emission_verification module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.translation.html">qat.experimental.backend.qblox.translation module</a></li>
 </ul>
 </li>
 </ul>
@@ -700,14 +701,6 @@
   <section id="module-qat.experimental.pipelines.compile">
 <span id="qat-experimental-pipelines-compile-module"></span><h1>qat.experimental.pipelines.compile module<a class="headerlink" href="#module-qat.experimental.pipelines.compile" title="Link to this heading"></a></h1>
 <p>Experimental Qblox compile pipeline.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Related work (TODOs)</p>
-<ul class="simple">
-<li><p>COMPILER-1421: Experimental pulse-level middleend.</p></li>
-<li><p>COMPILER-1422: Experimental QBlox backend.</p></li>
-</ul>
-</div>
 <p>Wires together the experimental frontend, middleend, and backend for the experimental Qblox
 target, using a
 <a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a>
@@ -729,27 +722,17 @@ directly instead:</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Experimental. <code class="xref py py-meth docutils literal notranslate"><span class="pre">compile()</span></code> will raise <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> at the backend stage
-until COMPILER-1422 (QBlox code generation from the new IR stack) is implemented. The
-frontend and middleend (COMPILER-1421 pulse-level passes) already run
-against real components. The <code class="docutils literal notranslate"><span class="pre">program</span></code> passed to <code class="docutils literal notranslate"><span class="pre">compile</span></code> must be a
-<code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code> (PuRR IR) — the experimental frontend only exposes the
-PuRR importer.</p>
-</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">program</span></code> passed to <code class="xref py py-meth docutils literal notranslate"><span class="pre">compile()</span></code> must be a <code class="docutils literal notranslate"><span class="pre">QuantumInstructionBuilder</span></code> (PuRR IR)
+because the experimental frontend currently exposes only the PuRR importer.</p>
+<p>The inherited <code class="docutils literal notranslate"><span class="pre">target_data</span></code> argument carries the Qblox limits used by the backend and
+lowering pipeline.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ExperimentalQbloxCompilePipeline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">engine</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.pipelines.compile.ExperimentalQbloxCompilePipeline" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.pipelines.updateable.html#qat.pipelines.updateable.UpdateablePipeline" title="qat.pipelines.updateable.UpdateablePipeline"><code class="xref py py-class docutils literal notranslate"><span class="pre">UpdateablePipeline</span></code></a></p>
 <p>Compiles programs for the experimental Qblox target using the frontend, middleend,
 and backend stack.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This pipeline is for compilation purposes only and does not execute programs.
-Backend code generation is not yet implemented (COMPILER-1422); compilation will
-raise <code class="docutils literal notranslate"><span class="pre">NotImplementedError</span></code> once it reaches that stage.</p>
-</div>
+<p>This pipeline is for compilation purposes only and does not execute programs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

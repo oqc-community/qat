@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.utils module &mdash; qat-compiler 3.0.0.post367.dev20260911155112 documentation</title>
+  <title>qat.experimental.dialect.pulse.utils module &mdash; qat-compiler 3.0.0.post368.dev20260914045630 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -170,8 +170,9 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.backend.html">qat.experimental.backend package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.backend.qblox.html">qat.experimental.backend.qblox package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.backend.html">qat.experimental.backend.qblox.backend module</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.payload.html">qat.experimental.backend.qblox.payload module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.codegen.html">qat.experimental.backend.qblox.codegen module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.pre_emission_verification.html">qat.experimental.backend.qblox.pre_emission_verification module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.backend.qblox.translation.html">qat.experimental.backend.qblox.translation module</a></li>
 </ul>
 </li>
 </ul>
@@ -768,13 +769,15 @@ attribute is not a <code class="docutils literal notranslate"><span class="pre">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.utils.pulse_entry_block">
 <span class="sig-name descname"><span class="pre">pulse_entry_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.utils.pulse_entry_block" title="Link to this definition"></a></dt>
 <dd><p>Return the block that carries the Pulse instruction stream.</p>
-<p>Current repository producers use two concrete module shapes:</p>
+<p>Current repository producers use three concrete module shapes:</p>
 <ul class="simple">
 <li><p>Frontend importers build a single <code class="docutils literal notranslate"><span class="pre">func.func</span> <span class="pre">&#64;main</span></code> and place Pulse ops in
 its body block.</p></li>
+<li><p>The PuRR importer builds a <code class="docutils literal notranslate"><span class="pre">pulse.kernel</span></code> containing the executable Pulse
+stream and a <code class="docutils literal notranslate"><span class="pre">func.func</span> <span class="pre">&#64;main</span></code> containing results processing.</p></li>
 <li><p>Some transforms and unit tests build a flat module with Pulse ops at top-level.</p></li>
 </ul>
-<p>TODO(COMPILER-1380): remove this dual-shape logic once the canonical module shape
+<p>TODO(COMPILER-1380): remove this multi-shape logic once the canonical module shape
 is settled.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -787,8 +790,8 @@ is settled.</p>
 <dd class="field-odd"><p>The entry block containing the Pulse instruction sequence.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>PassFailedException</strong> – If the module contains more than one function, or
-mixes a function with other top-level operations.</p>
+<dd class="field-even"><p><strong>PassFailedException</strong> – If the module contains multiple kernels, multiple
+functions without a kernel, or mixes a function with other non-kernel operations.</p>
 </dd>
 </dl>
 </dd></dl>
