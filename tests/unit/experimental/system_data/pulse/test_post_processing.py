@@ -218,6 +218,105 @@ class TestPostProcessingDerive:
             )
         }
 
+    @pytest.mark.parametrize("linear_first", [True, False])
+    def test_linear_map_mode_does_not_mask_a_shared_max_likelihood_mode(self, linear_first):
+        """A channel bound by both calibrations resolves to the max-likelihood one.
+
+        Max-likelihood is the only discrimination policy this view can express. A mode
+        carrying a linear map must therefore neither claim the channel nor displace the max-
+        likelihood mode sharing it, whichever order the modes are declared in.
+        """
+        method = _max_likelihood({0: 1 + 0j, 1: -1 + 0j, -1: 0 + 0j})
+        linear = ModeData(
+            id="q0/acquire",
+            channel_id="ch0",
+            post_process_method=LinearMapToRealMethodData(),
+        )
+        max_likelihood = ModeData(
+            id="q0/readout_acquire", channel_id="ch0", post_process_method=method
+        )
+        modes = (linear, max_likelihood) if linear_first else (max_likelihood, linear)
+        qubits = (QubitData(id="q0", index=0, modes=modes),)
+        channels = (ChannelData(id="ch0", port_id="port0", frequency=8_800_000_000),)
+
+        pp = PostProcessingView.derive(
+            CanonicalSystemData(channels=channels, qubits=qubits)
+        )
+
+        assert pp.channel_to_discriminate_data == {
+            "ch0": DiscriminateData(
+                noise_est=1.0, p_min=0.0, state_centroids=(1 + 0j, -1 + 0j, 0 + 0j)
+            )
+        }
+        assert pp.channel_to_disallowed_states == {"ch0": {2}}
+
+    @pytest.mark.parametrize("linear_first", [True, False])
+    def test_linear_map_mode_on_another_qubit_does_not_mask_the_shared_channel(
+        self, linear_first
+    ):
+        """Qubits multiplexed onto one channel resolve it the same way modes do."""
+        method = _max_likelihood({0: 1 + 0j, -1: 0 + 0j})
+        linear_qubit = QubitData(
+            id="q0",
+            index=0,
+            modes=(
+                ModeData(
+                    id="q0/acquire",
+                    channel_id="ch0",
+                    post_process_method=LinearMapToRealMethodData(),
+                ),
+            ),
+        )
+        max_likelihood_qubit = QubitData(
+            id="q1",
+            index=1,
+            modes=(
+                ModeData(id="q1/acquire", channel_id="ch0", post_process_method=method),
+            ),
+        )
+        qubits = (
+            (linear_qubit, max_likelihood_qubit)
+            if linear_first
+            else (max_likelihood_qubit, linear_qubit)
+        )
+        channels = (ChannelData(id="ch0", port_id="port0", frequency=8_800_000_000),)
+
+        pp = PostProcessingView.derive(
+            CanonicalSystemData(channels=channels, qubits=qubits)
+        )
+
+        assert pp.channel_to_discriminate_data == {
+            "ch0": DiscriminateData(
+                noise_est=1.0, p_min=0.0, state_centroids=(1 + 0j, 0 + 0j)
+            )
+        }
+        assert pp.channel_to_disallowed_states == {"ch0": {1}}
+
+    def test_differing_linear_map_modes_sharing_a_channel_do_not_raise(self):
+        """Linear maps are not a calibration this view chooses between, so they cannot
+        conflict here; the channel is simply left undiscriminated."""
+        mode0 = ModeData(
+            id="q0/acquire",
+            channel_id="ch0",
+            post_process_method=LinearMapToRealMethodData(mean_z_map_args=(1 + 0j, 0j)),
+        )
+        mode1 = ModeData(
+            id="q0/readout_acquire",
+            channel_id="ch0",
+            post_process_method=LinearMapToRealMethodData(
+                mean_z_map_args=(0 + 1j, 0.5 + 0j)
+            ),
+        )
+        qubits = (QubitData(id="q0", index=0, modes=(mode0, mode1)),)
+        channels = (ChannelData(id="ch0", port_id="port0", frequency=8_800_000_000),)
+
+        pp = PostProcessingView.derive(
+            CanonicalSystemData(channels=channels, qubits=qubits)
+        )
+
+        assert pp.channel_to_discriminate_data == {}
+        assert pp.channel_to_disallowed_states == {}
+
     def test_modes_sharing_a_channel_with_different_methods_raises(self):
         method0 = _max_likelihood({0: 1 + 0j, -1: -0.2 + 0j})
         method1 = _max_likelihood({0: 0.7 + 0.1j, 1: -0.9 + 0.0j})
@@ -228,6 +327,40 @@ class TestPostProcessingDerive:
 
         with pytest.raises(ValueError, match="different max-likelihood methods"):
             PostProcessingView.derive(CanonicalSystemData(channels=channels, qubits=qubits))
+
+    @pytest.mark.parametrize(
+        "transform, offset",
+        [
+            (((1.0, 0.0), (0.0, 1.0)), (0.0, 0.0)),
+            (((0.0, -1.0), (1.0, 0.0)), (0.2, -0.3)),
+        ],
+    )
+    def test_affine_pre_transform_is_rejected(self, transform, offset):
+        """A pre-transform must not be silently dropped.
+
+        The centroids of such a method are calibrated in the transformed frame, so
+        discriminating without applying the transform would classify in the wrong frame.
+        Identity is rejected too: it is indistinguishable here from a calibration whose
+        transform simply has not been fitted yet.
+        """
+        method = MaxLikelihoodMethodData(
+            states=((0, MaxLikelihoodDiscriminateParams(location=1 + 0j)),),
+            transform=transform,
+            offset=offset,
+        )
+        with pytest.raises(NotImplementedError, match="affine IQ pre-transform"):
+            PostProcessingView.derive(_make_system_data(post_process_method=method))
+
+    def test_no_affine_pre_transform_is_accepted(self):
+        """The fields default to None, which is every calibration in use today."""
+        method = _max_likelihood({0: 1 + 0j, 1: -1 + 0j})
+        assert method.transform is None and method.offset is None
+        pp = PostProcessingView.derive(_make_system_data(post_process_method=method))
+        assert pp.channel_to_discriminate_data == {
+            "ch0": DiscriminateData(
+                noise_est=1.0, p_min=0.0, state_centroids=(1 + 0j, -1 + 0j)
+            )
+        }
 
     def test_discriminate_data_drops_labels(self):
         """Labels are calibration metadata only; the emitted label is the position."""

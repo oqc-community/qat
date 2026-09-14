@@ -18,6 +18,7 @@ from qat.experimental.dialect.pulse.ir import (
     DiscriminateOp,
     EqualiseAttr,
     EqualiseOp,
+    IQResultType,
     RealThresholdPolicyAttr,
 )
 from qat.experimental.dialect.pulse.ir.ops import KernelOp
@@ -444,13 +445,18 @@ class PurrImporter:
     ) -> SSAValue:
         """Terminate a post-processing chain with a calibrated discriminate operation.
 
-        Discrimination is only appended to an equalised IQ value. Anything else is left
-        untouched: a chain with no imported post-processing ends at the raw
-        :class:`~qat.experimental.dialect.results.ir.ExtractOp`, and a chain that purr
+        Discrimination is appended to any chain whose result is still an IQ value,
+        equalised or not. A max-likelihood calibration *is* the channel's whole
+        post-processing method, so a builder calibrated that way emits no
+        ``linear_map_complex_to_real`` step and the chain reaching here is the raw
+        :class:`~qat.experimental.dialect.results.ir.ExtractOp`.
+
+        Anything that is no longer an IQ value is left untouched: a chain that purr
         already discriminated ends at a
-        :class:`~qat.experimental.dialect.pulse.ir.DiscriminateOp`. The chain is also left
-        alone when the acquisition's channel has no max-likelihood calibration in the
-        system data.
+        :class:`~qat.experimental.dialect.pulse.ir.DiscriminateOp` carrying its own
+        policy, and a non-integrated acquisition holds no IQ value to discriminate. The
+        chain is also left alone when the acquisition's channel has no max-likelihood
+        calibration in the system data.
 
         :param body: The map body to append the operation to.
         :param key: The acquire output-variable name identifying the chain.
@@ -459,7 +465,7 @@ class PurrImporter:
         """
         if self._post_processing_factory is None:
             return value
-        if not isinstance(value.owner, EqualiseOp):
+        if not isinstance(value.type, IQResultType):
             return value
 
         policy = self._post_processing_factory.policy_for(self._label_to_channel.get(key))
@@ -866,8 +872,9 @@ class PurrImporter:
 
     @translate.register
     def _(self, value: Acquire, builder: PulseKernelBuilder) -> None:
-        frame_name = self._frame_keys(value.quantum_targets[0]).acquire_frame
-        self._label_to_channel[value.output_variable] = frame_name
+        channel = value.quantum_targets[0]
+        frame_name = self._frame_keys(channel).acquire_frame
+        self._label_to_channel[value.output_variable] = channel.partial_id()
         weights = None
         if value.filter is not None:
             if not isinstance(value.filter, CustomPulse):

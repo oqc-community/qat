@@ -18,6 +18,7 @@ from xdsl.interpreters.scf import scf
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
     CreateFrameOp,
+    DiscriminateOp,
     KernelOp,
     PulseOp,
     WaitOp,
@@ -31,7 +32,7 @@ from qat.experimental.system_data.canonical.schema import (
 from qat.experimental.system_data.materialisers.boundary import materialise
 from qat.model.loaders.purr import EchoModelLoader
 from qat.purr.compiler.devices import ChannelType, PulseShapeType
-from qat.purr.compiler.instructions import Acquire, Pulse
+from qat.purr.compiler.instructions import Acquire, AcquireMode, Pulse
 
 
 @pytest.fixture
@@ -336,6 +337,35 @@ def test_post_selection_disabled_with_canonical_model(builder, canonical_model_f
     )
 
 
+def test_discrimination_applied_when_post_selection_disabled(
+    builder, canonical_model_from_echo
+):
+    """Discrimination follows the model's calibration, not the post-selection request.
+
+    An acquisition on a channel calibrated for maximum likelihood is discriminated whenever
+    that calibration is available, so disabling post-selection must drop only the collection
+    filter and still leave the shots as integer state labels.
+    """
+    frontend = PurrFrontend(model=canonical_model_from_echo)
+
+    module = frontend.emit(builder, compiler_config=CompilerConfig(post_selection=False))
+
+    discriminate_ops = [op for op in module.walk() if isinstance(op, DiscriminateOp)]
+    assert len(discriminate_ops) == 1, (
+        "Expected the calibrated acquisition to be discriminated with post-selection off"
+    )
+    assert not [op for op in module.walk() if isinstance(op, PostSelectOp)]
+
+
+def test_no_discrimination_without_model(builder):
+    """Without a canonical model there is no calibration, so nothing is discriminated."""
+    frontend = PurrFrontend()
+
+    module = frontend.emit(builder, compiler_config=CompilerConfig(post_selection=False))
+
+    assert not [op for op in module.walk() if isinstance(op, DiscriminateOp)]
+
+
 def test_post_selection_disabled_without_model(builder):
     """Tests that post-selection can be disabled without providing a canonical model."""
     frontend = PurrFrontend()
@@ -378,6 +408,75 @@ def test_default_compiler_config_has_post_selection_disabled(builder):
     assert len(post_select_ops) == 0, (
         "Expected no PostSelectOp with default post-selection disabled"
     )
+
+
+def _macq_only_model():
+    """An echo model whose resonator exposes only the combined QBlox ``macq`` channel."""
+
+    model = EchoModelLoader(qubit_count=1).load()
+    resonator = model.get_qubit(0).measure_device
+    resonator.create_pulse_channel(ChannelType.macq, frequency=8.5e9)
+    # Real QBlox readout has no separate measure/acquire channels; without dropping them
+    # the canonical split keeps the pre-existing ids and the mismatch is hidden.
+    for key in [
+        key
+        for key in list(resonator.pulse_channels)
+        if key.endswith("measure") or key.endswith("acquire")
+    ]:
+        resonator.pulse_channels.pop(key)
+    return model, resonator.get_pulse_channel(ChannelType.macq)
+
+
+def _with_max_likelihood_on_macq(canonical):
+    """Calibrate every macq mode with a max-likelihood method and a disallowed state."""
+
+    method = MaxLikelihoodMethodData(
+        states=(
+            (0, MaxLikelihoodDiscriminateParams(location=0.0 + 0.0j)),
+            (-1, MaxLikelihoodDiscriminateParams(location=2.0 + 0.0j)),
+        )
+    )
+    qubits = [
+        replace(
+            qubit,
+            modes=tuple(
+                replace(mode, post_process_method=method)
+                if mode.channel_id.endswith(".macq")
+                else mode
+                for mode in qubit.modes
+            ),
+        )
+        for qubit in canonical.qubits
+    ]
+    return replace(canonical, qubits=tuple(qubits))
+
+
+@pytest.mark.parametrize("post_selection", [False, True])
+def test_macq_acquisition_is_discriminated_from_its_calibration(post_selection):
+    """A macq acquisition resolves its calibration despite being split into two frames.
+
+    The importer splits a macq pulse channel into ``measure``/``acquire`` frames, but the
+    canonical data still describes one channel (``R0.macq``). Calibration lookups must key
+    off the pulse-channel id rather than the frame name, or QBlox readout silently emits
+    no discrimination.
+    """
+    model, macq = _macq_only_model()
+    canonical = _with_max_likelihood_on_macq(
+        materialise(source_payload=loads(model.get_calibration()))
+    )
+
+    program = model.create_builder()
+    program.add(Pulse(macq, PulseShapeType.SQUARE, width=80e-9, amp=0.4))
+    program.add(
+        Acquire(macq, time=1e-6, output_variable="measurement", mode=AcquireMode.INTEGRATOR)
+    )
+
+    module = PurrFrontend(model=canonical, run_purr_pipeline=False).emit(
+        program, compiler_config=CompilerConfig(post_selection=post_selection)
+    )
+
+    assert len(_ops_of_type(module, DiscriminateOp)) == 1
+    assert len(_ops_of_type(module, PostSelectOp)) == (1 if post_selection else 0)
 
 
 def test_macq_pulse_and_acquire_use_two_distinct_frames_in_frontend_emit():

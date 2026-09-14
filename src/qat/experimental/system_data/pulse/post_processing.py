@@ -35,9 +35,23 @@ def _discriminate_data(method: MaxLikelihoodMethodData) -> DiscriminateData:
     Every calibrated centroid is kept, in calibration order. Discrimination assigns an
     IQ value to whichever centroid it is nearest.
 
+    An affine IQ pre-transform is rejected. The centroids of a method
+    carrying one are calibrated in the transformed frame, so discriminating against them
+    without applying the transform first would classify every shot in the wrong frame.
     :param method: The channel's calibrated max-likelihood method.
     :returns: The channel's :class:`DiscriminateData`.
+    :raises NotImplementedError: If the method carries an affine IQ pre-transform.
     """
+    # TODO: carry transform/offset through to the frontend and emit an EqualiseOp built
+    # from them ahead of the discriminator, rather than refusing the calibration.
+    # COMPILER-1461: Implement this.
+    if method.transform is not None or method.offset is not None:
+        raise NotImplementedError(
+            "Max-likelihood calibrations carrying an affine IQ pre-transform "
+            "('transform'/'offset') are not yet supported: the pre-transform would be "
+            "dropped and the centroids discriminated against in the wrong frame."
+        )
+
     return DiscriminateData(
         noise_est=method.noise_est,
         p_min=method.p_min,
@@ -112,12 +126,17 @@ class PostProcessingView:
         :returns: The derived post-processing configuration for the system.
         :raises ValueError: If modes sharing a channel carry different max-likelihood
             methods.
+        :raises NotImplementedError: If a max-likelihood calibration carries an affine IQ
+            pre-transform, which this view cannot yet express.
         """
         channel_to_method: dict[str, MaxLikelihoodMethodData] = {}
         for qubit in parent.qubits:
             for mode in qubit.modes:
                 method = mode.post_process_method
                 if not isinstance(method, MaxLikelihoodMethodData):
+                    # Uncalibrated and linear-map modes are skipped rather than recorded,
+                    # so a channel they share with a max-likelihood mode still resolves to
+                    # that mode's calibration.
                     continue
                 existing = channel_to_method.setdefault(mode.channel_id, method)
                 if existing != method:

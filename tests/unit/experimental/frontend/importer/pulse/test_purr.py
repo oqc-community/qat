@@ -1600,31 +1600,59 @@ class TestPurrImporterDiscrimination:
         module = PurrImporter(post_processing_factory=ppf).build(self._make_builder(hw))
         assert self._discriminate_ops(module) == []
 
-    def test_empty_post_processing_chain_emits_no_discriminate_op(self, hw):
-        """An acquisition with no PuRR post-processing is left untouched."""
+    def test_empty_post_processing_chain_is_discriminated(self, hw):
+        """A max-likelihood channel is discriminated without a PuRR chain to hang off.
+
+        The calibration is the channel's whole post-processing method, so the builder emits
+        no down-conversion step and the chain reaching the discriminator is the raw
+        integrated acquisition.
+        """
         builder = QuantumInstructionBuilder(hw)
         ch = hw.get_qubit(0).get_acquire_channel()
         builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
         module = PurrImporter(
             post_processing_factory=self._post_processing_factory(hw)
         ).build(builder)
-        assert self._discriminate_ops(module) == []
+        ops = self._discriminate_ops(module)
+        assert len(ops) == 1
+        assert isinstance(ops[0].policy, MaximumLikelihoodPolicyAttr)
+
+    def test_discriminate_consumes_the_extract_result_without_a_purr_chain(self, hw):
+        """With no imported chain the discriminator reads the extracted IQ value."""
+        builder = QuantumInstructionBuilder(hw)
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(builder)
+        assert _ops_of_type(module, EqualiseOp) == []
+        assert isinstance(self._discriminate_ops(module)[0].value.owner, ExtractOp)
 
     @pytest.mark.parametrize(
         "process",
         [PostProcessType.MEAN, PostProcessType.DOWN_CONVERT, PostProcessType.MUL],
     )
-    def test_chain_of_only_unsupported_steps_emits_no_discriminate_op(self, hw, process):
-        """An ignored step must not turn discrimination on.
+    def test_chain_of_only_unsupported_steps_is_discriminated(self, hw, process):
+        """Unsupported steps are skipped, leaving the raw IQ value to discriminate.
 
-        Unsupported post-processing types are skipped by the importer, so the chain emits no
-        operations and the value is still the raw acquisition. Discriminating there would
-        use centroids calibrated in the equalised frame against unequalised IQ.
+        The importer drops post-processing types it cannot express, so the chain emits no
+        operations and the value is still the integrated acquisition, which is exactly the
+        value a max-likelihood calibration is defined against.
         """
         builder = QuantumInstructionBuilder(hw)
         ch = hw.get_qubit(0).get_acquire_channel()
         builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.INTEGRATOR))
         builder.add(PostProcessing(builder.instructions[-1], process=process))
+        module = PurrImporter(
+            post_processing_factory=self._post_processing_factory(hw)
+        ).build(builder)
+        assert len(self._discriminate_ops(module)) == 1
+
+    def test_non_integrated_acquisition_emits_no_discriminate_op(self, hw):
+        """A raw acquisition carries no IQ value, so there is nothing to discriminate."""
+        builder = QuantumInstructionBuilder(hw)
+        ch = hw.get_qubit(0).get_acquire_channel()
+        builder.add(Acquire(ch, time=1e-6, mode=AcquireMode.RAW))
         module = PurrImporter(
             post_processing_factory=self._post_processing_factory(hw)
         ).build(builder)

@@ -169,19 +169,18 @@ class PurrFrontend(BaseFrontend):
                 **kwargs,
             )
 
-        if compiler_config.post_selection:
-            if self.model is None:
-                raise ValueError(
-                    "Canonical system data description must be provided if post-selection "
-                    "is enabled."
-                )
-
-            pp_derived_view = PostProcessingView.derive(self.model)
-            post_processing_factory = PostProcessingFactory(
-                pp_derived_view, post_selection_enabled=True
+        if compiler_config.post_selection and self.model is None:
+            raise ValueError(
+                "Canonical system data description must be provided if post-selection "
+                "is enabled."
             )
-        else:
-            post_processing_factory = None
+
+        post_processing_factory = None
+        if self.model is not None:
+            post_processing_factory = PostProcessingFactory(
+                PostProcessingView.derive(self.model),
+                post_selection_enabled=compiler_config.post_selection,
+            )
 
         return PurrImporter(post_processing_factory).build(src)
 
