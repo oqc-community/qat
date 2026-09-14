@@ -9,7 +9,6 @@ from xdsl.ir import Block, Region
 from xdsl.irdl import IRDLOperation, irdl_op_definition, region_def, result_def
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import (
     Q1OutliningPass,
     _normalize_sequence_symbol,
@@ -158,14 +157,6 @@ class TestPulseToQ1SequenceOutlining:
         assert list(module.body.block.ops) == []
         assert pass_instance.state.frame_to_port == {}
         assert pass_instance.state.frame_to_sequence == {}
-
-    def test_target_data_is_reachable_from_pass(self):
-        """Verify that target data supplied at construction remains accessible on the
-        pass."""
-        target_data = QbloxTargetData()
-        pass_instance = Q1OutliningPass(target_data=target_data)
-        assert pass_instance.target_data is target_data
-        assert pass_instance.target_data.CONTROL_SEQUENCER_DATA.grid_time == 4
 
     def test_emit_sequence_ops_rejects_partition_not_starting_with_create_frame(self):
         """Verify that malformed frame partitions are rejected during sequence emission."""

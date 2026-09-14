@@ -462,14 +462,10 @@ class TestSequencerConfigAttr:
                 acquisition_disabled=True,
             )
 
-    @pytest.mark.parametrize("frequency", [-500e6, 0.0, 500e6])
-    def test_accepts_nco_frequency_in_hardware_range(self, frequency):
+    @pytest.mark.parametrize("frequency", [-600e6, 0.0, 600e6])
+    def test_nco_frequency_is_structurally_unbounded(self, frequency):
+        """Selected-target verification owns the hardware frequency range."""
         NcoConfigAttr(frequency=frequency).verify()
-
-    @pytest.mark.parametrize("frequency", [-500e6 - 1, 500e6 + 1])
-    def test_rejects_nco_frequency_outside_hardware_range(self, frequency):
-        with pytest.raises(VerifyException, match="outside"):
-            NcoConfigAttr(frequency=frequency)
 
 
 class TestModuleConfigAttr:

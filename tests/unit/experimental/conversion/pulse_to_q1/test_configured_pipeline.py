@@ -15,20 +15,24 @@ from xdsl.dialects.builtin import (
 from xdsl.ir import Block, Region
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
+from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.backend.qblox.pre_emission_verification import (
     QbloxPreEmissionVerificationPass,
 )
 from qat.experimental.conversion.pulse_to_q1.passes import (
+    Q1PreAcquireTransformationPass,
     Q1PulseLegalisationPass,
     Q1PulseValidationPass,
     create_qblox_configured_q1_pipeline,
 )
+from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
     AmplitudeAttr,
     ConstantOp,
     CreateFrameOp,
     FrequencyAttr,
+    IntegrateOp,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     SynchronizeOp,
@@ -65,6 +69,7 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     SequencerConfigAttr,
     UnweightedAcquireConfigAttr,
     make_acquisition,
+    make_dense_floats,
     make_waveform,
     make_weight,
 )
@@ -72,7 +77,6 @@ from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPassPipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind, SignalPath
-from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
     canonical_data,
@@ -130,8 +134,15 @@ def _assert_emission_ready(module: ModuleOp) -> SequenceOp:
 
 
 def test_downstream_ordering_constraints_reject_misordered_lowering():
-    with pytest.raises(VerifyException, match="q1-pulse-validation"):
-        OrderedPassPipeline((Q1PulseLegalisationPass(), Q1PulseValidationPass()))
+    with pytest.raises(VerifyException, match="acquire-pre-q1-transformation"):
+        OrderedPassPipeline(
+            (
+                Q1OutliningPass(),
+                Q1PulseValidationPass(),
+                Q1PulseLegalisationPass(),
+                Q1PreAcquireTransformationPass(),
+            )
+        )
 
     with pytest.raises(VerifyException, match="lower-scf-to-q1-scf"):
         OrderedPassPipeline((LowerQ1ScfToQ1CfPass(), LowerScfToQ1ScfPass()))
@@ -178,7 +189,8 @@ def test_program_acquisition_length_overrides_hardware_default():
     frame = CreateFrameOp(frequency, StringAttr("port-0"))
     duration = ConstantOp(TimeAttr(1000e-9))
     acquire = AcquireOp(frame, duration)
-    module = _pulse_module(frequency, frame, duration, acquire)
+    integrate = IntegrateOp(acquire.acquisition_result)
+    module = _pulse_module(frequency, frame, duration, acquire, integrate)
 
     _configured_pipeline(_readout_canonical_data()).apply(Context(), module)
 
@@ -314,6 +326,43 @@ def test_pre_emission_verification_wraps_sequence_invariant_failure():
         PassFailedException,
         match="Sequence 'q0.drive' failed Qblox verification:.*port_id conflicts",
     ):
+        QbloxPreEmissionVerificationPass().apply(Context(), _configured_module(sequence))
+
+
+@pytest.mark.parametrize(
+    ("table_name", "entry", "invalid_data", "message"),
+    [
+        pytest.param(
+            "waveforms",
+            make_waveform("invalid", 0, [0.0]),
+            make_dense_floats([1.5]),
+            "invalid waveform table entry.*out of DAC range",
+            id="waveform",
+        ),
+        pytest.param(
+            "weights",
+            make_weight("invalid", 0, [0.0]),
+            make_dense_floats([-1.5]),
+            "invalid weight table entry.*out of ADC range",
+            id="weight",
+        ),
+    ],
+)
+def test_pre_emission_verification_checks_table_entries(
+    table_name, entry, invalid_data, message
+):
+    object.__setattr__(entry, "data", invalid_data)
+    sequence = SequenceOp(
+        "q0.drive",
+        [StopOp()],
+        instrument_id="cluster0",
+        slot_idx=2,
+        seq_idx=0,
+        sequencer_config=SequencerConfigAttr(),
+        **{table_name: ArrayAttr([entry])},
+    )
+
+    with pytest.raises(PassFailedException, match=message):
         QbloxPreEmissionVerificationPass().apply(Context(), _configured_module(sequence))
 
 
@@ -467,8 +516,7 @@ def _qrm_module_config() -> ModuleConfigAttr:
 
 def test_pre_emission_verification_uses_named_acquisition_bin_capacity_spec():
     """The aggregate acquisition-bin check uses the authoritative Qblox target limit."""
-    limit = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qrm).acquisition_memory_bins
-    assert limit is not None
+    limit = TARGET_DATA.QRM_DATA.max_binned_acquisitions
     module_config = _qrm_module_config()
     sequence = SequenceOp(
         "q0.readout",
@@ -616,9 +664,7 @@ def test_pre_emission_verification_rejects_missing_weight_table_entry():
 def test_pre_emission_verification_uses_named_waveform_sample_capacity_spec():
     """The per-sequencer waveform-sample check must reject at the authoritative Qblox
     sequencer target limit, not an ad hoc constant."""
-    limit = DEFAULT_QBLOX_TARGET.sequencer(
-        QbloxModuleKind.qcm_rf, 0
-    ).sequencer_spec.waveform_sample_capacity
+    limit = TARGET_DATA.CONTROL_SEQUENCER_DATA.max_sample_size_waveforms
     sequence = SequenceOp(
         "q0.drive",
         [StopOp()],
@@ -638,11 +684,7 @@ def test_pre_emission_verification_uses_named_waveform_sample_capacity_spec():
 def test_pre_emission_verification_uses_named_weight_sample_capacity_spec():
     """The per-sequencer weight-sample check must reject at the authoritative Qblox readout
     target limit, not an ad hoc constant."""
-    readout_spec = DEFAULT_QBLOX_TARGET.sequencer(
-        QbloxModuleKind.qrm, 0
-    ).sequencer_spec.readout
-    assert readout_spec is not None
-    limit = readout_spec.weight_sample_capacity
+    limit = TARGET_DATA.READOUT_SEQUENCER_DATA.max_sample_size_waveforms
     module_config = _qrm_module_config()
     sequence = SequenceOp(
         "q0.readout",

@@ -74,18 +74,12 @@ from qat.experimental.system_data.hardware.qblox.models import (
     connection_input_ids,
     connection_output_ids,
 )
-from qat.experimental.system_data.hardware.qblox.target import (
-    DEFAULT_QBLOX_TARGET,
-    Q1SequencerType,
-)
+from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
 
 f32 = Float32Type()
 
 _as_required_string = partial(as_string, required=True)
 _as_required_int = partial(as_int, required=True)
-_CONTROL_SEQUENCER_SPEC = DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control)
-_NCO_MIN_FREQUENCY = _CONTROL_SEQUENCER_SPEC.nco_min_frequency_hz
-_NCO_MAX_FREQUENCY = _CONTROL_SEQUENCER_SPEC.nco_max_frequency_hz
 
 
 def _as_integration_length(
@@ -259,7 +253,7 @@ class ConfigAttr(ParametrizedAttribute):
 class NcoConfigAttr(ConfigAttr):
     """Numerically controlled oscillator configuration of one sequencer.
 
-    :param frequency: NCO frequency in Hz. Range ``[-500e6, 500e6]``.
+    :param frequency: NCO frequency in Hz. The selected target validates its range.
     :param phase_offs: NCO phase offset in degrees.
     :param prop_delay_comp: Propagation delay compensation in nanoseconds.
     :param prop_delay_comp_en: Whether propagation delay compensation is enabled.
@@ -280,15 +274,6 @@ class NcoConfigAttr(ConfigAttr):
         prop_delay_comp_en: BoolAttr | bool | None = None,
     ):
         super().__init__(frequency, phase_offs, prop_delay_comp, prop_delay_comp_en)
-
-    def verify(self) -> None:
-        if isinstance(self.frequency, FloatAttr) and not (
-            _NCO_MIN_FREQUENCY <= self.frequency.value.data <= _NCO_MAX_FREQUENCY
-        ):
-            raise VerifyException(
-                f"NCO frequency {self.frequency.value.data} is outside "
-                f"[{_NCO_MIN_FREQUENCY:.0f}, {_NCO_MAX_FREQUENCY:.0f}] Hz"
-            )
 
 
 @irdl_attr_definition

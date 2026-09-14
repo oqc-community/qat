@@ -77,8 +77,6 @@ class ExperimentalQbloxExecutePipeline(UpdateablePipeline):
             )
 
         target_data = target_data if target_data is not None else TARGET_DATA
-        # TODO(COMPILER-1448): Configure native payload mappings through a narrow adapter
-        # while retaining the shared engine and instrument lifecycle.
         instrument = QbloxLeafInstrument(
             id=config.name,
             name=config.name,

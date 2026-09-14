@@ -52,7 +52,7 @@ class TestPulseLevelMiddleend:
         assert isinstance(middleend._pulse_pipeline, OrderedPassPipeline)
         pass_types = [type(p) for p in middleend._pulse_pipeline.passes]
         # The middleend runs the kernel-lowering pass before the final cleanup, ahead of
-        # the (not-yet-implemented) Q1 lowering handled by the backend.
+        # Q1 lowering handled by the backend.
         assert LowerKernelsToResultsArrays in pass_types
         assert pass_types[-1] is OrderedCanonicalizePass
 

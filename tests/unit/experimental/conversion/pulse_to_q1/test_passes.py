@@ -22,7 +22,6 @@ from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.passes import (
     BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
@@ -44,6 +43,7 @@ from qat.experimental.dialect.pulse.ir import (
     FrameType,
     FrequencyAttr,
     FrequencyType,
+    IntegrateOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
@@ -175,8 +175,8 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
     assert [pass_.name for pass_ in pipeline.passes] == [
         "pulse-to-q1-outlining",
         "q1-pulse-validation",
-        "q1-pulse-legalisation",
         "acquire-pre-q1-transformation",
+        "q1-pulse-legalisation",
         "qblox-hardware-binding",
         "pulse-to-q1-lowering",
         "bound-dead-frame-elimination",
@@ -441,7 +441,8 @@ def _create_acquire_module(
     acquires = [
         AcquireOp(frame, duration, weights=weights, label=label) for _ in range(no_acquires)
     ]
-    ops = [freq, frame, duration, *acquires]
+    integrations = [IntegrateOp(acquire.acquisition_result) for acquire in acquires]
+    ops = [freq, frame, duration, *acquires, *integrations]
 
     for repeat in repeats:
         ops.append(scf.YieldOp())
@@ -692,7 +693,7 @@ class TestPulseToQ1AcquireLowering:
     @staticmethod
     def _lower(module: ModuleOp) -> SequenceOp:
         Q1PreAcquireTransformationPass().apply(Context(), module)
-        Q1OutliningPass(target_data=TARGET_DATA).apply(Context(), module)
+        Q1OutliningPass().apply(Context(), module)
         PulseToQ1LoweringPass().apply(Context(), module)
         [sequence] = list(module.body.block.ops)
         assert isinstance(sequence, SequenceOp)
@@ -779,7 +780,7 @@ class TestPulseToQ1AcquireLowering:
         """Verify that a ``CreateFrameOp`` inside a loop is outlined without error."""
         module = _create_acquire_module(1000, "q0/readout", [1000])
         Q1PreAcquireTransformationPass().apply(Context(), module)
-        Q1OutliningPass(target_data=TARGET_DATA).apply(Context(), module)
+        Q1OutliningPass().apply(Context(), module)
 
         sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         assert len(sequences) == 1

@@ -11,9 +11,7 @@ from xdsl.ir import Operation, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException
 
-# TODO: Remove this unused target dependency with the QbloxTargetDescription migration.
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
-from qat.experimental.dialect.pulse.ir import CreateFrameOp
+from qat.experimental.dialect.pulse.ir import AcquireOp, CreateFrameOp, IntegrateOp
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineage,
     FrameLineageAnalysis,
@@ -27,8 +25,8 @@ from qat.experimental.passes.pass_ordering import OrderedPass
 _NON_SYMBOL_CHARS = compile(r"[^0-9A-Za-z_$.]")
 _MULTI_UNDERSCORE = compile(r"_+")
 
-# The bitmask has four bits; in binary, we want it to be 0011 which "opens" both output
-# paths for the RF modules. This is equivalent to 3 in decimal.
+# TODO(COMPILER-1450): Move marker initialisation after physical binding and derive it
+# from the module kind. This legacy RF-enable mask is not validated for QRC.
 _MARKER_BITMASK = 0b0011
 
 
@@ -135,6 +133,14 @@ def _partition_dependency_closure(
         if op in needed_ops:
             continue
         needed_ops.add(op)
+        if isinstance(op, AcquireOp):
+            # Integration is a downstream semantic marker for the acquisition rather than
+            # an operand dependency, so preserve it explicitly in the hardware partition.
+            pending_ops.extend(
+                use.operation
+                for use in op.acquisition_result.uses
+                if isinstance(use.operation, IntegrateOp)
+            )
         # op.walk() includes op itself, so this also covers op's own operands as well as
         # free variables captured by any nested regions.
         for nested_op in op.walk():
@@ -194,7 +200,6 @@ class Q1OutliningPass(OrderedPass, ModulePass):
     """
 
     name = "pulse-to-q1-outlining"
-    target_data: QbloxTargetData = field(default=TARGET_DATA)
 
     state: OutliningState = field(default_factory=OutliningState, init=False)
 
@@ -208,7 +213,7 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         """Construct one outlined sequence together with its recorded metadata.
 
         :param frame_id: Synthetic frame label used for fallback naming.
-        :param lineage: Frame lineage for this partition; supplies port metadata.
+        :param lineage: Frame lineage for this partition and its port metadata.
         :param sequence_body: Cloned operations to place in the sequence body. The body
             already contains the lineage ops plus any cloned definitions required to make
             the envelope self-contained.
@@ -247,7 +252,8 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         token is shared or the derived symbol would collide, the pass falls
         back to deterministic ``frame_i`` naming.
 
-        :param analysis: Frame-lineage analysis computed by FrameLineagePass.
+        :param module: Pulse module containing the entry block to partition.
+        :param analysis: Frame-lineage analysis computed for ``module``.
         :returns: Triple of emitted SequenceOp list, frame→port mapping, and
                   frame→sequence symbol mapping.
         """
@@ -275,7 +281,7 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         frame_to_port: dict[str, str] = {}
         frame_to_sequence: dict[str, str] = {}
         for frame_index, lineage in enumerate(analysis.lineages):
-            # TODO - Reuse a frame's optional identifier once: COMPILER-1379
+            # TODO(COMPILER-1379): Prefer the optional frame label once it is available.
             frame_id = f"frame_{frame_index}"
             sequence_body = _build_partition_sequence_body(
                 entry_block_ops,
@@ -302,8 +308,8 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         replaces them with ``q1_sequence.sequence`` envelopes that carry the
         frame-local operations for each lineage. Each emitted sequence body is
         self-contained and ends with ``q1.stop``. The per-operation rewrite
-        patterns introduced by COMPILER-1343–1346 will later lower the Pulse
-        payload inside those envelopes.
+        patterns later in the configured Q1 pipeline lower the Pulse payload
+        inside those envelopes.
         """
         analysis = build_frame_lineage_analysis(op)
         sequence_ops, frame_to_port, frame_to_sequence = self._emit_sequence_ops(

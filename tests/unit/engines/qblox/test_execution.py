@@ -10,6 +10,7 @@ from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.execution import DEFAULT_TIMEOUT_SECONDS, QbloxProgram
 from qat.backend.qblox.target_data import QRM_DATA, TARGET_DATA
 from qat.engines.qblox.live import QbloxLeafInstrument
+from qat.executables import Executable
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import get_builder
@@ -483,6 +484,24 @@ class TestQbloxProgramTimeout:
             program.timeout_seconds = invalid
         # The compiler-generated default is preserved after a rejected override.
         assert program.timeout_seconds == DEFAULT_TIMEOUT_SECONDS
+
+
+class TestQbloxProgramMetadata:
+    def test_defaults_to_none(self):
+        assert _make_program().metadata is None
+
+    def test_json_metadata_survives_serialization_roundtrip(self):
+        metadata = {"revision": 1, "arguments": [True, None, {"value": 2.5}]}
+        program = _make_program(metadata=metadata)
+
+        executable = Executable[QbloxProgram](programs=[program])
+        restored = Executable[QbloxProgram].deserialize(executable.serialize())
+
+        assert restored.programs[0].metadata == metadata
+
+    def test_rejects_non_json_metadata(self):
+        with pytest.raises(ValidationError, match="valid JSON value"):
+            _make_program(metadata={"unsupported": object()})
 
 
 class TestSetupStashesTimeout:

@@ -2,9 +2,6 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Experimental pulse-level middleend for the Qblox pipeline.
 
-TODO(COMPILER-1421): Update as part of the implementation of the experimental pulse-level
-middleend.
-
 Wraps :class:`~qat.experimental.dialect.pulse.transforms.pipeline.PulsePipelineManager`
 — the pulse-level pass pipeline already implemented in ``qat.experimental`` — as a
 :class:`~qat.middleend.base.BaseMiddleend` so it can be slotted into a
@@ -12,9 +9,8 @@ Wraps :class:`~qat.experimental.dialect.pulse.transforms.pipeline.PulsePipelineM
 
 .. warning::
 
-    Experimental. This only covers the pulse-level passes described in COMPILER-1421's
-    acceptance criteria (passes that run before Q1 lowering); Q1 lowering and code
-    generation are handled by the backend (COMPILER-1422), which is not yet implemented.
+    Experimental. This covers pulse-level passes that run before Q1 lowering. Q1 lowering
+    and code generation are handled by the experimental Qblox backend.
 """
 
 from compiler_config.config import CompilerConfig

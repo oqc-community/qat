@@ -34,14 +34,12 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     LowerArithIntegerConstantToMoveOp,
-    RewriteCreateFrameOp,
     RewritePhaseSetOp,
     RewritePhaseShiftOp,
     RewritePreQ1AcquireOp,
     RewritePulseOp,
     RewriteStartContinuousWaveformOp,
     RewriteStopContinuousWaveformOp,
-    RewriteSynchronizeOp,
     RewriteWaitOp,
     _get_enclosing_port,
     _register_waveform,
@@ -92,6 +90,30 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 
+_CONTROL_SEQUENCER_DATA = TARGET_DATA.CONTROL_SEQUENCER_DATA
+
+
+def _target_with_readout_sample_rate(sample_rate: float):
+    """Return target data with a custom readout sample rate."""
+
+    readout = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+        update={"sample_rate": sample_rate}
+    )
+    return TARGET_DATA.model_copy(
+        update={"READOUT_SEQUENCER_DATA": readout},
+    )
+
+
+def _target_with_control_timing(sample_rate: float, grid_time: int):
+    """Return target data with custom control sequencer timing."""
+
+    control = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
+        update={"sample_rate": sample_rate, "grid_time": grid_time},
+    )
+    return TARGET_DATA.model_copy(
+        update={"CONTROL_SEQUENCER_DATA": control},
+    )
+
 
 @irdl_op_definition
 class _DynamicPhaseSourceOp(IRDLOperation):
@@ -136,20 +158,18 @@ def _sequence_body_ops(module: ModuleOp) -> list[Operation]:
     return list(seq.body.block.ops)
 
 
-def test_lowering_pattern_factory_returns_ten_patterns():
+def test_lowering_pattern_factory_returns_all_patterns():
     """Verify that the pattern factory returns the full rewrite set in order."""
     patterns = create_pulse_to_q1_lowering_patterns()
-    assert len(patterns) == 10
+    assert len(patterns) == 8
     assert isinstance(patterns[0], LowerArithIntegerConstantToMoveOp)
     assert isinstance(patterns[1], RewritePhaseSetOp)
     assert isinstance(patterns[2], RewritePhaseShiftOp)
-    assert isinstance(patterns[3], RewriteCreateFrameOp)
-    assert isinstance(patterns[4], RewriteSynchronizeOp)
-    assert isinstance(patterns[5], RewriteWaitOp)
-    assert isinstance(patterns[6], RewritePulseOp)
-    assert isinstance(patterns[7], RewriteStartContinuousWaveformOp)
-    assert isinstance(patterns[8], RewriteStopContinuousWaveformOp)
-    assert isinstance(patterns[9], RewritePreQ1AcquireOp)
+    assert isinstance(patterns[3], RewriteWaitOp)
+    assert isinstance(patterns[4], RewritePulseOp)
+    assert isinstance(patterns[5], RewriteStartContinuousWaveformOp)
+    assert isinstance(patterns[6], RewriteStopContinuousWaveformOp)
+    assert isinstance(patterns[7], RewritePreQ1AcquireOp)
 
 
 def test_legalisation_pattern_factory_returns_two_patterns():
@@ -160,31 +180,12 @@ def test_legalisation_pattern_factory_returns_two_patterns():
     assert isinstance(patterns[1], RewritePhaseShiftOp)
 
 
-def test_rewrite_synchronize_op_is_noop_skeleton():
-    """Verify that RewriteSynchronizeOp leaves pulse.sync unchanged.
-
-    Replace this body with the actual Q1 macro-expansion assertion once
-    COMPILER-1343 is implemented. The module uses the post-outline IR shape:
-    a ``q1_sequence.sequence`` envelope containing the Pulse op.
-    """
-    freq_0, frame_0 = _frame("q0/drive")
-    freq_1, frame_1 = _frame("q1/drive")
-    sync = SynchronizeOp(frame_0, frame_1)
-    module = _sequence_module(freq_0, frame_0, freq_1, frame_1, sync)
-
-    _run_q1_pipeline(module)
-
-    body_ops = _sequence_body_ops(module)
-    assert any(isinstance(op, SynchronizeOp) for op in body_ops)
-
-
 def test_bound_dead_frame_elimination_removes_only_unreferenced_metadata():
     """Post-lowering cleanup erases unused frame metadata without affecting live frames.
 
-    ``pulse.sync`` is a deliberate no-op skeleton pending COMPILER-1343, so it is left
-    untouched by lowering and keeps referencing its frames: that is what makes ``frame_0``
-    and ``frame_1`` genuinely live. ``frame_2`` has no consumer at all and is genuinely
-    dead.
+    This isolated lowering test intentionally omits Pulse timeline normalization, so its
+    residual ``pulse.sync`` keeps ``frame_0`` and ``frame_1`` live. ``frame_2`` has no
+    consumer and is dead.
     """
     freq_0, frame_0 = _frame("q0/drive")
     freq_1, frame_1 = _frame("q1/drive")
@@ -202,7 +203,7 @@ def test_bound_dead_frame_elimination_removes_only_unreferenced_metadata():
     assert freq_0 in body_ops
     assert freq_1 in body_ops
     assert freq_2 not in body_ops
-    # pulse.sync is left untouched (COMPILER-1343), which is what kept its frames alive.
+    # The residual pulse.sync keeps its frames live in this isolated lowering test.
     assert any(isinstance(op, SynchronizeOp) for op in body_ops)
 
 
@@ -221,16 +222,26 @@ def test_rewrite_wait_op_lowers_short_wait():
     assert [op.duration.data for op in wait_ops] == [16]
 
 
-def test_rewrite_wait_op_aligns_to_sequencer_grid():
+@pytest.mark.parametrize(
+    ("duration_s", "target_data", "expected_duration_ns"),
+    [
+        (5e-9, TARGET_DATA, 8),
+        (9e-9, _target_with_control_timing(500e6, 8), 16),
+    ],
+)
+def test_rewrite_wait_op_aligns_to_sequencer_grid(
+    duration_s, target_data, expected_duration_ns
+):
     freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(5e-9))
+    duration = ConstantOp(TimeAttr(duration_s))
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
-    _run_q1_pipeline(module)
+    Q1PulseLegalisationPass().apply(Context(), module)
+    PulseToQ1LoweringPass(target_data=target_data).apply(Context(), module)
 
     wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
-    assert [op.duration.data for op in wait_ops] == [8]
+    assert [op.duration.data for op in wait_ops] == [expected_duration_ns]
 
 
 def test_rewrite_wait_op_leaves_dynamic_duration():
@@ -269,6 +280,28 @@ def test_rewrite_wait_op_chains_long_wait():
     assert sum(durations) == total_ns
 
 
+def test_rewrite_wait_op_uses_grid_aligned_chunks():
+    """Long wait chunks respect a selected sequencer's coarser timing grid."""
+    target_data = _target_with_control_timing(
+        sample_rate=1_000_000_000,
+        grid_time=8,
+    )
+    max_wait_time = target_data.Q1ASM_DATA.max_wait_time
+    max_aligned_wait_time = max_wait_time - max_wait_time % 8
+    total_ns = 2 * max_aligned_wait_time + 16
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(total_ns * 1e-9))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PulseToQ1LoweringPass(target_data=target_data).apply(Context(), module)
+
+    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+    durations = [op.duration.data for op in wait_ops]
+    assert durations == [max_aligned_wait_time, max_aligned_wait_time, 16]
+    assert all(duration_ns % 8 == 0 for duration_ns in durations)
+
+
 def test_rewrite_phase_set_op_lowers_to_set_ph_and_upd_param():
     """Verify pulse.phase_set is lowered to q1.set_ph + q1.upd_param with PhaseSetOp
     removed."""
@@ -287,7 +320,6 @@ def test_rewrite_phase_set_op_lowers_to_set_ph_and_upd_param():
 
 def test_rewrite_phase_set_op_converts_radians_to_nco_phase_steps():
     """Verify radian phase is converted to NCO phase steps using nco_phase_steps_per_deg."""
-    from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA
 
     phase_rad = math.pi / 2
     freq, frame = _frame()
@@ -300,7 +332,7 @@ def test_rewrite_phase_set_op_converts_radians_to_nco_phase_steps():
     body_ops = _sequence_body_ops(module)
     [set_ph] = [op for op in body_ops if isinstance(op, SetPhImmOp)]
     expected_steps = round(
-        math.degrees(phase_rad) % 360 * CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+        math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
     )
     assert set_ph.imm.data == expected_steps
 
@@ -323,7 +355,6 @@ def test_rewrite_phase_shift_op_lowers_to_set_ph_delta_and_upd_param():
 
 def test_rewrite_phase_shift_op_converts_radians_to_nco_phase_steps():
     """Verify radian phase is converted to NCO phase steps using nco_phase_steps_per_deg."""
-    from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA
 
     phase_rad = math.pi
     freq, frame = _frame()
@@ -336,14 +367,13 @@ def test_rewrite_phase_shift_op_converts_radians_to_nco_phase_steps():
     body_ops = _sequence_body_ops(module)
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
     expected_steps = round(
-        math.degrees(phase_rad) % 360 * CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+        math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
     )
     assert set_ph_delta.imm.data == expected_steps
 
 
 def test_rewrite_phase_shift_op_wraps_negative_radians_to_valid_nco_range():
     """Verify negative radian phase wraps to valid NCO phase range via degree modulo 360."""
-    from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA
 
     phase_rad = -math.pi / 2
     freq, frame = _frame()
@@ -356,7 +386,7 @@ def test_rewrite_phase_shift_op_wraps_negative_radians_to_valid_nco_range():
     body_ops = _sequence_body_ops(module)
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
     expected_steps = round(
-        math.degrees(phase_rad) % 360 * CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+        math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
     )
     assert set_ph_delta.imm.data == expected_steps
 
@@ -388,7 +418,6 @@ def test_phase_lowering_requires_canonical_phase_without_legalisation():
 
 def test_rewrite_phase_shift_op_near_full_rotation_stays_in_nco_range():
     """Verify phases near 2π map to an in-range immediate via modulo normalisation."""
-    from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA
 
     phase_rad = math.nextafter(2 * math.pi, 0.0)
     freq, frame = _frame()
@@ -400,7 +429,7 @@ def test_rewrite_phase_shift_op_near_full_rotation_stays_in_nco_range():
 
     body_ops = _sequence_body_ops(module)
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
-    assert 0 <= set_ph_delta.imm.data < CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+    assert 0 <= set_ph_delta.imm.data < _CONTROL_SEQUENCER_DATA.nco_max_phase_steps
 
 
 @pytest.mark.parametrize(
@@ -413,7 +442,6 @@ def test_rewrite_phase_shift_op_near_full_rotation_stays_in_nco_range():
 )
 def test_rewrite_phase_set_op_wraps_wide_radian_range_to_valid_nco_steps(phase_rad: float):
     """Wide-range phase_set constants are normalised into the valid NCO step interval."""
-    from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA
 
     freq, frame = _frame()
     phase = ConstantOp(PhaseAttr(phase_rad))
@@ -426,9 +454,9 @@ def test_rewrite_phase_set_op_wraps_wide_radian_range_to_valid_nco_steps(phase_r
     [set_ph] = [op for op in body_ops if isinstance(op, SetPhImmOp)]
     expected_steps = (
         round(
-            math.degrees(phase_rad) % 360 * CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+            math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
         )
-        % CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+        % _CONTROL_SEQUENCER_DATA.nco_max_phase_steps
     )
     assert set_ph.imm.data == expected_steps
 
@@ -445,7 +473,6 @@ def test_rewrite_phase_shift_op_wraps_wide_radian_range_to_valid_nco_steps(
     phase_rad: float,
 ):
     """Wide-range phase_shift constants are normalised into the valid NCO step interval."""
-    from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA
 
     freq, frame = _frame()
     phase = ConstantOp(PhaseAttr(phase_rad))
@@ -458,9 +485,9 @@ def test_rewrite_phase_shift_op_wraps_wide_radian_range_to_valid_nco_steps(
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
     expected_steps = (
         round(
-            math.degrees(phase_rad) % 360 * CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+            math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
         )
-        % CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+        % _CONTROL_SEQUENCER_DATA.nco_max_phase_steps
     )
     assert set_ph_delta.imm.data == expected_steps
 
@@ -522,7 +549,7 @@ class TestRewritePreQ1AcquireOp:
 
     @staticmethod
     def _run(
-        *acquire_params: tuple[WeightsAttr | None, int, str],
+        *acquire_params: tuple[WeightsAttr | None, int | float, str],
         override_label=None,
         sequencer_config: SequencerConfigAttr | None = None,
         target_data=TARGET_DATA,
@@ -598,12 +625,7 @@ class TestRewritePreQ1AcquireOp:
         assert seq.sequencer_config.integration_length.data == 1000
 
     def test_unweighted_integration_length_uses_readout_sample_rate(self):
-        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-            update={"sample_rate": 500_000_000}
-        )
-        target_data = TARGET_DATA.model_copy(
-            update={"READOUT_SEQUENCER_DATA": readout_data}
-        )
+        target_data = _target_with_readout_sample_rate(500_000_000)
 
         seq, [op] = self._run(
             (None, 16, "q0/measure"),
@@ -614,12 +636,7 @@ class TestRewritePreQ1AcquireOp:
         assert seq.sequencer_config.integration_length.data == 8
 
     def test_unweighted_rejects_misaligned_integration_length(self):
-        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-            update={"sample_rate": 500_000_000}
-        )
-        target_data = TARGET_DATA.model_copy(
-            update={"READOUT_SEQUENCER_DATA": readout_data}
-        )
+        target_data = _target_with_readout_sample_rate(500_000_000)
 
         with pytest.raises(
             PassFailedException,
@@ -633,13 +650,24 @@ class TestRewritePreQ1AcquireOp:
                 target_data=target_data,
             )
 
+    @pytest.mark.parametrize(
+        ("duration_ns", "sample_count"),
+        [
+            pytest.param(0, 0, id="below-minimum"),
+            pytest.param((1 << 24) - 3, (1 << 24) - 3, id="above-maximum"),
+        ],
+    )
+    def test_unweighted_rejects_out_of_range_integration_length(
+        self, duration_ns, sample_count
+    ):
+        with pytest.raises(
+            PassFailedException,
+            match=rf"spans {sample_count} samples.*outside the supported.*range",
+        ):
+            self._run((None, duration_ns, "q0/measure"))
+
     def test_unweighted_rejects_fractional_sample_count(self):
-        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-            update={"sample_rate": 750_000_000}
-        )
-        target_data = TARGET_DATA.model_copy(
-            update={"READOUT_SEQUENCER_DATA": readout_data}
-        )
+        target_data = _target_with_readout_sample_rate(750_000_000)
 
         with pytest.raises(PassFailedException, match="integer number of samples"):
             self._run(
@@ -648,18 +676,30 @@ class TestRewritePreQ1AcquireOp:
             )
 
     def test_unweighted_rejects_non_integer_sample_rate(self):
-        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-            update={"sample_rate": 500_000_000.5}
-        )
-        target_data = TARGET_DATA.model_copy(
-            update={"READOUT_SEQUENCER_DATA": readout_data}
-        )
+        target_data = _target_with_readout_sample_rate(500_000_000.5)
 
         with pytest.raises(PassFailedException, match="sample rate must be an integer"):
             self._run(
                 (None, 16, "q0/measure"),
                 target_data=target_data,
             )
+
+    @pytest.mark.parametrize(
+        "weights",
+        [
+            pytest.param(None, id="unweighted"),
+            pytest.param(WeightsAttr(np.array([0.5 + 0.5j])), id="weighted"),
+        ],
+    )
+    def test_rejects_fractional_nanosecond_duration(self, weights):
+        with pytest.raises(
+            PassFailedException,
+            match=(
+                "Acquisition duration 4.5 ns converts to 4.5 ns.*"
+                "requires a whole number of nanoseconds"
+            ),
+        ):
+            self._run((weights, 4.5, "q0/measure"))
 
     def test_single_weighted(self):
         """Single weighted acquire lowers to AcquireWeightedImmRsRsRsImmOp with correct
@@ -838,9 +878,8 @@ class TestRewritePreQ1AcquireOp:
         [op] = [op for op in seq.body.block.ops if isinstance(op, AcquireImmRsImmOp)]
         assert op.duration.data == expected_ns
 
-    def test_acquisition_result_consumer_raises(self):
-        """If anything consumes the acquisition_result SSA value of a pre_q1_pulse.acquire
-        op, lowering raises NotImplementedError because that path is not yet implemented."""
+    def test_integrated_acquisition_lowers_and_erases_integrate_marker(self):
+        """An IntegrateOp marks the binned Qblox acquisition and is not emitted."""
         freq, frame = _frame("q0/measure")
         duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
@@ -851,14 +890,33 @@ class TestRewritePreQ1AcquireOp:
             number_runs=1,
             weights=None,
         )
-        # Attach a use to the acquisition_result via pulse.integrate — any use
-        # is sufficient to trigger the guard.
         integrate = IntegrateOp(acquire.acquisition_result)
         module = _sequence_module(
             freq, frame, duration, store_idx, acquire, integrate, channel_id="q0/measure"
         )
 
-        with pytest.raises(NotImplementedError, match="acquisition_result consumers"):
+        PulseToQ1LoweringPass().apply(Context(), module)
+
+        assert not any(isinstance(op, IntegrateOp) for op in module.walk())
+        assert any(isinstance(op, AcquireImmRsImmOp) for op in module.walk())
+
+    def test_raw_acquisition_is_rejected(self):
+        """A bare acquisition cannot be mislabeled as Qblox scope data."""
+        freq, frame = _frame("q0/measure")
+        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
+        acquire = PreQ1AcquireOp(
+            frame=frame,
+            duration=duration,
+            store_idx=store_idx,
+            number_runs=1,
+            integrated=False,
+        )
+        module = _sequence_module(
+            freq, frame, duration, store_idx, acquire, channel_id="q0/measure"
+        )
+
+        with pytest.raises(NotImplementedError, match="RAW acquisition"):
             PulseToQ1LoweringPass().apply(Context(), module)
 
     def test_duplicate_acquisition_name_raises(self):
@@ -1158,7 +1216,7 @@ class TestRewritePulseOp:
         """When a pulse is greater than the value set in target data, it cannot be
         played."""
 
-        max_time = TARGET_DATA.Q1ASM_DATA.max_wait_time  # in ns
+        max_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
         waveform_op = _sampled_waveform([0.2 + 0.1j] * (max_time + 1))
         sequence = _sequence_with_pulse(waveform_op)
         module = ModuleOp([sequence])
@@ -1198,7 +1256,8 @@ class TestRewriteStartContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+            RewriteStartContinuousWaveformOp(TARGET_DATA),
+            apply_recursively=False,
         ).rewrite_module(module)
 
         offs_ops = [
@@ -1218,7 +1277,8 @@ class TestRewriteStartContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+            RewriteStartContinuousWaveformOp(TARGET_DATA),
+            apply_recursively=False,
         ).rewrite_module(module)
 
         assert not any(
@@ -1236,7 +1296,8 @@ class TestRewriteStartContinuousWaveformOp:
 
         with pytest.raises(PassFailedException, match="AmplitudeAttr"):
             PatternRewriteWalker(
-                RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+                RewriteStartContinuousWaveformOp(TARGET_DATA),
+                apply_recursively=False,
             ).rewrite_module(module)
 
     def test_multiple_amplitude_uses_does_not_erase_constant_op(self):
@@ -1251,7 +1312,8 @@ class TestRewriteStartContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStartContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+            RewriteStartContinuousWaveformOp(TARGET_DATA),
+            apply_recursively=False,
         ).rewrite_module(module)
 
         # The amplitude constant should still be present
@@ -1273,7 +1335,8 @@ class TestRewriteStopContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStopContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+            RewriteStopContinuousWaveformOp(TARGET_DATA),
+            apply_recursively=False,
         ).rewrite_module(module)
 
         offs_ops = [
@@ -1291,7 +1354,8 @@ class TestRewriteStopContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStopContinuousWaveformOp(TARGET_DATA), apply_recursively=False
+            RewriteStopContinuousWaveformOp(TARGET_DATA),
+            apply_recursively=False,
         ).rewrite_module(module)
 
         assert not any(

@@ -19,7 +19,6 @@ from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
-# TODO: Migrate this lowering boundary to QbloxTargetDescription.
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.backend.qblox.pre_emission_verification import (
     QbloxPreEmissionVerificationPass,
@@ -38,6 +37,7 @@ from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
     ConstantOp,
     CreateFrameOp,
+    IntegrateOp,
     PhaseSetOp,
     PhaseShiftOp,
     StartContinuousWaveformOp,
@@ -80,7 +80,6 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
     """
 
     name = "q1-pulse-validation"
-    target_data: QbloxTargetData = field(default=TARGET_DATA)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset({Q1OutliningPass})
@@ -171,10 +170,10 @@ class Q1PulseLegalisationPass(OrderedPass, ModulePass):
     name = "q1-pulse-legalisation"
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1PulseValidationPass})
+        return frozenset({Q1PreAcquireTransformationPass})
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1PreAcquireTransformationPass})
+        return frozenset({QbloxHardwareBindingPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         PatternRewriteWalker(
@@ -222,15 +221,15 @@ class Q1PreAcquireTransformationPass(OrderedPass, ModulePass):
     name = "acquire-pre-q1-transformation"
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1PulseLegalisationPass})
+        return frozenset({Q1PulseValidationPass})
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
-        return frozenset({QbloxHardwareBindingPass})
+        return frozenset({Q1PulseLegalisationPass, QbloxHardwareBindingPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         """Run the transformation over ``op`` in place.
 
-        :param ctx: The xDSL context (unused; present for the pass interface).
+        :param ctx: The xDSL context, unused but present for the pass interface.
         :param op: The module to transform.
         """
         _ = self._walk_op(
@@ -332,12 +331,22 @@ class Q1PreAcquireTransformationPass(OrderedPass, ModulePass):
             new_ops.append(const_index)
             store_idx = const_index.result
 
+        acquisition_uses = list(acquire_op.acquisition_result.uses)
+        if len(acquisition_uses) > 1 or any(
+            not isinstance(use.operation, IntegrateOp) for use in acquisition_uses
+        ):
+            raise PassFailedException(
+                "pulse.acquire result must be unused or consumed by one pulse.integrate "
+                "operation before Q1 lowering."
+            )
+
         new_ops.append(
             PreQ1AcquireOp(
                 frame=acquire_op.frame,
                 duration=acquire_op.duration,
                 store_idx=store_idx,
                 number_runs=IntAttr(int(prod(for_data.for_op_number_repeats))),
+                integrated=bool(acquisition_uses),
                 weights=acquire_op.weights,
                 label=acquire_op.label,
             )
@@ -437,9 +446,8 @@ def create_qblox_configured_q1_pipeline(
     This is a Q1 conversion/configuration pipeline only: it assumes the input module has
     already been through Pulse-level preprocessing (see
     :meth:`~qat.experimental.dialect.pulse.transforms.pipeline.PulsePipelineManager.build_default_pipeline`).
-    Callers that need both stages (for example
-    :func:`qat.experimental.backend.qblox.codegen.compile_qblox_program`) are responsible
-    for invoking Pulse preprocessing themselves before applying this pipeline.
+    The experimental middleend runs Pulse preprocessing before the backend applies this
+    pipeline.
 
     Binding runs after Pulse validation, legalisation, and acquisition preparation while
     ``pulse.create_frame`` still carries generator-selection metadata.
@@ -450,18 +458,16 @@ def create_qblox_configured_q1_pipeline(
     which requires the module to be free of ``builtin.unrealized_conversion_cast``.
 
     :param canonical_data: Canonical hardware data used for physical binding.
-    :param target_data: Qblox target description used by conversion stages.
+    :param target_data: Qblox limits used by Q1 lowering and final verification.
     :returns: Ordered pipeline ending in strict Qblox pre-emission verification.
     """
 
-    # TODO(COMPILER-1440): Resolve target capabilities from a typed DLTI description attached
-    # to the IR instead of passing QbloxTargetData separately through conversion stages.
     return OrderedPassPipeline(
         (
-            Q1OutliningPass(target_data=target_data),
-            Q1PulseValidationPass(target_data=target_data),
-            Q1PulseLegalisationPass(),
+            Q1OutliningPass(),
+            Q1PulseValidationPass(),
             Q1PreAcquireTransformationPass(),
+            Q1PulseLegalisationPass(),
             QbloxHardwareBindingPass(canonical_data),
             PulseToQ1LoweringPass(target_data=target_data),
             BoundDeadFrameEliminationPass(),
@@ -471,6 +477,6 @@ def create_qblox_configured_q1_pipeline(
             LineariseQ1CfToQ1Pass(),
             ReconcileUnrealizedCastsPass(),
             LinearScanRegisterAllocationPass(),
-            QbloxPreEmissionVerificationPass(),
+            QbloxPreEmissionVerificationPass(target_data=target_data),
         )
     )

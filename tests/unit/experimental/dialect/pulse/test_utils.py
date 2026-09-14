@@ -13,6 +13,7 @@ from qat.experimental.dialect.pulse.ir import (
     CreateFrameOp,
     FrequencyAttr,
     FrequencyType,
+    KernelOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
@@ -58,6 +59,24 @@ def test_pulse_entry_block_returns_function_body_for_single_function_module():
     module = ModuleOp([fn])
 
     assert pulse_entry_block(module) is body
+
+
+def test_pulse_entry_block_returns_kernel_body_when_main_is_also_present():
+    freq, frame = _frame()
+    kernel_body = Block([freq, frame])
+    kernel = KernelOp("program", ((), ()), Region(kernel_body))
+    main = func.FuncOp("main", ((), ()), Region(Block([func.ReturnOp()])))
+    module = ModuleOp([kernel, main])
+
+    assert pulse_entry_block(module) is kernel_body
+
+
+def test_pulse_entry_block_rejects_kernel_with_unrelated_top_level_operation():
+    kernel = KernelOp("program", ((), ()), Region(Block()))
+    module = ModuleOp([kernel, ConstantOp(TimeAttr(8e-9))])
+
+    with pytest.raises(PassFailedException, match="may only contain additional functions"):
+        pulse_entry_block(module)
 
 
 def test_pulse_entry_block_rejects_mixed_module_shape():

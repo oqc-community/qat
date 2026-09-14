@@ -542,6 +542,10 @@ def _nco_frequency(
 ) -> float:
     """Resolve the intermediate frequency the sequencer's NCO must synthesise.
 
+    Initial carrier-to-IF decomposition is resolved into static sequencer configuration
+    here. It must not also produce a ``set_freq`` instruction from ``pulse.create_frame``.
+    TODO(COMPILER-1386): Define and lower dynamic frame-frequency changes separately.
+
     :param channel_binding: Calibrated canonical channel driving the sequencer.
     :param nco: Supplied NCO values of the sequencer.
     :param origin: Description of the sequencer, used to describe validation failures.

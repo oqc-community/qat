@@ -8,7 +8,7 @@ that is derived from the surrounding Pulse control flow, so that the final lower
 instructions can be a straightforward, context-free rewrite.
 """
 
-from xdsl.dialects.builtin import IndexType, IntAttr, StringAttr
+from xdsl.dialects.builtin import BoolAttr, IndexType, IntAttr, StringAttr
 from xdsl.ir import Operation, SSAValue
 from xdsl.irdl import (
     IRDLOperation,
@@ -46,6 +46,7 @@ class PreQ1AcquireOp(IRDLOperation):
     :ivar frame_result: The frame threaded to downstream time-ordered ops.
     :ivar acquisition_result: The acquisition result value.
     :ivar number_runs: The number of times the acquisition executes across the loop nest.
+    :ivar integrated: Whether the Pulse result is integrated into one IQ value.
     :ivar weights: Optional integration weights.
     :ivar label: Optional label used for observability and debugging.
     """
@@ -59,6 +60,7 @@ class PreQ1AcquireOp(IRDLOperation):
     frame_result = result_def(FrameType)
     acquisition_result = result_def(AcquisitionType)
     number_runs = prop_def(IntAttr)
+    integrated = prop_def(BoolAttr)
     weights = opt_attr_def(WeightsAttr)
     label = opt_attr_def(StringAttr)
 
@@ -68,6 +70,7 @@ class PreQ1AcquireOp(IRDLOperation):
         duration: SSAValue | Operation,
         store_idx: SSAValue | Operation,
         number_runs: int | IntAttr,
+        integrated: bool | BoolAttr = True,
         weights: WeightsAttr | None = None,
         label: str | StringAttr | None = None,
     ) -> None:
@@ -81,6 +84,7 @@ class PreQ1AcquireOp(IRDLOperation):
             acquisition result is stored.
         :param number_runs: The total number of acquisition repetitions across the enclosing
             loop nest, used to size the acquisition's bin allocation.
+        :param integrated: Whether the Pulse result is integrated into one IQ value.
         :param weights: Optional weights attribute for the acquisition.
         :param label: Optional string attribute used to label the acquisition for
             observability and debugging.
@@ -92,6 +96,11 @@ class PreQ1AcquireOp(IRDLOperation):
         attributes = {} if weights is None else {"weights": weights}
         if label is not None:
             attributes["label"] = StringAttr(label) if isinstance(label, str) else label
+        integrated_attr = (
+            BoolAttr(integrated, value_type=1)
+            if isinstance(integrated, bool)
+            else integrated
+        )
 
         super().__init__(
             operands=[frame_ssa, duration_ssa, store_idx_ssa],
@@ -100,6 +109,7 @@ class PreQ1AcquireOp(IRDLOperation):
             properties={
                 "number_runs": IntAttr(number_runs)
                 if isinstance(number_runs, int)
-                else number_runs
+                else number_runs,
+                "integrated": integrated_attr,
             },
         )

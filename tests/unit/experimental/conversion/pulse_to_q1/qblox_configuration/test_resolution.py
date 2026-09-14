@@ -42,10 +42,14 @@ from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers 
 )
 
 
-def _resolve(configurations, **kwargs):
+def _resolve(
+    configurations,
+    **kwargs,
+):
     data = canonical_data(configurations=configurations, **kwargs)
     return resolve_sequencer_bindings(
-        QbloxHardwareView.derive(data), supplied_configurations(data)
+        QbloxHardwareView.derive(data),
+        supplied_configurations(data),
     )
 
 

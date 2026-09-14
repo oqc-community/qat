@@ -85,6 +85,7 @@ from qat.experimental.dialect.pulse.ir import (
     WeightsAttr,
 )
 from qat.experimental.dialect.pulse.ir.attributes import StateMapDictAttr
+from qat.experimental.dialect.q1 import MoveImmRdOp, Registers, SU32Imm
 from qat.experimental.waveforms.shapes.blackman import BlackmanWaveformShape
 from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
 from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
@@ -1190,6 +1191,18 @@ class TestPhaseOps:
         phase_op = op(frame.results[0], phase.results[0])
         assert phase_op.result.type == FrameType("measure")
         phase_op.verify()
+
+    def test_rejects_register_phase_operand(self, op):
+        """A register-typed phase operand is rejected: ``PhaseOp`` only accepts a
+        ``pulse.phase`` value, so IRDL's automatic operand-type check rejects a
+        register-typed operand without any bridge-specific verification logic."""
+        frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
+        phase_op = op(frame.results[0], MoveImmRdOp(SU32Imm(0), Registers.R1).rd)
+        with pytest.raises(
+            VerifyException,
+            match="operand 'phase' at position 1 does not verify",
+        ):
+            phase_op.verify()
 
 
 class TestWaitOp:

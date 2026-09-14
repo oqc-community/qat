@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, JsonValue
 from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
@@ -34,6 +34,7 @@ class QbloxProgram(AbstractProgram):
     driver_version: SemanticVersion
     fw_version: SemanticVersion
 
+    metadata: dict[str, JsonValue] | None = None
     timeout_seconds: float = Field(
         default=DEFAULT_TIMEOUT_SECONDS, gt=0, allow_inf_nan=False
     )

@@ -29,21 +29,19 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
-# TODO: Migrate this lowering boundary to QbloxTargetDescription.
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData, SequencerDescription
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
     ConstantOp,
-    CreateFrameOp,
+    IntegrateOp,
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
     SampledWaveformAttr,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
-    SynchronizeOp,
     WaitOp,
     WeightsAttr,
 )
@@ -71,6 +69,10 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_weight,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    Q1SequencerType,
+)
 
 
 class LowerArithIntegerConstantToMoveOp(ModulePass, RewritePattern):
@@ -166,38 +168,27 @@ def _make_debug_info(op: IRDLOperation) -> DebugInfoAttr | None:
     return ProvenanceInfoAttr(source_op=op.name, port=port)
 
 
-class RewriteCreateFrameOp(RewritePattern):
-    """Skeleton for frequency initialisation from ``pulse.create_frame``.
+def _sequencer_data(op: Operation, target_data: QbloxTargetData) -> SequencerDescription:
+    """Return target data for the physical sequencer enclosing ``op``.
 
-    The intended lowering emits ``q1.set_freq`` + ``q1.upd_param`` using the
-    frame's NCO intermediate frequency. ``CreateFrameOp.frequency`` carries
-    the total carrier frequency. Extracting the IF requires the LO frequency,
-    which is hardware-model information unavailable at this pipeline stage.
-    A prior legalisation pass must decompose ``carrier = LO + IF`` and rewrite
-    the operand to the IF before this pattern can fire safely.
+    Hardware binding runs before Pulse-to-Q1 lowering, so each enclosing sequence must
+    normally carry its module kind and physical sequencer index at this stage. Standalone
+    pattern use without binding retains the control-sequencer default.
 
-    TODO(COMPILER-1386): Implement once the carrier-to-IF legalisation pass is in place.
+    :param op: Operation whose enclosing sequence selects the physical sequencer.
+    :param target_data: Qblox target data used by the lowering pipeline.
+    :returns: Numeric limits for the selected physical sequencer.
     """
 
-    def __init__(self, target_data: QbloxTargetData) -> None:
-        self.target_data = target_data
-
-    @op_type_rewrite_pattern
-    def match_and_rewrite(self, op: CreateFrameOp, _rewriter: PatternRewriter) -> None:
-        # TODO(COMPILER-1386): Emit set_freq + upd_param once IF is available.
-        return
-
-
-class RewriteSynchronizeOp(RewritePattern):
-    """Skeleton for COMPILER-1344 synchronize macro-expansion."""
-
-    def __init__(self, target_data: QbloxTargetData) -> None:
-        self.target_data = target_data
-
-    @op_type_rewrite_pattern
-    def match_and_rewrite(self, op: SynchronizeOp, _rewriter: PatternRewriter) -> None:
-        # TODO(COMPILER-1343): Replace pulse.sync with Q1 macro-expansion.
-        return
+    sequence = find_enclosing_sequence(op)
+    if sequence.module_config is None or sequence.seq_idx is None:
+        return target_data.CONTROL_SEQUENCER_DATA
+    sequencer_type = DEFAULT_QBLOX_TARGET.sequencer(
+        sequence.module_config.kind.data, sequence.seq_idx.data
+    ).sequencer_spec.type
+    if sequencer_type is Q1SequencerType.readout:
+        return target_data.READOUT_SEQUENCER_DATA
+    return target_data.CONTROL_SEQUENCER_DATA
 
 
 class RewriteWaitOp(RewritePattern):
@@ -209,7 +200,7 @@ class RewriteWaitOp(RewritePattern):
     The frame carried by ``pulse.wait`` is forwarded to downstream operations.
 
     Register-driven durations that do not fold to a compile-time constant are left
-    untouched; those are handled elsewhere and are out of scope for this lowering.
+    untouched. Those are handled elsewhere and are out of scope for this lowering.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
@@ -221,25 +212,39 @@ class RewriteWaitOp(RewritePattern):
         if duration_s is None:
             return
 
-        grid_time = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+        sequencer_data = _sequencer_data(op, self.target_data)
+        grid_time = sequencer_data.grid_time
         max_wait_time = self.target_data.Q1ASM_DATA.max_wait_time
+        max_aligned_wait_time = max_wait_time - max_wait_time % grid_time
+        if max_aligned_wait_time < DurationImm._MIN:
+            raise PassFailedException(
+                f"Q1 wait limit {max_wait_time} ns cannot represent the required "
+                f"{grid_time} ns sequencer alignment."
+            )
 
         total_ns = int(
-            ceil(duration_s * self.target_data.CONTROL_SEQUENCER_DATA.sample_rate)
+            ceil(
+                duration_s
+                * 10
+                ** (
+                    TIME_UNIT_EXPONENTS[TimeUnits.SECOND]
+                    - TIME_UNIT_EXPONENTS[TimeUnits.NANOSECOND]
+                )
+            )
         )
         remainder = total_ns % grid_time
         if remainder:
             total_ns += grid_time - remainder
 
-        # Note: dosen't have a breakpoint to turn unrolling to
+        # Note: this has no breakpoint to turn unrolling into
         # hardware-based loops for now.
         debug_info = _make_debug_info(op)
         wait_ops: list[Operation] = []
-        while total_ns > max_wait_time:
+        while total_ns > max_aligned_wait_time:
             wait_ops.append(
-                WaitImmOp(DurationImm(max_wait_time)).with_debug_info(debug_info)
+                WaitImmOp(DurationImm(max_aligned_wait_time)).with_debug_info(debug_info)
             )
-            total_ns -= max_wait_time
+            total_ns -= max_aligned_wait_time
         if total_ns > 0:
             wait_ops.append(WaitImmOp(DurationImm(total_ns)).with_debug_info(debug_info))
 
@@ -296,7 +301,7 @@ class RewritePulseOp(RewritePattern):
 
     Distinct sampled waveforms are assumed to have been folded and de-duplicated
     upstream, so identical waveforms share a single ``ConstantOp``. Each such op is
-    therefore registered in the waveform table only once per sequence; subsequent
+    therefore registered in the waveform table only once per sequence. Subsequent
     pulses referencing the same op reuse the cached table indices instead of
     re-comparing sample arrays.
     """
@@ -304,7 +309,7 @@ class RewritePulseOp(RewritePattern):
     def __init__(self, target_data: QbloxTargetData) -> None:
         """Initialise the pattern.
 
-        :param target_data: The QBlox target description used during lowering.
+        :param target_data: Qblox target data used during lowering.
         """
         self.target_data = target_data
         self.sequence_to_waveform_to_index_map: dict[
@@ -347,12 +352,12 @@ class RewritePulseOp(RewritePattern):
         else:
             i_index, q_index = waveform_to_index_map[waveform_op]
 
-        # Convert duration to ns for Q1; each sample is assumed to be 1 ns, so we don't need
+        # Convert duration to ns for Q1. Each sample is assumed to be 1 ns, so we don't need
         # to worry about rounding error.
         duration_ns = round(waveform_op.value.width.value_in_unit(TimeUnits.NANOSECOND))
-        min_duration = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
+        min_duration = _sequencer_data(op, self.target_data).grid_time
 
-        # TODO (COMPILER-1389): Remove this validation in favour of a dedicated pulse-level
+        # TODO(COMPILER-1389): Remove this validation in favour of a dedicated pulse-level
         # pass
         if duration_ns < min_duration:
             raise PassFailedException(
@@ -390,7 +395,7 @@ class RewriteStartContinuousWaveformOp(RewritePattern):
     def __init__(self, target_data: QbloxTargetData) -> None:
         """Initialise the pattern.
 
-        :param target_data: The QBlox target description used during lowering.
+        :param target_data: Qblox target data used during lowering.
         """
         self.target_data = target_data
 
@@ -437,7 +442,7 @@ class RewriteStopContinuousWaveformOp(RewritePattern):
     def __init__(self, target_data: QbloxTargetData) -> None:
         """Initialise the pattern.
 
-        :param target_data: The QBlox target description used during lowering.
+        :param target_data: Qblox target data used during lowering.
         """
         self.target_data = target_data
 
@@ -467,7 +472,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
     :class:`SequenceOp` and assigned hardware indices in encounter order. Q1 requires the
     bin and weight indices to be supplied in registers. Bin indices retain their upstream
     value, while static weight indices are materialised directly as Q1 moves to unallocated
-    integer registers; a later register-allocation pass assigns concrete Q1 GPRs.
+    integer registers. A later register-allocation pass assigns concrete Q1 GPRs.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
@@ -480,16 +485,29 @@ class RewritePreQ1AcquireOp(RewritePattern):
 
         :param op: The ``pre_q1_pulse.acquire`` op to lower.
         :param rewriter: The pattern rewriter used to mutate the IR.
-        :raises NotImplementedError: If the acquisition result is consumed downstream;
-            lowering of ``pulse.acquire`` result consumers is not yet supported.
+        :raises NotImplementedError: If raw acquisition is requested or the integrated
+            result remains in the outlined hardware sequence.
         """
-        # TODO: Support lowering of pulse.acquire acquisition_result consumers
-        # (e.g. pulse.integrate). Once supported, replace the guard below with proper
-        # lowering logic. Post COMPILER-1369 work.
-        if op.acquisition_result.uses:
+        if not op.integrated.value.data:
             raise NotImplementedError(
-                "pre_q1_pulse.acquire acquisition_result consumers are not yet supported"
+                "Qblox RAW acquisition lowering is not yet supported; use an integrated "
+                "acquisition."
             )
+        acquisition_uses = list(op.acquisition_result.uses)
+        if len(acquisition_uses) > 1 or any(
+            not isinstance(use.operation, IntegrateOp) for use in acquisition_uses
+        ):
+            raise NotImplementedError(
+                "Integrated Qblox acquisition has unsupported result consumers."
+            )
+        for use in acquisition_uses:
+            integrate = use.operation
+            if integrate.result.uses:
+                raise NotImplementedError(
+                    "pulse.integrate results must be removed from the outlined hardware "
+                    "sequence before Q1 lowering."
+                )
+            rewriter.erase_op(integrate)
         debug_info = _make_debug_info(op)
 
         # Ops that replace ``op``, emitted in order: index casts first, then the acquire.
@@ -569,7 +587,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
     def _get_ns_duration(self, op: PreQ1AcquireOp) -> int:
         """Get the duration of the acquisition in nanoseconds.
 
-        TODO: Change this to ps as apart of COMPILER-1388.
+        TODO(COMPILER-1388): Consume integer picoseconds once Pulse IR units are removed.
 
         :param op: The ``pre_q1_pulse.acquire`` operation to extract from.
         :returns: Duration in nanoseconds as an integer.
@@ -580,18 +598,23 @@ class RewritePreQ1AcquireOp(RewritePattern):
         time_attr = const.fold()[0]
         unit = time_attr.unit.data
         value = time_attr.value.data
-        ns = value * 10 ** (
+        duration_ns = value * 10 ** (
             TIME_UNIT_EXPONENTS[unit] - TIME_UNIT_EXPONENTS[TimeUnits.NANOSECOND]
         )
-        return round(ns)
+        integer_duration_ns = int(duration_ns)
+        if integer_duration_ns != duration_ns:
+            raise PassFailedException(
+                f"Acquisition duration {value} {unit.value} converts to "
+                f"{duration_ns} ns, but Q1 acquisition duration requires a whole "
+                "number of nanoseconds."
+            )
+        return integer_duration_ns
 
     def _get_integration_length_samples(self, duration_ns: int) -> int:
         """Convert an acquisition duration to readout sequencer samples.
 
-        The sequencer ``grid_time`` constrains instruction timing in nanoseconds; it is not
-        the integration-length alignment once the readout sample rate differs from 1 GHz.
-        The sample count is therefore checked against the readout sequencer's acquisition
-        integration constraint after conversion.
+        After conversion, the sample count is checked against the readout sequencer's
+        ``grid_time`` alignment.
 
         :param duration_ns: Acquisition duration in nanoseconds.
         :returns: Number of samples at the target readout sequencer sample rate.
@@ -611,7 +634,18 @@ class RewritePreQ1AcquireOp(RewritePattern):
                 f"Acquisition duration {duration_ns} ns does not span an integer number "
                 f"of samples at {sample_rate} samples/s."
             )
-        alignment = readout_data.min_acq_integration_length
+        if not (
+            readout_data.min_acq_integration_length
+            <= sample_count
+            <= readout_data.max_acq_integration_length
+        ):
+            raise PassFailedException(
+                f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
+                f"{sample_rate} samples/s, outside the supported integration length "
+                f"range [{readout_data.min_acq_integration_length}, "
+                f"{readout_data.max_acq_integration_length}] samples."
+            )
+        alignment = readout_data.grid_time
         if sample_count % alignment:
             raise PassFailedException(
                 f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
@@ -621,7 +655,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
         return int(sample_count)
 
     def _register_weight(self, sequence_op: SequenceOp, weights_data: ndarray) -> int:
-        """Register a new weight in the target data and return its index.
+        """Register a weight in the enclosing sequence table and return its index.
 
         :param sequence_op: The enclosing ``SequenceOp`` to register the weight in.
         :param weights_data: Weight coefficients to register.
@@ -640,7 +674,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
     def _register_acquisition(
         self, sequence_op: SequenceOp, name: str, num_bins: int
     ) -> int:
-        """Register a new acquisition in the target data and return its index.
+        """Register an acquisition in the enclosing sequence table and return its index.
 
         :param sequence_op: The enclosing ``SequenceOp`` to register the acquisition in.
         :param name: Unique name for the acquisition entry.
@@ -686,30 +720,26 @@ def create_legalisation_patterns() -> tuple[RewritePattern, ...]:
 
 
 def create_pulse_to_q1_lowering_patterns(
-    target_data: QbloxTargetData | None = None,
+    target_data: QbloxTargetData = TARGET_DATA,
 ) -> tuple[RewritePattern, ...]:
     """Create the rewrite set used by the lowering stage.
 
-    Phase entries are configured with ``PhaseLowering``. ``RewritePreQ1AcquireOp`` fully
-    lowers ``pre_q1_pulse.acquire`` to Q1 acquire instructions. All other entries are
-    scaffold patterns that preserve IR shape pending their dedicated lowering
-    implementations.
+    Phase entries are configured with :class:`PhaseLowering`. Wait, finite pulse,
+    continuous-waveform, and acquisition patterns lower their Pulse or pre-Q1 operations
+    to Q1 instructions. Pulse preprocessing owns synchronization, while hardware
+    configuration resolution owns initial NCO frequency.
 
-    :param target_data: QBlox target description. When omitted, the repository
-        default is used.
+    :param target_data: Qblox limits used during lowering.
     :returns: Ordered pattern tuple for the lowering pass.
     """
 
-    resolved_target_data = target_data or TARGET_DATA
     return (
         LowerArithIntegerConstantToMoveOp(),
-        RewritePhaseSetOp(resolved_target_data, rewrite_callable=PhaseLowering()),
-        RewritePhaseShiftOp(resolved_target_data, rewrite_callable=PhaseLowering()),
-        RewriteCreateFrameOp(resolved_target_data),
-        RewriteSynchronizeOp(resolved_target_data),
-        RewriteWaitOp(resolved_target_data),
-        RewritePulseOp(resolved_target_data),
-        RewriteStartContinuousWaveformOp(resolved_target_data),
-        RewriteStopContinuousWaveformOp(resolved_target_data),
-        RewritePreQ1AcquireOp(resolved_target_data),
+        RewritePhaseSetOp(target_data, rewrite_callable=PhaseLowering()),
+        RewritePhaseShiftOp(target_data, rewrite_callable=PhaseLowering()),
+        RewriteWaitOp(target_data),
+        RewritePulseOp(target_data),
+        RewriteStartContinuousWaveformOp(target_data),
+        RewriteStopContinuousWaveformOp(target_data),
+        RewritePreQ1AcquireOp(target_data),
     )

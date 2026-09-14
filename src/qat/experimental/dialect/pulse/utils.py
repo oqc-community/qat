@@ -11,6 +11,7 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     CreateFrameOp,
     FrequencyAttr,
+    KernelOp,
     PhaseAttr,
     PhaseSetOp,
     PhaseShiftOp,
@@ -22,21 +23,36 @@ from qat.experimental.dialect.pulse.ir import (
 def pulse_entry_block(module: ModuleOp) -> Block:
     """Return the block that carries the Pulse instruction stream.
 
-    Current repository producers use two concrete module shapes:
+    Current repository producers use three concrete module shapes:
 
     * Frontend importers build a single ``func.func @main`` and place Pulse ops in
       its body block.
+    * The PuRR importer builds a ``pulse.kernel`` containing the executable Pulse
+      stream and a ``func.func @main`` containing results processing.
     * Some transforms and unit tests build a flat module with Pulse ops at top-level.
 
-    TODO(COMPILER-1380): remove this dual-shape logic once the canonical module shape
+    TODO(COMPILER-1380): remove this multi-shape logic once the canonical module shape
     is settled.
 
     :param module: The Pulse module to inspect.
     :returns: The entry block containing the Pulse instruction sequence.
-    :raises PassFailedException: If the module contains more than one function, or
-        mixes a function with other top-level operations.
+    :raises PassFailedException: If the module contains multiple kernels, multiple
+        functions without a kernel, or mixes a function with other non-kernel operations.
     """
     top_level_ops = list(module.body.block.ops)
+    kernel_ops = [op for op in top_level_ops if isinstance(op, KernelOp)]
+    if kernel_ops:
+        if len(kernel_ops) != 1:
+            raise PassFailedException("A Pulse module must contain at most one kernel.")
+        if unexpected_ops := [
+            op for op in top_level_ops if not isinstance(op, KernelOp | func.FuncOp)
+        ]:
+            raise PassFailedException(
+                "A Pulse module containing a kernel may only contain additional "
+                f"functions, but found {unexpected_ops[0].name}."
+            )
+        return kernel_ops[0].body.block
+
     func_ops = [op for op in top_level_ops if isinstance(op, func.FuncOp)]
     if not func_ops:
         return module.body.block

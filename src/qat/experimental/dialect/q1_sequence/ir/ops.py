@@ -29,6 +29,7 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
     SequencerIndexAttr,
     SlotIndexAttr,
 )
+from qat.experimental.system_data.hardware.qblox.models import QbloxModuleLocation
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
     Q1SequencerFeature,
@@ -139,13 +140,13 @@ class SequenceOp(IRDLOperation):
         )
 
     def verify_(self) -> None:
-        """Verifies SequenceOp invariants.
+        """Verify structural and physical sequence invariants.
 
-        - channel_id must be non-empty.
-        - Body must contain at least one block.
-        - Each block in the body must end with an IsTerminator op.
-        - Indices must be unique within each data table.
-        - Names must be unique within each data table.
+        Structural verification requires non-empty sequence and port identifiers, complete
+        allocation identity, terminated body blocks, and unique names and indices in each
+        data table. Bound sequences additionally validate module location, module lanes,
+        sequencer index and capability, connection routing, mixer configuration, and
+        agreement between sequence allocation and module or sequencer configuration.
         """
 
         if not self.channel_id.data:
@@ -209,7 +210,7 @@ class SequenceOp(IRDLOperation):
         self._verify_physical_allocation()
 
     def _verify_physical_allocation(self) -> None:
-        """Verify allocation against the attached authoritative module configuration."""
+        """Verify allocation against the fixed topology and module configuration."""
 
         if (
             self.sequencer_config is not None
@@ -271,6 +272,13 @@ class SequenceOp(IRDLOperation):
         if module_config is None:
             return
 
+        try:
+            DEFAULT_QBLOX_TARGET.validate_module_location(
+                QbloxModuleLocation(self.instrument_id.data, self.slot_idx.data)
+            )
+        except ValueError as error:
+            raise VerifyException(str(error)) from error
+        module_config.verify()
         module_spec = DEFAULT_QBLOX_TARGET.module_spec(module_config.kind.data)
         if self.seq_idx.data >= module_spec.sequencer_count:
             raise VerifyException(
@@ -343,12 +351,14 @@ class SequenceOp(IRDLOperation):
         :param module_config: Authoritative configuration of the allocated module.
         """
 
-        config = self.sequencer_config
+        sequencer_config = self.sequencer_config
         seq_idx = self.seq_idx.data
         configured_outputs = {item.output_id.data for item in module_config.outputs}
         configured_inputs = {item.input_id.data for item in module_config.inputs}
         connections = (
-            config.connections if isinstance(config.connections, ArrayAttr) else ()
+            sequencer_config.connections
+            if isinstance(sequencer_config.connections, ArrayAttr)
+            else ()
         )
         for connection in connections:
             missing_outputs = {
@@ -384,9 +394,22 @@ class SequenceOp(IRDLOperation):
                     f"SequenceOp connection references unconfigured inputs "
                     f"{sorted(missing_inputs)}"
                 )
+            unreachable_inputs = {
+                input_id
+                for input_id in connection.input_ids
+                if seq_idx
+                not in DEFAULT_QBLOX_TARGET.input_sequencers(
+                    module_config.kind.data, input_id
+                )
+            }
+            if unreachable_inputs:
+                raise VerifyException(
+                    f"{module_config.kind.data.value} sequencer {seq_idx} cannot "
+                    f"read connection inputs {sorted(unreachable_inputs)}"
+                )
         disabled_outputs = (
-            config.disabled_outputs
-            if isinstance(config.disabled_outputs, ArrayAttr)
+            sequencer_config.disabled_outputs
+            if isinstance(sequencer_config.disabled_outputs, ArrayAttr)
             else ()
         )
         missing_disabled_outputs = {
@@ -413,8 +436,8 @@ class SequenceOp(IRDLOperation):
                 f"disabled outputs {sorted(unreachable_disabled_outputs)}"
             )
         output_path_connections = (
-            config.output_path_connections
-            if isinstance(config.output_path_connections, ArrayAttr)
+            sequencer_config.output_path_connections
+            if isinstance(sequencer_config.output_path_connections, ArrayAttr)
             else ()
         )
         for connection in output_path_connections:
@@ -434,19 +457,27 @@ class SequenceOp(IRDLOperation):
                 )
 
         acquisition_path_connections = (
-            config.acquisition_path_connections
-            if isinstance(config.acquisition_path_connections, ArrayAttr)
+            sequencer_config.acquisition_path_connections
+            if isinstance(sequencer_config.acquisition_path_connections, ArrayAttr)
             else ()
         )
         for connection in acquisition_path_connections:
-            if connection.input_id.data not in configured_inputs:
+            input_id = connection.input_id.data
+            if input_id not in configured_inputs:
                 raise VerifyException(
-                    f"SequenceOp input {connection.input_id.data} is absent from the configuration "
+                    f"SequenceOp input {input_id} is absent from the configuration "
                     f"of module ({module_config.instrument_id.data!r}, "
                     f"{module_config.slot_idx.data})"
                 )
+            if seq_idx not in DEFAULT_QBLOX_TARGET.input_sequencers(
+                module_config.kind.data, input_id
+            ):
+                raise VerifyException(
+                    f"{module_config.kind.data.value} sequencer {seq_idx} cannot read "
+                    f"acquisition input {input_id}"
+                )
 
-        oscillator_id = config.local_oscillator_id
+        oscillator_id = sequencer_config.local_oscillator_id
         if isinstance(oscillator_id, StringAttr) and all(
             item.oscillator_id.data != oscillator_id.data
             for item in module_config.local_oscillators

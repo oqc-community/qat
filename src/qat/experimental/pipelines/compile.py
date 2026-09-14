@@ -2,11 +2,6 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Experimental Qblox compile pipeline.
 
-.. note:: Related work (TODOs)
-
-    - COMPILER-1421: Experimental pulse-level middleend.
-    - COMPILER-1422: Experimental QBlox backend.
-
 Wires together the experimental frontend, middleend, and backend for the experimental Qblox
 target, using a
 :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`
@@ -29,14 +24,11 @@ directly instead::
         model=canonical_system_data,
     )
 
-.. warning::
+The ``program`` passed to :meth:`compile` must be a ``QuantumInstructionBuilder`` (PuRR IR)
+because the experimental frontend currently exposes only the PuRR importer.
 
-    Experimental. :meth:`compile` will raise ``NotImplementedError`` at the backend stage
-    until COMPILER-1422 (QBlox code generation from the new IR stack) is implemented. The
-    frontend and middleend (COMPILER-1421 pulse-level passes) already run
-    against real components. The ``program`` passed to ``compile`` must be a
-    ``QuantumInstructionBuilder`` (PuRR IR) — the experimental frontend only exposes the
-    PuRR importer.
+The inherited ``target_data`` argument carries the Qblox limits used by the backend and
+lowering pipeline.
 """
 
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
@@ -58,15 +50,10 @@ class ExperimentalQbloxCompilePipelineConfig(PipelineConfig):
 
 
 class ExperimentalQbloxCompilePipeline(UpdateablePipeline):
-    # TODO(COMPILER-1443): Replace with new pipeline infrastructure.
     """Compiles programs for the experimental Qblox target using the frontend, middleend,
     and backend stack.
 
-    .. warning::
-
-        This pipeline is for compilation purposes only and does not execute programs.
-        Backend code generation is not yet implemented (COMPILER-1422); compilation will
-        raise ``NotImplementedError`` once it reaches that stage.
+    This pipeline is for compilation purposes only and does not execute programs.
     """
 
     @staticmethod
@@ -76,12 +63,12 @@ class ExperimentalQbloxCompilePipeline(UpdateablePipeline):
         target_data: QbloxTargetData | None = None,
         engine: None = None,
     ) -> CompilePipeline:
-        target_data = target_data if target_data is not None else TARGET_DATA
+        target_data = TARGET_DATA if target_data is None else target_data
         return CompilePipeline(
             name=config.name,
             model=model,
             target_data=target_data,
             frontend=PurrFrontend(model=model),
             middleend=PulseLevelMiddleend(model=model),
-            backend=ExperimentalQbloxBackend(model=model),
+            backend=ExperimentalQbloxBackend(model=model, target_data=target_data),
         )
