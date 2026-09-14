@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.pulse.post_processing module &mdash; qat-compiler 3.0.0.post369.dev20260914081604 documentation</title>
+  <title>qat.experimental.system_data.pulse.post_processing module &mdash; qat-compiler 3.0.0.post370.dev20260914101930 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -798,8 +798,12 @@ channels whose disallowed-label set is empty.</p>
 <dd class="field-odd"><p>The derived post-processing configuration for the system.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If modes sharing a channel carry different max-likelihood
-methods.</p>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – If modes sharing a channel carry different max-likelihood
+methods.</p></li>
+<li><p><strong>NotImplementedError</strong> – If a max-likelihood calibration carries an affine IQ
+pre-transform, which this view cannot yet express.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
