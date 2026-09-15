@@ -22,6 +22,7 @@ without changing canonical assembly responsibilities.
 """
 
 import math
+from copy import deepcopy
 from typing import Any
 
 from pydantic import ValidationError
@@ -241,6 +242,66 @@ def _inject_native_waveform_shapes(
     return payload
 
 
+def _matching_readout_rename(key: str) -> tuple[str, list[str]] | None:
+    """Return the combined-readout rename rule a pulse-channel key triggers.
+
+    :param key: Pulse-channel key from the source payload.
+    :returns: The matched ``(old_suffix, new_suffixes)`` rule, or ``None`` when the key
+        names no combined readout channel.
+    """
+
+    for old_suffix, new_suffixes in _QBLOX_COMBINED_READOUT_RENAMES.items():
+        if key.endswith(old_suffix):
+            return old_suffix, new_suffixes
+    return None
+
+
+def _replace_suffix(text: str, old_suffix: str, new_suffix: str) -> str:
+    """Replace a trailing suffix, preserving the text when no rename applies.
+
+    :param text: Value to rename.
+    :param old_suffix: Suffix to strip; an empty suffix leaves the text unchanged.
+    :param new_suffix: Suffix to append in place of ``old_suffix``.
+    :returns: The renamed text.
+    """
+
+    if old_suffix and text.endswith(old_suffix):
+        return f"{text[: -len(old_suffix)]}{new_suffix}"
+    return text
+
+
+def _pulse_channel_payload(value: Any) -> dict[str, Any] | None:
+    """Return the nested pulse-channel mapping carrying the ``id`` field.
+
+    PuRR wraps some pulse channels in a ``pulse_channel`` sub-mapping and inlines others,
+    so the identifier may live one level down or directly on ``value``.
+
+    :param value: A single pulse-channel payload.
+    :returns: The mapping owning the ``id`` field, or ``None`` when there is none.
+    """
+
+    if not isinstance(value, dict):
+        return None
+    pulse_payload = value.get("pulse_channel", value)
+    return pulse_payload if isinstance(pulse_payload, dict) else None
+
+
+def _renamed_channel_value(value: Any, old_suffix: str, new_suffix: str) -> Any:
+    """Copy one combined-readout channel value and rename its ``id`` suffix.
+
+    :param value: The source pulse-channel value to split off.
+    :param old_suffix: Combined-readout suffix being replaced.
+    :param new_suffix: Replacement suffix for the split channel.
+    :returns: A deep copy of ``value`` with any string ``id`` renamed.
+    """
+
+    new_value = deepcopy(value)
+    pulse_dict = _pulse_channel_payload(new_value)
+    if pulse_dict is not None and isinstance(pulse_dict.get("id"), str):
+        pulse_dict["id"] = _replace_suffix(pulse_dict["id"], old_suffix, new_suffix)
+    return new_value
+
+
 def _split_combined_readout_channels(node: Any) -> Any:
     """Split QBlox combined ``macq`` readout channels into ``measure``/``acquire``.
 
@@ -263,18 +324,23 @@ def _split_combined_readout_channels(node: Any) -> Any:
 
     pulse_channels = new_node.get("pulse_channels")
     if isinstance(pulse_channels, dict):
-        for old_macq_key, new_keys in _QBLOX_COMBINED_READOUT_RENAMES.items():
-            macq_view = pulse_channels.get(old_macq_key)
-            if isinstance(macq_view, dict):
-                new_channels = {
-                    key: value
-                    for key, value in pulse_channels.items()
-                    if key != old_macq_key
-                }
-                # Both roles reference the same physical readout channel.
-                for new_key in new_keys:
-                    new_channels.setdefault(new_key, macq_view)
-                new_node["pulse_channels"] = new_channels
+        remaining = dict(pulse_channels)
+        split_channels = deepcopy(pulse_channels)
+        for key in list(pulse_channels.keys()):
+            rename = _matching_readout_rename(key)
+            if rename is None:
+                continue
+            old_suffix, new_suffixes = rename
+            value = remaining.pop(key)
+            split_channels.pop(key)
+            for new_suffix in new_suffixes:
+                new_key = _replace_suffix(key, old_suffix, new_suffix)
+                split_channels[new_key] = _renamed_channel_value(
+                    value, old_suffix, new_suffix
+                )
+
+        new_node["pulse_channels"] = split_channels
+
     return new_node
 
 

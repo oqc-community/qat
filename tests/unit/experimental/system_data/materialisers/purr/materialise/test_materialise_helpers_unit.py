@@ -293,8 +293,8 @@ def test_split_combined_readout_channels_splits_top_level_macq():
 
     pulse_channels = result["pulse_channels"]
     assert "macq" not in pulse_channels
-    assert pulse_channels["measure"] == {"pulse_channel": {"id": "R0.macq"}}
-    assert pulse_channels["acquire"] == {"pulse_channel": {"id": "R0.macq"}}
+    assert pulse_channels["measure"] == {"pulse_channel": {"id": "R0.measure"}}
+    assert pulse_channels["acquire"] == {"pulse_channel": {"id": "R0.acquire"}}
     # Unrelated channels are preserved untouched.
     assert pulse_channels["drive"] == {"pulse_channel": {"id": "Q0.drive"}}
 
@@ -346,7 +346,7 @@ def test_split_combined_readout_channels_leaves_untouched_and_does_not_mutate():
     assert node == original
 
 
-def test_split_combined_readout_channels_preserves_existing_measure_and_acquire():
+def test_split_combined_readout_channels_overwrites_existing_measure_and_acquire():
     node = {
         "pulse_channels": {
             "macq": {"id": "macq"},
@@ -358,9 +358,32 @@ def test_split_combined_readout_channels_preserves_existing_measure_and_acquire(
 
     pulse_channels = result["pulse_channels"]
     assert "macq" not in pulse_channels
-    # Existing role channels win over the split (``setdefault`` semantics).
-    assert pulse_channels["measure"] == {"id": "existing-measure"}
-    assert pulse_channels["acquire"] == {"id": "macq"}
+    # The split now replaces any pre-existing role channels with the ones derived from the
+    # combined ``macq`` channel rather than preserving them.
+    assert pulse_channels["measure"] == {"id": "measure"}
+    assert pulse_channels["acquire"] == {"id": "acquire"}
+
+
+def test_split_combined_readout_channels_handles_non_dict_macq_payloads():
+    node = {"pulse_channels": {"macq": "bad-shape"}}
+
+    result = purr_materialise._split_combined_readout_channels(node)
+
+    pulse_channels = result["pulse_channels"]
+    assert "macq" not in pulse_channels
+    assert pulse_channels["measure"] == "bad-shape"
+    assert pulse_channels["acquire"] == "bad-shape"
+
+
+def test_split_combined_readout_channels_handles_non_dict_pulse_channel_entry():
+    node = {"pulse_channels": {"macq": {"pulse_channel": "bad-shape"}}}
+
+    result = purr_materialise._split_combined_readout_channels(node)
+
+    pulse_channels = result["pulse_channels"]
+    assert "macq" not in pulse_channels
+    assert pulse_channels["measure"] == {"pulse_channel": "bad-shape"}
+    assert pulse_channels["acquire"] == {"pulse_channel": "bad-shape"}
 
 
 def test_prepare_ingress_splits_combined_readout_channels():

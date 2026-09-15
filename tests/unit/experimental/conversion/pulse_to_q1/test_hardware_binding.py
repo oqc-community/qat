@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,9 @@ from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
     QbloxHardwareBindingPass,
+)
+from qat.experimental.conversion.pulse_to_q1.qblox_configuration.models import (
+    SequencerBinding,
 )
 from qat.experimental.dialect.pulse.ir import ConstantOp, CreateFrameOp, FrequencyAttr
 from qat.experimental.dialect.q1 import StopOp
@@ -26,7 +30,11 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
-from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.hardware.qblox.models import (
+    QbloxChannelBinding,
+    QbloxModuleKind,
+    QbloxModuleLocation,
+)
 from qat.experimental.system_data.materialisers.boundary import materialise
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
@@ -64,6 +72,47 @@ def _bind(data: CanonicalSystemData, *sequences: SequenceOp) -> ModuleOp:
     QbloxHardwareBindingPass(data).apply(Context(), module)
     module.verify()
     return module
+
+
+def _ambiguous_channel_data() -> CanonicalSystemData:
+    data = canonical_data(
+        configurations=[supplied([sequencer(0), sequencer(1)])],
+        channels_per_port=2,
+    )
+    channels = list(data.channels)
+    channels[1] = replace(channels[1], frequency=channels[0].frequency)
+    return replace(data, channels=tuple(channels))
+
+
+def _channel_binding(channel_id: str) -> QbloxChannelBinding:
+    return QbloxChannelBinding(
+        channel_id=channel_id,
+        port_id="port-0",
+        port_resource_id="port-0-resource",
+        carrier_frequency=4_200_000_000,
+        oscillator_id=None,
+        oscillator_frequency=None,
+        oscillator_resource_id=None,
+        scale=1.0 + 0.0j,
+        imbalance=0.0,
+        phase_offset=0.0,
+        module_location=QbloxModuleLocation("cluster", 2),
+    )
+
+
+def _sequencer_binding(channel_id: str, index: int) -> SequencerBinding:
+    return SequencerBinding(
+        channel_id=channel_id,
+        port_id="port-0",
+        module_location=QbloxModuleLocation("cluster", 2),
+        sequencer_index=index,
+        sequencer_config=make_sequencer_config(),
+        module_config=make_module_config(
+            slot_idx=2,
+            instrument_id="cluster",
+            kind=QbloxModuleKind.qcm_rf,
+        ),
+    )
 
 
 def test_sequences_are_bound_to_their_resolved_physical_allocation():
@@ -177,14 +226,111 @@ def test_a_port_supplying_no_sequencer_bank_is_rejected():
         _bind(data, _sequence(4_200_000_000))
 
 
-def test_sequences_resolving_to_one_sequencer_are_rejected():
+def test_reusing_one_canonical_channel_is_rejected_after_first_assignment():
     data = canonical_data(configurations=[supplied([sequencer(0)])])
 
-    with pytest.raises(PassFailedException, match="duplicate Qblox physical allocation"):
+    with pytest.raises(PassFailedException, match="but none are available"):
         _bind(
             data,
             _sequence(4_200_000_000),
             _sequence(4_200_000_000, channel_id="port-0-channel-0-copy"),
+        )
+
+
+def test_ambiguous_channels_are_consumed_in_sequence_order():
+    data = _ambiguous_channel_data()
+
+    module = _bind(
+        data,
+        _sequence(4_200_000_000, channel_id="sequence-0"),
+        _sequence(4_200_000_000, channel_id="sequence-1"),
+    )
+
+    first, second = module.body.block.ops
+    assert first.seq_idx == SequencerIndexAttr(0)
+    assert second.seq_idx == SequencerIndexAttr(1)
+
+
+def test_explicit_sequence_channel_id_is_preferred_when_ambiguous():
+    data = _ambiguous_channel_data()
+
+    module = _bind(data, _sequence(4_200_000_000, channel_id="port-0-channel-1"))
+
+    [bound] = module.body.block.ops
+    assert bound.seq_idx == SequencerIndexAttr(1)
+
+
+def test_preferred_channel_without_binding_falls_back_to_resolved_candidate():
+    channel_zero = _channel_binding("port-0-channel-0")
+    channel_one = _channel_binding("port-0-channel-1")
+    channels = {
+        channel_zero.channel_id: channel_zero,
+        channel_one.channel_id: channel_one,
+    }
+    bindings = {
+        channel_one.channel_id: _sequencer_binding(channel_one.channel_id, index=1),
+    }
+    sequence = _sequence(4_200_000_000, channel_id=channel_zero.channel_id)
+
+    binding = QbloxHardwareBindingPass(canonical_data())._resolve_sequence(
+        sequence,
+        channels,
+        bindings,
+        consumed_channel_ids=set(),
+    )
+
+    assert binding.channel_id == channel_one.channel_id
+
+
+def test_unresolved_preferred_candidate_raises_if_no_bindings_exist():
+    channel_zero = _channel_binding("port-0-channel-0")
+    channels = {channel_zero.channel_id: channel_zero}
+    sequence = _sequence(4_200_000_000, channel_id=channel_zero.channel_id)
+
+    with pytest.raises(PassFailedException, match="port-0-channel-0"):
+        QbloxHardwareBindingPass(canonical_data())._resolve_sequence(
+            sequence,
+            channels,
+            bindings={},
+            consumed_channel_ids=set(),
+        )
+
+
+def test_unresolved_candidates_without_preferred_match_raises():
+    channel_zero = _channel_binding("port-0-channel-0")
+    channels = {channel_zero.channel_id: channel_zero}
+    sequence = _sequence(4_200_000_000, channel_id="sequence-unmatched")
+
+    with pytest.raises(PassFailedException, match="port-0-channel-0"):
+        QbloxHardwareBindingPass(canonical_data())._resolve_sequence(
+            sequence,
+            channels,
+            bindings={},
+            consumed_channel_ids=set(),
+        )
+
+
+def test_duplicate_physical_allocations_are_rejected(monkeypatch):
+    duplicate = _sequencer_binding("duplicate-channel", index=0)
+
+    def _resolve_sequence_with_duplicate(*_args, **_kwargs):
+        return duplicate
+
+    monkeypatch.setattr(
+        QbloxHardwareBindingPass,
+        "_resolve_sequence",
+        _resolve_sequence_with_duplicate,
+    )
+
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)]), supplied([sequencer(1)])],
+    )
+
+    with pytest.raises(PassFailedException, match="duplicate Qblox physical allocation"):
+        _bind(
+            data,
+            _sequence(4_200_000_000, port_id="port-0", channel_id="port-0-channel-0"),
+            _sequence(4_200_000_000, port_id="port-1", channel_id="port-1-channel-0"),
         )
 
 
@@ -235,8 +381,10 @@ def test_an_existing_conflicting_sequencer_configuration_is_rejected():
         ("Q0.second_state", "A-CH-QCM-RF-2", 4_085_000_000, 2, 1),
         ("Q1.drive", "B-CH-QCM-RF-2", 3_872_000_000, 2, 2),
         ("Q1.second_state", "B-CH-QCM-RF-2", 4_085_000_000, 2, 3),
-        ("R0.macq", "A-CH-QRM-RF-14", 10_203_300_000, 14, 0),
-        ("R1.macq", "B-CH-QRM-RF-14", 10_203_300_000, 14, 1),
+        ("R0.measure", "A-CH-QRM-RF-14", 10_203_300_000, 14, 0),
+        ("R0.acquire", "A-CH-QRM-RF-14", 10_203_300_000, 14, 1),
+        ("R1.measure", "B-CH-QRM-RF-14", 10_203_300_000, 14, 2),
+        ("R1.acquire", "B-CH-QRM-RF-14", 10_203_300_000, 14, 3),
     ],
 )
 def test_a_real_calibration_binds_every_channel_end_to_end(
@@ -266,3 +414,31 @@ def test_a_real_calibration_binds_every_channel_end_to_end(
     assert sequence.module_config.local_oscillators.data
     assert sequence.sequencer_config.connections is not None
     assert int(channel.frequency) == carrier
+
+
+def test_real_calibration_measure_and_acquire_bind_to_distinct_sequencers():
+    """Proves that the acquire and measure channels get allocated to different sequencer
+    indices."""
+    data = materialise(
+        source_payload=json.loads(CALIBRATION_FILE.read_text()), source_additional_data={}
+    )
+    measure = next(entry for entry in data.channels if entry.id == "R0.measure")
+    acquire = next(entry for entry in data.channels if entry.id == "R0.acquire")
+
+    module = _bind(
+        data,
+        _sequence(
+            int(measure.frequency),
+            port_id=measure.port_id,
+            channel_id=measure.id,
+        ),
+        _sequence(
+            int(acquire.frequency),
+            port_id=acquire.port_id,
+            channel_id=acquire.id,
+        ),
+    )
+
+    first, second = module.body.block.ops
+    assert first.port_id == second.port_id
+    assert first.seq_idx != second.seq_idx

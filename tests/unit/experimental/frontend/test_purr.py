@@ -427,8 +427,8 @@ def _macq_only_model():
     return model, resonator.get_pulse_channel(ChannelType.macq)
 
 
-def _with_max_likelihood_on_macq(canonical):
-    """Calibrate every macq mode with a max-likelihood method and a disallowed state."""
+def _with_max_likelihood_on_acquire(canonical):
+    """Calibrate every acquire mode with a max-likelihood method and a disallowed state."""
 
     method = MaxLikelihoodMethodData(
         states=(
@@ -441,7 +441,7 @@ def _with_max_likelihood_on_macq(canonical):
             qubit,
             modes=tuple(
                 replace(mode, post_process_method=method)
-                if mode.channel_id.endswith(".macq")
+                if mode.channel_id.endswith(".acquire")
                 else mode
                 for mode in qubit.modes
             ),
@@ -455,13 +455,14 @@ def _with_max_likelihood_on_macq(canonical):
 def test_macq_acquisition_is_discriminated_from_its_calibration(post_selection):
     """A macq acquisition resolves its calibration despite being split into two frames.
 
-    The importer splits a macq pulse channel into ``measure``/``acquire`` frames, but the
-    canonical data still describes one channel (``R0.macq``). Calibration lookups must key
-    off the pulse-channel id rather than the frame name, or QBlox readout silently emits
-    no discrimination.
+    The importer splits a macq pulse channel into ``measure``/``acquire`` frames and records
+    the acquisition under its split ``.acquire`` channel id. Materialisation likewise attaches
+    readout calibration to the ``acquire`` mode (``R0.acquire``), so an acquisition issued on
+    the combined ``macq`` channel must still resolve that calibration, or QBlox readout
+    silently emits no discrimination.
     """
     model, macq = _macq_only_model()
-    canonical = _with_max_likelihood_on_macq(
+    canonical = _with_max_likelihood_on_acquire(
         materialise(source_payload=loads(model.get_calibration()))
     )
 

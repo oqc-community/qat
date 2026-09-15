@@ -1600,6 +1600,37 @@ class TestPurrImporterDiscrimination:
         module = PurrImporter(post_processing_factory=ppf).build(self._make_builder(hw))
         assert self._discriminate_ops(module) == []
 
+    def test_macq_acquire_discriminates_on_split_acquire_channel_id(self, hw):
+        """A combined ``macq`` acquire discriminates on the split ``.acquire`` channel id.
+
+        Canonical system data splits a combined ``macq`` readout into ``measure`` and
+        ``acquire`` channels, and the max-likelihood calibration is attached to the
+        ``acquire`` mode. A derived :class:`PostProcessingView` is therefore keyed by the
+        ``.acquire`` channel id, never ``.macq``. The importer must record the acquisition
+        under that same id, otherwise discrimination silently never matches.
+        """
+        macq = _make_macq_channel(hw)
+        builder = QuantumInstructionBuilder(hw)
+        builder.add(
+            Acquire(macq, time=1e-6, mode=AcquireMode.INTEGRATOR, output_variable="meas0")
+        )
+        acquire_channel_id = f"{macq.partial_id().removesuffix('.macq')}.acquire"
+        pp = PostProcessingView(
+            channel_to_disallowed_states={},
+            known_channel_ids=frozenset({acquire_channel_id}),
+            channel_to_discriminate_data={
+                acquire_channel_id: DiscriminateData(
+                    noise_est=0.5, p_min=0.2, state_centroids=self.STATES
+                )
+            },
+        )
+        module = PurrImporter(
+            post_processing_factory=PostProcessingFactory(pp, post_selection_enabled=False)
+        ).build(builder)
+        ops = self._discriminate_ops(module)
+        assert len(ops) == 1
+        assert isinstance(ops[0].policy, MaximumLikelihoodPolicyAttr)
+
     def test_empty_post_processing_chain_is_discriminated(self, hw):
         """A max-likelihood channel is discriminated without a PuRR chain to hang off.
 

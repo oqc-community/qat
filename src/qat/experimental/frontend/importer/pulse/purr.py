@@ -874,7 +874,7 @@ class PurrImporter:
     def _(self, value: Acquire, builder: PulseKernelBuilder) -> None:
         channel = value.quantum_targets[0]
         frame_name = self._frame_keys(channel).acquire_frame
-        self._label_to_channel[value.output_variable] = channel.partial_id()
+        self._label_to_channel[value.output_variable] = frame_name
         weights = None
         if value.filter is not None:
             if not isinstance(value.filter, CustomPulse):
