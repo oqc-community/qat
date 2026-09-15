@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post370.dev20260914101930 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post371.dev20260915150738 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -706,7 +706,7 @@
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxHardwareBindingPass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.passes.pass_ordering.html#qat.experimental.passes.pass_ordering.OrderedPass" title="qat.experimental.passes.pass_ordering.OrderedPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedPass</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code></p>
-<p>Bind each outlined sequence to the physical Qblox sequencer it runs on.</p>
+<p>Bind each outlined sequence op to the physical Qblox sequencer it runs on.</p>
 <p>Each <code class="docutils literal notranslate"><span class="pre">SequenceOp</span></code> must contain one constant <code class="docutils literal notranslate"><span class="pre">pulse.create_frame</span></code> whose port and
 carrier frequency identify a canonical channel. The pass records that channel’s
 allocated instrument, slot, and sequencer index on the sequence, and attaches the
