@@ -32,6 +32,7 @@ from xdsl.irdl import (
     var_operand_def,
     var_result_def,
 )
+from xdsl.rewriter import InsertPoint
 from xdsl.transforms.canonicalize import CanonicalizePass
 
 from qat.experimental.dialect.pulse.ir import (
@@ -59,6 +60,8 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.transforms.timeline_normalization import (
     TimelineNormalization,
+    _SynchronizeCandidate,
+    _TimeExpression,
 )
 from qat.experimental.dialect.pulse.units import TimeUnits
 
@@ -134,6 +137,38 @@ class TestTimelineNormalizationWithKeyOperations:
         module_op = build_module_from_ops(ops)
         _, clone_module_op = TimelineNormalization().apply_to_clone(_CONTEXT, module_op)
         assert module_op.is_structurally_equivalent(clone_module_op)
+
+    def test_replaces_candidates_in_reverse_order_to_preserve_insertion_points(
+        self, monkeypatch: pytest.MonkeyPatch
+    ):
+        ops, frames = _make_block_with_frames(2)
+        early_sync = SynchronizeOp(*frames)
+        late_sync = SynchronizeOp(*early_sync.results)
+        module_op = build_module_from_ops([*ops, early_sync, late_sync])
+
+        # The later candidate needs to materialize before early_sync. Replacing early_sync
+        # first detaches that insertion point before the expression can be materialized.
+        candidates = [
+            _SynchronizeCandidate(early_sync, [None, None]),
+            _SynchronizeCandidate(
+                late_sync,
+                [
+                    _TimeExpression.constant(
+                        TimeAttr(64, TimeUnits.NANOSECOND), InsertPoint.before(early_sync)
+                    ),
+                    None,
+                ],
+            ),
+        ]
+        monkeypatch.setattr(
+            TimelineNormalization,
+            "_get_synchronize_candidates",
+            lambda self, operation: candidates,
+        )
+
+        TimelineNormalization().apply(_CONTEXT, module_op)
+
+        assert not _get_ops_of_types(module_op, SynchronizeOp)[SynchronizeOp]
 
     def test_with_pulse_op_increments_frame_time(self):
         """Tests that a frame operation with a pulse op increments the time of the frame by

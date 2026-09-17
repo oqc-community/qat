@@ -618,7 +618,7 @@ class TimelineNormalization(ModulePass):
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         sync_candidates = self._get_synchronize_candidates(op)
         expression_materializer = _TimeExpressionMaterializer()
-        for candidate in sync_candidates:
+        for candidate in reversed(sync_candidates):
             self._replace_synchronize_candidate(candidate, expression_materializer)
 
     def _get_synchronize_candidates(
