@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution module &mdash; qat-compiler 3.0.0.post377.dev20260921094144 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution module &mdash; qat-compiler 3.0.0.post378.dev20260921134459 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -711,21 +711,23 @@ duplicates target data - the module and sequencer capabilities used to validate 
 supplied configuration are read from <code class="xref py py-data docutils literal notranslate"><span class="pre">DEFAULT_QBLOX_TARGET</span></code>.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings">
-<span class="sig-name descname"><span class="pre">resolve_sequencer_bindings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supplied_configurations_by_resource</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings" title="Link to this definition"></a></dt>
-<dd><p>Resolve every canonical channel of a hardware view onto Q1 configuration.</p>
+<span class="sig-name descname"><span class="pre">resolve_sequencer_bindings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hardware_view</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supplied_configurations_by_resource</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">used_channel_ids</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings" title="Link to this definition"></a></dt>
+<dd><p>Resolve the canonical channels a program uses onto Q1 configuration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings.params.hardware_view"></span><strong>hardware_view</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings.params.hardware_view">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView" title="qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxHardwareView</span></code></a></span>) – Derived Qblox projection of the canonical hardware.</p></li>
 <li><p><span class="target" id="qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings.params.supplied_configurations_by_resource"></span><strong>supplied_configurations_by_resource</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings.params.supplied_configurations_by_resource">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="qat.experimental.system_data.hardware.qblox.configuration.html#qat.experimental.system_data.hardware.qblox.configuration.QbloxSuppliedConfiguration" title="qat.experimental.system_data.hardware.qblox.configuration.QbloxSuppliedConfiguration"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxSuppliedConfiguration</span></code></a>]</span>) – Supplied configurations keyed by external-
 resource identifier.</p></li>
+<li><p><span class="target" id="qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings.params.used_channel_ids"></span><strong>used_channel_ids</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution.resolve_sequencer_bindings.params.used_channel_ids">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Collection</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</span>) – A collection of canonical channels used within a program.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozendict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.qblox_configuration.models.html#qat.experimental.conversion.pulse_to_q1.qblox_configuration.models.SequencerBinding" title="qat.experimental.conversion.pulse_to_q1.qblox_configuration.models.SequencerBinding"><code class="xref py py-class docutils literal notranslate"><span class="pre">SequencerBinding</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The resolved binding of each canonical channel, keyed by channel identifier.</p>
+<dd class="field-odd"><p>The resolved binding of each used canonical channel, keyed by channel
+identifier.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>ValueError</strong> – If the supplied configuration is incomplete, conflicts with the
