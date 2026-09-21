@@ -26,6 +26,7 @@ from qat.purr.backends.qblox.live import QbloxLiveHardwareModel
 from qat.purr.compiler.execution import QuantumExecutionEngine
 from qat.purr.compiler.hardware_models import QuantumHardwareModel
 
+from tests.unit.utils.config_helpers import write_full_and_separate_default_configs
 from tests.unit.utils.engines import InitableEngine
 from tests.unit.utils.pipelines import MockPipeline
 
@@ -217,6 +218,18 @@ class TestQatSessionConfigForPipelines:
         assert P.runtime.engine.x == 10
         assert P.runtime.engine.cblam.host == "someurl.com"
         assert P.runtime.engine.cblam.timeout == 60
+
+    def test_yaml_custom_config_ignores_default_qatconfig(self, tmp_path, monkeypatch):
+        explicit_config = write_full_and_separate_default_configs(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        qatconfig = QatSessionConfig.from_yaml(explicit_config)
+
+        assert len(qatconfig.PIPELINES) == 1
+        assert qatconfig.PIPELINES[0].name == "explicit-full"
+        assert qatconfig.PIPELINES[0].default is True
+        assert qatconfig.COMPILE is None
+        assert qatconfig.EXECUTE is None
 
     def test_yaml_legacy_pipeline(self, qatconfig_testfiles):
         qatconfig = QatSessionConfig.from_yaml(qatconfig_testfiles / "legacyengine.yaml")

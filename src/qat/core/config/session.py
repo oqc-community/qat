@@ -255,4 +255,8 @@ class QatSessionConfig(QatConfig):
     @classmethod
     def from_yaml(cls, path: str | Path):
         blob = piny.YamlLoader(path=str(path), matcher=VeryStrictMatcher).load()
-        return cls(**blob)
+        # Point the implicit yaml settings source at `path` so it can't pick up an
+        # unrelated "qatconfig.yaml" from the current working directory.
+        config = {**cls.model_config, "yaml_file": str(path)}
+        bound_cls = type(cls.__name__, (cls,), {"model_config": config})
+        return bound_cls(**blob)

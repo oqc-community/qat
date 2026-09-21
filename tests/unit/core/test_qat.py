@@ -27,6 +27,7 @@ from qat.pipelines.pipeline import Pipeline
 from qat.purr.qatconfig import QatConfig
 from qat.runtime import SimpleRuntime
 
+from tests.unit.utils.config_helpers import write_full_and_separate_default_configs
 from tests.unit.utils.engines import InitableEngine, MockEngineWithModel
 
 
@@ -179,6 +180,17 @@ class TestQATPipelineSetup:
             is DefaultFrontend
         )
         assert q.pipelines.get_execute_pipeline("echocustomconfig").runtime.engine.x == 10
+
+    def test_make_qatconfig_yaml_ignores_default_qatconfig(self, tmp_path, monkeypatch):
+        explicit_config = write_full_and_separate_default_configs(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        q = QAT(qatconfig=explicit_config)
+
+        assert set(q.pipelines.list_compile_pipelines) == {"explicit-full"}
+        assert set(q.pipelines.list_execute_pipelines) == {"explicit-full"}
+        assert q.pipelines.default_compile_pipeline == "explicit-full"
+        assert q.pipelines.default_execute_pipeline == "explicit-full"
 
     def test_make_qatconfig_yaml_curdir(self, testpath, tmpdir, monkeypatch):
         config_file = testpath / "files/qatconfig/pipelines.yaml"
