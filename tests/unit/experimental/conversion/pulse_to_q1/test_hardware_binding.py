@@ -45,6 +45,19 @@ from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers 
 
 CALIBRATION_FILE = Path("tests/files/calibrations/qblox_calibration.json")
 
+# Every calibrated channel of ``qblox_calibration.json`` and the port it is driven through.
+# Binding all of them at once lets allocation assign each its canonical module-wide index.
+_CALIBRATION_CHANNELS = [
+    ("Q0.drive", "A-CH-QCM-RF-2"),
+    ("Q0.second_state", "A-CH-QCM-RF-2"),
+    ("Q1.drive", "B-CH-QCM-RF-2"),
+    ("Q1.second_state", "B-CH-QCM-RF-2"),
+    ("R0.measure", "A-CH-QRM-RF-14"),
+    ("R0.acquire", "A-CH-QRM-RF-14"),
+    ("R1.measure", "B-CH-QRM-RF-14"),
+    ("R1.acquire", "B-CH-QRM-RF-14"),
+]
+
 
 def _sequence(
     carrier: int,
@@ -164,6 +177,50 @@ def test_ports_sharing_a_module_keep_separate_sequencer_banks():
     first, second = module.body.block.ops
     assert first.seq_idx == SequencerIndexAttr(0)
     assert second.seq_idx == SequencerIndexAttr(3)
+
+
+def test_only_a_frames_channel_is_allocated_when_a_port_exposes_many():
+    # A qubit drive port exposes three calibrated channels but supplies a single sequencer.
+    # Only the channel a frame drives is allocated, so the bank is never exhausted.
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)])],
+        channels_per_port=3,
+    )
+
+    module = _bind(data, _sequence(4_200_000_000, channel_id="port-0-channel-0"))
+
+    [sequence] = module.body.block.ops
+    assert sequence.seq_idx == SequencerIndexAttr(0)
+
+
+def test_unused_channels_do_not_shift_the_index_of_the_used_channel():
+    # The used channel is calibrated last of three on its port, yet still takes the lowest
+    # supplied sequencer because its unplayed siblings are never allocated.
+    data = canonical_data(
+        configurations=[supplied([sequencer(0), sequencer(1), sequencer(2)])],
+        channels_per_port=3,
+    )
+
+    module = _bind(data, _sequence(4_400_000_000, channel_id="port-0-channel-2"))
+
+    [sequence] = module.body.block.ops
+    assert sequence.seq_idx == SequencerIndexAttr(0)
+
+
+def test_a_qrc_qubit_port_binds_only_the_played_channel():
+    # A QRC control port exposes three calibrated channels but supplies a single control
+    # sequencer; binding one frame must not try to place the unplayed channels.
+    data = canonical_data(
+        kind=QbloxModuleKind.qrc,
+        configurations=[supplied([sequencer(8, outputs=[2])])],
+        channels_per_port=3,
+    )
+
+    module = _bind(data, _sequence(4_200_000_000, channel_id="port-0-channel-0"))
+
+    [sequence] = module.body.block.ops
+    assert sequence.seq_idx == SequencerIndexAttr(8)
+    assert sequence.module_config.kind.data is QbloxModuleKind.qrc
 
 
 def test_program_owned_acquisition_configuration_survives_binding():
@@ -394,26 +451,36 @@ def test_a_real_calibration_binds_every_channel_end_to_end(
 
     The calibration is materialised into canonical system data carrying the typed Qblox
     extension, reconciled into a hardware view, allocated, resolved into Q1 attributes, and
-    finally bound onto a sequence that must verify.
+    finally bound onto a sequence that must verify. Every calibrated channel is driven at
+    once, so allocation assigns each its canonical module-wide sequencer index.
     """
 
     data = materialise(
         source_payload=json.loads(CALIBRATION_FILE.read_text()), source_additional_data={}
     )
-    channel = next(entry for entry in data.channels if entry.id == channel_id)
+    channels = {entry.id: entry for entry in data.channels}
 
     module = _bind(
-        data, _sequence(int(channel.frequency), port_id=port_id, channel_id=channel_id)
+        data,
+        *(
+            _sequence(
+                int(channels[bound_id].frequency),
+                port_id=bound_port,
+                channel_id=bound_id,
+            )
+            for bound_id, bound_port, *_ in _CALIBRATION_CHANNELS
+        ),
     )
 
-    [sequence] = module.body.block.ops
+    bound = {sequence.channel_id.data: sequence for sequence in module.body.block.ops}
+    sequence = bound[channel_id]
     assert sequence.port_id.data == port_id
     assert sequence.slot_idx == SlotIndexAttr(slot)
     assert sequence.seq_idx == SequencerIndexAttr(index)
     assert sequence.instrument_id.data.startswith("test_save_model_")
     assert sequence.module_config.local_oscillators.data
     assert sequence.sequencer_config.connections is not None
-    assert int(channel.frequency) == carrier
+    assert int(channels[channel_id].frequency) == carrier
 
 
 def test_real_calibration_measure_and_acquire_bind_to_distinct_sequencers():

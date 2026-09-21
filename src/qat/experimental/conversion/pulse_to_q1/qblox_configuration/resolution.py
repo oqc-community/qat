@@ -13,7 +13,7 @@ supplied configuration are read from :data:`DEFAULT_QBLOX_TARGET`.
 from __future__ import annotations
 
 import re
-from collections.abc import Callable, Iterable, Mapping
+from collections.abc import Callable, Collection, Iterable, Mapping
 from math import degrees, isclose
 from typing import TypeVar
 
@@ -114,13 +114,16 @@ _AttributeT = TypeVar("_AttributeT", bound=Attribute)
 def resolve_sequencer_bindings(
     hardware_view: QbloxHardwareView,
     supplied_configurations_by_resource: Mapping[str, QbloxSuppliedConfiguration],
+    used_channel_ids: Collection[str],
 ) -> frozendict[str, SequencerBinding]:
-    """Resolve every canonical channel of a hardware view onto Q1 configuration.
+    """Resolve the canonical channels a program uses onto Q1 configuration.
 
     :param hardware_view: Derived Qblox projection of the canonical hardware.
     :param supplied_configurations_by_resource: Supplied configurations keyed by external-
         resource identifier.
-    :returns: The resolved binding of each canonical channel, keyed by channel identifier.
+    :param used_channel_ids: A collection of canonical channels used within a program.
+    :returns: The resolved binding of each used canonical channel, keyed by channel
+        identifier.
     :raises ValueError: If the supplied configuration is incomplete, conflicts with the
         canonical calibration, or is invalid for the installed hardware.
     """
@@ -130,7 +133,7 @@ def resolve_sequencer_bindings(
     )
     for module_configuration in module_configurations.values():
         _validate_supplied_configuration(module_configuration)
-    placements = allocate_sequencers(module_configurations)
+    placements = allocate_sequencers(module_configurations, used_channel_ids)
     bindings: dict[str, SequencerBinding] = {}
     for module_configuration in module_configurations.values():
         bindings.update(_module_bindings(module_configuration, placements))
@@ -208,18 +211,25 @@ def _module_bindings(
     module_configuration: ReconciledModuleConfiguration,
     placements: Mapping[str, SequencerPlacement],
 ) -> dict[str, SequencerBinding]:
-    """Resolve every canonical channel routed through one physical module.
+    """Resolve the canonical channels of one physical module a program uses.
+
+    Only channels present in ``placements`` are resolved, so a module exposes Q1
+    configuration for the sequencers a program actually drives.
 
     :param module_configuration: Configuration assembled from every canonical port exposing
         the physical module.
     :param placements: Allocated placements keyed by canonical channel identifier.
-    :returns: The resolved binding of each channel routed through the module.
+    :returns: The resolved binding of each placed channel routed through the module.
     :raises ValueError: If the module's supplied configuration is invalid.
     """
 
     module_view = module_configuration.module_view
     module_spec = DEFAULT_QBLOX_TARGET.module_spec(module_view.kind)
-    channel_bindings = module_view.channel_bindings
+    channel_bindings = [
+        channel_binding
+        for channel_binding in module_view.channel_bindings
+        if channel_binding.channel_id in placements
+    ]
     module_placements = [
         placements[channel_binding.channel_id] for channel_binding in channel_bindings
     ]

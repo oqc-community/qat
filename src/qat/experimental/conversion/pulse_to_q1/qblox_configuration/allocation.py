@@ -11,7 +11,7 @@ allocated, so the supplied bank alone decides what a module may use.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Collection, Mapping
 
 from frozendict import frozendict
 
@@ -19,28 +19,35 @@ from qat.experimental.conversion.pulse_to_q1.qblox_configuration.models import (
     ReconciledModuleConfiguration,
     SequencerPlacement,
 )
-from qat.experimental.system_data.hardware.qblox.models import QbloxModuleLocation
+from qat.experimental.system_data.hardware.qblox.models import (
+    QbloxModuleKind,
+    QbloxModuleLocation,
+)
 
 
 def allocate_sequencers(
     module_configurations: Mapping[QbloxModuleLocation, ReconciledModuleConfiguration],
+    used_channel_ids: Collection[str],
 ) -> frozendict[str, SequencerPlacement]:
-    """Allocate a physical sequencer to every canonical channel of every module.
+    """Allocate a physical sequencer to the canonical channels a program uses.
 
     :param module_configurations: Configurations keyed by physical module location.
-    :returns: The placement of each canonical channel, keyed by channel identifier.
+    :param used_channel_ids: A collection of canonical channels used within a program.
+    :returns: The placement of each allocated canonical channel, keyed by channel
+        identifier.
     :raises ValueError: If a port supplies no bank, or its bank cannot satisfy the channels
         routed through it.
     """
 
     placements: dict[str, SequencerPlacement] = {}
     for module_configuration in module_configurations.values():
-        placements.update(_allocate_on_module(module_configuration))
+        placements.update(_allocate_on_module(module_configuration, used_channel_ids))
     return frozendict(placements)
 
 
 def _allocate_on_module(
     module_configuration: ReconciledModuleConfiguration,
+    used_channel_ids: Collection[str],
 ) -> dict[str, SequencerPlacement]:
     """Allocate the sequencers of one physical module.
 
@@ -49,14 +56,22 @@ def _allocate_on_module(
 
     :param module_configuration: Configuration assembled from every canonical port exposing
         the physical module.
-    :returns: The placement of each channel routed through the module.
+    :param used_channel_ids: Canonical channels a program actually drives. A channel absent
+        from the set is skipped, so a calibrated-but-unplayed channel is never allocated.
+    :returns: The placement of each allocated channel routed through the module.
     :raises ValueError: If a port supplies no bank, or its bank is exhausted.
     """
 
     module_location = module_configuration.module_view.location
     allocated_indices: set[int] = set()
     placements: dict[str, SequencerPlacement] = {}
-    for channel_binding in module_configuration.module_view.channel_bindings:
+
+    used_channel_bindings = [
+        binding
+        for binding in module_configuration.module_view.channel_bindings
+        if binding.channel_id in used_channel_ids
+    ]
+    for channel_binding in used_channel_bindings:
         sequencer_bank = module_configuration.sequencer_banks.get(
             channel_binding.port_id, frozendict()
         )
@@ -73,7 +88,14 @@ def _allocate_on_module(
                 f"{channel_binding.channel_id!r}; its supplied bank "
                 f"{sorted(sequencer_bank)} is fully allocated"
             )
-        sequencer_index = available_indices[0]
+        if module_configuration.module_view.kind == QbloxModuleKind.qrc:
+            # A QRC places its readout sequencers on the low indices (0-7) and its
+            # control sequencers on the high indices (8-11). Allocating from the highest
+            # available index first keeps the low readout sequencers free for the channels
+            # that require them.
+            sequencer_index = available_indices[-1]
+        else:
+            sequencer_index = available_indices[0]
         allocated_indices.add(sequencer_index)
         placements[channel_binding.channel_id] = SequencerPlacement(
             channel_id=channel_binding.channel_id,

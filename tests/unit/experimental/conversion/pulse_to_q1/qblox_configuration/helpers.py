@@ -79,7 +79,7 @@ def supplied(
 def canonical_data(
     kind: QbloxModuleKind = QbloxModuleKind.qcm_rf,
     configurations: Sequence[QbloxSuppliedConfiguration | None] = (),
-    channels_per_port: int = 1,
+    channels_per_port: int | Sequence[int] = 1,
     slot: int = 2,
     instrument_id: str = "cluster",
     carrier_frequency: int = 4_200_000_000,
@@ -89,7 +89,9 @@ def canonical_data(
 
     :param kind: Installed module kind of the single module.
     :param configurations: Configuration each canonical port supplies, one entry per port.
-    :param channels_per_port: Calibrated channels routed through each port.
+    :param channels_per_port: Calibrated channels routed through each port. An integer
+        applies the same count to every port; a sequence gives a per-port count, one entry
+        per configuration.
     :param slot: Physical Cluster slot the module occupies.
     :param instrument_id: Physical Cluster containing the module.
     :param carrier_frequency: Carrier frequency of the first channel of each port, in Hz.
@@ -98,6 +100,11 @@ def canonical_data(
     :returns: Canonical system data carrying the typed Qblox extensions.
     """
 
+    counts = (
+        [channels_per_port] * len(configurations)
+        if isinstance(channels_per_port, int)
+        else list(channels_per_port)
+    )
     resources: list[ExternalResourceData] = []
     ports: list[PortData] = []
     oscillators: list[OscillatorData] = []
@@ -156,7 +163,7 @@ def canonical_data(
                 imbalance=0.9,
                 phase_offset=0.0,
             )
-            for channel_index in range(channels_per_port)
+            for channel_index in range(counts[index])
         )
     return CanonicalSystemData(
         acquire_limit=100,

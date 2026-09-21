@@ -49,17 +49,21 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
     canonical_data: CanonicalSystemData
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
-        try:
-            hardware_view = QbloxHardwareView.derive(self.canonical_data)
-            sequence_bindings = resolve_sequencer_bindings(
-                hardware_view, supplied_configurations(self.canonical_data)
-            )
-        except (ValueError, VerifyException) as error:
-            raise PassFailedException(str(error)) from error
-
         sequences = [
             sequence for sequence in op.body.block.ops if isinstance(sequence, SequenceOp)
         ]
+        try:
+            hardware_view = QbloxHardwareView.derive(self.canonical_data)
+            used_channel_ids = self._used_channel_ids(
+                sequences, hardware_view.channel_bindings
+            )
+            sequence_bindings = resolve_sequencer_bindings(
+                hardware_view,
+                supplied_configurations(self.canonical_data),
+                used_channel_ids,
+            )
+        except (ValueError, VerifyException) as error:
+            raise PassFailedException(str(error)) from error
 
         resolved_bindings = self._resolve_bindings(
             sequence_bindings, sequences, hardware_view
@@ -77,6 +81,31 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
             self._verify_existing(sequence, binding)
         for sequence, binding in zip(sequences, resolved_bindings, strict=True):
             self._bind(sequence, binding)
+
+    def _used_channel_ids(
+        self,
+        sequences: list[SequenceOp],
+        channels: Mapping[str, QbloxChannelBinding],
+    ) -> set[str]:
+        """Return the canonical channels the outlined sequences drive.
+
+        A sequence's frame identifies a canonical channel by port and carrier frequency; an
+        ambiguous frame maps to several channels, all of which are candidates the later
+        resolution may pick between. Only these channels are allocated and resolved, so a
+        calibrated-but-unplayed channel never consumes a sequencer, exhausts its port's
+        bank, or is projected onto Q1 attributes.
+
+        :param sequences: The outlined sequences to bind.
+        :param channels: Canonical channels keyed by identifier.
+        :returns: The identifiers of every channel a sequence frame may map to.
+        :raises PassFailedException: If a sequence has no single matching frame.
+        """
+
+        used_channel_ids: set[str] = set()
+        for sequence in sequences:
+            _, candidates = self._frame_candidates(sequence, channels)
+            used_channel_ids.update(candidate.channel_id for candidate in candidates)
+        return used_channel_ids
 
     def _resolve_bindings(
         self,
@@ -104,23 +133,19 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
             resolved_bindings.append(binding)
         return resolved_bindings
 
-    def _resolve_sequence(
+    def _frame_candidates(
         self,
         sequence: SequenceOp,
         channels: Mapping[str, QbloxChannelBinding],
-        bindings: Mapping[str, SequencerBinding],
-        consumed_channel_ids: set[str],
-    ) -> SequencerBinding:
-        """Resolve the sequencer, via binding it to a canonical channel.
+    ) -> tuple[float, list[QbloxChannelBinding]]:
+        """Return the carrier and canonical channels a sequence's frame maps to.
 
-        :param sequence: The outlined sequence to resolve.
+        :param sequence: The outlined sequence to inspect.
         :param channels: Canonical channels keyed by identifier.
-        :param bindings: Resolved sequencer bindings keyed by canonical channel.
-        :param consumed_channel_ids: Canonical channels already assigned to a previous
-            sequence during this pass application.
-        :returns: The binding for the sequence.
-        :raises PassFailedException: If the frame does not map to any available canonical
-            channel with a resolved sequencer.
+        :returns: The frame carrier frequency and the channels matching the sequence's port
+            at that frequency.
+        :raises PassFailedException: If the sequence does not contain exactly one
+            ``pulse.create_frame`` matching its port.
         """
 
         frames = [
@@ -141,6 +166,28 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
             if channel.port_id == sequence.port_id.data
             and isclose(channel.carrier_frequency, carrier, rel_tol=0.0, abs_tol=1e-6)
         ]
+        return carrier, candidates
+
+    def _resolve_sequence(
+        self,
+        sequence: SequenceOp,
+        channels: Mapping[str, QbloxChannelBinding],
+        bindings: Mapping[str, SequencerBinding],
+        consumed_channel_ids: set[str],
+    ) -> SequencerBinding:
+        """Resolve the sequencer, via binding it to a canonical channel.
+
+        :param sequence: The outlined sequence to resolve.
+        :param channels: Canonical channels keyed by identifier.
+        :param bindings: Resolved sequencer bindings keyed by canonical channel.
+        :param consumed_channel_ids: Canonical channels already assigned to a previous
+            sequence during this pass application.
+        :returns: The binding for the sequence.
+        :raises PassFailedException: If the frame does not map to any available canonical
+            channel with a resolved sequencer.
+        """
+
+        carrier, candidates = self._frame_candidates(sequence, channels)
         available_candidates = [
             candidate
             for candidate in candidates

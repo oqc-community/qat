@@ -47,9 +47,11 @@ def _resolve(
     **kwargs,
 ):
     data = canonical_data(configurations=configurations, **kwargs)
+    used_channel_ids = {channel.id for channel in data.channels}
     return resolve_sequencer_bindings(
         QbloxHardwareView.derive(data),
         supplied_configurations(data),
+        used_channel_ids,
     )
 
 
