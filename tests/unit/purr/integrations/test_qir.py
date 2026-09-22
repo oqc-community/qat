@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+from collections import Counter
 from os.path import abspath
 from unittest import mock
 
@@ -10,6 +11,7 @@ from compiler_config.config import CompilerConfig, Tket
 from qat.ir.builder_factory import BuilderFactory
 from qat.purr.backends.echo import get_default_echo_hardware
 from qat.purr.backends.realtime_chip_simulator import qutip_available
+from qat.purr.compiler import instructions
 from qat.purr.integrations.qir import QIRParser
 from qat.purr.qat import execute, execute_qir
 
@@ -57,7 +59,33 @@ class TestQIR:
         model = get_default_echo_hardware(7)
         parser = QIRParser(model, builder=BuilderFactory.create_builder(model))
         builder = parser.parse(_get_qir_path("base_profile_ops.ll"))
-        assert len(builder.instructions) == 180
+
+        exp_unqualified_inst_type_counts = {
+            "PhaseShift": 144,
+            "DrivePulse": 14,
+            "Synchronize": 8,
+            "PostProcessing": 3,
+            "CrossResonancePulse": 2,
+            "CrossResonanceCancelPulse": 2,
+            "MeasurePulse": 1,
+            "Acquire": 1,
+            "ResultsProcessing": 1,
+            "Reset": 1,
+            "PhaseReset": 1,
+            "Assign": 1,
+            "Return": 1,
+        }
+        exp_inst_type_counts = {
+            getattr(instructions, type_name): value
+            for type_name, value in exp_unqualified_inst_type_counts.items()
+        }
+
+        actual_inst_type_counts = Counter(
+            type(instruction) for instruction in builder.instructions
+        )
+
+        assert len(builder.instructions) > 0
+        assert actual_inst_type_counts == exp_inst_type_counts
 
     def test_cudaq_input(self):
         results = execute(

@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025 Oxford Quantum Circuits Ltd
 import re
+from collections import Counter
 from pathlib import Path
 
 import pytest
 from compiler_config.config import CompilerConfig, Tket
 
+import qat.purr.compiler.instructions
 from qat.frontend.parsers.qir import QIRParser as PydQIRParser
 from qat.frontend.qir import QIRFrontend, is_qir_path, is_qir_str, load_qir_file
 from qat.ir.instruction_builder import InstructionBuilder as PydInstructionBuilder
@@ -147,18 +149,74 @@ class TestQIRFrontend:
             assert list(active_qubits) == [2, 4]
 
     @pytest.mark.parametrize(
-        "model_type, builder_type, instruction_count",
+        "model_type, builder_type, namespace, inst_type_counts",
         [
-            ("legacy_model", LegInstructionBuilder, 181),
-            ("pyd_model", PydInstructionBuilder, 185),
+            (
+                "legacy_model",
+                LegInstructionBuilder,
+                qat.purr.compiler.instructions,
+                {
+                    "Repeat": 1,
+                    "PhaseShift": 144,
+                    "DrivePulse": 14,
+                    "Synchronize": 8,
+                    "PostProcessing": 3,
+                    "CrossResonancePulse": 2,
+                    "CrossResonanceCancelPulse": 2,
+                    "MeasurePulse": 1,
+                    "Acquire": 1,
+                    "ResultsProcessing": 1,
+                    "Reset": 1,
+                    "PhaseReset": 1,
+                    "Assign": 1,
+                    "Return": 1,
+                },
+            ),
+            (
+                "pyd_model",
+                PydInstructionBuilder,
+                qat.ir,
+                {
+                    "instructions.Repeat": 1,
+                    "instructions.PhaseShift": 144,
+                    "waveforms.Pulse": 18,
+                    "instructions.PhaseReset": 11,
+                    "instructions.Synchronize": 4,
+                    "measure.MeasureBlock": 1,
+                    "measure.Equalise": 1,
+                    "measure.Discriminate": 1,
+                    "instructions.ResultsProcessing": 1,
+                    "instructions.Reset": 1,
+                    "instructions.Assign": 1,
+                    "instructions.Return": 1,
+                },
+            ),
         ],
     )
-    def test_base_profile_ops(self, request, model_type, builder_type, instruction_count):
+    def test_base_profile_ops(
+        self, request, model_type, builder_type, namespace, inst_type_counts
+    ):
+        def get_fully_qualified_type(name):
+            full_namespace = namespace
+            for part in name.split("."):
+                full_namespace = getattr(full_namespace, part)
+            return full_namespace
+
         model = request.getfixturevalue(model_type)
         frontend = QIRFrontend(model)
         builder = frontend.emit(_get_qir_path("base_profile_ops.ll"))
         assert isinstance(builder, builder_type)
-        assert len(builder.instructions) == instruction_count
+
+        ref_inst_type_counts = {
+            get_fully_qualified_type(type_name): value
+            for type_name, value in inst_type_counts.items()
+        }
+        actual_inst_type_counts = Counter(
+            type(instruction) for instruction in builder.instructions
+        )
+
+        assert len(builder.instructions) > 0
+        assert actual_inst_type_counts == ref_inst_type_counts
 
     @pytest.mark.parametrize("qir_path", sorted(get_all_qir_paths()), ids=filename_ids)
     def test_check_and_return_source_with_qir_files(self, qir_path, legacy_model):
