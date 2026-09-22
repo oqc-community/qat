@@ -23,10 +23,11 @@ from qat.experimental.dialect.pulse.utils import pulse_entry_block
 
 
 class FrameNode:
-    """One operation in a frame-lineage chain.
+    """One operation in a frame lineage, positioned in the IR nesting hierarchy.
 
-    :ivar op: The operation at this position in the chain.
-    :ivar parent: The predecessor node; ``None`` for the root.
+    :ivar op: The operation this node records.
+    :ivar parent: Node of the region-bearing operation enclosing :attr:`op`; ``None``
+        when :attr:`op` sits directly in the entry block.
     """
 
     def __init__(self, op: Operation, parent: FrameNode | None) -> None:
@@ -34,7 +35,7 @@ class FrameNode:
         self.parent = parent
 
     def chain(self) -> Iterator[FrameNode]:
-        """Yield this node and each ancestor in order, ending at the root."""
+        """Yield this node and each enclosing operation, outwards to the entry block."""
         node: FrameNode | None = self
         while node is not None:
             yield node
@@ -42,7 +43,7 @@ class FrameNode:
 
     @property
     def root(self) -> FrameNode:
-        """The root node (the ``CreateFrameOp`` node)."""
+        """The outermost node, whose ``op`` is an entry-block operation."""
         *_, last = self.chain()
         return last
 
@@ -52,9 +53,10 @@ class FrameLineage:
 
     :ivar create_frame: Root ``CreateFrameOp``.
     :ivar port: Physical-port token from ``CreateFrameOp``.
-    :ivar related_ops: Ordered chain of :class:`FrameNode` objects, one per entry-block
-        op that interacts with this lineage. Each node's parent is the preceding node,
-        so walking the chain yields the full lineage history from any point.
+    :ivar related_ops: Ordered list of :class:`FrameNode` objects, one per operation
+        that interacts with this lineage, recorded at its own nesting depth. Each
+        node's parent is the region-bearing op enclosing it, so walking the chain
+        yields the path out to the entry block.
     """
 
     def __init__(
@@ -73,28 +75,34 @@ class FrameLineage:
         return self.create_frame.result
 
     @property
-    def root_node(self) -> FrameNode | None:
-        """The root :class:`FrameNode`; its ``op`` is ``create_frame``.
+    def entry_ops(self) -> tuple[Operation, ...]:
+        """Entry-block operations this lineage passes through, in encounter order.
 
-        ``None`` if
-        ``related_ops`` is empty.
+        Each node's :attr:`FrameNode.root` is its outermost enclosing operation, which
+        is the entry-block op that has to be carried along to bring this lineage's work
+        with it. Deduplicated, since several lineage ops commonly share one enclosing op.
         """
-        if not self.related_ops:
-            return None
-        return self.related_ops[0].root
+        entry_ops: dict[Operation, None] = {}
+        for node in self.related_ops:
+            entry_ops.setdefault(node.root.op, None)
+        return tuple(entry_ops)
 
     @property
     def ops(self) -> tuple[Operation, ...]:
         """Ops from :attr:`related_ops` in encounter order."""
         return tuple(n.op for n in self.related_ops)
 
-    def add_node(self, op: Operation) -> None:
-        """Append a FrameNode for op unless the tail already records it."""
-        if not self.related_ops:
-            self.related_ops.append(FrameNode(op=op, parent=None))
+    def add_node(self, op: Operation, enclosing: FrameNode | None = None) -> None:
+        """Append a FrameNode for ``op`` unless the tail already records it.
+
+        ``enclosing`` is the node of the region-bearing op containing ``op``, or
+        ``None`` when ``op`` sits in the entry block. A single walk attaches ``op``
+        once per frame operand resolving to this lineage, so repeats are always
+        adjacent and checking the tail is enough to deduplicate them.
+        """
+        if self.related_ops and self.related_ops[-1].op is op:
             return
-        if self.related_ops[-1].op is not op:
-            self.related_ops.append(FrameNode(op=op, parent=self.related_ops[-1]))
+        self.related_ops.append(FrameNode(op=op, parent=enclosing))
 
 
 class FrameLineageAnalysis:
@@ -145,6 +153,14 @@ class FrameLineageAnalysis:
             op for op, lineages in self._lineages_by_op.items() if len(lineages) > 1
         )
 
+    def lineages_for_op(self, op: Operation) -> tuple[FrameLineage, ...]:
+        """Return every lineage ``op`` is attached to, in encounter order.
+
+        Empty for operations the analysis does not track, such as constants and the region-
+        bearing operations that merely enclose a lineage.
+        """
+        return tuple(self._lineages_by_op.get(op, ()))
+
     def lineage_for_frame(self, frame: SSAValue) -> FrameLineage | None:
         """Return the :class:`FrameLineage` whose root value is ``frame``, or ``None``."""
         lineage = self._owner.get(frame)
@@ -163,11 +179,15 @@ class FrameLineageAnalysis:
         return lineage
 
     def attach(
-        self, entry_op: Operation, lineage: FrameLineage, result: SSAValue | None = None
+        self,
+        op: Operation,
+        lineage: FrameLineage,
+        result: SSAValue | None = None,
+        enclosing: FrameNode | None = None,
     ) -> None:
-        """Record ``entry_op``'s use of ``lineage``, optionally claiming ``result``."""
-        lineage.add_node(entry_op)
-        self._record_op_membership(entry_op, lineage)
+        """Record ``op``'s use of ``lineage``, optionally claiming ``result``."""
+        lineage.add_node(op, enclosing)
+        self._record_op_membership(op, lineage)
         if result is not None:
             self._owner[result] = lineage
 
@@ -196,10 +216,11 @@ def build_frame_lineage_analysis(module: ModuleOp) -> FrameLineageAnalysis:
     later lowering stages can recover the hardware-facing view without
     collapsing distinct logical frames.
 
-    Region-bearing entry operations are traversed recursively: a ``CreateFrameOp``
-    inside a nested region starts a new lineage with the enclosing entry-block op
-    as its representative; references to outer frame values append a new node to
-    those lineages.
+    Region-bearing operations are traversed recursively. Membership records the pulse
+    operations themselves at whatever depth they occur, so ownership stays decidable
+    per operation. Each node's parent is the enclosing region-bearing op, so
+    :attr:`FrameLineage.entry_ops` recovers the entry-block ops a lineage passes
+    through.
 
     :param module: Module containing pulse operations.
     :returns: Frame-lineage analysis.
@@ -207,20 +228,19 @@ def build_frame_lineage_analysis(module: ModuleOp) -> FrameLineageAnalysis:
     """
     analysis = FrameLineageAnalysis()
 
-    def _visit_op(op: Operation, representative: Operation | None) -> None:
-        entry_op = representative or op
-
+    def _visit_op(op: Operation, enclosing: FrameNode | None) -> None:
         if isinstance(op, CreateFrameOp):
-            root = FrameNode(op=op, parent=None)
-            node = root if entry_op is op else FrameNode(op=entry_op, parent=root)
-            analysis.begin_lineage(op, node)
+            analysis.begin_lineage(op, FrameNode(op=op, parent=enclosing))
             return
 
         if op.regions:
+            # One node per region-bearing op, shared by everything nested inside it, so
+            # that each contained lineage op walks the same path back to the entry block.
+            node = FrameNode(op=op, parent=enclosing)
             for region in op.regions:
                 for block in region.blocks:
                     for inner_op in block.ops:
-                        _visit_op(inner_op, representative=entry_op)
+                        _visit_op(inner_op, enclosing=node)
             return
 
         frame_operands = [o for o in op.operands if isinstance(o.type, FrameType)]
@@ -233,7 +253,7 @@ def build_frame_lineage_analysis(module: ModuleOp) -> FrameLineageAnalysis:
         for operand in frame_operands:
             lineage = analysis.lineage_for_result(operand)
             if lineage is None:
-                if representative is None:
+                if enclosing is None:
                     raise PassFailedException(
                         f"Unbound frame operand encountered in operation {op.name}."
                     )
@@ -249,14 +269,14 @@ def build_frame_lineage_analysis(module: ModuleOp) -> FrameLineageAnalysis:
         # All validation is complete; attach usage and claim results one value at a time.
         if frame_results:
             for lineage, result in zip(resolved, frame_results, strict=True):
-                analysis.attach(entry_op, lineage, result)
+                analysis.attach(op, lineage, result, enclosing=enclosing)
         else:
             for lineage in resolved:
-                analysis.attach(entry_op, lineage)
+                analysis.attach(op, lineage, enclosing=enclosing)
 
     entry_block = pulse_entry_block(module)
     for op in entry_block.ops:
-        _visit_op(op, representative=None)
+        _visit_op(op, enclosing=None)
 
     return analysis
 

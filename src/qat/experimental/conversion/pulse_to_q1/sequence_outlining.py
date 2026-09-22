@@ -7,11 +7,21 @@ from re import compile
 
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
+from xdsl.dialects.scf import ForOp
 from xdsl.ir import Operation, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.experimental.dialect.pulse.ir import AcquireOp, CreateFrameOp, IntegrateOp
+from qat.experimental.conversion.pulse_to_q1.loop_fission import (
+    fission_for_lineage,
+    is_results_op,
+)
+from qat.experimental.dialect.pulse.ir import (
+    AcquireOp,
+    CreateFrameOp,
+    FrameType,
+    IntegrateOp,
+)
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineage,
     FrameLineageAnalysis,
@@ -155,25 +165,105 @@ def _build_partition_sequence_body(
     entry_block_ops: list[Operation],
     lineage: FrameLineage,
     op_by_result: dict[SSAValue, Operation],
-    owning_lineage: dict[Operation, FrameLineage],
+    entry_lineages: dict[Operation, list[FrameLineage]],
+    analysis: FrameLineageAnalysis,
 ) -> list[Operation]:
     """Build the cloned body for one outlined sequence.
 
     The analysis result describes lineage membership. The outlining pass still needs to
     clone the supporting entry-block operations that feed that lineage so the emitted
     sequence body remains valid on its own.
+
+    A region-bearing entry-block operation enclosing this lineage's work, such as the
+    shot loop, is rebuilt from the operations belonging to this lineage alone rather than
+    copied wholesale. That applies whether or not other lineages are enclosed too: a loop
+    enclosing one frame still carries a results array the sequence must not keep.
+
+    Entry-block results bookkeeping is never copied: a hardware sequence records
+    acquisitions into bins and carries no results arrays, and nothing in the Q1 pipeline
+    lowers them.
     """
 
-    needed_ops = _partition_dependency_closure(lineage.ops, op_by_result)
+    needed_ops = _partition_dependency_closure(lineage.entry_ops, op_by_result)
     for op in needed_ops:
-        dependency_owner = owning_lineage.get(op)
-        if dependency_owner is not None and dependency_owner is not lineage:
+        owners = entry_lineages.get(op, ())
+        if len(owners) == 1 and owners[0] is not lineage:
             raise PassFailedException(
                 f"{op.name} is owned by another frame lineage and cannot be cloned as "
                 "a dependency"
             )
+
     value_mapper: dict[SSAValue, SSAValue] = {}
-    return [op.clone(value_mapper) for op in entry_block_ops if op in needed_ops]
+    sequence_body: list[Operation] = []
+    for op in entry_block_ops:
+        if op not in needed_ops or is_results_op(op):
+            continue
+        if _needs_rebuilding(op, lineage, entry_lineages, analysis):
+            _reject_consumed_loop_results(op, needed_ops)
+            sequence_body.append(fission_for_lineage(op, lineage, analysis, value_mapper))
+        else:
+            sequence_body.append(op.clone(value_mapper))
+    return sequence_body
+
+
+def _reject_consumed_loop_results(op: Operation, needed_ops: set[Operation]) -> None:
+    """Reject a rebuilt loop whose results this partition still needs.
+
+    A rebuilt loop carries nothing between iterations and so produces no results. Any
+    operation in the partition consuming one would be left holding a value owned by the
+    original loop, outside the emitted sequence.
+
+    :raises PassFailedException: If a needed operation consumes a result of ``op``.
+    """
+    for result in op.results:
+        for use in result.uses:
+            if use.operation in needed_ops and not is_results_op(use.operation):
+                raise PassFailedException(
+                    f"{use.operation.name} consumes a result of {op.name}, which is "
+                    "rebuilt without loop-carried values and so produces none"
+                )
+
+
+def _reject_frames_crossing_regions(module: ModuleOp) -> None:
+    """Reject entry-block regions that take frames as block arguments.
+
+    The lineage analysis cannot resolve a frame arriving as a block argument, so it
+    attributes nothing inside such a region. Outlining would then emit sequences missing
+    that region's work entirely, which is valid IR describing a different program.
+
+    :raises PassFailedException: If a region-bearing entry-block operation has a block
+        taking a frame argument.
+    """
+    for op in pulse_entry_block(module).ops:
+        for region in op.regions:
+            for block in region.blocks:
+                if any(isinstance(arg.type, FrameType) for arg in block.args):
+                    raise PassFailedException(
+                        f"{op.name} takes a frame as a block argument; frame lineage "
+                        "cannot be resolved across that boundary, so its body cannot be "
+                        "outlined"
+                    )
+
+
+def _needs_rebuilding(
+    op: Operation,
+    lineage: FrameLineage,
+    entry_lineages: dict[Operation, list[FrameLineage]],
+    analysis: FrameLineageAnalysis,
+) -> bool:
+    """Return whether ``op`` must be rebuilt per partition rather than copied wholesale.
+
+    Two cases need it. Several lineages cannot share one copy of a region-bearing operation,
+    since each emitted sequence is independent. And a shot loop enclosing even a single
+    lineage still carries results bookkeeping a hardware sequence must not keep.
+    """
+    if not op.regions:
+        return False
+    if len(entry_lineages.get(op, ())) > 1:
+        return True
+    return isinstance(op, ForOp) and any(
+        lineage in analysis.lineages_for_op(inner) for inner in op.walk() if inner is not op
+    )
 
 
 @dataclass(frozen=True)
@@ -257,17 +347,21 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         :returns: Triple of emitted SequenceOp list, frame→port mapping, and
                   frame→sequence symbol mapping.
         """
+        _reject_frames_crossing_regions(module)
+
+        # Region-bearing control flow shared by several lineages is fissioned below.
+        # A shared *pulse* operation is synchronisation that should already have been
+        # lowered to per-sequencer waits; fission cannot preserve its semantics.
         if shared_ops := analysis.shared_ops:
             shared_op = shared_ops[0]
             raise PassFailedException(
                 f"{shared_op.name} spans multiple frame lineages and cannot be outlined "
                 "into independent Q1 sequences"
             )
-        owning_lineage = {
-            lineage_op: lineage
-            for lineage in analysis.lineages
-            for lineage_op in lineage.ops
-        }
+        entry_lineages: dict[Operation, list[FrameLineage]] = {}
+        for frame_lineage in analysis.lineages:
+            for entry_op in frame_lineage.entry_ops:
+                entry_lineages.setdefault(entry_op, []).append(frame_lineage)
         symbol_counts = analysis.port_counts
         n_frames = len(analysis.lineages)
         reserved = {f"frame_{i}" for i in range(n_frames)}
@@ -287,7 +381,8 @@ class Q1OutliningPass(OrderedPass, ModulePass):
                 entry_block_ops,
                 lineage,
                 op_by_result,
-                owning_lineage,
+                entry_lineages,
+                analysis,
             )
             sequence_op, channel_token, sequence_symbol = self._sequence_op_for_partition(
                 frame_id,

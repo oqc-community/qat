@@ -95,19 +95,18 @@ class TestFrameNode:
 
 
 class TestFrameLineage:
-    def test_root_node_is_none_when_related_ops_is_empty(self):
-        """Verify that root_node returns None rather than raising when related_ops has not
-        been seeded yet."""
+    def test_entry_ops_is_empty_when_related_ops_is_empty(self):
+        """Verify that entry_ops is empty rather than raising when related_ops has not been
+        seeded yet."""
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
         lineage = FrameLineage(create_frame=frame, port="q0/drive")
 
         assert lineage.related_ops == []
-        assert lineage.root_node is None
+        assert lineage.entry_ops == ()
 
-    def test_add_node_on_empty_related_ops_seeds_a_root(self):
-        """Verify that add_node creates a parentless root node when related_ops starts
-        empty, rather than indexing into an empty list."""
+    def test_add_node_without_an_enclosing_op_records_an_entry_block_op(self):
+        """Verify that an operation added with no enclosing node is its own entry op."""
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
         lineage = FrameLineage(create_frame=frame, port="q0/drive")
@@ -116,7 +115,21 @@ class TestFrameLineage:
 
         assert [n.op for n in lineage.related_ops] == [frame]
         assert lineage.related_ops[0].parent is None
-        assert lineage.root_node is lineage.related_ops[0]
+        assert lineage.entry_ops == (frame,)
+
+    def test_add_node_with_an_enclosing_op_records_the_enclosing_entry_op(self):
+        """Verify that a nested operation reports its enclosing op as the entry op while
+        remaining itself in related_ops."""
+        freq = ConstantOp(FrequencyAttr(4.8e9))
+        frame = CreateFrameOp(freq, StringAttr("q0/drive"))
+        container = _RegionBearingOp(Region(Block([])))
+        lineage = FrameLineage(create_frame=frame, port="q0/drive")
+
+        lineage.add_node(frame, FrameNode(op=container, parent=None))
+
+        assert [n.op for n in lineage.related_ops] == [frame]
+        assert lineage.related_ops[0].parent.op is container
+        assert lineage.entry_ops == (container,)
 
 
 class TestFrameLineageAnalysis:
@@ -258,9 +271,9 @@ class TestFrameLineageAnalysis:
         analysis = build_frame_lineage_analysis(module)
         assert analysis.lineages == []
 
-    def test_nested_create_frame_op_is_attributed_to_enclosing_container(self):
-        """Verify that a CreateFrameOp created inside a nested region starts a lineage whose
-        first related op is the enclosing container, not the CreateFrameOp itself."""
+    def test_nested_create_frame_op_is_recorded_under_its_enclosing_container(self):
+        """Verify that a CreateFrameOp created inside a nested region is itself the lineage
+        member, with the enclosing container reported as the entry-block op."""
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame_op = CreateFrameOp(freq, StringAttr("q0/drive"))
         container = _RegionBearingOp(Region(Block([freq, frame_op])))
@@ -271,9 +284,9 @@ class TestFrameLineageAnalysis:
         [lin] = analysis.lineages
         assert lin.port == "q0/drive"
         assert lin.frame is frame_op.result
-        assert [n.op for n in lin.related_ops] == [container]
-        assert lin.root_node is not None
-        assert lin.root_node.op is frame_op
+        assert [n.op for n in lin.related_ops] == [frame_op]
+        assert lin.related_ops[0].parent.op is container
+        assert lin.entry_ops == (container,)
 
     def test_lineage_for_result_resolves_any_owned_value(self):
         """Verify that lineage_for_result resolves any value claimed by a lineage, not just
@@ -349,17 +362,19 @@ class TestFrameLineageAnalysis:
 
         lin = analysis.lineage_for_frame(frame_op.result)
         assert lin is not None
-        assert [n.op for n in lin.related_ops] == [frame_op, container]
+        assert [n.op for n in lin.related_ops] == [frame_op, side_effect]
+        assert lin.entry_ops == (frame_op, container)
 
-    def test_region_bearing_op_shared_by_two_frames_attributed_to_both(self):
-        """Verify that a region-bearing op referencing multiple frames appears in each
-        lineage."""
+    def test_region_bearing_op_shared_by_two_frames_is_a_shared_entry_op_only(self):
+        """Verify that a region enclosing two frames keeps their members distinct, and is
+        reported through entry_ops rather than as a shared operation."""
         freq_0 = ConstantOp(FrequencyAttr(4.8e9))
         freq_1 = ConstantOp(FrequencyAttr(5.2e9))
         frame_0 = CreateFrameOp(freq_0, StringAttr("q0/drive"))
         frame_1 = CreateFrameOp(freq_1, StringAttr("q1/drive"))
-        body = Region(Block([_FrameSideEffectOp(frame_0), _FrameSideEffectOp(frame_1)]))
-        container = _RegionBearingOp(body)
+        side_effect_0 = _FrameSideEffectOp(frame_0)
+        side_effect_1 = _FrameSideEffectOp(frame_1)
+        container = _RegionBearingOp(Region(Block([side_effect_0, side_effect_1])))
         analysis = build_frame_lineage_analysis(
             _module_with_main(
                 [freq_0, freq_1, frame_0, frame_1, container, func.ReturnOp()]
@@ -370,13 +385,18 @@ class TestFrameLineageAnalysis:
         lin_1 = analysis.lineage_for_frame(frame_1.result)
         assert lin_0 is not None and [n.op for n in lin_0.related_ops] == [
             frame_0,
-            container,
+            side_effect_0,
         ]
         assert lin_1 is not None and [n.op for n in lin_1.related_ops] == [
             frame_1,
-            container,
+            side_effect_1,
         ]
-        assert analysis.shared_ops == (container,)
+        assert lin_0.entry_ops == (frame_0, container)
+        assert lin_1.entry_ops == (frame_1, container)
+        # The container encloses both lineages but belongs to neither, so it is a
+        # fission candidate rather than a genuinely shared operation.
+        assert analysis.shared_ops == ()
+        assert analysis.lineages_for_op(container) == ()
 
     def test_frame_operand_without_frame_result_keeps_partition(self):
         """Verify that frame-consuming side effects remain attached to their lineage."""
