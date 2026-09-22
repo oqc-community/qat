@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post379.dev20260922084435 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post380.dev20260922163401 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -540,6 +540,7 @@ window.runMermaid = runMermaid;</script>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.html">qat.experimental.conversion.pulse_to_q1 package</a><ul>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.qblox_configuration.html">qat.experimental.conversion.pulse_to_q1.qblox_configuration package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.hardware_binding.html">qat.experimental.conversion.pulse_to_q1.hardware_binding module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.loop_fission.html">qat.experimental.conversion.pulse_to_q1.loop_fission module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.passes.html">qat.experimental.conversion.pulse_to_q1.passes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.phase.html">qat.experimental.conversion.pulse_to_q1.phase module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html">qat.experimental.conversion.pulse_to_q1.pre_q1_ir module</a></li>
@@ -2106,7 +2107,11 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineagePass.analysis">analysis (FrameLineagePass property)</a>
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage.params.analysis">(qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage parameter)</a>
 </li>
+      </ul></li>
       <li><a href="qat.core.pass_base.html#qat.core.pass_base.AnalysisPass">AnalysisPass (class in qat.core.pass_base)</a>
 
       <ul>
@@ -7089,6 +7094,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.backend.qblox.codegen.html#qat.backend.qblox.codegen.QbloxContext.enter_sweep">enter_sweep() (QbloxContext static method)</a>, <a href="qat.purr.backends.qblox.codegen.html#qat.purr.backends.qblox.codegen.QbloxContext.enter_sweep">[1]</a>
 </li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.entry_ops">entry_ops (FrameLineage property)</a>
+</li>
       <li><a href="qat.experimental.dialect.q1_cf.html#qat.experimental.dialect.q1_cf.BinaryPredicateAttr.enum_type">enum_type (BinaryPredicateAttr attribute)</a>, <a href="qat.experimental.dialect.q1_cf.ir.attrs.html#qat.experimental.dialect.q1_cf.ir.attrs.BinaryPredicateAttr.enum_type">[1]</a>, <a href="qat.experimental.dialect.q1_scf.html#qat.experimental.dialect.q1_scf.BinaryPredicateAttr.enum_type">[2]</a>
 
       <ul>
@@ -7738,6 +7745,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.FirConfig">FirConfig (class in qat.backend.qblox.config.specification)</a>
+</li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage">fission_for_lineage() (in module qat.experimental.conversion.pulse_to_q1.loop_fission)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.BasicLogger.output.params.fit_type">fit_type (qat.purr.utils.logger.BasicLogger.output parameter)</a>
 
@@ -10857,6 +10866,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.system_data.hardware.qblox.configuration.html#qat.experimental.system_data.hardware.qblox.configuration.QbloxSuppliedConfiguration.is_reference">is_reference (QbloxSuppliedConfiguration attribute)</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.is_results_op">is_results_op() (in module qat.experimental.conversion.pulse_to_q1.loop_fission)</a>
+</li>
       <li><a href="qat.experimental.system_data.hardware.qblox.target.html#qat.experimental.system_data.hardware.qblox.target.ModuleSpec.is_rf">is_rf (ModuleSpec attribute)</a>
 </li>
       <li><a href="qat.core.config.validators.html#qat.core.config.validators.is_runtime">is_runtime() (in module qat.core.config.validators)</a>
@@ -11599,11 +11610,15 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.backend.passes.purr.analysis.html#qat.backend.passes.purr.analysis.LifetimePass">LifetimePass (class in qat.backend.passes.purr.analysis)</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage.params.lineage">lineage (qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage parameter)</a>
+</li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.lineage_for_frame">lineage_for_frame() (FrameLineageAnalysis method)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.lineage_for_result">lineage_for_result() (FrameLineageAnalysis method)</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.from_lineages.params.lineages">lineages (qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.from_lineages parameter)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineageAnalysis.lineages_for_op">lineages_for_op() (FrameLineageAnalysis method)</a>
 </li>
       <li><a href="qat.model.error_mitigation.html#qat.model.error_mitigation.ReadoutMitigation.params.linear">linear (qat.model.error_mitigation.ReadoutMitigation parameter)</a>
 
@@ -14675,6 +14690,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.hardware_binding.html#module-qat.experimental.conversion.pulse_to_q1.hardware_binding">qat.experimental.conversion.pulse_to_q1.hardware_binding</a>
 </li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#module-qat.experimental.conversion.pulse_to_q1.loop_fission">qat.experimental.conversion.pulse_to_q1.loop_fission</a>
+</li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#module-qat.experimental.conversion.pulse_to_q1.passes">qat.experimental.conversion.pulse_to_q1.passes</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.phase.html#module-qat.experimental.conversion.pulse_to_q1.phase">qat.experimental.conversion.pulse_to_q1.phase</a>
@@ -16964,6 +16981,10 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.backend.qblox.pre_emission_verification.html#qat.experimental.backend.qblox.pre_emission_verification.verify_qblox_pre_emission.params.op">(qat.experimental.backend.qblox.pre_emission_verification.verify_qblox_pre_emission parameter)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse.lower_kernels_to_arrays.html#qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays.apply.params.op">(qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays.apply parameter)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage.params.op">(qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage parameter)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.is_results_op.params.op">(qat.experimental.conversion.pulse_to_q1.loop_fission.is_results_op parameter)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply.params.op">(qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply parameter)</a>
 </li>
@@ -20341,6 +20362,13 @@ window.runMermaid = runMermaid;</script>
 </li>
       </ul></li>
       <li>
+    qat.experimental.conversion.pulse_to_q1.loop_fission
+
+      <ul>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#module-qat.experimental.conversion.pulse_to_q1.loop_fission">module</a>
+</li>
+      </ul></li>
+      <li>
     qat.experimental.conversion.pulse_to_q1.passes
 
       <ul>
@@ -21824,6 +21852,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.instruction_basetypes.html#module-qat.ir.instruction_basetypes">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.ir.instruction_builder
 
@@ -21831,8 +21861,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.ir.instruction_builder.html#module-qat.ir.instruction_builder">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     qat.ir.instructions
 
@@ -25226,8 +25254,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.utils.pydantic.html#qat.utils.pydantic.PydSetBase.root">(PydSetBase attribute)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.dialect.pulse.transforms.partition_by_frame.html#qat.experimental.dialect.pulse.transforms.partition_by_frame.FrameLineage.root_node">root_node (FrameLineage property)</a>
-</li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RTCSQubit.rotating_frame_frequency">rotating_frame_frequency (RTCSQubit property)</a>
 </li>
       <li><a href="qat.ir.measure.html#qat.ir.measure.Acquire.rotation">rotation (Acquire attribute)</a>
@@ -29277,6 +29303,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.StoreOp.value_in_collection">value_in_collection() (StoreOp class method)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.StoreOp.value_in_collection">[1]</a>
 </li>
       <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.value_in_unit">value_in_unit() (TimeAttr method)</a>, <a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.TimeAttr.value_in_unit">[1]</a>
+</li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage.params.value_mapper">value_mapper (qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage parameter)</a>
 </li>
       <li><a href="qat.purr.compiler.execution.html#qat.purr.compiler.execution.ValueReplacement">ValueReplacement (class in qat.purr.compiler.execution)</a>
 </li>

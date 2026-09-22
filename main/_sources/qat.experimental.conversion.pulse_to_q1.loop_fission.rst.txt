@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.loop\_fission module
+==============================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.loop_fission
+   :members:
+   :undoc-members:
+   :show-inheritance:
