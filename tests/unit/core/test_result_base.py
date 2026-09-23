@@ -6,6 +6,10 @@ from uuid import UUID
 import pytest
 
 from qat.core.result_base import ResultInfoMixin, ResultManager, ResultModel
+from qat.purr.core.result_base import (
+    ResultManager as PurrResultManager,
+    ResultModel as PurrResultModel,
+)
 
 
 @dataclass
@@ -115,3 +119,54 @@ class TestResultsManager:
         expected = "Could not find result" if not results else "Found multiple results"
         with pytest.raises(ValueError, match=expected):
             manager._remove(MockResult("first"))
+
+
+def test_purr_result_manager_lifecycle():
+    first = MockResult("first")
+    second = OtherResult("second")
+    manager = PurrResultManager()
+    other = PurrResultManager()
+
+    manager.add(first)
+    other.add(second)
+    manager.update(other)
+
+    wrapped = manager._find(first)
+    assert wrapped.value is first
+    assert isinstance(wrapped.id, UUID)
+    assert hash(wrapped) == hash(wrapped.id)
+    assert manager.lookup_by_type(MockResult) is first
+    assert manager.lookup_by_type(OtherResult) is second
+
+    manager.mark_as_dirty(first)
+    manager.cleanup()
+    assert all(result.value is not first for result in manager.results)
+
+    manager.remove_by_type(OtherResult)
+    assert not manager.results
+
+
+def test_purr_result_manager_rejects_invalid_operations():
+    manager = PurrResultManager()
+
+    with pytest.raises(ValueError, match="Invalid type"):
+        manager.update(object())
+    with pytest.raises(ValueError, match="Could not find result"):
+        manager._remove(MockResult("missing"))
+    with pytest.raises(ValueError, match="Could not find any results"):
+        manager.lookup_by_type(MockResult)
+    with pytest.raises(ValueError, match="Could not find any results"):
+        manager.remove_by_type(MockResult)
+
+    manager.results.update(
+        {
+            PurrResultModel(MockResult("duplicate")),
+            PurrResultModel(MockResult("duplicate")),
+        }
+    )
+    with pytest.raises(ValueError, match="Found multiple results"):
+        manager._find(MockResult("duplicate"))
+    with pytest.raises(ValueError, match="Found multiple results"):
+        manager.lookup_by_type(MockResult)
+    with pytest.raises(ValueError, match="Found multiple results"):
+        manager.remove_by_type(MockResult)

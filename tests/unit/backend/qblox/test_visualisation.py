@@ -68,6 +68,8 @@ def test_plot_program_pads_and_plots_each_timeline(mocker):
     assert axes[1, 0].plot.call_count == 2
     axes[0, 0].set_title.assert_called_once_with("q0.drive")
     axes[1, 0].set_title.assert_called_once_with("q1.drive")
+    axes[0, 0].legend.assert_called_once_with(loc="upper right")
+    axes[1, 0].legend.assert_called_once_with(loc="upper right")
     tight_layout.assert_called_once_with()
     show.assert_called_once_with()
 

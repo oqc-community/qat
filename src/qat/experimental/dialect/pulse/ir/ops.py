@@ -76,7 +76,7 @@ from .attributes import (
     TimeAttr,
     WeightsAttr,
 )
-from .interfaces import IsAnalyticalWaveformInterface
+from .interfaces import IsAnalyticalWaveformInterface, PulseOperationInterface
 from .traits import (
     AdvancesTimeTrait,
     CallKernelOpUserOpInterface,
@@ -132,7 +132,9 @@ def extract_constant_scalar(ssa: SSAValue) -> float | complex | None:
 
 
 @irdl_op_definition
-class ConstantOp(IRDLOperation, HasFolderInterface, Generic[PULSE_VAR_TYPE]):
+class ConstantOp(
+    IRDLOperation, PulseOperationInterface, HasFolderInterface, Generic[PULSE_VAR_TYPE]
+):
     """Represents a constant value of a given type. This is used to represent constant
     frequencies, phases, durations, amplitudes and waveforms in the IR.
 
@@ -1155,7 +1157,7 @@ class SechWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
 
 @irdl_op_definition
-class CreateFrameOp(IRDLOperation):
+class CreateFrameOp(IRDLOperation, PulseOperationInterface):
     """Creates a frame, which is a medium for waveforms to be played at a given frequency,
     and tracks any phase manipulations.
 
@@ -1251,7 +1253,7 @@ class CreateFrameOp(IRDLOperation):
         return self.result.type.port
 
 
-class PhaseOp(IRDLOperation, ABC):
+class PhaseOp(IRDLOperation, PulseOperationInterface, ABC):
     """Abstract base class for operations that manipulate the phase of a frame."""
 
     frame = operand_def(FrameType)
@@ -1323,7 +1325,7 @@ class PhaseSetOp(PhaseOp):
 
 
 @irdl_op_definition
-class WaitOp(IRDLOperation):
+class WaitOp(IRDLOperation, PulseOperationInterface):
     """Progresses time on a given frame by a specified amount, without playing any waveform.
 
     This is used to ensure waveforms are played at the correct time.
@@ -1364,7 +1366,7 @@ class WaitOp(IRDLOperation):
 
 
 @irdl_op_definition
-class SynchronizeOp(IRDLOperation):
+class SynchronizeOp(IRDLOperation, PulseOperationInterface):
     """Synchronizes a set of frames, ensuring they all progress to the same time.
 
     This is used to ensure operations on different frames are correctly synchronized in
@@ -1412,7 +1414,7 @@ class SynchronizeOp(IRDLOperation):
 
 
 @irdl_op_definition
-class PulseOp(IRDLOperation):
+class PulseOp(IRDLOperation, PulseOperationInterface):
     """Represents a pulse, which is a waveform played on a frame at a given frequency, and
     with a given phase.
 
@@ -1451,7 +1453,7 @@ class PulseOp(IRDLOperation):
 
 
 @irdl_op_definition
-class StartContinuousWaveformOp(IRDLOperation):
+class StartContinuousWaveformOp(IRDLOperation, PulseOperationInterface):
     """Represents the start of a continuous waveform, which is a waveform that is played
     indefinitely until a corresponding stop operation is reached.
 
@@ -1493,7 +1495,7 @@ class StartContinuousWaveformOp(IRDLOperation):
 
 
 @irdl_op_definition
-class StopContinuousWaveformOp(IRDLOperation):
+class StopContinuousWaveformOp(IRDLOperation, PulseOperationInterface):
     """Represents stopping a continuous waveform, which is a waveform that is played
     indefinitely until a corresponding stop operation is reached. Paired with
     :class:`StartContinuousWaveformOp`.
@@ -1519,7 +1521,7 @@ class StopContinuousWaveformOp(IRDLOperation):
 
 
 @irdl_op_definition
-class AcquireOp(IRDLOperation):
+class AcquireOp(IRDLOperation, PulseOperationInterface):
     """Represents an acquisition operation, which listens to the waveform input to the
     channel within the reference frame.
 

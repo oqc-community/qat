@@ -46,7 +46,7 @@ def plot_program(program: QbloxProgram):
         axes[i][0].set_xlabel("Time (ns)")
         axes[i][0].set_ylabel("Digital offset")
         axes[i][0].autoscale()
-        axes[i][0].legend()
+        axes[i][0].legend(loc="upper right")
 
     plt.tight_layout()
     plt.show()

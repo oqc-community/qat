@@ -72,6 +72,8 @@ class Q1SequencerSpec:
     instruction_capacity: int
     clock_period_ns: int = 4
     sample_rate_hz: int = 1_000_000_000
+    min_waveform_sample: float = -1.0
+    max_waveform_sample: float = 1.0
     nco_min_frequency_hz: float = -500_000_000.0
     nco_max_frequency_hz: float = 500_000_000.0
     nco_phase_steps: int = 1_000_000_000

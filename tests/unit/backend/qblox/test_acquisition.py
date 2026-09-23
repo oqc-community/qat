@@ -5,6 +5,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from qat.backend.qblox import acquisition as current_acquisition
+from qat.backend.qblox.acquisition import Acquisition as CurrentAcquisition
 from qat.backend.qblox.target_data import QRM_DATA
 from qat.purr.backends.qblox.acquisition import (
     Acquisition,
@@ -14,6 +16,143 @@ from qat.purr.backends.qblox.acquisition import (
     PathData,
     ScopeAcqData,
 )
+
+
+def _current_acquisition(
+    name: str = "readout",
+    index: int = 0,
+    path0: list[float] | None = None,
+    path1: list[float] | None = None,
+) -> current_acquisition.Acquisition:
+    return CurrentAcquisition(
+        name=name,
+        index=index,
+        acquisition=current_acquisition.BinnedAndScopeAcqData(
+            scope=current_acquisition.ScopeAcqData(
+                path0=current_acquisition.PathData(
+                    avg_cnt=4,
+                    **{"out-of-range": True},
+                    data=path0 or [1.0],
+                ),
+                path1=current_acquisition.PathData(
+                    avg_cnt=2,
+                    **{"out-of-range": True},
+                    data=path1 or [2.0],
+                ),
+            ),
+            bins=current_acquisition.BinnedAcqData(
+                avg_cnt=[1],
+                integration=current_acquisition.IntegData(path0=[3.0], path1=[4.0]),
+                threshold=[1.0],
+            ),
+        ),
+    )
+
+
+def test_current_acquisition_concatenates_data():
+    first = _current_acquisition()
+    second = _current_acquisition(path0=[5.0], path1=[6.0])
+
+    result = first + second
+
+    assert result.name == "readout"
+    assert result.index == 0
+    assert result.acquisition.scope.path0.avg_cnt == 4
+    assert result.acquisition.scope.path1.avg_cnt == 2
+    assert result.acquisition.scope.path0.oor
+    assert result.acquisition.scope.path1.oor
+    np.testing.assert_array_equal(result.acquisition.scope.path0.data, [1.0, 5.0])
+    np.testing.assert_array_equal(result.acquisition.scope.path1.data, [2.0, 6.0])
+    np.testing.assert_array_equal(result.acquisition.bins.avg_cnt, [1, 1])
+    np.testing.assert_array_equal(result.acquisition.bins.integration.path0, [3.0, 3.0])
+    np.testing.assert_array_equal(result.acquisition.bins.integration.path1, [4.0, 4.0])
+    np.testing.assert_array_equal(result.acquisition.bins.threshold, [1.0, 1.0])
+
+
+def test_current_acquisition_handles_empty_operands():
+    acquisition = _current_acquisition()
+
+    assert acquisition + CurrentAcquisition() == acquisition
+    assert CurrentAcquisition() + acquisition == acquisition
+
+
+def test_current_acquisition_rejects_incompatible_operands():
+    acquisition = _current_acquisition()
+
+    with pytest.raises(TypeError, match="Can only add acquisitions"):
+        acquisition + object()
+    with pytest.raises(ValueError, match="Expected the same index"):
+        acquisition + _current_acquisition(index=1)
+    with pytest.raises(ValueError, match="Expected the same name"):
+        acquisition + _current_acquisition(name="other")
+
+
+@pytest.mark.parametrize(
+    ("left", "right"),
+    [
+        (current_acquisition.PathData(), object()),
+        (
+            current_acquisition.PathData(avg_cnt=1),
+            current_acquisition.PathData(avg_cnt=2),
+        ),
+        (
+            current_acquisition.PathData(**{"out-of-range": True}),
+            current_acquisition.PathData(**{"out-of-range": False}),
+        ),
+        (
+            current_acquisition.PathData(data=[1.0]),
+            current_acquisition.PathData(data=[1.0, 2.0]),
+        ),
+        (
+            current_acquisition.PathData(data=[1.0]),
+            current_acquisition.PathData(data=[2.0]),
+        ),
+        (current_acquisition.IntegData(), object()),
+        (
+            current_acquisition.IntegData(path0=[1.0]),
+            current_acquisition.IntegData(path0=[1.0, 2.0]),
+        ),
+        (
+            current_acquisition.IntegData(path0=[1.0]),
+            current_acquisition.IntegData(path0=[2.0]),
+        ),
+        (
+            current_acquisition.IntegData(path1=[1.0]),
+            current_acquisition.IntegData(path1=[1.0, 2.0]),
+        ),
+        (
+            current_acquisition.IntegData(path1=[1.0]),
+            current_acquisition.IntegData(path1=[2.0]),
+        ),
+        (current_acquisition.BinnedAcqData(), object()),
+        (
+            current_acquisition.BinnedAcqData(avg_cnt=[1]),
+            current_acquisition.BinnedAcqData(avg_cnt=[1, 2]),
+        ),
+        (
+            current_acquisition.BinnedAcqData(avg_cnt=[1]),
+            current_acquisition.BinnedAcqData(avg_cnt=[2]),
+        ),
+        (
+            current_acquisition.BinnedAcqData(
+                integration=current_acquisition.IntegData(path0=[1.0])
+            ),
+            current_acquisition.BinnedAcqData(
+                integration=current_acquisition.IntegData(path0=[2.0])
+            ),
+        ),
+        (
+            current_acquisition.BinnedAcqData(threshold=[1.0]),
+            current_acquisition.BinnedAcqData(threshold=[1.0, 2.0]),
+        ),
+        (
+            current_acquisition.BinnedAcqData(threshold=[1.0]),
+            current_acquisition.BinnedAcqData(threshold=[2.0]),
+        ),
+    ],
+)
+def test_current_acquisition_data_equality_rejects_differences(left, right):
+    assert left != right
 
 
 class TestAcquisition:

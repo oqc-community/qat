@@ -1,15 +1,31 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import ClassVar
+from typing import ClassVar, TypeVar
 
 from xdsl.irdl import Operation, SSAValue
 
+from qat.experimental.visitor import OperationVisitor
 from qat.experimental.waveforms.shapes.base import WaveformShape
 
+_VisitResultT = TypeVar("_VisitResultT")
 
-class IsAnalyticalWaveformInterface(Operation, ABC):
+
+class PulseOperationInterface(Operation, ABC):
+    """Common interface for Pulse operations."""
+
+    def accept(
+        self,
+        visitor: OperationVisitor[PulseOperationInterface, _VisitResultT],
+    ) -> _VisitResultT:
+        """Pass this operation to a Pulse operation visitor."""
+        return visitor.visit(self)
+
+
+class IsAnalyticalWaveformInterface(PulseOperationInterface):
     """Marks operations that produce waveforms via an analytical definition.
 
     Operations implementing this interface know how to construct the

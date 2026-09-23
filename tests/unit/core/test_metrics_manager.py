@@ -4,6 +4,7 @@ import pytest
 from compiler_config.config import MetricsType
 
 from qat.core.metrics_base import MetricsManager
+from qat.purr.core.metrics_base import MetricsManager as PurrMetricsManager
 
 
 class TestMetricsManager:
@@ -106,3 +107,31 @@ class TestMetricsManager:
     def test_merge_rejects_incompatible_type(self):
         with pytest.raises(TypeError, match="other must be of type MetricsManager"):
             MetricsManager().merge(object())
+
+
+def test_purr_metrics_manager_lifecycle():
+    manager = PurrMetricsManager(None)
+
+    assert not manager.are_enabled(MetricsType.OptimizedCircuit)
+    manager.record_metric(MetricsType.OptimizedCircuit, "ignored")
+    assert manager.optimized_circuit is None
+
+    manager.enable_metrics()
+    assert manager.are_enabled(MetricsType.OptimizedCircuit)
+    manager.record_metric(MetricsType.OptimizedCircuit, "OPENQASM 2.0;")
+    assert manager.get_metric(MetricsType.OptimizedCircuit) == "OPENQASM 2.0;"
+
+    manager.enable(MetricsType.OptimizedInstructionCount)
+    manager.record_metric(MetricsType.OptimizedInstructionCount, 42)
+    assert manager.as_dict() == {
+        "optimized_circuit": "OPENQASM 2.0;",
+        "optimized_instruction_count": 42,
+        "physical_qubit_indices": None,
+    }
+
+    manager.enable(MetricsType.OptimizedInstructionCount, overwrite=True)
+    assert not manager.are_enabled(MetricsType.OptimizedCircuit)
+    manager.enable(None)
+
+    with pytest.raises(TypeError, match="other must be of type MetricsManager"):
+        manager.merge(object())

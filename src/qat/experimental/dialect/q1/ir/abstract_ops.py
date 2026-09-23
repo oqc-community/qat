@@ -13,7 +13,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 from re import compile
-from typing import Generic, TypeAlias
+from typing import Generic, TypeAlias, TypeVar
 
 from xdsl.backend.assembly_printer import OneLineAssemblyPrintable
 from xdsl.backend.register_allocatable import HasRegisterConstraints, RegisterConstraints
@@ -38,8 +38,10 @@ from qat.experimental.dialect.q1.ir.imm_desc import (
     Q1Imm,
 )
 from qat.experimental.dialect.q1.ir.reg_desc import RInvT
+from qat.experimental.visitor import OperationVisitor
 
 _Q1_OP_NAME_PATTERN = compile("^q1\\.([^.]*)\\.([^.]*)$")
+_VisitResultT = TypeVar("_VisitResultT")
 
 AssemblyInstructionArg: TypeAlias = (
     Q1Imm | LabelAttr | SSAValue | RegisterType | StringAttr | str
@@ -78,6 +80,13 @@ class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
 
     comment = opt_prop_def(StringAttr)
     debug_info = opt_prop_def(DebugInfoAttr)
+
+    def accept(
+        self,
+        visitor: OperationVisitor[Q1AsmOperation, _VisitResultT],
+    ) -> _VisitResultT:
+        """Pass this operation to a Q1 operation visitor."""
+        return visitor.visit(self)
 
     @classmethod
     def parse(cls, parser: Parser) -> Q1AsmOperation:
