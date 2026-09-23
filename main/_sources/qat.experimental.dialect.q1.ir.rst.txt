@@ -19,3 +19,4 @@ Submodules
    qat.experimental.dialect.q1.ir.imm_desc
    qat.experimental.dialect.q1.ir.ops
    qat.experimental.dialect.q1.ir.reg_desc
+   qat.experimental.dialect.q1.ir.schedule

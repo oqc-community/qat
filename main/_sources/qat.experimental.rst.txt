@@ -22,5 +22,14 @@ Subpackages
    qat.experimental.pipelines
    qat.experimental.runtime
    qat.experimental.system_data
+   qat.experimental.tools
    qat.experimental.utils
    qat.experimental.waveforms
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   qat.experimental.visitor

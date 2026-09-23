@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental package &mdash; qat-compiler 3.0.0.post380.dev20260922163401 documentation</title>
+  <title>qat.experimental package &mdash; qat-compiler 3.0.0.post381.dev20260923173459 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -308,6 +308,14 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.html">qat.experimental.tools package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.tools.schedule.html">qat.experimental.tools.schedule package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.tools.schedule.tracker.html">qat.experimental.tools.schedule.tracker module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.tools.schedule.visualisation.html">qat.experimental.tools.schedule.visualisation module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.utils.html">qat.experimental.utils package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.utils.logging.html">qat.experimental.utils.logging module</a></li>
 </ul>
@@ -332,6 +340,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.waveforms.numerical.html">qat.experimental.waveforms.numerical module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.visitor.html">qat.experimental.visitor module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
@@ -1086,6 +1095,68 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.tools.html">qat.experimental.tools package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ResourceKind"><code class="docutils literal notranslate"><span class="pre">ResourceKind</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ResourceKind.FRAME"><code class="docutils literal notranslate"><span class="pre">ResourceKind.FRAME</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ResourceKind.SEQUENCE"><code class="docutils literal notranslate"><span class="pre">ResourceKind.SEQUENCE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.amplitude"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.amplitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.duration"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.duration</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.end"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.end</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.frequency"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.kind"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.kind</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.label"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.phase"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.phase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.phase_label"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.phase_label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.phase_scale"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.phase_scale</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.phase_unit"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.phase_unit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.resource"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.resource</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.signal"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.signal</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.signal_unit"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.signal_unit</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.start"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.start</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.unit"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent.unit</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.acquire"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.acquire()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.advance"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.advance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.amplitude"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.amplitude</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.frequency"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.frequency</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.mark"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.mark()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.phase"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.phase</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.pulse"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.pulse()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.records"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.records</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.resource"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.resource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.resource_info"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.resource_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.resources"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.resources</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.select"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.select()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.selected_resource"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.selected_resource</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.set_amplitude"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.set_amplitude()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.set_frequency"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.set_frequency()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.set_phase"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.set_phase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.shift_phase"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.shift_phase()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.synchronise"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.synchronise()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.timelines"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.timelines</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.wait"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker.wait()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.tools.html#qat.experimental.tools.visualise_schedule"><code class="docutils literal notranslate"><span class="pre">visualise_schedule()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.tools.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.tools.schedule.html">qat.experimental.tools.schedule package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ResourceKind"><code class="docutils literal notranslate"><span class="pre">ResourceKind</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleEvent"><code class="docutils literal notranslate"><span class="pre">ScheduleEvent</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleResource"><code class="docutils literal notranslate"><span class="pre">ScheduleResource</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleTracker"><code class="docutils literal notranslate"><span class="pre">ScheduleTracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.visualise_schedule"><code class="docutils literal notranslate"><span class="pre">visualise_schedule()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.schedule.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="qat.experimental.utils.html">qat.experimental.utils package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.utils.html#submodules">Submodules</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.utils.logging.html">qat.experimental.utils.logging module</a><ul>
@@ -1113,6 +1184,20 @@
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.waveforms.numerical.html#qat.experimental.waveforms.numerical.numerical_derivative"><code class="docutils literal notranslate"><span class="pre">numerical_derivative()</span></code></a></li>
 </ul>
 </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qat.experimental.visitor.html">qat.experimental.visitor module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qat.experimental.visitor.html#qat.experimental.visitor.OperationVisitor"><code class="docutils literal notranslate"><span class="pre">OperationVisitor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.visitor.html#qat.experimental.visitor.OperationVisitor.visit"><code class="docutils literal notranslate"><span class="pre">OperationVisitor.visit()</span></code></a></li>
 </ul>
 </li>
 </ul>

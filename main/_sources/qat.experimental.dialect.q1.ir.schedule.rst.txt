@@ -1,0 +1,7 @@
+qat.experimental.dialect.q1.ir.schedule module
+==============================================
+
+.. automodule:: qat.experimental.dialect.q1.ir.schedule
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+qat.experimental.tools.schedule.visualisation module
+====================================================
+
+.. automodule:: qat.experimental.tools.schedule.visualisation
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -15,5 +15,6 @@ Submodules
    qat.experimental.dialect.pulse.ir.attributes
    qat.experimental.dialect.pulse.ir.interfaces
    qat.experimental.dialect.pulse.ir.ops
+   qat.experimental.dialect.pulse.ir.schedule
    qat.experimental.dialect.pulse.ir.traits
    qat.experimental.dialect.pulse.ir.types

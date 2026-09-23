@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.abstract_ops module &mdash; qat-compiler 3.0.0.post380.dev20260922163401 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.abstract_ops module &mdash; qat-compiler 3.0.0.post381.dev20260923173459 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -307,6 +307,14 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.tools.html">qat.experimental.tools package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="qat.experimental.tools.schedule.html">qat.experimental.tools.schedule package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.tools.schedule.tracker.html">qat.experimental.tools.schedule.tracker module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.tools.schedule.visualisation.html">qat.experimental.tools.schedule.visualisation module</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="qat.experimental.utils.html">qat.experimental.utils package</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.utils.logging.html">qat.experimental.utils.logging module</a></li>
 </ul>
@@ -331,6 +339,7 @@
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.waveforms.numerical.html">qat.experimental.waveforms.numerical module</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="qat.experimental.visitor.html">qat.experimental.visitor module</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qat.frontend.html">qat.frontend package</a><ul>
@@ -1217,6 +1226,17 @@ The target accepts either an <code class="xref py py-class docutils literal notr
 and <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line"><code class="xref py py-meth docutils literal notranslate"><span class="pre">assembly_line()</span></code></a> respectively.</p>
 <p>Parsing currently covers parsing only textual IR which is implemented
 by <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse()</span></code></a> and <a class="reference internal" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type" title="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.parse_op_type"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parse_op_type()</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.accept">
+<span class="sig-name descname"><span class="pre">accept</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">visitor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.accept" title="Link to this definition"></a></dt>
+<dd><p>Pass this operation to a Q1 operation visitor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code>(<code class="docutils literal notranslate"><span class="pre">_VisitResultT</span></code>)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line">
 <span class="sig-name descname"><span class="pre">assembly_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line" title="Link to this definition"></a></dt>
