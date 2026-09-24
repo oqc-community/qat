@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post381.dev20260923173459 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post382.dev20260924084528 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -711,7 +711,22 @@
 
   <section id="module-qat.experimental.conversion.pulse_to_q1.hardware_binding">
 <span id="qat-experimental-conversion-pulse-to-q1-hardware-binding-module"></span><h1>qat.experimental.conversion.pulse_to_q1.hardware_binding module<a class="headerlink" href="#module-qat.experimental.conversion.pulse_to_q1.hardware_binding" title="Link to this heading"></a></h1>
-<p>Bind outlined Pulse sequences to their physical Qblox configuration.</p>
+<p>Bind outlined Pulse sequences to their physical Qblox sequencer hardware.</p>
+<p>This pass assigns each outlined sequence to a Qblox sequencer based on its frame’s
+port and carrier frequency. A sequence’s frame nominally identifies a canonical channel;
+when a port exposes multiple channels at the same frequency (ambiguous case), the pass
+selects one deterministically: preferring an explicit sequence channel_id match, then
+defaulting to the first available candidate.</p>
+<p>Once selected, each sequence is resolved to a sequencer binding via the allocation
+strategy. When multiple sequencers can satisfy a candidate, a tie-breaker applies:
+the sequencer with minimum (instrument_id, slot, sequencer_index) is chosen to ensure
+deterministic and reproducible allocation across runs.</p>
+<p>Frequency matching tolerates ±0.5 Hz to account for Q1asm’s 1 Hz frequency resolution.
+Only channels actively selected by sequences consume allocation; calibrated but unplayed
+channels do not reserve sequencers, enabling efficient hardware utilization.</p>
+<p>The pass merges existing program-owned sequencer configuration with the resolved
+configuration during binding, preserving acquisition settings while enforcing canonical
+module constraints.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxHardwareBindingPass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">canonical_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass" title="Link to this definition"></a></dt>
@@ -720,8 +735,8 @@
 <p>Each <code class="docutils literal notranslate"><span class="pre">SequenceOp</span></code> must contain one constant <code class="docutils literal notranslate"><span class="pre">pulse.create_frame</span></code> whose port and
 carrier frequency identify a canonical channel. The pass records that channel’s
 allocated instrument, slot, and sequencer index on the sequence, and attaches the
-resolved sequencer and module configuration. Configuration a sequence already carries
-is merged rather than replaced, so program-owned acquisition data survives binding.</p>
+resolved sequencer and module configuration. Existing program-owned acquisition
+configuration is preserved by merging it with the resolved configuration during binding.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.apply" title="Link to this definition"></a></dt>
