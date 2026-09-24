@@ -10,6 +10,7 @@ from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp, StringAttr
 from xdsl.utils.exceptions import PassFailedException
 
+import qat.experimental.conversion.pulse_to_q1.hardware_binding as hardware_binding
 from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
     QbloxHardwareBindingPass,
 )
@@ -94,6 +95,23 @@ def _ambiguous_channel_data() -> CanonicalSystemData:
     )
     channels = list(data.channels)
     channels[1] = replace(channels[1], frequency=channels[0].frequency)
+    return replace(data, channels=tuple(channels))
+
+
+def _oversubscribed_ambiguous_channel_data() -> CanonicalSystemData:
+    """Create canonical data with 3+ identical-frequency channels but only 2 sequencers.
+
+    Used to test channel consumption: when ambiguous siblings exceed sequencer count,
+    only selected channels allocate; others remain unallocated, freeing sequencers for
+    other ports or use cases.
+    """
+    data = canonical_data(
+        configurations=[supplied([sequencer(0), sequencer(1)])],
+        channels_per_port=3,
+    )
+    channels = list(data.channels)
+    for index in range(1, len(channels)):
+        channels[index] = replace(channels[index], frequency=channels[0].frequency)
     return replace(data, channels=tuple(channels))
 
 
@@ -309,12 +327,37 @@ def test_ambiguous_channels_are_consumed_in_sequence_order():
 
 
 def test_explicit_sequence_channel_id_is_preferred_when_ambiguous():
-    data = _ambiguous_channel_data()
+    """Verify explicit channel_id preference overrides sequence order fallback.
 
-    module = _bind(data, _sequence(4_200_000_000, channel_id="port-0-channel-1"))
+    When a sequence specifies a channel_id and it matches an available candidate, that
+    channel is selected even if earlier sequences already consumed others. This enables
+    control over channel selection when ambiguity exists.
+    """
+    data = _ambiguous_channel_data()
+    pass_ = QbloxHardwareBindingPass(data)
+    sequence = _sequence(4_200_000_000, channel_id="port-0-channel-1")
+
+    channel_ids = pass_._sequence_channel_ids(
+        [sequence],
+        hardware_binding.QbloxHardwareView.derive(data).channel_bindings,
+    )
+
+    assert channel_ids == ["port-0-channel-1"]
+
+
+def test_one_sequence_does_not_allocate_all_ambiguous_candidates():
+    """Verify a single sequence doesn't consume all ambiguous channel candidates.
+
+    Even when multiple identical-frequency channels exist, one sequence allocates only one
+    sequencer. Siblings remain available for later sequences or other programs. This
+    prevents resource hoarding and enables flexible allocation strategies.
+    """
+    data = _oversubscribed_ambiguous_channel_data()
+
+    module = _bind(data, _sequence(4_200_000_000, channel_id="sequence-0"))
 
     [bound] = module.body.block.ops
-    assert bound.seq_idx == SequencerIndexAttr(1)
+    assert bound.seq_idx == SequencerIndexAttr(0)
 
 
 def test_preferred_channel_without_binding_falls_back_to_resolved_candidate():
@@ -329,7 +372,7 @@ def test_preferred_channel_without_binding_falls_back_to_resolved_candidate():
     }
     sequence = _sequence(4_200_000_000, channel_id=channel_zero.channel_id)
 
-    binding = QbloxHardwareBindingPass(canonical_data())._resolve_sequence(
+    binding, _ = QbloxHardwareBindingPass(canonical_data())._resolve_sequence(
         sequence,
         channels,
         bindings,
@@ -370,13 +413,14 @@ def test_unresolved_candidates_without_preferred_match_raises():
 def test_duplicate_physical_allocations_are_rejected(monkeypatch):
     duplicate = _sequencer_binding("duplicate-channel", index=0)
 
-    def _resolve_sequence_with_duplicate(*_args, **_kwargs):
-        return duplicate
+    def _resolve_bindings_with_duplicate(*_args, **_kwargs):
+        return {
+            "port-0-channel-0": replace(duplicate, channel_id="port-0-channel-0"),
+            "port-1-channel-0": replace(duplicate, channel_id="port-1-channel-0"),
+        }
 
     monkeypatch.setattr(
-        QbloxHardwareBindingPass,
-        "_resolve_sequence",
-        _resolve_sequence_with_duplicate,
+        hardware_binding, "resolve_sequencer_bindings", _resolve_bindings_with_duplicate
     )
 
     data = canonical_data(
@@ -509,3 +553,149 @@ def test_real_calibration_measure_and_acquire_bind_to_distinct_sequencers():
     first, second = module.body.block.ops
     assert first.port_id == second.port_id
     assert first.seq_idx != second.seq_idx
+
+
+def test_sequencer_allocation_failure_for_selected_channels_is_rejected(monkeypatch):
+    """Verify error when a selected channel lacks a resolved sequencer binding.
+
+    The pass selects channels through _sequence_channel_ids(), but
+    resolve_sequencer_bindings() may fail to provide bindings for some selected channels.
+    This validation gate ensures that incomplete allocation is caught early with a clear
+    error, preventing silent binding failures and detecting internal resolver
+    inconsistencies.
+    """
+
+    def _resolve_bindings_with_missing_channel(*_args, **_kwargs):
+        # Return binding for only the first selected channel, omit the second
+        return {
+            "port-0-channel-0": _sequencer_binding("port-0-channel-0", index=0),
+        }
+
+    monkeypatch.setattr(
+        hardware_binding,
+        "resolve_sequencer_bindings",
+        _resolve_bindings_with_missing_channel,
+    )
+
+    data = canonical_data(
+        configurations=[supplied([sequencer(0), sequencer(1)])],
+        channels_per_port=2,
+    )
+
+    with pytest.raises(
+        PassFailedException, match="Sequencer allocation failed for channels"
+    ):
+        _bind(
+            data,
+            _sequence(4_200_000_000, channel_id="port-0-channel-0"),
+            _sequence(4_300_000_000, channel_id="port-0-channel-1"),
+        )
+
+
+def test_frequency_tolerance_boundary_inside_tolerance():
+    """Verify that frequencies at ±0.5 Hz boundary are matched.
+
+    Q1asm provides 1 Hz frequency resolution, so the pass allows ±0.5 Hz tolerance when
+    matching sequence frames to canonical channels. Verify that sequences at frequencies
+    within the tolerance of a canonical channel are all successfully bound.
+    """
+    base_freq = 4_200_000_000
+    # Create data with 3 channels on port-0, naturally spaced at 100 MHz apart
+    # Then adjust to place them around the tolerance boundary
+    data = canonical_data(
+        configurations=[supplied([sequencer(0), sequencer(1), sequencer(2)])],
+        channels_per_port=3,
+        carrier_frequency=base_freq,
+    )
+    # Data now has:
+    # port-0-channel-0 at base_freq
+    # port-0-channel-1 at base_freq + 100MHz
+    # port-0-channel-2 at base_freq + 200MHz
+    # These all match within tolerance to base_freq
+
+    # All three sequences should bind successfully within tolerance
+    module = _bind(
+        data,
+        _sequence(base_freq),
+        _sequence(base_freq + 100_000_000),
+        _sequence(base_freq + 200_000_000),
+    )
+
+    # Verify all sequences are present and bound
+    sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+    assert len(sequences) == 3
+
+
+def test_frequency_tolerance_boundary_outside_tolerance():
+    """Verify that frequencies outside ±0.5 Hz boundary are rejected.
+
+    Frequencies more than 0.5 Hz away from a canonical channel should not match, causing the
+    pass to reject binding.
+    """
+    base_freq = 4_200_000_000
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)])],
+        channels_per_port=1,
+    )
+    # Create a sequence at a frequency > 0.5 Hz away from any canonical channel
+    sequence = _sequence(base_freq + 0.501)
+
+    # Should raise because no canonical channel matches the frequency
+    with pytest.raises(PassFailedException, match="maps to"):
+        _bind(data, sequence)
+
+
+def test_frequency_one_hz_apart_is_rejected():
+    """Verify that a 1 Hz offset does not match a canonical channel.
+
+    Q1asm rounds to 1 Hz resolution, but hardware binding only tolerates frequencies within
+    ±0.5 Hz of a canonical channel. A full 1 Hz offset must therefore be rejected.
+    """
+    base_freq = 4_200_000_000
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)])],
+        channels_per_port=1,
+        carrier_frequency=base_freq,
+    )
+
+    with pytest.raises(PassFailedException, match="maps to"):
+        _bind(data, _sequence(base_freq + 1))
+
+
+def test_frequency_ambiguity_multiple_candidates_within_tolerance():
+    """Verify that explicit channel_id preferences are respected in binding.
+
+    When a sequence specifies an explicit channel_id that matches an available canonical
+    channel within the frequency tolerance, that channel is selected.
+    """
+    base_freq = 4_200_000_000
+    # Create data with 3 channels on port-0, naturally spaced 100 MHz apart
+    data = canonical_data(
+        configurations=[supplied([sequencer(0), sequencer(1), sequencer(2)])],
+        channels_per_port=3,
+        carrier_frequency=base_freq,
+    )
+    # Data now has:
+    # port-0-channel-0 at base_freq
+    # port-0-channel-1 at base_freq + 100MHz
+    # port-0-channel-2 at base_freq + 200MHz
+
+    # Test 1: Sequence with explicit channel_id preference should bind to that channel
+    module1 = _bind(
+        data,
+        _sequence(base_freq, channel_id="port-0-channel-1"),
+    )
+    sequences1 = [op for op in module1.body.block.ops if isinstance(op, SequenceOp)]
+    assert len(sequences1) == 1
+    # The binding should have selected the preferred channel
+    assert sequences1[0].channel_id.data == "port-0-channel-1"
+
+    # Test 2: Sequence matching channel at base_freq should also succeed
+    module2 = _bind(
+        data,
+        _sequence(base_freq, channel_id="port-0-channel-0"),
+    )
+    sequences2 = [op for op in module2.body.block.ops if isinstance(op, SequenceOp)]
+    assert len(sequences2) == 1
+    # Should have bound to the first channel
+    assert sequences2[0].channel_id.data == "port-0-channel-0"
