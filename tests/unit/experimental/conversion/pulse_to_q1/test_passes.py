@@ -182,10 +182,10 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
         "bound-dead-frame-elimination",
         "dce",
         "lower-scf-to-q1-scf",
-        "lower-q1-scf-to-q1-cf",
-        "linearise-q1-cf-to-q1",
         "reconcile-unrealized-casts",
         "q1-lin-scan-reg-alloc",
+        "lower-q1-scf-to-q1-cf",
+        "linearise-q1-cf-to-q1",
         "qblox-pre-emission-verification",
     ]
 

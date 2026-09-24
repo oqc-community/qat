@@ -473,10 +473,10 @@ def create_qblox_configured_q1_pipeline(
             BoundDeadFrameEliminationPass(),
             DeadCodeElimination(),
             LowerScfToQ1ScfPass(),
-            LowerQ1ScfToQ1CfPass(),
-            LineariseQ1CfToQ1Pass(),
             ReconcileUnrealizedCastsPass(),
             LinearScanRegisterAllocationPass(),
+            LowerQ1ScfToQ1CfPass(),
+            LineariseQ1CfToQ1Pass(),
             QbloxPreEmissionVerificationPass(target_data=target_data),
         )
     )

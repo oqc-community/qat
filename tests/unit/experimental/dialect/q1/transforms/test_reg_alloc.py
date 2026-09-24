@@ -8,7 +8,11 @@ from xdsl.backend.block_naive_allocator import BlockNaiveAllocator
 from xdsl.backend.register_stack import OutOfRegisters
 
 from qat.experimental.dialect.q1 import IntRegisterType, Registers
-from qat.experimental.dialect.q1.transforms.reg_alloc import Q1RegisterStack
+from qat.experimental.dialect.q1.transforms.reg_alloc import (
+    LinearScanRegisterAllocationPass,
+    Q1RegisterStack,
+)
+from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
 
 
 def test_q1_register_stack_uses_q1_physical_registers():
@@ -54,3 +58,11 @@ def test_q1_register_stack_can_back_xdsl_allocators():
 
     assert allocator.register_base_class is IntRegisterType
     assert allocator.available_registers.pop(IntRegisterType) == Registers.R1
+
+
+def test_linear_scan_register_allocation_pass_runs_before_lower_q1_scf_to_q1_cf():
+    """Verify that LinearScanRegisterAllocationPass declares it runs before
+    LowerQ1ScfToQ1CfPass."""
+    pass_ = LinearScanRegisterAllocationPass()
+
+    assert LowerQ1ScfToQ1CfPass in pass_.runs_before()

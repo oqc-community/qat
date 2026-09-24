@@ -21,7 +21,7 @@ from qat.experimental.dialect.q1.ir.reg_desc import (
     Q1RegisterType,
     Registers,
 )
-from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
+from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass
 
@@ -116,8 +116,8 @@ class LinearScanRegisterAllocationPass(OrderedPass, ModulePass):
 
     name = "q1-lin-scan-reg-alloc"
 
-    def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({LineariseQ1CfToQ1Pass})
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LowerQ1ScfToQ1CfPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         for sequence in (s for s in op.walk() if isinstance(s, SequenceOp)):
