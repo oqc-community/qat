@@ -279,6 +279,11 @@ class QbloxTargetDescription:
 
         return self.sequencer(kind, index).sequencer_spec.supports(feature)
 
+    def is_readout_sequencer(self, kind: QbloxModuleKind, index: int) -> bool:
+        """Return whether a physical sequencer is a readout sequencer."""
+
+        return self.sequencer(kind, index).sequencer_spec.type is Q1SequencerType.readout
+
     def output_sequencers(self, kind: QbloxModuleKind, output: int) -> tuple[int, ...]:
         """Return sequencers routable to a physical output channel."""
 

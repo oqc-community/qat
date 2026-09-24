@@ -37,6 +37,7 @@ from qat.experimental.conversion.pulse_to_q1.qblox_configuration.models import (
 from qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution import (
     resolve_sequencer_bindings,
 )
+from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
 from qat.experimental.dialect.pulse.ir import CreateFrameOp
 from qat.experimental.dialect.pulse.utils import extract_frequency_hz
 from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
@@ -66,6 +67,14 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
 
     name = "qblox-hardware-binding"
     canonical_data: CanonicalSystemData
+
+    def required_predecessors(self) -> frozenset[type[ModulePass]]:
+        return frozenset({Q1OutliningPass})
+
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        from qat.experimental.conversion.pulse_to_q1.passes import Q1PulseValidationPass
+
+        return frozenset({Q1PulseValidationPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         sequence_ops = [

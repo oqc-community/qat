@@ -32,6 +32,7 @@ from qat.experimental.dialect.q1.ir.reg_desc import Q1RegisterType
 from qat.experimental.dialect.q1.transforms.reg_alloc import (
     LinearScanRegisterAllocationPass,
 )
+from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_sequence.ir.attrs import NcoConfigAttr
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass
@@ -430,7 +431,7 @@ class QbloxPreEmissionVerificationPass(OrderedPass, ModulePass):
     target_data: QbloxTargetData = field(default=TARGET_DATA)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({LinearScanRegisterAllocationPass})
+        return frozenset({LinearScanRegisterAllocationPass, LineariseQ1CfToQ1Pass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         verify_qblox_pre_emission(op, self.target_data)

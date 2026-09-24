@@ -28,7 +28,7 @@ from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
 )
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
-    create_legalisation_patterns,
+    create_pulse_to_q1_legalisation_patterns,
     create_pulse_to_q1_lowering_patterns,
 )
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
@@ -40,7 +40,9 @@ from qat.experimental.dialect.pulse.ir import (
     IntegrateOp,
     PhaseSetOp,
     PhaseShiftOp,
+    SquareWaveformOp,
     StartContinuousWaveformOp,
+    TimeAttr,
     WaitOp,
 )
 from qat.experimental.dialect.pulse.utils import (
@@ -54,9 +56,10 @@ from qat.experimental.dialect.q1.transforms.reg_alloc import (
 from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_scf.transforms.lower_scf import LowerScfToQ1ScfPass
 from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
-from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
 from qat.experimental.passes.pass_ordering import OrderedPass, OrderedPassPipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
 
 _TIME_ROUNDING_TOLERANCE_NS = 1e-3
 
@@ -75,14 +78,17 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
 
     * ``pulse.wait`` constant duration: finite, non-negative, and an integer
       number of nanoseconds.
+    * ``pulse.square_waveform`` constant width and amplitude components in ``[-1, 1]``,
+      with a width aligned to at least one sequencer grid cycle.
     * ``pulse.create_frame`` constant frequency: finite.
     * ``pulse.phase_set`` and ``pulse.phase_shift`` constant phase: finite.
     """
 
     name = "q1-pulse-validation"
+    target_data: QbloxTargetData = field(default=TARGET_DATA)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1OutliningPass})
+        return frozenset({Q1OutliningPass, QbloxHardwareBindingPass})
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
         return frozenset({Q1PulseLegalisationPass})
@@ -95,32 +101,43 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
                 self._validate_create_frame(pulse_op)
             elif isinstance(pulse_op, StartContinuousWaveformOp):
                 self._validate_amplitude(pulse_op)
+            elif isinstance(pulse_op, SquareWaveformOp):
+                self._validate_square_waveform(pulse_op)
             elif isinstance(pulse_op, PhaseSetOp | PhaseShiftOp):
                 self._validate_phase(pulse_op)
 
     def _validate_wait(self, op: WaitOp) -> None:
         if not isinstance(op.duration.owner, ConstantOp):
             raise PassFailedException("Dynamic pulse.wait duration is not supported.")
-        seconds = extract_time_seconds(op)
+        self._validate_time_to_nanoseconds(op.name, "duration", extract_time_seconds(op))
+
+    @staticmethod
+    def _validate_time_to_nanoseconds(
+        op_name: str, operand_name: str, seconds: float
+    ) -> int:
         if not isfinite(seconds):
-            raise PassFailedException(f"{op.name} time must be finite. Got {seconds}.")
+            raise PassFailedException(
+                f"{op_name} {operand_name} must be finite. Got {seconds}."
+            )
         if seconds < 0:
             raise PassFailedException(
-                f"{op.name} time must be non-negative. Got {seconds}."
+                f"{op_name} {operand_name} must be non-negative. Got {seconds}."
             )
 
         ns_float = seconds * 1e9
         if 0 < ns_float < 1:
             raise PassFailedException(
-                f"pulse.wait duration smaller than one nanosecond is illegal. Got {ns_float} ns."
+                f"{op_name} {operand_name} smaller than one nanosecond is illegal. "
+                f"Got {ns_float} ns."
             )
 
         ns_int = round(ns_float)
         if not isclose(ns_float, ns_int, abs_tol=_TIME_ROUNDING_TOLERANCE_NS, rel_tol=0):
             raise PassFailedException(
-                "pulse.wait duration must map to integer nanoseconds within tolerance. "
-                f"Got {ns_float} ns."
+                f"{op_name} {operand_name} must map to integer nanoseconds within "
+                f"tolerance. Got {ns_float} ns."
             )
+        return ns_int
 
     def _validate_create_frame(self, op: CreateFrameOp) -> None:
         if not isinstance(op.frequency.owner, ConstantOp):
@@ -142,19 +159,65 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
 
     @staticmethod
     def _validate_amplitude(op: StartContinuousWaveformOp) -> None:
-        if not isinstance(op.amplitude.owner, ConstantOp):
-            raise PassFailedException(
-                "Dynamic pulse.start_continuous_waveform amplitude is not supported."
-            )
-        amplitude = op.amplitude.owner.value
+        Q1PulseValidationPass._validate_amplitude_operand(op.name, op.amplitude)
+
+    @staticmethod
+    def _validate_amplitude_operand(op_name: str, amplitude_operand: SSAValue) -> None:
+        if not isinstance(amplitude_operand.owner, ConstantOp):
+            raise PassFailedException(f"Dynamic {op_name} amplitude is not supported.")
+        amplitude = amplitude_operand.owner.value
         if not isinstance(amplitude, AmplitudeAttr):
-            raise PassFailedException(
-                "pulse.start_continuous_waveform expects a pulse.amplitude constant."
-            )
+            raise PassFailedException(f"{op_name} expects a pulse.amplitude constant.")
         value = amplitude.literal_value
         if not isfinite(value.real) or not isfinite(value.imag):
+            raise PassFailedException(f"{op_name} amplitude must be finite. Got {value}.")
+        if not (-1 <= value.real <= 1 and -1 <= value.imag <= 1):
             raise PassFailedException(
-                f"pulse.start_continuous_waveform amplitude must be finite. Got {value}."
+                f"{op_name} amplitude components must be within [-1, 1]. Got {value}."
+            )
+
+    def _validate_square_waveform(self, op: SquareWaveformOp) -> None:
+        self._validate_amplitude_operand(op.name, op.amplitude)
+
+        width = op.width.owner
+        if not isinstance(width, ConstantOp):
+            raise PassFailedException(
+                "Dynamic pulse.square_waveform width is not supported."
+            )
+        if not isinstance(width.value, TimeAttr):
+            raise PassFailedException(
+                "pulse.square_waveform width must be a pulse.time constant. "
+                f"Got {width.value!r} ({type(width.value).__name__})."
+            )
+
+        width_ns = self._validate_time_to_nanoseconds(
+            op.name, "width", float(width.value.literal_value)
+        )
+
+        sequence = find_enclosing_sequence(op)
+        is_readout = (
+            sequence.module_config is not None
+            and sequence.seq_idx is not None
+            and DEFAULT_QBLOX_TARGET.is_readout_sequencer(
+                sequence.module_config.kind.data, sequence.seq_idx.data
+            )
+        )
+        sequencer_data = (
+            self.target_data.READOUT_SEQUENCER_DATA
+            if is_readout
+            else self.target_data.CONTROL_SEQUENCER_DATA
+        )
+        grid_time = sequencer_data.grid_time
+        min_width_ns = grid_time
+        if width_ns < min_width_ns:
+            raise PassFailedException(
+                f"pulse.square_waveform width must be at least {min_width_ns} ns "
+                f"(grid_time). Got {width_ns} ns."
+            )
+        if width_ns % grid_time:
+            raise PassFailedException(
+                "pulse.square_waveform width must be a multiple of sequencer grid_time "
+                f"({grid_time} ns). Got {width_ns} ns."
             )
 
 
@@ -173,11 +236,11 @@ class Q1PulseLegalisationPass(OrderedPass, ModulePass):
         return frozenset({Q1PreAcquireTransformationPass})
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
-        return frozenset({QbloxHardwareBindingPass})
+        return frozenset({PulseToQ1LoweringPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         PatternRewriteWalker(
-            GreedyRewritePatternApplier(create_legalisation_patterns()),
+            GreedyRewritePatternApplier(create_pulse_to_q1_legalisation_patterns()),
             apply_recursively=False,
         ).rewrite_module(op)
 
@@ -224,7 +287,7 @@ class Q1PreAcquireTransformationPass(OrderedPass, ModulePass):
         return frozenset({Q1PulseValidationPass})
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1PulseLegalisationPass, QbloxHardwareBindingPass})
+        return frozenset({Q1PulseLegalisationPass, LowerScfToQ1ScfPass})
 
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         """Run the transformation over ``op`` in place.
@@ -396,7 +459,13 @@ class PulseToQ1LoweringPass(OrderedPass, ModulePass):
     target_data: QbloxTargetData = field(default=TARGET_DATA)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1PreAcquireTransformationPass, QbloxHardwareBindingPass})
+        return frozenset(
+            {
+                Q1PreAcquireTransformationPass,
+                Q1PulseLegalisationPass,
+                QbloxHardwareBindingPass,
+            }
+        )
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
         return frozenset({LowerScfToQ1ScfPass})
@@ -426,6 +495,9 @@ class BoundDeadFrameEliminationPass(OrderedPass, ModulePass):
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset({PulseToQ1LoweringPass})
 
+    def runs_before(self) -> frozenset[type[ModulePass]]:
+        return frozenset({LowerScfToQ1ScfPass})
+
     def apply(self, ctx: Context, op: ModuleOp) -> None:
         for sequence in (nested for nested in op.walk() if isinstance(nested, SequenceOp)):
             frames = [
@@ -449,8 +521,9 @@ def create_qblox_configured_q1_pipeline(
     The experimental middleend runs Pulse preprocessing before the backend applies this
     pipeline.
 
-    Binding runs after Pulse validation, legalisation, and acquisition preparation while
-    ``pulse.create_frame`` still carries generator-selection metadata.
+    Binding runs immediately after outlining while ``pulse.create_frame`` still carries
+    generator-selection metadata. Validation can therefore select the configured control or
+    readout sequencer limits before legalisation and lowering.
     :class:`~xdsl.transforms.reconcile_unrealized_casts.ReconcileUnrealizedCastsPass` runs
     after all lowering (including the arith integer constant to ``q1.ir.move`` rewrite
     applied by :class:`PulseToQ1LoweringPass`) has substituted the values that made the
@@ -465,10 +538,10 @@ def create_qblox_configured_q1_pipeline(
     return OrderedPassPipeline(
         (
             Q1OutliningPass(),
-            Q1PulseValidationPass(),
+            QbloxHardwareBindingPass(canonical_data),
+            Q1PulseValidationPass(target_data=target_data),
             Q1PreAcquireTransformationPass(),
             Q1PulseLegalisationPass(),
-            QbloxHardwareBindingPass(canonical_data),
             PulseToQ1LoweringPass(target_data=target_data),
             BoundDeadFrameEliminationPass(),
             DeadCodeElimination(),

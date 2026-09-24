@@ -19,7 +19,11 @@ from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.backend.qblox.pre_emission_verification import (
     QbloxPreEmissionVerificationPass,
 )
+from qat.experimental.conversion.pulse_to_q1.hardware_binding import (
+    QbloxHardwareBindingPass,
+)
 from qat.experimental.conversion.pulse_to_q1.passes import (
+    PulseToQ1LoweringPass,
     Q1PreAcquireTransformationPass,
     Q1PulseLegalisationPass,
     Q1PulseValidationPass,
@@ -33,6 +37,8 @@ from qat.experimental.dialect.pulse.ir import (
     CreateFrameOp,
     FrequencyAttr,
     IntegrateOp,
+    PulseOp,
+    SquareWaveformOp,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     SynchronizeOp,
@@ -134,13 +140,36 @@ def _assert_emission_ready(module: ModuleOp) -> SequenceOp:
 
 
 def test_downstream_ordering_constraints_reject_misordered_lowering():
-    with pytest.raises(VerifyException, match="acquire-pre-q1-transformation"):
+    canonical = _canonical_data()
+
+    with pytest.raises(VerifyException, match="qblox-hardware-binding"):
         OrderedPassPipeline(
             (
                 Q1OutliningPass(),
                 Q1PulseValidationPass(),
+                QbloxHardwareBindingPass(canonical),
+            )
+        )
+
+    with pytest.raises(VerifyException, match="acquire-pre-q1-transformation"):
+        OrderedPassPipeline(
+            (
+                Q1OutliningPass(),
+                QbloxHardwareBindingPass(canonical),
+                Q1PulseValidationPass(),
                 Q1PulseLegalisationPass(),
                 Q1PreAcquireTransformationPass(),
+            )
+        )
+
+    with pytest.raises(VerifyException, match="q1-pulse-legalisation"):
+        OrderedPassPipeline(
+            (
+                Q1OutliningPass(),
+                QbloxHardwareBindingPass(canonical),
+                Q1PulseValidationPass(),
+                Q1PreAcquireTransformationPass(),
+                PulseToQ1LoweringPass(),
             )
         )
 
@@ -149,6 +178,30 @@ def test_downstream_ordering_constraints_reject_misordered_lowering():
 
     with pytest.raises(VerifyException, match="lower-q1-scf-to-q1-cf"):
         OrderedPassPipeline((LineariseQ1CfToQ1Pass(), LowerQ1ScfToQ1CfPass()))
+
+    assert (
+        LineariseQ1CfToQ1Pass in QbloxPreEmissionVerificationPass().required_predecessors()
+    )
+
+
+def test_bound_readout_grid_is_used_during_square_validation():
+    frequency = ConstantOp(FrequencyAttr(6_200_000_000))
+    frame = CreateFrameOp(frequency, StringAttr("port-0"))
+    width = ConstantOp(TimeAttr(12e-9))
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(width, amplitude)
+    pulse = PulseOp(frame, waveform)
+    module = _pulse_module(frequency, frame, width, amplitude, waveform, pulse)
+    readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(update={"grid_time": 8})
+    target_data = TARGET_DATA.model_copy(update={"READOUT_SEQUENCER_DATA": readout_data})
+
+    with pytest.raises(
+        PassFailedException,
+        match=r"multiple of sequencer grid_time \(8 ns\)",
+    ):
+        create_qblox_configured_q1_pipeline(_readout_canonical_data(), target_data).apply(
+            Context(), module
+        )
 
 
 def test_pipeline_lowers_normalized_pulse_to_configured_flat_q1():

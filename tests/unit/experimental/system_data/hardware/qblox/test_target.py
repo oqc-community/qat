@@ -54,6 +54,8 @@ def test_routing_and_sequencer_types_come_from_target_description():
     assert DEFAULT_QBLOX_TARGET.input_sequencers(QbloxModuleKind.qrc, 0) == tuple(range(8))
     readout = DEFAULT_QBLOX_TARGET.sequencer(QbloxModuleKind.qrc, 7)
     control = DEFAULT_QBLOX_TARGET.sequencer(QbloxModuleKind.qrc, 8)
+    assert DEFAULT_QBLOX_TARGET.is_readout_sequencer(QbloxModuleKind.qrc, 7)
+    assert not DEFAULT_QBLOX_TARGET.is_readout_sequencer(QbloxModuleKind.qrc, 8)
     assert readout.sequencer_spec.type is Q1SequencerType.readout
     assert readout.sequencer_spec.supports(Q1SequencerFeature.awg)
     assert readout.sequencer_spec.supports(Q1SequencerFeature.acquisition)

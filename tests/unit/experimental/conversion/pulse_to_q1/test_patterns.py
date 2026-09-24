@@ -38,14 +38,16 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     RewritePhaseShiftOp,
     RewritePreQ1AcquireOp,
     RewritePulseOp,
+    RewriteSquareWaveformPulseOp,
     RewriteStartContinuousWaveformOp,
     RewriteStopContinuousWaveformOp,
     RewriteWaitOp,
     _get_enclosing_port,
     _register_waveform,
-    create_legalisation_patterns,
+    create_pulse_to_q1_legalisation_patterns,
     create_pulse_to_q1_lowering_patterns,
 )
+from qat.experimental.conversion.pulse_to_q1.waveform import SquareWaveformLowering
 from qat.experimental.dialect.pulse.ir import (
     AddOp,
     AmplitudeAttr,
@@ -61,6 +63,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseType,
     PulseOp,
     SampledWaveformAttr,
+    SquareWaveformOp,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     SynchronizeOp,
@@ -148,6 +151,19 @@ def _frame(channel_id: str = "q0/drive") -> tuple[ConstantOp, CreateFrameOp]:
     return freq, CreateFrameOp(freq, StringAttr(channel_id))
 
 
+def _square_pulse_module(width: TimeAttr) -> tuple[ModuleOp, SequenceOp]:
+    frequency, frame = _frame()
+    width_constant = ConstantOp(width)
+    amplitude = ConstantOp(AmplitudeAttr(0.5 + 0.25j))
+    waveform = SquareWaveformOp(width_constant, amplitude)
+    pulse = PulseOp(frame, waveform)
+    sequence = SequenceOp(
+        "q0_drive",
+        [frequency, frame, width_constant, amplitude, waveform, pulse, StopOp()],
+    )
+    return ModuleOp([sequence]), sequence
+
+
 def _run_q1_pipeline(module: ModuleOp) -> None:
     Q1PulseLegalisationPass().apply(Context(), module)
     PulseToQ1LoweringPass().apply(Context(), module)
@@ -161,23 +177,27 @@ def _sequence_body_ops(module: ModuleOp) -> list[Operation]:
 def test_lowering_pattern_factory_returns_all_patterns():
     """Verify that the pattern factory returns the full rewrite set in order."""
     patterns = create_pulse_to_q1_lowering_patterns()
-    assert len(patterns) == 8
-    assert isinstance(patterns[0], LowerArithIntegerConstantToMoveOp)
-    assert isinstance(patterns[1], RewritePhaseSetOp)
-    assert isinstance(patterns[2], RewritePhaseShiftOp)
-    assert isinstance(patterns[3], RewriteWaitOp)
-    assert isinstance(patterns[4], RewritePulseOp)
-    assert isinstance(patterns[5], RewriteStartContinuousWaveformOp)
-    assert isinstance(patterns[6], RewriteStopContinuousWaveformOp)
-    assert isinstance(patterns[7], RewritePreQ1AcquireOp)
+    assert tuple(type(pattern) for pattern in patterns) == (
+        LowerArithIntegerConstantToMoveOp,
+        RewriteSquareWaveformPulseOp,
+        RewritePhaseSetOp,
+        RewritePhaseShiftOp,
+        RewriteWaitOp,
+        RewritePulseOp,
+        RewriteStartContinuousWaveformOp,
+        RewriteStopContinuousWaveformOp,
+        RewritePreQ1AcquireOp,
+    )
 
 
-def test_legalisation_pattern_factory_returns_two_patterns():
-    """Verify that the legalisation factory returns the two phase rewrite patterns."""
-    patterns = create_legalisation_patterns()
-    assert len(patterns) == 2
-    assert isinstance(patterns[0], RewritePhaseSetOp)
-    assert isinstance(patterns[1], RewritePhaseShiftOp)
+def test_legalisation_pattern_factory_returns_three_patterns():
+    """Verify that the legalisation factory includes square-width canonicalisation."""
+    patterns = create_pulse_to_q1_legalisation_patterns()
+    assert tuple(type(pattern) for pattern in patterns) == (
+        RewriteSquareWaveformPulseOp,
+        RewritePhaseSetOp,
+        RewritePhaseShiftOp,
+    )
 
 
 def test_bound_dead_frame_elimination_removes_only_unreferenced_metadata():
@@ -1244,6 +1264,159 @@ class TestRewritePulseOp:
         assert len(play_ops) == 1
         play = play_ops[0]
         assert play.imm3.data == pulse_length
+
+
+class TestSquareWaveformLegalisation:
+    def test_legalises_width_to_integer_nanoseconds(self):
+        module, sequence = _square_pulse_module(TimeAttr(80e-9))
+
+        PatternRewriteWalker(
+            create_pulse_to_q1_legalisation_patterns()[0],
+            apply_recursively=False,
+        ).rewrite_module(module)
+
+        ops = list(sequence.body.block.ops)
+        legalised_pulse = next(op for op in ops if isinstance(op, PulseOp))
+        legalised_waveform = legalised_pulse.waveform.owner
+        assert isinstance(legalised_waveform, SquareWaveformOp)
+        assert [
+            op for op in sequence.body.block.ops if isinstance(op, SquareWaveformOp)
+        ] == [legalised_waveform]
+        legalised_width = legalised_waveform.width.owner
+        assert isinstance(legalised_width, ConstantOp)
+        assert legalised_width.value == TimeAttr(80, TimeUnits.NANOSECOND)
+
+
+class TestSquareWaveformLowering:
+    @pytest.mark.parametrize("width_ns", [4, 12, 80])
+    def test_lowers_square_pulse_with_exact_plateau_duration(self, width_ns: int):
+        module, sequence = _square_pulse_module(TimeAttr(width_ns, TimeUnits.NANOSECOND))
+
+        PatternRewriteWalker(
+            RewriteSquareWaveformPulseOp(
+                TARGET_DATA,
+                rewrite_callable=SquareWaveformLowering(),
+            ),
+            apply_recursively=False,
+        ).rewrite_module(module)
+
+        ops = list(sequence.body.block.ops)
+        assert not any(isinstance(op, PulseOp) for op in ops)
+        q1_ops = tuple(
+            op
+            for op in ops
+            if isinstance(op, SetAwgOffsImmImmOp | UpdParamImmOp | WaitImmOp)
+        )
+        assert isinstance(q1_ops[0], SetAwgOffsImmImmOp)
+        assert q1_ops[0].imm1.data == int(0.5 * TARGET_DATA.Q1ASM_DATA.max_offset)
+        assert q1_ops[0].imm2.data == int(0.25 * TARGET_DATA.Q1ASM_DATA.max_offset)
+
+        fall_index = next(
+            index
+            for index, q1_op in enumerate(q1_ops[1:], start=1)
+            if isinstance(q1_op, SetAwgOffsImmImmOp)
+        )
+        plateau_ops = q1_ops[1:fall_index]
+        assert all(isinstance(op, UpdParamImmOp | WaitImmOp) for op in plateau_ops)
+        assert sum(op.duration.data for op in plateau_ops) == width_ns
+
+        assert q1_ops[fall_index].imm1.data == 0
+        assert q1_ops[fall_index].imm2.data == 0
+        assert isinstance(q1_ops[fall_index + 1], UpdParamImmOp)
+        assert q1_ops[fall_index + 1].duration.data == _CONTROL_SEQUENCER_DATA.grid_time
+        assert (
+            sum(
+                op.duration.data
+                for op in q1_ops
+                if isinstance(op, UpdParamImmOp | WaitImmOp)
+            )
+            == width_ns + _CONTROL_SEQUENCER_DATA.grid_time
+        )
+        assert not any(isinstance(op, SquareWaveformOp) for op in sequence.body.block.ops)
+
+    def test_rejects_wait_limit_smaller_than_sequencer_grid(self):
+        control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
+            update={"grid_time": 8}
+        )
+        q1asm_data = TARGET_DATA.Q1ASM_DATA.model_copy(update={"max_wait_time": 4})
+        target_data = TARGET_DATA.model_copy(
+            update={
+                "CONTROL_SEQUENCER_DATA": control_data,
+                "Q1ASM_DATA": q1asm_data,
+            }
+        )
+        module, _ = _square_pulse_module(TimeAttr(16, TimeUnits.NANOSECOND))
+
+        with pytest.raises(
+            PassFailedException,
+            match="Q1 wait limit 4 ns cannot represent.*8 ns sequencer alignment",
+        ):
+            PatternRewriteWalker(
+                RewriteSquareWaveformPulseOp(
+                    target_data,
+                    rewrite_callable=SquareWaveformLowering(),
+                ),
+                apply_recursively=False,
+            ).rewrite_module(module)
+
+    def test_splits_long_waits_on_the_sequencer_grid(self):
+        control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
+            update={"grid_time": 8}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"CONTROL_SEQUENCER_DATA": control_data}
+        )
+        width_ns = 65_544
+        module, sequence = _square_pulse_module(TimeAttr(width_ns, TimeUnits.NANOSECOND))
+
+        PatternRewriteWalker(
+            RewriteSquareWaveformPulseOp(
+                target_data,
+                rewrite_callable=SquareWaveformLowering(),
+            ),
+            apply_recursively=False,
+        ).rewrite_module(module)
+
+        durations = [
+            op.duration.data
+            for op in sequence.body.block.ops
+            if isinstance(op, UpdParamImmOp | WaitImmOp)
+        ]
+        assert all(duration % control_data.grid_time == 0 for duration in durations)
+        assert sum(durations[:-1]) == width_ns
+
+    def test_lowering_pass_emits_complete_q1_sequence(self):
+        module, sequence = _square_pulse_module(TimeAttr(80e-9))
+
+        _run_q1_pipeline(module)
+
+        assert not any(
+            isinstance(
+                op,
+                PulseOp | StartContinuousWaveformOp | WaitOp | StopContinuousWaveformOp,
+            )
+            for op in sequence.body.block.ops
+        )
+        assert (
+            sum(isinstance(op, SetAwgOffsImmImmOp) for op in sequence.body.block.ops) == 2
+        )
+        assert sum(isinstance(op, UpdParamImmOp) for op in sequence.body.block.ops) == 2
+        assert sum(isinstance(op, WaitImmOp) for op in sequence.body.block.ops) == 1
+
+    def test_rejects_non_canonical_width(self):
+        module, _ = _square_pulse_module(TimeAttr(80e-9))
+
+        with pytest.raises(
+            PassFailedException,
+            match="width is not canonical",
+        ):
+            PatternRewriteWalker(
+                RewriteSquareWaveformPulseOp(
+                    TARGET_DATA,
+                    rewrite_callable=SquareWaveformLowering(),
+                ),
+                apply_recursively=False,
+            ).rewrite_module(module)
 
 
 class TestRewriteStartContinuousWaveformOp:

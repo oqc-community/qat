@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Rewrite patterns for the Pulse-to-Q1 phase legalisation and lowering stages."""
+"""Rewrite patterns for the Pulse-to-Q1 legalisation and lowering stages."""
 
 from collections import defaultdict
 from collections.abc import Callable
@@ -32,6 +32,10 @@ from xdsl.utils.exceptions import PassFailedException, VerifyException
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData, SequencerDescription
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
+from qat.experimental.conversion.pulse_to_q1.waveform import (
+    SquareWaveformLegalisation,
+    SquareWaveformLowering,
+)
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
     ConstantOp,
@@ -40,6 +44,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseShiftOp,
     PulseOp,
     SampledWaveformAttr,
+    SquareWaveformOp,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     WaitOp,
@@ -69,10 +74,21 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_weight,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
-from qat.experimental.system_data.hardware.qblox.target import (
-    DEFAULT_QBLOX_TARGET,
-    Q1SequencerType,
-)
+from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
+
+PhaseRewriteCallable = Callable[
+    [
+        PhaseSetOp | PhaseShiftOp,
+        PatternRewriter,
+        QbloxTargetData,
+        DebugInfoAttr | None,
+    ],
+    None,
+]
+SquareWaveformRewriteCallable = Callable[
+    [PulseOp, PatternRewriter, QbloxTargetData, DebugInfoAttr | None],
+    None,
+]
 
 
 class LowerArithIntegerConstantToMoveOp(ModulePass, RewritePattern):
@@ -183,10 +199,9 @@ def _sequencer_data(op: Operation, target_data: QbloxTargetData) -> SequencerDes
     sequence = find_enclosing_sequence(op)
     if sequence.module_config is None or sequence.seq_idx is None:
         return target_data.CONTROL_SEQUENCER_DATA
-    sequencer_type = DEFAULT_QBLOX_TARGET.sequencer(
+    if DEFAULT_QBLOX_TARGET.is_readout_sequencer(
         sequence.module_config.kind.data, sequence.seq_idx.data
-    ).sequencer_spec.type
-    if sequencer_type is Q1SequencerType.readout:
+    ):
         return target_data.READOUT_SEQUENCER_DATA
     return target_data.CONTROL_SEQUENCER_DATA
 
@@ -251,6 +266,26 @@ class RewriteWaitOp(RewritePattern):
         rewriter.replace_matched_op(wait_ops, new_results=[op.frame])
 
 
+class RewriteSquareWaveformPulseOp(RewritePattern):
+    """Match a square pulse and delegate stage policy to ``rewrite_callable``."""
+
+    def __init__(
+        self,
+        target_data: QbloxTargetData,
+        rewrite_callable: SquareWaveformRewriteCallable,
+    ) -> None:
+        self.target_data = target_data
+        self.rewrite_callable = rewrite_callable
+
+    @op_type_rewrite_pattern
+    def match_and_rewrite(self, op: PulseOp, rewriter: PatternRewriter) -> None:
+        waveform_op = op.waveform.owner
+        if not isinstance(waveform_op, SquareWaveformOp):
+            return
+
+        self.rewrite_callable(op, rewriter, self.target_data, _make_debug_info(op))
+
+
 class RewritePhaseSetOp(RewritePattern):
     """Match ``pulse.phase_set`` and delegate stage policy to ``rewrite_callable``.
 
@@ -261,7 +296,7 @@ class RewritePhaseSetOp(RewritePattern):
     def __init__(
         self,
         target_data: QbloxTargetData,
-        rewrite_callable: Callable,
+        rewrite_callable: PhaseRewriteCallable,
     ) -> None:
         self.target_data = target_data
         self.rewrite_callable = rewrite_callable
@@ -280,7 +315,7 @@ class RewritePhaseShiftOp(RewritePattern):
     def __init__(
         self,
         target_data: QbloxTargetData,
-        rewrite_callable: Callable,
+        rewrite_callable: PhaseRewriteCallable,
     ) -> None:
         self.target_data = target_data
         self.rewrite_callable = rewrite_callable
@@ -388,8 +423,6 @@ class RewriteStartContinuousWaveformOp(RewritePattern):
     A continuous waveform is emitted on Q1 hardware by latching a constant AWG
     offset on both output paths. This pattern replaces the pulse op with a
     ``SetAwgOffsImmImmOp`` carrying the I and Q offsets scaled to the DAC range.
-    Assumes Square waves have been legalised to `StartContinuousWaveformOp`,
-    `Delay`, and `StopContinuousWaveformOp`.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
@@ -435,8 +468,6 @@ class RewriteStopContinuousWaveformOp(RewritePattern):
 
     Stopping a continuous waveform corresponds to clearing the latched AWG offset
     on both output paths, emitted as a ``SetAwgOffsImmImmOp`` with zero offsets.
-    Assumes Square waves have been legalised to `StartContinuousWaveformOp`,
-    `Delay`, and `StopContinuousWaveformOp`.
     """
 
     def __init__(self, target_data: QbloxTargetData) -> None:
@@ -693,27 +724,36 @@ class RewritePreQ1AcquireOp(RewritePattern):
         return acq_index
 
 
-def create_legalisation_patterns() -> tuple[RewritePattern, ...]:
+def create_pulse_to_q1_legalisation_patterns(
+    target_data: QbloxTargetData = TARGET_DATA,
+) -> tuple[RewritePattern, ...]:
     """Create the rewrite set used by the legalisation stage.
 
-    Canonicalises ``pulse.phase_set`` and ``pulse.phase_shift`` operands inside
-    the Pulse dialect. New legalisation behaviour can be added here without
-    touching the lowering factory.
+    Canonicalises phase operands and square-waveform widths within the Pulse dialect. New
+    legalisation behaviour can be added here without touching the lowering factory.
 
+    :param target_data: Qblox limits used during legalisation.
     :returns: Ordered pattern tuple for the legalisation pass.
     """
-    canonicalise = PhaseLegalisation()
+    canonicalise_phase = PhaseLegalisation()
+    canonicalise_square_waveform = SquareWaveformLegalisation()
     return (
+        RewriteSquareWaveformPulseOp(
+            target_data,
+            rewrite_callable=lambda op, rewriter, target_data, debug_info: (
+                canonicalise_square_waveform(op, rewriter)
+            ),
+        ),
         RewritePhaseSetOp(
-            TARGET_DATA,
-            rewrite_callable=lambda op, rewriter, _target_data, _debug_info=None: (
-                canonicalise(op, rewriter)
+            target_data,
+            rewrite_callable=lambda op, rewriter, target_data, debug_info: (
+                canonicalise_phase(op, rewriter)
             ),
         ),
         RewritePhaseShiftOp(
-            TARGET_DATA,
-            rewrite_callable=lambda op, rewriter, _target_data, _debug_info=None: (
-                canonicalise(op, rewriter)
+            target_data,
+            rewrite_callable=lambda op, rewriter, target_data, debug_info: (
+                canonicalise_phase(op, rewriter)
             ),
         ),
     )
@@ -724,10 +764,9 @@ def create_pulse_to_q1_lowering_patterns(
 ) -> tuple[RewritePattern, ...]:
     """Create the rewrite set used by the lowering stage.
 
-    Phase entries are configured with :class:`PhaseLowering`. Wait, finite pulse,
-    continuous-waveform, and acquisition patterns lower their Pulse or pre-Q1 operations
-    to Q1 instructions. Pulse preprocessing owns synchronization, while hardware
-    configuration resolution owns initial NCO frequency.
+    Phase entries are configured with :class:`PhaseLowering`. Square pulses lower directly
+    to latched Q1 AWG offsets and waits. The remaining entries lower Pulse waits, finite
+    pulses, continuous waveforms, and acquisitions to Q1 instructions.
 
     :param target_data: Qblox limits used during lowering.
     :returns: Ordered pattern tuple for the lowering pass.
@@ -735,6 +774,10 @@ def create_pulse_to_q1_lowering_patterns(
 
     return (
         LowerArithIntegerConstantToMoveOp(),
+        RewriteSquareWaveformPulseOp(
+            target_data,
+            rewrite_callable=SquareWaveformLowering(),
+        ),
         RewritePhaseSetOp(target_data, rewrite_callable=PhaseLowering()),
         RewritePhaseShiftOp(target_data, rewrite_callable=PhaseLowering()),
         RewriteWaitOp(target_data),

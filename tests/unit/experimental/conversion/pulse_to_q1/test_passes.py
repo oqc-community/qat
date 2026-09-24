@@ -22,6 +22,7 @@ from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.passes import (
     BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
@@ -48,8 +49,11 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseSetOp,
     PhaseShiftOp,
     PhaseType,
+    PulseOp,
+    SquareWaveformOp,
     StartContinuousWaveformOp,
     TimeAttr,
+    TimeType,
     WaitOp,
     WeightsAttr,
 )
@@ -63,7 +67,7 @@ from qat.experimental.dialect.q1 import (
     StopOp,
     UI5Imm,
 )
-from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.dialect.q1_sequence import ModuleConfigAttr, SequenceOp
 from qat.experimental.system_data.canonical.schema import (
     AttributeEntry,
     CanonicalSystemData,
@@ -72,6 +76,7 @@ from qat.experimental.system_data.canonical.schema import (
     OscillatorData,
     PortData,
 )
+from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
 
 
 def _module_with_main(ops) -> ModuleOp:
@@ -105,13 +110,60 @@ class _DynamicAmplitudeSourceOp(IRDLOperation):
         super().__init__(result_types=[AmplitudeType()])
 
 
-def _sequence_module(*ops, channel_id="q0_drive") -> ModuleOp:
-    return ModuleOp([SequenceOp(channel_id, [*ops, StopOp()])])
+@irdl_op_definition
+class _DynamicTimeSourceOp(IRDLOperation):
+    name = "test.dynamic_time_source"
+    result = result_def(TimeType)
+
+    def __init__(self):
+        super().__init__(result_types=[TimeType()])
+
+
+def _sequence_module(
+    *ops,
+    channel_id="q0_drive",
+    module_kind: QbloxModuleKind | None = None,
+    seq_idx: int | None = None,
+) -> ModuleOp:
+    allocation = (
+        {
+            "instrument_id": "cluster",
+            "slot_idx": 1,
+            "seq_idx": seq_idx,
+            "module_config": ModuleConfigAttr(1, "cluster", module_kind),
+        }
+        if module_kind is not None and seq_idx is not None
+        else {}
+    )
+    return ModuleOp([SequenceOp(channel_id, [*ops, StopOp()], **allocation)])
 
 
 def _frame(channel_id: str = "q0/drive") -> tuple[ConstantOp, CreateFrameOp]:
     freq = ConstantOp(FrequencyAttr(4.8e9))
     return freq, CreateFrameOp(freq, StringAttr(channel_id))
+
+
+def _square_pulse_module(
+    width: TimeAttr,
+    *,
+    module_kind: QbloxModuleKind | None = None,
+    seq_idx: int | None = None,
+) -> ModuleOp:
+    frequency, frame = _frame()
+    width_constant = ConstantOp(width)
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(width_constant, amplitude)
+    pulse = PulseOp(frame, waveform)
+    return _sequence_module(
+        frequency,
+        frame,
+        width_constant,
+        amplitude,
+        waveform,
+        pulse,
+        module_kind=module_kind,
+        seq_idx=seq_idx,
+    )
 
 
 def _sequence_body_ops(module: ModuleOp) -> list:
@@ -174,10 +226,10 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
 
     assert [pass_.name for pass_ in pipeline.passes] == [
         "pulse-to-q1-outlining",
+        "qblox-hardware-binding",
         "q1-pulse-validation",
         "acquire-pre-q1-transformation",
         "q1-pulse-legalisation",
-        "qblox-hardware-binding",
         "pulse-to-q1-lowering",
         "bound-dead-frame-elimination",
         "dce",
@@ -191,8 +243,8 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
 
 
 class TestQ1PulseValidationPass:
-    def _run(self, module: ModuleOp) -> None:
-        Q1PulseValidationPass().apply(Context(), module)
+    def _run(self, module: ModuleOp, target_data: QbloxTargetData = TARGET_DATA) -> None:
+        Q1PulseValidationPass(target_data).apply(Context(), module)
 
     def test_accepts_integer_nanosecond_wait(self):
         freq, frame = _frame()
@@ -220,14 +272,14 @@ class TestQ1PulseValidationPass:
         freq, frame = _frame()
         time = ConstantOp(TimeAttr(duration))
         wait = WaitOp(frame, time)
-        with pytest.raises(PassFailedException, match="time must be finite"):
+        with pytest.raises(PassFailedException, match="duration must be finite"):
             self._run(_sequence_module(freq, frame, time, wait))
 
     def test_rejects_negative_wait_duration(self):
         freq, frame = _frame()
         time = ConstantOp(TimeAttr(-16e-9))
         wait = WaitOp(frame, time)
-        with pytest.raises(PassFailedException, match="time must be non-negative"):
+        with pytest.raises(PassFailedException, match="duration must be non-negative"):
             self._run(_sequence_module(freq, frame, time, wait))
 
     def test_accepts_minimum_nanosecond_duration(self):
@@ -244,21 +296,113 @@ class TestQ1PulseValidationPass:
             self._run(_sequence_module(freq, frame, time, wait))
 
     def test_rejects_dynamic_wait_duration(self):
-        from qat.experimental.dialect.pulse.ir import TimeType
-
-        @irdl_op_definition
-        class _DynamicTimeSourceOp(IRDLOperation):
-            name = "test.dynamic_time_source_val"
-            result = result_def(TimeType)
-
-            def __init__(self):
-                super().__init__(result_types=[TimeType()])
-
         freq, frame = _frame()
         dynamic_time = _DynamicTimeSourceOp()
         wait = WaitOp(frame, dynamic_time)
         with pytest.raises(PassFailedException, match="Dynamic pulse.wait"):
             self._run(_sequence_module(freq, frame, dynamic_time, wait))
+
+    def test_accepts_square_waveform_at_minimum_width(self):
+        self._run(_square_pulse_module(TimeAttr(4e-9)))
+
+    def test_rejects_square_waveform_below_minimum_width(self):
+        with pytest.raises(
+            PassFailedException,
+            match="pulse.square_waveform width must be at least 4 ns",
+        ):
+            self._run(_square_pulse_module(TimeAttr(3e-9)))
+
+    def test_rejects_square_waveform_width_off_sequencer_grid(self):
+        with pytest.raises(
+            PassFailedException,
+            match="width must be a multiple of sequencer grid_time",
+        ):
+            self._run(_square_pulse_module(TimeAttr(5e-9)))
+
+    def test_uses_readout_sequencer_grid_for_square_waveform_width(self):
+        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+            update={"grid_time": 8}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"READOUT_SEQUENCER_DATA": readout_data}
+        )
+        module = _square_pulse_module(
+            TimeAttr(12e-9),
+            module_kind=QbloxModuleKind.qrm,
+            seq_idx=0,
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match=r"multiple of sequencer grid_time \(8 ns\)",
+        ):
+            self._run(module, target_data)
+
+    @pytest.mark.parametrize("amplitude", [1.1, -1.1, 1.1j, -1.1j])
+    def test_rejects_square_waveform_amplitude_outside_dac_range(
+        self, amplitude: complex | float
+    ):
+        frequency, frame = _frame()
+        width = ConstantOp(TimeAttr(8e-9))
+        amplitude_constant = ConstantOp(AmplitudeAttr(amplitude))
+        waveform = SquareWaveformOp(width, amplitude_constant)
+        pulse = PulseOp(frame, waveform)
+
+        with pytest.raises(PassFailedException, match="must be within"):
+            self._run(
+                _sequence_module(
+                    frequency,
+                    frame,
+                    width,
+                    amplitude_constant,
+                    waveform,
+                    pulse,
+                )
+            )
+
+    def test_rejects_dynamic_square_waveform_width_with_specific_diagnostic(self):
+        frequency, frame = _frame()
+        width = _DynamicTimeSourceOp()
+        amplitude = ConstantOp(AmplitudeAttr(0.5))
+        waveform = SquareWaveformOp(width, amplitude)
+        pulse = PulseOp(frame, waveform)
+
+        with pytest.raises(
+            PassFailedException,
+            match="Dynamic pulse.square_waveform width",
+        ):
+            self._run(
+                _sequence_module(
+                    frequency,
+                    frame,
+                    width,
+                    amplitude,
+                    waveform,
+                    pulse,
+                )
+            )
+
+    def test_reports_invalid_square_waveform_width_value_and_type(self):
+        frequency, frame = _frame()
+        width = ConstantOp(FrequencyAttr(8.0))
+        amplitude = ConstantOp(AmplitudeAttr(0.5))
+        waveform = SquareWaveformOp(width, amplitude)
+        pulse = PulseOp(frame, waveform)
+
+        with pytest.raises(
+            PassFailedException,
+            match=r"Got FrequencyAttr.*\(FrequencyAttr\)",
+        ):
+            self._run(
+                _sequence_module(
+                    frequency,
+                    frame,
+                    width,
+                    amplitude,
+                    waveform,
+                    pulse,
+                )
+            )
 
     @pytest.mark.parametrize("frequency", [math.inf, -math.inf, math.nan])
     def test_rejects_non_finite_frame_frequency(self, frequency: float):
