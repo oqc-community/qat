@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post384.dev20260924101933 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post385.dev20260924110111 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -191,6 +191,7 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.pre_q1_ir.html">qat.experimental.conversion.pulse_to_q1.pre_q1_ir module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.rewrite_patterns.html">qat.experimental.conversion.pulse_to_q1.rewrite_patterns module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html">qat.experimental.conversion.pulse_to_q1.sequence_outlining module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.conversion.pulse_to_q1.waveform.html">qat.experimental.conversion.pulse_to_q1.waveform module</a></li>
 </ul>
 </li>
 </ul>
@@ -756,6 +757,30 @@ configuration is preserved by merging it with the resolved configuration during 
 <dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'qblox-hardware-binding'</span></em><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.name" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.required_predecessors">
+<span class="sig-name descname"><span class="pre">required_predecessors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.required_predecessors" title="Link to this definition"></a></dt>
+<dd><p>Pass classes that <strong>must</strong> be present in the same pipeline and run <strong>before</strong>
+this pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.runs_before">
+<span class="sig-name descname"><span class="pre">runs_before</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.hardware_binding.QbloxHardwareBindingPass.runs_before" title="Link to this definition"></a></dt>
+<dd><p>Pass classes that, if present in the same pipeline, must run <strong>after</strong> this
+pass.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">frozenset</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ModulePass</span></code>]]</span></p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 

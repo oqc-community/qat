@@ -1,0 +1,7 @@
+qat.experimental.conversion.pulse\_to\_q1.waveform module
+=========================================================
+
+.. automodule:: qat.experimental.conversion.pulse_to_q1.waveform
+   :members:
+   :undoc-members:
+   :show-inheritance:
