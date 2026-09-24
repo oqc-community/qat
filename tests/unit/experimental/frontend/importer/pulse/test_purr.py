@@ -1748,3 +1748,208 @@ class TestPurrImporterDiscrimination:
             op for op in _record_create_ops(module) if _has_parent_of_type(op, MapOp)
         )
         assert discriminate_op.result in list(create_op.operands)
+
+
+class TestPurrImporterChannelScale:
+    """Tests that channel scale is correctly applied to Pulse and CustomPulse
+    instructions."""
+
+    def test_pulse_applies_channel_scale_when_ignore_false(self, builder, hw):
+        """Pulse amplitude should be multiplied by channel.scale when ignore_channel_scale
+        is False."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.5 + 0.2j  # Set a non-trivial scale
+
+        amp = 0.4
+        builder.add(
+            Pulse(
+                ch, PulseShapeType.SQUARE, width=80e-9, amp=amp, ignore_channel_scale=False
+            )
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        # Verify the waveform operation received the scaled amplitude
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        assert len(square_ops) == 1
+        amplitude_const = square_ops[0].amplitude.owner
+        assert isinstance(amplitude_const, ConstantOp)
+        # amplitude should be scaled: amp * channel.scale
+        expected_amplitude = amp * ch.scale
+        assert amplitude_const.value.literal_value == pytest.approx(expected_amplitude)
+
+    def test_pulse_ignores_channel_scale_when_ignore_true(self, builder, hw):
+        """Pulse amplitude should NOT be scaled when ignore_channel_scale is True."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.5 + 0.2j  # Set a non-trivial scale
+
+        amp = 0.4
+        builder.add(
+            Pulse(
+                ch, PulseShapeType.SQUARE, width=80e-9, amp=amp, ignore_channel_scale=True
+            )
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        # Verify the waveform operation received the unscaled amplitude
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        assert len(square_ops) == 1
+        amplitude_const = square_ops[0].amplitude.owner
+        assert isinstance(amplitude_const, ConstantOp)
+        # amplitude should be unscaled: just amp
+        assert amplitude_const.value.literal_value == pytest.approx(amp)
+
+    def test_pulse_scale_with_complex_amplitude(self, builder, hw):
+        """Pulse with complex amplitude should scale correctly with channel scale."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.5 + 0.1j
+
+        amp = 0.2 + 0.3j
+        builder.add(
+            Pulse(
+                ch, PulseShapeType.SQUARE, width=80e-9, amp=amp, ignore_channel_scale=False
+            )
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        assert len(square_ops) == 1
+        amplitude_const = square_ops[0].amplitude.owner
+        assert amplitude_const.value.literal_value == pytest.approx(amp * ch.scale)
+
+    def test_custom_pulse_applies_scale_to_samples_when_ignore_false(self, builder, hw):
+        """CustomPulse samples should be multiplied by channel.scale when
+        ignore_channel_scale is False."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.5  # Simple real scale
+
+        samples = np.array([0.1 + 0.2j, 0.3 - 0.1j, 0.2, -0.15j], dtype=np.complex128)
+        builder.add(CustomPulse(ch, samples, ignore_channel_scale=False))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [pulse_op] = _ops_of_type(module, PulseOp)
+        waveform_owner = pulse_op.waveform.owner
+        assert isinstance(waveform_owner, ConstantOp)
+        assert isinstance(waveform_owner.value, SampledWaveformAttr)
+
+        # Verify samples are scaled
+        sampled_attr = waveform_owner.value
+        expected_samples = samples * ch.scale
+        assert np.allclose(sampled_attr.samples.data, expected_samples)
+
+    def test_custom_pulse_ignores_scale_when_ignore_true(self, builder, hw):
+        """CustomPulse samples should NOT be scaled when ignore_channel_scale is True."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.5  # Set a scale, but it should be ignored
+
+        samples = np.array([0.1 + 0.2j, 0.3 - 0.1j, 0.2, -0.15j], dtype=np.complex128)
+        builder.add(CustomPulse(ch, samples, ignore_channel_scale=True))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [pulse_op] = _ops_of_type(module, PulseOp)
+        waveform_owner = pulse_op.waveform.owner
+        assert isinstance(waveform_owner, ConstantOp)
+        assert isinstance(waveform_owner.value, SampledWaveformAttr)
+
+        # Verify samples are NOT scaled
+        sampled_attr = waveform_owner.value
+        assert np.allclose(
+            sampled_attr.samples.data, np.asarray(samples, dtype=np.complex128)
+        )
+
+    def test_custom_pulse_scale_with_complex_scale(self, builder, hw):
+        """CustomPulse with complex channel scale should scale samples correctly."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.5 + 0.2j
+
+        samples = np.array([1.0, 0.5 + 0.5j, -0.25j], dtype=np.complex128)
+        builder.add(CustomPulse(ch, samples, ignore_channel_scale=False))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        [pulse_op] = _ops_of_type(module, PulseOp)
+        waveform_owner = pulse_op.waveform.owner
+        sampled_attr = waveform_owner.value
+
+        expected_samples = samples * ch.scale
+        assert np.allclose(sampled_attr.samples.data, expected_samples)
+
+    def test_pulse_gaussian_applies_channel_scale(self, builder, hw):
+        """Gaussian pulse should also apply channel scale to amplitude."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.75
+
+        amp = 0.6
+        builder.add(
+            Pulse(
+                ch,
+                PulseShapeType.GAUSSIAN,
+                width=80e-9,
+                amp=amp,
+                rise=8e-9,
+                ignore_channel_scale=False,
+            )
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        gaussian_ops = _ops_of_type(module, GaussianWaveformOp)
+        assert len(gaussian_ops) == 1
+        amplitude_const = gaussian_ops[0].amplitude.owner
+        expected_amplitude = amp * ch.scale
+        assert amplitude_const.value.literal_value == pytest.approx(expected_amplitude)
+
+    def test_pulse_with_default_ignore_false_applies_scale(self, builder, hw):
+        """Pulse with default ignore_channel_scale (False) should apply scale."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        ch.scale = 0.8
+
+        amp = 0.5
+        # ignore_channel_scale defaults to False
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=80e-9, amp=amp))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        amplitude_const = square_ops[0].amplitude.owner
+        expected_amplitude = amp * ch.scale
+        assert amplitude_const.value.literal_value == pytest.approx(expected_amplitude)
+
+    def test_setup_hold_with_complex_scale_raises_error(self, builder, hw):
+        """SetupHold waveform with non-negligible complex scale should raise ValueError.
+
+        This tests the error path in _to_real() when a complex scale cannot be safely
+        converted to a real value. SetupHold waveform parameters must be real, so a channel
+        scale with significant imaginary part is invalid.
+        """
+        ch = hw.get_qubit(0).get_drive_channel()
+        # Set a scale with non-negligible imaginary part (> 1e-10)
+        ch.scale = 0.5 + 0.3j
+
+        builder.add(
+            Pulse(
+                ch,
+                PulseShapeType.SETUP_HOLD,
+                width=80e-9,
+                amp=0.5,
+                amp_setup=0.25,
+                rise=16e-9,
+                ignore_channel_scale=False,
+            )
+        )
+
+        imp = PurrImporter()
+        with pytest.raises(ValueError, match="non-negligible imaginary"):
+            imp.build(builder)

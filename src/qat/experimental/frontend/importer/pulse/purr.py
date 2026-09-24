@@ -69,6 +69,7 @@ _KERNEL_NAME = "program"
 _ACQUIRE_SUFFIX = "acquire"
 _PULSE_SUFFIX = "measure"
 _MACQ_SUFFIX = f".{ChannelType.macq.name}"
+_COMPLEX_TO_REAL_TOLERANCE = 1e-10
 
 logger = get_logger(__name__)
 
@@ -605,10 +606,42 @@ class PurrImporter:
             return value
         raise ValueError(f"Unsupported value type {type(value)} for {value!r}.")
 
+    def _to_real(self, value: float | int | complex) -> float:
+        """Convert a numeric value to float, extracting real part if negligibly complex.
+
+        When converting a complex number to float, the imaginary part is discarded if its
+        magnitude is below _COMPLEX_TO_REAL_TOLERANCE (1e-10). This is a lossy conversion
+        and should only be used when the imaginary part is expected to be numerical noise
+        from calculations like conjugate or phase operations.
+        """
+        if isinstance(value, float | int):
+            return float(value)
+        if isinstance(value, complex):
+            if np.isclose(value.imag, 0.0, atol=_COMPLEX_TO_REAL_TOLERANCE):
+                return float(value.real)
+            raise ValueError(
+                f"Cannot convert complex number {value} with non-negligible imaginary "
+                f"part to float."
+            )
+        raise ValueError(f"Unsupported type {type(value)} for {value!r}.")
+
     def _get_waveform_name(self) -> str:
         """Generate a unique waveform name for emitted pulse waveforms."""
         self._waveform_index += 1
         return f"waveform_{self._waveform_index}"
+
+    def _get_channel_scale(
+        self, channel: PulseChannel, ignore_scale: bool
+    ) -> float | complex:
+        """Resolve the channel scale factor, returning 1.0 if scale should be ignored.
+
+        Channel scales are allowed to be complex-valued; only shape-specific conversions to
+        real are enforced where the backend requires a real amplitude (for example in
+        SetupHold waveforms).
+        """
+        if ignore_scale:
+            return 1.0
+        return self._resolve_numeric(channel.scale)
 
     def _create_waveform(self, purr_waveform: Pulse, builder: PulseKernelBuilder) -> str:
         """Create a backend waveform from a PuRR pulse and return its symbol name."""
@@ -616,6 +649,11 @@ class PurrImporter:
         width = float(self._resolve_numeric(purr_waveform.width))
         amplitude = self._resolve_numeric(purr_waveform.amp)
         drag = self._resolve_numeric(purr_waveform.drag)
+
+        channel_scale = self._get_channel_scale(
+            purr_waveform.channel, purr_waveform.ignore_channel_scale
+        )
+        amplitude *= channel_scale
 
         match purr_waveform.shape:
             case PulseShapeType.SQUARE:
@@ -707,9 +745,15 @@ class PurrImporter:
             case PulseShapeType.BLACKMAN:
                 builder.create_blackman_waveform(waveform_name, amplitude, width, drag)
             case PulseShapeType.SETUP_HOLD:
+                # Apply channel scale to amp_setup to preserve the setup/hold ratio.
+                # amp_setup is an absolute setup amplitude that will be used as a ratio
+                # relative to the main amplitude in SetupHoldWaveformShape.from_legacy().
+                amp_setup_scaled = (
+                    self._resolve_numeric(purr_waveform.amp_setup) * channel_scale
+                )
                 shape = SetupHoldWaveformShape.from_legacy(
-                    amp_setup=self._resolve_numeric(purr_waveform.amp_setup),
-                    amp=amplitude,
+                    amp_setup=self._to_real(amp_setup_scaled),
+                    amp=self._to_real(amplitude),
                     rise=float(self._resolve_numeric(purr_waveform.rise)),
                     width=width,
                 )
@@ -863,9 +907,14 @@ class PurrImporter:
     def _(self, value: CustomPulse, builder: PulseKernelBuilder) -> None:
         frame_name = self._frame_keys(value.quantum_targets[0]).pulse_frame
         waveform_name = self._get_waveform_name()
+
+        channel_scale = self._get_channel_scale(value.channel, value.ignore_channel_scale)
+        # Use numpy vectorisation for memory efficiency and performance.
+        samples = list(np.array(value.samples) * channel_scale)
+
         builder.create_custom_waveform(
             waveform_name,
-            list(value.samples),
+            samples,
             float(self._resolve_numeric(value.duration)),
         )
         builder.pulse(frame_name, waveform_name)
