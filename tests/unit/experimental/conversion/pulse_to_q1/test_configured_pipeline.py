@@ -13,6 +13,7 @@ from xdsl.dialects.builtin import (
     UnrealizedConversionCastOp,
 )
 from xdsl.ir import Block, Region
+from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.backend.qblox.target_data import TARGET_DATA
@@ -120,6 +121,15 @@ def _pulse_module(*body_ops) -> ModuleOp:
 def _frame() -> tuple[ConstantOp, CreateFrameOp]:
     frequency = ConstantOp(FrequencyAttr(4_800_000_000))
     return frequency, CreateFrameOp(frequency, StringAttr("port-0"))
+
+
+@irdl_op_definition
+class _DynamicIndexSourceOp(IRDLOperation):
+    name = "test.dynamic_index_source"
+    result = result_def(IndexType)
+
+    def __init__(self):
+        super().__init__(result_types=[IndexType()])
 
 
 def _configured_pipeline(canonical: CanonicalSystemData):
@@ -259,12 +269,12 @@ def test_pipeline_reports_unsupported_nested_control_flow_lowering():
     wait = WaitOp(start, duration)
     stop = StopContinuousWaveformOp(wait)
     lower = ArithConstantOp.from_int_and_width(0, IndexType())
-    upper = ArithConstantOp.from_int_and_width(2, IndexType())
+    upper = _DynamicIndexSourceOp()
     step = ArithConstantOp.from_int_and_width(1, IndexType())
     loop = scf.ForOp(
-        lower,
-        upper,
-        step,
+        lower.result,
+        upper.result,
+        step.result,
         [],
         Block([start, wait, stop, scf.YieldOp()], arg_types=[IndexType()]),
     )
@@ -279,7 +289,9 @@ def test_pipeline_reports_unsupported_nested_control_flow_lowering():
         loop,
     )
 
-    with pytest.raises(PassFailedException, match="lower bound is not a static integer"):
+    with pytest.raises(
+        PassFailedException, match="Dynamic For loop bounds not currently supported"
+    ):
         _configured_pipeline(_canonical_data()).apply(Context(), module)
 
 

@@ -78,6 +78,10 @@ class TestGetStaticInteger:
         const = ArithConstantOp.from_int_and_width(42, IndexType())
         assert _get_static_integer(const.result) == 42
 
+    def test_returns_integer_for_q1_move_immediate(self):
+        move = MoveImmRdOp(SU32Imm(42), IntRegisterType.unallocated())
+        assert _get_static_integer(move.rd) == 42
+
     def test_returns_none_for_block_arg(self):
         block = Block(arg_types=[IndexType()])
         assert _get_static_integer(block.args[0]) is None
@@ -123,6 +127,34 @@ class TestForLowering:
 
         move_ops = _ops_of_type(entry, MoveImmRdOp)
         assert move_ops[0].imm.data == 5
+
+    def test_shots_loop_accepts_q1_constant_producers(self):
+        """Q1 constant-producing bounds and step lower like ``arith.constant`` values."""
+        lb_op = MoveImmRdOp(SU32Imm(2), IntRegisterType.unallocated())
+        ub_op = MoveImmRdOp(SU32Imm(12), IntRegisterType.unallocated())
+        step_op = MoveImmRdOp(SU32Imm(2), IntRegisterType.unallocated())
+
+        body_block = Block(arg_types=[IndexType()])
+        body_block.add_op(ScfYieldOp())
+
+        for_op = ScfForOp(
+            lb=lb_op.rd,
+            ub=ub_op.rd,
+            step=step_op.rd,
+            iter_args=[],
+            body=body_block,
+        )
+        entry = Block()
+        entry.add_ops([lb_op, ub_op, step_op, for_op, StopOp()])
+
+        lower_entry = _lower(SequenceOp("Q0", Region([entry])))
+
+        q1_for_ops = _ops_of_type(lower_entry, ForOp)
+        assert len(q1_for_ops) == 1
+        assert _ops_of_type(lower_entry, ScfForOp) == []
+
+        generated_moves = _ops_of_type(lower_entry, MoveImmRdOp)
+        assert [move.imm.data for move in generated_moves] == [2, 12, 2, 5]
 
     def test_body_ops_are_preserved(self):
         """Ops inside the loop body survive lowering unchanged."""

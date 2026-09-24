@@ -63,6 +63,7 @@ from qat.experimental.dialect.q1 import (
     AddRsImmRdOp,
     MoveImmRdOp,
     Muls16RsImmRdOp,
+    NotImmRdOp,
     NotRsRdOp,
 )
 from qat.experimental.dialect.q1.ir.imm_desc import SI16Imm, SU32Imm
@@ -72,18 +73,30 @@ from qat.experimental.passes.pass_ordering import OrderedPass
 
 
 def _get_static_integer(value: SSAValue) -> int | None:
-    """Return the integer value of a static ``arith.constant`` result, or ``None``.
+    """Return the integer value of a static bound-like SSA value, or ``None``.
 
-    :returns: The integer constant, or ``None`` if not a static integer constant.
+    Supports ``arith.constant`` and q1 values that are still compile-time constant,
+    such as immediate ``move`` producers.
+
+    :returns: The integer constant, or ``None`` if not statically known.
     """
+
+    # TODO: COMPILER-1484, revisit this approach for briding between arith and scf -> q1_scf
+
     if not isinstance(value, OpResult):
         return None
-    if not isinstance(value.op, ArithConstantOp):
-        return None
-    attr = value.op.value
-    if not isinstance(attr, IntegerAttr):
-        return None
-    return int(attr.value.data)
+    owner = value.op
+    if isinstance(owner, ArithConstantOp):
+        attr = owner.value
+        if not isinstance(attr, IntegerAttr):
+            return None
+        return int(attr.value.data)
+    if isinstance(owner, MoveImmRdOp):
+        return int(owner.imm.data)
+    if isinstance(owner, NotImmRdOp):
+        # Masks back to the register width
+        return (~int(owner.imm.data)) & 0xFFFFFFFF
+    return None
 
 
 def _remap_induction_uses(
