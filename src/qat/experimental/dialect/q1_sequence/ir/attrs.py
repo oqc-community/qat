@@ -1118,6 +1118,23 @@ class ModuleConfigAttr(ConfigAttr):
         ]
         if len(oscillator_ids) != len(set(oscillator_ids)):
             raise VerifyException("ModuleConfigAttr has duplicate local oscillator ids")
+        oscillator_spec = module_spec.local_oscillator
+        if self.local_oscillators and oscillator_spec is None:
+            raise VerifyException(
+                f"ModuleConfigAttr {self.kind.data.value} does not support a local "
+                "oscillator"
+            )
+        if oscillator_spec is not None:
+            for lo in self.local_oscillators:
+                frequency = lo.frequency.data
+                if not oscillator_spec.supports(frequency):
+                    raise VerifyException(
+                        f"ModuleConfigAttr local oscillator frequency {frequency} Hz is not "
+                        f"representable by {self.kind.data.value}; expected "
+                        f"[{oscillator_spec.min_frequency_hz}, "
+                        f"{oscillator_spec.max_frequency_hz}] Hz in "
+                        f"{oscillator_spec.frequency_step_hz} Hz steps"
+                    )
 
         for lane_name, lane_ids, limit in (
             (

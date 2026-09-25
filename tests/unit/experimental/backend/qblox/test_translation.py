@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 import pytest
+from xdsl.utils.exceptions import VerifyException
 
 from qat.backend.qblox.execution import ModuleConfig
 from qat.experimental.backend.qblox.translation import (
@@ -289,20 +290,14 @@ def test_rejects_sequencer_reference_to_missing_local_oscillator():
         translate_module_config(module_config, [sequencer_config])
 
 
-def test_rejects_local_oscillator_without_legacy_lane():
-    module_config = ModuleConfigAttr(
-        2,
-        "cluster0",
-        QbloxModuleKind.qcm,
-        local_oscillators=[LocalOscillatorConfigAttr("lo0", 4_400_000_000)],
-    )
-    sequencer_config = _sequencer_config(
-        connections=[ConnectionAttr(DirectionKind.output, [0])],
-        local_oscillator_id="lo0",
-    )
-
-    with pytest.raises(ValueError, match="Cannot map local oscillator 'lo0'"):
-        translate_module_config(module_config, [sequencer_config])
+def test_rejects_local_oscillator_on_baseband_module():
+    with pytest.raises(VerifyException, match="does not support a local oscillator"):
+        ModuleConfigAttr(
+            2,
+            "cluster0",
+            QbloxModuleKind.qcm,
+            local_oscillators=[LocalOscillatorConfigAttr("lo0", 4_400_000_000)],
+        )
 
 
 def test_rejects_local_oscillator_enable_without_legacy_field():

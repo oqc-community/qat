@@ -534,6 +534,33 @@ class TestModuleConfigAttr:
                 local_oscillators=[oscillator, oscillator],
             )
 
+    @pytest.mark.parametrize("kind", [QbloxModuleKind.qcm, QbloxModuleKind.qrm])
+    def test_baseband_module_rejects_local_oscillator(self, kind):
+        with pytest.raises(VerifyException, match="does not support a local oscillator"):
+            ModuleConfigAttr(
+                1,
+                "cluster0",
+                kind,
+                local_oscillators=[LocalOscillatorConfigAttr("lo0", 4_000_000_000)],
+            )
+
+    @pytest.mark.parametrize(
+        ("kind", "frequency"),
+        [
+            (QbloxModuleKind.qcm_rf, 1_999_999_999),
+            (QbloxModuleKind.qrm_rf, 18_000_000_001),
+            (QbloxModuleKind.qrc, 550_000_000),
+        ],
+    )
+    def test_rejects_unrepresentable_local_oscillator_frequency(self, kind, frequency):
+        with pytest.raises(VerifyException, match="not representable"):
+            ModuleConfigAttr(
+                1,
+                "cluster0",
+                kind,
+                local_oscillators=[LocalOscillatorConfigAttr("lo0", frequency)],
+            )
+
     @pytest.mark.parametrize(
         ("kind", "outputs", "inputs", "expected"),
         [

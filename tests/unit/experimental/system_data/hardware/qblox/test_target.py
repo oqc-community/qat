@@ -14,6 +14,7 @@ from qat.experimental.system_data.hardware.qblox.models import (
 )
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
+    LocalOscillatorSpec,
     ModuleSpec,
     Q1SequencerFeature,
     Q1SequencerType,
@@ -76,6 +77,48 @@ def test_routing_and_sequencer_types_come_from_target_description():
 )
 def test_rf_classification_matches_qblox_driver(kind, is_rf):
     assert DEFAULT_QBLOX_TARGET.module_spec(kind).is_rf is is_rf
+
+
+@pytest.mark.parametrize(
+    ("kind", "expected"),
+    [
+        (QbloxModuleKind.qcm, None),
+        (
+            QbloxModuleKind.qcm_rf,
+            LocalOscillatorSpec(2_000_000_000, 18_000_000_000),
+        ),
+        (QbloxModuleKind.qrm, None),
+        (
+            QbloxModuleKind.qrm_rf,
+            LocalOscillatorSpec(2_000_000_000, 18_000_000_000),
+        ),
+        (
+            QbloxModuleKind.qrc,
+            LocalOscillatorSpec(500_000_000, 10_100_000_000, 100_000_000),
+        ),
+    ],
+)
+def test_module_local_oscillator_limits_match_qblox_driver(kind, expected):
+    assert DEFAULT_QBLOX_TARGET.module_spec(kind).local_oscillator == expected
+
+
+@pytest.mark.parametrize(
+    "frequency",
+    [500_000_000, 10_100_000_000],
+)
+def test_qrc_local_oscillator_accepts_documented_boundaries(frequency):
+    oscillator = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qrc).local_oscillator
+
+    assert oscillator is not None
+    assert oscillator.supports(frequency)
+    assert not oscillator.supports(frequency + 50_000_000)
+
+
+def test_module_rf_classification_requires_a_local_oscillator_specification():
+    qcm = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm)
+
+    with pytest.raises(ValueError, match="RF module classification"):
+        replace(qcm, is_rf=True)
 
 
 def test_target_rejects_illegal_indices():

@@ -484,6 +484,12 @@ def _sequencer_config(
     ttl = _group(values, "ttl_acq")
 
     frequency = _nco_frequency(channel_binding, nco, origin)
+    _validate_nco_frequency(
+        channel_binding,
+        placement,
+        module_spec,
+        frequency,
+    )
     return SequencerConfigAttr(
         port_id=channel_binding.port_id,
         carrier_frequency=channel_binding.carrier_frequency,
@@ -577,6 +583,36 @@ def _nco_frequency(
     return frequency
 
 
+def _validate_nco_frequency(
+    channel_binding: QbloxChannelBinding,
+    placement: SequencerPlacement,
+    module_spec: ModuleSpec,
+    frequency: float,
+) -> None:
+    """Validate a selected channel's derived NCO against its physical sequencer.
+
+    :param channel_binding: Calibrated canonical channel driving the sequencer.
+    :param placement: Allocated physical sequencer placement.
+    :param module_spec: Target description of the installed module kind.
+    :param frequency: Derived NCO frequency in Hz.
+    :raises ValueError: If the selected sequencer cannot synthesise the frequency.
+    """
+
+    sequencer = DEFAULT_QBLOX_TARGET.sequencer(module_spec.kind, placement.sequencer_index)
+    minimum = sequencer.sequencer_spec.nco_min_frequency_hz
+    maximum = sequencer.sequencer_spec.nco_max_frequency_hz
+    if minimum <= frequency <= maximum:
+        return
+
+    oscillator_frequency = channel_binding.oscillator_frequency or 0
+    raise ValueError(
+        f"Canonical channel {channel_binding.channel_id!r} requires NCO frequency "
+        f"{frequency} Hz from carrier {channel_binding.carrier_frequency} Hz and "
+        f"local oscillator {oscillator_frequency} Hz, outside [{minimum}, {maximum}] Hz "
+        f"for {module_spec.kind.value} sequencer {placement.sequencer_index}"
+    )
+
+
 def _mixer_config(
     channel_binding: QbloxChannelBinding,
     values: Mapping[str, ConfigValue],
@@ -648,7 +684,9 @@ def _local_oscillator_configs(
         if channel_binding.oscillator_id is None:
             continue
         lanes.setdefault(channel_binding.oscillator_id, set()).update(
-            _oscillator_lane_names(placement.sequencer_configuration.connection)
+            _oscillator_lane_names(
+                placement.sequencer_configuration.connection, module_spec
+            )
         )
 
     supplied_values = _group(module_configuration.module_values, "lo")
@@ -656,6 +694,11 @@ def _local_oscillator_configs(
     for oscillator_id, lane_names in sorted(lanes.items()):
         frequency = frequencies[oscillator_id]
         origin = f"Local oscillator {oscillator_id!r} on a {module_spec.kind.value} module"
+        _validate_local_oscillator_frequency(
+            module_spec,
+            oscillator_id,
+            frequency,
+        )
         declared = _oscillator_value(supplied_values, lane_names, "freq", origin, _number)
         if declared is not None and not isclose(
             declared, frequency, rel_tol=1e-12, abs_tol=1.0
@@ -676,26 +719,63 @@ def _local_oscillator_configs(
     return oscillators
 
 
-def _oscillator_lane_names(connection: SequencerConnection) -> set[str]:
+def _validate_local_oscillator_frequency(
+    module_spec: ModuleSpec,
+    oscillator_id: str,
+    frequency: int,
+) -> None:
+    """Validate a selected oscillator against its Qblox module specification.
+
+    :param module_spec: Target description of the installed module kind.
+    :param oscillator_id: Canonical oscillator identifier.
+    :param frequency: Calibrated oscillator frequency in Hz.
+    :raises ValueError: If the module has no oscillator or cannot represent its frequency.
+    """
+
+    oscillator_spec = module_spec.local_oscillator
+    if oscillator_spec is None:
+        raise ValueError(
+            f"Canonical local oscillator {oscillator_id!r} is selected on "
+            f"{module_spec.kind.value}, which has no local oscillator"
+        )
+    if oscillator_spec.supports(frequency):
+        return
+
+    raise ValueError(
+        f"Canonical local oscillator {oscillator_id!r} frequency {frequency} Hz is not "
+        f"representable by {module_spec.kind.value}; expected "
+        f"[{oscillator_spec.min_frequency_hz}, {oscillator_spec.max_frequency_hz}] Hz "
+        f"in {oscillator_spec.frequency_step_hz} Hz steps"
+    )
+
+
+def _oscillator_lane_names(
+    connection: SequencerConnection, module_spec: ModuleSpec
+) -> set[str]:
     """Return the module field prefixes naming the lanes one sequencer drives.
 
-    Qblox names a module's oscillator fields after the lanes it feeds: ``out0`` on a
-    control module, and ``out0_in0`` where one oscillator serves an output and its paired
-    input.
+    Qblox names a module's oscillator fields after the lanes it feeds. QCM-RF has one
+    oscillator per output, QRM-RF shares ``out0_in0``, and QRC shares ``out0_in0`` and
+    ``out1_in1`` while its remaining outputs have independent oscillators.
 
     :param connection: Routing supplied for the sequencer.
+    :param module_spec: Target description of the installed module kind.
     :returns: The field prefixes covering the sequencer's lanes.
     """
 
     output_ids = sorted(connection.output_ids)
     input_ids = sorted(connection.input_ids)
-    if not input_ids:
+    if module_spec.kind is QbloxModuleKind.qcm_rf:
         return {f"out{output_id}" for output_id in output_ids}
-    if not output_ids:
-        return {f"in{input_id}" for input_id in input_ids}
-    return {
-        f"out{output_id}_in{input_id}" for output_id in output_ids for input_id in input_ids
-    }
+    if module_spec.kind is QbloxModuleKind.qrm_rf:
+        return {"out0_in0"} if output_ids or input_ids else set()
+    if module_spec.kind is QbloxModuleKind.qrc:
+        lanes = {f"out{output_id}" for output_id in output_ids if output_id >= 2}
+        for paired_id in (0, 1):
+            if paired_id in output_ids or paired_id in input_ids:
+                lanes.add(f"out{paired_id}_in{paired_id}")
+        return lanes
+    return set()
 
 
 def _oscillator_value(

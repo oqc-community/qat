@@ -731,13 +731,11 @@ class TestIoConnectionDirections:
             seq_idx=0,
             sequencer_config=SequencerConfigAttr(
                 connections=[ConnectionAttr(DirectionKind.io, [0, 1])],
-                local_oscillator_id="lo0",
             ),
             module_config=_module_config(
                 kind=QbloxModuleKind.qrm,
                 outputs=[OutputConfigAttr(0), OutputConfigAttr(1)],
                 inputs=[InputConfigAttr(0), InputConfigAttr(1)],
-                local_oscillators=[LocalOscillatorConfigAttr("lo0", 6_000_000_000)],
             ),
         )
 
@@ -769,13 +767,11 @@ class TestIoConnectionDirections:
             seq_idx=0,
             sequencer_config=SequencerConfigAttr(
                 connections=[ConnectionAttr(DirectionKind.io, [0, 1])],
-                local_oscillator_id="lo0",
             ),
             module_config=_module_config(
                 kind=QbloxModuleKind.qrm,
                 outputs=outputs,
                 inputs=inputs,
-                local_oscillators=[LocalOscillatorConfigAttr("lo0", 6_000_000_000)],
             ),
         )
 

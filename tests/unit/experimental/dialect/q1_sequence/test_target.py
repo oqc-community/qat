@@ -98,7 +98,7 @@ class TestEmitConfig:
         config = ModuleConfigAttr(
             2,
             "cluster0",
-            QbloxModuleKind.qrm,
+            QbloxModuleKind.qrc,
             outputs=[OutputConfigAttr(1), OutputConfigAttr(0)],
             inputs=[
                 InputConfigAttr(
@@ -118,7 +118,7 @@ class TestEmitConfig:
 
         assert emitted["instrument_id"] == "cluster0"
         assert emitted["slot_idx"] == 2
-        assert emitted["kind"] == "qrm"
+        assert emitted["kind"] == "qrc"
         assert [output["output_id"] for output in emitted["outputs"]] == [0, 1]
         assert [module_input["input_id"] for module_input in emitted["inputs"]] == [0, 1]
         assert [

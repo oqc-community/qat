@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 import re
+from dataclasses import replace
 
 import pytest
 from xdsl.dialects.builtin import NoneAttr
@@ -44,14 +45,19 @@ from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers 
 
 def _resolve(
     configurations,
+    used_channel_ids=None,
     **kwargs,
 ):
     data = canonical_data(configurations=configurations, **kwargs)
-    used_channel_ids = {channel.id for channel in data.channels}
+    selected_channel_ids = (
+        {channel.id for channel in data.channels}
+        if used_channel_ids is None
+        else used_channel_ids
+    )
     return resolve_sequencer_bindings(
         QbloxHardwareView.derive(data),
         supplied_configurations(data),
-        used_channel_ids,
+        selected_channel_ids,
     )
 
 
@@ -79,6 +85,59 @@ def test_nco_frequency_is_the_carrier_minus_the_oscillator():
 
     assert binding.sequencer_config.nco.frequency.value.data == 200_000_000.0
     assert binding.sequencer_config.carrier_frequency.value.data == 4_200_000_000.0
+
+
+@pytest.mark.parametrize(
+    ("carrier_frequency", "expected_frequency"),
+    [
+        (3_500_000_000, -500_000_000.0),
+        (4_500_000_000, 500_000_000.0),
+    ],
+)
+def test_nco_frequency_accepts_target_boundaries(carrier_frequency, expected_frequency):
+    binding = _resolve(
+        [supplied([sequencer(0)])],
+        carrier_frequency=carrier_frequency,
+    )["port-0-channel-0"]
+
+    assert binding.sequencer_config.nco.frequency.value.data == expected_frequency
+
+
+@pytest.mark.parametrize(
+    "carrier_frequency",
+    [3_499_999_999, 4_500_000_001],
+)
+def test_nco_frequency_rejects_values_outside_target_boundaries(carrier_frequency):
+    with pytest.raises(ValueError, match="outside.*-500000000.0.*500000000.0"):
+        _resolve(
+            [supplied([sequencer(0)])],
+            carrier_frequency=carrier_frequency,
+        )
+
+
+def test_nco_frequency_rejects_selected_channel_with_invalid_calibration():
+    with pytest.raises(
+        ValueError,
+        match=(
+            r"'port-0-channel-0'.*-520000000.0 Hz.*3480000000 Hz.*"
+            r"4000000000 Hz.*qcm_rf sequencer 0"
+        ),
+    ):
+        _resolve(
+            [supplied([sequencer(0)])],
+            carrier_frequency=3_480_000_000,
+        )
+
+
+def test_nco_frequency_does_not_reject_an_invalid_unused_channel():
+    binding = _resolve(
+        [supplied([sequencer(0)])],
+        used_channel_ids={"port-0-channel-1"},
+        channels_per_port=2,
+        carrier_frequency=3_480_000_000,
+    )["port-0-channel-1"]
+
+    assert binding.sequencer_config.nco.frequency.value.data == -420_000_000.0
 
 
 def test_supplied_nco_frequency_must_match_the_calibration():
@@ -141,6 +200,8 @@ def test_supplied_routing_is_preserved_in_full():
     binding = _resolve(
         [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
         kind=QbloxModuleKind.qrm,
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
     )["port-0-channel-0"]
 
     config = binding.sequencer_config
@@ -282,6 +343,138 @@ def test_supplied_oscillator_frequency_must_match_the_calibration():
         _resolve(
             [supplied([sequencer(0)], module_values={"lo": {"out0_freq": 5.0e9}})],
         )
+
+
+def test_qrc_input_only_connection_validates_paired_oscillator_frequency():
+    with pytest.raises(ValueError, match="supplied at 5000000000.0 Hz"):
+        _resolve(
+            [
+                supplied(
+                    [sequencer(0, outputs=[], inputs=[0])],
+                    module_values={"lo": {"out0_in0_freq": 5_000_000_000}},
+                )
+            ],
+            kind=QbloxModuleKind.qrc,
+        )
+
+
+@pytest.mark.parametrize(
+    ("kind", "output_id", "field"),
+    [
+        (QbloxModuleKind.qrm_rf, 0, "out0_in0_freq"),
+        (QbloxModuleKind.qrc, 0, "out0_in0_freq"),
+        (QbloxModuleKind.qrc, 1, "out1_in1_freq"),
+    ],
+)
+def test_output_only_rf_connection_validates_paired_oscillator_frequency(
+    kind, output_id, field
+):
+    with pytest.raises(ValueError, match="supplied at 5000000000.0 Hz"):
+        _resolve(
+            [
+                supplied(
+                    [sequencer(0, outputs=[output_id])],
+                    module_values={"lo": {field: 5_000_000_000}},
+                )
+            ],
+            kind=kind,
+        )
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qcm, QbloxModuleKind.qrm])
+def test_baseband_module_rejects_a_selected_local_oscillator(kind):
+    with pytest.raises(ValueError, match=rf"{kind.value}.*has no local oscillator"):
+        _resolve(
+            [supplied([sequencer(0)])],
+            kind=kind,
+            oscillator_frequency=4_000_000_000,
+            carrier_frequency=4_200_000_000,
+        )
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qcm_rf, QbloxModuleKind.qrm_rf])
+@pytest.mark.parametrize("oscillator_frequency", [2_000_000_000, 18_000_000_000])
+def test_rf_module_accepts_local_oscillator_frequency_boundaries(
+    kind, oscillator_frequency
+):
+    binding = _resolve(
+        [supplied([sequencer(0)])],
+        kind=kind,
+        oscillator_frequency=oscillator_frequency,
+        carrier_frequency=oscillator_frequency,
+    )["port-0-channel-0"]
+
+    [oscillator] = binding.module_config.local_oscillators
+    assert oscillator.frequency.data == oscillator_frequency
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qcm_rf, QbloxModuleKind.qrm_rf])
+@pytest.mark.parametrize("oscillator_frequency", [1_999_999_999, 18_000_000_001])
+def test_rf_module_rejects_local_oscillator_frequency_outside_boundaries(
+    kind, oscillator_frequency
+):
+    with pytest.raises(ValueError, match=rf"{kind.value}.*2000000000.*18000000000"):
+        _resolve(
+            [supplied([sequencer(0)])],
+            kind=kind,
+            oscillator_frequency=oscillator_frequency,
+            carrier_frequency=oscillator_frequency,
+        )
+
+
+@pytest.mark.parametrize("oscillator_frequency", [500_000_000, 10_100_000_000])
+def test_qrc_accepts_local_oscillator_frequency_boundaries(oscillator_frequency):
+    binding = _resolve(
+        [supplied([sequencer(0)])],
+        kind=QbloxModuleKind.qrc,
+        oscillator_frequency=oscillator_frequency,
+        carrier_frequency=oscillator_frequency,
+    )["port-0-channel-0"]
+
+    [oscillator] = binding.module_config.local_oscillators
+    assert oscillator.frequency.data == oscillator_frequency
+
+
+@pytest.mark.parametrize(
+    "oscillator_frequency",
+    [400_000_000, 550_000_000, 10_200_000_000],
+)
+def test_qrc_rejects_unrepresentable_local_oscillator_frequency(
+    oscillator_frequency,
+):
+    with pytest.raises(
+        ValueError,
+        match=r"qrc.*500000000.*10100000000.*100000000 Hz steps",
+    ):
+        _resolve(
+            [supplied([sequencer(0)])],
+            kind=QbloxModuleKind.qrc,
+            oscillator_frequency=oscillator_frequency,
+            carrier_frequency=oscillator_frequency,
+        )
+
+
+def test_invalid_local_oscillator_on_an_unused_port_does_not_block_resolution():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)]), None],
+        oscillator_frequency=4_000_000_000,
+        carrier_frequency=4_200_000_000,
+    )
+    data = replace(
+        data,
+        oscillators=(
+            data.oscillators[0],
+            replace(data.oscillators[1], frequency=1_000_000_000),
+        ),
+    )
+
+    bindings = resolve_sequencer_bindings(
+        QbloxHardwareView.derive(data),
+        supplied_configurations(data),
+        {"port-0-channel-0"},
+    )
+
+    assert set(bindings) == {"port-0-channel-0"}
 
 
 def test_mixer_correction_comes_from_the_channel_calibration():
@@ -447,7 +640,12 @@ def test_an_io_connection_binds_both_lanes_in_both_directions():
         )
     ]
 
-    binding = _resolve([supplied(bank)], kind=QbloxModuleKind.qrm)["port-0-channel-0"]
+    binding = _resolve(
+        [supplied(bank)],
+        kind=QbloxModuleKind.qrm,
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
+    )["port-0-channel-0"]
 
     assert [output.output_id.data for output in binding.module_config.outputs] == [0, 1]
     assert [entry.input_id.data for entry in binding.module_config.inputs] == [0, 1]
@@ -468,7 +666,12 @@ def test_a_complex_input_connection_binds_both_acquisition_lanes():
         )
     ]
 
-    binding = _resolve([supplied(bank)], kind=QbloxModuleKind.qrm)["port-0-channel-0"]
+    binding = _resolve(
+        [supplied(bank)],
+        kind=QbloxModuleKind.qrm,
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
+    )["port-0-channel-0"]
 
     assert [entry.input_id.data for entry in binding.module_config.inputs] == [0, 1]
     assert list(binding.sequencer_config.connections) == [

@@ -65,6 +65,33 @@ class ReadoutSpec:
 
 
 @dataclass(frozen=True, slots=True)
+class LocalOscillatorSpec:
+    """Frequency limits of a module-local oscillator."""
+
+    min_frequency_hz: int
+    max_frequency_hz: int
+    frequency_step_hz: int = 1
+
+    def __post_init__(self) -> None:
+        if self.min_frequency_hz < 0:
+            raise ValueError("Local oscillator minimum frequency must be non-negative")
+        if self.max_frequency_hz < self.min_frequency_hz:
+            raise ValueError(
+                "Local oscillator maximum frequency must not be below its minimum"
+            )
+        if self.frequency_step_hz < 1:
+            raise ValueError("Local oscillator frequency step must be positive")
+
+    def supports(self, frequency_hz: int) -> bool:
+        """Return whether ``frequency_hz`` is representable by this oscillator."""
+
+        return (
+            self.min_frequency_hz <= frequency_hz <= self.max_frequency_hz
+            and frequency_hz % self.frequency_step_hz == 0
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class Q1SequencerSpec:
     """Static limits and features of one Q1 sequencer type."""
 
@@ -124,6 +151,7 @@ class ModuleSpec:
     ``qblox_instruments.types.TypeHandle.is_rf_type``, which covers QCM-RF, QRM-RF, and
     QRC. The driver's :class:`Module` property delegates to that classification.
     """
+    local_oscillator: LocalOscillatorSpec | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.sequencers, tuple):
@@ -166,6 +194,10 @@ class ModuleSpec:
         if has_readout != (self.acquisition_memory_bins is not None):
             raise ValueError(
                 f"{self.kind.value} acquisition memory must match its sequencer types"
+            )
+        if self.is_rf != (self.local_oscillator is not None):
+            raise ValueError(
+                "RF module classification must match local oscillator specification"
             )
 
     @property
@@ -339,6 +371,10 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
             QbloxModuleKind.qcm_rf: ModuleSpec(
                 kind=QbloxModuleKind.qcm_rf,
                 is_rf=True,
+                local_oscillator=LocalOscillatorSpec(
+                    min_frequency_hz=2_000_000_000,
+                    max_frequency_hz=18_000_000_000,
+                ),
                 sequencers=_SIX_CONTROL,
                 output_count=2,
                 input_count=0,
@@ -364,6 +400,10 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
             QbloxModuleKind.qrm_rf: ModuleSpec(
                 kind=QbloxModuleKind.qrm_rf,
                 is_rf=True,
+                local_oscillator=LocalOscillatorSpec(
+                    min_frequency_hz=2_000_000_000,
+                    max_frequency_hz=18_000_000_000,
+                ),
                 sequencers=_SIX_READOUT,
                 output_count=1,
                 input_count=1,
@@ -375,6 +415,11 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
             QbloxModuleKind.qrc: ModuleSpec(
                 kind=QbloxModuleKind.qrc,
                 is_rf=True,
+                local_oscillator=LocalOscillatorSpec(
+                    min_frequency_hz=500_000_000,
+                    max_frequency_hz=10_100_000_000,
+                    frequency_step_hz=100_000_000,
+                ),
                 sequencers=(_READOUT,) * 8 + (_CONTROL,) * 4,
                 output_count=6,
                 input_count=2,

@@ -211,6 +211,36 @@ def test_only_a_frames_channel_is_allocated_when_a_port_exposes_many():
     assert sequence.seq_idx == SequencerIndexAttr(0)
 
 
+def test_selected_channel_with_out_of_range_nco_is_rejected_during_binding():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)])],
+        carrier_frequency=3_480_000_000,
+    )
+
+    with pytest.raises(
+        PassFailedException,
+        match=r"'port-0-channel-0'.*NCO frequency -520000000.0 Hz",
+    ):
+        _bind(data, _sequence(3_480_000_000))
+
+
+def test_unused_channel_with_out_of_range_nco_does_not_block_binding():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)])],
+        channels_per_port=2,
+        carrier_frequency=3_480_000_000,
+    )
+
+    module = _bind(
+        data,
+        _sequence(3_580_000_000, channel_id="port-0-channel-1"),
+    )
+
+    [sequence] = module.body.block.ops
+    assert sequence.seq_idx == SequencerIndexAttr(0)
+    assert sequence.sequencer_config.nco.frequency.value.data == -420_000_000.0
+
+
 def test_unused_channels_do_not_shift_the_index_of_the_used_channel():
     # The used channel is calibrated last of three on its port, yet still takes the lowest
     # supplied sequencer because its unplayed siblings are never allocated.
