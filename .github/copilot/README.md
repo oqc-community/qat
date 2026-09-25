@@ -9,8 +9,12 @@ plugin) and VS Code users.
 
 ## Cross-editor guidance
 
-- Keep `.github/copilot-instructions.md` focused on always-on policy and coding conventions.
-- Keep multi-step workflows in `skills/` and reference them from `.github/copilot-instructions.md`.
+- Keep `AGENTS.md` (repository root) focused on always-on policy and coding conventions. Claude Code
+  reads it, and so do Copilot code review on GitHub.com, the Copilot cloud agent and CLI, and
+  Copilot Chat in VS Code and JetBrains.
+- Copilot code review run inside VS Code or Visual Studio does not read `AGENTS.md`. For local
+  reviews, use the team's `review-pr` agent skill instead.
+- Keep multi-step workflows in `skills/` and reference them from `AGENTS.md`.
 - Do not duplicate workflow logic in editor-specific settings files.
 
 ## How to invoke a skill

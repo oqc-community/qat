@@ -104,3 +104,7 @@ Thumbs.db
 # Reports
 reports/*
 /tmp/
+
+# Personal agent instructions (see AGENTS.md)
+AGENTS.local.md
+CLAUDE.local.md
