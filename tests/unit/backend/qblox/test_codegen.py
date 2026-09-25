@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import re
 from contextlib import nullcontext
@@ -199,7 +199,10 @@ class TestQbloxBackend1:
         executable = do_emit(qblox_model, QbloxBackend1, builder)
         remaining_width = int(qubit.pulse_measure["width"] * 1e9) - int(delay * 1e9)
 
-        pattern = rf"set_awg_offs {i_offs_steps},0\nupd_param {int(delay * 1e9)}\nacquire 0,R\d{{1,2}},{remaining_width}\nset_awg_offs 0,0\nupd_param 4"
+        pattern = (
+            rf"set_awg_offs {i_offs_steps},0\nupd_param {int(delay * 1e9)}\n"
+            rf"acquire 0,R\d{{1,2}},{remaining_width}\nset_awg_offs 0,0\nupd_param 4"
+        )
         for program in executable.programs:
             assert len(program.packages) == 1
             pkg = next(iter(program.packages.values()))

@@ -226,8 +226,9 @@ class TestParityWithPydanticRoundedSquareWaveform:
 
     The Rounded Square waveform implements the pydantic ``RoundedSquareWaveform`` class with
     the following parameterisations: ``fractional_rise = 2 * fractional_rise / width`` and
-    ``fractional_top_width = std_dev / width``. Note the legacy implementation seems to be inconsistent,
-    and is defined between ``[0, T]`` instead of the usual ``[-T/2, T/2]`` domain.
+    ``fractional_top_width = std_dev / width``. Note the legacy implementation seems to be
+    inconsistent, and is defined between ``[0, T]`` instead of the usual ``[-T/2, T/2]``
+    domain.
     """
 
     @pytest.mark.parametrize("width", [2.0, 160e-9])

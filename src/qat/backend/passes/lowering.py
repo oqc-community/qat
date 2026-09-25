@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from collections import defaultdict
 from itertools import chain
 
@@ -69,8 +69,8 @@ class PartitionByPulseChannel(LoweringPass):
                 if isinstance(instr, Synchronize):
                     raise ValueError(
                         f"The `Synchronize` instruction {instr} is not supported by the "
-                        "PartitionByPulseChannel pass. Please lower it to `Delay` instructions "
-                        "using the `LowerSyncsToDelays` pass"
+                        "PartitionByPulseChannel pass. Please lower it to `Delay` "
+                        "instructions using the `LowerSyncsToDelays` pass"
                     )
                 handled = True
                 for target in instr.targets:

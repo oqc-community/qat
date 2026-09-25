@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import abc
 from collections import defaultdict
@@ -20,7 +20,8 @@ class BaseBackend(Generic[Program], abc.ABC):
 
     def __init__(self, model: None | QuantumHardwareModel):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         """
         self.model = model
 

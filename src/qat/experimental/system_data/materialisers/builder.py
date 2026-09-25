@@ -422,8 +422,9 @@ class CanonicalSystemDataBuilder:
     ) -> CanonicalSystemDataBuilder:
         """Append a metadata entry.
 
-        Accepts either an :class:`~qat.experimental.system_data.canonical.schema.AttributeEntry`
-        directly, or a ``(key, value)`` shorthand::
+        Accepts either an
+        :class:`~qat.experimental.system_data.canonical.schema.AttributeEntry` directly, or
+        a ``(key, value)`` shorthand::
 
             builder.with_metadata(AttributeEntry(key="k", value="v"))
             # or equivalently:
@@ -483,7 +484,8 @@ class CanonicalSystemDataBuilder:
         """Build a source payload mirroring :class:`CanonicalSystemData`'s field structure.
 
         Produces a shallow dict mapping each :class:`CanonicalSystemData` field name to its
-        current value, plus the structural version key required by :func:`materialise_model`.
+        current value, plus the structural version key required by
+        :func:`materialise_model`.
 
         :returns: Dict with one key per :class:`CanonicalSystemData` field plus the
             ``_version`` entry.

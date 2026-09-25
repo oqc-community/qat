@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 import pytest
 from compiler_config.config import (
     CompilerConfig,
@@ -223,7 +223,8 @@ class TestPostProcessingSanitisation:
 
         PostProcessingSanitisation().run(builder, ResultManager(), MetricsManager())
 
-        # Make sure no instructions get discarded in the post-processing sanitisation for a mid-circuit measurement.
+        # Make sure no instructions get discarded in the post-processing sanitisation for a
+        # mid-circuit measurement.
         pp = [instr for instr in builder if isinstance(instr, PostProcessing)]
         assert len(pp) == 1
 

@@ -42,7 +42,8 @@ def _is_type_expr_node(node: ast.expr) -> bool:
 def is_valid_type_expr(expr: str) -> bool:
     """Return ``True`` if *expr* is a syntactically valid Python type-annotation string.
 
-    :param expr: The :attr:`~qat.experimental.system_data.canonical.schema.OperationParameterData.type_expr`
+    :param expr: The
+        :attr:`~qat.experimental.system_data.canonical.schema.OperationParameterData.type_expr`
         string to validate.
     :returns: ``True`` when the string parses as a Python expression whose AST
         contains only nodes permitted in type annotations; ``False`` otherwise.

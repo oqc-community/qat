@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 import uuid
@@ -133,7 +133,8 @@ class InstructionBlock(Instruction, Iterable):
             return instructions
         if not isinstance(instructions, list | ValidatedList):
             raise TypeError(
-                f"Expected `instructions` to be a list of `Instruction` instances or dictionaries, got {type(instructions)}."
+                "Expected `instructions` to be a list of `Instruction` instances or "
+                f"dictionaries, got {type(instructions)}."
             )
 
         rehydrated = []
@@ -152,7 +153,8 @@ class InstructionBlock(Instruction, Iterable):
                 rehydrated.append(instr)
             else:
                 raise TypeError(
-                    f"Instruction must be an Instruction instance or dict, got {type(instr)}."
+                    "Instruction must be an Instruction instance or dict, got "
+                    f"{type(instr)}."
                 )
 
         return rehydrated
@@ -213,7 +215,10 @@ class Variable(Instruction):
         return Variable(name=str(uuid.uuid4()))
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(name={self.name}, type={self.var_type}, value={self.value})"
+        return (
+            f"{self.__class__.__name__}(name={self.name}, type={self.var_type}, "
+            f"value={self.value})"
+        )
 
     @field_serializer("var_type", when_used="json")
     def _serialise_type(self, var_type: type) -> str:
@@ -338,9 +343,9 @@ class Assign(Instruction):
 
     This is used to assign some value (e.g. the results from an acquisition) to a variable.
     In the legacy instructions, `Assign` could be given a `Variable` that declares the value
-    as another variable. It could also be given more complex structures, should as a list of
-    `Variables`, or an `IndexAccessor`. For example, this could be used to assign each of the
-    qubit acquisitions to a single register,
+    as another variable. It could also be given more complex structures, should as a list
+    of `Variables`, or an `IndexAccessor`. For example, this could be used to assign each of
+    the qubit acquisitions to a single register,
 
     ```
         c = [
@@ -353,8 +358,8 @@ class Assign(Instruction):
     In general, declarations and allocations could be improved in future iterations, and
     functionality may change with improvements to the front end. For now, `Assign` has been
     adapted to support the required front end behaviour. The value is allowed to be a list
-    (with recurssions supported) of strings that declare what Variable to point to, or a tuple
-    for `IndexAccessor`.
+    (with recurssions supported) of strings that declare what Variable to point to, or a
+    tuple for `IndexAccessor`.
     """
 
     name: str

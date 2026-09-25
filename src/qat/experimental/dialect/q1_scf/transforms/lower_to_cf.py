@@ -85,8 +85,8 @@ def _conditional_branch(
 
     A comparison predicate reads two operands and lowers to
     :class:`BinaryPredicateBranchOp`; a unary predicate reads one and lowers to
-    :class:`UnaryPredicateBranchOp`. The predicate attribute passes through unchanged, so the
-    signed or unsigned character of the source condition is preserved.
+    :class:`UnaryPredicateBranchOp`. The predicate attribute passes through unchanged, so
+    the signed or unsigned character of the source condition is preserved.
 
     :param predicate: The source predicate, a unary or binary predicate attribute.
     :param predicate_args: The register operands the predicate tests.

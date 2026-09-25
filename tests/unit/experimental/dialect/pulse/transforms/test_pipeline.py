@@ -13,7 +13,7 @@ from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonical
 from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
 )
-from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions import (
+from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions import (  # noqa: E501
     ApplySquashContiguousOptimizations,
 )
 from qat.experimental.dialect.pulse.transforms.pipeline import PulsePipelineManager

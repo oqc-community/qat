@@ -6,13 +6,14 @@ Wires together the experimental frontend, middleend, and backend for the experim
 target, using a
 :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`
 instance rather than the legacy ``QuantumHardwareModel``/``PhysicalHardwareModel`` used by
-production pipelines such as :class:`~qat.pipelines.purr.qblox.compile.QbloxCompilePipeline1`.
+production pipelines such as
+:class:`~qat.pipelines.purr.qblox.compile.QbloxCompilePipeline1`.
 
 There is no :class:`~qat.model.loaders.base.BaseModelLoader` that produces
 ``CanonicalSystemData`` (it can be materialised from a supported source payload through
 :func:`~qat.experimental.system_data.materialisers.boundary.materialise`), so this pipeline
-cannot be wired up through a qatconfig ``HARDWARE``/``hardware_loader`` entry. Instantiate it
-directly instead::
+cannot be wired up through a qatconfig ``HARDWARE``/``hardware_loader`` entry. Instantiate
+it directly instead::
 
     from qat.experimental.pipelines.compile import (
         ExperimentalQbloxCompilePipeline,

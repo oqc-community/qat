@@ -89,18 +89,28 @@ class MixerTestValues(ConfigTestValues):
     num_points = 2
 
     # Module values
-    qcm_i_offsets = rng.choice(np.linspace(-2.5, 2.5), size=num_points)  # fmt: skip # I offsets (Volt)
-    qcm_q_offsets = rng.choice(np.linspace(-2.5, 2.5), size=num_points)  # fmt: skip # Q offsets (Volt)
-    qcm_rf_i_offsets = rng.choice(np.linspace(-84, 73), size=num_points)  # fmt: skip # I offsets (mVolt)
-    qcm_rf_q_offsets = rng.choice(np.linspace(-84, 73), size=num_points)  # fmt: skip # Q offsets (mVolt)
-    qrm_i_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # I offsets (Volt)
-    qrm_q_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # Q offsets (Volt)
-    qrm_rf_i_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # I offsets (Volt)
-    qrm_rf_q_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip # Q offsets (Volt)
+    # I offsets (Volt)
+    qcm_i_offsets = rng.choice(np.linspace(-2.5, 2.5), size=num_points)  # fmt: skip
+    # Q offsets (Volt)
+    qcm_q_offsets = rng.choice(np.linspace(-2.5, 2.5), size=num_points)  # fmt: skip
+    # I offsets (mVolt)
+    qcm_rf_i_offsets = rng.choice(np.linspace(-84, 73), size=num_points)  # fmt: skip
+    # Q offsets (mVolt)
+    qcm_rf_q_offsets = rng.choice(np.linspace(-84, 73), size=num_points)  # fmt: skip
+    # I offsets (Volt)
+    qrm_i_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip
+    # Q offsets (Volt)
+    qrm_q_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip
+    # I offsets (Volt)
+    qrm_rf_i_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip
+    # Q offsets (Volt)
+    qrm_rf_q_offsets = rng.choice(np.linspace(-0.09, 0.09), size=num_points)  # fmt: skip
 
     # Sequencer values
-    phase_offsets = rng.choice(np.linspace(-45, 45), size=num_points)  # fmt: skip # Phase offsets (Degree)
-    gain_ratios = rng.choice(np.linspace(0.5, 2), size=num_points)  # fmt: skip # Gain ratios
+    # Phase offsets (Degree)
+    phase_offsets = rng.choice(np.linspace(-45, 45), size=num_points)  # fmt: skip
+    # Gain ratios
+    gain_ratios = rng.choice(np.linspace(0.5, 2), size=num_points)  # fmt: skip
 
 
 @dataclass
@@ -441,7 +451,8 @@ class TestAttenuationConfig(TestQbloxConfigMixin):
     def test_qrc_attenuation_config_in(self, qrc_attenuation_setup):
         module_config, module, sequencer_config, sequencer = qrc_attenuation_setup
 
-        # TODO - QBlox bug: Dummy cluster fails to update input attenuation values: COMPILER-1052
+        # TODO - QBlox bug: Dummy cluster fails to update input attenuation values:
+        #   COMPILER-1052
         assert module.in0_att() == module_config.attenuation.in0
         assert module.in1_att() == module_config.attenuation.in1
 

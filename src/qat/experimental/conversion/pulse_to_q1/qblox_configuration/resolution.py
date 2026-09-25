@@ -577,8 +577,8 @@ def _nco_frequency(
         supplied_frequency, frequency, rel_tol=1e-12, abs_tol=1.0
     ):
         raise ValueError(
-            f"{origin} supplies NCO frequency {supplied_frequency} Hz, but canonical channel "
-            f"{channel_binding.channel_id!r} requires {frequency} Hz"
+            f"{origin} supplies NCO frequency {supplied_frequency} Hz, but canonical "
+            f"channel {channel_binding.channel_id!r} requires {frequency} Hz"
         )
     return frequency
 

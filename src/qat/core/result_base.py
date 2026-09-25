@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import uuid
 from typing import TypeVar
 
@@ -166,9 +166,9 @@ class ResultManager:
 class PreservedResults:
     """A mechanism for result invalidation and preservation.
 
-    Similar to LLVM's new PassManager, we state
-    that each transform pass must declare what analysis results it preserves. In this case, the pass returns
-    a PreservedResults instance which is then used by the :class:`PassManager` for cache housekeeping.
+    Similar to LLVM's new PassManager, we state that each transform pass must declare what
+    analysis results it preserves. In this case, the pass returns a PreservedResults
+    instance which is then used by the :class:`PassManager` for cache housekeeping.
     """
 
     @staticmethod

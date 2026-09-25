@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import re
 
 import numpy as np
@@ -77,7 +77,10 @@ class TestAcquire:
         else:
             with pytest.raises(
                 ValidationError,
-                match=rf"Filter duration '{time}' must be equal to Acquire duration '1e-06'",
+                match=(
+                    rf"Filter duration '{time}' must be equal to Acquire duration "
+                    r"'1e-06'"
+                ),
             ):
                 Acquire(
                     targets=acquire_channel.uuid,

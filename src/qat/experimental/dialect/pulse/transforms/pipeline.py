@@ -13,20 +13,20 @@ The default pipeline runs the following passes, in order:
 1. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
    — fold all constant arithmetic so that subsequent passes only see canonical
    :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` operands.
-2. :class:`~qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation`
+2. :class:`.ApplyGranularitySanitisation`
    — round constant durations and sampled-waveform widths up to the hardware timing
    granularity, so later passes only see realisable times.
-3. :class:`~qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples`
+3. :class:`.EvaluateWaveformsAsSamples`
    — convert analytical waveform ops into sampled
    :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` payloads, using the
    per-port sample times from *constraints*.
-4. :class:`~qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization`
+4. :class:`.TimelineNormalization`
    — resolve :class:`~qat.experimental.dialect.pulse.ir.ops.SynchronizeOp` operations
    into explicit :class:`~qat.experimental.dialect.pulse.ir.ops.WaitOp` chains using
    symbolic time-expression analysis.
-5. :class:`~qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations`
+5. :class:`.ApplySquashContiguousOptimizations`
    — merge adjacent wait and phase operations.
-6. :class:`~qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays`
+6. :class:`.LowerKernelsToResultsArrays`
    — rewrite each kernel signature from ``ResultsCollectionType`` values to
    ``ResultsArrayType`` values and update all call sites to match the expanded signature.
 7. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
@@ -48,7 +48,7 @@ from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonical
 from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
 )
-from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions import (
+from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions import (  # noqa: E501
     ApplySquashContiguousOptimizations,
 )
 from qat.experimental.dialect.pulse.transforms.timeline_normalization import (

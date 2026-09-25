@@ -757,7 +757,8 @@ def _throw_if_not_rewritable(candidates: list[_RewriteCandidate]):
         raise PassFailedException(
             f"The pass convert_results_collections_to_arrays failed to convert all "
             f"results collection types to results array types. Cannot convert the "
-            f"following operations: {', '.join(str(c.operation) for c in non_rewritable_ops)}"
+            f"following operations: "
+            f"{', '.join(str(c.operation) for c in non_rewritable_ops)}"
         )
 
 

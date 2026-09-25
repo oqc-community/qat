@@ -48,8 +48,8 @@ class DefaultPlugin(SourceMaterialiserPlugin):
     ) -> tuple[SourceType, str] | None:
         """Detect a default source payload.
 
-        A payload is identified as default v0.1.0 when its ``model`` sub-dict contains
-        a ``_version`` key matching the current structural hash (``version_structure_hash``).
+        A payload is identified as default v0.1.0 when its ``model`` sub-dict contains a
+        ``_version`` key matching the current structural hash (``version_structure_hash``).
 
         :param source_payload: Raw source payload dict.
         :returns: ``(SourceType.MODEL, "0.1.0")`` if matched, otherwise ``None``.

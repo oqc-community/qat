@@ -61,7 +61,8 @@ def materialise_model(source_payload: dict[str, Any]) -> CanonicalSystemData:
         result = CanonicalSystemData(**source_payload)
     except TypeError as exc:
         raise SourceValidationError(
-            f"Model source payload could not construct a CanonicalSystemData instance: {exc}"
+            "Model source payload could not construct a CanonicalSystemData instance: "
+            f"{exc}"
         ) from exc
     validate(result)
     return result

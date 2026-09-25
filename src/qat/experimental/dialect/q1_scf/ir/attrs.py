@@ -60,7 +60,8 @@ class IterDomainAttr(ParametrizedAttribute):
     :param start: First value of the varied quantity.
     :param stop: Exclusive upper bound of the varied quantity.
     :param step: Increment between successive iterations; must be non-zero.
-    :param count: Number of loop iterations, which must equal ``ceil((stop - start) / step)``.
+    :param count: Number of loop iterations, which must equal
+        ``ceil((stop - start) / step)``.
     :param parameter: The varied quantity and, implicitly, its unit.
     """
 

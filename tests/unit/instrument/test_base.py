@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from uuid import uuid4
 
 import pytest
@@ -62,7 +62,8 @@ class TestInstrument:
             assert not sequencer.get_waveforms()
             assert sequencer.get_acquisitions()
 
-            # Expecting injected configuration such as integration length (aka. acquire width)
+            # Expecting injected configuration such as integration length
+            # (aka. acquire width)
             acq_pkg = program.packages[pulse_channel_id]
             assert (
                 sequencer.integration_length_acq()

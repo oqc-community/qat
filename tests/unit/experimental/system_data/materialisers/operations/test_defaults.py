@@ -1172,8 +1172,8 @@ class TestDefaultOperations:
         subscripts, ``|`` unions, and tuple slices while rejecting literals, arithmetic,
         and call expressions.
         """
-        from tests.unit.experimental.system_data.materialisers.operations.type_expr_checker import (
-            is_valid_type_expr,
+        from tests.unit.experimental.system_data.materialisers.operations import (
+            type_expr_checker,
         )
 
         ops = make_default_operations(
@@ -1183,6 +1183,6 @@ class TestDefaultOperations:
             (op.id, p.name, p.type_expr)
             for op in ops
             for p in op.parameters
-            if not is_valid_type_expr(p.type_expr)
+            if not type_expr_checker.is_valid_type_expr(p.type_expr)
         ]
         assert invalid == [], f"Parameters with invalid type_expr: {invalid}"

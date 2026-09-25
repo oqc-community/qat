@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from collections import defaultdict
 from dataclasses import dataclass, field
 
@@ -61,13 +61,14 @@ class TimelineAnalysis(AnalysisPass):
         The pass will assume that the durations of instructions are sanitised to the
         granularity of the channels. If instructions that do not meet the criteria are
         provided, it might produce incorrect timelines. This can be enforced used the
-        :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
+        :class:`~qat.middleend.passes.transform.InstructionGranularitySanitisation`
         pass.
     """
 
     def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         :param target_data: Target-related information.
         """
         self.sample_times_map = {}

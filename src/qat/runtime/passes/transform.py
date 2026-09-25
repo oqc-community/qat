@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 """Runtime transform passes for result formatting and post-processing.
 
 This module contains transform passes that operate on acquired results and the
@@ -445,7 +445,8 @@ class InlineResultsProcessingTransform(TransformPass):
 
     **Legacy vs granular acquires**
 
-    All acquires that go through :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing`
+    All acquires that go through
+    :meth:`~.QuantumInstructionBuilder.measure_with_granular_post_processing`
     now produce granular ``Equalise`` → ``Discriminate`` instructions and
     appear in :class:`~qat.runtime.passes.analysis.DiscriminateResult`.
     :class:`~qat.ir.measure.Discriminate` emits integer state keys directly. This includes
@@ -626,8 +627,8 @@ class AssignResultsTransform(TransformPass):
 class ResultTransform(TransformPass):
     """Transform the raw results into the format that we've been asked to provide.
 
-    This pass applies ``ResultsFormatting`` flags (``BinaryCount``, ``SquashBinaryResultArrays``,
-    ``DynamicStructureReturn``) to shape final results.
+    This pass applies ``ResultsFormatting`` flags (``BinaryCount``,
+    ``SquashBinaryResultArrays``, ``DynamicStructureReturn``) to shape final results.
 
     **Granular pipeline routing**
 

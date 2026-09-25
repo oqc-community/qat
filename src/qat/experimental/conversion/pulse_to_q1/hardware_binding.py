@@ -204,8 +204,8 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
         if not available_candidates:
             raise PassFailedException(
                 f"Sequence {sequence_op.channel_id.data!r} maps to {len(candidates)} "
-                f"canonical channels for port {sequence_op.port_id.data!r} at {carrier} Hz, "
-                f"but none are available."
+                f"canonical channels for port {sequence_op.port_id.data!r} at "
+                f"{carrier} Hz, but none are available."
             )
         return available_candidates
 

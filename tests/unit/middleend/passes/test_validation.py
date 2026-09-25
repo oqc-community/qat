@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 import logging
 from contextlib import nullcontext
 from copy import deepcopy
@@ -556,7 +556,8 @@ class TestFrequencySetupValidation:
             chan["baseband_frequency"]
             for chan in freq_setup._physical_channel_data.values()
         ]
-        # test that the number of baseband frequencies is the same as the number of physical channels
+        # test that the number of baseband frequencies is the same as the number of
+        # physical channels
         assert len(baseband_frequencies) == len(self.model.qubits) * 2
 
     def test_create_is_resonator_data(self):

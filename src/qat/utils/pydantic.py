@@ -255,7 +255,8 @@ class PydValidatedBase(RootModel):
     def validate_value(self, value: V):
         if not isinstance(value, self._value_types):
             raise TypeError(
-                f"Cannot add value {value} of type '{type(value)}' to container of type {self._value_type}."
+                f"Cannot add value {value} of type '{type(value)}' to container of type "
+                f"{self._value_type}."
             )
         for validator in self._value_validators:
             value = validator(value)

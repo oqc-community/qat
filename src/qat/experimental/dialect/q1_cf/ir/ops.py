@@ -358,7 +358,8 @@ class BinaryPredicateBranchOp(HasRegisterConstraints, IRDLOperation):
 
     .. code-block:: mlir
 
-        q1_cf.binary_predicate_branch slt %lhs : q1.reg, %rhs : q1.reg, ^then(...), ^else(...)
+        q1_cf.binary_predicate_branch slt %lhs : q1.reg, %rhs : q1.reg,
+            ^then(...), ^else(...)
     """
 
     name = "q1_cf.binary_predicate_branch"
@@ -481,7 +482,8 @@ class LoopBranchOp(HasRegisterConstraints, IRDLOperation):
 
     .. code-block:: mlir
 
-        q1_cf.loop_branch %counter : q1.reg, ^body(%a : q1.reg, ...), ^exit(%b : q1.reg, ...)
+        q1_cf.loop_branch %counter : q1.reg, ^body(%a : q1.reg, ...),
+            ^exit(%b : q1.reg, ...)
     """
 
     name = "q1_cf.loop_branch"

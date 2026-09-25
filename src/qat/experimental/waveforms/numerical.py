@@ -30,7 +30,8 @@ def numerical_derivative(
         )
     if len(y) < 2:
         raise ValueError(
-            f"y and x must have at least 2 points to compute a derivative, but got {len(y)}."
+            "y and x must have at least 2 points to compute a derivative, but got "
+            f"{len(y)}."
         )
 
     return np.gradient(y, x)

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from pydantic import BaseModel, Field
 
 from qat.purr.utils.logger import get_default_logger
@@ -67,8 +67,10 @@ class NcoConfig(BaseModel):
 class AwgConfig(BaseModel):
     """Configuration components related to the sequencer's AWG.
 
-    :param cont_mode_en_path0: Flag to enable/disable continuous waveform mode enable path 0 (I).
-    :param cont_mode_en_path1: Flag to enable/disable continuous waveform mode enable path 1 (Q).
+    :param cont_mode_en_path0: Flag to enable/disable continuous waveform mode enable path 0
+        (I).
+    :param cont_mode_en_path1: Flag to enable/disable continuous waveform mode enable path 1
+        (Q).
     :param cont_mode_waveform_idx_path0: Waveform index to play continuously on AWG path 0
                                          (if enabled, see :param:`cont_mode_en_path0`)
     :param cont_mode_waveform_idx_path1: Waveform index to play continuously on AWG path 1
@@ -193,7 +195,8 @@ class SequencerConfig(BaseModel):
     :param mixer: Mixer config, see :class:`MixerConfig`.
     :param demod_en_acq: Flag to enable/disable demodulation on the acquisition path.
     :param square_weight_acq: Unweighed acquisition config, see :class:`SquareWeightAcq`.
-    :param thresholded_acq: Thresholded acquisition config, see :class:`ThresholdedAcqConfig`.
+    :param thresholded_acq: Thresholded acquisition config, see
+        :class:`ThresholdedAcqConfig`.
     :param ttl_acq: TTL acquisition config, see :class:`TtlAcqConfig`.
     """
 

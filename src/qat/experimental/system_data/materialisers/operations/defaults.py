@@ -158,7 +158,8 @@ def _make_reset_private_operations(
 
     :param reset_methods: Supported reset strategies (top-level canonical metadata).
     :param default_reset_method: Default reset method type selected from ``reset_methods``.
-    :returns: Tuple of (resolved_reset_methods, resolved_default_reset_method, reset_private_ops).
+    :returns: Tuple of (resolved_reset_methods, resolved_default_reset_method,
+        reset_private_ops).
     """
     resolved_reset_methods, resolved_default = _resolve_reset_methods(
         reset_methods,
@@ -456,8 +457,10 @@ def make_ry_gate(has_x_pi: bool = True) -> OperationData:
 
     - θ ≈  π/2 → rz(−π/2) → X_pi_2 → rz(π/2)
     - θ ≈ −π/2 → rz( π/2) → X_pi_2 → rz(−π/2)
-    - θ ≈  π,   ``direct_x_pi`` present → rz(−π/2) → X_pi → rz(π/2)  (only when ``has_x_pi``)
-    - θ ≈ −π,   ``direct_x_pi`` present → rz( π/2) → X_pi → rz(−π/2) (only when ``has_x_pi``)
+    - θ ≈  π,   ``direct_x_pi`` present → rz(−π/2) → X_pi → rz(π/2)
+      (only when ``has_x_pi``)
+    - θ ≈ −π,   ``direct_x_pi`` present → rz( π/2) → X_pi → rz(−π/2)
+      (only when ``has_x_pi``)
     - default → decompose via ``U(theta, phi=0, lambda=0)``
 
     Default angle is π.
@@ -814,8 +817,9 @@ def make_zx_operation(
 def make_zx_pi_4_cancellation_operation(control_qubit_id: str) -> OperationData:
     """Return the ZX(π/4) cancellation-tone primitive (owned by the target qubit).
 
-    Fires the ``zx_pi_4`` waveform on the ``{control_qubit_id}.cross_resonance_cancellation``
-    mode to suppress leakage during the control qubit's CR drive.
+    Fires the ``zx_pi_4`` waveform on the
+    ``{control_qubit_id}.cross_resonance_cancellation`` mode to suppress leakage during the
+    control qubit's CR drive.
 
     :param control_qubit_id: Identifier of the driving control qubit (e.g. ``"q0"``).
     """
@@ -907,7 +911,9 @@ def make_swap_operation(target_qubit_id: str) -> OperationData:
                 operation_steps=(
                     ErrorOperationStepData(
                         error_type="NotImplementedError",
-                        message="SWAP gate not yet implemented in QuantumInstructionBuilder.",
+                        message=(
+                            "SWAP gate not yet implemented in QuantumInstructionBuilder."
+                        ),
                     ),
                 ),
             ),
@@ -933,7 +939,10 @@ def make_cx_operation(target_qubit_id: str) -> OperationData:
                 operation_steps=(
                     ErrorOperationStepData(
                         error_type="NotImplementedError",
-                        message="CX (controlled-X) gate not yet implemented in QuantumInstructionBuilder.",
+                        message=(
+                            "CX (controlled-X) gate not yet implemented in "
+                            "QuantumInstructionBuilder."
+                        ),
                     ),
                 ),
             ),
@@ -959,7 +968,10 @@ def make_cy_operation(target_qubit_id: str) -> OperationData:
                 operation_steps=(
                     ErrorOperationStepData(
                         error_type="NotImplementedError",
-                        message="CY (controlled-Y) gate not yet implemented in QuantumInstructionBuilder.",
+                        message=(
+                            "CY (controlled-Y) gate not yet implemented in "
+                            "QuantumInstructionBuilder."
+                        ),
                     ),
                 ),
             ),
@@ -985,7 +997,10 @@ def make_cz_operation(target_qubit_id: str) -> OperationData:
                 operation_steps=(
                     ErrorOperationStepData(
                         error_type="NotImplementedError",
-                        message="CZ (controlled-Z) gate not yet implemented in QuantumInstructionBuilder.",
+                        message=(
+                            "CZ (controlled-Z) gate not yet implemented in "
+                            "QuantumInstructionBuilder."
+                        ),
                     ),
                 ),
             ),
@@ -1012,7 +1027,10 @@ def make_ccnot_operation(target_qubit_id: str, second_control_id: str) -> Operat
                 operation_steps=(
                     ErrorOperationStepData(
                         error_type="NotImplementedError",
-                        message="CCNOT (Toffoli) gate not yet implemented in QuantumInstructionBuilder.",
+                        message=(
+                            "CCNOT (Toffoli) gate not yet implemented in "
+                            "QuantumInstructionBuilder."
+                        ),
                     ),
                 ),
             ),
@@ -1039,7 +1057,10 @@ def make_cswap_operation(target1_id: str, target2_id: str) -> OperationData:
                 operation_steps=(
                     ErrorOperationStepData(
                         error_type="NotImplementedError",
-                        message="CSWAP (Fredkin) gate not yet implemented in QuantumInstructionBuilder.",
+                        message=(
+                            "CSWAP (Fredkin) gate not yet implemented in "
+                            "QuantumInstructionBuilder."
+                        ),
                     ),
                 ),
             ),
@@ -1164,7 +1185,8 @@ def make_delay_operation() -> OperationData:
 class DefaultOperationBuilder(AbstractOperationBuilder):
     """Builds the default transmon gate-set operation set for a single qubit.
 
-    Each operation is a method that returns an :class:`~qat.experimental.system_data.canonical.schema.OperationData`
+    Each operation is a method that returns an
+    :class:`~qat.experimental.system_data.canonical.schema.OperationData`
     instance.  Subclasses can override individual methods to customise or replace
     specific operations without touching the rest of the set — no knowledge of
     operation IDs is required.

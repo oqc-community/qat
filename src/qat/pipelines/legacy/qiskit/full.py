@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from qat.backend.fallthrough import FallthroughBackend
 from qat.frontend import AutoFrontend
 from qat.middleend import CustomMiddleend
@@ -43,8 +43,8 @@ class LegacyQiskitPipeline(UpdateablePipeline):
 
         if engine is not None:
             log.warning(
-                "An engine was provided to the LegacyQiskitPipeline, but it will be ignored. "
-                "The legacy Qiskit engine is used directly."
+                "An engine was provided to the LegacyQiskitPipeline, but it will be "
+                "ignored. The legacy Qiskit engine is used directly."
             )
 
         return Pipeline(

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from compiler_config.config import CompilerConfig
 
@@ -28,8 +28,8 @@ class CustomFrontend(BaseFrontend):
         pipeline: None | PassManager = None,
     ):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU,
-                    defaults to None.
+        :param model: The hardware model that holds calibrated information on the qubits on
+                    the QPU, defaults to None.
         :param pipeline: The custom pipeline, defaults to None.
         """
         super().__init__(model)

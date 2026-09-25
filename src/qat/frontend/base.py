@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
 
@@ -29,7 +29,8 @@ class BaseFrontend(ABC):
 
     def __init__(self, model: None | QuantumHardwareModel | PydHardwareModel = None):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         """
         self.model = check_type_legacy_or_pydantic(model)
 

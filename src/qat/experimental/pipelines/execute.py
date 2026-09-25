@@ -71,9 +71,8 @@ class ExperimentalQbloxExecutePipeline(UpdateablePipeline):
         if engine is not None:
             log.warning(
                 "An engine was provided to the ExperimentalQbloxExecutePipeline, but it is "
-                "intended to be built from the configured Qblox cluster. The provided engine "
-                "will be "
-                "ignored."
+                "intended to be built from the configured Qblox cluster. The provided "
+                "engine will be ignored."
             )
 
         target_data = target_data if target_data is not None else TARGET_DATA

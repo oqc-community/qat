@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import random
 
 import numpy as np
@@ -465,7 +465,8 @@ class TestQubitMapperDiscriminator:
 
     def test_qubit_mapper_both_provided(self):
         """
-        Test exclusivity validation: error if both mean_z_map_args and post_process_method are provided.
+        Test exclusivity validation: error if both mean_z_map_args and post_process_method
+        are provided.
 
         :raises ValueError: If both are provided.
         """
@@ -480,7 +481,8 @@ class TestQubitMapperDiscriminator:
 
     def test_qubit_mapper_neither_provided(self):
         """
-        Test exclusivity validation: error if neither mean_z_map_args nor post_process_method is provided.
+        Test exclusivity validation: error if neither mean_z_map_args nor
+        post_process_method is provided.
 
         :raises ValueError: If neither is provided.
         """

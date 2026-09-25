@@ -383,7 +383,8 @@ def _coalescing_rename_block_arguments(seq: SequenceOp, layout: _Layout) -> None
             if source is arg:
                 raise PassFailedException(
                     f"Sequence '{seq.channel_id.data}': block argument is only fed from "
-                    f"itself. q1_cf edges must provide a non-self incoming value to coalesce"
+                    "itself. q1_cf edges must provide a non-self incoming value to "
+                    "coalesce"
                 )
             if source.type != arg.type:
                 raise PassFailedException(

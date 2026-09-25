@@ -456,10 +456,10 @@ def test_macq_acquisition_is_discriminated_from_its_calibration(post_selection):
     """A macq acquisition resolves its calibration despite being split into two frames.
 
     The importer splits a macq pulse channel into ``measure``/``acquire`` frames and records
-    the acquisition under its split ``.acquire`` channel id. Materialisation likewise attaches
-    readout calibration to the ``acquire`` mode (``R0.acquire``), so an acquisition issued on
-    the combined ``macq`` channel must still resolve that calibration, or QBlox readout
-    silently emits no discrimination.
+    the acquisition under its split ``.acquire`` channel id. Materialisation likewise
+    attaches readout calibration to the ``acquire`` mode (``R0.acquire``), so an acquisition
+    issued on the combined ``macq`` channel must still resolve that calibration, or QBlox
+    readout silently emits no discrimination.
     """
     model, macq = _macq_only_model()
     canonical = _with_max_likelihood_on_acquire(

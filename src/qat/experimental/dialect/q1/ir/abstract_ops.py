@@ -191,8 +191,9 @@ class Q1AsmOperation(IRDLOperation, OneLineAssemblyPrintable, ABC):
     def print_arg(self, arg: AssemblyInstructionArg) -> str:
         """Return the textual form of a single assembly argument.
 
-        Delegates to :meth:`~qat.experimental.dialect.q1.ir.arg_format.WithArgument.print_arg`
-        for any arg that implements
+        Delegates to
+        :meth:`~qat.experimental.dialect.q1.ir.arg_format.WithArgument.print_arg` for any
+        arg that implements
         :class:`~qat.experimental.dialect.q1.ir.arg_format.WithArgument`.  For
         :class:`~xdsl.ir.SSAValue`, delegation is applied to its type attribute.
         :class:`~xdsl.dialects.builtin.StringAttr` falls back to ``arg.data``;

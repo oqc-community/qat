@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2023-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2023-2026 Oxford Quantum Circuits Ltd
 import json
 import random
 import re
@@ -76,9 +76,9 @@ def apply_setup_to_hardware(hw, qubit_indices: list, seed: SeedType | None = Non
             channel_index = channel_index + 2
 
         # TODO: For backwards compatability cross resonance pulse channels are fully
-        #   connected but coupled qubits are only in a ring architecture. I think it would be
-        #   more approriate for cross resonace channels to also be a ring architecture but
-        #   that can be done in a later PR.
+        #   connected but coupled qubits are only in a ring architecture. I think it would
+        #   be more approriate for cross resonace channels to also be a ring architecture
+        #   but that can be done in a later PR.
         def _cross_channels(q1, q2):
             """Create cross resonance channels for q2 on q1."""
             try:

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from functools import singledispatchmethod
 
 from qat.ir.gates.base import GateBase
@@ -70,8 +70,8 @@ class DefaultPulseDecompositions(PulseDecompositionBase):
     def __init__(self, gate_decompositions: DecompositionBase = None):
         """
         :param gate_decompositions: The DAG for decomposing higher-level, non-native gates
-            can be provided as an optional argument. Uses the:class:`DefaultGateDecompositions`
-            by default.
+            can be provided as an optional argument. Uses the
+            :class:`DefaultGateDecompositions` by default.
         """
 
         if not gate_decompositions:

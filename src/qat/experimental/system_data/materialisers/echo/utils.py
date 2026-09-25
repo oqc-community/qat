@@ -124,9 +124,9 @@ def build_default_echo_topology(
     :param reset_methods: Supported reset strategy type strings.  Defaults to
         ``["passive"]``.
     :param default_reset_method: Default reset strategy type.  Defaults to ``"passive"``.
-    :returns: :class:`~qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder`
-        populated with the echo QPU topology.  Call :meth:`~CanonicalSystemDataBuilder.build`
-        to produce the frozen :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`.
+    :returns: :class:`.CanonicalSystemDataBuilder` populated with the echo QPU topology.
+        Call :meth:`~CanonicalSystemDataBuilder.build` to produce the frozen
+        :class:`~qat.experimental.system_data.canonical.schema.CanonicalSystemData`.
     :raises ValueError: If ``qubit_count`` is negative, or if any connectivity index is
         out of range for ``qubit_count``.
     """

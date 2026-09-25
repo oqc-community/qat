@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 import numpy as np
 from pydantic import BaseModel, Field
@@ -94,7 +94,8 @@ class Acquisition(BaseModel):
     integrated, and threshold data all at once. It's up to the SW layer to pick up what it
     needs and adapt it to its flow.
 
-    An acquisition contains is described by a name, index, and blob data represented by :class:`AcqData`
+    An acquisition contains is described by a name, index, and blob data represented by
+    :class:`AcqData`
     """
 
     name: str | None = None
@@ -107,8 +108,8 @@ class Acquisition(BaseModel):
 
         A few important details that might be adjusted in the future:
             + Resulting scope_data.path0.avg_cnt is taken as the minimum of the two
-                Reason for the underestimation is to remain conservative and on the safe side
-                (Can raise if strictness is required)
+                Reason for the underestimation is to remain conservative and on the safe
+                side (Can raise if strictness is required)
             + Resulting scope_data.path0.oor follows "AND" semantics
         """
 

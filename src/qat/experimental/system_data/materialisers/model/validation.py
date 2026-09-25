@@ -162,7 +162,8 @@ def _validate_external_resource_references(canonical: CanonicalSystemData) -> No
             resource_id = value.external_resource_id
             if resource_id is not None and resource_id not in resource_ids:
                 _raise_consistency_error(
-                    f"Canonical {collection_name[:-1]} references unknown external resource.",
+                    f"Canonical {collection_name[:-1]} references unknown external "
+                    "resource.",
                     path=f"$.{collection_name}[{value.id}].external_resource_id",
                     details={"external_resource_id": resource_id},
                 )

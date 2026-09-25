@@ -19,7 +19,8 @@ The Gaussian waveform is defined as
 
 .. math::
 
-    f(x) = \\frac{1}{N}\\left[\\text{exp}\\left(-\\frac{x^2}{2\\sigma^2}\\right) - C\\right],
+    f(x) = \\frac{1}{N}
+        \\left[\\text{exp}\\left(-\\frac{x^2}{2\\sigma^2}\\right) - C\\right],
 
 where ``fractional_breadth`` is the standard deviation. ``C`` is the shift value, and ``N``
 is the regularization value, where ``N`` and ``C`` are one and zero respectively if
@@ -39,8 +40,9 @@ parameterisations:
   ``regularize = False``,
 * ``GaussianZeroEdgeWaveform``: ``fractional_breadth = 2 * std_dev / width``,
   ``regularize = zero_at_edges``,
-* ``DragGaussianWaveform``: ``fractional_breadth = std_dev``, ``regularize = zero_at_edges``,
-  where DRAG is implemented away from the waveform definition, using the derivatives,
+* ``DragGaussianWaveform``: ``fractional_breadth = std_dev``,
+  ``regularize = zero_at_edges``, where DRAG is implemented away from the waveform
+  definition, using the derivatives,
 * ``SofterGaussianWaveform``: ``fractional_breadth = sqrt(2) * fractional_rise``,
   ``regularize = True``.
 """
@@ -167,9 +169,10 @@ class GaussianWaveformShape(WaveformShape):
         """Constructs from absolute parameters.
 
         :param width: The waveform width.
-        :param absolute_breadth: The absolute fractional_breadth of the Gaussian waveform.
-        :param regularize: If ``True``, applies a shift and rescaling so that the waveform is
-            zero at the edges with maximum component one. Default is ``False``.
+        :param absolute_breadth: The absolute fractional_breadth of the Gaussian
+            waveform.
+        :param regularize: If ``True``, applies a shift and rescaling so that the waveform
+            is zero at the edges with maximum component one. Default is ``False``.
         """
         fractional_breadth = absolute_breadth / width
         return cls(fractional_breadth=fractional_breadth, regularize=regularize)

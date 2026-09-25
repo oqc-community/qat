@@ -627,7 +627,8 @@ class OperationReferenceStepData:
     :ivar operation_id: Referenced operation identifier.
     :ivar qubit_id: Optional qubit ID that owns the referenced operation (e.g., "q0", "q1").
         If None, the referenced operation is on the same qubit as the containing operation.
-    :ivar arguments: Optional ``(parameter_name, value)`` pairs to pass to the referenced operation.
+    :ivar arguments: Optional ``(parameter_name, value)`` pairs to pass to the referenced
+        operation.
     """
 
     operation_id: str

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 """IR models for measurement and post-processing instructions.
 
 This module defines :class:`Acquire`, :class:`PostProcessing` and
@@ -94,8 +94,9 @@ class Acquire(QuantumInstruction):
                 filter_duration = (
                     filter.duration if isinstance(filter, Pulse) else filter["duration"]
                 )
-                # TODO: COMPILER-722 -- with this in place, it required to add a duration to both the pulse
-                #  and the Acquire instruction, would be better to figure out how to share information in some cases.
+                # TODO: COMPILER-722 -- with this in place, it required to add a duration to
+                #  both the pulse and the Acquire instruction, would be better to figure out
+                #  how to share information in some cases.
                 if filter_duration == 0:  # < 0 condition already tested in `Waveform`
                     raise ValueError("Filter duration cannot be equal to zero.")
 
@@ -166,7 +167,8 @@ class Equalise(Instruction):
     .. math::
 
         \\begin{pmatrix} I' \\\\ Q' \\end{pmatrix}
-        = A \\begin{pmatrix} I \\\\ Q \\end{pmatrix} + \\begin{pmatrix} b_I \\\\ b_Q \\end{pmatrix}
+        = A \\begin{pmatrix} I \\\\ Q \\end{pmatrix}
+        + \\begin{pmatrix} b_I \\\\ b_Q \\end{pmatrix}
 
     where ``A`` is a **real** 2×2 matrix (``transform``) and ``[b_I, b_Q]``
     is the real offset vector (``offset``).  The output is returned as a

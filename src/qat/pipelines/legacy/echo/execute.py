@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from qat.model.target_data import TargetData
 from qat.pipelines.legacy.base import results_pipeline
 from qat.pipelines.pipeline import ExecutePipeline
@@ -31,8 +31,8 @@ class LegacyEchoExecutePipeline(UpdateablePipeline):
     ) -> ExecutePipeline:
         if engine is not None:
             log.warning(
-                "The engine for the LegacyEchoExecutePipeline is expected to be provided by "
-                "the model, and the provided engine will be ignored."
+                "The engine for the LegacyEchoExecutePipeline is expected to be provided "
+                "by the model, and the provided engine will be ignored."
             )
 
         target_data = target_data if target_data is not None else TargetData()

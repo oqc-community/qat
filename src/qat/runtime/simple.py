@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from qat.core.metrics_base import MetricsManager
 from qat.core.pass_base import PassManager
@@ -17,11 +17,11 @@ class SimpleRuntime(BaseRuntime):
     acquisition restrictions such as the expected shape of any loop nest, the post-
     processing, and results formatting. The runtime provides the following services.
 
-    - Execution batching: Some programs require memory specifications beyond that of the control
-      hardware. It important to slice and batch-execute large programs. Equally important is
-      necessity to aggregate results from different batches.
-    - Postprocessing: Performs any required post-processing steps that haven't been carried out
-      real-time on the FPGA.
+    - Execution batching: Some programs require memory specifications beyond that of the
+      control hardware. It important to slice and batch-execute large programs. Equally
+      important is necessity to aggregate results from different batches.
+    - Postprocessing: Performs any required post-processing steps that haven't been carried
+      out real-time on the FPGA.
     - Error mitigation: Adjusts results based on error mitigation strategies.
 
     These services are specified as a pipline of passes, see `results_pipeline` module.

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 from bisect import insort
 from collections import defaultdict
@@ -65,7 +65,8 @@ class QbloxLegalisationPass(AnalysisPass):
                 sequencer_data.nco_freq_limit_steps / sequencer_data.nco_freq_steps_per_hz
             )
             raise ValueError(
-                f"IF frequency must be in [-{min_max_frequency_in_hz:e}, {min_max_frequency_in_hz:e}] Hz. "
+                f"IF frequency must be in [-{min_max_frequency_in_hz:e}, "
+                f"{min_max_frequency_in_hz:e}] Hz. "
                 f"Got {freq_hz:e} Hz"
             )
 
@@ -78,9 +79,10 @@ class QbloxLegalisationPass(AnalysisPass):
         q1asm_data = Q1ASM_DATA
         amp_steps = int(amp.real * q1asm_data.max_offset)
         if amp_steps < q1asm_data.min_offset or amp_steps > q1asm_data.max_offset:
+            min_offset, max_offset = q1asm_data.min_offset, q1asm_data.max_offset
             raise ValueError(
                 f"""
-                Expected offset to be in range [{q1asm_data.min_offset}, {q1asm_data.max_offset}].
+                Expected offset to be in range [{min_offset}, {max_offset}].
                 Got {amp_steps} instead
                 """
             )
@@ -97,10 +99,11 @@ class QbloxLegalisationPass(AnalysisPass):
             num_bins = bound.count
             if num_bins > qrm_data.max_binned_acquisitions:
                 raise ValueError(
-                    f"""
-                        Loop nest size would require {num_bins} acquisition memory bins which exceeds the maximum {qrm_data.max_binned_acquisitions}.
-                        Please reduce number of points
-                        """
+                    f"\n                        Loop nest size would require {num_bins} "
+                    "acquisition memory bins which exceeds the maximum "
+                    f"{qrm_data.max_binned_acquisitions}.\n"
+                    "                        Please reduce number of points\n"
+                    "                        "
                 )
         elif isinstance(inst, Delay):
             if bound.start < sequencer_data.grid_time:
@@ -109,12 +112,14 @@ class QbloxLegalisationPass(AnalysisPass):
                 )
             if bound.end > q1asm_data.max_wait_time:
                 log.warning(
-                    f"Undefined runtime behaviour. Will be batching variable {name} at runtime"
+                    f"Undefined runtime behaviour. Will be batching variable {name} at "
+                    "runtime"
                 )
         elif isinstance(inst, DeviceUpdate):
             if inst.attribute not in ["frequency", "phase"]:
                 raise NotImplementedError(
-                    f"Unsupported processing of attribute {inst.attribute} for instruction {inst}"
+                    f"Unsupported processing of attribute {inst.attribute} for instruction "
+                    f"{inst}"
                 )
 
             if inst.attribute == "frequency":
@@ -144,7 +149,8 @@ class QbloxLegalisationPass(AnalysisPass):
                 return legal_bound
             if len(attr2var) > 1:
                 raise ValueError(
-                    f"Unsafe analysis. Distinct attributes expecting the same variable bound {attr2var}"
+                    "Unsafe analysis. Distinct attributes expecting the same variable "
+                    f"bound {attr2var}"
                 )
             attr, var = next(iter(attr2var.items()), (None, None))
             if attr not in ["width", "amp", "phase"]:
@@ -155,11 +161,13 @@ class QbloxLegalisationPass(AnalysisPass):
             if attr == "width":
                 if bound.start < sequencer_data.grid_time:
                     log.warning(
-                        f"Undefined runtime behaviour. Variable {name} has illegal lower bound"
+                        f"Undefined runtime behaviour. Variable {name} has illegal lower "
+                        "bound"
                     )
                 if bound.end > q1asm_data.max_wait_time:
                     log.warning(
-                        f"Undefined runtime behaviour. Will be batching variable {name} at runtime"
+                        f"Undefined runtime behaviour. Will be batching variable {name} "
+                        "at runtime"
                     )
             elif attr == "amp" and isinstance(inst, Pulse):
                 legal_bound = IterBound(
@@ -179,7 +187,8 @@ class QbloxLegalisationPass(AnalysisPass):
         for attr, val in vars(legal_bound).items():
             if not isinstance(val, int):
                 raise ValueError(
-                    f"Illegal value {val} for attribute {attr}. Expected value to be an integer"
+                    f"Illegal value {val} for attribute {attr}. Expected value to be an "
+                    "integer"
                 )
 
         # Qblox registers are unsigned 32bit integers.
@@ -188,14 +197,15 @@ class QbloxLegalisationPass(AnalysisPass):
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
         """Performs target-dependent legalisation for QBlox.
 
-            A) A repeat instruction with a very high repetition count is illegal because acquisition memory
-        on a QBlox sequencer is limited. This requires optimal batching of the repeat instruction into maximally
-        supported batches of smaller repeat counts.
+            A) A repeat instruction with a very high repetition count is illegal because
+        acquisition memory on a QBlox sequencer is limited. This requires optimal batching
+        of the repeat instruction into maximally supported batches of smaller repeat counts.
 
-        This pass does not do any batching. More features and adjustments will follow in future iterations.
+        This pass does not do any batching. More features and adjustments will follow in
+        future iterations.
 
-            B) Previously processed variables such as frequencies, phases, and amplitudes still need digital conversion
-        to a representation that's required by the QBlox ISA.
+            B) Previously processed variables such as frequencies, phases, and amplitudes
+        still need digital conversion to a representation that's required by the QBlox ISA.
 
         + NCO's 1GHz frequency range by 4e9 steps:
             + [-500, 500] Mhz <=> [-2e9, 2e9] steps
@@ -210,15 +220,16 @@ class QbloxLegalisationPass(AnalysisPass):
         + AWG offset:
             + [-1, 1]         <=> [-32 768, 32 767]
 
-        The last point is interesting as it requires knowledge of physical configuration of qubits and the modules
-        they are wired to. This knowledge is typically found during execution and involving it early on would upset
-        the rest of the compilation flow. In fact, it complicates this pass in particular, involves allocation
-        concepts that should not be treated here, and promotes a monolithic compilation style. A temporary workaround
-        is to simply assume the legality of amplitudes from the start whereby users are required to convert
-        the desired voltages to the equivalent ratio AOT.
+        The last point is interesting as it requires knowledge of physical configuration of
+        qubits and the modules they are wired to. This knowledge is typically found during
+        execution and involving it early on would upset the rest of the compilation flow. In
+        fact, it complicates this pass in particular, involves allocation concepts that
+        should not be treated here, and promotes a monolithic compilation style. A temporary
+        workaround is to simply assume the legality of amplitudes from the start whereby
+        users are required to convert the desired voltages to the equivalent ratio AOT.
 
-        This pass performs target-dependent conversion as described in part (B). More features and adjustments
-        will follow in future iterations.
+        This pass performs target-dependent conversion as described in part (B). More
+        features and adjustments will follow in future iterations.
         """
 
         triage_result = res_mgr.lookup_by_type(TriageResult)
@@ -267,7 +278,8 @@ class AllocationManager:
             register = self.registers[name]
         elif len(self._reg_pool) < 1:
             raise IndexError(
-                "Out of registers. Attempting to use more registers than available in the Q1 sequence processor"
+                "Out of registers. Attempting to use more registers than available in the "
+                "Q1 sequence processor"
             )
         else:
             register = self._reg_pool.pop(0)

@@ -44,9 +44,11 @@ parameterisations:
 
 * ``SoftSquareWaveform``: ``fractional_top_width = 1 - fractional_rise / width``,
   ``fractional_rise = 2 * fractional_rise / width``, ``regularize = False``.
-* ``SofterSquareWaveform``: ``fractional_top_width = (std_dev - 2 * fractional_rise) / width``,
+* ``SofterSquareWaveform``:
+  ``fractional_top_width = (std_dev - 2 * fractional_rise) / width``,
   ``fractional_rise = 2 * fractional_rise / width``, ``regularize = True``.
-* ``ExtraSoftSquareWaveform``: ``fractional_top_width = (std_dev - 4 * fractional_rise) / width``,
+* ``ExtraSoftSquareWaveform``:
+  ``fractional_top_width = (std_dev - 4 * fractional_rise) / width``,
   ``fractional_rise = 2 * fractional_rise / width``, ``regularize = True``.
 
 You can see the ``fractional_top_width`` parameterisation effectively becoming smaller as we
@@ -265,8 +267,8 @@ class SoftSquareWaveformShape(WaveformShape):
         :param absolute_top_width: The "top width" of the Soft Square function.
         :param absolute_rise: The sharpness of the fractional_rise and fall edges of the
             Soft Square function.
-        :param regularize: If ``True``, applies a shift and rescaling so that the waveform is
-            zero at the edges with maximum component one. Default is ``False``.
+        :param regularize: If ``True``, applies a shift and rescaling so that the waveform
+            is zero at the edges with maximum component one. Default is ``False``.
         """
         return cls(
             fractional_top_width=absolute_top_width / width,
@@ -296,7 +298,8 @@ class SoftSquareWaveformShape(WaveformShape):
         """Constructs from legacy ``SofterSquareWaveform`` parameters.
 
         :param std_dev: The ``std_dev`` parameter from the legacy implementation.
-        :param rise: The ``rise`` parameter from the legacy ``SofterSquareWaveform`` implementation.
+        :param rise: The ``rise`` parameter from the legacy ``SofterSquareWaveform``
+            implementation.
         :param width: The waveform width.
         """
         return cls(

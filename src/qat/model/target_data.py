@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 import random
 from functools import cached_property
 from pathlib import Path
@@ -125,7 +125,8 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
 
     :param max_acquisitions: The maximum amount of acquisitions possible on this target.
     :param max_shots: (deprecated) Use `max_acquisitions` instead.
-    :param default_shots: The default amount of shots on this target if none specified through the instructions.
+    :param default_shots: The default amount of shots on this target if none specified
+        through the instructions.
     """
 
     max_acquisitions: PositiveInt = Field(
@@ -165,7 +166,9 @@ class AbstractTargetData(NoExtraFieldsFrozenModel):
                 return super().__getattribute__(name)
             except AttributeError as e:
                 raise AttributeError(
-                    f"Tried to get '{name}' from {self.__class__.__name__}, which does not exist. Please use a child class of `AbstractTargetData` that has '{name}'."
+                    f"Tried to get '{name}' from {self.__class__.__name__}, which does not "
+                    "exist. Please use a child class of `AbstractTargetData` that has "
+                    f"'{name}'."
                 ) from e
         return super().__getattribute__(name)
 
@@ -221,7 +224,8 @@ class TargetData(AbstractTargetData):
     def validate_clock_cycles(self):
         if self.QUBIT_DATA.clock_cycle != self.RESONATOR_DATA.clock_cycle:
             raise ValueError(
-                "Different clock cycles for qubit and resonator are currently not supported."
+                "Different clock cycles for qubit and resonator are currently not "
+                "supported."
             )
         return self
 

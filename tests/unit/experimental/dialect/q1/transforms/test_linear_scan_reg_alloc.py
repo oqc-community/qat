@@ -150,7 +150,10 @@ class TestLinearAllocatorOnSequence:
         allocator = _allocator()
         with pytest.raises(
             DiagnosticException,
-            match="Q1LinearScanAllocator does not support SequenceOps with more than one block.",
+            match=(
+                "Q1LinearScanAllocator does not support SequenceOps with more than one "
+                "block."
+            ),
         ):
             allocator.allocate_sequence(sequence_op)
 
@@ -880,7 +883,7 @@ class TestForOpUnsupportedAllocations:
         ):
             allocator.allocate_sequence(sequence_op)
 
-    def test_for_op_with_consumer_producer_chain_and_later_block_arg_use_raises_diagnostic_error(
+    def test_for_op_consumer_producer_chain_and_later_block_arg_use_raises_diagnostic_error(
         self,
     ):
         """Tests that a ForOp with a consumer-producer chain and a later block arg use
@@ -1026,7 +1029,7 @@ class TestForOpUnsupportedAllocations:
         ):
             allocator.allocate_sequence(sequence_op)
 
-    def test_tangle_block_args_with_parallel_consumer_producer_chain_raises_diagnostic_error(
+    def test_tangle_block_args_parallel_consumer_producer_chain_raises_diagnostic_error(
         self,
     ):
         """Tests when block args and yield operands are tangled through consumer-producer

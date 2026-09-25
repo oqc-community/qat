@@ -26,7 +26,7 @@ from qat.experimental.dialect.pulse.ir.ops import (
     PulseOp,
     WaitOp,
 )
-from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions import (
+from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions import (  # noqa: E501
     ApplySquashContiguousOptimizations,
 )
 

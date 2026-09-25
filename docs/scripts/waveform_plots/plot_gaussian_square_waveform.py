@@ -141,7 +141,8 @@ def draw_figure(ax: "plt.Axes | None" = None) -> plt.Figure:
     ax.text(
         (x_min + x_max) / 2.0,
         1.18,
-        r"$\mathbf{s_i}$: square_width    $\mathbf{\sigma}$: std_dev  zero_at_edges: True   $\mathbf{w}$: width    $\mathbf{G_i}$: waveform",
+        r"$\mathbf{s_i}$: square_width    $\mathbf{\sigma}$: std_dev  zero_at_edges: True"
+        r"   $\mathbf{w}$: width    $\mathbf{G_i}$: waveform",
         ha="center",
         va="top",
         fontsize=label_size,

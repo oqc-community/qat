@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from collections import defaultdict
 from functools import singledispatchmethod
 
@@ -98,7 +98,8 @@ class InstructionValidation(ValidationPass):
         if instruction.target not in self._channel_data["acquire"]:
             channel = self._channel_data["non-acquire"][instruction.target]
             raise ValueError(
-                f"Cannot perform an acquire on the {channel[0]} pulse channel for qubit {channel[1]}"
+                f"Cannot perform an acquire on the {channel[0]} pulse channel for qubit "
+                f"{channel[1]}"
             )
 
 
@@ -199,7 +200,9 @@ class DynamicFrequencyValidation(ValidationPass):
     def run(
         self, ir: QuantumInstructionBuilder, *args, **kwargs
     ) -> QuantumInstructionBuilder:
-        """:param ir: The list of instructions stored in an :class:`QuantumInstructionBuilder`."""
+        """
+        :param ir: The list of instructions stored in an :class:`QuantumInstructionBuilder`.
+        """
 
         ifs = defaultdict(list)
         physical_channel_ids = defaultdict(str)
@@ -334,8 +337,9 @@ class ReadoutValidation(ValidationPass):
         elif acquire_mode is None:
             raise ValueError(
                 f"No AcquireMode found with output variable {inst.output_variable},"
-                f"ensure PostProcessing output_variable matches an Acquire output_variable with a"
-                f"valid AcquireMode selected."
+                "ensure PostProcessing output_variable matches an Acquire "
+                "output_variable with a"
+                "valid AcquireMode selected."
             )
 
 

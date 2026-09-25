@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import json
 import os
@@ -30,7 +30,10 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
 
         if self.dump_program:
             for pulse_channel_id, pkg in program.packages.items():
-                filename = f"schedules/target_{pulse_channel_id}_{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
+                filename = (
+                    f"schedules/target_{pulse_channel_id}_"
+                    f"{datetime.now().strftime('%m-%d-%Y_%H%M%S')}.json"
+                )
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
                 with open(filename, "w") as f:
                     f.write(json.dumps(asdict(pkg.sequence)))

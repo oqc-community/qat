@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 from abc import ABC, abstractmethod
 
@@ -123,23 +123,26 @@ class QbloxConfigHelper(ABC):
 
         :param module: A Module instance representing a QCM-RF or a QRM-RF card.
         :param sequencer: A Sequencer instance representing the sequencer.
-            When None, sideband cal will run on all sequencers belonging to module `module`
-        :param connection: An optional string indicating muxing of Sequencer to analog channel
-            Defaults to "out0"
+            When None, sideband cal will run on all sequencers belonging to module
+            `module`
+        :param connection: An optional string indicating muxing of Sequencer to analog
+            channel Defaults to "out0"
         """
 
         sequencers = [sequencer] if sequencer else module.sequencers
 
         if connection:
             log.info(
-                f"Provided argument `connection` is {connection}. Will overwrite sequencer's connections"
+                f"Provided argument `connection` is {connection}. Will overwrite "
+                "sequencer's connections"
             )
             module.disconnect_outputs()
             for sequencer in sequencers:
                 sequencer.connect_sequencer(connection)
         else:
             log.info(
-                "Argument `connection` not provided. Assuming `connection` already specified"
+                "Argument `connection` not provided. Assuming `connection` already "
+                "specified"
             )
 
         log.info(f"Calibrating LO leakage on module {module}")
@@ -152,7 +155,8 @@ class QbloxConfigHelper(ABC):
 
         if connection:
             log.info(
-                f"Mixer calibration finished. Resetting sequencer connections for module {module.slot_idx}"
+                "Mixer calibration finished. Resetting sequencer connections for module "
+                f"{module.slot_idx}"
             )
             module.disconnect_outputs()
 

@@ -243,7 +243,8 @@ class QbloxContext:
 
         if remainder < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
             log.debug(
-                f"Rounding up {remainder} ns to {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns"
+                f"Rounding up {remainder} ns to "
+                f"{self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns"
             )
             remainder = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
             duration = quotient * self.target_data.Q1ASM_DATA.max_wait_time + remainder
@@ -260,8 +261,9 @@ class QbloxContext:
     def wait_reg(self, duration: str):
         """A mere `wait RX` in general has undefined runtime behaviour.
 
-        This is a useful helper to dynamically wait for a `duration` nanoseconds expressed as a register.
-        `iter_reg` is a short-lived register only used as an interator. Customer is responsible for (de)allocation.
+        This is a useful helper to dynamically wait for a `duration` nanoseconds expressed
+        as a register. `iter_reg` is a short-lived register only used as an interator.
+        Customer is responsible for (de)allocation.
         """
 
         batch_enter = self.alloc_mgr.label_gen("batch_enter")
@@ -382,11 +384,13 @@ class QbloxContext:
         """Update latched parameters and wait for `duration` nanoseconds expressed as a
         register.
 
-        If `duration` is less than the threshold self.target_data.CONTROL_SEQUENCER_DATA.grid_time, the generates assembly rounds up
+        If `duration` is less than the threshold
+        self.target_data.CONTROL_SEQUENCER_DATA.grid_time, the generates assembly rounds up
         and waits for self.target_data.CONTROL_SEQUENCER_DATA.grid_time.
 
-        Note that the `up_param` instruction is defined only for an immediate operand which must be
-        at least self.target_data.CONTROL_SEQUENCER_DATA.grid_time. Therefore, technically we're already forced to round up.
+        Note that the `up_param` instruction is defined only for an immediate operand which
+        must be at least self.target_data.CONTROL_SEQUENCER_DATA.grid_time. Therefore,
+        technically we're already forced to round up.
         """
 
         batch_enter = self.alloc_mgr.label_gen("batch_enter")
@@ -452,11 +456,13 @@ class QbloxContext:
 
         if ((pulse.real < -1) | (pulse.real > 1)).any():
             raise ValueError(
-                "Voltage range for I exceeded. Make sure all I values are within the range [-1, 1]"
+                "Voltage range for I exceeded. Make sure all I values are within the range "
+                "[-1, 1]"
             )
         if ((pulse.imag < -1) | (pulse.imag > 1)).any():
             raise ValueError(
-                "Voltage range for Q exceeded. Make sure all I values are within the range [-1, 1]"
+                "Voltage range for Q exceeded. Make sure all I values are within the range "
+                "[-1, 1]"
             )
 
         return pulse
@@ -485,11 +491,13 @@ class QbloxContext:
         index = self.sequence_builder.lookup_waveform_by_data(data)
         if index is not None:
             log.debug(
-                f"Reusing signal {name} at index {index} for pulse {waveform} on channel {target}"
+                f"Reusing signal {name} at index {index} for pulse {waveform} on channel "
+                f"{target}"
             )
         elif data.size > self._wf_memory:
             raise ValueError(
-                f"No more waveform memory left for signal {name} of pulse {waveform} on channel {target}"
+                f"No more waveform memory left for signal {name} of pulse {waveform} on "
+                f"channel {target}"
             )
         else:
             wf_hash = hash(waveform)
@@ -620,7 +628,8 @@ class QbloxContext:
         new_frequency = old_frequency + inst.frequency
         if new_frequency < target.min_frequency or new_frequency > target.max_frequency:
             raise ValueError(
-                f"Cannot shift pulse channel frequency from '{old_frequency}' to '{new_frequency}'"
+                f"Cannot shift pulse channel frequency from '{old_frequency}' to "
+                f"'{new_frequency}'"
             )
 
         self._frequency = self._frequency + inst.frequency
@@ -673,10 +682,11 @@ class QbloxContext:
             else:
                 pulse_width = int(calculate_duration(waveform))
                 if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
+                    grid_time = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
                     log.debug(
                         f"""
-                        Minimum pulse width is {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns with a resolution of {1} ns.
-                        Please round up the width to at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} nanoseconds.
+                        Minimum pulse width is {grid_time} ns with a resolution of {1} ns.
+                        Please round up the width to at least {grid_time} nanoseconds.
                         This pulse will be ignored.
                         """
                     )
@@ -712,10 +722,11 @@ class QbloxContext:
             pulse = self._evaluate_waveform(waveform, target)
             pulse_width = pulse.size
             if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
+                grid_time = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
                 log.debug(
                     f"""
-                    Minimum pulse width is {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns with a resolution of {1} ns.
-                    Please round up the width to at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} nanoseconds.
+                    Minimum pulse width is {grid_time} ns with a resolution of {1} ns.
+                    Please round up the width to at least {grid_time} nanoseconds.
                     This pulse will be ignored.
                     """
                 )
@@ -745,10 +756,11 @@ class QbloxContext:
         delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
 
         if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
+            grid_time = self.target_data.CONTROL_SEQUENCER_DATA.grid_time
             log.debug(
                 f"""
-                Minimum pulse width is {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} ns with a resolution of {1} ns.
-                Please round up the width to at least {self.target_data.CONTROL_SEQUENCER_DATA.grid_time} nanoseconds.
+                Minimum pulse width is {grid_time} ns with a resolution of {1} ns.
+                Please round up the width to at least {grid_time} nanoseconds.
                 This pulse will be ignored.
                 """
             )
@@ -830,7 +842,8 @@ class QbloxContext:
                 self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
             else:
                 raise NotImplementedError(
-                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                    f"Unsupported processing of attribute {du_inst.attribute} for "
+                    f"instruction {du_inst}"
                 )
         elif isinstance(du_inst.value, Number):
             if du_inst.attribute == "frequency":
@@ -848,7 +861,8 @@ class QbloxContext:
                 pass
             else:
                 raise NotImplementedError(
-                    f"Unsupported processing of attribute {du_inst.attribute} for instruction {du_inst}"
+                    f"Unsupported processing of attribute {du_inst.attribute} for "
+                    f"instruction {du_inst}"
                 )
         else:
             raise ValueError(f"Expected a Variable or a Number but got {du_inst.value}")

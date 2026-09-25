@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import pytest
 
@@ -28,6 +28,8 @@ class TestBuilderFactory:
     def test_create_builder_with_invalid_type(self, invalid_type):
         with pytest.raises(
             TypeError,
-            match=f"Cannot find a builder for hardware model with type {type(invalid_type)}.",
+            match=(
+                f"Cannot find a builder for hardware model with type {type(invalid_type)}."
+            ),
         ):
             BuilderFactory.create_builder(invalid_type)

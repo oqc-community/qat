@@ -271,8 +271,8 @@ class TestParityWithPydanticGaussianSquareWaveform:
     GaussianSquareWaveform class.
 
     The Gaussian Square waveform implements the legacy ``GaussianSquareWaveform`` under the
-    parameterisations ``fractional_rise = 2 * std_dev / width``, ``regularize = zero_at_edges``, and
-    ``fractional_top_width = square_width / width``.
+    parameterisations ``fractional_rise = 2 * std_dev / width``,
+    ``regularize = zero_at_edges``, and ``fractional_top_width = square_width / width``.
     """
 
     @pytest.mark.parametrize(

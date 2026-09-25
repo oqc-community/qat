@@ -42,8 +42,8 @@ from qat.experimental.waveforms.shapes.base import (
 from qat.experimental.waveforms.shapes.exceptions import DerivativeOrderNotImplementedError
 from qat.experimental.waveforms.shapes.validators import validate_fractional_breadth
 
-# This function has historically caused overflows when extreme values of ``fractional_breadth`` are
-# used, so this guard is used to prevent that from happening.
+# This function has historically caused overflows when extreme values of
+# ``fractional_breadth`` are used, so this guard is used to prevent that from happening.
 _MAX_COSH_ARG = np.arccosh(0.99 * sys.float_info.max)
 
 
@@ -82,7 +82,8 @@ def sample_sech_waveform(
     """Samples a Sech waveform shape.
 
     :param x: The list of values in the range [-1, 1] to sample the waveform for.
-    :param fractional_breadth: The standard deviation of the Sech function, default is ``1/3``.
+    :param fractional_breadth: The standard deviation of the Sech function, default is
+        ``1/3``.
     :param regularize: If ``True``, applies a shift and rescaling so that the waveform is
         zero at the edges. Default is ``False``.
     """

@@ -185,8 +185,8 @@ class MaxLikelihoodMethod(MethodBase):
     )
     states: dict[int, MLDiscriminateParams] = Field(
         ...,
-        description="Mapping from integer output key to MLDiscriminateParams. Non-negative keys "
-        "are allowed states (key = classical register value). Negative keys are "
+        description="Mapping from integer output key to MLDiscriminateParams. Non-negative "
+        "keys are allowed states (key = classical register value). Negative keys are "
         "disallowed states filtered by PostSelect.",
     )
     noise_est: float = Field(

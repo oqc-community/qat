@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import warnings
 
@@ -11,7 +11,8 @@ class MismatchingHardwareModelError(Exception):
 def __getattr__(name):
     if name == "MismatchingHardwareModelException":
         warnings.warn(
-            "MismatchingHardwareModelException is deprecated; use MismatchingHardwareModelError",
+            "MismatchingHardwareModelException is deprecated; use "
+            "MismatchingHardwareModelError",
             DeprecationWarning,
             stacklevel=2,
         )

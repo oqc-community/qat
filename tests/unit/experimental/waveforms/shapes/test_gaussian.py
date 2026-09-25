@@ -188,7 +188,8 @@ class TestParityWithPydanticGaussianWaveform:
     """Tests the sampling implementation is consistent with the pydantic GaussianWaveform
     class.
 
-    Parity should be achieved with ``fractional_breadth = sqrt(2) * fractional_rise`` and ``regularize = False``.
+    Parity should be achieved with ``fractional_breadth = sqrt(2) * fractional_rise`` and
+    ``regularize = False``.
     """
 
     def test_samples_match(self, fractional_breadth, width):
@@ -270,7 +271,8 @@ class TestParityWithPydanticSofterGaussianWaveform:
     """Tests the sampling implementation is consistent with the pydantic
     SofterGaussianWaveform class.
 
-    Parity should be achieved with ``fractional_breadth = sqrt(2) * fractional_rise`` and ``regularize = True``.
+    Parity should be achieved with ``fractional_breadth = sqrt(2) * fractional_rise`` and
+    ``regularize = True``.
     The pydantic implementation does regularize at whatever boundary is provided (not
     strictly ``width / 2``), so this test enforces the boundary is ``width / 2`` for a
     fair comparison. This means we don't get complete parity with the legacy implementation,

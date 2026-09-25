@@ -98,7 +98,10 @@ class Waveform(AbstractWaveform):
         return self.width
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(width={self.width}, amp={self.amp}, phase={self.phase})"
+        return (
+            f"{self.__class__.__name__}(width={self.width}, amp={self.amp}, "
+            f"phase={self.phase})"
+        )
 
     def sample(self, t: np.ndarray, phase_offset: float = 0.0) -> SampledWaveform:
         r"""Evaluate the waveform at discrete times *t* and return a
@@ -136,7 +139,8 @@ class Waveform(AbstractWaveform):
         """
         if self.shape_function_type is None:
             raise AttributeError(
-                f"Waveform of type `{self.__class__.__name__}` cannot be evaluated, please provide a valid shape function type."
+                f"Waveform of type `{self.__class__.__name__}` cannot be evaluated, please "
+                "provide a valid shape function type."
             )
 
         # Generate a shape function based on the given type. The shape function
@@ -206,9 +210,11 @@ class SampledWaveform(AbstractWaveform):
     @property
     def duration(self):
         if self.sample_time is None:
-            # TODO: COMPILER-723 -- Do we want to raise an error here, or return NAN or None or 0?
+            # TODO: COMPILER-723 -- Do we want to raise an error here, or return NAN or None
+            #  or 0?
             raise ValueError(
-                "Cannot determine duration of SampledWaveform without sample_time being set."
+                "Cannot determine duration of SampledWaveform without sample_time being "
+                "set."
             )
         return self.sample_time * len(self.samples)
 
@@ -290,7 +296,8 @@ class SofterSquareWaveform(Waveform):
     Here :math:`\sigma` = ``std_dev`` and :math:`r` = ``rise``.
 
     .. image:: /_images/waveform/softer_square_waveform.png
-        :alt: Annotated SofterSquareWaveform comparison showing std_dev and rise differences.
+        :alt: Annotated SofterSquareWaveform
+            comparison showing std_dev and rise differences.
         :align: center
         :width: 700px
 
@@ -325,7 +332,8 @@ class ExtraSoftSquareWaveform(Waveform):
     ``2×rise`` inset instead of ``1×rise``.
 
     .. image:: /_images/waveform/extra_soft_square_waveform.png
-        :alt: Annotated ExtraSoftSquareWaveform comparison showing std_dev and rise differences.
+        :alt: Annotated ExtraSoftSquareWaveform
+            comparison showing std_dev and rise differences.
         :align: center
         :width: 700px
 
@@ -444,7 +452,8 @@ class SetupHoldWaveform(Waveform):
     the hold section occupies the remainder (``width - rise`` seconds).
 
     .. image:: /_images/waveform/setup_hold_waveform.png
-        :alt: Annotated SetupHoldWaveform comparison showing setup duration and amplitude differences.
+        :alt: Annotated SetupHoldWaveform
+            comparison showing setup duration and amplitude differences.
         :align: center
         :width: 700px
 
@@ -483,7 +492,8 @@ class RoundedSquareWaveform(Waveform):
     constant.
 
     .. image:: /_images/waveform/rounded_square_waveform.png
-        :alt: Annotated RoundedSquareWaveform comparison showing rise and std_dev differences.
+        :alt: Annotated RoundedSquareWaveform
+            comparison showing rise and std_dev differences.
         :align: center
         :width: 700px
 
@@ -521,7 +531,8 @@ class GaussianSquareWaveform(Waveform):
     is offset and rescaled to be zero at the outermost samples.
 
     .. image:: /_images/waveform/gaussian_square_waveform.png
-        :alt: Annotated GaussianSquareWaveform comparison showing square width and edge softness differences.
+        :alt: Annotated GaussianSquareWaveform
+            comparison showing square width and edge softness differences.
         :align: center
         :width: 700px
 
@@ -605,7 +616,8 @@ class GaussianZeroEdgeWaveform(Waveform):
     ensuring :math:`f(\pm w/2) = 0` and :math:`f(0) = 1`.
 
     .. image:: /_images/waveform/gaussian_zero_edge_waveform.png
-        :alt: Annotated GaussianZeroEdgeWaveform comparison with and without zero_at_edges normalisation.
+        :alt: Annotated GaussianZeroEdgeWaveform
+            comparison with and without zero_at_edges normalisation.
         :align: center
         :width: 700px
 
@@ -636,7 +648,8 @@ class CosWaveform(Waveform):
     ``internal_phase``.
 
     .. image:: /_images/waveform/cos_waveform.png
-        :alt: Annotated CosWaveform comparison showing frequency and internal phase differences.
+        :alt: Annotated CosWaveform
+            comparison showing frequency and internal phase differences.
         :align: center
         :width: 700px
 
@@ -666,7 +679,8 @@ class SinWaveform(Waveform):
     ``internal_phase``.
 
     .. image:: /_images/waveform/sin_waveform.png
-        :alt: Annotated SinWaveform comparison showing frequency and internal phase differences.
+        :alt: Annotated SinWaveform
+            comparison showing frequency and internal phase differences.
         :align: center
         :width: 700px
 
@@ -745,7 +759,10 @@ class Pulse(QuantumInstruction):
         return data
 
     def __repr__(self):
-        return f"{self.__class__.__name__} on targets {set(self.targets)} with {self.waveform}."
+        return (
+            f"{self.__class__.__name__} on targets {set(self.targets)} with "
+            f"{self.waveform}."
+        )
 
     def update_duration(self, duration: float, sample_time: float | None = None):
         if isinstance(self.waveform, Waveform):

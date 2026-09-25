@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from importlib.metadata import version
 from warnings import warn
 
@@ -283,7 +283,8 @@ class QbloxTargetData(TargetData):
     :param QRC_DATA: Constants related to the QRC module.
     """
 
-    # TODO (Follow up from COMPILER-661 and COMPILER-1004) - COMPILER-1005: check against fw version (live testing)
+    # TODO (Follow up from COMPILER-661 and COMPILER-1004) - COMPILER-1005: check against fw
+    # version (live testing)
     driver_version: SemanticVersion = SemanticVersion.parse(version("qblox_instruments"))
     fw_version: SemanticVersion = SemanticVersion.parse("0.13.0")
     Q1ASM_DATA: Q1asmDescription = Q1asmDescription()

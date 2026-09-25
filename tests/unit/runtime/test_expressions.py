@@ -217,9 +217,9 @@ class TestUnaryExpression:
 
     def test_repr(self):
         expr = sin(Variable(name="alpha", var_type=VariableType.PHASE))
-        assert (
-            repr(expr)
-            == "UnaryExpression(sin, Variable(name='alpha', var_type=<VariableType.PHASE: 'phase'>))"
+        assert repr(expr) == (
+            "UnaryExpression(sin, Variable(name='alpha', "
+            "var_type=<VariableType.PHASE: 'phase'>))"
         )
 
     @pytest.mark.parametrize(

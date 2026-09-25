@@ -296,7 +296,8 @@ class QubitView(DerivedViewInterface[CanonicalSystemData]):
         """Unpacks per-qubit properties from the selected canonical qubit records.
 
         :param selected: Canonical qubit records keyed by id.
-        :param qubit_by_id: All qubits in the system, used to resolve cross-qubit references.
+        :param qubit_by_id: All qubits in the system, used to resolve cross-qubit
+            references.
         :returns: Dict of :class:`QubitProperties` keyed by qubit id.
         """
         return {
@@ -330,7 +331,8 @@ class QubitView(DerivedViewInterface[CanonicalSystemData]):
 
         :param parent: Canonical system data.
         :param position_by_id: Map from qubit id to its position in the view.
-        :returns: Tuple of :class:`Interaction` sorted by ``(source_position, target_position)``.
+        :returns: Tuple of :class:`Interaction` sorted by
+            ``(source_position, target_position)``.
         """
         return tuple(
             sorted(

@@ -19,10 +19,10 @@ The dialect is centered around collections of results:
   grouping them together in a single structure.
 * :class:`RecordType` represents the entire results of a single shot with dictionary-like
   semantics, allowing each piece of data to be stored by a string key.
-* :class:`ResultsCollectionType` allows us to represent a collection of results. Results are
-  stored and referenced by two identifiers; an integer index (which e.g. represents the shot)
-  and a string key (which e.g. represents the result name). Conceptually, we can think of
-  this as a dictionary of arrays, or as list of dictionaries. The actual data type is not
+* :class:`ResultsCollectionType` allows us to represent a collection of results. Results
+  are stored and referenced by two identifiers; an integer index (which e.g. represents the
+  shot) and a string key (which e.g. represents the result name). Conceptually, we can think
+  of this as a dictionary of arrays, or as list of dictionaries. The actual data type is not
   specified to be index-major or key-major. This allows us to support flexible results
   acquisition.
 

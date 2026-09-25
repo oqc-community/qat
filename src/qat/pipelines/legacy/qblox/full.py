@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from qat.backend.qblox.codegen import QbloxBackend2
 from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
@@ -35,8 +35,8 @@ class LegacyQbloxPipeline(UpdateablePipeline):
     ) -> Pipeline:
         if engine is not None:
             log.warning(
-                "An engine was provided to the LegacyQbloxPipeline, but it will be ignored. "
-                "The legacy QbloxEngine is used directly."
+                "An engine was provided to the LegacyQbloxPipeline, but it will be "
+                "ignored. The legacy QbloxEngine is used directly."
             )
 
         target_data = target_data if target_data is not None else TARGET_DATA

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 """Tests for runtime post-processing utilities.
 
 These cover mean, linear mapping, discrimination and the granular post-processing pipeline
@@ -86,7 +86,8 @@ class TestGranularPipeline:
         state_keys = np.array([0, 1, -2, 2, 1])
         instr = PostSelect(output_variable="v", additional_disallowed={2})
         _, mask = apply_post_select(state_keys, instr, self._axes)
-        # key 1 → allowed, key -2 → negative → masked, key 2 → additional_disallowed → masked
+        # key 1 → allowed, key -2 → negative → masked,
+        # key 2 → additional_disallowed → masked
         assert list(mask) == [True, True, False, False, True]
 
     def test_apply_post_select_empty_additional_disallowed_is_noop(self):

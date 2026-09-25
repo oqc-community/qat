@@ -9,7 +9,8 @@ Some things that are tested are:
 
 * Situations where time is completely deterministic gets resolved to constant times.
 * Situations with a variable time (e.g. through a function argument or loop) gets resolved
-  into expressions over times, but all synchronizes are rewritten to wait instructions where possible.
+  into expressions over times, but all synchronizes are rewritten to wait instructions where
+  possible.
 * Operations with unknown timing semantics result in affected frames being unknown, and
   synchronizes on those frames remain.
 * Operations with bodies, such as control flows, means that we treat all frames as unknown,

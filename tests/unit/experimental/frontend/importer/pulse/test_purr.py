@@ -688,7 +688,10 @@ class TestPurrImporterPostProcessing:
         imp = PurrImporter()
         with pytest.raises(
             ValueError,
-            match="Post-processing expects an IQResultType.*Ensure the acquire has mode INTEGRATOR",
+            match=(
+                "Post-processing expects an IQResultType.*"
+                "Ensure the acquire has mode INTEGRATOR"
+            ),
         ):
             imp.build(builder)
 

@@ -312,8 +312,8 @@ class SequenceOp(IRDLOperation):
             )
         if uses_acquisition and not supports_acquisition:
             raise VerifyException(
-                "Acquisition connections, configuration, table data, or instructions require "
-                "an acquisition-capable sequencer"
+                "Acquisition connections, configuration, table data, or instructions "
+                "require an acquisition-capable sequencer"
             )
 
         if parent is not None and module_spec.acquisition_memory_bins is not None:

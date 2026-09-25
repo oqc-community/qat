@@ -157,7 +157,10 @@ def _print_ir(op) -> str:
         (
             SetCondImmImmImmImmOp(BoolImm(1), UI4Imm(2), UI3Imm(3), UI16Imm(4)),
             None,
-            "<{imm1 = #q1.bool_imm<1>, imm2 = #q1.ui4_imm<2>, imm3 = #q1.ui3_imm<3>, imm4 = #q1.ui16_imm<4>}>",
+            (
+                "<{imm1 = #q1.bool_imm<1>, imm2 = #q1.ui4_imm<2>, imm3 = #q1.ui3_imm<3>, "
+                "imm4 = #q1.ui16_imm<4>}>"
+            ),
             None,
         ),
         (
@@ -175,7 +178,10 @@ def _print_ir(op) -> str:
         (
             FbComDataImmImmImmOp(UI8Imm(1), UI32Imm(2), DurationImm(100)),
             None,
-            "<{imm1 = #q1.ui8_imm<1>, imm2 = #q1.ui32_imm<2>, imm3 = #q1.duration_imm<100>}>",
+            (
+                "<{imm1 = #q1.ui8_imm<1>, imm2 = #q1.ui32_imm<2>, "
+                "imm3 = #q1.duration_imm<100>}>"
+            ),
             None,
         ),
         (
@@ -201,7 +207,10 @@ def _print_ir(op) -> str:
         (
             PlayImmImmImmOp(UI10Imm(1), UI10Imm(2), DurationImm(4)),
             None,
-            "<{imm1 = #q1.ui10_imm<1>, imm2 = #q1.ui10_imm<2>, imm3 = #q1.duration_imm<4>}>",
+            (
+                "<{imm1 = #q1.ui10_imm<1>, imm2 = #q1.ui10_imm<2>, "
+                "imm3 = #q1.duration_imm<4>}>"
+            ),
             None,
         ),
         (
@@ -215,13 +224,19 @@ def _print_ir(op) -> str:
                 UI5Imm(1), UI24Imm(2), UI6Imm(3), UI6Imm(4), DurationImm(5)
             ),
             None,
-            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.ui6_imm<3>, imm4 = #q1.ui6_imm<4>, imm5 = #q1.duration_imm<5>}>",
+            (
+                "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.ui6_imm<3>, "
+                "imm4 = #q1.ui6_imm<4>, imm5 = #q1.duration_imm<5>}>"
+            ),
             None,
         ),
         (
             AcquireTtlImmImmImmImmOp(UI5Imm(1), UI24Imm(2), BoolImm(1), DurationImm(4)),
             None,
-            "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.bool_imm<1>, imm4 = #q1.duration_imm<4>}>",
+            (
+                "<{imm1 = #q1.ui5_imm<1>, imm2 = #q1.ui24_imm<2>, imm3 = #q1.bool_imm<1>, "
+                "imm4 = #q1.duration_imm<4>}>"
+            ),
             None,
         ),
         (

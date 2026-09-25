@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 """Instruction builder abstractions and a concrete quantum builder.
 
 This module defines the abstract :class:`InstructionBuilder` API and a
@@ -324,7 +324,10 @@ class QuantumInstructionBuilder(InstructionBuilder):
             if targets:
                 format_target = ""
                 for target in targets:
-                    format_target = f"{instr.__class__.__name__} -> {self.hw._ids_to_pulse_channels[target]} "
+                    format_target = (
+                        f"{instr.__class__.__name__} -> "
+                        f"{self.hw._ids_to_pulse_channels[target]} "
+                    )
                     device = self.hw._pulse_channel_ids_to_device[target]
                     if isinstance(device, Qubit):
                         format_target += f" @Q{self.hw._qubits_to_qubit_ids[device]}"
@@ -412,7 +415,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         """
         if pulse_channel:
             log.warning(
-                "Pulse channel in Z-gate will be ignored in the `QuantumInstructionBuilder`."
+                "Pulse channel in Z-gate will be ignored in the "
+                "`QuantumInstructionBuilder`."
             )
 
         return self.add(*self._hw_Z(target=target, theta=theta))
@@ -690,7 +694,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
         :param targets: The qubit(s) to be measured.
         :param mode: The type of acquisition at the level of the control hardware.
         :param sync_qubits: Flag determining whether to align the measurements of all
-                            qubits in `targets` or not. Sync between qubits is on by default.
+                            qubits in `targets` or not. Sync between qubits is on by
+                            default.
         """
         if isinstance(targets, Qubit):
             targets = [targets]
@@ -965,7 +970,9 @@ class QuantumInstructionBuilder(InstructionBuilder):
             targets = {targets}
         else:
             raise TypeError(
-                f"Invalid type, expected '(PulseChannel | Qubit | list[PulseChannel | Qubit])' but got {type(targets)}."
+                "Invalid type, expected "
+                "'(PulseChannel | Qubit | list[PulseChannel | Qubit])' "
+                f"but got {type(targets)}."
             )
 
         pulse_channel_ids = []
@@ -1320,7 +1327,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
 
         if not control.cross_resonance_pulse_channels.get(target_id, None):
             raise ValueError(
-                f"Qubits {self._qubit_index_by_uuid[control.uuid]} and {target_id} are not coupled."
+                f"Qubits {self._qubit_index_by_uuid[control.uuid]} and {target_id} are not "
+                "coupled."
             )
 
         return (
@@ -1385,7 +1393,8 @@ class QuantumInstructionBuilder(InstructionBuilder):
             return self.add(Synchronize(targets=pulse_channel_ids))
         else:
             log.warning(
-                f"Ignored synchronisation of a single pulse channel with id {next(iter(pulse_channel_ids))}."
+                "Ignored synchronisation of a single pulse channel with id "
+                f"{next(iter(pulse_channel_ids))}."
             )
             return self
 

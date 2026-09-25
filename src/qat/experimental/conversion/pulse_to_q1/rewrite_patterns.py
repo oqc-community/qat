@@ -714,7 +714,8 @@ class RewritePreQ1AcquireOp(RewritePattern):
         """
         if name in (entry.acquisition_name.data for entry in sequence_op.acquisitions):
             raise ValueError(
-                f"Acquisition name '{name}' already exists in sequence '{sequence_op.channel_id.data}'"
+                f"Acquisition name '{name}' already exists in sequence "
+                f"'{sequence_op.channel_id.data}'"
             )
         acq_index = len(sequence_op.acquisitions)
         acq_attr = make_acquisition(name, acq_index, num_bins)

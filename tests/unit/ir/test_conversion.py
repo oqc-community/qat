@@ -146,10 +146,12 @@ class TestConvertToPydanticIRPass:
     def _(self, legacy_value, converted_value):
         if legacy_value.__module__.startswith("qat."):
             assert converted_value.__name__ == legacy_value.__name__, (
-                f"Converted value class does not match: {converted_value.__name__} != {legacy_value.__name__}"
+                "Converted value class does not match: "
+                f"{converted_value.__name__} != {legacy_value.__name__}"
             )
             assert converted_value.__module__.startswith("qat.ir"), (
-                f"Converted value class does not start with 'qat.ir': {converted_value.__module__}"
+                "Converted value class does not start with 'qat.ir': "
+                f"{converted_value.__module__}"
             )
         else:
             assert converted_value == legacy_value, (
@@ -189,7 +191,8 @@ class TestConvertToPydanticIRPass:
             if len(legacy_value) > 0 and isinstance(
                 legacy_value[0], instructions.Instruction | instructions.Variable
             ):
-                # Lists of instructions are a special case since changing the nuber of targets allowed in the pydantic stack
+                # Lists of instructions are a special case since changing the nuber of
+                # targets allowed in the pydantic stack
                 i: int = 0
                 for legacy_val in legacy_value:
                     if (
@@ -197,8 +200,9 @@ class TestConvertToPydanticIRPass:
                         and hasattr(legacy_val, "quantum_targets")
                         and len(legacy_val.quantum_targets) > 1
                     ):
-                        # If the legacy instruction has multiple quantum targets, and isn't a Synchronize instruction,
-                        # the converted value should be multiple instructions.
+                        # If the legacy instruction has multiple quantum targets, and isn't
+                        # a Synchronize instruction, the converted value should be multiple
+                        # instructions.
                         target_count = len(legacy_val.quantum_targets)
                         converted_val = converted_value[i : i + target_count]
                         i += target_count
@@ -265,7 +269,8 @@ class TestConvertToPydanticIRPass:
                 assert np.allclose(
                     converted_value.waveform.samples, legacy_value.samples, atol=1e-9
                 ), (
-                    f"Waveform samples do not match: {converted_value.waveform.samples} != {legacy_value.samples}"
+                    "Waveform samples do not match: "
+                    f"{converted_value.waveform.samples} != {legacy_value.samples}"
                 )
                 continue
             elif name == "quantum_targets":
@@ -291,7 +296,8 @@ class TestConvertToPydanticIRPass:
         """Check that the value of a legacy instruction matches the converted
         instruction."""
         assert converted_value.__class__.__name__ == legacy_value.__class__.__name__, (
-            f"Converted instruction class does not match: {converted_value.__class__.__name__} != {legacy_value.__class__.__name__}"
+            "Converted instruction class does not match: "
+            f"{converted_value.__class__.__name__} != {legacy_value.__class__.__name__}"
         )
         assert converted_value.__class__.__module__.startswith("qat.ir"), (
             f"Converted instruction class does not start with 'qat.ir': "
@@ -311,9 +317,9 @@ class TestConvertToPydanticIRPass:
             elif name in ("rotation", "threshold") and isinstance(
                 legacy_value, instructions.Acquire
             ):
-                # rotation and threshold are deprecated fields on the pydantic Acquire model;
-                # the conversion pass intentionally leaves them unset (defaulting to 0.0)
-                # so we skip comparing them here.
+                # rotation and threshold are deprecated fields on the pydantic Acquire
+                # model; the conversion pass intentionally leaves them unset (defaulting to
+                # 0.0) so we skip comparing them here.
                 continue
             assert hasattr(converted_value, name), (
                 f"Converted instruction does not have field '{name}'"
@@ -332,7 +338,8 @@ class TestConvertToPydanticIRPass:
             else:
                 self._check_conversion(value, value)
         assert self.converter_pass._additional_data == additional_data, (
-            f"Additional data does not match: {self.converter_pass._additional_data} != {additional_data}"
+            "Additional data does not match: "
+            f"{self.converter_pass._additional_data} != {additional_data}"
         )
 
     def test_covert_partitioned_ir(self):
@@ -346,9 +353,12 @@ class TestConvertToPydanticIRPass:
         converted_ir = self.converter_pass.run(legacy_ir, res_mgr, met_mgr)
         self._check_conversion(legacy_ir, converted_ir)
 
-    # TODO: Ensure that the legacy instruction builder is compatible with the pydantic version.
+    # TODO: Ensure that the legacy instruction builder is compatible with the pydantic
+    #   version.
     # Variables: COMPILER-589
-    # @pytest.mark.skip("Legacy instruction builder is not compatible with pydantic version.")
+    # @pytest.mark.skip(
+    #     "Legacy instruction builder is not compatible with pydantic version."
+    # )
     def test_convert_instruction_builder(self):
         """Test converting instruction builder."""
         res_mgr = ResultManager()
@@ -506,7 +516,8 @@ class TestConvertToPydanticIRPass:
         legacy_inst = instruction_type(channel, **inst_data)
         converted_inst = self.converter_pass._convert_element(legacy_inst)
         if isinstance(converted_inst, list):
-            # If the converted instruction is a list, it means it has been split into multiple instructions.
+            # If the converted instruction is a list, it means it has been split into
+            # multiple instructions.
             for conv_inst in converted_inst:
                 self._check_conversion(legacy_inst, conv_inst)
         else:

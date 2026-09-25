@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import hashlib
 import itertools as it
 import random
@@ -204,7 +204,8 @@ def apply_setup_to_echo_hardware(
             qubit_indices = it.islice(qubit_indices, qubit_count)
         elif no_qubits_indices < qubit_count:
             raise ValueError(
-                f"Not enough qubit indices provided: len({qubit_indices}) = {no_qubits_indices} < {qubit_count}."
+                f"Not enough qubit indices provided: len({qubit_indices}) = "
+                f"{no_qubits_indices} < {qubit_count}."
             )
     else:
         qubit_indices = range(qubit_count)
@@ -297,7 +298,8 @@ def generate_random_linear(qubit_indices):
 def check_type_legacy_or_pydantic(hw_model: QuantumHardwareModel | PydHardwareModel):
     if not isinstance(hw_model, QuantumHardwareModel | PydHardwareModel | None):
         raise TypeError(
-            f"Invalid type for the hardware model: {hw_model.__class__.__name__}. Please provide a `QuantumHardwareModel` or `PhysicalHardwareModel`."
+            f"Invalid type for the hardware model: {hw_model.__class__.__name__}. Please "
+            "provide a `QuantumHardwareModel` or `PhysicalHardwareModel`."
         )
 
     return hw_model

@@ -46,7 +46,8 @@ class QbloxLeafInstrument(LeafInstrument):
         self._timeout_seconds: float = None
 
     def _reset_modules(self):
-        # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting defaults
+        # TODO - Qblox bug: Hard reset clutters sequencer connections with conflicting
+        # defaults
         # TODO - This is a temporary workaround until Qblox fixes the issue
 
         modules = [mod for mod, is_dirty in self._modules.items() if is_dirty]
@@ -165,7 +166,8 @@ class QbloxLeafInstrument(LeafInstrument):
                     log.debug(f"Sequencer status - {sequencer}: {status_obj}")
                     if acquisitions := sequencer.get_acquisitions():
                         # Only wait if the sequencer is expected to have acquisitions.
-                        # TODO - Precise expectation of acquisitions should come from higher up
+                        # TODO - Precise expectation of acquisitions should come from
+                        # higher up
                         sequencer.get_acquisition_status(timeout=timeout_minutes)
 
                     for name in acquisitions:
@@ -211,15 +213,16 @@ class QbloxCompositeInstrument(CompositeInstrument[QbloxLeafInstrument]):
     """
     Composing Qblox instruments can be achieved by 2 methods:
     1- Daisy-chaining the REF_out of one cluster's CMM to REF_in of the next cluster's CMM.
-       This is like a linked list pattern where the first cluster is **allowed** to have both "external"
-       or "internal" reference source config, but subsequent clusters **must** have their reference
-       source set as "external".
-    2- Distribute the clock from a common source to all the REF_in of all clusters' CMM modules.
-       This is like a star pattern where an external reference clock is distributed to all the clusters
-       in the fleet
+       This is like a linked list pattern where the first cluster is **allowed** to have
+       both "external" or "internal" reference source config, but subsequent clusters
+       **must** have their reference source set as "external".
+    2- Distribute the clock from a common source to all the REF_in of all clusters' CMM
+       modules. This is like a star pattern where an external reference clock is
+       distributed to all the clusters in the fleet
 
-    Historically, both methods have been supported, but recent FW versions ditched the first method and only
-    support the second method. Regardless of the method followed, this abstraction remains oblivious.
+    Historically, both methods have been supported, but recent FW versions ditched the first
+    method and only support the second method. Regardless of the method followed, this
+    abstraction remains oblivious.
     """
 
     pass

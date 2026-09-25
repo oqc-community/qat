@@ -115,8 +115,8 @@ def draw_figure(ax: "plt.Axes | None" = None) -> plt.Figure:
         for x_tick in (-k_ns / 2.0, k_ns / 2.0):
             ax.vlines(x_tick, span_y - 0.03, span_y + 0.03, color=color, linewidth=1.2)
 
-    # Inline "raw" annotation — tip near the right edge where softer≈0 but raw is still visible,
-    # so the open circle sits unambiguously on the dashed curve only
+    # Inline "raw" annotation — tip near the right edge where softer≈0 but raw is still
+    # visible, so the open circle sits unambiguously on the dashed curve only
     raw_label_x, raw_label_y = 27.0, 0.55
     raw_tip_x = 36.0
     raw_tip_y = float(np.interp(raw_tip_x, time_ns, raw2))

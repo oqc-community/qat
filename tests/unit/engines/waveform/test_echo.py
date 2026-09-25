@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import numpy as np
 import pytest
@@ -88,7 +88,7 @@ class TestEchoEngine:
     @pytest.mark.parametrize(
         "mode", [AcquireMode.RAW, AcquireMode.SCOPE, AcquireMode.INTEGRATOR]
     )
-    def test_acquire_mode_gives_expected_results_for_multiple_acquires_on_different_channels(
+    def test_acquire_mode_expected_results_for_multiple_acquires_on_different_channels(
         self, mode
     ):
         acquire1 = PositionalAcquireData(

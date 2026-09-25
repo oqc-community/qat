@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 import random
 
 import numpy as np
@@ -216,8 +216,8 @@ class TestEchoPipelineWithCircuits:
                 if len(channel_data.buffer) > 0 and any(np.abs(channel_data.buffer) > 0):
                     has_waveforms = True
 
-            # If there are no waveforms, then there are no active qubits, so no reset is added
-            # and the repetition_time is zero.
+            # If there are no waveforms, then there are no active qubits, so no reset is
+            # added and the repetition_time is zero.
             if has_waveforms:
                 assert program.repetition_time > passive_reset_time
             else:

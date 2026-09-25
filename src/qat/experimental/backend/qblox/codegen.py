@@ -36,8 +36,8 @@ def _validate_table_references(sequence_op: SequenceOp) -> None:
                 index = _resolve_static_table_index(sequence_op, reference)
                 if not 0 <= index <= 1023:
                     raise ValueError(
-                        f"Sequence {sequence_op.channel_id.data!r} has out-of-range waveform "
-                        f"index {index}. Expected [0, 1023]"
+                        f"Sequence {sequence_op.channel_id.data!r} has out-of-range "
+                        f"waveform index {index}. Expected [0, 1023]"
                     )
                 if index not in waveform_indices:
                     raise ValueError(

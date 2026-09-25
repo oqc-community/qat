@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
+
 from collections.abc import Iterable
 
 import numpy as np
@@ -99,8 +102,10 @@ def plot_physical_buffers(
     Parameters
     ----------
     builder: the qat builder object to be plotted
-    engine: qat execution engine to use to generate buffers. Defaults to Echo hardware engine
-    channels: physical channel ids for the channels to be plotted. If None, plots all channels.
+    engine: qat execution engine to use to generate buffers. Defaults to Echo hardware
+        engine
+    channels: physical channel ids for the channels to be plotted. If None, plots all
+        channels.
     """
     engine = PhysicalBufferPlotEngine(
         builder.model, engine, channels, upconvert, figsize, name

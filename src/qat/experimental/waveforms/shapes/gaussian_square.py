@@ -17,7 +17,8 @@ remapped to ``[-1, 0]`` and ``[0, 1]`` respectively via
 
 .. math::
 
-    x_{\\text{rise}} = \\frac{x + w_{t}}{1 - w_{t}}, \\qquad x_{\\text{fall}} = \\frac{x - w_{t}}{1 - w_{t}},
+    x_{\\text{rise}} = \\frac{x + w_{t}}{1 - w_{t}}, \\qquad
+    x_{\\text{fall}} = \\frac{x - w_{t}}{1 - w_{t}},
 
 and the Gaussian is sampled with effective parameter :math:`r / (1 - w_{t})`. This ensures
 that ``fractional_rise`` retains the same meaning regardless of ``fractional_top_width``;
@@ -40,9 +41,11 @@ and the regularize factor is :math:`N = 1 - C`. If ``regularize = False``, then
 .. math::
 
     f(x) = \\begin{cases}
-        \\frac{1}{N}\\left[\\text{exp}\\left(-\\frac{1}{2}\\frac{(x + w_{t})^2}{r^2}\\right) - C\\right] & \\text{if } x < -w_{t} \\\\
+        \\frac{1}{N}\\left[\\text{exp}\\left(-\\frac{1}{2}\\frac{(x + w_{t})^2}{r^2}\\right)
+            - C\\right] & \\text{if } x < -w_{t} \\\\
         1 & \\text{if } -w_{t} \\leq x \\leq w_{t} \\\\
-        \\frac{1}{N}\\left[\\text{exp}\\left(-\\frac{1}{2}\\frac{(x - w_{t})^2}{r^2}\\right) - C\\right] & \\text{if } x > w_{t}
+        \\frac{1}{N}\\left[\\text{exp}\\left(-\\frac{1}{2}\\frac{(x - w_{t})^2}{r^2}\\right)
+            - C\\right] & \\text{if } x > w_{t}
     \\end{cases},
 
 where :math:`w_{t}` is ``fractional_top_width`` and :math:`r` is ``fractional_rise``.

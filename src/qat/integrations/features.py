@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 import re
@@ -68,7 +68,8 @@ class OpenPulseFeatures(FeatureMetadata):
     def from_hardware(model: PhysicalHardwareModel) -> OpenPulseFeatures:
         if not isinstance(model, PhysicalHardwareModel):
             raise ValueError(
-                "OpenPulseFeatures can only be generated from a `model` of type `PhysicalHardwareModel`."
+                "OpenPulseFeatures can only be generated from a `model` of type "
+                "`PhysicalHardwareModel`."
             )
 
         # Generate frames from the hardware model.

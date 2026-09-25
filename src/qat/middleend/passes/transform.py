@@ -293,7 +293,8 @@ class MeasurePhaseResetSanitisation(TransformPass):
 
     def __init__(self, hardware_model: PhysicalHardwareModel):
         """
-        :param hardware_model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param hardware_model: The hardware model that holds calibrated information on the
+            qubits on the QPU.
         """
         self.model = hardware_model
         self.measure_pulse_channels = self._get_measure_pulse_channels(hardware_model)
@@ -337,7 +338,7 @@ class InactivePulseChannelSanitisation(TransformPass):
     .. note::
 
         This pass requires results from the
-        :class:`ActivePulseChannelAnalysis <qat.middleend.passes.analysis.ActivePulseChannelAnalysis>`
+        :class:`~qat.middleend.passes.analysis.ActivePulseChannelAnalysis`
         to be stored in the results manager.
     """
 
@@ -464,8 +465,9 @@ class InstructionGranularitySanitisation(TransformPass):
             isinstance(instruction.filter.waveform, SampledWaveform)
             and new_duration < instruction.duration
         ):
-            # This is a temporary workaround due to the fact that the acquire duration gets rounded
-            # down to the nearest clock cycle, which results in cutting off the sample.
+            # This is a temporary workaround due to the fact that the acquire duration gets
+            # rounded down to the nearest clock cycle, which results in cutting off the
+            # sample.
             # TODO: Review for COMPILER-488 changes.
             n_samples = int(
                 np.floor(new_duration / instruction.filter.waveform.sample_time)
@@ -494,9 +496,9 @@ class InstructionGranularitySanitisation(TransformPass):
 
         if len(invalid_instructions) > 1:
             log.info(
-                "The following sampled waveform pulses do not have durations that are integer "
-                f"multiples of the clock cycle {self.clock_cycle}, and will be rounded "
-                "up by padding with zero amplitudes: "
+                "The following sampled waveform pulses do not have durations that are "
+                f"integer multiples of the clock cycle {self.clock_cycle}, and will be "
+                "rounded up by padding with zero amplitudes: "
                 + ", ".join(set(invalid_instructions))
             )
 
@@ -511,9 +513,10 @@ class InstructionLengthSanitisation(TransformPass):
         .. warning::
 
             The pass will assume that the durations of instructions are sanitised to the
-            granularity of the pulse channels. If instructions that do not meet the criteria are
-            provided, it might produce incorrect instructions (i.e., instructions that are shorter than
-            the clock cycle). This can be enforced using the :class:`InstructionGranularitySanitisation <qat.middleend.passes.transform.InstructionGranularitySanitisation>`
+            granularity of the pulse channels. If instructions that do not meet the
+            criteria are provided, it might produce incorrect instructions (i.e.,
+            instructions that are shorter than the clock cycle). This can be enforced using
+            the :class:`~qat.middleend.passes.transform.InstructionGranularitySanitisation`
             pass.
         """
         self.duration_limit = target_data.QUBIT_DATA.pulse_duration_max
@@ -801,15 +804,16 @@ class BatchedShots(TransformPass):
 
         if not acquire_counts:
             log.warning(
-                "No acquire instructions found. Assuming 1 acquire per shot for batching of shots."
+                "No acquire instructions found. Assuming 1 acquire per shot for batching "
+                "of shots."
             )
             num_acquire = 1
         else:
             num_acquire = max(acquire_counts.values())
             if num_acquire > self.max_acquisitions:
                 raise ValueError(
-                    "The number of acquires per shot exceeds the maximum acquires allowed on the "
-                    "target machine, batching cannot be performed."
+                    "The number of acquires per shot exceeds the maximum acquires allowed "
+                    "on the target machine, batching cannot be performed."
                 )
 
         total_num_acquire = num_acquire * num_shots
@@ -822,8 +826,9 @@ class BatchedShots(TransformPass):
 
         if num_batches > 1:
             log.info(
-                f"The number of acquisitions {total_num_acquire} exceeds the maximum allowed on the "
-                f"target. Batching as {num_batches} batches of {shots_per_batch} shots."
+                f"The number of acquisitions {total_num_acquire} exceeds the maximum "
+                f"allowed on the target. Batching as {num_batches} batches of "
+                f"{shots_per_batch} shots."
             )
 
         repeat.repeat_count = shots_per_batch
@@ -835,13 +840,15 @@ class BatchedShots(TransformPass):
 class ResetsToDelays(TransformPass):
     """Transforms :class:`Reset` operations to :class:`Delay`s.
 
-    Note that the delays do not necessarily agree with the granularity of the underlying target machine.
-    This can be enforced using the :class:`InstructionGranularitySanitisation` pass.
+    Note that the delays do not necessarily agree with the granularity of the underlying
+    target machine. This can be enforced using the
+    :class:`InstructionGranularitySanitisation` pass.
     """
 
     def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         :param target_data: Target-related information.
         """
         self.model = model
@@ -922,19 +929,21 @@ class ResetsToDelays(TransformPass):
 class ResetTransformation(ResetsToDelays):
     """Transforms :class:`Reset` operations to pulsed definitions of reset.
 
-    A general reset pass, which transforms resets into pulses/delays depending on the reset type.
-    Reset type is controlled via the compiler configuration, the reset will be transformed into
-    a pulsed readout (DDrop) or a set of delays (Passive reset). This is an extended version of
-    `ResetsToDelays`.
+    A general reset pass, which transforms resets into pulses/delays depending on the reset
+    type. Reset type is controlled via the compiler configuration, the reset will be
+    transformed into a pulsed readout (DDrop) or a set of delays (Passive reset). This is an
+    extended version of `ResetsToDelays`.
 
-    Note that the delays do not necessarily agree with the granularity of the underlying target machine.
-    This can be enforced using the :class:`InstructionGranularitySanitisation` pass. This pass assumes
+    Note that the delays do not necessarily agree with the granularity of the underlying
+    target machine. This can be enforced using the
+    :class:`InstructionGranularitySanitisation` pass. This pass assumes
     :class:`SynchronizeTask` comes after this pass to ensure reset is synchronized.
     """
 
     def __init__(self, model: PhysicalHardwareModel, target_data: TargetData):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         :param target_data: Target-related information.
         """
         self.model = model
@@ -989,8 +998,8 @@ class ResetTransformation(ResetsToDelays):
                     or res_reset_ch.uuid not in ch_id_targets
                 ):
                     raise ValueError(
-                        f"Reset channels from qubit {qubit.uuid} not in active channel list, "
-                        "cannot correctly synchronize channels."
+                        f"Reset channels from qubit {qubit.uuid} not in active "
+                        "channel list, cannot correctly synchronize channels."
                     )
                 if (
                     not qubit_reset_ch.is_ddrop_calibrated
@@ -1135,7 +1144,8 @@ class EndOfTaskResetSanitisation(TransformPass):
 
     def __init__(self, model: PhysicalHardwareModel):
         """
-        :param model: The hardware model that holds calibrated information on the qubits on the QPU.
+        :param model: The hardware model that holds calibrated information on the qubits on
+            the QPU.
         """
         self.model = model
 
@@ -1268,7 +1278,8 @@ class InitialPhaseResetSanitisation(TransformPass):
 
     .. warning::
 
-        This pass implies that an `ActivePulseChannelAnalysis` is performed prior to this pass.
+        This pass implies that an `ActivePulseChannelAnalysis` is performed prior to this
+        pass.
     """
 
     def run(self, ir: InstructionBuilder, res_mgr: ResultManager, *args, **kwargs):
@@ -1603,7 +1614,8 @@ class InsertPreSelectionMeasurement(TransformPass):
     3. ``qubit.preselect_disallowed_states`` is non-empty.
     4. Either ``qubit.post_process_method`` is set, **or** ``qubit.mean_z_map_args``
        is set (legacy path — the same ``Equalise → Discriminate`` chain is derived
-       as for :meth:`~qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing`).
+       as for
+       :meth:`~.QuantumInstructionBuilder.measure_with_granular_post_processing`).
 
     The background state (:data:`~qat.model.post_processing.BG_KEY`)
     is negative and is therefore always discarded.
@@ -1701,7 +1713,8 @@ class InsertPreSelectionMeasurement(TransformPass):
             + ir.instructions[repeat_index + 1 :]
         )
 
-        # Register injected channels so InactivePulseChannelSanitisation does not strip them.
+        # Register injected channels so InactivePulseChannelSanitisation does not strip
+        # them.
         for qubit in candidates.values():
             active_pulse_channels.add_target(qubit.measure_pulse_channel, qubit)
             active_pulse_channels.add_target(qubit.resonator.acquire_pulse_channel, qubit)

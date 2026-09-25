@@ -204,8 +204,6 @@ extend-select = [
 
 # Ignore specific rules (add or remove as needed)
 ignore = [
-  # E codes TODO: COMPILER-1069
-  "E501", # Line too long (handled by ruff format as best we can with line-length=92)
   # N codes
   "N801", # Class name should use CapWords convention
   "N802", # Function name should be lowercase
@@ -258,6 +256,7 @@ ignore = [
   "B027",
   "B904",
   "BLE001",
+  "E501",
   "RSE102",
   "S110",
   "S112",
@@ -279,6 +278,7 @@ ignore = [
   "B008",
   "B904",
   "BLE001",
+  "E501",
   "RSE102",
   "S110",
   "S112",
@@ -293,6 +293,7 @@ ignore = [
   "B024",
   "B026",
   "B027",
+  "E501",
 ]
 "tests/unit/purr/**" = [
   "B006",
@@ -300,6 +301,7 @@ ignore = [
   "BLE001",
   "B017",
   "B904",
+  "E501",
   "PT010",
   "PT011",
   "PT017",
@@ -311,7 +313,7 @@ ignore = [
   "SIM201",
   "SIM300",
 ]
-"notebooks/**" = ["E402", "B018"]
+"notebooks/**" = ["E402", "B018", "E501"]
 # Ignore issues in scripts and tools
 # TODO: COMPILER-1079
 "scripts/**" = ["S314", "S605", "S607"]

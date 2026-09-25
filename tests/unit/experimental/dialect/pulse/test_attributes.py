@@ -73,7 +73,10 @@ class TestTimeAttr:
         printer.print_attribute(attr)
         output = io_stream.getvalue()
 
-        pattern = r"#pulse\.time_attr<\s*#builtin\.(.*?)<(.*?)>,\s*#pulse\.time_units\"(.*?)\"\s*>"
+        pattern = (
+            r"#pulse\.time_attr<\s*#builtin\.(.*?)<(.*?)>,"
+            r"\s*#pulse\.time_units\"(.*?)\"\s*>"
+        )
         match = re.search(pattern, output)
         assert match is not None
         type_string, value_str, unit_str = match.groups()
@@ -188,7 +191,10 @@ class TestFrequencyAttr:
         printer.print_attribute(attr)
         output = io_stream.getvalue()
 
-        pattern = r"#pulse\.frequency_attr<\s*#builtin\.(.*?)<(.*?)>,\s*#pulse\.frequency_units\"(.*?)\"\s*>"
+        pattern = (
+            r"#pulse\.frequency_attr<\s*#builtin\.(.*?)<(.*?)>,"
+            r"\s*#pulse\.frequency_units\"(.*?)\"\s*>"
+        )
         match = re.search(pattern, output)
         assert match is not None
         type_string, value_str, unit_str = match.groups()
@@ -354,7 +360,10 @@ class TestSampledWaveformAttr:
         output = io_stream.getvalue()
 
         # Match the full output
-        pattern = r"#pulse\.sampled_waveform<\s*#pulse\.numeric_array_data\[(.*?)\],\s*#pulse\.time_attr<(.*?)>,\s*#pulse\.time_attr<(.*?)>\s*>"
+        pattern = (
+            r"#pulse\.sampled_waveform<\s*#pulse\.numeric_array_data\[(.*?)\],"
+            r"\s*#pulse\.time_attr<(.*?)>,\s*#pulse\.time_attr<(.*?)>\s*>"
+        )
         match = re.search(pattern, output)
         assert match is not None
         waveform_contents, time_str, sample_time_str = match.groups()

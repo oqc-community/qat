@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 """OpenQASM3 parser integration and helpers.
 
 This module implements a QASM3 parser that maps OpenQASM AST nodes into the
@@ -498,7 +498,8 @@ def _create_lark_parser():
 class Qasm3Parser(Interpreter, AbstractParser):
     lark_parser = _create_lark_parser()
 
-    # TODO modifiy configurability of max_count_operator_within_waveform_elements: see ID COMPILER-1002
+    # TODO modifiy configurability of max_count_operator_within_waveform_elements: see ID
+    # COMPILER-1002
     def __init__(self, max_count_operator_within_waveform_elements: int = 50):
         super().__init__()
         self.builder: QuantumInstructionBuilder | None = None
@@ -533,8 +534,9 @@ class Qasm3Parser(Interpreter, AbstractParser):
                     for element in elements:
                         operators = "+-*/"
                         count_operators = sum(element.count(ops) for ops in operators)
-                        # default _max_count_operator_within_waveform_elements set to 50 to ensure poly-time overhead
-                        # does not negatively affect runtime performance
+                        # default _max_count_operator_within_waveform_elements set to 50 to
+                        # ensure poly-time overhead does not negatively affect runtime
+                        # performance
                         if (
                             count_operators
                             > self._max_count_operator_within_waveform_elements

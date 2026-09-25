@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 """Unit tests for the instruction builder and quantum instruction helpers.
 
 These tests exercise high-level builder convenience methods and ensure the generated
@@ -297,14 +297,16 @@ class TestPauliGates:
         if use_xpi_pulse and add_xpi_pulse:
             # 1 pulse on the drive pulse channel, two phaseshifts on the drive channel,
             # 2 Z pulses to rotate to -pi
-            # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 2 Z pulses`.
+            # 2 phase shifts per coupled qubit for each cross resonance (cancellation)
+            # channel) * 2 Z pulses`.
             ref_number_of_instructions = (
                 1 + 2 + len(model.logical_connectivity[qubit_index]) * 2 * 2
             )
         else:
             # 2 pulses on the drive pulse channel, (two phaseshifts on the drive channel,
             # 3 Z pulses in U gate
-            # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * 3 Z pulses`.
+            # 2 phase shifts per coupled qubit for each cross resonance (cancellation)
+            # channel) * 3 Z pulses`.
             ref_number_of_instructions = (
                 2 + 3 + len(model.logical_connectivity[qubit_index]) * 6
             )
@@ -335,7 +337,8 @@ class TestPauliGates:
 
         if builder.constrain(theta):
             # 2 pulses on the drive pulse channel, (two phaseshifts on the drive channel,
-            # 2 phase shifts per coupled qubit for each cross resonance (cancellation) channel) * `number_of_z``.
+            # 2 phase shifts per coupled qubit for each cross resonance (cancellation)
+            # channel) * `number_of_z``.
             ref_number_of_instructions = (
                 1 * 2
                 + 1 * number_of_z

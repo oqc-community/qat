@@ -276,8 +276,8 @@ class TestParityWithPydanticSoftSquareWaveform:
     SoftSquareWaveform class.
 
     The Soft Square waveform implements the legacy ``SoftSquareWaveform`` under the
-    parameterisations ``fractional_top_width = 1 - fractional_rise / width``, ``fractional_rise = 2 * fractional_rise / width``,
-    ``regularize = False``.
+    parameterisations ``fractional_top_width = 1 - fractional_rise / width``,
+    ``fractional_rise = 2 * fractional_rise / width``, ``regularize = False``.
     """
 
     @pytest.mark.parametrize("width", [2.0, 160e-9])
@@ -349,7 +349,8 @@ class TestParityWithPydanticExtraSoftSquareWaveform:
     ExtraSoftSquareWaveform class.
 
     The Extra Soft Square waveform implements the legacy ``ExtraSoftSquareWaveform`` under
-    the parameterisations ``fractional_top_width = (std_dev - 4 * fractional_rise) / width``,
+    the parameterisations
+    ``fractional_top_width = (std_dev - 4 * fractional_rise) / width``,
     ``fractional_rise = 2 * fractional_rise / width``, ``regularize = True``.
     """
 

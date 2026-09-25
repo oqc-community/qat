@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 """Unit tests for runtime transform passes that post-process acquisition results and format
 runtime outputs.
 
@@ -665,7 +665,8 @@ class TestAcquisitionPostprocessingPostSelection:
             process_type=PostProcessType.MEAN,
             axes=[ProcessAxis.TIME],
         )
-        # Use synthetic ML method: "1" (negative real → key -2, disallowed), "0" (positive → 0)
+        # Use synthetic ML method: "1" (negative real → key -2, disallowed),
+        # "0" (positive → 0)
         synth_method = MaxLikelihoodMethod(
             states={
                 0: MLDiscriminateParams(location=1.0 + 0j),

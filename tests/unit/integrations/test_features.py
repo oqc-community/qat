@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from dataclasses import fields
 
 import pytest
@@ -46,13 +46,15 @@ class TestOpenPulseFeatures:
         assert len(features["ports"]) == self.hw_pyd.number_of_qubits * 2
 
         assert "frames" in features
+        # Freq shift, second state, and reset pulse channels are ignored for OpenPulse
+        # features.
         number_of_pulse_channels = (
             sum(
                 len(qubit.all_qubit_and_resonator_pulse_channels)
                 for qubit in self.hw_pyd.qubits.values()
             )
             - 4 * self.hw_pyd.number_of_qubits
-        )  # Freq shift, second state, and reset pulse channels are ignored for OpenPulse features.
+        )
         assert len(features["frames"]) == number_of_pulse_channels
 
         assert "waveforms" in features

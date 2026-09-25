@@ -82,7 +82,9 @@ class Q1LinearScanAllocator(BlockNaiveAllocator):
     """
 
     def __init__(self, available_registers: Q1RegisterStack):
-        """:param available_registers: The Q1 physical registers available for allocation."""
+        """
+        :param available_registers: The Q1 physical registers available for allocation.
+        """
         super().__init__(available_registers, Q1RegisterType)
 
     def allocate_sequence(self, sequence: SequenceOp) -> None:

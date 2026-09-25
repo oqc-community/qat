@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
-"""Q1 sequence outlining pass: partitions a Pulse entry block into per-frame sequence envelopes."""
+"""Q1 sequence outlining: splits a Pulse entry block into per-frame sequence envelopes."""
 
 from dataclasses import dataclass, field
 from re import compile

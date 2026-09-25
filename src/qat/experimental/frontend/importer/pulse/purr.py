@@ -312,7 +312,8 @@ class PurrImporter:
         *ops* and return the SSA value that should be wired to the return op.
 
         :param post_processing_factory: Optional post-processing factory.
-        :param ops: ``ops[0]`` must be the :class:`~qat.experimental.dialect.results.ir.MapOp`.
+        :param ops: ``ops[0]`` must be the
+            :class:`~qat.experimental.dialect.results.ir.MapOp`.
         :returns: The SSA value to pass to ``func.ReturnOp``.
         """
         if post_processing_factory is not None:
@@ -566,7 +567,8 @@ class PurrImporter:
                 )
             case _:
                 logger.warning(
-                    "Post-processing type %s is unsupported by the PuRR importer and will be ignored.",
+                    "Post-processing type %s is unsupported by the PuRR importer and will "
+                    "be ignored.",
                     instruction.process,
                 )
                 return None

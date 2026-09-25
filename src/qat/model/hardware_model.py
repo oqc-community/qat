@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from __future__ import annotations
 
 from copy import deepcopy
@@ -42,7 +42,8 @@ class LogicalHardwareModel(NoExtraFieldsModel):
     @field_validator("version")
     def version_compatibility(version: Version):
         assert version.major == VERSION.major, (
-            f"Direct instantiation requires major version compatibility (expected {VERSION.major}.Y.Z, found {version})"
+            "Direct instantiation requires major version compatibility (expected "
+            f"{VERSION.major}.Y.Z, found {version})"
         )
         assert version <= VERSION, (
             f"Latest supported hardware model version {VERSION}, found {version}"

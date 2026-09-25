@@ -493,8 +493,10 @@ class ModuloOp(InternalBinaryOp[PhaseType]):
         %phase2 = pulse.constant<1.0> : !pulse.phase
         %result = pulse.modulo(%phase1, %phase2) : !pulse.phase
 
-    :ivar lhs: The left-hand side operand of the modulo operation, which must be phase type.
-    :ivar rhs: The right-hand side operand of the modulo operation, which must be phase type.
+    :ivar lhs: The left-hand side operand of the modulo operation, which must be phase
+        type.
+    :ivar rhs: The right-hand side operand of the modulo operation, which must be phase
+        type.
     """
 
     name = "pulse.modulo"
@@ -1464,7 +1466,8 @@ class StartContinuousWaveformOp(IRDLOperation, PulseOperationInterface):
 
         %frame = pulse.create_frame(%frequency) : !pulse.frame<"channel_1">
         %amplitude = pulse.constant<0.5> : !pulse.amplitude
-        %frame2 = pulse.start_continuous_waveform(%frame, %amplitude) : !pulse.frame<"channel_1">
+        %frame2 = pulse.start_continuous_waveform(%frame, %amplitude)
+            : !pulse.frame<"channel_1">
         %duration = pulse.constant<800e-9> : !pulse.time
         %frame3 = pulse.wait(%frame2, %duration) : !pulse.frame<"channel_1">
         %frame4 = pulse.stop_continuous_waveform(%frame3) : !pulse.frame<"channel_1">
@@ -1653,7 +1656,8 @@ class EqualiseOp(IRDLOperation):
     .. math::
 
         \\begin{pmatrix} I' \\\\ Q' \\end{pmatrix}
-        = A \\begin{pmatrix} I \\\\ Q \\end{pmatrix} + \\begin{pmatrix} b_I \\\\ b_Q \\end{pmatrix}
+        = A \\begin{pmatrix} I \\\\ Q \\end{pmatrix}
+        + \\begin{pmatrix} b_I \\\\ b_Q \\end{pmatrix}
 
     where ``A`` is a **real** 2×2 matrix (``transform``) and ``[b_I, b_Q]`` is the real
     offset vector (``offset``).  The output is returned as a complex value ``I' + j Q'``.
