@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_396e053e254835cb_timeline_normalization_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-09-25 13:45 +0000
+            created at 2026-09-25 14:42 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -97,20 +97,20 @@
     <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="str">1. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="str">   &#8212; fold all constant arithmetic so that subsequent passes only see canonical</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="str">   :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` operands.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="str">2. :class:`~qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation`</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="str">2. :class:`.ApplyGranularitySanitisation`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="str">   &#8212; round constant durations and sampled-waveform widths up to the hardware timing</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="str">   granularity, so later passes only see realisable times.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="str">3. :class:`~qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples`</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="str">3. :class:`.EvaluateWaveformsAsSamples`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="str">   &#8212; convert analytical waveform ops into sampled</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="str">   :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` payloads, using the</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t"><span class="str">   per-port sample times from *constraints*.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="str">4. :class:`~qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization`</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="str">4. :class:`.TimelineNormalization`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t"><span class="str">   &#8212; resolve :class:`~qat.experimental.dialect.pulse.ir.ops.SynchronizeOp` operations</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t"><span class="str">   into explicit :class:`~qat.experimental.dialect.pulse.ir.ops.WaitOp` chains using</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t"><span class="str">   symbolic time-expression analysis.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t"><span class="str">5. :class:`~qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations`</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t"><span class="str">5. :class:`.ApplySquashContiguousOptimizations`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t"><span class="str">   &#8212; merge adjacent wait and phase operations.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t"><span class="str">6. :class:`~qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays`</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t"><span class="str">6. :class:`.LowerKernelsToResultsArrays`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t"><span class="str">   &#8212; rewrite each kernel signature from ``ResultsCollectionType`` values to</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t"><span class="str">   ``ResultsArrayType`` values and update all call sites to match the expanded signature.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t"><span class="str">7. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`</span>&nbsp;</span><span class="r"></span></p>
@@ -132,7 +132,7 @@
     <p class="run"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">dialect</span><span class="op">.</span><span class="nam">pulse</span><span class="op">.</span><span class="nam">transforms</span><span class="op">.</span><span class="nam">granularity_sanitisation</span> <span class="key">import</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">    <span class="nam">ApplyGranularitySanitisation</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t"><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">dialect</span><span class="op">.</span><span class="nam">pulse</span><span class="op">.</span><span class="nam">transforms</span><span class="op">.</span><span class="nam">optimize_contiguous_squashable_instructions</span> <span class="key">import</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">dialect</span><span class="op">.</span><span class="nam">pulse</span><span class="op">.</span><span class="nam">transforms</span><span class="op">.</span><span class="nam">optimize_contiguous_squashable_instructions</span> <span class="key">import</span> <span class="op">(</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">    <span class="nam">ApplySquashContiguousOptimizations</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t"><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t"><span class="key">from</span> <span class="nam">qat</span><span class="op">.</span><span class="nam">experimental</span><span class="op">.</span><span class="nam">dialect</span><span class="op">.</span><span class="nam">pulse</span><span class="op">.</span><span class="nam">transforms</span><span class="op">.</span><span class="nam">timeline_normalization</span> <span class="key">import</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
@@ -195,7 +195,7 @@
             <a class="nav" href="z_396e053e254835cb_timeline_normalization_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-09-25 13:45 +0000
+            created at 2026-09-25 14:42 +0000
         </p>
     </div>
 </footer>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.runtime.simple module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.runtime.simple module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -719,11 +719,11 @@ wrapped in a :class:Executable object which further specifies high level metadat
 acquisition restrictions such as the expected shape of any loop nest, the post-
 processing, and results formatting. The runtime provides the following services.</p>
 <ul class="simple">
-<li><p>Execution batching: Some programs require memory specifications beyond that of the control
-hardware. It important to slice and batch-execute large programs. Equally important is
-necessity to aggregate results from different batches.</p></li>
-<li><p>Postprocessing: Performs any required post-processing steps that haven’t been carried out
-real-time on the FPGA.</p></li>
+<li><p>Execution batching: Some programs require memory specifications beyond that of the
+control hardware. It important to slice and batch-execute large programs. Equally
+important is necessity to aggregate results from different batches.</p></li>
+<li><p>Postprocessing: Performs any required post-processing steps that haven’t been carried
+out real-time on the FPGA.</p></li>
 <li><p>Error mitigation: Adjusts results based on error mitigation strategies.</p></li>
 </ul>
 <p>These services are specified as a pipline of passes, see <cite>results_pipeline</cite> module.</p>

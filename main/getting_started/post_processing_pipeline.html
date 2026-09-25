@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Readout Post-Processing &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>Readout Post-Processing &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -790,7 +790,8 @@ cloud, degrading any downstream discriminator.</p>
 real affine transform:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix} I' \\ Q' \end{pmatrix}
-= A \begin{pmatrix} I \\ Q \end{pmatrix} + \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
+= A \begin{pmatrix} I \\ Q \end{pmatrix}
++ \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
 <p>where <code class="docutils literal notranslate"><span class="pre">A</span></code> is a <strong>real</strong> 2×2 matrix (<code class="docutils literal notranslate"><span class="pre">transform</span></code>) and <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code>
 is the real offset vector (<code class="docutils literal notranslate"><span class="pre">offset</span></code>).  The output is returned as a
 complex value <code class="docutils literal notranslate"><span class="pre">I'</span> <span class="pre">+</span> <span class="pre">j</span> <span class="pre">Q'</span></code>.</p>

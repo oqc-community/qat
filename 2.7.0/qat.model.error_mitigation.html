@@ -389,9 +389,9 @@ validated to form a valid model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.model.error_mitigation.ReadoutMitigation.params.linear"></span><strong>linear</strong><a class="paramlink headerlink reference internal" href="#qat.model.error_mitigation.ReadoutMitigation.params.linear">¶</a> – <p>Maps each individual qubit to its &lt;0/1&gt; state given the &lt;0/1&gt; probabilistic
-error that happens on the device. Note that linear assumes no cross-talk effects and
-considers each qubit independent.
+<li><p><span class="target" id="qat.model.error_mitigation.ReadoutMitigation.params.linear"></span><strong>linear</strong><a class="paramlink headerlink reference internal" href="#qat.model.error_mitigation.ReadoutMitigation.params.linear">¶</a> – <p>Maps each individual qubit to its &lt;0/1&gt; state given the &lt;0/1&gt;
+probabilistic error that happens on the device. Note that linear assumes no
+cross-talk effects and considers each qubit independent.
 linear = {</p>
 <blockquote>
 <div><p>&lt;qubit_number&gt;: NDArray(2, 2)</p>
@@ -399,8 +399,9 @@ linear = {</p>
 <p>}
 The matrix element (i, j) of the NDArray maps the probability p(i|j).</p>
 </p></li>
-<li><p><span class="target" id="qat.model.error_mitigation.ReadoutMitigation.params.m3_available"></span><strong>m3_available</strong><a class="paramlink headerlink reference internal" href="#qat.model.error_mitigation.ReadoutMitigation.params.m3_available">¶</a> – Flag to enable a runtime mitigation strategy that builds up the calibration
-it needs at runtime. For more info <a class="reference external" href="https://github.com/Qiskit-Partners/mthree">https://github.com/Qiskit-Partners/mthree</a>.</p></li>
+<li><p><span class="target" id="qat.model.error_mitigation.ReadoutMitigation.params.m3_available"></span><strong>m3_available</strong><a class="paramlink headerlink reference internal" href="#qat.model.error_mitigation.ReadoutMitigation.params.m3_available">¶</a> – Flag to enable a runtime mitigation strategy that builds up the
+calibration it needs at runtime. For more info
+<a class="reference external" href="https://github.com/Qiskit-Partners/mthree">https://github.com/Qiskit-Partners/mthree</a>.</p></li>
 </ul>
 </dd>
 </dl>

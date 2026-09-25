@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.engines.qblox.live module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.engines.qblox.live module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -718,17 +718,18 @@
 <p>Composing Qblox instruments can be achieved by 2 methods:
 1- Daisy-chaining the REF_out of one cluster’s CMM to REF_in of the next cluster’s CMM.</p>
 <blockquote>
-<div><p>This is like a linked list pattern where the first cluster is <strong>allowed</strong> to have both “external”
-or “internal” reference source config, but subsequent clusters <strong>must</strong> have their reference
-source set as “external”.</p>
+<div><p>This is like a linked list pattern where the first cluster is <strong>allowed</strong> to have
+both “external” or “internal” reference source config, but subsequent clusters
+<strong>must</strong> have their reference source set as “external”.</p>
 </div></blockquote>
 <dl class="simple">
-<dt>2- Distribute the clock from a common source to all the REF_in of all clusters’ CMM modules.</dt><dd><p>This is like a star pattern where an external reference clock is distributed to all the clusters
-in the fleet</p>
+<dt>2- Distribute the clock from a common source to all the REF_in of all clusters’ CMM</dt><dd><p>modules. This is like a star pattern where an external reference clock is
+distributed to all the clusters in the fleet</p>
 </dd>
 </dl>
-<p>Historically, both methods have been supported, but recent FW versions ditched the first method and only
-support the second method. Regardless of the method followed, this abstraction remains oblivious.</p>
+<p>Historically, both methods have been supported, but recent FW versions ditched the first
+method and only support the second method. Regardless of the method followed, this
+abstraction remains oblivious.</p>
 </dd></dl>
 
 <dl class="py class">

@@ -352,11 +352,11 @@ wrapped in a :class:Executable object which further specifies high level metadat
 acquisition restrictions such as the expected shape of any loop nest, the post-
 processing, and results formatting. The runtime provides the following services.</p>
 <ul class="simple">
-<li><p>Execution batching: Some programs require memory specifications beyond that of the control
-hardware. It important to slice and batch-execute large programs. Equally important is
-necessity to aggregate results from different batches.</p></li>
-<li><p>Postprocessing: Performs any required post-processing steps that haven’t been carried out
-real-time on the FPGA.</p></li>
+<li><p>Execution batching: Some programs require memory specifications beyond that of the
+control hardware. It important to slice and batch-execute large programs. Equally
+important is necessity to aggregate results from different batches.</p></li>
+<li><p>Postprocessing: Performs any required post-processing steps that haven’t been carried
+out real-time on the FPGA.</p></li>
 <li><p>Error mitigation: Adjusts results based on error mitigation strategies.</p></li>
 </ul>
 <p>These services are specified as a pipline of passes, see <cite>results_pipeline</cite> module.</p>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.waveforms.shapes.gaussian module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.experimental.waveforms.shapes.gaussian module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -729,7 +729,8 @@ It is <code class="docutils literal notranslate"><span class="pre">False</span><
 </ul>
 <p>The Gaussian waveform is defined as</p>
 <div class="math notranslate nohighlight">
-\[f(x) = \frac{1}{N}\left[\text{exp}\left(-\frac{x^2}{2\sigma^2}\right) - C\right],\]</div>
+\[f(x) = \frac{1}{N}
+    \left[\text{exp}\left(-\frac{x^2}{2\sigma^2}\right) - C\right],\]</div>
 <p>where <code class="docutils literal notranslate"><span class="pre">fractional_breadth</span></code> is the standard deviation. <code class="docutils literal notranslate"><span class="pre">C</span></code> is the shift value, and <code class="docutils literal notranslate"><span class="pre">N</span></code>
 is the regularization value, where <code class="docutils literal notranslate"><span class="pre">N</span></code> and <code class="docutils literal notranslate"><span class="pre">C</span></code> are one and zero respectively if
 <code class="docutils literal notranslate"><span class="pre">regularize</span> <span class="pre">=</span> <span class="pre">False</span></code>, and are otherwise defined as</p>
@@ -744,8 +745,9 @@ parameterisations:</p>
 <code class="docutils literal notranslate"><span class="pre">regularize</span> <span class="pre">=</span> <span class="pre">False</span></code>,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">GaussianZeroEdgeWaveform</span></code>: <code class="docutils literal notranslate"><span class="pre">fractional_breadth</span> <span class="pre">=</span> <span class="pre">2</span> <span class="pre">*</span> <span class="pre">std_dev</span> <span class="pre">/</span> <span class="pre">width</span></code>,
 <code class="docutils literal notranslate"><span class="pre">regularize</span> <span class="pre">=</span> <span class="pre">zero_at_edges</span></code>,</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveform</span></code>: <code class="docutils literal notranslate"><span class="pre">fractional_breadth</span> <span class="pre">=</span> <span class="pre">std_dev</span></code>, <code class="docutils literal notranslate"><span class="pre">regularize</span> <span class="pre">=</span> <span class="pre">zero_at_edges</span></code>,
-where DRAG is implemented away from the waveform definition, using the derivatives,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DragGaussianWaveform</span></code>: <code class="docutils literal notranslate"><span class="pre">fractional_breadth</span> <span class="pre">=</span> <span class="pre">std_dev</span></code>,
+<code class="docutils literal notranslate"><span class="pre">regularize</span> <span class="pre">=</span> <span class="pre">zero_at_edges</span></code>, where DRAG is implemented away from the waveform
+definition, using the derivatives,</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">SofterGaussianWaveform</span></code>: <code class="docutils literal notranslate"><span class="pre">fractional_breadth</span> <span class="pre">=</span> <span class="pre">sqrt(2)</span> <span class="pre">*</span> <span class="pre">fractional_rise</span></code>,
 <code class="docutils literal notranslate"><span class="pre">regularize</span> <span class="pre">=</span> <span class="pre">True</span></code>.</p></li>
 </ul>
@@ -789,9 +791,10 @@ where DRAG is implemented away from the waveform definition, using the derivativ
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><span class="target" id="qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.width"></span><strong>width</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.width">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The waveform width.</p></li>
-<li><p><span class="target" id="qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.absolute_breadth"></span><strong>absolute_breadth</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.absolute_breadth">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The absolute fractional_breadth of the Gaussian waveform.</p></li>
-<li><p><span class="target" id="qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.regularize"></span><strong>regularize</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.regularize">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, applies a shift and rescaling so that the waveform is
-zero at the edges with maximum component one. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><span class="target" id="qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.absolute_breadth"></span><strong>absolute_breadth</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.absolute_breadth">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The absolute fractional_breadth of the Gaussian
+waveform.</p></li>
+<li><p><span class="target" id="qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.regularize"></span><strong>regularize</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.waveforms.shapes.gaussian.GaussianWaveformShape.from_absolute.params.regularize">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, applies a shift and rescaling so that the waveform
+is zero at the edges with maximum component one. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>

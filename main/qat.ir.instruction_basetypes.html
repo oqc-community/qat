@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.ir.instruction_basetypes module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.ir.instruction_basetypes module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -736,12 +736,10 @@ control hardware.</p>
 <p>Note that different backends will only allow selected acquisition modes.</p>
 <ul class="simple">
 <li><p><cite>RAW</cite>: Returns the time-series acquisition data for each shot</p></li>
-<li><p><cite>SCOPE</cite>: Returns the time-series acquisition data where each point is averaged over the number of shots</p></li>
-<li><dl class="simple">
-<dt><cite>INTEGRATOR</cite>: Down-conversion and integration of the acquisition data has occurred on the hardware so that a</dt><dd><p>single data point is returned for each shot</p>
-</dd>
-</dl>
-</li>
+<li><p><cite>SCOPE</cite>: Returns the time-series acquisition data where each point is averaged over
+the number of shots</p></li>
+<li><p><cite>INTEGRATOR</cite>: Down-conversion and integration of the acquisition data has occurred on
+the hardware so that a single data point is returned for each shot</p></li>
 </ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.instruction_basetypes.AcquireMode.INTEGRATOR">
@@ -801,14 +799,13 @@ begins. Shots that fail are discarded via
 <p><cite>PostProcessType</cite> is used in a <cite>PostProcessing</cite> instruction to determine how readouts
 should be processed. It describes a type of classical post-processing:</p>
 <ul class="simple">
-<li><p><cite>DOWN_CONVERT</cite>: Down-converts the readout measurement, should only be used along the  axis <cite>ProcessAxis.TIME</cite>.</p></li>
+<li><p><cite>DOWN_CONVERT</cite>: Down-converts the readout measurement, should only be used along the
+axis <cite>ProcessAxis.TIME</cite>.</p></li>
 <li><p><cite>MEAN</cite>: Takes an average over the given axis.</p></li>
-<li><dl class="simple">
-<dt><cite>LINEAR_MAP_COMPLEX_TO_REAL</cite>: Maps the (complex) measured value onto a (real) z-projection using a supplied</dt><dd><p>linear mapping.</p>
-</dd>
-</dl>
-</li>
-<li><p><cite>DISCRIMINATE</cite>: Converts a z-projection to a classical bit by comparison with a supplied discrimination threshold.</p></li>
+<li><p><cite>LINEAR_MAP_COMPLEX_TO_REAL</cite>: Maps the (complex) measured value onto a (real)
+z-projection using a supplied linear mapping.</p></li>
+<li><p><cite>DISCRIMINATE</cite>: Converts a z-projection to a classical bit by comparison with a
+supplied discrimination threshold.</p></li>
 </ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.ir.instruction_basetypes.PostProcessType.DISCRIMINATE">
@@ -845,7 +842,8 @@ should be processed. It describes a type of classical post-processing:</p>
 axis which the post-processing should occur on. Often used in conjunction with the
 <cite>AcquireMode</cite> to determine the correct method for post-processing.</p>
 <ul class="simple">
-<li><p><cite>TIME</cite>: Instructs the post-processing to be performed over the time-series data returned from a readout.</p></li>
+<li><p><cite>TIME</cite>: Instructs the post-processing to be performed over the time-series data
+returned from a readout.</p></li>
 <li><p><cite>SEQUENCE</cite>: Instructs the post-processing to be performed over the shots.</p></li>
 </ul>
 <dl class="py attribute">

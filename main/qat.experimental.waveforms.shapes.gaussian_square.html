@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.waveforms.shapes.gaussian_square module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.experimental.waveforms.shapes.gaussian_square module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -726,7 +726,8 @@ waveform is a pure square function, and otherwise it linearly interpolates betwe
 <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">-fractional_top_width]</span></code> and the fall interval <code class="docutils literal notranslate"><span class="pre">[fractional_top_width,</span> <span class="pre">1]</span></code> are each
 remapped to <code class="docutils literal notranslate"><span class="pre">[-1,</span> <span class="pre">0]</span></code> and <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code> respectively via</p>
 <div class="math notranslate nohighlight">
-\[x_{\text{rise}} = \frac{x + w_{t}}{1 - w_{t}}, \qquad x_{\text{fall}} = \frac{x - w_{t}}{1 - w_{t}},\]</div>
+\[x_{\text{rise}} = \frac{x + w_{t}}{1 - w_{t}}, \qquad
+x_{\text{fall}} = \frac{x - w_{t}}{1 - w_{t}},\]</div>
 <p>and the Gaussian is sampled with effective parameter <span class="math notranslate nohighlight">\(r / (1 - w_{t})\)</span>. This ensures
 that <code class="docutils literal notranslate"><span class="pre">fractional_rise</span></code> retains the same meaning regardless of <code class="docutils literal notranslate"><span class="pre">fractional_top_width</span></code>;
 changing <code class="docutils literal notranslate"><span class="pre">fractional_top_width</span></code> does not implicitly rescale the Gaussian edge. The
@@ -742,9 +743,11 @@ Gaussian is</p>
 <span class="math notranslate nohighlight">\(C = 0\)</span> and <span class="math notranslate nohighlight">\(N = 1\)</span>. The Gaussian Square waveform is then</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}f(x) = \begin{cases}
-    \frac{1}{N}\left[\text{exp}\left(-\frac{1}{2}\frac{(x + w_{t})^2}{r^2}\right) - C\right] &amp; \text{if } x &lt; -w_{t} \\
+    \frac{1}{N}\left[\text{exp}\left(-\frac{1}{2}\frac{(x + w_{t})^2}{r^2}\right)
+        - C\right] &amp; \text{if } x &lt; -w_{t} \\
     1 &amp; \text{if } -w_{t} \leq x \leq w_{t} \\
-    \frac{1}{N}\left[\text{exp}\left(-\frac{1}{2}\frac{(x - w_{t})^2}{r^2}\right) - C\right] &amp; \text{if } x &gt; w_{t}
+    \frac{1}{N}\left[\text{exp}\left(-\frac{1}{2}\frac{(x - w_{t})^2}{r^2}\right)
+        - C\right] &amp; \text{if } x &gt; w_{t}
 \end{cases},\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(w_{t}\)</span> is <code class="docutils literal notranslate"><span class="pre">fractional_top_width</span></code> and <span class="math notranslate nohighlight">\(r\)</span> is <code class="docutils literal notranslate"><span class="pre">fractional_rise</span></code>.</p>
 <p>Since the Gaussian Square waveform is differentiable, the first derivative of the waveform

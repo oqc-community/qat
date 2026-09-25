@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.qblox.passes.analysis module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.backend.qblox.passes.analysis module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -830,18 +830,19 @@ integer operand.</p>
 <dd><p>Performs target-dependent legalisation for QBlox.</p>
 <blockquote>
 <div><ol class="upperalpha simple">
-<li><p>A repeat instruction with a very high repetition count is illegal because acquisition memory</p></li>
+<li><p>A repeat instruction with a very high repetition count is illegal because</p></li>
 </ol>
 </div></blockquote>
-<p>on a QBlox sequencer is limited. This requires optimal batching of the repeat instruction into maximally
-supported batches of smaller repeat counts.</p>
-<p>This pass does not do any batching. More features and adjustments will follow in future iterations.</p>
+<p>acquisition memory on a QBlox sequencer is limited. This requires optimal batching
+of the repeat instruction into maximally supported batches of smaller repeat counts.</p>
+<p>This pass does not do any batching. More features and adjustments will follow in
+future iterations.</p>
 <blockquote>
 <div><ol class="upperalpha simple" start="2">
-<li><p>Previously processed variables such as frequencies, phases, and amplitudes still need digital conversion</p></li>
+<li><p>Previously processed variables such as frequencies, phases, and amplitudes</p></li>
 </ol>
 </div></blockquote>
-<p>to a representation that’s required by the QBlox ISA.</p>
+<p>still need digital conversion to a representation that’s required by the QBlox ISA.</p>
 <ul class="simple">
 <li><dl class="simple">
 <dt>NCO’s 1GHz frequency range by 4e9 steps:</dt><dd><ul>
@@ -876,14 +877,15 @@ supported batches of smaller repeat counts.</p>
 </dl>
 </li>
 </ul>
-<p>The last point is interesting as it requires knowledge of physical configuration of qubits and the modules
-they are wired to. This knowledge is typically found during execution and involving it early on would upset
-the rest of the compilation flow. In fact, it complicates this pass in particular, involves allocation
-concepts that should not be treated here, and promotes a monolithic compilation style. A temporary workaround
-is to simply assume the legality of amplitudes from the start whereby users are required to convert
-the desired voltages to the equivalent ratio AOT.</p>
-<p>This pass performs target-dependent conversion as described in part (B). More features and adjustments
-will follow in future iterations.</p>
+<p>The last point is interesting as it requires knowledge of physical configuration of
+qubits and the modules they are wired to. This knowledge is typically found during
+execution and involving it early on would upset the rest of the compilation flow. In
+fact, it complicates this pass in particular, involves allocation concepts that
+should not be treated here, and promotes a monolithic compilation style. A temporary
+workaround is to simply assume the legality of amplitudes from the start whereby
+users are required to convert the desired voltages to the equivalent ratio AOT.</p>
+<p>This pass performs target-dependent conversion as described in part (B). More
+features and adjustments will follow in future iterations.</p>
 </dd></dl>
 
 </dd></dl>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.materialisers.operations.defaults module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.experimental.system_data.materialisers.operations.defaults module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -761,7 +761,8 @@ in the mode’s calibration data, as built by the PuRR qubit materialiser:</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DefaultOperationBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qubit_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coupled_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_qubit_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_x_pi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reset_methods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_reset_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ddrop_delay_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.DefaultOperationBuilder" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.materialisers.operations.operation_builder.html#qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder" title="qat.experimental.system_data.materialisers.operations.operation_builder.AbstractOperationBuilder"><code class="xref py py-class docutils literal notranslate"><span class="pre">AbstractOperationBuilder</span></code></a></p>
 <p>Builds the default transmon gate-set operation set for a single qubit.</p>
-<p>Each operation is a method that returns an <a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>
+<p>Each operation is a method that returns an
+<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.OperationData" title="qat.experimental.system_data.canonical.schema.OperationData"><code class="xref py py-class docutils literal notranslate"><span class="pre">OperationData</span></code></a>
 instance.  Subclasses can override individual methods to customise or replace
 specific operations without touching the rest of the set — no knowledge of
 operation IDs is required.</p>
@@ -1432,8 +1433,10 @@ fixed-angle alias of this operation.</p>
 <ul class="simple">
 <li><p>θ ≈  π/2 → rz(−π/2) → X_pi_2 → rz(π/2)</p></li>
 <li><p>θ ≈ −π/2 → rz( π/2) → X_pi_2 → rz(−π/2)</p></li>
-<li><p>θ ≈  π,   <code class="docutils literal notranslate"><span class="pre">direct_x_pi</span></code> present → rz(−π/2) → X_pi → rz(π/2)  (only when <code class="docutils literal notranslate"><span class="pre">has_x_pi</span></code>)</p></li>
-<li><p>θ ≈ −π,   <code class="docutils literal notranslate"><span class="pre">direct_x_pi</span></code> present → rz( π/2) → X_pi → rz(−π/2) (only when <code class="docutils literal notranslate"><span class="pre">has_x_pi</span></code>)</p></li>
+<li><p>θ ≈  π,   <code class="docutils literal notranslate"><span class="pre">direct_x_pi</span></code> present → rz(−π/2) → X_pi → rz(π/2)
+(only when <code class="docutils literal notranslate"><span class="pre">has_x_pi</span></code>)</p></li>
+<li><p>θ ≈ −π,   <code class="docutils literal notranslate"><span class="pre">direct_x_pi</span></code> present → rz( π/2) → X_pi → rz(−π/2)
+(only when <code class="docutils literal notranslate"><span class="pre">has_x_pi</span></code>)</p></li>
 <li><p>default → decompose via <code class="docutils literal notranslate"><span class="pre">U(theta,</span> <span class="pre">phi=0,</span> <span class="pre">lambda=0)</span></code></p></li>
 </ul>
 <p>Default angle is π.</p>
@@ -1712,8 +1715,9 @@ yet supported.</p></li>
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.operations.defaults.make_zx_pi_4_cancellation_operation">
 <span class="sig-name descname"><span class="pre">make_zx_pi_4_cancellation_operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">control_qubit_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.operations.defaults.make_zx_pi_4_cancellation_operation" title="Link to this definition"></a></dt>
 <dd><p>Return the ZX(π/4) cancellation-tone primitive (owned by the target qubit).</p>
-<p>Fires the <code class="docutils literal notranslate"><span class="pre">zx_pi_4</span></code> waveform on the <code class="docutils literal notranslate"><span class="pre">{control_qubit_id}.cross_resonance_cancellation</span></code>
-mode to suppress leakage during the control qubit’s CR drive.</p>
+<p>Fires the <code class="docutils literal notranslate"><span class="pre">zx_pi_4</span></code> waveform on the
+<code class="docutils literal notranslate"><span class="pre">{control_qubit_id}.cross_resonance_cancellation</span></code> mode to suppress leakage during the
+control qubit’s CR drive.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.experimental.system_data.materialisers.operations.defaults.make_zx_pi_4_cancellation_operation.params.control_qubit_id"></span><strong>control_qubit_id</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.materialisers.operations.defaults.make_zx_pi_4_cancellation_operation.params.control_qubit_id">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Identifier of the driving control qubit (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;q0&quot;</span></code>).</p>

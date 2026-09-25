@@ -439,7 +439,8 @@ mitigaiton, and should be provided as a keyword argument.</p></li>
 <p>Uses <code class="xref py py-class docutils literal notranslate"><span class="pre">InlineResultsProcessing</span></code> instructions from the executable package to
 format the acquired results in the desired format.</p>
 <p><strong>Legacy vs granular acquires</strong></p>
-<p>All acquires that go through <a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a>
+<p>All acquires that go through
+<a class="reference internal" href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing" title="qat.ir.instruction_builder.QuantumInstructionBuilder.measure_with_granular_post_processing"><code class="xref py py-meth docutils literal notranslate"><span class="pre">measure_with_granular_post_processing()</span></code></a>
 now produce granular <code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> instructions and
 appear in <a class="reference internal" href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.DiscriminateResult" title="qat.runtime.passes.analysis.DiscriminateResult"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiscriminateResult</span></code></a>.
 <a class="reference internal" href="qat.ir.measure.html#qat.ir.measure.Discriminate" title="qat.ir.measure.Discriminate"><code class="xref py py-class docutils literal notranslate"><span class="pre">Discriminate</span></code></a> emits integer state keys directly. This includes
@@ -516,8 +517,8 @@ should be passed as a keyword argument.</p></li>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ResultTransform</span></span><a class="headerlink" href="#qat.runtime.passes.transform.ResultTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.core.pass_base.html#qat.core.pass_base.TransformPass" title="qat.core.pass_base.TransformPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransformPass</span></code></a></p>
 <p>Transform the raw results into the format that we’ve been asked to provide.</p>
-<p>This pass applies <code class="docutils literal notranslate"><span class="pre">ResultsFormatting</span></code> flags (<code class="docutils literal notranslate"><span class="pre">BinaryCount</span></code>, <code class="docutils literal notranslate"><span class="pre">SquashBinaryResultArrays</span></code>,
-<code class="docutils literal notranslate"><span class="pre">DynamicStructureReturn</span></code>) to shape final results.</p>
+<p>This pass applies <code class="docutils literal notranslate"><span class="pre">ResultsFormatting</span></code> flags (<code class="docutils literal notranslate"><span class="pre">BinaryCount</span></code>,
+<code class="docutils literal notranslate"><span class="pre">SquashBinaryResultArrays</span></code>, <code class="docutils literal notranslate"><span class="pre">DynamicStructureReturn</span></code>) to shape final results.</p>
 <p><strong>Granular pipeline routing</strong></p>
 <p>When the granular post-processing pipeline (<code class="docutils literal notranslate"><span class="pre">Equalise</span></code> → <code class="docutils literal notranslate"><span class="pre">Discriminate</span></code> →
 <code class="docutils literal notranslate"><span class="pre">PostSelect</span></code>) has been used for end-of-circuit measurements,

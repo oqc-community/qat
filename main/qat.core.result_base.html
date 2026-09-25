@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.core.result_base module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.core.result_base module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -715,9 +715,9 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PreservedResults</span></span><a class="headerlink" href="#qat.core.result_base.PreservedResults" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A mechanism for result invalidation and preservation.</p>
-<p>Similar to LLVM’s new PassManager, we state
-that each transform pass must declare what analysis results it preserves. In this case, the pass returns
-a PreservedResults instance which is then used by the <code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code> for cache housekeeping.</p>
+<p>Similar to LLVM’s new PassManager, we state that each transform pass must declare what
+analysis results it preserves. In this case, the pass returns a PreservedResults
+instance which is then used by the <code class="xref py py-class docutils literal notranslate"><span class="pre">PassManager</span></code> for cache housekeeping.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.core.result_base.PreservedResults.all">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">all</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.core.result_base.PreservedResults.all" title="Link to this definition"></a></dt>

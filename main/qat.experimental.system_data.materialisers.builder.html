@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.materialisers.builder module &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.experimental.system_data.materialisers.builder module &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -797,7 +797,8 @@ model is passed to <code class="xref py py-meth docutils literal notranslate"><s
 <span class="sig-name descname"><span class="pre">build_payload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.build_payload" title="Link to this definition"></a></dt>
 <dd><p>Build a source payload mirroring <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code>’s field structure.</p>
 <p>Produces a shallow dict mapping each <code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code> field name to its
-current value, plus the structural version key required by <code class="xref py py-func docutils literal notranslate"><span class="pre">materialise_model()</span></code>.</p>
+current value, plus the structural version key required by
+<code class="xref py py-func docutils literal notranslate"><span class="pre">materialise_model()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</span></p>
@@ -982,8 +983,9 @@ to an empty tuple.</p></li>
 <dt class="sig sig-object py" id="qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.with_metadata">
 <span class="sig-name descname"><span class="pre">with_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_or_entry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.materialisers.builder.CanonicalSystemDataBuilder.with_metadata" title="Link to this definition"></a></dt>
 <dd><p>Append a metadata entry.</p>
-<p>Accepts either an <a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.AttributeEntry" title="qat.experimental.system_data.canonical.schema.AttributeEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeEntry</span></code></a>
-directly, or a <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">value)</span></code> shorthand:</p>
+<p>Accepts either an
+<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.AttributeEntry" title="qat.experimental.system_data.canonical.schema.AttributeEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeEntry</span></code></a> directly, or
+a <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">value)</span></code> shorthand:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">builder</span><span class="o">.</span><span class="n">with_metadata</span><span class="p">(</span><span class="n">AttributeEntry</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;v&quot;</span><span class="p">))</span>
 <span class="c1"># or equivalently:</span>
 <span class="n">builder</span><span class="o">.</span><span class="n">with_metadata</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">)</span>

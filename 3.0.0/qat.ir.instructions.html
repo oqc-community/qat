@@ -350,9 +350,9 @@
 <p>Assigns a value to a variable.</p>
 <p>This is used to assign some value (e.g. the results from an acquisition) to a variable.
 In the legacy instructions, <cite>Assign</cite> could be given a <cite>Variable</cite> that declares the value
-as another variable. It could also be given more complex structures, should as a list of
-<cite>Variables</cite>, or an <cite>IndexAccessor</cite>. For example, this could be used to assign each of the
-qubit acquisitions to a single register,</p>
+as another variable. It could also be given more complex structures, should as a list
+of <cite>Variables</cite>, or an <cite>IndexAccessor</cite>. For example, this could be used to assign each of
+the qubit acquisitions to a single register,</p>
 <dl>
 <dt><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a></dt><dd><dl class="simple">
 <dt>c = [</dt><dd><p>Qubit 1 measurements,
@@ -367,8 +367,8 @@ Qubit 2 measurements,
 <p>In general, declarations and allocations could be improved in future iterations, and
 functionality may change with improvements to the front end. For now, <cite>Assign</cite> has been
 adapted to support the required front end behaviour. The value is allowed to be a list
-(with recurssions supported) of strings that declare what Variable to point to, or a tuple
-for <cite>IndexAccessor</cite>.</p>
+(with recurssions supported) of strings that declare what Variable to point to, or a
+tuple for <cite>IndexAccessor</cite>.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>

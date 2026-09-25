@@ -522,7 +522,8 @@ cloud, degrading any downstream discriminator.</p>
 real affine transform:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{pmatrix} I' \\ Q' \end{pmatrix}
-= A \begin{pmatrix} I \\ Q \end{pmatrix} + \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
+= A \begin{pmatrix} I \\ Q \end{pmatrix}
++ \begin{pmatrix} b_I \\ b_Q \end{pmatrix}\end{split}\]</div>
 <p>where <code class="docutils literal notranslate"><span class="pre">A</span></code> is a <strong>real</strong> 2×2 matrix (<code class="docutils literal notranslate"><span class="pre">transform</span></code>) and <code class="docutils literal notranslate"><span class="pre">[b_I,</span> <span class="pre">b_Q]</span></code>
 is the real offset vector (<code class="docutils literal notranslate"><span class="pre">offset</span></code>).  The output is returned as a
 complex value <code class="docutils literal notranslate"><span class="pre">I'</span> <span class="pre">+</span> <span class="pre">j</span> <span class="pre">Q'</span></code>.</p>

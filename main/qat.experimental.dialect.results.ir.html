@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.results.ir package &mdash; qat-compiler 3.0.0.post389.dev20260925133929 documentation</title>
+  <title>qat.experimental.dialect.results.ir package &mdash; qat-compiler 3.0.0.post390.dev20260925143212 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -727,10 +727,10 @@ manipulation in the future.</p>
 grouping them together in a single structure.</p></li>
 <li><p><a class="reference internal" href="#qat.experimental.dialect.results.ir.RecordType" title="qat.experimental.dialect.results.ir.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a> represents the entire results of a single shot with dictionary-like
 semantics, allowing each piece of data to be stored by a string key.</p></li>
-<li><p><a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="qat.experimental.dialect.results.ir.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a> allows us to represent a collection of results. Results are
-stored and referenced by two identifiers; an integer index (which e.g. represents the shot)
-and a string key (which e.g. represents the result name). Conceptually, we can think of
-this as a dictionary of arrays, or as list of dictionaries. The actual data type is not
+<li><p><a class="reference internal" href="#qat.experimental.dialect.results.ir.ResultsCollectionType" title="qat.experimental.dialect.results.ir.ResultsCollectionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code></a> allows us to represent a collection of results. Results
+are stored and referenced by two identifiers; an integer index (which e.g. represents the
+shot) and a string key (which e.g. represents the result name). Conceptually, we can think
+of this as a dictionary of arrays, or as list of dictionaries. The actual data type is not
 specified to be index-major or key-major. This allows us to support flexible results
 acquisition.</p></li>
 </ul>
