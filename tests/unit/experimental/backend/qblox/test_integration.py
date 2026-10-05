@@ -22,8 +22,8 @@ from qat.experimental.dialect.pulse.ir import (
     GaussianWaveformOp,
     IntegrateOp,
     PulseOp,
+    SquareWaveformOp,
     TimeAttr,
-    WaitOp,
     WeightsAttr,
 )
 from qat.experimental.dialect.pulse.transforms.pipeline import PulsePipelineManager
@@ -106,11 +106,13 @@ def _acquisition_module(
     )
 
 
-def _wait_chain(port_id: str, carrier: int):
+def _pulse_chain(port_id: str, carrier: int):
     frequency = ConstantOp(FrequencyAttr(carrier))
     frame = CreateFrameOp(frequency, StringAttr(port_id))
     duration = ConstantOp(TimeAttr(8e-9))
-    return frequency, frame, duration, WaitOp(frame, duration)
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(duration, amplitude)
+    return frequency, frame, duration, amplitude, waveform, PulseOp(frame, waveform)
 
 
 def _canonical_for(
@@ -194,8 +196,8 @@ def test_compiles_multiple_sequences_sharing_one_module():
 
     program = _compile(
         _pulse_module(
-            *_wait_chain("port-0", 200_000_000),
-            *_wait_chain("port-1", 200_000_000),
+            *_pulse_chain("port-0", 200_000_000),
+            *_pulse_chain("port-1", 200_000_000),
         ),
         canonical,
     )
@@ -236,7 +238,7 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
 
     program = _compile(
         _pulse_module(
-            *_wait_chain("port-0", 4_200_000_000),
+            *_pulse_chain("port-0", 4_200_000_000),
             readout_frequency,
             readout_frame,
             readout_duration,
@@ -258,7 +260,7 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
         "physical_channel_id": "port-0",
         "seq_idx": 8,
         "connections": ["out2"],
-        "program": "set_mrk 3\nwait 8\nstop\n",
+        "program": "set_mrk 3\nplay 0, 1, 8\nstop\n",
     }
     assert {
         "physical_channel_id": readout.physical_channel_id,
@@ -326,7 +328,7 @@ def test_all_five_module_kinds_emit_independent_expected_payload_values(
 ):
     canonical = _canonical_for(kind, acquire=acquire)
     carrier = 4_200_000_000 if kind.value.endswith("_rf") else 200_000_000
-    program = _compile(_pulse_module(*_wait_chain("port-0", carrier)), canonical)
+    program = _compile(_pulse_module(*_pulse_chain("port-0", carrier)), canonical)
     package = program.packages["port_0"]
 
     assert (
@@ -336,8 +338,11 @@ def test_all_five_module_kinds_emit_independent_expected_payload_values(
         package.slot_idx,
         package.seq_idx,
     ) == ("port_0", "port-0", "cluster", 2, 0)
-    assert package.sequence.program == "set_mrk 3\nwait 8\nstop\n"
-    assert package.sequence.waveforms == {}
+    assert package.sequence.program == "set_mrk 3\nplay 0, 1, 8\nstop\n"
+    assert package.sequence.waveforms == {
+        "waveform_0_I": {"data": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "index": 0},
+        "waveform_0_Q": {"data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "index": 1},
+    }
     assert package.sequence.weights == {}
     assert package.sequence.acquisitions == {}
     assert package.seq_config.connection.bulk_value == [

@@ -13,23 +13,26 @@ The default pipeline runs the following passes, in order:
 1. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
    — fold all constant arithmetic so that subsequent passes only see canonical
    :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` operands.
-2. :class:`.ApplyGranularitySanitisation`
+1. :class:`.ApplyGranularitySanitisation`
    — round constant durations and sampled-waveform widths up to the hardware timing
    granularity, so later passes only see realisable times.
-3. :class:`.EvaluateWaveformsAsSamples`
+1. :class:`.EvaluateWaveformsAsSamples`
    — convert analytical waveform ops into sampled
    :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` payloads, using the
    per-port sample times from *constraints*.
-4. :class:`.TimelineNormalization`
+1. :class:`.TimelineNormalization`
    — resolve :class:`~qat.experimental.dialect.pulse.ir.ops.SynchronizeOp` operations
    into explicit :class:`~qat.experimental.dialect.pulse.ir.ops.WaitOp` chains using
    symbolic time-expression analysis.
-5. :class:`.ApplySquashContiguousOptimizations`
+1. :class:`.DeadFrameEliminationPass`
+   — eliminate frame creation and manipulation operations that do not contribute to
+   any hardware-visible pulse operations, reducing IR complexity.
+1. :class:`.ApplySquashContiguousOptimizations`
    — merge adjacent wait and phase operations.
-6. :class:`.LowerKernelsToResultsArrays`
+1. :class:`.LowerKernelsToResultsArrays`
    — rewrite each kernel signature from ``ResultsCollectionType`` values to
    ``ResultsArrayType`` values and update all call sites to match the expanded signature.
-7. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
+1. :class:`~qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass`
    — a final canonicalization pass that folds any constants left behind by the earlier
    passes and removes the resulting no-ops.
 
@@ -45,6 +48,9 @@ from qat.experimental.conversion.pulse.lower_kernels_to_arrays import (
     LowerKernelsToResultsArrays,
 )
 from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
+from qat.experimental.dialect.pulse.transforms.dead_frame_elimination import (
+    DeadFrameEliminationPass,
+)
 from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
 )
@@ -97,6 +103,7 @@ class PulsePipelineManager:
                 ApplyGranularitySanitisation(constraints=self.constraints),
                 EvaluateWaveformsAsSamples(constraints=self.constraints),
                 TimelineNormalization(),
+                DeadFrameEliminationPass(),
                 ApplySquashContiguousOptimizations(),
                 LowerKernelsToResultsArrays(),
                 OrderedCanonicalizePass(),

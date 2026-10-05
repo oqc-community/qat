@@ -10,6 +10,9 @@ from qat.experimental.conversion.pulse.lower_kernels_to_arrays import (
     LowerKernelsToResultsArrays,
 )
 from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
+from qat.experimental.dialect.pulse.transforms.dead_frame_elimination import (
+    DeadFrameEliminationPass,
+)
 from qat.experimental.dialect.pulse.transforms.granularity_sanitisation import (
     ApplyGranularitySanitisation,
 )
@@ -100,6 +103,7 @@ def test_pipeline_manager_produces_correct_pass_order():
         ApplyGranularitySanitisation,
         EvaluateWaveformsAsSamples,
         TimelineNormalization,
+        DeadFrameEliminationPass,
         ApplySquashContiguousOptimizations,
         LowerKernelsToResultsArrays,
         OrderedCanonicalizePass,
@@ -142,6 +146,7 @@ def test_pipeline_manager_from_canonical_data_builds_valid_pipeline():
         ApplyGranularitySanitisation,
         EvaluateWaveformsAsSamples,
         TimelineNormalization,
+        DeadFrameEliminationPass,
         ApplySquashContiguousOptimizations,
         LowerKernelsToResultsArrays,
         OrderedCanonicalizePass,
@@ -157,7 +162,7 @@ def test_pipeline_manager_reuses_canonicalize_as_cleanup():
         for index, p in enumerate(pipeline.passes)
         if isinstance(p, OrderedCanonicalizePass)
     ]
-    assert canonicalize_positions == [0, 6]
+    assert canonicalize_positions == [0, 7]
 
 
 def test_pipeline_manager_lowers_kernels_before_final_cleanup():
