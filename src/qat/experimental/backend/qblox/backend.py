@@ -24,6 +24,7 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
 from qat.experimental.dialect.pulse.analysis.locate_kernels import locate_kernels
 from qat.experimental.dialect.results.ir import ResultsArrayType
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
 
 
 class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
@@ -40,6 +41,7 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
     ):
         super().__init__(model=model)
         self.target_data = target_data
+        self.hardware_view = QbloxHardwareView.derive(model)
 
     def emit(
         self,
@@ -73,7 +75,9 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
         create_qblox_configured_q1_pipeline(self.model, self.target_data).apply(
             Context(), ir
         )
-        program = emit_qblox_program(ir, self.target_data, metadata=metadata)
+        program = emit_qblox_program(
+            ir, self.hardware_view, self.target_data, metadata=metadata
+        )
         return Executable[QbloxProgram](
             programs=[program],
             acquires=post_processing.acquire_data,

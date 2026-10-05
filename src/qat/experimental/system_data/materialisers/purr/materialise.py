@@ -23,6 +23,7 @@ without changing canonical assembly responsibilities.
 
 import math
 from copy import deepcopy
+from importlib.metadata import version
 from typing import Any
 
 from pydantic import ValidationError
@@ -45,6 +46,9 @@ from qat.experimental.system_data.materialisers.operations.defaults import (
 )
 from qat.experimental.system_data.materialisers.operations.operation_builder import (
     AbstractOperationBuilder,
+)
+from qat.experimental.system_data.materialisers.purr.extensions.qblox import (
+    QBLOX_PORT_REFERENCE_ATTRIBUTE,
 )
 from qat.experimental.system_data.materialisers.purr.ingress.v0_1_0 import PurrIngressV010
 from qat.experimental.system_data.materialisers.purr.materialisers.capabilities import (
@@ -496,7 +500,7 @@ class PurrMaterialiserV010:
         :param source_version: Source contract version, written to metadata.
         :returns: Assembled canonical system data.
         """
-        external_resources = ExternalResourceRegistry()
+        external_resources_reg = ExternalResourceRegistry()
         acquire_modes, default_acquire_mode = _build_acquire_modes(
             dto.supported_acquire_modes,
             dto.default_acquire_mode,
@@ -506,6 +510,33 @@ class PurrMaterialiserV010:
             dto.default_reset_method,
             dto.passive_reset_time,
         )
+        oscillators = _build_oscillators(dto.basebands, external_resources_reg)
+        ports = _build_ports(dto.physical_channels, external_resources_reg)
+        external_resources = external_resources_reg.to_tuple()
+        metadata = [
+            AttributeEntry(key="materialiser_source_type", value="purr"),
+            AttributeEntry(key="materialiser_source_version", value=source_version),
+            AttributeEntry(key="materialiser_status", value="experimental_partial_mapping"),
+        ]
+
+        has_qblox_resources = any(
+            attribute.key == QBLOX_PORT_REFERENCE_ATTRIBUTE
+            for external_resource in external_resources
+            for attribute in external_resource.attributes
+        )
+        metadata_keys = {entry.key for entry in metadata}
+
+        if has_qblox_resources:
+            if "driver_version" not in metadata_keys:
+                metadata.append(
+                    AttributeEntry(
+                        key="driver_version",
+                        value=version("qblox_instruments"),
+                    )
+                )
+            if "fw_version" not in metadata_keys:
+                metadata.append(AttributeEntry(key="fw_version", value="0.13.0"))
+
         return CanonicalSystemData(
             calibration_id=dto.calibration_id,
             acquire_limit=_build_acquire_limit(dto.repeat_limit),
@@ -513,8 +544,8 @@ class PurrMaterialiserV010:
             default_acquire_mode=default_acquire_mode,
             reset_methods=reset_methods,
             default_reset_method=default_reset_method,
-            oscillators=_build_oscillators(dto.basebands, external_resources),
-            ports=_build_ports(dto.physical_channels, external_resources),
+            oscillators=oscillators,
+            ports=ports,
             channels=self.build_channels(dto=dto),
             qubits=self.build_qubits(
                 dto=dto,
@@ -522,15 +553,8 @@ class PurrMaterialiserV010:
                 default_reset_method=default_reset_method,
             ),
             couplings=self.build_couplings(dto=dto),
-            external_resources=external_resources.to_tuple(),
-            metadata=(
-                AttributeEntry(key="materialiser_source_type", value="purr"),
-                AttributeEntry(key="materialiser_source_version", value=source_version),
-                AttributeEntry(
-                    key="materialiser_status",
-                    value="experimental_partial_mapping",
-                ),
-            ),
+            external_resources=external_resources,
+            metadata=tuple(metadata),
         )
 
     def materialise(

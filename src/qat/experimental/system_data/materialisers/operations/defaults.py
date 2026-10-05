@@ -43,6 +43,7 @@ in the mode's calibration data, as built by the PuRR qubit materialiser:
 
 from typing import Any
 
+from qat.experimental.system_data.canonical.attributes import get_attribute_value
 from qat.experimental.system_data.canonical.schema import (
     AcquireOperationStepData,
     AttributeEntry,
@@ -111,17 +112,6 @@ def _simple_operation(
     )
 
 
-def _get_attribute_value(
-    attributes: tuple[AttributeEntry, ...],
-    key: str,
-) -> Any | None:
-    """Return the value for ``key`` from ``attributes`` if present."""
-    for attribute in attributes:
-        if attribute.key == key:
-            return attribute.value
-    return None
-
-
 def _resolve_reset_methods(
     reset_methods: tuple[ResetData, ...],
     default_reset_method: str | None,
@@ -170,7 +160,13 @@ def _make_reset_private_operations(
     for method in resolved_reset_methods:
         operation_name = method.operation_name
         if method.type == "passive":
-            duration = int(_get_attribute_value(method.attributes, "duration"))
+            duration_attr = get_attribute_value(method.attributes, "duration")
+            if duration_attr.value is None:
+                raise ValueError(
+                    f"Passive reset method {operation_name!r} has an explicit None duration"
+                )
+            else:
+                duration = int(duration_attr.value)
             reset_private_ops.append(
                 make_passive_reset_operation(
                     operation_id=operation_name,

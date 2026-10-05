@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 import pytest
+from pydantic_extra_types.semantic_version import SemanticVersion
 from xdsl.dialects.builtin import ArrayAttr, ModuleOp
 from xdsl.ir import Block, Region
 from xdsl.irdl import irdl_op_definition, region_def
@@ -45,10 +46,15 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_weight,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
 from qat.experimental.system_data.hardware.qblox.models import (
     DirectionKind,
     QbloxModuleKind,
     SignalPath,
+)
+
+from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
+    canonical_data,
 )
 
 
@@ -142,13 +148,22 @@ def _sequence(
     )
 
 
-def test_emits_verified_sequence_as_json_payload_mappings():
+@pytest.fixture(scope="module")
+def hardware_view():
+    return QbloxHardwareView.derive(canonical_data())
+
+
+def test_emits_verified_sequence_as_json_payload_mappings(hardware_view):
     sequence = _sequence(
         "q0.drive.channel",
         waveforms=[make_waveform("drive", 2, [0.25, -0.5])],
     )
 
-    program = emit_qblox_program(ModuleOp([sequence]), metadata={"revision": 1})
+    program = emit_qblox_program(
+        ModuleOp([sequence]),
+        hardware_view,
+        metadata={"revision": 1},
+    )
 
     assert tuple(program.packages) == ("q0.drive.channel",)
     package = program.packages["q0.drive.channel"]
@@ -160,10 +175,11 @@ def test_emits_verified_sequence_as_json_payload_mappings():
     assert package.sequence.acquisitions == {}
     assert package.sequence.program == "stop\n"
     assert program.metadata == {"revision": 1}
-    assert program.fw_version == TARGET_DATA.fw_version
+    assert program.driver_version == SemanticVersion.parse("1.2.3")
+    assert program.fw_version == SemanticVersion.parse("4.5.6")
 
 
-def test_emits_readout_tables_without_loss():
+def test_emits_readout_tables_without_loss(hardware_view):
     sequence = _sequence(
         "q0.readout.channel",
         readout=True,
@@ -171,7 +187,9 @@ def test_emits_readout_tables_without_loss():
         acquisitions=[make_acquisition("result", 4, 128)],
     )
 
-    package = emit_qblox_program(ModuleOp([sequence])).packages[sequence.channel_id.data]
+    package = emit_qblox_program(ModuleOp([sequence]), hardware_view).packages[
+        sequence.channel_id.data
+    ]
 
     assert package.sequence.weights["integration"] == {
         "index": 3,
@@ -185,13 +203,15 @@ def test_emits_readout_tables_without_loss():
     assert package.seq_config.connection.acq_I == "in0"
 
 
-def test_sequence_payload_shape_matches_qblox_driver_contract():
+def test_sequence_payload_shape_matches_qblox_driver_contract(hardware_view):
     sequence = _sequence(
         "q0.drive.channel",
         waveforms=[make_waveform("drive", 2, [0.25, -0.5])],
     )
 
-    package = emit_qblox_program(ModuleOp([sequence])).packages["q0.drive.channel"]
+    package = emit_qblox_program(ModuleOp([sequence]), hardware_view).packages[
+        "q0.drive.channel"
+    ]
 
     assert package.sequence == type(package.sequence)(
         program="stop\n",
@@ -201,8 +221,10 @@ def test_sequence_payload_shape_matches_qblox_driver_contract():
     )
 
 
-def test_shared_payload_round_trips_through_executable_serialization():
-    program = emit_qblox_program(ModuleOp([_sequence()]), metadata={"revision": 1})
+def test_shared_payload_round_trips_through_executable_serialization(hardware_view):
+    program = emit_qblox_program(
+        ModuleOp([_sequence()]), hardware_view, metadata={"revision": 1}
+    )
     executable = Executable[QbloxProgram](programs=[program])
 
     restored = Executable[QbloxProgram].deserialize(executable.serialize())
@@ -210,7 +232,7 @@ def test_shared_payload_round_trips_through_executable_serialization():
     assert restored.programs == [program]
 
 
-def test_rejects_duplicate_logical_package_key_before_dict_insertion():
+def test_rejects_duplicate_logical_package_key_before_dict_insertion(hardware_view):
     module = ModuleOp(
         [
             _sequence("drive", instrument_id="cluster0"),
@@ -219,10 +241,10 @@ def test_rejects_duplicate_logical_package_key_before_dict_insertion():
     )
 
     with pytest.raises(ValueError, match="Duplicate Qblox package key 'drive'"):
-        emit_qblox_program(module)
+        emit_qblox_program(module, hardware_view)
 
 
-def test_rejects_duplicate_physical_allocation():
+def test_rejects_duplicate_physical_allocation(hardware_view):
     module = ModuleOp(
         [
             _sequence("drive"),
@@ -231,24 +253,24 @@ def test_rejects_duplicate_physical_allocation():
     )
 
     with pytest.raises(PassFailedException, match="Duplicate physical allocation"):
-        emit_qblox_program(module)
+        emit_qblox_program(module, hardware_view)
 
 
-def test_rejects_conflicting_module_configurations_on_shared_module():
+def test_rejects_conflicting_module_configurations_on_shared_module(hardware_view):
     first = _sequence("first", seq_idx=0)
     second = _sequence("second", seq_idx=1)
     second.properties["module_config"] = _module_config(output_ids=(0, 1))
 
     with pytest.raises(PassFailedException, match="conflicting module configurations"):
-        emit_qblox_program(ModuleOp([first, second]))
+        emit_qblox_program(ModuleOp([first, second]), hardware_view)
 
 
-def test_rejects_missing_allocation_or_configuration():
+def test_rejects_missing_allocation_or_configuration(hardware_view):
     with pytest.raises(PassFailedException, match="missing its Qblox allocation"):
-        emit_qblox_program(ModuleOp([SequenceOp("drive", [StopOp()])]))
+        emit_qblox_program(ModuleOp([SequenceOp("drive", [StopOp()])]), hardware_view)
 
 
-def test_rejects_nested_q1asm_before_table_reference_validation():
+def test_rejects_nested_q1asm_before_table_reference_validation(hardware_view):
     sequence = _sequence(
         operations=[
             _NestedQ1AsmOp(PlayImmImmImmOp(UI10Imm(1), UI10Imm(2), DurationImm(4))),
@@ -257,7 +279,7 @@ def test_rejects_nested_q1asm_before_table_reference_validation():
     )
 
     with pytest.raises(PassFailedException, match="requires flat Q1ASM"):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
 @pytest.mark.parametrize(
@@ -282,7 +304,7 @@ def test_rejects_nested_q1asm_before_table_reference_validation():
         ),
     ],
 )
-def test_rejects_missing_immediate_table_references(operation, expected):
+def test_rejects_missing_immediate_table_references(operation, expected, hardware_view):
     readout = not isinstance(operation, PlayImmImmImmOp)
     sequence = _sequence(
         readout=readout,
@@ -291,7 +313,7 @@ def test_rejects_missing_immediate_table_references(operation, expected):
     )
 
     with pytest.raises(PassFailedException, match=expected):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
 @pytest.mark.parametrize(
@@ -309,14 +331,14 @@ def test_rejects_missing_immediate_table_references(operation, expected):
         ),
     ],
 )
-def test_rejects_tables_exceeding_sequencer_capacity(table, expected):
+def test_rejects_tables_exceeding_sequencer_capacity(table, expected, hardware_view):
     sequence = _sequence(readout="weights" in table, **table)
 
     with pytest.raises(PassFailedException, match=expected):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
-def test_rejects_aggregate_acquisition_bins_exceeding_module_capacity():
+def test_rejects_aggregate_acquisition_bins_exceeding_module_capacity(hardware_view):
     shared_config = _module_config(kind=QbloxModuleKind.qrm)
     sequences = [
         _sequence(
@@ -331,10 +353,10 @@ def test_rejects_aggregate_acquisition_bins_exceeding_module_capacity():
         sequence.properties["module_config"] = shared_config
 
     with pytest.raises(PassFailedException, match="3000001"):
-        emit_qblox_program(ModuleOp(sequences))
+        emit_qblox_program(ModuleOp(sequences), hardware_view)
 
 
-def test_rejects_acquisition_instruction_on_qrc_control_sequencer():
+def test_rejects_acquisition_instruction_on_qrc_control_sequencer(hardware_view):
     sequence = SequenceOp(
         "control",
         [AcquireImmImmImmOp(UI5Imm(0), UI24Imm(0), DurationImm(4)), StopOp()],
@@ -355,7 +377,7 @@ def test_rejects_acquisition_instruction_on_qrc_control_sequencer():
     )
 
     with pytest.raises(PassFailedException, match="acquisition-capable sequencer"):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
 def _register_play(index: int = 1):
@@ -363,7 +385,7 @@ def _register_play(index: int = 1):
     return immediate, PlayRsRsImmOp(immediate.rd, immediate.rd, DurationImm(4))
 
 
-def test_rejects_aliased_register_table_reference():
+def test_rejects_aliased_register_table_reference(hardware_view):
     immediate = MoveImmRdOp(SU32Imm(1), Registers.R1)
     alias = MoveRsRdOp(immediate.rd, Registers.R2)
     second = MoveImmRdOp(SU32Imm(2), Registers.R3)
@@ -382,10 +404,10 @@ def test_rejects_aliased_register_table_reference():
     )
 
     with pytest.raises(ValueError, match="non-static register table reference"):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
-def test_rejects_dynamically_computed_register_table_reference():
+def test_rejects_dynamically_computed_register_table_reference(hardware_view):
     immediate = MoveImmRdOp(SU32Imm(0), Registers.R1)
     dynamic = AddRsImmRdOp(immediate.rd, SU32Imm(1), Registers.R2)
     sequence = _sequence(
@@ -399,7 +421,7 @@ def test_rejects_dynamically_computed_register_table_reference():
     )
 
     with pytest.raises(ValueError, match="non-static register table reference"):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
 @pytest.mark.parametrize(
@@ -409,7 +431,9 @@ def test_rejects_dynamically_computed_register_table_reference():
         pytest.param(1, [], "missing waveform index 1", id="missing"),
     ],
 )
-def test_rejects_invalid_register_waveform_reference(index, waveforms, expected):
+def test_rejects_invalid_register_waveform_reference(
+    index, waveforms, expected, hardware_view
+):
     immediate, play = _register_play(index)
     sequence = _sequence(
         operations=[immediate, play, StopOp()],
@@ -417,7 +441,7 @@ def test_rejects_invalid_register_waveform_reference(index, waveforms, expected)
     )
 
     with pytest.raises(ValueError, match=expected):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
 @pytest.mark.parametrize(
@@ -432,7 +456,9 @@ def test_rejects_invalid_register_waveform_reference(index, waveforms, expected)
         ),
     ],
 )
-def test_rejects_invalid_register_weight_reference(indices, weights, expected):
+def test_rejects_invalid_register_weight_reference(
+    indices, weights, expected, hardware_view
+):
     bin_index = MoveImmRdOp(SU32Imm(0), Registers.R1)
     first = MoveImmRdOp(SU32Imm(indices[0]), Registers.R2)
     second = MoveImmRdOp(SU32Imm(indices[1]), Registers.R3)
@@ -448,20 +474,20 @@ def test_rejects_invalid_register_weight_reference(indices, weights, expected):
     )
 
     with pytest.raises(ValueError, match=expected):
-        emit_qblox_program(ModuleOp([sequence]))
+        emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
-def test_accepts_static_register_waveform_references():
+def test_accepts_static_register_waveform_references(hardware_view):
     immediate, play = _register_play()
     sequence = _sequence(
         operations=[immediate, play, StopOp()],
         waveforms=[make_waveform("pulse", 1, [0.25])],
     )
 
-    emit_qblox_program(ModuleOp([sequence]))
+    emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
-def test_accepts_static_register_weight_references():
+def test_accepts_static_register_weight_references(hardware_view):
     bin_index = MoveImmRdOp(SU32Imm(0), Registers.R1)
     first = MoveImmRdOp(SU32Imm(1), Registers.R2)
     second = MoveImmRdOp(SU32Imm(2), Registers.R3)
@@ -479,10 +505,10 @@ def test_accepts_static_register_weight_references():
         acquisitions=[make_acquisition("result", 0, 1)],
     )
 
-    emit_qblox_program(ModuleOp([sequence]))
+    emit_qblox_program(ModuleOp([sequence]), hardware_view)
 
 
-def test_uses_target_data_waveform_capacity():
+def test_uses_target_data_waveform_capacity(hardware_view):
     control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
         update={"max_sample_size_waveforms": 1}
     )
@@ -490,10 +516,10 @@ def test_uses_target_data_waveform_capacity():
     sequence = _sequence(waveforms=[make_waveform("large", 0, [0.0, 0.0])])
 
     with pytest.raises(PassFailedException, match="2 waveform samples"):
-        emit_qblox_program(ModuleOp([sequence]), target_data)
+        emit_qblox_program(ModuleOp([sequence]), hardware_view, target_data)
 
 
-def test_rejects_program_exceeding_target_data_instruction_capacity():
+def test_rejects_program_exceeding_target_data_instruction_capacity(hardware_view):
     control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
         update={"max_num_instructions": 1}
     )
@@ -501,10 +527,10 @@ def test_rejects_program_exceeding_target_data_instruction_capacity():
     sequence = _sequence(operations=[MoveImmRdOp(SU32Imm(0), Registers.R1), StopOp()])
 
     with pytest.raises(PassFailedException, match="2 instructions"):
-        emit_qblox_program(ModuleOp([sequence]), target_data)
+        emit_qblox_program(ModuleOp([sequence]), hardware_view, target_data)
 
 
-def test_qrc_control_uses_control_sequencer_instruction_capacity():
+def test_qrc_control_uses_control_sequencer_instruction_capacity(hardware_view):
     readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
         update={"max_num_instructions": 1}
     )
@@ -528,7 +554,7 @@ def test_qrc_control_uses_control_sequencer_instruction_capacity():
         input_ids=(),
     )
 
-    emit_qblox_program(ModuleOp([sequence]), target_data)
+    emit_qblox_program(ModuleOp([sequence]), hardware_view, target_data)
 
     readout_sequence = _sequence(
         readout=True,
@@ -536,10 +562,10 @@ def test_qrc_control_uses_control_sequencer_instruction_capacity():
     )
     readout_sequence.properties["module_config"] = _module_config(kind=QbloxModuleKind.qrc)
     with pytest.raises(PassFailedException, match="2 instructions.*readout sequencer"):
-        emit_qblox_program(ModuleOp([readout_sequence]), target_data)
+        emit_qblox_program(ModuleOp([readout_sequence]), hardware_view, target_data)
 
 
-def test_rejects_nco_frequency_outside_target_data_range():
+def test_rejects_nco_frequency_outside_target_data_range(hardware_view):
     control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
         update={"nco_min_freq": -100e6, "nco_max_freq": 100e6}
     )
@@ -548,10 +574,10 @@ def test_rejects_nco_frequency_outside_target_data_range():
     sequence.properties["sequencer_config"] = _sequencer_config(nco_frequency=200e6)
 
     with pytest.raises(PassFailedException, match="outside.*selected control sequencer"):
-        emit_qblox_program(ModuleOp([sequence]), target_data)
+        emit_qblox_program(ModuleOp([sequence]), hardware_view, target_data)
 
 
-def test_accepts_nco_frequency_inside_widened_target_data_range():
+def test_accepts_nco_frequency_inside_widened_target_data_range(hardware_view):
     control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
         update={"nco_min_freq": -600e6, "nco_max_freq": 600e6}
     )
@@ -559,4 +585,4 @@ def test_accepts_nco_frequency_inside_widened_target_data_range():
     sequence = _sequence()
     sequence.properties["sequencer_config"] = _sequencer_config(nco_frequency=550e6)
 
-    emit_qblox_program(ModuleOp([sequence]), target_data)
+    emit_qblox_program(ModuleOp([sequence]), hardware_view, target_data)

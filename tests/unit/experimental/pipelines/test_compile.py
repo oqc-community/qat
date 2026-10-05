@@ -2,6 +2,8 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Tests for the experimental Qblox compile pipeline."""
 
+from dataclasses import replace
+
 import pytest
 from compiler_config.config import CompilerConfig
 from xdsl.dialects import scf
@@ -28,6 +30,8 @@ from qat.experimental.pipelines.compile import (
     ExperimentalQbloxCompilePipeline,
     ExperimentalQbloxCompilePipelineConfig,
 )
+from qat.experimental.system_data.canonical.schema import AttributeEntry
+from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
 from qat.ir.measure import AcquireMode, PostSelect
 from qat.pipelines.pipeline import CompilePipeline
 
@@ -82,92 +86,110 @@ def _kernel_with_dynamic_shot_loop() -> KernelOp:
 
 
 class TestExperimentalQbloxCompilePipeline:
-    def test_can_be_instantiated_with_canonical_model(self, canonical_model):
+    @pytest.fixture
+    def canonical_model_qblox(self, canonical_model):
+        return replace(
+            canonical_model,
+            metadata=(
+                *canonical_model.metadata,
+                AttributeEntry(key="driver_version", value="1.0.0"),
+                AttributeEntry(key="fw_version", value="0.13.0"),
+            ),
+        )
+
+    def test_can_be_instantiated_with_canonical_model(self, canonical_model_qblox):
         """The public pipeline factory accepts canonical system data directly."""
         pipeline = ExperimentalQbloxCompilePipeline(
             config=ExperimentalQbloxCompilePipelineConfig(),
-            model=canonical_model,
+            model=canonical_model_qblox,
         )
 
-        assert pipeline.model is canonical_model
+        assert pipeline.model is canonical_model_qblox
         assert isinstance(pipeline.pipeline, CompilePipeline)
 
     def test_build_pipeline_uses_canonical_model_and_experimental_components(
-        self, canonical_model
+        self, canonical_model_qblox
     ):
         """The compile pipeline wires canonical data into all experimental components."""
         pipeline = ExperimentalQbloxCompilePipeline._build_pipeline(
             config=ExperimentalQbloxCompilePipelineConfig(),
-            model=canonical_model,
+            model=canonical_model_qblox,
             target_data=None,
         )
 
         assert isinstance(pipeline, CompilePipeline)
-        assert pipeline.model is canonical_model
+        assert pipeline.model is canonical_model_qblox
         assert pipeline.target_data is TARGET_DATA
         assert isinstance(pipeline.frontend, PurrFrontend)
-        assert pipeline.frontend.model is canonical_model
+        assert pipeline.frontend.model is canonical_model_qblox
         assert isinstance(pipeline.middleend, PulseLevelMiddleend)
-        assert pipeline.middleend.model is canonical_model
+        assert pipeline.middleend.model is canonical_model_qblox
         assert isinstance(pipeline.backend, ExperimentalQbloxBackend)
-        assert pipeline.backend.model is canonical_model
+        assert pipeline.backend.model is canonical_model_qblox
         assert pipeline.backend.target_data is TARGET_DATA
 
-    def test_build_pipeline_uses_supplied_target_data(self, canonical_model):
+    def test_build_pipeline_uses_supplied_target_data(self, canonical_model_qblox):
         """The pipeline and backend preserve explicitly supplied Qblox target data."""
         target_data = QbloxTargetData()
 
         pipeline = ExperimentalQbloxCompilePipeline._build_pipeline(
             config=ExperimentalQbloxCompilePipelineConfig(),
-            model=canonical_model,
+            model=canonical_model_qblox,
             target_data=target_data,
         )
 
         assert pipeline.target_data is target_data
         assert pipeline.backend.target_data is target_data
 
-    def test_backend_emits_executable_with_runtime_payload(self, canonical_model, mocker):
+    def test_backend_emits_executable_with_runtime_payload(
+        self, canonical_model_qblox, mocker
+    ):
         """The backend lowers configured Q1 IR and wraps compiler and result metadata."""
         lowering = mocker.Mock()
         lowering_factory = mocker.patch(
             "qat.experimental.backend.qblox.backend.create_qblox_configured_q1_pipeline",
             return_value=lowering,
         )
+        hardware_view = QbloxHardwareView.derive(canonical_model_qblox)
         program = QbloxProgram(
             packages={},
-            driver_version=TARGET_DATA.driver_version,
-            fw_version=TARGET_DATA.fw_version,
+            driver_version=hardware_view.driver_version,
+            fw_version=hardware_view.firmware_version,
             metadata={"revision": 1},
         )
         emitter = mocker.patch(
             "qat.experimental.backend.qblox.backend.emit_qblox_program",
             return_value=program,
         )
-        backend = ExperimentalQbloxBackend(canonical_model)
+        backend = ExperimentalQbloxBackend(canonical_model_qblox)
         module = ModuleOp([_kernel_with_shot_loop(1)])
 
         executable = backend.emit(module, metadata={"revision": 1})
 
-        lowering_factory.assert_called_once_with(canonical_model, TARGET_DATA)
+        lowering_factory.assert_called_once_with(canonical_model_qblox, TARGET_DATA)
         lowering.apply.assert_called_once()
         emitter.assert_called_once_with(
             module,
+            hardware_view,
             TARGET_DATA,
             metadata={"revision": 1},
         )
         assert isinstance(executable, Executable)
         assert executable.programs == [program]
-        assert executable.calibration_id == canonical_model.calibration_id
+        assert executable.calibration_id == canonical_model_qblox.calibration_id
 
-    def test_backend_attaches_results_processing_metadata(self, canonical_model, mocker):
+    def test_backend_attaches_results_processing_metadata(
+        self, canonical_model_qblox, mocker
+    ):
         """The backend preserves analysis metadata needed by the current runtime."""
         mocker.patch(
             "qat.experimental.backend.qblox.backend.create_qblox_configured_q1_pipeline"
         )
+        hardware_view = QbloxHardwareView.derive(canonical_model_qblox)
         program = QbloxProgram(
             packages={},
-            driver_version=TARGET_DATA.driver_version,
-            fw_version=TARGET_DATA.fw_version,
+            driver_version=hardware_view.driver_version,
+            fw_version=hardware_view.firmware_version,
         )
         mocker.patch(
             "qat.experimental.backend.qblox.backend.emit_qblox_program",
@@ -191,7 +213,7 @@ class TestExperimentalQbloxCompilePipeline:
         result_manager = ResultManager()
         module = ModuleOp([_kernel_with_shot_loop(7)])
 
-        executable = ExperimentalQbloxBackend(canonical_model).emit(
+        executable = ExperimentalQbloxBackend(canonical_model_qblox).emit(
             module,
             res_mgr=result_manager,
             compiler_config=CompilerConfig(repeats=99),

@@ -28,6 +28,7 @@ from qat.experimental.dialect.pulse.ir import (
 )
 from qat.experimental.dialect.pulse.transforms.pipeline import PulsePipelineManager
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
@@ -51,7 +52,8 @@ def _compile(module: ModuleOp, canonical: CanonicalSystemData):
         PulseLevelConstraints.derive(canonical)
     ).build_default_pipeline().apply(Context(), module)
     create_qblox_configured_q1_pipeline(canonical).apply(Context(), module)
-    return emit_qblox_program(module)
+    hardware_view = QbloxHardwareView.derive(canonical)
+    return emit_qblox_program(module, hardware_view)
 
 
 def _control_module(port_id: str, carrier: int) -> ModuleOp:

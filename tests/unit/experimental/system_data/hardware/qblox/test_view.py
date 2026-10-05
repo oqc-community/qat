@@ -3,6 +3,7 @@
 
 import pytest
 from frozendict import frozendict
+from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.experimental.system_data.canonical.schema import (
     AttributeEntry,
@@ -88,6 +89,10 @@ def _canonical(
                 phase_offset=0.125,
             ),
         ),
+        metadata=(
+            AttributeEntry(key="driver_version", value="1.2.3"),
+            AttributeEntry(key="fw_version", value="4.5.6"),
+        ),
     )
 
 
@@ -164,6 +169,7 @@ def test_derivation_preserves_port_timing_constraints():
             ports=(constrained_port,),
             oscillators=canonical.oscillators,
             channels=canonical.channels,
+            metadata=canonical.metadata,
         )
     )
 
@@ -177,7 +183,9 @@ def test_derivation_preserves_port_timing_constraints():
 def test_direct_construction_copies_module_mapping():
     derived = QbloxHardwareView.derive(_canonical())
     modules = dict(derived.modules)
-    view = QbloxHardwareView(100, modules)
+    view = QbloxHardwareView(
+        SemanticVersion.parse("0.0.0"), SemanticVersion.parse("0.0.0"), 100, modules
+    )
 
     modules.clear()
 
@@ -213,6 +221,7 @@ def test_rejects_invalid_target_attribute_shapes(mutator, expected):
         ports=canonical.ports,
         oscillators=canonical.oscillators,
         channels=canonical.channels,
+        metadata=canonical.metadata,
     )
     with pytest.raises(ValueError, match=expected):
         QbloxHardwareView.derive(invalid)
@@ -235,6 +244,7 @@ def test_ignores_duplicate_attributes_on_unrelated_resources():
             ports=canonical.ports,
             oscillators=canonical.oscillators,
             channels=canonical.channels,
+            metadata=canonical.metadata,
         )
     )
 
@@ -242,6 +252,7 @@ def test_ignores_duplicate_attributes_on_unrelated_resources():
 
 
 def test_does_not_infer_qblox_identity_from_resource_names():
+    canonical = _canonical()
     resource = ExternalResourceData(id="A-CH-QCM-2", object_type="QCM")
     port = PortData(
         id="A-CH-QCM-2",
@@ -250,7 +261,11 @@ def test_does_not_infer_qblox_identity_from_resource_names():
     )
 
     view = QbloxHardwareView.derive(
-        CanonicalSystemData(external_resources=(resource,), ports=(port,))
+        CanonicalSystemData(
+            external_resources=(resource,),
+            ports=(port,),
+            metadata=canonical.metadata,
+        )
     )
 
     assert not view.modules
@@ -273,6 +288,7 @@ def test_typed_reference_is_authoritative_over_resource_object_type():
             ports=canonical.ports,
             oscillators=canonical.oscillators,
             channels=canonical.channels,
+            metadata=canonical.metadata,
         )
     )
 
@@ -292,6 +308,7 @@ def test_typed_reference_is_authoritative_over_port_identifier():
             external_resources=canonical.external_resources,
             ports=(contradictory_port,),
             oscillators=canonical.oscillators,
+            metadata=canonical.metadata,
         )
     )
 
@@ -335,6 +352,7 @@ def test_typed_module_location_is_authoritative_over_resource_identifiers(
             ports=(port,),
             oscillators=(oscillator,),
             channels=canonical.channels,
+            metadata=canonical.metadata,
         )
     )
 
@@ -380,6 +398,7 @@ def test_projects_custom_resource_identifiers():
             ports=(port,),
             oscillators=(oscillator,),
             channels=(channel,),
+            metadata=canonical.metadata,
         )
     )
 
@@ -396,6 +415,7 @@ def test_rejects_missing_oscillator_join_and_cross_module_use():
                 ports=canonical.ports,
                 oscillators=(oscillator,),
                 channels=canonical.channels,
+                metadata=canonical.metadata,
             )
         )
 
@@ -443,6 +463,7 @@ def test_rejects_missing_oscillator_join_and_cross_module_use():
                         oscillator_reference=shared_oscillator.id,
                     ),
                 ),
+                metadata=canonical.metadata,
             )
         )
 
@@ -492,6 +513,7 @@ def test_local_oscillator_cannot_span_modules_without_channel_references():
                     ),
                 ),
                 oscillators=(shared_oscillator,),
+                metadata=canonical.metadata,
             )
         )
 
@@ -518,5 +540,64 @@ def test_port_channels_must_share_the_local_oscillator():
                 ports=canonical.ports,
                 oscillators=(*canonical.oscillators, second_oscillator),
                 channels=(*canonical.channels, second_channel),
+                metadata=canonical.metadata,
             )
         )
+
+
+def test_driver_firmware_versions_extracted_from_metadata():
+    canonical = _canonical()
+    view = QbloxHardwareView.derive(canonical)
+
+    assert view.driver_version == SemanticVersion.parse("1.2.3")
+    assert view.firmware_version == SemanticVersion.parse("4.5.6")
+    assert all(
+        module_details.firmware_version == "4.5.6"
+        for module_location, module_details in view.modules.items()
+    )
+
+
+@pytest.mark.parametrize(
+    "invalid_metadata",
+    [
+        (
+            (
+                AttributeEntry(key="driver_version", value=123),
+                AttributeEntry(key="fw_version", value="4.5.6"),
+            )
+        ),
+        (
+            (
+                AttributeEntry(key="driver_version", value="1.2.3"),
+                AttributeEntry(key="fw_version", value=None),
+            )
+        ),
+    ],
+)
+def test_invalid_driver_firmware_version_raises_error(invalid_metadata):
+    canonical = _canonical()
+    invalid_canonical = CanonicalSystemData(
+        external_resources=canonical.external_resources,
+        ports=canonical.ports,
+        oscillators=canonical.oscillators,
+        channels=canonical.channels,
+        metadata=invalid_metadata,
+    )
+
+    with pytest.raises(ValueError, match="Invalid driver or firmware version"):
+        QbloxHardwareView.derive(invalid_canonical)
+
+
+def test_missing_driver_firmware_versions_raise_error():
+    canonical = _canonical()
+    missing_metadata = (AttributeEntry(key="some_other_key", value="value"),)
+    missing_canonical = CanonicalSystemData(
+        external_resources=canonical.external_resources,
+        ports=canonical.ports,
+        oscillators=canonical.oscillators,
+        channels=canonical.channels,
+        metadata=missing_metadata,
+    )
+
+    with pytest.raises(ValueError, match="Missing required Qblox metadata"):
+        QbloxHardwareView.derive(missing_canonical)

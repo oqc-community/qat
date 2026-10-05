@@ -18,8 +18,11 @@ from functools import cached_property
 from typing import Any
 
 from frozendict import frozendict
+from pydantic_extra_types.semantic_version import SemanticVersion
 
+from qat.experimental.system_data.canonical.attributes import get_attribute_value
 from qat.experimental.system_data.canonical.schema import (
+    AttributeEntry,
     CanonicalSystemData,
     ChannelData,
     ExternalResourceData,
@@ -55,10 +58,14 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
     oriented shape is the stable input expected by later allocation and Q1 configuration
     layers.
 
+    :param driver_version: Canonical driver version.
+    :param firmware_version: Canonical firmware version.
     :param acquire_limit: Canonical runtime acquisition limit.
     :param modules: Installed modules indexed by physical location.
     """
 
+    driver_version: SemanticVersion
+    firmware_version: SemanticVersion
     acquire_limit: int
     modules: frozendict[QbloxModuleLocation, QbloxModuleView] = field(
         default_factory=frozendict
@@ -66,11 +73,15 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
 
     def __init__(
         self,
+        driver_version: SemanticVersion,
+        firmware_version: SemanticVersion,
         acquire_limit: int,
         modules: Mapping[QbloxModuleLocation, QbloxModuleView] = frozendict(),
     ) -> None:
         """Create an immutable view from already-projected module records."""
 
+        object.__setattr__(self, "driver_version", driver_version)
+        object.__setattr__(self, "firmware_version", firmware_version)
         object.__setattr__(self, "acquire_limit", acquire_limit)
         object.__setattr__(self, "modules", frozendict(modules))
 
@@ -119,12 +130,38 @@ class QbloxHardwareView(DerivedViewInterface[CanonicalSystemData]):
         return _derive_hardware_view(canonical_data)
 
 
+def _parse_version(value: Any, key: str) -> SemanticVersion:
+    """Parse a version string into a SemanticVersion, or return it if already parsed."""
+    if isinstance(value, SemanticVersion):
+        return value
+    if not isinstance(value, str):
+        raise ValueError(
+            f"Invalid driver or firmware version: {key} must be a string "
+            f"or SemanticVersion, got {type(value).__name__}"
+        )
+    return SemanticVersion.parse(value)
+
+
+def _required_version(
+    metadata: tuple[AttributeEntry, ...],
+    key: str,
+) -> SemanticVersion:
+    """Extract a required version from metadata."""
+    entry = get_attribute_value(metadata, key)
+    if entry is None:
+        raise ValueError(f"Missing required Qblox metadata {key!r}")
+    return _parse_version(entry.value, key)
+
+
 def _derive_hardware_view(canonical_data: CanonicalSystemData) -> QbloxHardwareView:
     """Group typed canonical bindings into physical modules.
 
     :param canonical_data: Validated canonical system data.
     :returns: A detached immutable hardware view.
     """
+    metadata = canonical_data.metadata
+    driver_version = _required_version(metadata, "driver_version")
+    firmware_version = _required_version(metadata, "fw_version")
 
     resources_by_id = {
         resource.id: resource for resource in canonical_data.external_resources
@@ -208,11 +245,16 @@ def _derive_hardware_view(canonical_data: CanonicalSystemData) -> QbloxHardwareV
                 oscillators_by_id,
                 resources_by_id,
                 channels_by_module[module_location],
+                # set firmware version to system level version for now
+                # because we don't have per-module firmware versions in the canonical data
+                firmware_version,
             ),
         )
         for module_location, module_ports in ports_by_module.items()
     )
-    return QbloxHardwareView(canonical_data.acquire_limit, modules)
+    return QbloxHardwareView(
+        driver_version, firmware_version, canonical_data.acquire_limit, modules
+    )
 
 
 def _port_reference(resource: ExternalResourceData) -> PortReference | None:
@@ -265,6 +307,7 @@ def _build_module(
     oscillators_by_id: Mapping[str, OscillatorData],
     resources_by_id: Mapping[str, ExternalResourceData],
     channel_bindings: list[QbloxChannelBinding],
+    firmware_version: SemanticVersion,
 ) -> QbloxModuleView:
     """Build one module from ports sharing a physical location.
 
@@ -273,6 +316,7 @@ def _build_module(
     :param oscillators_by_id: Canonical oscillators indexed by identifier.
     :param resources_by_id: Canonical external resources indexed by identifier.
     :param channel_bindings: Calibrated channels routed through the module.
+    :param firmware_version: Firmware version of the module
     :returns: An immutable module projection.
     :raises ValueError: If grouped ports disagree on module kind or oscillator binding.
     """
@@ -321,6 +365,7 @@ def _build_module(
             for oscillator_id in dict.fromkeys(oscillator_ids)
         ),
         channel_bindings=tuple(channel_bindings),
+        firmware_version=firmware_version,
     )
 
 

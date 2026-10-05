@@ -7,6 +7,7 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping, Sequence
 
 from frozendict import frozendict
+from pydantic_extra_types.semantic_version import SemanticVersion
 
 from qat.experimental.system_data.canonical.schema import (
     AttributeEntry,
@@ -84,6 +85,8 @@ def canonical_data(
     instrument_id: str = "cluster",
     carrier_frequency: int = 4_200_000_000,
     oscillator_frequency: int | None = 4_000_000_000,
+    driver_version: SemanticVersion = "1.2.3",
+    fw_version: SemanticVersion = "4.5.6",
 ) -> CanonicalSystemData:
     """Build canonical system data for one module exposed by several canonical ports.
 
@@ -97,6 +100,8 @@ def canonical_data(
     :param carrier_frequency: Carrier frequency of the first channel of each port, in Hz.
     :param oscillator_frequency: Local oscillator frequency in Hz, or ``None`` for a port
         with no oscillator.
+    :param driver_version: Version of the Qblox driver used to generate the data.
+    :param fw_version: Version of the Qblox firmware used to generate the data.
     :returns: Canonical system data carrying the typed Qblox extensions.
     """
 
@@ -165,10 +170,18 @@ def canonical_data(
             )
             for channel_index in range(counts[index])
         )
+    metadata = []
+    if driver_version is not None:
+        driver_version_entry = AttributeEntry(key="driver_version", value=driver_version)
+        metadata.append(driver_version_entry)
+    if fw_version is not None:
+        fw_version_entry = AttributeEntry(key="fw_version", value=fw_version)
+        metadata.append(fw_version_entry)
     return CanonicalSystemData(
         acquire_limit=100,
         external_resources=tuple(resources),
         ports=tuple(ports),
         oscillators=tuple(oscillators),
         channels=tuple(channels),
+        metadata=tuple(metadata),
     )

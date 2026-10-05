@@ -24,7 +24,6 @@ from qat.experimental.system_data.canonical.schema import (
 )
 from qat.experimental.system_data.materialisers.operations.defaults import (
     DefaultOperationBuilder,
-    _get_attribute_value,
     _resolve_reset_methods,
     make_ccnot_operation,
     make_cnot_operation,
@@ -172,12 +171,6 @@ def test_single_variant_operations_are_unconditional(make_fn):
 
 
 # ── Internal helper unit tests ────────────────────────────────────────────────
-
-
-def test_get_attribute_value_returns_none_for_absent_key():
-    """_get_attribute_value returns None when the key is not present in attributes."""
-    attrs = (AttributeEntry(key="duration", value=500),)
-    assert _get_attribute_value(attrs, "nonexistent") is None
 
 
 def test_resolve_reset_methods_falls_back_to_first_type_when_no_passive_or_default():

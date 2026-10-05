@@ -24,6 +24,7 @@ from qat.experimental.dialect.q1 import (
     PlayRsRsImmOp,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
 
 def _validate_table_references(sequence_op: SequenceOp) -> None:
@@ -78,6 +79,7 @@ def _resolve_static_table_index(sequence: SequenceOp, value) -> int:
 
 def emit_qblox_program(
     module: ModuleOp,
+    hardware_view: QbloxHardwareView,
     target_data: QbloxTargetData = TARGET_DATA,
     metadata: dict[str, JsonValue] | None = None,
 ) -> QbloxProgram:
@@ -87,6 +89,7 @@ def emit_qblox_program(
     is constructed.
 
     :param module: Configured, allocated and flat Qblox Q1 sequence module.
+    :param hardware_view: Qblox hardware view containing driver and firmware versions.
     :param target_data: Qblox numeric limits used for final emission validation.
     :param metadata: Optional linker/runtime metadata reserved for later consumers.
     :returns: Compiler payload snapshotted from the verified sequence IR.
@@ -127,8 +130,8 @@ def emit_qblox_program(
 
     return QbloxProgram(
         packages=packages,
-        driver_version=target_data.driver_version,
-        fw_version=target_data.fw_version,
+        driver_version=hardware_view.driver_version,
+        fw_version=hardware_view.firmware_version,
         timeout_seconds=DEFAULT_TIMEOUT_SECONDS,
         metadata=metadata,
     )

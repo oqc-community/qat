@@ -13,6 +13,8 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 
+from pydantic_extra_types.semantic_version import SemanticVersion
+
 
 class QbloxModuleKind(str, Enum):
     """Qblox module kinds represented by canonical system data."""
@@ -244,6 +246,7 @@ class QbloxModuleView:
     :ivar ports: Canonical ports attached to the module.
     :ivar oscillators: Local oscillators used by those ports and channels.
     :ivar channel_bindings: Calibrated logical channels routed through the module.
+    :ivar firmware_version: Firmware version of the module.
     """
 
     kind: QbloxModuleKind
@@ -251,3 +254,4 @@ class QbloxModuleView:
     ports: tuple[QbloxPortBinding, ...] = ()
     oscillators: tuple[QbloxOscillatorBinding, ...] = ()
     channel_bindings: tuple[QbloxChannelBinding, ...] = ()
+    firmware_version: SemanticVersion
