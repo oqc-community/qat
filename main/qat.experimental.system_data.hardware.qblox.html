@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.hardware.qblox package &mdash; qat-compiler 3.0.0.post395.dev20261005070606 documentation</title>
+  <title>qat.experimental.system_data.hardware.qblox package &mdash; qat-compiler 3.0.0.post396.dev20261005141727 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -271,6 +271,7 @@
 </li>
 <li class="toctree-l4 current"><a class="reference internal" href="qat.experimental.system_data.html">qat.experimental.system_data package</a><ul class="current">
 <li class="toctree-l5"><a class="reference internal" href="qat.experimental.system_data.canonical.html">qat.experimental.system_data.canonical package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.attributes.html">qat.experimental.system_data.canonical.attributes module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.system_data.canonical.schema.html">qat.experimental.system_data.canonical.schema module</a></li>
 </ul>
 </li>
@@ -748,7 +749,7 @@ group canonical ports without interpreting legacy configuration payloads.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxHardwareView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">acquire_limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozendict.frozendict({})</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxHardwareView</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">driver_version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">firmware_version</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquire_limit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">modules</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozendict.frozendict({})</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.system_data.derived.interface.html#qat.experimental.system_data.derived.interface.DerivedViewInterface" title="qat.experimental.system_data.derived.interface.DerivedViewInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DerivedViewInterface</span></code></a>[<a class="reference internal" href="qat.experimental.system_data.canonical.schema.html#qat.experimental.system_data.canonical.schema.CanonicalSystemData" title="qat.experimental.system_data.canonical.schema.CanonicalSystemData"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalSystemData</span></code></a>]</p>
 <p>Installed modules and canonical bindings used by Q1 configuration resolution.</p>
 <p>The view owns immutable records and does not retain its canonical parent. Its module-
@@ -757,6 +758,8 @@ layers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.driver_version"></span><strong>driver_version</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.driver_version">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SemanticVersion</span></code></span>) – Canonical driver version.</p></li>
+<li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.firmware_version"></span><strong>firmware_version</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.firmware_version">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">SemanticVersion</span></code></span>) – Canonical firmware version.</p></li>
 <li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.acquire_limit"></span><strong>acquire_limit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.acquire_limit">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Canonical runtime acquisition limit.</p></li>
 <li><p><span class="target" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.modules"></span><strong>modules</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.params.modules">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code>[<a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleLocation" title="qat.experimental.system_data.hardware.qblox.models.QbloxModuleLocation"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModuleLocation</span></code></a>, <a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView" title="qat.experimental.system_data.hardware.qblox.models.QbloxModuleView"><code class="xref py py-class docutils literal notranslate"><span class="pre">QbloxModuleView</span></code></a>]</span>) – Installed modules indexed by physical location.</p></li>
 </ul>
@@ -793,6 +796,16 @@ layers.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.driver_version">
+<span class="sig-name descname"><span class="pre">driver_version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">SemanticVersion</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.driver_version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.firmware_version">
+<span class="sig-name descname"><span class="pre">firmware_version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">SemanticVersion</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.QbloxHardwareView.firmware_version" title="Link to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.QbloxHardwareView.modules">
@@ -1130,6 +1143,7 @@ performed by <a class="reference internal" href="#qat.experimental.system_data.h
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView"><code class="docutils literal notranslate"><span class="pre">QbloxModuleView</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView.channel_bindings"><code class="docutils literal notranslate"><span class="pre">QbloxModuleView.channel_bindings</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView.firmware_version"><code class="docutils literal notranslate"><span class="pre">QbloxModuleView.firmware_version</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView.kind"><code class="docutils literal notranslate"><span class="pre">QbloxModuleView.kind</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView.location"><code class="docutils literal notranslate"><span class="pre">QbloxModuleView.location</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.models.html#qat.experimental.system_data.hardware.qblox.models.QbloxModuleView.oscillators"><code class="docutils literal notranslate"><span class="pre">QbloxModuleView.oscillators</span></code></a></li>
@@ -1265,6 +1279,8 @@ performed by <a class="reference internal" href="#qat.experimental.system_data.h
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.acquire_limit"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.acquire_limit</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.channel_bindings"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.channel_bindings</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.derive"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.derive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.driver_version"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.driver_version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.firmware_version"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.firmware_version</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.modules"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.modules</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.oscillator_bindings"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.oscillator_bindings</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.system_data.hardware.qblox.view.html#qat.experimental.system_data.hardware.qblox.view.QbloxHardwareView.port_bindings"><code class="docutils literal notranslate"><span class="pre">QbloxHardwareView.port_bindings</span></code></a></li>
