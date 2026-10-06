@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.qblox.acquisition module &mdash; qat-compiler 3.0.0.post399.dev20261006032935 documentation</title>
+  <title>qat.backend.qblox.acquisition module &mdash; qat-compiler 3.0.0.post400.dev20261006035812 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -877,9 +877,11 @@ validated to form a valid model.</p>
 <dt class="sig sig-object py" id="qat.backend.qblox.acquisition.ScopeAcqData">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScopeAcqData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.acquisition.ScopeAcqData" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
-<p>Path 0 refers to I while Path 1 refers to Q.</p>
-<p>Their lengths are statically equal
-to <code class="xref py py-class docutils literal notranslate"><span class="pre">Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS</span></code></p>
+<p>Raw scope traces returned by a Qblox readout module.</p>
+<p>Paths 0 and 1 are the I/Q pair for the first physical input. QRC modules additionally
+return paths 2 and 3 for the second physical input. Paths 2 and 3 are independently
+optional because this result model also accepts QRM and partial acquisition payloads.
+Their lengths are statically equal to the target’s maximum scope acquisition size.</p>
 <p>Create a new model by parsing and validating input data from keyword arguments.</p>
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
@@ -898,6 +900,16 @@ validated to form a valid model.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.acquisition.ScopeAcqData.path1">
 <span class="sig-name descname"><span class="pre">path1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.backend.qblox.acquisition.PathData" title="qat.backend.qblox.acquisition.PathData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathData</span></code></a></em><a class="headerlink" href="#qat.backend.qblox.acquisition.ScopeAcqData.path1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.qblox.acquisition.ScopeAcqData.path2">
+<span class="sig-name descname"><span class="pre">path2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.backend.qblox.acquisition.PathData" title="qat.backend.qblox.acquisition.PathData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathData</span></code></a> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.acquisition.ScopeAcqData.path2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.qblox.acquisition.ScopeAcqData.path3">
+<span class="sig-name descname"><span class="pre">path3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.backend.qblox.acquisition.PathData" title="qat.backend.qblox.acquisition.PathData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PathData</span></code></a> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.acquisition.ScopeAcqData.path3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
