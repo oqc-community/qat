@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from qat.experimental.tools.schedule import (
     ResourceKind,
     ScheduleTracker,
+    plot_schedule,
     visualise_schedule,
 )
 
@@ -54,6 +55,58 @@ def test_visualise_schedule_accepts_tracker_without_resources():
     assert len(axes) == 2
     assert [axis.get_xlabel() for axis in axes] == ["Time", "Time"]
     assert figure.number not in plt.get_fignums()
+
+
+@pytest.mark.parametrize("plotter", [visualise_schedule, plot_schedule])
+def test_schedule_plotters_use_explicit_resource_order_without_mutating_tracker(plotter):
+    schedule_tracker = ScheduleTracker()
+    for resource in ("drive", "measure", "acquire"):
+        schedule_tracker.resource(resource, ResourceKind.SEQUENCE, "ns")
+
+    _, axes = plotter(
+        schedule_tracker,
+        resource_order=(resource for resource in ("acquire", "drive", "measure")),
+    )
+
+    assert [axes[index].get_title() for index in range(0, len(axes), 2)] == [
+        "acquire",
+        "drive",
+        "measure",
+    ]
+    assert schedule_tracker.resources == ("drive", "measure", "acquire")
+
+
+def test_visualise_schedule_defaults_to_tracker_resource_order():
+    schedule_tracker = ScheduleTracker()
+    for resource in ("drive", "measure", "acquire"):
+        schedule_tracker.resource(resource, ResourceKind.SEQUENCE, "ns")
+
+    _, axes = visualise_schedule(schedule_tracker)
+
+    assert [axes[index].get_title() for index in range(0, len(axes), 2)] == [
+        "drive",
+        "measure",
+        "acquire",
+    ]
+
+
+@pytest.mark.parametrize(
+    "resource_order",
+    [
+        ("drive", "measure"),
+        ("drive", "measure", "unknown"),
+        ("drive", "drive", "acquire"),
+    ],
+)
+def test_visualise_schedule_rejects_resource_order_that_is_not_exact_permutation(
+    resource_order,
+):
+    schedule_tracker = ScheduleTracker()
+    for resource in ("drive", "measure", "acquire"):
+        schedule_tracker.resource(resource, ResourceKind.SEQUENCE, "ns")
+
+    with pytest.raises(ValueError, match="exact permutation"):
+        visualise_schedule(schedule_tracker, resource_order=resource_order)
 
 
 def test_visualise_schedule_marks_instantaneous_events():
@@ -141,6 +194,41 @@ def test_visualise_schedule_plots_wrapped_nco_phase():
     assert np.nanmin(phases) >= -np.pi
     assert np.nanmax(phases) <= np.pi
     assert axes[1].get_ylim() == pytest.approx((-np.pi, np.pi))
+
+
+def test_visualise_schedule_keeps_phase_constant_when_modulation_is_disabled():
+    schedule_tracker = ScheduleTracker()
+    schedule_tracker.resource(
+        "frame",
+        ResourceKind.FRAME,
+        "s",
+        frequency_modulates_signal=False,
+    )
+    schedule_tracker.set_frequency(4.9e9)
+    schedule_tracker.set_phase(np.pi / 2)
+    schedule_tracker.advance(2e-9, signal=[1.0, 1.0], label="pulse")
+
+    _, axes = visualise_schedule(schedule_tracker)
+
+    phase_line = next(line for line in axes[1].lines if line.get_color() == "C2")
+    assert phase_line.get_ydata().tolist() == pytest.approx(
+        [np.pi / 2, np.pi / 2, np.pi / 2]
+    )
+
+
+def test_visualise_schedule_continues_phase_between_modulated_events():
+    schedule_tracker = ScheduleTracker()
+    schedule_tracker.resource("sequence", ResourceKind.SEQUENCE, "ns")
+    schedule_tracker.set_frequency(125e6)
+    schedule_tracker.advance(1, signal=[1.0], label="first")
+    schedule_tracker.advance(1, signal=[1.0], label="second")
+
+    _, axes = visualise_schedule(schedule_tracker)
+
+    phase_lines = [line for line in axes[1].lines if line.get_color() == "C2"]
+    assert phase_lines[0].get_ydata()[-1] == pytest.approx(np.pi / 4)
+    assert phase_lines[1].get_ydata()[0] == pytest.approx(np.pi / 4)
+    assert phase_lines[1].get_ydata()[-1] == pytest.approx(np.pi / 2)
 
 
 def test_visualise_schedule_scales_wrapped_phase_to_native_steps():

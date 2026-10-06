@@ -27,7 +27,9 @@ from dataclasses import dataclass
 from math import isclose
 
 from xdsl.context import Context
-from xdsl.dialects.builtin import ModuleOp, StringAttr
+from xdsl.dialects import scf
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import IntegerAttr, ModuleOp, StringAttr
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
@@ -40,6 +42,8 @@ from qat.experimental.conversion.pulse_to_q1.qblox_configuration.resolution impo
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
 from qat.experimental.dialect.pulse.ir import CreateFrameOp
 from qat.experimental.dialect.pulse.utils import extract_frequency_hz
+from qat.experimental.dialect.q1 import WaitSyncImmOp, WaitSyncRsOp
+from qat.experimental.dialect.q1_sequence.ir.attrs import SequencerConfigAttr
 from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
     SequencerIndexAttr,
     SlotIndexAttr,
@@ -128,6 +132,7 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
                 "Outlined sequences resolve to a duplicate Qblox physical allocation."
             )
 
+        _validate_synchronization_topology(sequence_ops)
         for sequence_op, binding in zip(sequence_ops, resolved_bindings, strict=True):
             self._verify_existing(sequence_op, binding)
         for sequence_op, binding in zip(sequence_ops, resolved_bindings, strict=True):
@@ -367,11 +372,16 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
         """
 
         try:
-            sequencer_config = (
-                sequence_op.sequencer_config.merge_bound(binding.sequencer_config)
-                if sequence_op.sequencer_config is not None
-                else binding.sequencer_config
+            enable_sync = any(
+                isinstance(operation, WaitSyncImmOp | WaitSyncRsOp)
+                for operation in sequence_op.walk()
             )
+            generated_config = SequencerConfigAttr(enable_sync=enable_sync)
+            sequencer_config = (
+                generated_config
+                if sequence_op.sequencer_config is None
+                else sequence_op.sequencer_config.merge_bound(generated_config)
+            ).merge_bound(binding.sequencer_config)
         except VerifyException as error:
             raise PassFailedException(
                 f"Sequence {sequence_op.channel_id.data!r} has sequencer configuration "
@@ -384,3 +394,94 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
         sequence_op.properties["seq_idx"] = SequencerIndexAttr(binding.sequencer_index)
         sequence_op.properties["sequencer_config"] = sequencer_config
         sequence_op.properties["module_config"] = binding.module_config
+
+
+def _validate_synchronization_topology(sequence_ops: list[SequenceOp]) -> None:
+    """Reject incompatible party-line barrier structures before enabling synchronization.
+
+    Every participating sequence must encounter barriers in the same region/loop structure
+    and with the same static loop trip counts. Otherwise one sequencer can wait at a barrier
+    that its peers never reach.
+    """
+
+    participants = [
+        (sequence_op.channel_id.data, topology)
+        for sequence_op in sequence_ops
+        if (
+            topology := _region_synchronization_topology(
+                sequence_op.body.block.ops, sequence_op
+            )
+        )
+    ]
+    if len(participants) < 2:
+        return
+
+    expected_channel, expected_topology = participants[0]
+    for channel, topology in participants[1:]:
+        if topology != expected_topology:
+            raise PassFailedException(
+                "Synchronized sequences require matching wait_sync barrier topology, but "
+                f"{expected_channel!r} has {expected_topology} and {channel!r} has "
+                f"{topology}."
+            )
+
+
+def _region_synchronization_topology(
+    operations,
+    sequence_op: SequenceOp,
+) -> tuple[object, ...]:
+    """Build the synchronization-only structure for one operation range.
+
+    Non-synchronizing operations are omitted. A loop is retained only when its body contains
+    a barrier, together with its static trip count and nested topology.
+
+    :param operations: Ordered operations in the sequence or loop body.
+    :param sequence_op: Owning sequence, used to identify invalid loop bounds.
+    :returns: Ordered barrier and loop nodes for the operation range.
+    :raises PassFailedException: If a barrier is enclosed by a loop whose trip count cannot
+        be determined statically.
+    """
+
+    topology: list[object] = []
+    for operation in operations:
+        if isinstance(operation, WaitSyncImmOp | WaitSyncRsOp):
+            topology.append("wait_sync")
+        elif isinstance(operation, scf.ForOp):
+            body_topology = _region_synchronization_topology(
+                operation.body.block.ops, sequence_op
+            )
+            if body_topology:
+                topology.append(
+                    ("loop", _static_trip_count(operation, sequence_op), body_topology)
+                )
+    return tuple(topology)
+
+
+def _static_trip_count(loop: scf.ForOp, sequence_op: SequenceOp) -> int:
+    """Return the number of iterations executed by a static ``scf.for``.
+
+    :param loop: Loop whose lower bound, upper bound, and step are inspected.
+    :param sequence_op: Owning sequence, used to identify invalid synchronization IR.
+    :returns: The number of loop iterations.
+    :raises PassFailedException: If any bound is dynamic or the step is zero.
+    """
+
+    bounds: list[int] = []
+    for value in (loop.lb, loop.ub, loop.step):
+        owner = value.owner
+        if not isinstance(owner, ArithConstantOp) or not isinstance(
+            owner.value, IntegerAttr
+        ):
+            raise PassFailedException(
+                "Dynamic For loop bounds not currently supported. "
+                f"Sequence {sequence_op.channel_id.data!r} has wait_sync inside the loop, "
+                "so synchronization topology cannot be proven."
+            )
+        bounds.append(owner.value.value.data)
+    lower, upper, step = bounds
+    if step == 0:
+        raise PassFailedException(
+            f"Sequence {sequence_op.channel_id.data!r} has wait_sync inside an scf.for "
+            "with a zero step."
+        )
+    return len(range(lower, upper, step))

@@ -302,7 +302,7 @@ class TestNullaryFormat:
     _OPS_TABLE = [
         (IllegalOp, "illegal", (IsTerminator, HasRegisterConstraintsTrait)),
         (StopOp, "stop", (IsTerminator, HasRegisterConstraintsTrait)),
-        (NopOp, "nop", (Pure, HasRegisterConstraintsTrait)),
+        (NopOp, "nop", (HasRegisterConstraintsTrait,)),
         (ResetPhOp, "reset_ph", (HasRegisterConstraintsTrait,)),
     ]
 

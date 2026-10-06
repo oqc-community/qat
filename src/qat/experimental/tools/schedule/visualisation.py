@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from math import ceil
 from typing import Literal
 
@@ -26,12 +27,15 @@ SignalInterpolation = Literal["linear", "zero_order_hold"]
 def visualise_schedule(
     tracker: ScheduleTracker,
     signal_interpolation: SignalInterpolation = "linear",
+    resource_order: Iterable[str] | None = None,
 ) -> tuple[Figure, np.ndarray]:
     """Render tracker events without displaying the resulting figure.
 
     :param tracker: Generic schedule tracker containing recorded events.
     :param signal_interpolation: Whether to join samples linearly or hold each sample until
         the next one.
+    :param resource_order: Optional exact permutation of tracked resource names that sets
+        subplot order. Defaults to tracker registration order.
     :returns: The matplotlib figure and consecutive amplitude and phase axes for each
         tracked resource.
     """
@@ -45,17 +49,21 @@ def visualise_schedule(
             f"Unsupported signal interpolation {signal_interpolation!r}"
         ) from error
 
-    count = max(len(tracker.resources), 1)
+    resources = tracker.resources if resource_order is None else tuple(resource_order)
+    if len(resources) != len(tracker.resources) or set(resources) != set(tracker.resources):
+        raise ValueError("resource_order must be an exact permutation of tracker resources")
+
+    count = max(len(resources), 1)
     figure, axes = plt.subplots(2 * count, 1, squeeze=False, figsize=(10, 5 * count))
     flat_axes: np.ndarray = axes[:, 0]
 
-    if not tracker.resources:
+    if not resources:
         for axis in flat_axes:
             axis.set_xlabel("Time")
         plt.close(figure)
         return figure, flat_axes
 
-    for resource_index, resource_name in enumerate(tracker.resources):
+    for resource_index, resource_name in enumerate(resources):
         amplitude_axis = flat_axes[2 * resource_index]
         phase_axis = flat_axes[2 * resource_index + 1]
         events = tracker.timelines[resource_name]
@@ -175,11 +183,12 @@ def visualise_schedule(
 def _phase_trace(event: ScheduleEvent) -> tuple[np.ndarray, np.ndarray]:
     signal_sample_count = event.signal.size if event.signal is not None else 0
     seconds = event.duration * _SECONDS_PER_UNIT[event.unit]
-    cycles = abs(event.frequency) * seconds
+    frequency = event.frequency if event.frequency_modulates_signal else 0.0
+    cycles = abs(frequency) * seconds
     sample_count = min(max(signal_sample_count, ceil(cycles * 16), 2), 10_000)
     times = np.linspace(event.start, event.end, sample_count + 1)
     elapsed_seconds = (times - event.start) * _SECONDS_PER_UNIT[event.unit]
-    phase = event.phase + 2 * np.pi * event.frequency * elapsed_seconds
+    phase = event.phase + 2 * np.pi * frequency * elapsed_seconds
     wrapped_phase = (phase + np.pi) % (2 * np.pi) - np.pi
     displayed_phase = wrapped_phase * event.phase_scale
     wrap_indices = np.flatnonzero(np.abs(np.diff(wrapped_phase)) > np.pi) + 1

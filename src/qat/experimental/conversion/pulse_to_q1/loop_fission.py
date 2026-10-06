@@ -34,6 +34,8 @@ from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineage,
     FrameLineageAnalysis,
 )
+from qat.experimental.dialect.q1 import ResetPhOp, UpdParamImmOp, WaitSyncImmOp
+from qat.experimental.dialect.q1.ir.imm_desc import DurationImm
 from qat.experimental.dialect.results.ir import Results
 
 
@@ -55,6 +57,7 @@ def fission_for_lineage(
     lineage: FrameLineage,
     analysis: FrameLineageAnalysis,
     value_mapper: dict[SSAValue, SSAValue],
+    synchronization_grid_time: int,
 ) -> ForOp:
     """Build a copy of an ``scf.for`` with only the contents belonging to ``lineage``.
 
@@ -63,11 +66,16 @@ def fission_for_lineage(
     :param analysis: Analysis providing per-operation lineage ownership.
     :param value_mapper: Clone mapping for the partition, used to resolve operands
         defined by entry-block operations already copied into this sequence.
+    :param synchronization_grid_time: Duration valid on every sequencer that can receive
+        synchronization scaffolding.
     :returns: A newly built ``scf.for`` carrying only ``lineage``'s operations, with no
         loop-carried values.
     :raises PassFailedException: If ``op`` is not an ``scf.for``, if the loop has an
         unsupported shape, or if the copy would have to carry a loop-carried value.
     """
+    # TODO(COMPILER-1466): Introduce a typed fission context when loop partitioning is
+    # generalised. The current signature couples lineage analysis, clone state, and Q1
+    # timing.
     if not isinstance(op, ForOp):
         raise PassFailedException(
             f"{op.name} encloses more than one frame lineage. Only scf.for shot loops "
@@ -75,7 +83,13 @@ def fission_for_lineage(
             "rules for its regions and block arguments that nothing yet exercises."
         )
     _reject_unsupported_shape(op)
-    return _build_loop(op, _retained_ops(op, lineage, analysis), lineage, value_mapper)
+    return _build_loop(
+        op,
+        _retained_ops(op, lineage, analysis),
+        lineage,
+        value_mapper,
+        synchronization_grid_time,
+    )
 
 
 def _reject_unsupported_shape(op: ForOp) -> None:
@@ -167,6 +181,7 @@ def _build_loop(
     retained: set[Operation],
     lineage: FrameLineage,
     value_mapper: dict[SSAValue, SSAValue],
+    synchronization_grid_time: int,
 ) -> ForOp:
     """Build a loop over ``retained``, carrying no values between iterations."""
     block = op.body.block
@@ -180,7 +195,14 @@ def _build_loop(
     body = Block(arg_types=[block.args[0].type])
     mapper = dict(value_mapper)
     mapper[block.args[0]] = body.args[0]
-    body.add_ops([inner.clone(mapper) for inner in block.ops if inner in retained])
+    body.add_ops(
+        [
+            WaitSyncImmOp(DurationImm(synchronization_grid_time)),
+            ResetPhOp(),
+            UpdParamImmOp(DurationImm(synchronization_grid_time)),
+            *(inner.clone(mapper) for inner in block.ops if inner in retained),
+        ]
+    )
     body.add_op(YieldOp())
 
     bounds = [value_mapper.get(bound, bound) for bound in (op.lb, op.ub, op.step)]

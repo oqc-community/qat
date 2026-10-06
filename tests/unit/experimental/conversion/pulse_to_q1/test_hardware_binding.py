@@ -7,7 +7,10 @@ from pathlib import Path
 
 import pytest
 from xdsl.context import Context
-from xdsl.dialects.builtin import ModuleOp, StringAttr
+from xdsl.dialects import scf
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import IndexType, ModuleOp, StringAttr
+from xdsl.ir import Block
 from xdsl.utils.exceptions import PassFailedException
 
 import qat.experimental.conversion.pulse_to_q1.hardware_binding as hardware_binding
@@ -18,7 +21,15 @@ from qat.experimental.conversion.pulse_to_q1.qblox_configuration.models import (
     SequencerBinding,
 )
 from qat.experimental.dialect.pulse.ir import ConstantOp, CreateFrameOp, FrequencyAttr
-from qat.experimental.dialect.q1 import StopOp
+from qat.experimental.dialect.q1 import (
+    DurationImm,
+    MoveImmRdOp,
+    StopOp,
+    SU32Imm,
+    WaitSyncImmOp,
+    WaitSyncRsOp,
+)
+from qat.experimental.dialect.q1.ir.reg_desc import Registers
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     ModuleConfigAttr,
     SequencerConfigAttr,
@@ -86,6 +97,29 @@ def _bind(data: CanonicalSystemData, *sequences: SequenceOp) -> ModuleOp:
     QbloxHardwareBindingPass(data).apply(Context(), module)
     module.verify()
     return module
+
+
+def _looped_sequence(
+    carrier: int,
+    *,
+    port_id: str,
+    channel_id: str,
+    iterations: int = 2,
+) -> SequenceOp:
+    frequency = ConstantOp(FrequencyAttr(carrier))
+    frame = CreateFrameOp(frequency, StringAttr(port_id))
+    lower, upper, step = (
+        ArithConstantOp.from_int_and_width(value, IndexType())
+        for value in (0, iterations, 1)
+    )
+    body = Block(arg_types=[IndexType()])
+    body.add_ops([WaitSyncImmOp(DurationImm(4)), scf.YieldOp()])
+    loop = scf.ForOp(lower, upper, step, [], body)
+    return SequenceOp(
+        channel_id,
+        [frequency, frame, lower, upper, step, loop, StopOp()],
+        port_id,
+    )
 
 
 def _ambiguous_channel_data() -> CanonicalSystemData:
@@ -503,6 +537,125 @@ def test_an_existing_conflicting_sequencer_configuration_is_rejected():
 
     with pytest.raises(PassFailedException, match="sequencer configuration conflicting"):
         _bind(data_with_sync, _sequence(4_200_000_000, sequencer_config=existing))
+
+
+def test_only_sequences_with_wait_sync_join_party_line_synchronization():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)]), supplied([sequencer(1)])],
+    )
+    looped = _looped_sequence(
+        4_200_000_000,
+        port_id="port-0",
+        channel_id="port-0-channel-0",
+    )
+    top_level = _sequence(
+        4_200_000_000,
+        port_id="port-1",
+        channel_id="port-1-channel-0",
+    )
+
+    _bind(data, looped, top_level)
+
+    assert any(isinstance(operation, WaitSyncImmOp) for operation in looped.walk())
+    assert not any(isinstance(operation, WaitSyncImmOp) for operation in top_level.walk())
+    assert bool(looped.sequencer_config.enable_sync.value.data)
+    assert not bool(top_level.sequencer_config.enable_sync.value.data)
+
+
+def test_synchronized_sequences_require_matching_barrier_topology():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)]), supplied([sequencer(1)])],
+    )
+    first = _looped_sequence(
+        4_200_000_000,
+        port_id="port-0",
+        channel_id="port-0-channel-0",
+        iterations=2,
+    )
+    second = _looped_sequence(
+        4_200_000_000,
+        port_id="port-1",
+        channel_id="port-1-channel-0",
+        iterations=3,
+    )
+
+    with pytest.raises(PassFailedException, match="matching wait_sync barrier topology"):
+        _bind(data, first, second)
+
+
+def test_synchronized_sequences_distinguish_sibling_and_shared_loops():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)]), supplied([sequencer(1)])],
+    )
+    sibling_loops = _looped_sequence(
+        4_200_000_000,
+        port_id="port-0",
+        channel_id="port-0-channel-0",
+    )
+    [first_loop] = [
+        operation
+        for operation in sibling_loops.body.block.ops
+        if isinstance(operation, scf.ForOp)
+    ]
+    sibling_loops.body.block.insert_op_before(
+        first_loop.clone(), sibling_loops.body.block.last_op
+    )
+
+    shared_loop = _looped_sequence(
+        4_200_000_000,
+        port_id="port-1",
+        channel_id="port-1-channel-0",
+    )
+    [loop] = [
+        operation
+        for operation in shared_loop.body.block.ops
+        if isinstance(operation, scf.ForOp)
+    ]
+    loop.body.block.insert_op_before(WaitSyncImmOp(DurationImm(4)), loop.body.block.last_op)
+
+    with pytest.raises(PassFailedException, match="matching wait_sync barrier topology"):
+        _bind(data, sibling_loops, shared_loop)
+
+
+def test_synchronized_sequences_accept_matching_sibling_loop_topology():
+    data = canonical_data(
+        configurations=[supplied([sequencer(0)]), supplied([sequencer(1)])],
+    )
+    first = _looped_sequence(
+        4_200_000_000,
+        port_id="port-0",
+        channel_id="port-0-channel-0",
+    )
+    second = _looped_sequence(
+        4_200_000_000,
+        port_id="port-1",
+        channel_id="port-1-channel-0",
+    )
+    for sequence in (first, second):
+        [loop] = [
+            operation
+            for operation in sequence.body.block.ops
+            if isinstance(operation, scf.ForOp)
+        ]
+        sequence.body.block.insert_op_before(loop.clone(), sequence.body.block.last_op)
+
+    _bind(data, first, second)
+
+    assert bool(first.sequencer_config.enable_sync.value.data)
+    assert bool(second.sequencer_config.enable_sync.value.data)
+
+
+def test_register_wait_sync_joins_party_line_synchronization():
+    data = canonical_data(configurations=[supplied([sequencer(0)])])
+    sequence = _sequence(4_200_000_000)
+    duration = MoveImmRdOp(SU32Imm(4), Registers.R0)
+    sequence.body.block.insert_ops_before(
+        [duration, WaitSyncRsOp(duration.rd)], sequence.body.block.last_op
+    )
+
+    _bind(data, sequence)
+
+    assert bool(sequence.sequencer_config.enable_sync.value.data)
 
 
 @pytest.mark.parametrize(

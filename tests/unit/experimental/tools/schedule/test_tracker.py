@@ -4,7 +4,48 @@
 import numpy as np
 import pytest
 
-from qat.experimental.tools.schedule import ResourceKind, ScheduleTracker
+from qat.experimental.tools.schedule import (
+    ResourceKind,
+    ScheduleEvent,
+    ScheduleResource,
+    ScheduleTracker,
+)
+
+
+def test_schedule_metadata_preserves_previous_positional_constructor_api():
+    resource = ScheduleResource(
+        "frame",
+        ResourceKind.FRAME,
+        "ns",
+        "Amplitude",
+        "Phase",
+        "rad",
+        1.0,
+        None,
+    )
+    event = ScheduleEvent(
+        "frame",
+        ResourceKind.FRAME,
+        "ns",
+        "Amplitude",
+        "Phase",
+        "rad",
+        1.0,
+        0.0,
+        4.0,
+        1e9,
+        0.0,
+        1.0 + 0.0j,
+        None,
+        "pulse",
+    )
+
+    assert resource.frequency_modulates_signal
+    assert resource.phase_modulates_signal
+    assert event.frequency_modulates_signal
+    assert event.phase_modulates_signal
+    assert event.signal is None
+    assert event.label == "pulse"
 
 
 def test_schedule_tracker_applies_state_to_signal_and_advances_time():
@@ -63,6 +104,40 @@ def test_schedule_tracker_continuously_modulates_signal_and_phase():
         [1.0j, np.exp(1j * 3 * np.pi / 4)],
         atol=1e-12,
     )
+
+
+def test_schedule_tracker_can_disable_frequency_modulation():
+    schedule_tracker = ScheduleTracker()
+    schedule_tracker.resource(
+        "q0",
+        ResourceKind.FRAME,
+        "s",
+        frequency_modulates_signal=False,
+    )
+    schedule_tracker.set_frequency(250e6)
+
+    event = schedule_tracker.advance(2e-9, [1.0, 1.0])
+
+    np.testing.assert_allclose(event.signal, [1.0, 1.0])
+    assert schedule_tracker.phase == 0.0
+
+
+def test_schedule_tracker_can_display_phase_without_modulating_signal():
+    schedule_tracker = ScheduleTracker()
+    schedule_tracker.resource(
+        "q0",
+        ResourceKind.SEQUENCE,
+        "ns",
+        phase_modulates_signal=False,
+    )
+    schedule_tracker.set_frequency(250e6)
+    schedule_tracker.set_phase(np.pi / 2)
+
+    event = schedule_tracker.advance(1, [1.0])
+
+    np.testing.assert_allclose(event.signal, [1.0])
+    assert event.phase == pytest.approx(np.pi / 2)
+    assert schedule_tracker.phase == pytest.approx(np.pi)
 
 
 def test_schedule_tracker_synchronises_resources():

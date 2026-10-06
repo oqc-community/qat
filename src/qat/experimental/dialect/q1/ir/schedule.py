@@ -11,8 +11,14 @@ from math import sqrt, tau
 import numpy as np
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.ir import Operation
+from xdsl.traits import Pure
 
-from qat.experimental.dialect.q1.ir.abstract_ops import Q1AsmOperation
+from qat.experimental.dialect.q1.ir.abstract_ops import (
+    JumpImmOperation,
+    LoopImmOperation,
+    Q1AsmOperation,
+)
+from qat.experimental.dialect.q1.ir.attrs import LabelAttr
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
     AcquireImmRsImmOp,
@@ -20,7 +26,9 @@ from qat.experimental.dialect.q1.ir.ops import (
     AcquireTtlImmRsImmImmOp,
     AcquireWeightedImmImmImmImmImmOp,
     AcquireWeightedImmRsRsRsImmOp,
+    LabelOp,
     LatchRstImmOp,
+    LoopRdImmOp,
     MoveImmRdOp,
     NopOp,
     PlayImmImmImmOp,
@@ -43,9 +51,12 @@ from qat.experimental.dialect.q1.ir.ops import (
     UpdParamImmOp,
     WaitImmOp,
     WaitSyncImmOp,
+    WaitSyncRsOp,
 )
+from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
+    Q1SequencerSpec,
     Q1SequencerType,
     QbloxTargetDescription,
 )
@@ -62,6 +73,9 @@ class Q1ScheduleVisitor:
         target_description: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
         waveforms: Mapping[int, Iterable[float]] | None = None,
         sequencer_type: Q1SequencerType = Q1SequencerType.control,
+        initial_frequency: float = 0.0,
+        initial_phase_offset_steps: int = 0,
+        nco_modulates_signal: bool = True,
     ) -> None:
         self.tracker = tracker
         self.sequence = sequence
@@ -88,10 +102,12 @@ class Q1ScheduleVisitor:
                 )
         self._active_waveform: np.ndarray | None = None
         self._waveform_cursor = 0
-        self._active_phase_offset = 0.0
+        self._active_phase_offset_steps = (
+            initial_phase_offset_steps % self._sequencer_spec.nco_phase_steps
+        )
         self._pending_frequency: float | None = None
-        self._pending_phase_offset: float | None = None
-        self._pending_phase_delta = 0.0
+        self._pending_phase_offset_steps: int | None = None
+        self._pending_phase_delta_steps = 0
         self._pending_phase_reset = False
         self._pending_gains: tuple[float, float] | None = None
         self._pending_offsets: tuple[float, float] | None = None
@@ -109,6 +125,11 @@ class Q1ScheduleVisitor:
                 self._sequencer_spec.min_waveform_sample,
                 self._sequencer_spec.max_waveform_sample,
             ),
+            phase_modulates_signal=nco_modulates_signal,
+        )
+        self._set_frequency(initial_frequency)
+        self.tracker.select(self.sequence).set_phase(
+            self._phase_steps_as_radians(self._active_phase_offset_steps)
         )
 
     @singledispatchmethod
@@ -134,6 +155,10 @@ class Q1ScheduleVisitor:
     @visit.register
     def _(self, operation: WaitSyncImmOp) -> None:
         self._advance(operation.duration.data, "wait_sync")
+
+    @visit.register
+    def _(self, operation: WaitSyncRsOp) -> None:
+        self._advance(self._static_register_value(operation.duration), "wait_sync")
 
     @visit.register
     def _(self, operation: PlayImmImmImmOp) -> None:
@@ -194,6 +219,16 @@ class Q1ScheduleVisitor:
         frequency = (
             operation.nco_freq.data / self._sequencer_spec.nco_frequency_steps_per_hz
         )
+        self._validate_frequency(frequency)
+        self._pending_frequency = frequency
+
+    def _set_frequency(self, frequency: float) -> None:
+        """Validate and apply an initial NCO frequency to the selected sequence."""
+        self._validate_frequency(frequency)
+        self.tracker.select(self.sequence).set_frequency(frequency)
+
+    def _validate_frequency(self, frequency: float) -> None:
+        """Reject an NCO frequency outside the selected sequencer's target limits."""
         if not (
             self._sequencer_spec.nco_min_frequency_hz
             <= frequency
@@ -204,19 +239,14 @@ class Q1ScheduleVisitor:
                 f"[{self._sequencer_spec.nco_min_frequency_hz}, "
                 f"{self._sequencer_spec.nco_max_frequency_hz}]"
             )
-        self._pending_frequency = frequency
 
     @visit.register
     def _(self, operation: SetPhImmOp) -> None:
-        self._pending_phase_offset = (
-            tau * operation.nco_po.data / self._sequencer_spec.nco_phase_steps
-        )
+        self._pending_phase_offset_steps = operation.nco_po.data
 
     @visit.register
     def _(self, operation: SetPhDeltaImmOp) -> None:
-        self._pending_phase_delta = (
-            tau * operation.nco_delta_po.data / self._sequencer_spec.nco_phase_steps
-        )
+        self._pending_phase_delta_steps = operation.nco_delta_po.data
 
     @visit.register(SetCondImmImmImmImmOp)
     @visit.register(SetCondRsRsRsImmOp)
@@ -235,6 +265,11 @@ class Q1ScheduleVisitor:
     ) -> None:
         return None
 
+    @visit.register(LabelOp)
+    @visit.register(LoopRdImmOp)
+    def _(self, operation: LabelOp | LoopRdImmOp) -> None:
+        return None
+
     @visit.register(SetLatchEnImmImmOp)
     @visit.register(SetLatchEnRsImmOp)
     def _(self, operation: SetLatchEnImmImmOp | SetLatchEnRsImmOp) -> None:
@@ -247,8 +282,8 @@ class Q1ScheduleVisitor:
     @visit.register
     def _(self, operation: ResetPhOp) -> None:
         self._pending_phase_reset = True
-        self._pending_phase_offset = None
-        self._pending_phase_delta = 0.0
+        self._pending_phase_offset_steps = None
+        self._pending_phase_delta_steps = 0
 
     @visit.register
     def _(self, operation: SetAwgGainImmImmOp) -> None:
@@ -272,28 +307,39 @@ class Q1ScheduleVisitor:
     def _apply_pending_parameters(self) -> None:
         resource = self.tracker.select(self.sequence)
         if self._pending_phase_reset:
-            resource.set_phase(0.0)
-            self._active_phase_offset = 0.0
+            resource.set_phase(
+                self._phase_steps_as_radians(self._active_phase_offset_steps)
+            )
         if self._pending_frequency is not None:
             resource.set_frequency(self._pending_frequency)
-        if self._pending_phase_offset is not None:
+        if self._pending_phase_offset_steps is not None:
             resource.set_phase(
-                self.tracker.phase + self._pending_phase_offset - self._active_phase_offset
+                self.tracker.phase
+                + self._phase_steps_as_radians(
+                    self._pending_phase_offset_steps - self._active_phase_offset_steps
+                )
             )
-            self._active_phase_offset = self._pending_phase_offset
-        if self._pending_phase_delta:
-            resource.set_phase(self.tracker.phase + self._pending_phase_delta)
+            self._active_phase_offset_steps = self._pending_phase_offset_steps
+        if self._pending_phase_delta_steps:
+            resource.set_phase(
+                self.tracker.phase
+                + self._phase_steps_as_radians(self._pending_phase_delta_steps)
+            )
         if self._pending_gains is not None:
             self._active_gains = self._pending_gains
         if self._pending_offsets is not None:
             self._active_offsets = self._pending_offsets
 
         self._pending_frequency = None
-        self._pending_phase_offset = None
-        self._pending_phase_delta = 0.0
+        self._pending_phase_offset_steps = None
+        self._pending_phase_delta_steps = 0
         self._pending_phase_reset = False
         self._pending_gains = None
         self._pending_offsets = None
+
+    def _phase_steps_as_radians(self, steps: int) -> float:
+        """Convert native Q1 phase steps to radians at the tracker boundary."""
+        return tau * steps / self._sequencer_spec.nco_phase_steps
 
     def _waveform_pair(
         self,
@@ -340,7 +386,12 @@ def build_q1_schedule(
     waveforms: Mapping[int, Iterable[float]] | None = None,
     sequencer_type: Q1SequencerType = Q1SequencerType.control,
 ) -> ScheduleTracker:
-    """Walk a Q1 module and record its linear instruction schedule.
+    """Walk a Q1 module and record one execution of its linear instruction schedule.
+
+    A canonical lowered counted loop, represented by one backward label/loop pair, is
+    visualised once. Sequences with synchronization enabled are advanced cooperatively at
+    matching ``wait_sync`` barriers. General jumps and non-canonical loop control remain
+    unsupported.
 
     :param module: Q1 module containing Q1 assembly operations.
     :param sequence: Name assigned to the tracked Q1 sequence.
@@ -362,14 +413,7 @@ def build_q1_schedule(
             raise ValueError(
                 "Q1 schedule plotting requires linearised single-block sequences"
             )
-        if len(sequence_ops) > 1 and any(
-            isinstance(operation, WaitSyncImmOp)
-            for sequence_op in sequence_ops
-            for operation in sequence_op.body.walk()
-        ):
-            raise ValueError(
-                "Q1 schedule plotting does not support wait_sync across multiple sequences"
-            )
+        prepared_sequences = []
         for sequence_op in sequence_ops:
             operations = tuple(sequence_op.body.block.ops)
             unsupported = next(
@@ -385,29 +429,35 @@ def build_q1_schedule(
                     f"Q1 schedule plotting requires flat Q1 operations, found "
                     f"{unsupported.name}"
                 )
+            operations = _one_iteration_operations(operations)
             waveform_table = {
                 waveform.index.data: tuple(
                     float(value) for value in waveform.data.iter_values()
                 )
                 for waveform in sequence_op.waveforms
             }
+            sequence_type = (
+                target.sequencer(
+                    sequence_op.module_config.kind.data,
+                    sequence_op.seq_idx.data,
+                ).sequencer_spec.type
+                if sequence_op.module_config is not None and sequence_op.seq_idx is not None
+                else sequencer_type
+            )
             visitor = Q1ScheduleVisitor(
                 tracker,
                 sequence_op.channel_id.data,
                 target,
                 waveform_table,
-                (
-                    target.sequencer(
-                        sequence_op.module_config.kind.data,
-                        sequence_op.seq_idx.data,
-                    ).sequencer_spec.type
-                    if sequence_op.module_config is not None
-                    and sequence_op.seq_idx is not None
-                    else sequencer_type
+                sequence_type,
+                _configured_nco_frequency(sequence_op),
+                _configured_nco_phase_offset_steps(
+                    sequence_op, target.sequencer_spec(sequence_type)
                 ),
+                _configured_awg_modulation_enabled(sequence_op),
             )
-            for operation in operations:
-                operation.accept(visitor)
+            prepared_sequences.append((sequence_op, operations, visitor))
+        _visit_sequences(tracker, prepared_sequences)
         return tracker
 
     operations = tuple(module.body.block.ops)
@@ -423,6 +473,7 @@ def build_q1_schedule(
         raise ValueError(
             f"Q1 schedule plotting requires flat Q1 operations, found {unsupported.name}"
         )
+    operations = _one_iteration_operations(operations)
     visitor = Q1ScheduleVisitor(
         tracker,
         sequence,
@@ -433,3 +484,161 @@ def build_q1_schedule(
     for operation in operations:
         operation.accept(visitor)
     return tracker
+
+
+def _configured_nco_frequency(sequence_op) -> float:
+    """Return the configured NCO frequency in Hz, defaulting to zero when absent."""
+    from xdsl.dialects.builtin import NoneAttr
+
+    from qat.experimental.dialect.q1_sequence.ir.attrs import NcoConfigAttr
+
+    config = sequence_op.sequencer_config
+    if config is None or not isinstance(config.nco, NcoConfigAttr):
+        return 0.0
+    frequency = config.nco.frequency
+    return 0.0 if isinstance(frequency, NoneAttr) else frequency.value.data
+
+
+def _configured_nco_phase_offset_steps(
+    sequence_op,
+    sequencer_spec: Q1SequencerSpec,
+) -> int:
+    """Quantize a configured phase offset in degrees to wrapped native Q1 steps."""
+    from xdsl.dialects.builtin import NoneAttr
+
+    from qat.experimental.dialect.q1_sequence.ir.attrs import NcoConfigAttr
+
+    config = sequence_op.sequencer_config
+    if config is None or not isinstance(config.nco, NcoConfigAttr):
+        return 0
+    phase_offset = config.nco.phase_offs
+    if isinstance(phase_offset, NoneAttr):
+        return 0
+    return (
+        round(phase_offset.value.data * sequencer_spec.nco_phase_steps_per_degree)
+        % sequencer_spec.nco_phase_steps
+    )
+
+
+def _configured_awg_modulation_enabled(sequence_op) -> bool:
+    """Return whether configured AWG NCO modulation is enabled, defaulting to enabled."""
+    from xdsl.dialects.builtin import NoneAttr
+
+    from qat.experimental.dialect.q1_sequence.ir.attrs import AwgConfigAttr
+
+    config = sequence_op.sequencer_config
+    if config is None or not isinstance(config.awg, AwgConfigAttr):
+        return True
+    mod_en = config.awg.mod_en
+    return True if isinstance(mod_en, NoneAttr) else bool(mod_en.value.data)
+
+
+def _visit_sequences(tracker: ScheduleTracker, prepared_sequences) -> None:
+    """Visit sequences cooperatively when they share compatible enabled barriers."""
+    synchronized = [
+        prepared for prepared in prepared_sequences if _synchronization_enabled(prepared[0])
+    ]
+    barrier_counts = {
+        sum(isinstance(operation, WaitSyncImmOp | WaitSyncRsOp) for operation in operations)
+        for _, operations, _ in synchronized
+    }
+    if len(synchronized) >= 2 and len(barrier_counts) != 1:
+        raise ValueError(
+            "Q1 schedule plotting requires synchronized sequences to have matching "
+            "wait_sync counts"
+        )
+    if len(synchronized) < 2 or barrier_counts == {0}:
+        for _, operations, visitor in prepared_sequences:
+            for operation in operations:
+                operation.accept(visitor)
+        return
+
+    synchronized_ids = {id(sequence_op) for sequence_op, _, _ in synchronized}
+    for sequence_op, operations, visitor in prepared_sequences:
+        if id(sequence_op) not in synchronized_ids:
+            for operation in operations:
+                operation.accept(visitor)
+
+    split_sequences = [
+        (_split_at_synchronization_barriers(operations), visitor)
+        for _, operations, visitor in synchronized
+    ]
+    barrier_count = barrier_counts.pop()
+    for barrier_index in range(barrier_count):
+        for segments, visitor in split_sequences:
+            for operation in segments[barrier_index][0]:
+                operation.accept(visitor)
+        tracker.synchronise(visitor.sequence for _, visitor in split_sequences)
+        for segments, visitor in split_sequences:
+            segments[barrier_index][1].accept(visitor)
+    for segments, visitor in split_sequences:
+        for operation in segments[-1][0]:
+            operation.accept(visitor)
+
+
+def _synchronization_enabled(sequence_op) -> bool:
+    """Return whether a sequence is configured to join party-line synchronization."""
+    from xdsl.dialects.builtin import NoneAttr
+
+    config = sequence_op.sequencer_config
+    return (
+        config is not None
+        and not isinstance(config.enable_sync, NoneAttr)
+        and bool(config.enable_sync.value.data)
+    )
+
+
+def _split_at_synchronization_barriers(
+    operations: tuple[Operation, ...],
+) -> list[tuple[tuple[Operation, ...], WaitSyncImmOp | WaitSyncRsOp | None]]:
+    """Split operations into pre-barrier segments and a final barrier-free tail."""
+    segments = []
+    pending = []
+    for operation in operations:
+        if isinstance(operation, WaitSyncImmOp | WaitSyncRsOp):
+            segments.append((tuple(pending), operation))
+            pending = []
+        else:
+            pending.append(operation)
+    segments.append((tuple(pending), None))
+    return segments
+
+
+def _one_iteration_operations(
+    operations: tuple[Operation, ...],
+) -> tuple[Operation, ...]:
+    """Return schedule-relevant operations from one canonical lowered loop iteration."""
+
+    labels = [operation for operation in operations if isinstance(operation, LabelOp)]
+    loops = [
+        operation for operation in operations if isinstance(operation, LoopImmOperation)
+    ]
+    jumps = [
+        operation for operation in operations if isinstance(operation, JumpImmOperation)
+    ]
+    if not labels and not loops and not jumps:
+        return operations
+    if jumps:
+        raise ValueError("Q1 schedule plotting does not support general jump control flow")
+    if len(labels) != 1 or len(loops) != 1 or not isinstance(loops[0], LoopRdImmOp):
+        raise ValueError(
+            "Q1 schedule plotting supports only one canonical lowered counted loop"
+        )
+    loop = loops[0]
+    if not isinstance(loop.imm, LabelAttr) or loop.imm != labels[0].reference:
+        raise ValueError(
+            "Q1 schedule plotting requires the counted loop to target its body label"
+        )
+    if operations.index(labels[0]) >= operations.index(loop):
+        raise ValueError("Q1 schedule plotting requires a backward counted-loop target")
+    return tuple(
+        operation
+        for operation in operations
+        if not (
+            operation.results
+            and operation.has_trait(Pure)
+            and all(
+                isinstance(result.type, IntRegisterType) for result in operation.results
+            )
+        )
+    )

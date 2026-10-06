@@ -8,6 +8,7 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
+from qat.experimental.dialect.q1.ir.imm_desc import SU32Imm
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
     AcquireImmRsImmOp,
@@ -37,7 +38,9 @@ from qat.experimental.dialect.q1.ir.ops import (
     UpdParamImmOp,
     WaitImmOp,
     WaitSyncImmOp,
+    WaitSyncRsOp,
 )
+from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1.ir.schedule import Q1ScheduleVisitor
 from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
@@ -124,6 +127,17 @@ def test_q1_schedule_visitor_accepts_lowered_register_setup():
     )
 
     assert schedule_tracker.records == ()
+
+
+def test_q1_schedule_visitor_resolves_register_wait_sync_duration():
+    schedule_tracker = ScheduleTracker()
+    schedule_visitor = Q1ScheduleVisitor(schedule_tracker)
+    duration = MoveImmRdOp(SU32Imm(8), IntRegisterType.unallocated())
+
+    WaitSyncRsOp(duration.rd).accept(schedule_visitor)
+
+    assert schedule_tracker.records[0].label == "wait_sync"
+    assert schedule_tracker.records[0].duration == 8
 
 
 def test_q1_schedule_visitor_records_timed_latch_reset():

@@ -7,8 +7,9 @@ from __future__ import annotations
 from functools import singledispatchmethod
 
 import numpy as np
+from xdsl.dialects import arith, scf
 from xdsl.dialects.builtin import ModuleOp
-from xdsl.ir import Operation, SSAValue
+from xdsl.ir import Block, Operation, SSAValue
 from xdsl.traits import ConstantLike
 
 from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr
@@ -123,6 +124,7 @@ class PulseScheduleVisitor:
             "s",
             signal_unit=self.signal_unit,
             signal_limits=self.signal_limits,
+            frequency_modulates_signal=False,
         ).set_frequency(frequency)
         self._frames[operation.result] = resource
         self._continuous_amplitudes[resource] = None
@@ -232,7 +234,11 @@ class PulseScheduleVisitor:
 def build_pulse_schedule(
     module: ModuleOp,
 ) -> ScheduleTracker:
-    """Walk a Pulse module and record its entry-block schedule.
+    """Walk a Pulse module and record one execution of its entry-block schedule.
+
+    A canonical top-level static ``scf.for`` shot loop is visualised once without
+    modifying the input IR. Other region-bearing operations and nested control flow are
+    rejected.
 
     :param module: Pulse module containing the executable entry block.
     :returns: The populated schedule tracker.
@@ -242,12 +248,7 @@ def build_pulse_schedule(
 
     tracker = ScheduleTracker()
     visitor = PulseScheduleVisitor(tracker)
-    for operation in pulse_entry_block(module).ops:
-        if operation.regions:
-            raise ValueError(
-                f"Pulse schedule plotting requires flat control flow, found "
-                f"{operation.name}"
-            )
+    for operation in _one_shot_operations(pulse_entry_block(module)):
         if isinstance(operation, PulseOperationInterface):
             operation.accept(visitor)
         elif isinstance(operation, AddOp | SubOp | MixOp) and isinstance(
@@ -255,3 +256,45 @@ def build_pulse_schedule(
         ):
             visitor.visit(operation)
     return tracker
+
+
+def _one_shot_operations(block: Block) -> tuple[Operation, ...]:
+    """Return a read-only, one-iteration view of a canonical Pulse shot loop."""
+
+    operations = tuple(block.ops)
+    region_operations = tuple(operation for operation in operations if operation.regions)
+    if not region_operations:
+        return operations
+    if len(region_operations) != 1 or not isinstance(region_operations[0], scf.ForOp):
+        found = region_operations[0]
+        raise ValueError(
+            f"Pulse schedule plotting supports only one top-level static scf.for shot "
+            f"loop, found {found.name}"
+        )
+
+    loop = region_operations[0]
+    bounds: list[int] = []
+    for bound in (loop.lb, loop.ub, loop.step):
+        owner = bound.owner
+        if not isinstance(owner, arith.ConstantOp):
+            raise ValueError("Pulse schedule shot loop requires static bounds")
+        bounds.append(owner.value.value.data)
+    lower, upper, step = bounds
+    if step == 0 or len(range(lower, upper, step)) < 1:
+        raise ValueError("Pulse schedule shot loop must execute at least once")
+
+    body_operations = tuple(loop.body.block.ops)
+    nested = next((operation for operation in body_operations if operation.regions), None)
+    if nested is not None:
+        raise ValueError(
+            f"Pulse schedule plotting does not support nested control flow, found "
+            f"{nested.name}"
+        )
+
+    flattened: list[Operation] = []
+    for operation in operations:
+        if operation is loop:
+            flattened.extend(body_operations)
+        else:
+            flattened.append(operation)
+    return tuple(flattened)

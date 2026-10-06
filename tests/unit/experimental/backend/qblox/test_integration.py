@@ -4,9 +4,9 @@
 import pytest
 from numpy import array
 from xdsl.context import Context
-from xdsl.dialects import func
+from xdsl.dialects import func, scf
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
-from xdsl.dialects.builtin import FloatAttr, ModuleOp, StringAttr, f64
+from xdsl.dialects.builtin import FloatAttr, IndexType, ModuleOp, StringAttr, f64
 from xdsl.ir import Block, Region
 
 from qat.experimental.backend.qblox.codegen import emit_qblox_program
@@ -24,6 +24,7 @@ from qat.experimental.dialect.pulse.ir import (
     PulseOp,
     SquareWaveformOp,
     TimeAttr,
+    WaitOp,
     WeightsAttr,
 )
 from qat.experimental.dialect.pulse.transforms.pipeline import PulsePipelineManager
@@ -113,6 +114,27 @@ def _pulse_chain(port_id: str, carrier: int):
     amplitude = ConstantOp(AmplitudeAttr(0.5))
     waveform = SquareWaveformOp(duration, amplitude)
     return frequency, frame, duration, amplitude, waveform, PulseOp(frame, waveform)
+
+
+def _repeated_wait_module(port_ids: tuple[str, ...], carrier: int) -> ModuleOp:
+    body_ops = []
+    for port_id in port_ids:
+        frequency = ConstantOp(FrequencyAttr(carrier))
+        frame = CreateFrameOp(frequency, StringAttr(port_id))
+        duration = ConstantOp(TimeAttr(8e-9))
+        body_ops.extend([frequency, frame, duration, WaitOp(frame, duration)])
+
+    lower = ArithConstantOp.from_int_and_width(0, IndexType())
+    upper = ArithConstantOp.from_int_and_width(2, IndexType())
+    step = ArithConstantOp.from_int_and_width(1, IndexType())
+    loop = scf.ForOp(
+        lower,
+        upper,
+        step,
+        [],
+        Block([*body_ops, scf.YieldOp()], arg_types=[IndexType()]),
+    )
+    return _pulse_module(lower, upper, step, loop)
 
 
 def _canonical_for(
@@ -210,6 +232,34 @@ def test_compiles_multiple_sequences_sharing_one_module():
     assert len({str(package.mod_config) for package in program.packages.values()}) == 1
 
 
+def test_compiles_repeated_sequences_with_legacy_synchronization_scaffolding():
+    canonical = canonical_data(
+        QbloxModuleKind.qcm,
+        configurations=[
+            supplied([sequencer(0, outputs=(0,))]),
+            supplied([sequencer(1, outputs=(1,))]),
+        ],
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
+    )
+
+    module = _repeated_wait_module(("port-0", "port-1"), 200_000_000)
+    create_qblox_configured_q1_pipeline(canonical).apply(Context(), module)
+    program = emit_qblox_program(module, QbloxHardwareView.derive(canonical))
+
+    for package in program.packages.values():
+        lines = package.sequence.program.splitlines()
+        assert lines[:3] == ["set_mrk 3", "set_latch_en 1, 4", "upd_param 4"]
+        assert lines[-1] == "stop"
+        label = next(index for index, line in enumerate(lines) if line.endswith(":"))
+        assert lines[label + 1 : label + 4] == [
+            "wait_sync 4",
+            "reset_ph",
+            "upd_param 4",
+        ]
+        assert package.seq_config.sync_en is True
+
+
 def test_repeated_compilation_serializes_deterministically():
     canonical = _canonical_for(QbloxModuleKind.qcm_rf)
 
@@ -260,7 +310,7 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
         "physical_channel_id": "port-0",
         "seq_idx": 8,
         "connections": ["out2"],
-        "program": "set_mrk 3\nplay 0, 1, 8\nstop\n",
+        "program": ("set_mrk 3\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"),
     }
     assert {
         "physical_channel_id": readout.physical_channel_id,
@@ -338,7 +388,9 @@ def test_all_five_module_kinds_emit_independent_expected_payload_values(
         package.slot_idx,
         package.seq_idx,
     ) == ("port_0", "port-0", "cluster", 2, 0)
-    assert package.sequence.program == "set_mrk 3\nplay 0, 1, 8\nstop\n"
+    assert package.sequence.program == (
+        "set_mrk 3\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"
+    )
     assert package.sequence.waveforms == {
         "waveform_0_I": {"data": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "index": 0},
         "waveform_0_Q": {"data": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "index": 1},

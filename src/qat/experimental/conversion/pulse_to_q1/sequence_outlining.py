@@ -3,6 +3,7 @@
 """Q1 sequence outlining: splits a Pulse entry block into per-frame sequence envelopes."""
 
 from dataclasses import dataclass, field
+from math import lcm
 from re import compile
 
 from xdsl.context import Context
@@ -12,6 +13,7 @@ from xdsl.ir import Operation, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException
 
+from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.loop_fission import (
     fission_for_lineage,
     is_results_op,
@@ -28,7 +30,15 @@ from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     build_frame_lineage_analysis,
 )
 from qat.experimental.dialect.pulse.utils import pulse_entry_block
-from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp, UI4Imm
+from qat.experimental.dialect.q1 import (
+    BoolImm,
+    DurationImm,
+    SetLatchEnImmImmOp,
+    SetMrkImmOp,
+    StopOp,
+    UI4Imm,
+    UpdParamImmOp,
+)
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass
 
@@ -36,8 +46,17 @@ _NON_SYMBOL_CHARS = compile(r"[^0-9A-Za-z_$.]")
 _MULTI_UNDERSCORE = compile(r"_+")
 
 # TODO(COMPILER-1450): Move marker initialisation after physical binding and derive it
-# from the module kind. This legacy RF-enable mask is not validated for QRC.
+# from the module kind. QbloxTargetDescription has no RF marker-mask field, and
+# marker_count cannot identify the required bits. This legacy mask is not validated for QRC.
 _MARKER_BITMASK = 0b0011
+
+
+def _synchronization_grid_time(target_data: QbloxTargetData) -> int:
+    """Return a synchronization duration valid for control and readout sequencers."""
+    return lcm(
+        target_data.CONTROL_SEQUENCER_DATA.grid_time,
+        target_data.READOUT_SEQUENCER_DATA.grid_time,
+    )
 
 
 def _normalize_sequence_symbol(channel_token: str) -> str:
@@ -167,6 +186,7 @@ def _build_partition_sequence_body(
     op_by_result: dict[SSAValue, Operation],
     entry_lineages: dict[Operation, list[FrameLineage]],
     analysis: FrameLineageAnalysis,
+    target_data: QbloxTargetData,
 ) -> list[Operation]:
     """Build the cloned body for one outlined sequence.
 
@@ -200,7 +220,15 @@ def _build_partition_sequence_body(
             continue
         if _needs_rebuilding(op, lineage, entry_lineages, analysis):
             _reject_consumed_loop_results(op, needed_ops)
-            sequence_body.append(fission_for_lineage(op, lineage, analysis, value_mapper))
+            sequence_body.append(
+                fission_for_lineage(
+                    op,
+                    lineage,
+                    analysis,
+                    value_mapper,
+                    _synchronization_grid_time(target_data),
+                )
+            )
         else:
             sequence_body.append(op.clone(value_mapper))
     return sequence_body
@@ -285,12 +313,17 @@ class Q1OutliningPass(OrderedPass, ModulePass):
 
     becomes two independent sequence envelopes::
 
-        q1_sequence.sequence @q0_drive { q1.stop }
-        q1_sequence.sequence @q1_drive { q1.stop }
+        q1_sequence.sequence @q0_drive { q1.i.set_mrk ... q1.stop }
+        q1_sequence.sequence @q1_drive { q1.i.set_mrk ... q1.stop }
+
+    Sequence scaffolding mirrors the legacy Qblox code generator: marker and trigger-latch
+    setup form the prologue, and ``q1.stop`` forms the epilogue. Fissioned shot loops carry
+    their per-shot synchronisation and phase-reset prologue inside the loop body.
     """
 
     name = "pulse-to-q1-outlining"
 
+    target_data: QbloxTargetData = TARGET_DATA
     state: OutliningState = field(default_factory=OutliningState, init=False)
 
     def _sequence_op_for_partition(
@@ -320,8 +353,11 @@ class Q1OutliningPass(OrderedPass, ModulePass):
             raise ValueError(f"Partition {frame_id} does not contain pulse.create_frame.")
 
         channel_token, sequence_symbol = symbol_allocator.allocate(frame_id, lineage)
+        grid_time = _synchronization_grid_time(self.target_data)
         sequence_ops = [
             SetMrkImmOp(UI4Imm(_MARKER_BITMASK)),
+            SetLatchEnImmImmOp(BoolImm(1), DurationImm(grid_time)),
+            UpdParamImmOp(DurationImm(grid_time)),
             *sequence_body,
             StopOp(),
         ]
@@ -383,6 +419,7 @@ class Q1OutliningPass(OrderedPass, ModulePass):
                 op_by_result,
                 entry_lineages,
                 analysis,
+                self.target_data,
             )
             sequence_op, channel_token, sequence_symbol = self._sequence_op_for_partition(
                 frame_id,

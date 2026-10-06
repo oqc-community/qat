@@ -33,6 +33,8 @@ class ScheduleResource:
     phase_unit: str
     phase_scale: float
     signal_limits: tuple[float, float] | None
+    frequency_modulates_signal: bool = True
+    phase_modulates_signal: bool = True
 
 
 @dataclass(frozen=True)
@@ -53,6 +55,8 @@ class ScheduleEvent:
     amplitude: complex
     signal: NDArray[np.complexfloating] | None = None
     label: str | None = None
+    frequency_modulates_signal: bool = True
+    phase_modulates_signal: bool = True
 
     @property
     def duration(self) -> float:
@@ -70,6 +74,8 @@ class _Resource:
     phase_unit: str
     phase_scale: float
     signal_limits: tuple[float, float] | None
+    frequency_modulates_signal: bool = True
+    phase_modulates_signal: bool = True
     time: float = 0.0
     frequency: float = 0.0
     phase: float = 0.0
@@ -99,6 +105,8 @@ class ScheduleTracker:
         phase_scale: float = 1.0,
         phase_label: str = "Phase",
         signal_limits: tuple[Real, Real] | None = None,
+        frequency_modulates_signal: bool = True,
+        phase_modulates_signal: bool = True,
     ) -> ScheduleTracker:
         """Select or create a resource.
 
@@ -110,6 +118,10 @@ class ScheduleTracker:
         :param phase_scale: Displayed phase units per radian.
         :param phase_label: Label describing the recorded phase.
         :param signal_limits: Optional lower and upper bounds for the signal axis.
+        :param frequency_modulates_signal: Whether frequency rotates supplied signal samples
+            and accumulates phase as time advances.
+        :param phase_modulates_signal: Whether the tracked NCO phase rotates supplied signal
+            samples. The phase remains available as event metadata when disabled.
         :returns: This tracker, for fluent visitor code.
         """
         phase_scale = self._finite(phase_scale, "phase scale")
@@ -134,6 +146,8 @@ class ScheduleTracker:
                 phase_unit,
                 phase_scale,
                 limits,
+                frequency_modulates_signal,
+                phase_modulates_signal,
             )
         elif (
             existing.kind != kind
@@ -143,6 +157,8 @@ class ScheduleTracker:
             or existing.phase_unit != phase_unit
             or existing.phase_scale != phase_scale
             or existing.signal_limits != limits
+            or existing.frequency_modulates_signal != frequency_modulates_signal
+            or existing.phase_modulates_signal != phase_modulates_signal
         ):
             raise ValueError(f"Resource {name!r} was registered with conflicting metadata")
         self._selected = name
@@ -171,8 +187,7 @@ class ScheduleTracker:
 
     def set_phase(self, phase: Real) -> None:
         """Set the selected resource phase."""
-        phase_value = self._finite(phase, "phase") % (2 * np.pi)
-        self._current().phase = 0.0 if np.isclose(phase_value, 2 * np.pi) else phase_value
+        self._current().phase = self._finite(phase, "phase") % (2 * np.pi)
 
     def shift_phase(self, phase: Real) -> None:
         """Shift the selected resource phase."""
@@ -224,13 +239,15 @@ class ScheduleTracker:
         if samples is not None:
             sample_times = np.linspace(0.0, duration_value, samples.size, endpoint=False)
             sample_times *= seconds_per_unit
-            samples = (
-                samples
-                * resource.amplitude
-                * np.exp(
-                    1j * (resource.phase + 2 * np.pi * resource.frequency * sample_times)
-                )
+            frequency_phase = (
+                2 * np.pi * resource.frequency * sample_times
+                if resource.frequency_modulates_signal
+                else 0.0
             )
+            modulation_phase = (
+                resource.phase + frequency_phase if resource.phase_modulates_signal else 0.0
+            )
+            samples = samples * resource.amplitude * np.exp(1j * modulation_phase)
         event = ScheduleEvent(
             resource=resource.name,
             kind=resource.kind,
@@ -244,17 +261,19 @@ class ScheduleTracker:
             frequency=resource.frequency,
             phase=resource.phase,
             amplitude=resource.amplitude,
+            frequency_modulates_signal=resource.frequency_modulates_signal,
+            phase_modulates_signal=resource.phase_modulates_signal,
             signal=samples,
             label=label,
         )
         resource.events.append(event)
         self._records.append(event)
         resource.time = event.end
-        phase = (
-            resource.phase
-            + 2 * np.pi * resource.frequency * duration_value * seconds_per_unit
-        ) % (2 * np.pi)
-        resource.phase = 0.0 if np.isclose(phase, 2 * np.pi) else phase
+        if resource.frequency_modulates_signal:
+            resource.phase = (
+                resource.phase
+                + 2 * np.pi * resource.frequency * duration_value * seconds_per_unit
+            ) % (2 * np.pi)
         return event
 
     def wait(
@@ -331,6 +350,8 @@ class ScheduleTracker:
             resource.phase_unit,
             resource.phase_scale,
             resource.signal_limits,
+            resource.frequency_modulates_signal,
+            resource.phase_modulates_signal,
         )
 
     @staticmethod

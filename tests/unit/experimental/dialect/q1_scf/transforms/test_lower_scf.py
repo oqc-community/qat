@@ -9,6 +9,8 @@ behaviour for ``scf.if`` and ``scf.while``.
 
 from __future__ import annotations
 
+from io import StringIO
+
 import pytest
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import IndexType, IntegerAttr, ModuleOp
@@ -19,23 +21,37 @@ from xdsl.dialects.scf import (
     YieldOp as ScfYieldOp,
 )
 from xdsl.ir import Block, Region
+from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.q1 import (
+    AcquireImmRsImmOp,
     AddRsImmRdOp,
+    DurationImm,
     MoveImmRdOp,
     MoveRsRdOp,
+    NopOp,
     NotRsRdOp,
     Registers,
+    ResetPhOp,
     StopOp,
+    UI5Imm,
+    UpdParamImmOp,
+    WaitSyncImmOp,
 )
 from qat.experimental.dialect.q1.ir.imm_desc import SU32Imm
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
+from qat.experimental.dialect.q1.target import emit_program
+from qat.experimental.dialect.q1.transforms.reg_alloc import (
+    LinearScanRegisterAllocationPass,
+)
+from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_scf import ForOp, YieldOp
 from qat.experimental.dialect.q1_scf.transforms.lower_scf import (
     LowerScfToQ1ScfPass,
     _get_static_integer,
 )
+from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
 from qat.experimental.dialect.q1_sequence import SequenceOp
 
 R = Registers.UNALLOCATED_INT
@@ -119,6 +135,25 @@ class TestForLowering:
         move_ops = _ops_of_type(entry, MoveImmRdOp)
         assert len(move_ops) == 1
         assert move_ops[0].imm.data == 10
+
+    def test_minimal_loop_pads_count_register_before_loop_instruction(self):
+        sequence = _make_shots_loop(0, 5, 1)
+        module = ModuleOp([sequence])
+
+        LowerScfToQ1ScfPass().apply(None, module)
+        DeadCodeElimination().apply(None, module)
+        LinearScanRegisterAllocationPass().apply(None, module)
+        LowerQ1ScfToQ1CfPass().apply(None, module)
+        LineariseQ1CfToQ1Pass().apply(None, module)
+
+        output = StringIO()
+        emit_program(sequence.body, output)
+        lines = [line.strip() for line in output.getvalue().splitlines() if line.strip()]
+        move = next(index for index, line in enumerate(lines) if line.startswith("move"))
+
+        assert lines[move + 1] == "nop"
+        assert lines[move + 2].endswith(":")
+        assert lines[move + 3].startswith("loop")
 
     def test_count_computed_from_step(self):
         """``(ub - lb) // step`` is used as the iteration count."""
@@ -344,13 +379,98 @@ class TestForLowering:
         assert isinstance(countdown.type, IntRegisterType)
 
         # lb=0, step=1, count=5: ascending = ~countdown + (0 + 5 + 1)
-        not_op, add_op, move_op, _yield = list(body_block.ops)
+        not_op, not_latency, add_op, add_latency, move_op, _yield = list(body_block.ops)
         assert isinstance(not_op, NotRsRdOp)
         assert not_op.rs is countdown
+        assert isinstance(not_latency, NopOp)
         assert isinstance(add_op, AddRsImmRdOp)
         assert add_op.rs is not_op.rd
+        assert isinstance(add_latency, NopOp)
         assert isinstance(move_op, MoveRsRdOp)
         assert move_op.rs is add_op.rd
+
+    def test_induction_remapping_preserves_shot_prologue_order(self):
+        lb_op = ArithConstantOp.from_int_and_width(0, IndexType())
+        ub_op = ArithConstantOp.from_int_and_width(5, IndexType())
+        step_op = ArithConstantOp.from_int_and_width(1, IndexType())
+        body_block = Block(arg_types=[IndexType()])
+        body_block.add_ops(
+            [
+                WaitSyncImmOp(DurationImm(4)),
+                ResetPhOp(),
+                UpdParamImmOp(DurationImm(4)),
+                MoveRsRdOp(body_block.args[0], IntRegisterType.unallocated()),
+                ScfYieldOp(),
+            ]
+        )
+        for_op = ScfForOp(
+            lb_op,
+            ub_op,
+            step_op,
+            [],
+            body=body_block,
+        )
+        entry = Block([lb_op, ub_op, step_op, for_op, StopOp()])
+
+        lower_entry = _lower(SequenceOp("Q0", Region([entry])))
+        (lowered_for,) = _ops_of_type(lower_entry, ForOp)
+
+        assert [type(op) for op in list(lowered_for.body.block.ops)[:7]] == [
+            WaitSyncImmOp,
+            ResetPhOp,
+            UpdParamImmOp,
+            NotRsRdOp,
+            NopOp,
+            AddRsImmRdOp,
+            NopOp,
+        ]
+
+    def test_induction_register_hazards_are_spaced_in_final_q1asm(self):
+        lb_op = ArithConstantOp.from_int_and_width(0, IndexType())
+        ub_op = ArithConstantOp.from_int_and_width(967, IndexType())
+        step_op = ArithConstantOp.from_int_and_width(1, IndexType())
+        body_block = Block(arg_types=[IndexType()])
+        body_block.add_ops(
+            [
+                AcquireImmRsImmOp(UI5Imm(0), body_block.args[0], DurationImm(1000)),
+                ScfYieldOp(),
+            ]
+        )
+        loop = ScfForOp(
+            lb=lb_op.result,
+            ub=ub_op.result,
+            step=step_op.result,
+            iter_args=[],
+            body=body_block,
+        )
+        sequence = SequenceOp(
+            "Q0", Region([Block([lb_op, ub_op, step_op, loop, StopOp()])])
+        )
+        module = ModuleOp([sequence])
+
+        LowerScfToQ1ScfPass().apply(None, module)
+        DeadCodeElimination().apply(None, module)
+        LinearScanRegisterAllocationPass().apply(None, module)
+        LowerQ1ScfToQ1CfPass().apply(None, module)
+        LineariseQ1CfToQ1Pass().apply(None, module)
+
+        output = StringIO()
+        emit_program(sequence.body, output)
+        instructions = [
+            line.strip().split()[0]
+            for line in output.getvalue().splitlines()
+            if line.strip() and not line.rstrip().endswith(":")
+        ]
+        move = instructions.index("move")
+        start = instructions.index("not")
+        assert instructions[move : move + 2] == ["move", "nop"]
+        assert instructions[start : start + 5] == [
+            "not",
+            "nop",
+            "add",
+            "nop",
+            "acquire",
+        ]
 
     def test_rejects_incompatible_iter_arg_type(self):
         """An iter_arg that is not ``q1.reg`` is rejected."""
@@ -418,7 +538,7 @@ class TestForLowering:
         lower_entry = _lower(SequenceOp("Q0", Region([entry])))
 
         (for_op,) = _ops_of_type(lower_entry, ForOp)
-        not_op, add_op, _move, _yield = list(list(for_op.body.blocks)[0].ops)
+        not_op, _, add_op, _, _move, _yield = list(list(for_op.body.blocks)[0].ops)
         assert isinstance(not_op, NotRsRdOp)
         assert isinstance(add_op, AddRsImmRdOp)
         assert add_op.imm.data == 3 + 5 + 1  # lb + count + 1
@@ -444,7 +564,7 @@ class TestForLowering:
         lower_entry = _lower(SequenceOp("Q0", Region([entry])))
 
         (for_op,) = _ops_of_type(lower_entry, ForOp)
-        not_op, add_op, _move, _yield = list(list(for_op.body.blocks)[0].ops)
+        not_op, _, add_op, _, _move, _yield = list(list(for_op.body.blocks)[0].ops)
         assert isinstance(not_op, NotRsRdOp)
         assert isinstance(add_op, AddRsImmRdOp)
         assert add_op.imm.data == 2  # lb + count + 1 = 0 + 1 + 1

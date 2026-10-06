@@ -537,7 +537,7 @@ def create_qblox_configured_q1_pipeline(
 
     return OrderedPassPipeline(
         (
-            Q1OutliningPass(),
+            Q1OutliningPass(target_data=target_data),
             QbloxHardwareBindingPass(canonical_data),
             Q1PulseValidationPass(target_data=target_data),
             Q1PreAcquireTransformationPass(),

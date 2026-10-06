@@ -221,7 +221,9 @@ class NopOp(NullaryOperation):
 
     name = "q1..nop"
 
-    traits = traits_def(Pure())
+    # TODO(COMPILER-1587): Model Q1 data hazards so latency padding is retained without
+    # making every explicit NOP appear side-effecting.
+    traits = traits_def()
 
 
 # endregion

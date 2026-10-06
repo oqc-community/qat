@@ -11,6 +11,7 @@ from xdsl.ir import Block, Region
 from xdsl.irdl import IRDLOperation, irdl_op_definition, operand_def, region_def, result_def
 from xdsl.utils.exceptions import PassFailedException
 
+from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import (
     Q1OutliningPass,
     _normalize_sequence_symbol,
@@ -36,7 +37,14 @@ from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineageAnalysis,
     FrameNode,
 )
-from qat.experimental.dialect.q1 import SetMrkImmOp, StopOp
+from qat.experimental.dialect.q1 import (
+    ResetPhOp,
+    SetLatchEnImmImmOp,
+    SetMrkImmOp,
+    StopOp,
+    UpdParamImmOp,
+    WaitSyncImmOp,
+)
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.results.ir import CreateOp, StoreOp
 
@@ -521,7 +529,39 @@ class TestPulseToQ1ShotLoopFission:
         Q1OutliningPass().apply(Context(), module)
         module.verify()
 
-        assert sorted(_outlined_loops(module)) == ["q0/drive", "q0/measure"]
+        loops = _outlined_loops(module)
+        assert sorted(loops) == ["q0/drive", "q0/measure"]
+        assert all(
+            [type(op) for op in list(loop.body.block.ops)[:3]]
+            == [WaitSyncImmOp, ResetPhOp, UpdParamImmOp]
+            for loop in loops.values()
+        )
+        assert all(
+            [type(op) for op in list(sequence.body.block.ops)[:3]]
+            == [SetMrkImmOp, SetLatchEnImmImmOp, UpdParamImmOp]
+            for sequence in _sequences_by_port(module).values()
+        )
+
+    def test_scaffolding_uses_common_sequencer_grid_time(self):
+        """Verify synchronization scaffolding is aligned for control and readout."""
+        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
+            update={"grid_time": 8}
+        )
+        target_data = TARGET_DATA.model_copy(
+            update={"READOUT_SEQUENCER_DATA": readout_data}
+        )
+        module = _shot_loop_module()
+
+        Q1OutliningPass(target_data=target_data).apply(Context(), module)
+
+        for sequence in _sequences_by_port(module).values():
+            _, latch_enable, apply_latch = list(sequence.body.block.ops)[:3]
+            assert latch_enable.duration.data == readout_data.grid_time
+            assert apply_latch.duration.data == readout_data.grid_time
+        for loop in _outlined_loops(module).values():
+            wait_sync, _, apply_phase_reset = list(loop.body.block.ops)[:3]
+            assert wait_sync.duration.data == readout_data.grid_time
+            assert apply_phase_reset.duration.data == readout_data.grid_time
 
     def test_fissioned_drive_loop_drops_the_acquisition_plumbing(self):
         """Verify that a partition with no acquisition keeps neither the results array nor

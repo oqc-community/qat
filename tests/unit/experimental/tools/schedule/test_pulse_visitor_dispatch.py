@@ -37,6 +37,7 @@ from qat.experimental.dialect.pulse.ir.schedule import (
     build_pulse_schedule,
 )
 from qat.experimental.dialect.pulse.ir.types import WaveformType
+from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
 from qat.experimental.tools.schedule import ScheduleTracker
 
 
@@ -269,20 +270,75 @@ def test_build_pulse_schedule_evaluates_static_waveform_expressions(
     np.testing.assert_array_equal(schedule.records[0].signal, expected.astype(complex))
 
 
+def test_build_pulse_schedule_preserves_carrier_metadata_without_modulating_envelope():
+    width = TimeAttr(2e-9)
+    sample_time = TimeAttr(1e-9)
+    waveform = ConstantOp(SampledWaveformAttr([1.0, 1.0], width, sample_time))
+    frequency = ConstantOp(FrequencyAttr(4.9e9))
+    frame = CreateFrameOp(frequency, StringAttr("drive"))
+    phase = ConstantOp(PhaseAttr(np.pi / 2))
+    phased_frame = PhaseSetOp(frame, phase)
+    module = ModuleOp(
+        [
+            waveform,
+            frequency,
+            frame,
+            phase,
+            phased_frame,
+            PulseOp(phased_frame, waveform),
+        ]
+    )
+
+    schedule = build_pulse_schedule(module)
+
+    event = schedule.records[0]
+    assert event.frequency == 4.9e9
+    assert event.phase == pytest.approx(np.pi / 2)
+    assert not event.frequency_modulates_signal
+    np.testing.assert_allclose(event.signal, [1.0j, 1.0j], atol=1e-12)
+
+
+def test_build_pulse_schedule_visualises_one_shot_without_mutating_loop():
+    kernel = (
+        PulseKernelBuilder("test", shots=2)
+        .create_frame("drive", 4.9e9, "drive")
+        .create_custom_waveform("waveform", [1.0, 0.5], 2e-9)
+        .pulse("drive", "waveform")
+        .finalize()
+    )
+    module = ModuleOp([kernel])
+    loop = next(op for op in kernel.body.block.ops if isinstance(op, scf.ForOp))
+    original_body = tuple(loop.body.block.ops)
+
+    schedule = build_pulse_schedule(module)
+
+    assert [event.label for event in schedule.records] == ["pulse"]
+    np.testing.assert_allclose(schedule.records[0].signal, [1.0, 0.5])
+    assert tuple(loop.body.block.ops) == original_body
+    assert loop.parent is kernel.body.block
+
+
 def test_build_pulse_schedule_rejects_nested_control_flow():
     index_type = IndexType()
     lower = arith.ConstantOp.from_int_and_width(0, index_type)
     upper = arith.ConstantOp.from_int_and_width(2, index_type)
     step = arith.ConstantOp.from_int_and_width(1, index_type)
-    loop = scf.ForOp(
+    nested_loop = scf.ForOp(
         lower,
         upper,
         step,
         [],
         Block(ops=[scf.YieldOp()], arg_types=[index_type]),
     )
+    loop = scf.ForOp(
+        lower,
+        upper,
+        step,
+        [],
+        Block(ops=[nested_loop, scf.YieldOp()], arg_types=[index_type]),
+    )
 
-    with pytest.raises(ValueError, match="requires flat control flow"):
+    with pytest.raises(ValueError, match="nested control flow"):
         build_pulse_schedule(ModuleOp([lower, upper, step, loop]))
 
 

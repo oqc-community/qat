@@ -63,8 +63,12 @@ from qat.experimental.dialect.q1 import (
     AddRsImmRdOp,
     MoveImmRdOp,
     Muls16RsImmRdOp,
+    NopOp,
     NotImmRdOp,
     NotRsRdOp,
+    ResetPhOp,
+    UpdParamImmOp,
+    WaitSyncImmOp,
 )
 from qat.experimental.dialect.q1.ir.imm_desc import SI16Imm, SU32Imm
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
@@ -110,34 +114,47 @@ def _remap_induction_uses(
 ) -> None:
     """Replace uses of the ``scf.for`` induction variable with the ascending index.
 
-    Inserts arithmetic at the top of *body_block* to compute
-    ``lb + (count - countdown) * step`` from the ``q1_scf.for`` countdown arg.
+    Inserts arithmetic before the user body to compute
+    ``lb + (count - countdown) * step`` from the ``q1_scf.for`` countdown arg. A leading
+    shot synchronisation and phase-reset prologue remains first in the loop body.
     """
     # ~countdown + (count + 1)  ==  count - countdown  (two's complement)
     not_op = NotRsRdOp(countdown, IntRegisterType.unallocated())
-    rewriter.insert_op(not_op, InsertPoint.at_start(body_block))
+    # TODO(COMPILER-1587): Replace hand-inserted NOPs with Q1 data-hazard scheduling.
+    replacement_ops = [not_op, NopOp()]
 
     if step == 1:
         ascending = AddRsImmRdOp(
             not_op.rd, SU32Imm(lb + count + 1), IntRegisterType.unallocated()
         )
-        rewriter.insert_op(ascending, InsertPoint.after(not_op))
+        replacement_ops.extend([ascending, NopOp()])
         induction_var.replace_all_uses_with(ascending.rd)
     else:
         count_minus_c = AddRsImmRdOp(
             not_op.rd, SU32Imm(count + 1), IntRegisterType.unallocated()
         )
-        rewriter.insert_op(count_minus_c, InsertPoint.after(not_op))
+        replacement_ops.extend([count_minus_c, NopOp()])
         scaled = Muls16RsImmRdOp(
             count_minus_c.rd, SI16Imm(step), IntRegisterType.unallocated()
         )
-        rewriter.insert_op(scaled, InsertPoint.after(count_minus_c))
+        replacement_ops.extend([scaled, NopOp()])
         if lb == 0:
             induction_var.replace_all_uses_with(scaled.rd)
         else:
             shifted = AddRsImmRdOp(scaled.rd, SU32Imm(lb), IntRegisterType.unallocated())
-            rewriter.insert_op(shifted, InsertPoint.after(scaled))
+            replacement_ops.extend([shifted, NopOp()])
             induction_var.replace_all_uses_with(shifted.rd)
+
+    first_op = body_block.first_op
+    if (
+        isinstance(first_op, WaitSyncImmOp)
+        and isinstance(reset_phase := first_op.next_op, ResetPhOp)
+        and isinstance(apply_reset := reset_phase.next_op, UpdParamImmOp)
+    ):
+        insertion_point = InsertPoint.after(apply_reset)
+    else:
+        insertion_point = InsertPoint.at_start(body_block)
+    rewriter.insert_op(replacement_ops, insertion_point)
 
 
 class ForLowering(RewritePattern):
@@ -212,9 +229,10 @@ class ForLowering(RewritePattern):
 
         body_block = list(op.body.blocks)[0]
         induction_var = body_block.args[0]
+        induction_is_used = any(True for _ in induction_var.uses)
 
         new_induction = body_block.insert_arg(IntRegisterType.unallocated(), 0)
-        if any(True for _ in induction_var.uses):
+        if induction_is_used:
             _remap_induction_uses(
                 induction_var, new_induction, lb_int, count, step_int, body_block, rewriter
             )
@@ -231,7 +249,9 @@ class ForLowering(RewritePattern):
         rewriter.insert_op(YieldOp(*yield_values), InsertPoint.at_end(body_block))
 
         move_op = MoveImmRdOp(SU32Imm(count), IntRegisterType.unallocated())
-        rewriter.insert_op(move_op, InsertPoint.before(op))
+        # TODO(COMPILER-1587): Replace this hand-inserted NOP with Q1 data-hazard
+        # scheduling for the loop-counter dependency.
+        rewriter.insert_op([move_op, NopOp()], InsertPoint.before(op))
 
         # Detach body_block from op.body before passing it to ForOp; xDSL's
         # Region.__init__ raises if a block is already owned by another region.

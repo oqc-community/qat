@@ -3,14 +3,18 @@
 """Generic schedule tracking and visualisation."""
 
 from qat.experimental.tools.schedule.tracker import (
-    ResourceKind,
-    ScheduleEvent,
-    ScheduleResource,
-    ScheduleTracker,
+    ResourceKind as ResourceKind,
+    ScheduleEvent as ScheduleEvent,
+    ScheduleResource as ScheduleResource,
+    ScheduleTracker as ScheduleTracker,
 )
-from qat.experimental.tools.schedule.visualisation import visualise_schedule
+from qat.experimental.tools.schedule.visualisation import (
+    plot_schedule as plot_schedule,
+    visualise_schedule as visualise_schedule,
+)
 
 __all__ = [
+    "plot_schedule",
     "ResourceKind",
     "ScheduleEvent",
     "ScheduleResource",
