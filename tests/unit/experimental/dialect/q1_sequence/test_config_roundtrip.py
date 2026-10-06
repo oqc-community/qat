@@ -14,7 +14,6 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     AcquireConfigAttr,
     AcquisitionPathConnectionAttr,
     AwgConfigAttr,
-    ConnectionAttr,
     InputConfigAttr,
     InputSignalConfigAttr,
     LocalOscillatorConfigAttr,
@@ -32,11 +31,7 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     UnweightedAcquireConfigAttr,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
-from qat.experimental.system_data.hardware.qblox.models import (
-    DirectionKind,
-    QbloxModuleKind,
-    SignalPath,
-)
+from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind, SignalPath
 
 
 def test_physical_configuration_round_trips():
@@ -63,10 +58,7 @@ def test_physical_configuration_round_trips():
     sequencer_config = SequencerConfigAttr(
         port_id="q0/measure",
         carrier_frequency=4_640_000_000.0,
-        connections=[
-            ConnectionAttr(DirectionKind.output, [0]),
-            ConnectionAttr(DirectionKind.input, [0]),
-        ],
+        connections=[],
         output_path_connections=[OutputPathConnectionAttr(0, SignalPath.iq)],
         acquisition_path_connections=[AcquisitionPathConnectionAttr(0, SignalPath.iq)],
         acquisition_enabled=True,

@@ -2,14 +2,44 @@
 # Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import pytest
+from qblox_instruments import ClusterType
 
 from qat.experimental.system_data.materialisers.purr.decoder import (
     decode_jsonpickle_payload,
 )
+from qat.model.loaders.purr.qblox import _CONTROL_CONFIG_MAP, _READOUT_CONFIG_MAP
 
 from tests.unit.backend.qblox.utils import create_parameters
 
 test_parameters = create_parameters(["model", "dummy_config", "qubit_count", "allocation"])
+
+
+def test_qrc_default_configs_retain_legacy_bulk_connections():
+    control_connections = {
+        index: config.connection.bulk_value
+        for index, config in _CONTROL_CONFIG_MAP[ClusterType.CLUSTER_QRC].sequencers.items()
+    }
+    assert control_connections == {
+        0: ["out0", "out1", "out2"],
+        1: ["out0", "out1", "out3"],
+        2: ["out0", "out1", "out4"],
+        3: ["out0", "out1", "out5"],
+        4: ["out0", "out1", "out2"],
+        5: ["out0", "out1", "out3"],
+        6: ["out0", "out1", "out4"],
+        7: ["out0", "out1", "out5"],
+        8: ["out2", "out3", "out4", "out5"],
+        9: ["out2", "out3", "out4", "out5"],
+        10: ["out2", "out3", "out4", "out5"],
+        11: ["out2", "out3", "out4", "out5"],
+    }
+
+    readout_connections = [
+        config.connection.bulk_value
+        for config in _READOUT_CONFIG_MAP[ClusterType.CLUSTER_QRC].sequencers.values()
+    ]
+    assert readout_connections
+    assert all(connection == ["out0", "in0"] for connection in readout_connections)
 
 
 def test_pydantic_qblox_configuration_decodes_to_source_fields():

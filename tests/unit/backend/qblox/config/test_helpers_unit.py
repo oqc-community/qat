@@ -8,7 +8,15 @@ from qat.backend.qblox.config.helpers import (
     QrcConfigHelper,
     QrmRfConfigHelper,
 )
-from qat.backend.qblox.config.specification import ModuleConfig
+from qat.backend.qblox.config.specification import ConnectionConfig, ModuleConfig
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_connection_config_preserves_rf_boolean_aliases(enabled):
+    config = ConnectionConfig.model_validate({"out0": enabled, "acq": enabled})
+
+    assert config.out0 is enabled
+    assert config.acq is enabled
 
 
 @pytest.mark.parametrize(

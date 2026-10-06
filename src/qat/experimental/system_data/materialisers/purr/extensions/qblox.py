@@ -21,6 +21,7 @@ from typing import Any
 from qat.experimental.system_data.hardware.qblox.configuration import (
     QBLOX_CONFIGURATION_ATTRIBUTE,
     AcquisitionPathConnection,
+    BooleanOutputConnection,
     ConfigValue,
     OutputPathConnection,
     PortConnection,
@@ -186,7 +187,11 @@ def _decode_bulk_value(value: Any, path: str) -> tuple[PortConnection, ...]:
 
 def _decode_output_paths(
     connection: Mapping[str, Any], path: str
-) -> tuple[tuple[OutputPathConnection, ...], frozenset[int]]:
+) -> tuple[
+    tuple[OutputPathConnection, ...],
+    tuple[BooleanOutputConnection, ...],
+    frozenset[int],
+]:
     """Decode the source ``outN`` fields selecting sequencer paths.
 
     :param connection: Decoded source connection payload.
@@ -196,12 +201,18 @@ def _decode_output_paths(
     """
 
     bound: list[OutputPathConnection] = []
+    boolean_aliases: list[BooleanOutputConnection] = []
     disabled: set[int] = set()
     for key, value in connection.items():
         match = _OUTPUT_PATH_FIELD.fullmatch(key)
         if match is None or value is None:
             continue
         field_path = f"{path}.{key}"
+        if isinstance(value, bool):
+            boolean_aliases.append(
+                BooleanOutputConnection(output_id=int(match["output"]), enabled=value)
+            )
+            continue
         if not isinstance(value, str):
             raise ValueError(f"{field_path} must be a sequencer path or {_OFF!r}")
         if value == _OFF:
@@ -214,7 +225,7 @@ def _decode_output_paths(
                 f"{field_path} must be a sequencer path or {_OFF!r}, got {value!r}"
             ) from error
         bound.append(OutputPathConnection(output_id=int(match["output"]), path=signal_path))
-    return tuple(bound), frozenset(disabled)
+    return tuple(bound), tuple(boolean_aliases), frozenset(disabled)
 
 
 def _decode_acquisition_paths(
@@ -274,11 +285,12 @@ def _decode_connection(value: Any, path: str) -> SequencerConnection | None:
         raise ValueError(f"{path} has unsupported fields {unsupported!r}")
 
     connections = _decode_bulk_value(value.get("bulk_value"), f"{path}.bulk_value")
-    output_paths, disabled_outputs = _decode_output_paths(value, path)
+    output_paths, boolean_outputs, disabled_outputs = _decode_output_paths(value, path)
     acquisition_paths, disabled_acquisition_paths = _decode_acquisition_paths(value, path)
 
     acquisition = value.get("acq")
-    acquisition_enabled = acquisition if isinstance(acquisition, bool) else None
+    combined_acquisition_alias = acquisition if isinstance(acquisition, bool) else None
+    acquisition_enabled = None
     acquisition_disabled = None
     if isinstance(acquisition, str):
         if acquisition == _OFF:
@@ -296,11 +308,13 @@ def _decode_connection(value: Any, path: str) -> SequencerConnection | None:
     connection = SequencerConnection(
         connections=connections,
         output_path_connections=output_paths,
+        boolean_output_connections=boolean_outputs,
         acquisition_path_connections=acquisition_paths,
         acquisition_enabled=acquisition_enabled,
         disabled_outputs=disabled_outputs,
         disabled_acquisition_paths=disabled_acquisition_paths,
         acquisition_disabled=acquisition_disabled,
+        combined_acquisition_alias=combined_acquisition_alias,
     )
     if connection == SequencerConnection():
         return None

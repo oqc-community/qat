@@ -16,7 +16,10 @@ from qat.experimental.dialect.q1_cf import (
 )
 from qat.experimental.dialect.q1_scf import ForOp, YieldOp
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    AcquireConfigAttr,
     AcquisitionPathConnectionAttr,
+    AwgConfigAttr,
+    BooleanOutputConnectionAttr,
     ConnectionAttr,
     InputConfigAttr,
     LocalOscillatorConfigAttr,
@@ -303,6 +306,48 @@ class TestSequenceOpVerify:
         with pytest.raises(VerifyException, match="does not support mixer correction"):
             seq.verify_()
 
+    @pytest.mark.parametrize(
+        ("sequencer_config", "expected"),
+        [
+            pytest.param(
+                SequencerConfigAttr(awg=AwgConfigAttr(mod_en=False)),
+                "does not support AWG modulation",
+                id="awg-modulation",
+            ),
+            pytest.param(
+                SequencerConfigAttr(acquire=AcquireConfigAttr(demod_en_acq=False)),
+                "does not support acquisition demodulation",
+                id="acquisition-demodulation",
+            ),
+        ],
+    )
+    def test_module_rejects_unsupported_sequencer_configuration(
+        self, sequencer_config, expected
+    ):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=sequencer_config,
+            module_config=_module_config(kind=QbloxModuleKind.qrc),
+        )
+
+        with pytest.raises(VerifyException, match=expected):
+            seq.verify_()
+
+    def test_module_rejects_unsupported_local_oscillator_enable(self):
+        with pytest.raises(
+            VerifyException, match="does not support local oscillator enable"
+        ):
+            _module_config(
+                kind=QbloxModuleKind.qrc,
+                local_oscillators=[
+                    LocalOscillatorConfigAttr("lo0", 6_000_000_000, enable=False)
+                ],
+            )
+
     def test_valid_connections_against_module_lanes(self):
         seq = SequenceOp(
             "ch0",
@@ -324,6 +369,202 @@ class TestSequenceOpVerify:
             ),
         )
         seq.verify_()
+
+    @pytest.mark.parametrize(
+        "sequencer_config",
+        [
+            pytest.param(
+                SequencerConfigAttr(
+                    output_path_connections=[OutputPathConnectionAttr(0, SignalPath.iq)],
+                    acquisition_path_connections=[
+                        AcquisitionPathConnectionAttr(0, SignalPath.iq)
+                    ],
+                ),
+                id="combined-connections",
+            ),
+            pytest.param(
+                SequencerConfigAttr(
+                    disabled_acquisition_paths=[SignalPath.iq],
+                ),
+                id="combined-acquisition-disable",
+            ),
+            pytest.param(
+                SequencerConfigAttr(acquisition_disabled=True),
+                id="whole-acquisition-disable",
+            ),
+        ],
+    )
+    def test_qrc_accepts_combined_iq_routing(self, sequencer_config):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=sequencer_config,
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc,
+                outputs=[OutputConfigAttr(0)],
+                inputs=[InputConfigAttr(0)],
+            ),
+        )
+
+        seq.verify_()
+
+    @pytest.mark.parametrize(
+        "direction",
+        [DirectionKind.output, DirectionKind.input, DirectionKind.io],
+    )
+    def test_qrc_rejects_multi_lane_bulk_connections(self, direction):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(direction, [0, 1])]
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc,
+                outputs=[OutputConfigAttr(0), OutputConfigAttr(1)],
+                inputs=[InputConfigAttr(0), InputConfigAttr(1)],
+            ),
+        )
+
+        with pytest.raises(
+            VerifyException, match="accepts only one I/O port per connection"
+        ):
+            seq.verify_()
+
+    @pytest.mark.parametrize(
+        "kind",
+        [
+            QbloxModuleKind.qcm_rf,
+            QbloxModuleKind.qrm_rf,
+            QbloxModuleKind.qrc,
+        ],
+    )
+    @pytest.mark.parametrize("enabled", [True, False])
+    def test_rf_modules_accept_boolean_output_aliases(self, kind, enabled):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                boolean_output_connections=[BooleanOutputConnectionAttr(0, enabled)]
+            ),
+            module_config=_module_config(
+                kind=kind,
+                outputs=[OutputConfigAttr(0)],
+            ),
+        )
+
+        seq.verify_()
+
+    @pytest.mark.parametrize("kind", [QbloxModuleKind.qrm_rf, QbloxModuleKind.qrc])
+    @pytest.mark.parametrize("enabled", [True, False])
+    def test_rf_readout_modules_accept_boolean_acquisition_aliases(self, kind, enabled):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(combined_acquisition_alias=enabled),
+            module_config=_module_config(
+                kind=kind,
+                inputs=[InputConfigAttr(0)],
+            ),
+        )
+
+        seq.verify_()
+
+    @pytest.mark.parametrize(
+        "kind",
+        [
+            QbloxModuleKind.qcm_rf,
+            QbloxModuleKind.qrm_rf,
+            QbloxModuleKind.qrc,
+        ],
+    )
+    @pytest.mark.parametrize("path", [SignalPath.i, SignalPath.q])
+    def test_rf_modules_reject_component_output_paths(self, kind, path):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                output_path_connections=[OutputPathConnectionAttr(0, path)]
+            ),
+            module_config=_module_config(
+                kind=kind,
+                outputs=[OutputConfigAttr(0)],
+            ),
+        )
+
+        with pytest.raises(VerifyException, match="does not support output paths"):
+            seq.verify_()
+
+    @pytest.mark.parametrize("kind", [QbloxModuleKind.qcm, QbloxModuleKind.qrm])
+    def test_baseband_modules_reject_combined_output_path(self, kind):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                output_path_connections=[OutputPathConnectionAttr(0, SignalPath.iq)]
+            ),
+            module_config=_module_config(
+                kind=kind,
+                outputs=[OutputConfigAttr(0)],
+            ),
+        )
+
+        with pytest.raises(VerifyException, match="does not support output paths"):
+            seq.verify_()
+
+    @pytest.mark.parametrize(
+        "sequencer_config",
+        [
+            pytest.param(
+                SequencerConfigAttr(
+                    acquisition_path_connections=[
+                        AcquisitionPathConnectionAttr(0, SignalPath.i)
+                    ]
+                ),
+                id="component-connection",
+            ),
+            pytest.param(
+                SequencerConfigAttr(
+                    disabled_acquisition_paths=[SignalPath.q],
+                ),
+                id="component-disable",
+            ),
+        ],
+    )
+    def test_qrc_rejects_component_acquisition_paths(self, sequencer_config):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=sequencer_config,
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrc,
+                inputs=[InputConfigAttr(0)],
+            ),
+        )
+
+        with pytest.raises(VerifyException, match="does not support acquisition paths"):
+            seq.verify_()
 
     @pytest.mark.parametrize(
         ("config", "expected"),
@@ -435,6 +676,36 @@ class TestSequenceOpVerify:
             ),
         )
         with pytest.raises(VerifyException, match="cannot drive connection output"):
+            seq.verify_()
+
+    @pytest.mark.parametrize(
+        ("acquisition_paths", "disabled_paths"),
+        [
+            ([AcquisitionPathConnectionAttr(0, SignalPath.iq)], []),
+            ([], [SignalPath.iq]),
+        ],
+    )
+    def test_rejects_bulk_acquisition_with_conflicting_direct_path(
+        self, acquisition_paths, disabled_paths
+    ):
+        seq = SequenceOp(
+            "ch0",
+            [StopOp()],
+            instrument_id="cluster0",
+            slot_idx=1,
+            seq_idx=0,
+            sequencer_config=SequencerConfigAttr(
+                connections=[ConnectionAttr(DirectionKind.input, [0, 1])],
+                acquisition_path_connections=acquisition_paths,
+                disabled_acquisition_paths=disabled_paths,
+            ),
+            module_config=_module_config(
+                kind=QbloxModuleKind.qrm,
+                inputs=[InputConfigAttr(0), InputConfigAttr(1)],
+            ),
+        )
+
+        with pytest.raises(VerifyException, match="conflicting bulk and direct states"):
             seq.verify_()
 
     @pytest.mark.parametrize(

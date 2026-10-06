@@ -30,6 +30,11 @@ from qat.experimental.dialect.pulse.ir import (
 from qat.experimental.dialect.pulse.transforms.pipeline import PulsePipelineManager
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
+from qat.experimental.system_data.hardware.qblox.configuration import (
+    BooleanOutputConnection,
+    QbloxSequencerConfiguration,
+    SequencerConnection,
+)
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
@@ -274,8 +279,29 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
     canonical = canonical_data(
         QbloxModuleKind.qrc,
         configurations=[
-            supplied([sequencer(8, outputs=(2,))]),
-            supplied([sequencer(0, outputs=(0,), inputs=(0,))]),
+            supplied(
+                [
+                    sequencer(
+                        8,
+                        outputs=(2,),
+                        values={"awg": {"mod_en": True}},
+                    )
+                ]
+            ),
+            supplied(
+                [
+                    sequencer(
+                        0,
+                        outputs=(0,),
+                        inputs=(0,),
+                        values={
+                            "demod_en_acq": True,
+                            "awg": {"gain_path0": 0.5, "mod_en": True},
+                        },
+                    )
+                ],
+                module_values={"lo": {"out0_in0_en": True}},
+            ),
         ],
     )
     readout_frequency = ConstantOp(FrequencyAttr(4_200_000_000))
@@ -304,27 +330,36 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
     assert {
         "physical_channel_id": control.physical_channel_id,
         "seq_idx": control.seq_idx,
-        "connections": control.seq_config.connection.bulk_value,
+        "connections": control.seq_config.connection.model_dump(exclude_none=True),
+        "awg_modulation": control.seq_config.awg.mod_en,
         "program": control.sequence.program,
     } == {
         "physical_channel_id": "port-0",
         "seq_idx": 8,
-        "connections": ["out2"],
+        "connections": {"bulk_value": ["out2"]},
+        "awg_modulation": None,
         "program": ("set_mrk 3\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"),
     }
     assert {
         "physical_channel_id": readout.physical_channel_id,
         "seq_idx": readout.seq_idx,
-        "connections": readout.seq_config.connection.bulk_value,
+        "connections": readout.seq_config.connection.model_dump(exclude_none=True),
+        "awg_gain": readout.seq_config.awg.gain_path0,
+        "awg_modulation": readout.seq_config.awg.mod_en,
+        "demodulation": readout.seq_config.demod_en_acq,
         "integration_length": (readout.seq_config.square_weight_acq.integration_length),
         "acquisitions": readout.sequence.acquisitions,
     } == {
         "physical_channel_id": "port-1",
         "seq_idx": 0,
-        "connections": ["out0", "in0"],
+        "connections": {"bulk_value": ["out0", "in0"]},
+        "awg_gain": 0.5,
+        "awg_modulation": None,
+        "demodulation": None,
         "integration_length": 16,
         "acquisitions": {"readout": {"index": 0, "num_bins": 1}},
     }
+    assert readout.mod_config.lo.out0_in0_en is None
 
 
 @pytest.mark.parametrize(
@@ -333,40 +368,31 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
         pytest.param(
             QbloxModuleKind.qcm,
             False,
-            [{"direction": "out", "port_ids": [0]}],
+            {"bulk_value": ["out0"]},
             id="qcm",
         ),
         pytest.param(
             QbloxModuleKind.qcm_rf,
             False,
-            [{"direction": "out", "port_ids": [0]}],
+            {"bulk_value": ["out0"]},
             id="qcm-rf",
         ),
         pytest.param(
             QbloxModuleKind.qrm,
             True,
-            [
-                {"direction": "out", "port_ids": [0]},
-                {"direction": "in", "port_ids": [0]},
-            ],
+            {"bulk_value": ["out0", "in0"]},
             id="qrm",
         ),
         pytest.param(
             QbloxModuleKind.qrm_rf,
             True,
-            [
-                {"direction": "out", "port_ids": [0]},
-                {"direction": "in", "port_ids": [0]},
-            ],
+            {"bulk_value": ["out0", "in0"]},
             id="qrm-rf",
         ),
         pytest.param(
             QbloxModuleKind.qrc,
             True,
-            [
-                {"direction": "out", "port_ids": [0]},
-                {"direction": "in", "port_ids": [0]},
-            ],
+            {"bulk_value": ["out0", "in0"]},
             id="qrc",
         ),
     ],
@@ -374,7 +400,7 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
 def test_all_five_module_kinds_emit_independent_expected_payload_values(
     kind: QbloxModuleKind,
     acquire: bool,
-    expected_connections: list[dict[str, object]],
+    expected_connections: dict[str, object],
 ):
     canonical = _canonical_for(kind, acquire=acquire)
     carrier = 4_200_000_000 if kind.value.endswith("_rf") else 200_000_000
@@ -397,7 +423,71 @@ def test_all_five_module_kinds_emit_independent_expected_payload_values(
     }
     assert package.sequence.weights == {}
     assert package.sequence.acquisitions == {}
-    assert package.seq_config.connection.bulk_value == [
-        item["direction"] + "_".join(str(value) for value in item["port_ids"])
-        for item in expected_connections
-    ]
+    assert (
+        package.seq_config.connection.model_dump(exclude_none=True) == expected_connections
+    )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        QbloxModuleKind.qcm_rf,
+        QbloxModuleKind.qrm_rf,
+        QbloxModuleKind.qrc,
+    ],
+)
+@pytest.mark.parametrize("enabled", [True, False])
+def test_rf_boolean_output_alias_reaches_runtime_payload(kind, enabled):
+    canonical = canonical_data(
+        kind,
+        configurations=[
+            supplied(
+                [
+                    QbloxSequencerConfiguration(
+                        index=0,
+                        connection=SequencerConnection(
+                            boolean_output_connections=(
+                                BooleanOutputConnection(0, enabled),
+                            )
+                        ),
+                    )
+                ]
+            )
+        ],
+    )
+    carrier = 4_200_000_000
+
+    program = _compile(_control_module("port-0", carrier), canonical)
+
+    assert program.packages["port_0"].seq_config.connection.out0 is enabled
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qrm_rf, QbloxModuleKind.qrc])
+@pytest.mark.parametrize("enabled", [True, False])
+def test_rf_boolean_acquisition_alias_reaches_runtime_payload(kind, enabled):
+    canonical = canonical_data(
+        kind,
+        configurations=[
+            supplied(
+                [
+                    QbloxSequencerConfiguration(
+                        index=0,
+                        connection=SequencerConnection(
+                            boolean_output_connections=(BooleanOutputConnection(0, True),),
+                            combined_acquisition_alias=enabled,
+                        ),
+                    )
+                ]
+            )
+        ],
+    )
+    carrier = 4_200_000_000
+
+    module = (
+        _acquisition_module("port-0", carrier)
+        if enabled
+        else _control_module("port-0", carrier)
+    )
+    program = _compile(module, canonical)
+
+    assert program.packages["port_0"].seq_config.connection.acq is enabled

@@ -20,6 +20,7 @@ from xdsl.utils.exceptions import VerifyException
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
     AcquisitionAttr,
     AcquisitionPathConnectionAttr,
+    BooleanOutputConnectionAttr,
     ConnectionAttr,
     DirectionKindAttr,
     InputConfigAttr,
@@ -167,6 +168,8 @@ class TestSequencerConfigAttr:
             carrier_frequency=6.24e9,
             connections=[ConnectionAttr(DirectionKind.output, [0])],
             output_path_connections=[OutputPathConnectionAttr(0, SignalPath.iq)],
+            boolean_output_connections=[BooleanOutputConnectionAttr(1, True)],
+            combined_acquisition_alias=False,
             local_oscillator_id="lo0",
             enable_sync=True,
             nco=NcoConfigAttr(frequency=240e6),
@@ -176,6 +179,8 @@ class TestSequencerConfigAttr:
         assert config.carrier_frequency.value.data == 6.24e9
         assert config.connections.data[0].connection == "out0"
         assert config.output_path_connections.data[0].path.data is SignalPath.iq
+        assert bool(config.boolean_output_connections.data[0].enabled.value.data)
+        assert not bool(config.combined_acquisition_alias.value.data)
         assert config.local_oscillator_id.data == "lo0"
         assert bool(config.enable_sync.value.data)
         assert config.nco.frequency.value.data == 240e6

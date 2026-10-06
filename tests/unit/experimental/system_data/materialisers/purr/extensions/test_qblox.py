@@ -215,12 +215,25 @@ def test_combined_acquisition_field_decodes(acq, expected_paths, expected_disabl
     assert connection.acquisition_disabled is expected_disabled
 
 
-def test_boolean_acquisition_field_is_an_explicit_enable():
+@pytest.mark.parametrize("enabled", [True, False])
+def test_boolean_acquisition_field_preserves_the_qblox_alias(enabled):
     configuration = decode_qblox_configuration(
-        {"sequencers": {0: {"connection": {"acq": True}}}}
+        {"sequencers": {0: {"connection": {"acq": enabled}}}}
     )
 
-    assert configuration.sequencers[0].connection.acquisition_enabled is True
+    connection = configuration.sequencers[0].connection
+    assert connection.combined_acquisition_alias is enabled
+    assert connection.acquisition_enabled is None
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_boolean_output_field_preserves_the_qblox_alias(enabled):
+    configuration = decode_qblox_configuration(
+        {"sequencers": {0: {"connection": {"out0": enabled}}}}
+    )
+
+    [connection] = configuration.sequencers[0].connection.boolean_output_connections
+    assert (connection.output_id, connection.enabled) == (0, enabled)
 
 
 def test_empty_connection_is_reported_as_absent():

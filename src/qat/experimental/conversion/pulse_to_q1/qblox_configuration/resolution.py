@@ -36,6 +36,7 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     AcquireConfigAttr,
     AcquisitionPathConnectionAttr,
     AwgConfigAttr,
+    BooleanOutputConnectionAttr,
     ConnectionAttr,
     InputConfigAttr,
     InputSignalConfigAttr,
@@ -68,6 +69,7 @@ from qat.experimental.system_data.hardware.qblox.models import (
 )
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
+    AcquisitionConnectionMode,
     ModuleSpec,
     Q1SequencerFeature,
     Q1SequencerType,
@@ -192,6 +194,19 @@ def _validate_supplied_module(
     scope = _group(module_configuration.module_values, "scope_acq")
     if not scope:
         return
+    if module_spec.kind is QbloxModuleKind.qrc:
+        supported_paths = range(2 * module_spec.input_count)
+        unsupported_paths = sorted(
+            key
+            for key in scope
+            if key.startswith("avg_mode_en_path")
+            and int(key.removeprefix("avg_mode_en_path")) not in supported_paths
+        )
+        if unsupported_paths:
+            raise ValueError(
+                f"{origin} supplies unsupported QRC scope acquisition fields "
+                f"{unsupported_paths!r}"
+            )
     readout_indices = module_spec.sequencer_indices(Q1SequencerType.readout)
     if not readout_indices or not module_spec.input_count:
         raise ValueError(
@@ -279,8 +294,7 @@ def _validate_supplied_sequencer(
     if connection is None:
         raise ValueError(f"{origin} supplies no routing")
     _validate_connection_routing(connection, origin)
-    if module_spec.is_rf:
-        _validate_rf_connection(connection, kind, origin)
+    _validate_connection_capabilities(connection, module_spec, origin)
 
     for output_id in sorted(connection.output_ids):
         if output_id >= module_spec.output_count:
@@ -344,65 +358,144 @@ def _validate_connection_routing(connection: SequencerConnection, origin: str) -
         )
     if connection.acquisition_enabled and connection.acquisition_disabled:
         raise ValueError(f"{origin} both enables and disables acquisition")
+    if connection.combined_acquisition_alias is True and connection.acquisition_disabled:
+        raise ValueError(f"{origin} both connects and disables acquisition")
     if connection.acquisition_disabled and (inputs or bound_paths):
+        raise ValueError(f"{origin} disables acquisition while connecting inputs")
+    if connection.combined_acquisition_alias is False and (inputs or bound_paths):
         raise ValueError(f"{origin} disables acquisition while connecting inputs")
 
 
-def _validate_rf_connection(
-    connection: SequencerConnection, kind: QbloxModuleKind, origin: str
+def _validate_connection_capabilities(
+    connection: SequencerConnection, module_spec: ModuleSpec, origin: str
 ) -> None:
-    """Reject routing an RF module cannot express.
+    """Reject routing outside the selected module's connection API.
 
-    An RF module exposes one logical I/O port per RF chain and derives the I and Q lanes
-    from it internally. Its driver therefore accepts a single port index per connection,
-    offers only the combined ``IQ`` state on ``connect_out<n>``, and selects acquisition
-    through one combined ``connect_acq`` parameter instead of the ``connect_acq_I`` and
-    ``connect_acq_Q`` pair a baseband module exposes. See
-    ``qblox_instruments.qcodes_drivers.sequencer.Sequencer``.
+    Generic RF connections name one complex port. Direct output fields use the component
+    values declared by the module specification. Acquisition fields are either independent
+    I/Q selectors or one combined selector, depending on the module kind.
 
     :param connection: Routing supplied for the sequencer.
-    :param kind: Installed module kind.
+    :param module_spec: Connection capabilities of the installed module kind.
     :param origin: Description of the sequencer, used to describe validation failures.
-    :raises ValueError: If the routing names I and Q lanes an RF module does not expose.
+    :raises ValueError: If the routing is unsupported by the selected module.
     """
 
+    if (
+        module_spec.acquisition_connection_mode is AcquisitionConnectionMode.none
+        and connection.uses_acquisition
+    ):
+        raise ValueError(f"{origin} configures acquisition but is not acquisition-capable")
+    if connection.boolean_output_connections and not module_spec.is_rf:
+        raise ValueError(
+            f"{origin} supplies boolean output aliases, unsupported on "
+            f"{module_spec.kind.value}"
+        )
+    if (
+        connection.combined_acquisition_alias is not None
+        and module_spec.acquisition_connection_mode
+        is not AcquisitionConnectionMode.combined
+    ):
+        raise ValueError(
+            f"{origin} supplies a boolean acquisition alias, unsupported on "
+            f"{module_spec.kind.value}"
+        )
     complex_connections = sorted(
-        entry.connection for entry in connection.connections if len(entry.port_ids) > 1
+        entry.connection
+        for entry in connection.connections
+        if module_spec.is_rf and len(entry.port_ids) > 1
     )
     if complex_connections:
         raise ValueError(
-            f"{origin} supplies connections {complex_connections!r}; {kind.value} is an "
-            "RF module and accepts only one I/O port per connection"
+            f"{origin} supplies connections {complex_connections!r}; "
+            f"{module_spec.kind.value} accepts only one I/O port per connection"
         )
     component_outputs = sorted(
         f"out{entry.output_id}={entry.path.value}"
         for entry in connection.output_path_connections
-        if entry.path is not SignalPath.iq
+        if entry.path not in module_spec.output_path_components
     )
     if component_outputs:
+        allowed = sorted(path.value for path in module_spec.output_path_components)
         raise ValueError(
-            f"{origin} supplies output paths {component_outputs!r}; {kind.value} is an "
-            f"RF module and drives an output with the combined "
-            f"{SignalPath.iq.value!r} path only"
+            f"{origin} supplies unsupported output paths {component_outputs!r}; "
+            f"{module_spec.kind.value} accepts {allowed!r}"
         )
-    component_paths = _sorted_paths(
+    acquisition_paths = {
+        entry.path for entry in connection.acquisition_path_connections
+    } | set(connection.disabled_acquisition_paths)
+    expected_paths = module_spec.acquisition_path_components
+    unsupported_paths = _sorted_paths(acquisition_paths - expected_paths)
+    if unsupported_paths:
+        allowed = sorted(path.value for path in expected_paths)
+        raise ValueError(
+            f"{origin} supplies unsupported acquisition paths "
+            f"{[path.value for path in unsupported_paths]!r}; "
+            f"{module_spec.kind.value} accepts {allowed!r}"
+        )
+    _validate_mixed_connection_compatibility(connection, module_spec, origin)
+
+
+def _validate_mixed_connection_compatibility(
+    connection: SequencerConnection, module_spec: ModuleSpec, origin: str
+) -> None:
+    """Reject bulk and direct routing only when they claim different states."""
+
+    bulk_outputs: dict[int, SignalPath] = {}
+    bulk_acquisition: dict[SignalPath, int] = {}
+    for entry in connection.connections:
+        if module_spec.is_rf:
+            for output_id in connection_output_ids(entry.direction, entry.port_ids):
+                bulk_outputs[output_id] = SignalPath.iq
+            for input_id in connection_input_ids(entry.direction, entry.port_ids):
+                bulk_acquisition[SignalPath.iq] = input_id
+            continue
+        output_ids = connection_output_ids(entry.direction, entry.port_ids)
+        input_ids = connection_input_ids(entry.direction, entry.port_ids)
+        for path, output_id in zip((SignalPath.i, SignalPath.q), output_ids, strict=False):
+            bulk_outputs[output_id] = path
+        for path, input_id in zip((SignalPath.i, SignalPath.q), input_ids, strict=False):
+            bulk_acquisition[path] = input_id
+
+    direct_outputs: dict[int, SignalPath | bool] = {
+        entry.output_id: entry.path for entry in connection.output_path_connections
+    }
+    direct_outputs.update(
+        {entry.output_id: entry.enabled for entry in connection.boolean_output_connections}
+    )
+    for output_id, direct in direct_outputs.items():
+        if output_id not in bulk_outputs:
+            continue
+        compatible = (
+            direct is True and bulk_outputs[output_id] is SignalPath.iq
+        ) or direct is bulk_outputs[output_id]
+        if not compatible:
+            raise ValueError(
+                f"{origin} gives output {output_id} conflicting bulk and direct states"
+            )
+
+    direct_acquisition = {
+        component: entry.input_id
+        for entry in connection.acquisition_path_connections
+        for component in module_spec.acquisition_components(entry.path)
+    }
+    direct_acquisition.update(
         {
-            entry.path
-            for entry in connection.acquisition_path_connections
-            if entry.path is not SignalPath.iq
-        }
-        | {
-            path
+            component: -1
             for path in connection.disabled_acquisition_paths
-            if path is not SignalPath.iq
+            for component in module_spec.acquisition_components(path)
         }
     )
-    if component_paths:
-        raise ValueError(
-            f"{origin} supplies acquisition paths "
-            f"{[path.value for path in component_paths]!r}; {kind.value} is an RF module "
-            "and selects one input for its whole acquisition path"
+    if connection.combined_acquisition_alias is not None:
+        direct_acquisition[SignalPath.iq] = (
+            0 if connection.combined_acquisition_alias else -1
         )
+    for path, direct in direct_acquisition.items():
+        if path in bulk_acquisition and direct != bulk_acquisition[path]:
+            raise ValueError(
+                f"{origin} gives acquisition path {path.value} conflicting bulk and "
+                "direct states"
+            )
 
 
 def _module_config(
@@ -448,7 +541,7 @@ def _module_config(
             InputConfigAttr(
                 input_id,
                 input_signal=_input_signal_config(values, input_id),
-                scope_acquire=_scope_acquire_config(values, input_id),
+                scope_acquire=_scope_acquire_config(values, input_id, module_spec.kind),
             )
             for input_id in input_ids
         ],
@@ -501,6 +594,10 @@ def _sequencer_config(
             OutputPathConnectionAttr(entry.output_id, entry.path)
             for entry in connection.output_path_connections
         ],
+        boolean_output_connections=[
+            BooleanOutputConnectionAttr(entry.output_id, entry.enabled)
+            for entry in connection.boolean_output_connections
+        ],
         acquisition_path_connections=[
             AcquisitionPathConnectionAttr(entry.input_id, entry.path)
             for entry in connection.acquisition_path_connections
@@ -509,6 +606,7 @@ def _sequencer_config(
         disabled_outputs=sorted(connection.disabled_outputs),
         disabled_acquisition_paths=_sorted_paths(connection.disabled_acquisition_paths),
         acquisition_disabled=connection.acquisition_disabled,
+        combined_acquisition_alias=connection.combined_acquisition_alias,
         local_oscillator_id=channel_binding.oscillator_id,
         enable_sync=_boolean(values, "sync_en", origin),
         nco=NcoConfigAttr(
@@ -523,7 +621,11 @@ def _sequencer_config(
                 gain_path1=_number(awg, "gain_path1", origin),
                 offset_path0=_number(awg, "offset_path0", origin),
                 offset_path1=_number(awg, "offset_path1", origin),
-                mod_en=_boolean(awg, "mod_en", origin),
+                mod_en=(
+                    _boolean(awg, "mod_en", origin)
+                    if module_spec.supports_awg_modulation
+                    else None
+                ),
             )
         ),
         mixer=_mixer_config(channel_binding, values, module_spec, origin),
@@ -539,7 +641,11 @@ def _sequencer_config(
         acquire=_configured(
             AcquireConfigAttr(
                 auto_bin_incr_en=_boolean(ttl, "auto_bin_incr_en", origin),
-                demod_en_acq=_boolean(values, "demod_en_acq", origin),
+                demod_en_acq=(
+                    _boolean(values, "demod_en_acq", origin)
+                    if module_spec.supports_acquisition_demodulation
+                    else None
+                ),
             )
         ),
         thresholded_acquire=_configured(
@@ -711,8 +817,10 @@ def _local_oscillator_configs(
             LocalOscillatorConfigAttr(
                 oscillator_id,
                 frequency,
-                enable=_oscillator_value(
-                    supplied_values, lane_names, "en", origin, _boolean
+                enable=(
+                    _oscillator_value(supplied_values, lane_names, "en", origin, _boolean)
+                    if module_spec.supports_local_oscillator_enable
+                    else None
                 ),
             )
         )
@@ -930,7 +1038,9 @@ def _input_signal_config(
 
 
 def _scope_acquire_config(
-    values: Mapping[str, ConfigValue], input_id: int
+    values: Mapping[str, ConfigValue],
+    input_id: int,
+    module_kind: QbloxModuleKind,
 ) -> ScopeAcquireConfigAttr | None:
     """Resolve the trace acquisition configuration of one physical input.
 
@@ -938,20 +1048,36 @@ def _scope_acquire_config(
     The selection is a physical sequencer index, and is carried through unchanged so that
     a module configuration shared by several bindings still names the one sequencer the
     source selected. The index itself is validated against the module's acquisition-capable
-    sequencers before resolution.
+    sequencers before resolution. A value supplied for either path of a QRC input applies
+    to the whole I/Q pair; two explicit values must agree.
 
     :param values: Reconciled module-wide values.
     :param input_id: Physical input to configure.
+    :param module_kind: Installed module kind, which determines the scope-path layout.
     :returns: The scope configuration, or ``None`` when the source supplies none.
-    :raises ValueError: If a supplied value has an unexpected type.
+    :raises ValueError: If a supplied value has an unexpected type or the two QRC paths
+        for an input disagree about averaging.
     """
 
     origin = f"Module input in{input_id} scope acquisition"
     scope = _group(values, "scope_acq")
+    if module_kind is QbloxModuleKind.qrc:
+        path_values = [
+            _boolean(scope, f"avg_mode_en_path{path}", origin)
+            for path in (2 * input_id, 2 * input_id + 1)
+        ]
+        configured_values = {value for value in path_values if value is not None}
+        if len(configured_values) > 1:
+            raise ValueError(
+                f"{origin} supplies conflicting averaging modes for its I/Q scope paths"
+            )
+        enable_average_mode = next(iter(configured_values), None)
+    else:
+        enable_average_mode = _boolean(scope, f"avg_mode_en_path{input_id}", origin)
     return _configured(
         ScopeAcquireConfigAttr(
             sequencer_select=_integer(scope, "sequencer_select", origin),
-            enable_average_mode=_boolean(scope, f"avg_mode_en_path{input_id}", origin),
+            enable_average_mode=enable_average_mode,
         )
     )
 

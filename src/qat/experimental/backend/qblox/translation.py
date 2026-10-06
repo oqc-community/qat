@@ -34,6 +34,10 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.dialect.q1_sequence.target import emit_config, emit_sequence
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    AcquisitionConnectionMode,
+)
 
 
 def _mapping(value: object, name: str) -> Mapping[str, object]:
@@ -42,40 +46,105 @@ def _mapping(value: object, name: str) -> Mapping[str, object]:
     return value
 
 
-def _connection_config(config: Mapping[str, object]) -> ConnectionConfig:
+def _set_connection_field(
+    connection: ConnectionConfig,
+    field: str,
+    value: str | bool,
+) -> None:
+    previous = getattr(connection, field)
+    if previous is not None and previous != value:
+        raise ValueError(
+            f"Conflicting Qblox connection values for {field!r}: "
+            f"{previous!r} and {value!r}."
+        )
+    setattr(connection, field, value)
+
+
+def _connection_config(
+    config: Mapping[str, object],
+    module_kind: QbloxModuleKind | None,
+) -> ConnectionConfig:
+    if module_kind is not None and DEFAULT_QBLOX_TARGET.module_spec(module_kind).is_rf:
+        complex_connections = sorted(
+            str(item["direction"]) + "_".join(str(port_id) for port_id in item["port_ids"])
+            for item in config["connections"]
+            if len(item["port_ids"]) > 1
+        )
+        if complex_connections:
+            raise ValueError(
+                f"{module_kind.value} accepts only one I/O port per connection; "
+                f"got {complex_connections!r}."
+            )
     connection = ConnectionConfig(
         bulk_value=[
             str(item["direction"]) + "_".join(str(port_id) for port_id in item["port_ids"])
             for item in config["connections"]
         ]
     )
+    acquisition_mode = (
+        AcquisitionConnectionMode.components
+        if module_kind is None
+        else DEFAULT_QBLOX_TARGET.module_spec(module_kind).acquisition_connection_mode
+    )
+    if acquisition_mode is AcquisitionConnectionMode.none and (
+        config["acquisition_path_connections"]
+        or config["disabled_acquisition_paths"]
+        or config["acquisition_disabled"]
+    ):
+        raise ValueError(f"{module_kind.value} does not support acquisition connections.")
     for item in config["output_path_connections"]:
-        setattr(connection, f"out{item['output_id']}", item["path"])
+        if item["path"] is not None:
+            _set_connection_field(connection, f"out{item['output_id']}", str(item["path"]))
+    for item in config["boolean_output_connections"] or []:
+        _set_connection_field(connection, f"out{item['output_id']}", bool(item["enabled"]))
     for output_id in config["disabled_outputs"]:
-        setattr(connection, f"out{output_id}", "off")
+        _set_connection_field(connection, f"out{output_id}", "off")
 
     for item in config["acquisition_path_connections"]:
         input_name = f"in{item['input_id']}"
         path = item["path"]
+        if acquisition_mode is AcquisitionConnectionMode.combined:
+            if path != "IQ":
+                raise ValueError(
+                    f"{module_kind.value} supports the combined acquisition path only."
+                )
+            _set_connection_field(connection, "acq", input_name)
+            continue
         if path in ("I", "IQ"):
-            connection.acq_I = input_name
+            _set_connection_field(connection, "acq_I", input_name)
         if path in ("Q", "IQ"):
-            connection.acq_Q = input_name
+            _set_connection_field(connection, "acq_Q", input_name)
     for path in config["disabled_acquisition_paths"]:
+        if acquisition_mode is AcquisitionConnectionMode.combined:
+            if path != "IQ":
+                raise ValueError(
+                    f"{module_kind.value} supports the combined acquisition path only."
+                )
+            _set_connection_field(connection, "acq", "off")
+            continue
         if path in ("I", "IQ"):
-            connection.acq_I = "off"
+            _set_connection_field(connection, "acq_I", "off")
         if path in ("Q", "IQ"):
-            connection.acq_Q = "off"
+            _set_connection_field(connection, "acq_Q", "off")
     if config["acquisition_disabled"]:
-        connection.acq_I = "off"
-        connection.acq_Q = "off"
+        if acquisition_mode is AcquisitionConnectionMode.combined:
+            _set_connection_field(connection, "acq", "off")
+        else:
+            _set_connection_field(connection, "acq_I", "off")
+            _set_connection_field(connection, "acq_Q", "off")
+    if config["combined_acquisition_alias"] is not None:
+        _set_connection_field(connection, "acq", bool(config["combined_acquisition_alias"]))
     return connection
 
 
-def translate_sequencer_config(config_attr: SequencerConfigAttr) -> SequencerConfig:
+def translate_sequencer_config(
+    config_attr: SequencerConfigAttr,
+    module_kind: QbloxModuleKind | None = None,
+) -> SequencerConfig:
     """Translate one verified Q1 sequencer configuration.
 
     :param config_attr: Fully resolved Q1 sequencer configuration.
+    :param module_kind: Installed module kind, when translation is target-specific.
     :returns: Configuration consumed by the shared Qblox engine.
     """
 
@@ -108,7 +177,7 @@ def translate_sequencer_config(config_attr: SequencerConfigAttr) -> SequencerCon
         sync_en=config["enable_sync"],
         marker_ovr_en=marker.get("marker_ovr_en"),
         marker_ovr_value=marker.get("marker_ovr_value"),
-        connection=_connection_config(config),
+        connection=_connection_config(config, module_kind),
         nco=NcoConfig(
             freq=nco.get("frequency"),
             phase_offs=nco.get("phase_offs"),
@@ -208,6 +277,7 @@ def _translate_output(
 
 def _translate_input(
     module_input: Mapping[str, object],
+    module_kind: QbloxModuleKind,
     offsets: dict[str, object],
     attenuations: dict[str, object],
     gains: dict[str, object],
@@ -262,13 +332,27 @@ def _translate_input(
             origin=f"input {input_id}",
             supported_fields=ScopeAcqConfig.model_fields,
         )
-        _set_field(
-            scope,
-            f"avg_mode_en_path{input_id}",
-            scope_acquire["enable_average_mode"],
-            origin=f"input {input_id}",
-            supported_fields=ScopeAcqConfig.model_fields,
+        scope_paths = (
+            (2 * input_id, 2 * input_id + 1)
+            if module_kind is QbloxModuleKind.qrc
+            else (input_id,)
         )
+        for path in scope_paths:
+            _set_field(
+                scope,
+                f"avg_mode_en_path{path}",
+                scope_acquire["enable_average_mode"],
+                origin=f"input {input_id}",
+                supported_fields=ScopeAcqConfig.model_fields,
+            )
+            if module_kind is QbloxModuleKind.qrc:
+                _set_field(
+                    scope,
+                    f"trigger_mode_path{path}",
+                    "sequencer",
+                    origin=f"input {input_id}",
+                    supported_fields=ScopeAcqConfig.model_fields,
+                )
 
 
 def _oscillator_lanes(kind: QbloxModuleKind, config: Mapping[str, object]) -> set[str]:
@@ -281,6 +365,19 @@ def _oscillator_lanes(kind: QbloxModuleKind, config: Mapping[str, object]) -> se
             output_ids.update(port_ids)
         if direction != "out":
             input_ids.update(port_ids)
+    output_ids.update(
+        connection["output_id"] for connection in config["output_path_connections"] or ()
+    )
+    output_ids.update(
+        connection["output_id"] for connection in config["boolean_output_connections"] or ()
+    )
+    output_ids.update(config["disabled_outputs"] or ())
+    input_ids.update(
+        connection["input_id"]
+        for connection in config["acquisition_path_connections"] or ()
+    )
+    if config["combined_acquisition_alias"] is not None:
+        input_ids.add(0)
 
     if kind is QbloxModuleKind.qcm_rf:
         return {f"out{output_id}" for output_id in output_ids}
@@ -308,6 +405,7 @@ def translate_module_config(
     """
 
     config = _mapping(emit_config(config_attr), "module configuration")
+    kind = QbloxModuleKind(config["kind"])
     offsets: dict[str, object] = {}
     attenuations: dict[str, object] = {}
     gains: dict[str, object] = {}
@@ -323,6 +421,7 @@ def translate_module_config(
     for module_input in config["inputs"]:
         _translate_input(
             _mapping(module_input, "module input"),
+            kind,
             offsets,
             attenuations,
             gains,
@@ -336,7 +435,6 @@ def translate_module_config(
         )
     }
     oscillator_lanes: dict[str, set[str]] = {}
-    kind = QbloxModuleKind(config["kind"])
     for sequencer_attr in sequencer_configs:
         sequencer = _mapping(emit_config(sequencer_attr), "sequencer configuration")
         oscillator_id = sequencer["local_oscillator_id"]
@@ -414,6 +512,7 @@ def translate_package(
         or sequence_op.slot_idx is None
         or sequence_op.seq_idx is None
         or sequence_op.sequencer_config is None
+        or sequence_op.module_config is None
     ):
         raise ValueError(
             "Qblox package translation requires a fully configured and allocated "
@@ -424,7 +523,10 @@ def translate_package(
         physical_channel_id=sequence_op.port_id.data,
         instrument_id=sequence_op.instrument_id.data,
         seq_idx=sequence_op.seq_idx.data,
-        seq_config=translate_sequencer_config(sequence_op.sequencer_config),
+        seq_config=translate_sequencer_config(
+            sequence_op.sequencer_config,
+            sequence_op.module_config.kind.data,
+        ),
         slot_idx=sequence_op.slot_idx.data,
         mod_config=module_config,
         sequence=Sequence(**emit_sequence(sequence_op)),

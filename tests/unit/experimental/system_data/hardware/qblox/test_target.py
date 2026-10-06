@@ -11,15 +11,77 @@ from frozendict import frozendict
 from qat.experimental.system_data.hardware.qblox.models import (
     QbloxModuleKind,
     QbloxModuleLocation,
+    SignalPath,
 )
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
+    AcquisitionConnectionMode,
     LocalOscillatorSpec,
     ModuleSpec,
     Q1SequencerFeature,
+    Q1SequencerSpec,
     Q1SequencerType,
     QbloxTargetDescription,
 )
+
+
+@pytest.mark.parametrize(
+    ("kind", "output_paths", "acquisition_mode", "acquisition_paths"),
+    [
+        (
+            QbloxModuleKind.qcm,
+            frozenset({SignalPath.i, SignalPath.q}),
+            AcquisitionConnectionMode.none,
+            frozenset(),
+        ),
+        (
+            QbloxModuleKind.qrm,
+            frozenset({SignalPath.i, SignalPath.q}),
+            AcquisitionConnectionMode.components,
+            frozenset({SignalPath.i, SignalPath.q, SignalPath.iq}),
+        ),
+        (
+            QbloxModuleKind.qcm_rf,
+            frozenset({SignalPath.iq}),
+            AcquisitionConnectionMode.none,
+            frozenset(),
+        ),
+        (
+            QbloxModuleKind.qrm_rf,
+            frozenset({SignalPath.iq}),
+            AcquisitionConnectionMode.combined,
+            frozenset({SignalPath.iq}),
+        ),
+        (
+            QbloxModuleKind.qrc,
+            frozenset({SignalPath.iq}),
+            AcquisitionConnectionMode.combined,
+            frozenset({SignalPath.iq}),
+        ),
+    ],
+)
+def test_module_connection_capabilities_match_qblox_api(
+    kind, output_paths, acquisition_mode, acquisition_paths
+):
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(kind)
+
+    assert module_spec.output_path_components == output_paths
+    assert module_spec.acquisition_connection_mode is acquisition_mode
+    assert module_spec.acquisition_path_components == acquisition_paths
+
+
+@pytest.mark.parametrize(
+    ("kind", "path", "components"),
+    [
+        (QbloxModuleKind.qrm, SignalPath.i, (SignalPath.i,)),
+        (QbloxModuleKind.qrm, SignalPath.q, (SignalPath.q,)),
+        (QbloxModuleKind.qrm, SignalPath.iq, (SignalPath.i, SignalPath.q)),
+        (QbloxModuleKind.qrm_rf, SignalPath.iq, (SignalPath.iq,)),
+        (QbloxModuleKind.qrc, SignalPath.iq, (SignalPath.iq,)),
+    ],
+)
+def test_acquisition_paths_expand_to_module_api_components(kind, path, components):
+    assert DEFAULT_QBLOX_TARGET.module_spec(kind).acquisition_components(path) == components
 
 
 @pytest.mark.parametrize(
@@ -121,6 +183,102 @@ def test_module_rf_classification_requires_a_local_oscillator_specification():
         replace(qcm, is_rf=True)
 
 
+@pytest.mark.parametrize(
+    ("arguments", "message"),
+    [
+        (
+            (-1, 1, 1),
+            "minimum frequency must be non-negative",
+        ),
+        (
+            (1, 0, 1),
+            "maximum frequency must not be below its minimum",
+        ),
+        (
+            (0, 1, 0),
+            "frequency step must be positive",
+        ),
+    ],
+)
+def test_local_oscillator_rejects_invalid_limits(arguments, message):
+    with pytest.raises(ValueError, match=message):
+        LocalOscillatorSpec(*arguments)
+
+
+@pytest.mark.parametrize(
+    ("type_", "readout"),
+    [
+        (
+            Q1SequencerType.control,
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout).readout,
+        ),
+        (Q1SequencerType.readout, None),
+    ],
+)
+def test_sequencer_spec_requires_readout_limits_only_for_readout(type_, readout):
+    with pytest.raises(ValueError, match="require readout-path limits"):
+        Q1SequencerSpec(type_, instruction_capacity=1, readout=readout)
+
+
+def _qcm_spec(**changes):
+    return replace(DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm), **changes)
+
+
+@pytest.mark.parametrize(
+    ("changes", "exception", "message"),
+    [
+        (
+            {"sequencers": [Q1SequencerType.control]},
+            TypeError,
+            "sequencers must be an immutable tuple",
+        ),
+        (
+            {"output_channel_map": {0: (0,), 1: (0,), 2: (0,), 3: (0,)}},
+            TypeError,
+            "channel maps must be immutable frozendict",
+        ),
+        (
+            {"output_path_components": {SignalPath.i}},
+            TypeError,
+            "output path components must be an immutable frozenset",
+        ),
+        (
+            {"output_channel_map": frozendict({0: [0], 1: (0,), 2: (0,), 3: (0,)})},
+            TypeError,
+            "channel-map sequencer indices must be tuples",
+        ),
+        (
+            {"output_channel_map": frozendict()},
+            ValueError,
+            "output channel map is incomplete",
+        ),
+        (
+            {"input_count": 1},
+            ValueError,
+            "input channel map is incomplete",
+        ),
+        (
+            {"output_channel_map": frozendict({0: (6,), 1: (0,), 2: (0,), 3: (0,)})},
+            ValueError,
+            "channel map references an invalid sequencer",
+        ),
+        (
+            {"acquisition_memory_bins": 1},
+            ValueError,
+            "acquisition memory must match its sequencer types",
+        ),
+        (
+            {"acquisition_connection_mode": AcquisitionConnectionMode.components},
+            ValueError,
+            "acquisition connection mode must match its sequencer types",
+        ),
+    ],
+)
+def test_module_spec_rejects_inconsistent_capabilities(changes, exception, message):
+    with pytest.raises(exception, match=message):
+        _qcm_spec(**changes)
+
+
 def test_target_rejects_illegal_indices():
     with pytest.raises(ValueError, match="Sequencer index 12"):
         DEFAULT_QBLOX_TARGET.sequencer(QbloxModuleKind.qrc, 12)
@@ -159,6 +317,14 @@ def test_module_and_sequencer_limits(kind, supports_mixer_correction):
     assert readout.readout.weight_sample_capacity == 16_384
 
 
+def test_qrc_excludes_unsupported_runtime_configuration():
+    module = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qrc)
+
+    assert not module.supports_local_oscillator_enable
+    assert not module.supports_awg_modulation
+    assert not module.supports_acquisition_demodulation
+
+
 def test_target_import_does_not_load_xdsl():
     result = subprocess.run(  # noqa: S603 - interpreter and script are fixed test inputs
         [
@@ -192,6 +358,60 @@ def test_target_requires_complete_matching_specifications():
             ),
             module_specs=DEFAULT_QBLOX_TARGET.module_specs,
         )
+
+
+@pytest.mark.parametrize(
+    ("changes", "message"),
+    [
+        (
+            {
+                "sequencer_specs": frozendict(
+                    {
+                        Q1SequencerType.control: DEFAULT_QBLOX_TARGET.sequencer_spec(
+                            Q1SequencerType.readout
+                        ),
+                        Q1SequencerType.readout: DEFAULT_QBLOX_TARGET.sequencer_spec(
+                            Q1SequencerType.control
+                        ),
+                    }
+                )
+            },
+            "Sequencer specification keys must match their types",
+        ),
+        (
+            {
+                "module_specs": frozendict(
+                    {
+                        kind: spec
+                        for kind, spec in DEFAULT_QBLOX_TARGET.module_specs.items()
+                        if kind is not QbloxModuleKind.qrc
+                    }
+                )
+            },
+            "Target description must define every Qblox module kind",
+        ),
+        (
+            {
+                "module_specs": frozendict(
+                    {
+                        **DEFAULT_QBLOX_TARGET.module_specs,
+                        QbloxModuleKind.qcm: DEFAULT_QBLOX_TARGET.module_spec(
+                            QbloxModuleKind.qrm
+                        ),
+                    }
+                )
+            },
+            "Module specification keys must match their kinds",
+        ),
+        (
+            {"min_module_slot": 0},
+            "Target module slot range is invalid",
+        ),
+    ],
+)
+def test_target_rejects_inconsistent_capability_tables(changes, message):
+    with pytest.raises(ValueError, match=message):
+        replace(DEFAULT_QBLOX_TARGET, **changes)
 
 
 def test_readout_sequencer_uses_readout_specification():

@@ -32,7 +32,6 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1.ir.abstract_ops import Q1AsmOperation
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
-    AcquisitionPathConnectionAttr,
     ConnectionAttr,
     InputConfigAttr,
     ModuleConfigAttr,
@@ -50,7 +49,6 @@ from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
 from qat.experimental.system_data.hardware.qblox.models import (
     DirectionKind,
     QbloxModuleKind,
-    SignalPath,
 )
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
@@ -85,9 +83,7 @@ def _sequencer_config(
             )
         ],
         output_path_connections=[OutputPathConnectionAttr(output_id)],
-        acquisition_path_connections=(
-            [AcquisitionPathConnectionAttr(output_id, SignalPath.i)] if readout else []
-        ),
+        acquisition_path_connections=[],
         disabled_outputs=[],
         disabled_acquisition_paths=[],
         nco=NcoConfigAttr(frequency=nco_frequency),
@@ -200,7 +196,7 @@ def test_emits_readout_tables_without_loss(hardware_view):
         "num_bins": 128,
     }
     assert package.seq_config.square_weight_acq.integration_length == 16
-    assert package.seq_config.connection.acq_I == "in0"
+    assert package.seq_config.connection.bulk_value == ["io0"]
 
 
 def test_sequence_payload_shape_matches_qblox_driver_contract(hardware_view):

@@ -80,6 +80,7 @@ f32 = Float32Type()
 
 _as_required_string = partial(as_string, required=True)
 _as_required_int = partial(as_int, required=True)
+_as_required_bool = partial(as_bool, required=True)
 
 
 def _as_integration_length(
@@ -735,6 +736,25 @@ class OutputPathConnectionAttr(ParametrizedAttribute):
 
 
 @irdl_attr_definition
+class BooleanOutputConnectionAttr(ParametrizedAttribute):
+    """One RF output configured through the exact Qblox boolean alias."""
+
+    name = "q1_sequence.boolean_output_connection"
+
+    output_id: IntAttr = param_def(converter=_as_required_int)
+    enabled: BoolAttr = param_def(converter=_as_required_bool)
+
+    def __init__(self, output_id: IntAttr | int, enabled: BoolAttr | bool):
+        super().__init__(output_id, enabled)
+
+    def verify(self) -> None:
+        if self.output_id.data < 0:
+            raise VerifyException(
+                "BooleanOutputConnectionAttr output_id must be non-negative"
+            )
+
+
+@irdl_attr_definition
 class AcquisitionPathConnectionAttr(ParametrizedAttribute):
     """Physical input connected to one Qblox acquisition path.
 
@@ -767,18 +787,20 @@ class SequencerConfigAttr(ConfigAttr):
 
     The connections bind the sequencer to the analogue lanes configured by the attached
     :class:`ModuleConfigAttr`. Output connections retain fan-out and Qblox signal-path
-    selection. Acquisition connections retain each ``acq_I``/``acq_Q`` input selection.
+    selection. Acquisition connections retain component selectors and RF boolean aliases.
 
     :param port_id: Canonical port the sequencer drives.
     :param carrier_frequency: Carrier frequency in Hz produced by the local oscillator and
         the NCO together.
     :param connections: Exact ordered entries in the supplied ``bulk_value``.
     :param output_path_connections: Output selection for each output path.
+    :param boolean_output_connections: Exact RF boolean aliases for physical outputs.
     :param acquisition_path_connections: Input selection for each acquisition path.
     :param acquisition_enabled: Explicit acquisition enable state.
     :param disabled_outputs: Outputs explicitly configured as off.
     :param disabled_acquisition_paths: Acquisition paths configured as off.
     :param acquisition_disabled: Whether the combined acquisition path is configured as off.
+    :param combined_acquisition_alias: Exact RF boolean alias for ``connect_acq``.
     :param local_oscillator_id: Local oscillator mixed with the NCO, absent for baseband.
     :param enable_sync: Whether the sequencer joins party-line synchronisation.
     :param nco: Numerically controlled oscillator configuration.
@@ -798,6 +820,9 @@ class SequencerConfigAttr(ConfigAttr):
     output_path_connections: ArrayAttr[OutputPathConnectionAttr] | NoneAttr = param_def(
         converter=as_optional
     )
+    boolean_output_connections: ArrayAttr[BooleanOutputConnectionAttr] | NoneAttr = (
+        param_def(converter=as_optional)
+    )
     acquisition_path_connections: ArrayAttr[AcquisitionPathConnectionAttr] | NoneAttr = (
         param_def(converter=as_optional)
     )
@@ -807,6 +832,7 @@ class SequencerConfigAttr(ConfigAttr):
         converter=as_optional
     )
     acquisition_disabled: OptionalBool = param_def(converter=as_bool)
+    combined_acquisition_alias: OptionalBool = param_def(converter=as_bool)
     local_oscillator_id: OptionalString = param_def(converter=as_string)
     enable_sync: OptionalBool = param_def(converter=as_bool)
     nco: NcoConfigAttr | NoneAttr = param_def(converter=as_optional)
@@ -829,6 +855,11 @@ class SequencerConfigAttr(ConfigAttr):
         output_path_connections: (
             ArrayAttr[OutputPathConnectionAttr] | Iterable[OutputPathConnectionAttr] | None
         ) = None,
+        boolean_output_connections: (
+            ArrayAttr[BooleanOutputConnectionAttr]
+            | Iterable[BooleanOutputConnectionAttr]
+            | None
+        ) = None,
         acquisition_path_connections: (
             ArrayAttr[AcquisitionPathConnectionAttr]
             | Iterable[AcquisitionPathConnectionAttr]
@@ -840,6 +871,7 @@ class SequencerConfigAttr(ConfigAttr):
             ArrayAttr[SignalPathAttr] | Iterable[SignalPathAttr | SignalPath] | None
         ) = None,
         acquisition_disabled: BoolAttr | bool | None = None,
+        combined_acquisition_alias: BoolAttr | bool | None = None,
         local_oscillator_id: StringAttr | str | None = None,
         enable_sync: BoolAttr | bool | None = None,
         nco: NcoConfigAttr | None = None,
@@ -865,6 +897,12 @@ class SequencerConfigAttr(ConfigAttr):
                 else output_path_connections
             ),
             (
+                ArrayAttr(boolean_output_connections)
+                if boolean_output_connections is not None
+                and not isinstance(boolean_output_connections, ArrayAttr)
+                else boolean_output_connections
+            ),
+            (
                 ArrayAttr(acquisition_path_connections)
                 if acquisition_path_connections is not None
                 and not isinstance(acquisition_path_connections, ArrayAttr)
@@ -882,6 +920,7 @@ class SequencerConfigAttr(ConfigAttr):
                 else disabled_acquisition_paths
             ),
             acquisition_disabled,
+            combined_acquisition_alias,
             local_oscillator_id,
             enable_sync,
             nco,
@@ -918,6 +957,7 @@ class SequencerConfigAttr(ConfigAttr):
                 and bool(self.disabled_acquisition_paths)
             )
             or not isinstance(self.acquisition_disabled, NoneAttr)
+            or not isinstance(self.combined_acquisition_alias, NoneAttr)
             or not isinstance(self.unweighted_acquire, NoneAttr)
             or not isinstance(self.acquire, NoneAttr)
             or not isinstance(self.thresholded_acquire, NoneAttr)
@@ -943,6 +983,11 @@ class SequencerConfigAttr(ConfigAttr):
                 if isinstance(self.output_path_connections, NoneAttr)
                 else self.output_path_connections
             ),
+            boolean_output_connections=(
+                None
+                if isinstance(self.boolean_output_connections, NoneAttr)
+                else self.boolean_output_connections
+            ),
             acquisition_path_connections=(
                 None
                 if isinstance(self.acquisition_path_connections, NoneAttr)
@@ -960,6 +1005,7 @@ class SequencerConfigAttr(ConfigAttr):
                 else self.disabled_acquisition_paths
             ),
             acquisition_disabled=self.acquisition_disabled,
+            combined_acquisition_alias=self.combined_acquisition_alias,
             local_oscillator_id=self.local_oscillator_id,
             enable_sync=self.enable_sync,
             nco=self.nco,
@@ -1009,6 +1055,12 @@ class SequencerConfigAttr(ConfigAttr):
             if isinstance(self.output_path_connections, ArrayAttr)
             else []
         )
+        boolean_output_connections = (
+            [connection.output_id.data for connection in self.boolean_output_connections]
+            if isinstance(self.boolean_output_connections, ArrayAttr)
+            else []
+        )
+        output_path_connections.extend(boolean_output_connections)
         if len(output_path_connections) != len(set(output_path_connections)):
             raise VerifyException(
                 "SequencerConfigAttr has multiple paths for the same physical output"
@@ -1067,7 +1119,27 @@ class SequencerConfigAttr(ConfigAttr):
             raise VerifyException(
                 "SequencerConfigAttr acquisition cannot be both enabled and disabled"
             )
+        combined_alias = (
+            bool(self.combined_acquisition_alias.value.data)
+            if not isinstance(self.combined_acquisition_alias, NoneAttr)
+            else None
+        )
+        if combined_alias is not None and (acquisition_paths or disabled_acquisition_paths):
+            raise VerifyException(
+                "SequencerConfigAttr combined acquisition path has multiple direct "
+                "connection values"
+            )
+        if combined_alias is not None and acquisition_disabled:
+            raise VerifyException(
+                "SequencerConfigAttr combined acquisition path cannot use a boolean "
+                "alias and be disabled"
+            )
         if acquisition_disabled and (occupied_inputs or acquisition_paths):
+            raise VerifyException(
+                "SequencerConfigAttr acquisition cannot be disabled while input "
+                "connections are active"
+            )
+        if combined_alias is False and (occupied_inputs or acquisition_paths):
             raise VerifyException(
                 "SequencerConfigAttr acquisition cannot be disabled while input "
                 "connections are active"
@@ -1134,6 +1206,13 @@ class ModuleConfigAttr(ConfigAttr):
                         f"[{oscillator_spec.min_frequency_hz}, "
                         f"{oscillator_spec.max_frequency_hz}] Hz in "
                         f"{oscillator_spec.frequency_step_hz} Hz steps"
+                    )
+                if not module_spec.supports_local_oscillator_enable and not isinstance(
+                    lo.enable, NoneAttr
+                ):
+                    raise VerifyException(
+                        f"{self.kind.data.value} does not support local oscillator "
+                        "enable configuration"
                     )
 
         for lane_name, lane_ids, limit in (
@@ -1216,11 +1295,13 @@ def make_sequencer_config(
     carrier_frequency: float | None = None,
     connections: Iterable[ConnectionAttr] | None = None,
     output_path_connections: Iterable[OutputPathConnectionAttr] | None = None,
+    boolean_output_connections: Iterable[BooleanOutputConnectionAttr] | None = None,
     acquisition_path_connections: Iterable[AcquisitionPathConnectionAttr] | None = None,
     acquisition_enabled: bool | None = None,
     disabled_outputs: Iterable[int] | None = None,
     disabled_acquisition_paths: Iterable[SignalPath] | None = None,
     acquisition_disabled: bool | None = None,
+    combined_acquisition_alias: bool | None = None,
     local_oscillator_id: str | None = None,
     enable_sync: bool | None = None,
     nco: NcoConfigAttr | None = None,
@@ -1237,11 +1318,13 @@ def make_sequencer_config(
     :param carrier_frequency: Carrier frequency in Hz.
     :param connections: Connections accepted by ``connect_sequencer``.
     :param output_path_connections: Physical outputs selected for output signal paths.
+    :param boolean_output_connections: Exact RF boolean aliases for physical outputs.
     :param acquisition_path_connections: Physical inputs selected for acquisition paths.
     :param acquisition_enabled: Explicit acquisition enable state.
     :param disabled_outputs: Physical outputs explicitly configured as off.
     :param disabled_acquisition_paths: Acquisition paths explicitly configured as off.
     :param acquisition_disabled: Whether the combined acquisition path is off.
+    :param combined_acquisition_alias: Exact RF boolean alias for ``connect_acq``.
     :param local_oscillator_id: Local oscillator mixed with the sequencer NCO.
     :param enable_sync: Whether the sequencer joins party-line synchronisation.
     :param nco: Numerically controlled oscillator configuration.
@@ -1258,11 +1341,13 @@ def make_sequencer_config(
         carrier_frequency=carrier_frequency,
         connections=connections,
         output_path_connections=output_path_connections,
+        boolean_output_connections=boolean_output_connections,
         acquisition_path_connections=acquisition_path_connections,
         acquisition_enabled=acquisition_enabled,
         disabled_outputs=disabled_outputs,
         disabled_acquisition_paths=disabled_acquisition_paths,
         acquisition_disabled=acquisition_disabled,
+        combined_acquisition_alias=combined_acquisition_alias,
         local_oscillator_id=local_oscillator_id,
         enable_sync=enable_sync,
         nco=nco,

@@ -145,6 +145,28 @@ class OutputPathConnection:
 
 
 @dataclass(frozen=True, slots=True)
+class BooleanOutputConnection:
+    """One RF output configured through the Qblox boolean alias.
+
+    :ivar output_id: Physical RF output configured by the ``outN`` field.
+    :ivar enabled: Exact boolean value supplied to ``connect_outN``.
+    """
+
+    output_id: int
+    enabled: bool
+
+    def __post_init__(self) -> None:
+        if (
+            isinstance(self.output_id, bool)
+            or not isinstance(self.output_id, int)
+            or self.output_id < 0
+        ):
+            raise ValueError("A Qblox boolean output connection needs a physical output")
+        if not isinstance(self.enabled, bool):
+            raise ValueError("A Qblox boolean output connection needs a boolean value")
+
+
+@dataclass(frozen=True, slots=True)
 class AcquisitionPathConnection:
     """One physical input bound to a sequencer acquisition path.
 
@@ -170,25 +192,32 @@ class SequencerConnection:
 
     :ivar connections: Ordered entries of the source ``bulk_value`` list.
     :ivar output_path_connections: Output path selected for each physical output.
+    :ivar boolean_output_connections: Exact RF boolean aliases selected for outputs.
     :ivar acquisition_path_connections: Physical input selected for each acquisition path.
     :ivar acquisition_enabled: Explicit acquisition enable supplied as a boolean.
     :ivar disabled_outputs: Physical outputs the source configures as ``off``.
     :ivar disabled_acquisition_paths: Acquisition paths the source configures as ``off``.
     :ivar acquisition_disabled: Whether the combined acquisition path is ``off``.
+    :ivar combined_acquisition_alias: Exact RF boolean alias for ``connect_acq``.
     """
 
     connections: tuple[PortConnection, ...] = ()
     output_path_connections: tuple[OutputPathConnection, ...] = ()
+    boolean_output_connections: tuple[BooleanOutputConnection, ...] = ()
     acquisition_path_connections: tuple[AcquisitionPathConnection, ...] = ()
     acquisition_enabled: bool | None = None
     disabled_outputs: frozenset[int] = frozenset()
     disabled_acquisition_paths: frozenset[SignalPath] = frozenset()
     acquisition_disabled: bool | None = None
+    combined_acquisition_alias: bool | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "connections", tuple(self.connections))
         object.__setattr__(
             self, "output_path_connections", tuple(self.output_path_connections)
+        )
+        object.__setattr__(
+            self, "boolean_output_connections", tuple(self.boolean_output_connections)
         )
         object.__setattr__(
             self,
@@ -201,12 +230,33 @@ class SequencerConnection:
             "disabled_acquisition_paths",
             frozenset(self.disabled_acquisition_paths),
         )
-        output_ids = [connection.output_id for connection in self.output_path_connections]
+        output_ids = [
+            connection.output_id
+            for connection in (
+                *self.output_path_connections,
+                *self.boolean_output_connections,
+            )
+        ]
         if len(set(output_ids)) != len(output_ids):
             raise ValueError("A Qblox output may select only one sequencer path")
+        if set(output_ids) & self.disabled_outputs:
+            raise ValueError("A Qblox output may have only one direct connection value")
         paths = [connection.path for connection in self.acquisition_path_connections]
         if len(set(paths)) != len(paths):
             raise ValueError("A Qblox acquisition path may select only one input")
+        if self.combined_acquisition_alias is not None and not isinstance(
+            self.combined_acquisition_alias, bool
+        ):
+            raise ValueError("A Qblox combined acquisition alias must be boolean")
+        if self.combined_acquisition_alias is not None and (
+            self.acquisition_path_connections
+            or self.disabled_acquisition_paths
+            or self.acquisition_disabled
+        ):
+            raise ValueError(
+                "A Qblox combined acquisition path may have only one direct "
+                "connection value"
+            )
 
     @property
     def output_ids(self) -> frozenset[int]:
@@ -220,6 +270,7 @@ class SequencerConnection:
             )
         }
         bound.update(connection.output_id for connection in self.output_path_connections)
+        bound.update(connection.output_id for connection in self.boolean_output_connections)
         return frozenset(bound | self.disabled_outputs)
 
     @property
@@ -234,6 +285,8 @@ class SequencerConnection:
         bound.update(
             connection.input_id for connection in self.acquisition_path_connections
         )
+        if self.combined_acquisition_alias is not None:
+            bound.add(0)
         return frozenset(bound)
 
     @property
@@ -251,6 +304,7 @@ class SequencerConnection:
             self.input_ids
             or self.acquisition_enabled is not None
             or self.acquisition_disabled is not None
+            or self.combined_acquisition_alias is not None
             or self.disabled_acquisition_paths
         )
 

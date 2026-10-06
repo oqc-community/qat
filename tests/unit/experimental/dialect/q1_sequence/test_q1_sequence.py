@@ -19,6 +19,7 @@ class TestDialectRegistration:
             "q1_sequence.weight",
             "q1_sequence.acquisition",
             "q1_sequence.acquisition_path_connection",
+            "q1_sequence.boolean_output_connection",
             "q1_sequence.connection",
             "q1_sequence.direction_kind",
             "q1_sequence.nco_config",

@@ -23,6 +23,7 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
 )
 from qat.experimental.system_data.hardware.qblox.configuration import (
     AcquisitionPathConnection,
+    BooleanOutputConnection,
     OutputPathConnection,
     PortConnection,
     QbloxSequencerConfiguration,
@@ -184,12 +185,35 @@ def test_supplied_sequencer_values_reach_their_q1_attributes():
     )
 
 
-def test_supplied_routing_is_preserved_in_full():
+def test_qrc_omits_unsupported_configuration_fields():
+    binding = _resolve(
+        [
+            supplied(
+                [
+                    sequencer(
+                        0,
+                        inputs=[0],
+                        values={
+                            "demod_en_acq": True,
+                            "awg": {"gain_path0": 0.5, "mod_en": True},
+                        },
+                    )
+                ],
+                module_values={"lo": {"out0_in0_en": True}},
+            )
+        ],
+        kind=QbloxModuleKind.qrc,
+    )["port-0-channel-0"]
+
+    config = binding.sequencer_config
+    assert config.awg == AwgConfigAttr(gain_path0=0.5)
+    assert isinstance(config.acquire, NoneAttr)
+    [oscillator] = binding.module_config.local_oscillators
+    assert isinstance(oscillator.enable, NoneAttr)
+
+
+def test_supplied_direct_routing_is_preserved_in_full():
     connection = SequencerConnection(
-        connections=(
-            PortConnection(direction=DirectionKind.output, port_ids=(0,)),
-            PortConnection(direction=DirectionKind.input, port_ids=(0,)),
-        ),
         output_path_connections=(OutputPathConnection(output_id=0, path=SignalPath.i),),
         acquisition_path_connections=(
             AcquisitionPathConnection(input_id=0, path=SignalPath.q),
@@ -205,10 +229,7 @@ def test_supplied_routing_is_preserved_in_full():
     )["port-0-channel-0"]
 
     config = binding.sequencer_config
-    assert list(config.connections) == [
-        ConnectionAttr(DirectionKind.output, [0]),
-        ConnectionAttr(DirectionKind.input, [0]),
-    ]
+    assert list(config.connections) == []
     assert list(config.output_path_connections) == [
         OutputPathConnectionAttr(0, SignalPath.i)
     ]
@@ -264,6 +285,82 @@ def test_scope_selection_preserves_the_selected_sequencer_index():
     assert scope.sequencer_select.data == 4
 
 
+def test_qrc_second_input_scope_uses_paths_two_and_three():
+    binding = _resolve(
+        [
+            supplied(
+                [sequencer(6, inputs=[1])],
+                module_values={
+                    "scope_acq": {
+                        "sequencer_select": 6,
+                        "avg_mode_en_path2": True,
+                        "avg_mode_en_path3": True,
+                    }
+                },
+            )
+        ],
+        kind=QbloxModuleKind.qrc,
+        oscillator_frequency=None,
+        carrier_frequency=-107_000_000,
+    )["port-0-channel-0"]
+
+    scope = binding.module_config.inputs.data[0].scope_acquire
+    assert scope.sequencer_select.data == 6
+    assert bool(scope.enable_average_mode.value.data)
+
+
+def test_qrc_scope_rejects_conflicting_iq_path_average_modes():
+    with pytest.raises(ValueError, match="conflicting averaging modes"):
+        _resolve(
+            [
+                supplied(
+                    [sequencer(6, inputs=[1])],
+                    module_values={
+                        "scope_acq": {
+                            "sequencer_select": 6,
+                            "avg_mode_en_path2": True,
+                            "avg_mode_en_path3": False,
+                        }
+                    },
+                )
+            ],
+            kind=QbloxModuleKind.qrc,
+            oscillator_frequency=None,
+            carrier_frequency=-107_000_000,
+        )
+
+
+@pytest.mark.parametrize(
+    ("configured_path", "enable_average_mode"),
+    [
+        pytest.param(2, True, id="i-path-enabled"),
+        pytest.param(3, False, id="q-path-disabled"),
+    ],
+)
+def test_qrc_scope_applies_one_configured_average_mode_to_iq_pair(
+    configured_path, enable_average_mode
+):
+    binding = _resolve(
+        [
+            supplied(
+                [sequencer(6, inputs=[1])],
+                module_values={
+                    "scope_acq": {
+                        "sequencer_select": 6,
+                        f"avg_mode_en_path{configured_path}": enable_average_mode,
+                    }
+                },
+            )
+        ],
+        kind=QbloxModuleKind.qrc,
+        oscillator_frequency=None,
+        carrier_frequency=-107_000_000,
+    )["port-0-channel-0"]
+
+    scope = binding.module_config.inputs.data[0].scope_acquire
+    assert bool(scope.enable_average_mode.value.data) is enable_average_mode
+
+
 def test_scope_selection_is_shared_faithfully_by_every_binding_of_a_module():
     bindings = _resolve(
         [
@@ -305,6 +402,22 @@ def test_a_scope_selection_naming_a_non_acquiring_sequencer_is_rejected(kind, se
             carrier_frequency=(
                 200_000_000 if kind is QbloxModuleKind.qrc else 4_200_000_000
             ),
+        )
+
+
+@pytest.mark.parametrize("path", [4, 9])
+def test_qrc_rejects_scope_paths_outside_its_four_physical_paths(path):
+    with pytest.raises(ValueError, match="unsupported QRC scope acquisition fields"):
+        _resolve(
+            [
+                supplied(
+                    [sequencer(0, outputs=[0], inputs=[0])],
+                    module_values={"scope_acq": {f"avg_mode_en_path{path}": True}},
+                )
+            ],
+            kind=QbloxModuleKind.qrc,
+            oscillator_frequency=None,
+            carrier_frequency=200_000_000,
         )
 
 
@@ -505,7 +618,7 @@ def test_supplied_mixer_correction_must_match_the_calibration():
     ("kind", "outputs", "inputs", "index", "expected"),
     [
         (QbloxModuleKind.qcm_rf, [2], [], 0, "routes to output 2, absent on qcm_rf"),
-        (QbloxModuleKind.qcm_rf, [0], [0], 0, "routes from input 0, absent on qcm_rf"),
+        (QbloxModuleKind.qcm_rf, [0], [0], 0, "is not acquisition-capable"),
         (QbloxModuleKind.qrc, [2], [], 1, "cannot drive output 2 on qrc"),
         (QbloxModuleKind.qrc, [2], [0], 8, "cannot read input 0 on qrc"),
         (QbloxModuleKind.qcm_rf, [0], [], 6, "is outside the 6 sequencers"),
@@ -817,7 +930,7 @@ def test_unrepresentable_module_values_are_rejected():
                     OutputPathConnection(output_id=0, path=SignalPath.i),
                 )
             ),
-            "drives an output with the combined 'IQ' path only",
+            "supplies unsupported output paths",
             id="output-i-path",
         ),
         pytest.param(
@@ -826,7 +939,7 @@ def test_unrepresentable_module_values_are_rejected():
                     OutputPathConnection(output_id=0, path=SignalPath.q),
                 )
             ),
-            "drives an output with the combined 'IQ' path only",
+            "supplies unsupported output paths",
             id="output-q-path",
         ),
         pytest.param(
@@ -835,7 +948,7 @@ def test_unrepresentable_module_values_are_rejected():
                     AcquisitionPathConnection(input_id=0, path=SignalPath.i),
                 )
             ),
-            "selects one input for its whole acquisition path",
+            "supplies unsupported acquisition paths",
             id="acquisition-i-path",
         ),
         pytest.param(
@@ -845,7 +958,7 @@ def test_unrepresentable_module_values_are_rejected():
                 ),
                 disabled_acquisition_paths=frozenset({SignalPath.q}),
             ),
-            "selects one input for its whole acquisition path",
+            "supplies unsupported acquisition paths",
             id="disabled-q-path",
         ),
     ],
@@ -865,7 +978,157 @@ def test_rf_modules_reject_component_specific_routing(connection, expected, kind
         )
 
 
-def test_rf_modules_accept_combined_iq_and_acquisition_routing():
+def test_accepts_compatible_mixed_bulk_and_direct_routing():
+    connection = SequencerConnection(
+        connections=(PortConnection(direction=DirectionKind.output, port_ids=(0,)),),
+        output_path_connections=(OutputPathConnection(output_id=0, path=SignalPath.i),),
+    )
+
+    _resolve(
+        [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+        kind=QbloxModuleKind.qcm,
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
+    )
+
+
+def test_accepts_non_overlapping_bulk_output_and_direct_acquisition():
+    connection = SequencerConnection(
+        connections=(PortConnection(direction=DirectionKind.output, port_ids=(0,)),),
+        acquisition_path_connections=(
+            AcquisitionPathConnection(input_id=0, path=SignalPath.i),
+        ),
+    )
+
+    _resolve(
+        [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+        kind=QbloxModuleKind.qrm,
+        oscillator_frequency=None,
+        carrier_frequency=200_000_000,
+    )
+
+
+def test_rejects_conflicting_mixed_bulk_and_direct_routing():
+    connection = SequencerConnection(
+        connections=(PortConnection(direction=DirectionKind.output, port_ids=(0,)),),
+        output_path_connections=(OutputPathConnection(output_id=0, path=SignalPath.q),),
+    )
+
+    with pytest.raises(ValueError, match="conflicting bulk and direct states"):
+        _resolve(
+            [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+            kind=QbloxModuleKind.qcm,
+            oscillator_frequency=None,
+            carrier_frequency=200_000_000,
+        )
+
+
+@pytest.mark.parametrize(
+    ("acquisition_paths", "disabled_paths"),
+    [
+        (
+            (AcquisitionPathConnection(input_id=0, path=SignalPath.iq),),
+            frozenset(),
+        ),
+        ((), frozenset({SignalPath.iq})),
+    ],
+)
+def test_rejects_bulk_acquisition_with_conflicting_direct_path(
+    acquisition_paths, disabled_paths
+):
+    connection = SequencerConnection(
+        connections=(PortConnection(direction=DirectionKind.input, port_ids=(0, 1)),),
+        acquisition_path_connections=acquisition_paths,
+        disabled_acquisition_paths=disabled_paths,
+    )
+
+    with pytest.raises(ValueError, match="conflicting bulk and direct states"):
+        _resolve(
+            [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+            kind=QbloxModuleKind.qrm,
+            oscillator_frequency=None,
+            carrier_frequency=200_000_000,
+        )
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        QbloxModuleKind.qcm_rf,
+        QbloxModuleKind.qrm_rf,
+        QbloxModuleKind.qrc,
+    ],
+)
+@pytest.mark.parametrize("enabled", [True, False])
+def test_rf_modules_accept_boolean_output_aliases(kind, enabled):
+    connection = SequencerConnection(
+        boolean_output_connections=(BooleanOutputConnection(0, enabled),),
+    )
+
+    binding = _resolve(
+        [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+        kind=kind,
+        oscillator_frequency=(None if kind is QbloxModuleKind.qrc else 4_000_000_000),
+        carrier_frequency=(200_000_000 if kind is QbloxModuleKind.qrc else 4_200_000_000),
+    )["port-0-channel-0"]
+
+    [translated] = binding.sequencer_config.boolean_output_connections
+    assert bool(translated.enabled.value.data) is enabled
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qcm, QbloxModuleKind.qrm])
+def test_baseband_modules_reject_boolean_output_aliases(kind):
+    connection = SequencerConnection(
+        boolean_output_connections=(BooleanOutputConnection(0, True),),
+    )
+
+    with pytest.raises(ValueError, match="boolean output aliases"):
+        _resolve(
+            [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+            kind=kind,
+            oscillator_frequency=None,
+            carrier_frequency=200_000_000,
+        )
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qrm_rf, QbloxModuleKind.qrc])
+@pytest.mark.parametrize("enabled", [True, False])
+def test_rf_readout_modules_accept_boolean_acquisition_aliases(kind, enabled):
+    connection = SequencerConnection(combined_acquisition_alias=enabled)
+
+    binding = _resolve(
+        [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+        kind=kind,
+        oscillator_frequency=(None if kind is QbloxModuleKind.qrc else 4_000_000_000),
+        carrier_frequency=(200_000_000 if kind is QbloxModuleKind.qrc else 4_200_000_000),
+    )["port-0-channel-0"]
+
+    alias = binding.sequencer_config.combined_acquisition_alias
+    assert bool(alias.value.data) is enabled
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [QbloxModuleKind.qcm, QbloxModuleKind.qrm, QbloxModuleKind.qcm_rf],
+)
+def test_other_modules_reject_boolean_acquisition_aliases(kind):
+    connection = SequencerConnection(combined_acquisition_alias=True)
+
+    with pytest.raises(ValueError, match="acquisition"):
+        _resolve(
+            [supplied([QbloxSequencerConfiguration(index=0, connection=connection)])],
+            kind=kind,
+            oscillator_frequency=(
+                4_000_000_000 if kind is QbloxModuleKind.qcm_rf else None
+            ),
+            carrier_frequency=(
+                4_200_000_000 if kind is QbloxModuleKind.qcm_rf else 200_000_000
+            ),
+        )
+
+
+@pytest.mark.parametrize("kind", [QbloxModuleKind.qrm_rf, QbloxModuleKind.qrc])
+def test_rf_modules_accept_combined_iq_and_acquisition_routing(kind):
     bank = [
         QbloxSequencerConfiguration(
             index=0,
@@ -880,7 +1143,12 @@ def test_rf_modules_accept_combined_iq_and_acquisition_routing():
         )
     ]
 
-    binding = _resolve([supplied(bank)], kind=QbloxModuleKind.qrm_rf)["port-0-channel-0"]
+    binding = _resolve(
+        [supplied(bank)],
+        kind=kind,
+        oscillator_frequency=(None if kind is QbloxModuleKind.qrc else 4_000_000_000),
+        carrier_frequency=(200_000_000 if kind is QbloxModuleKind.qrc else 4_200_000_000),
+    )["port-0-channel-0"]
 
     assert list(binding.sequencer_config.output_path_connections) == [
         OutputPathConnectionAttr(0, SignalPath.iq)

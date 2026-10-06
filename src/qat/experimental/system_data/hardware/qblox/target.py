@@ -23,6 +23,7 @@ from frozendict import frozendict
 from qat.experimental.system_data.hardware.qblox.models import (
     QbloxModuleKind,
     QbloxModuleLocation,
+    SignalPath,
 )
 
 
@@ -38,6 +39,14 @@ class Q1SequencerFeature(str, Enum):
 
     awg = "awg"
     acquisition = "acquisition"
+
+
+class AcquisitionConnectionMode(str, Enum):
+    """Acquisition connection parameters exposed by one module kind."""
+
+    none = "none"
+    components = "components"
+    combined = "combined"
 
 
 @dataclass(frozen=True, slots=True)
@@ -143,6 +152,11 @@ class ModuleSpec:
     marker_count: int = 0
     acquisition_memory_bins: int | None = None
     supports_mixer_correction: bool = True
+    supports_local_oscillator_enable: bool = True
+    supports_awg_modulation: bool = True
+    supports_acquisition_demodulation: bool = True
+    output_path_components: frozenset[SignalPath] = frozenset({SignalPath.i, SignalPath.q})
+    acquisition_connection_mode: AcquisitionConnectionMode = AcquisitionConnectionMode.none
     is_rf: bool = False
     """Whether the module carries an RF front end.
 
@@ -160,6 +174,8 @@ class ModuleSpec:
             self.input_channel_map, frozendict
         ):
             raise TypeError("Module channel maps must be immutable frozendict values")
+        if not isinstance(self.output_path_components, frozenset):
+            raise TypeError("Module output path components must be an immutable frozenset")
         if any(
             not isinstance(indices, tuple)
             for channel_map in (self.output_channel_map, self.input_channel_map)
@@ -195,6 +211,13 @@ class ModuleSpec:
             raise ValueError(
                 f"{self.kind.value} acquisition memory must match its sequencer types"
             )
+        if has_readout != (
+            self.acquisition_connection_mode is not AcquisitionConnectionMode.none
+        ):
+            raise ValueError(
+                f"{self.kind.value} acquisition connection mode must match its "
+                "sequencer types"
+            )
         if self.is_rf != (self.local_oscillator is not None):
             raise ValueError(
                 "RF module classification must match local oscillator specification"
@@ -214,6 +237,28 @@ class ModuleSpec:
             for index, sequencer_type in enumerate(self.sequencers)
             if type_ is None or sequencer_type is type_
         )
+
+    @property
+    def acquisition_path_components(self) -> frozenset[SignalPath]:
+        """Return acquisition path values accepted by direct configuration."""
+
+        return {
+            AcquisitionConnectionMode.none: frozenset(),
+            AcquisitionConnectionMode.components: frozenset(
+                {SignalPath.i, SignalPath.q, SignalPath.iq}
+            ),
+            AcquisitionConnectionMode.combined: frozenset({SignalPath.iq}),
+        }[self.acquisition_connection_mode]
+
+    def acquisition_components(self, path: SignalPath) -> tuple[SignalPath, ...]:
+        """Return component API fields represented by an acquisition path."""
+
+        if (
+            self.acquisition_connection_mode is AcquisitionConnectionMode.components
+            and path is SignalPath.iq
+        ):
+            return SignalPath.i, SignalPath.q
+        return (path,)
 
 
 @dataclass(frozen=True, slots=True)
@@ -381,6 +426,7 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 output_channel_map=frozendict(
                     {output: tuple(range(6)) for output in range(2)}
                 ),
+                output_path_components=frozenset({SignalPath.iq}),
                 marker_count=2,
             ),
             QbloxModuleKind.qrm: ModuleSpec(
@@ -396,6 +442,7 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 ),
                 marker_count=4,
                 acquisition_memory_bins=3_000_000,
+                acquisition_connection_mode=AcquisitionConnectionMode.components,
             ),
             QbloxModuleKind.qrm_rf: ModuleSpec(
                 kind=QbloxModuleKind.qrm_rf,
@@ -409,8 +456,10 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 input_count=1,
                 output_channel_map=frozendict({0: tuple(range(6))}),
                 input_channel_map=frozendict({0: tuple(range(6))}),
+                output_path_components=frozenset({SignalPath.iq}),
                 marker_count=2,
                 acquisition_memory_bins=3_000_000,
+                acquisition_connection_mode=AcquisitionConnectionMode.combined,
             ),
             QbloxModuleKind.qrc: ModuleSpec(
                 kind=QbloxModuleKind.qrc,
@@ -436,9 +485,14 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 input_channel_map=frozendict(
                     {input_: tuple(range(8)) for input_ in range(2)}
                 ),
+                output_path_components=frozenset({SignalPath.iq}),
                 marker_count=1,
                 acquisition_memory_bins=7_000_000,
+                acquisition_connection_mode=AcquisitionConnectionMode.combined,
                 supports_mixer_correction=False,
+                supports_local_oscillator_enable=False,
+                supports_awg_modulation=False,
+                supports_acquisition_demodulation=False,
             ),
         }
     ),

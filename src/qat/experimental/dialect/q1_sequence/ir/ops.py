@@ -29,9 +29,14 @@ from qat.experimental.dialect.q1_sequence.ir.imm_desc import (
     SequencerIndexAttr,
     SlotIndexAttr,
 )
-from qat.experimental.system_data.hardware.qblox.models import QbloxModuleLocation
+from qat.experimental.system_data.hardware.qblox.models import (
+    QbloxModuleLocation,
+    SignalPath,
+)
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
+    AcquisitionConnectionMode,
+    ModuleSpec,
     Q1SequencerFeature,
 )
 
@@ -343,6 +348,22 @@ class SequenceOp(IRDLOperation):
             raise VerifyException(
                 f"{module_config.kind.data.value} does not support mixer correction"
             )
+        if (
+            not module_spec.supports_awg_modulation
+            and not isinstance(self.sequencer_config.awg, NoneAttr)
+            and not isinstance(self.sequencer_config.awg.mod_en, NoneAttr)
+        ):
+            raise VerifyException(
+                f"{module_config.kind.data.value} does not support AWG modulation"
+            )
+        if (
+            not module_spec.supports_acquisition_demodulation
+            and not isinstance(self.sequencer_config.acquire, NoneAttr)
+            and not isinstance(self.sequencer_config.acquire.demod_en_acq, NoneAttr)
+        ):
+            raise VerifyException(
+                f"{module_config.kind.data.value} does not support acquisition demodulation"
+            )
         self._verify_connections(module_config)
 
     def _verify_connections(self, module_config: ModuleConfigAttr) -> None:
@@ -353,6 +374,7 @@ class SequenceOp(IRDLOperation):
 
         sequencer_config = self.sequencer_config
         seq_idx = self.seq_idx.data
+        module_spec = DEFAULT_QBLOX_TARGET.module_spec(module_config.kind.data)
         configured_outputs = {item.output_id.data for item in module_config.outputs}
         configured_inputs = {item.input_id.data for item in module_config.inputs}
         connections = (
@@ -360,6 +382,16 @@ class SequenceOp(IRDLOperation):
             if isinstance(sequencer_config.connections, ArrayAttr)
             else ()
         )
+        complex_connections = sorted(
+            connection.connection
+            for connection in connections
+            if module_spec.is_rf and len(connection.port_ids) > 1
+        )
+        if complex_connections:
+            raise VerifyException(
+                f"{module_config.kind.data.value} accepts only one I/O port per "
+                f"connection; got {complex_connections!r}"
+            )
         for connection in connections:
             missing_outputs = {
                 output_id
@@ -440,6 +472,27 @@ class SequenceOp(IRDLOperation):
             if isinstance(sequencer_config.output_path_connections, ArrayAttr)
             else ()
         )
+        boolean_output_connections = (
+            sequencer_config.boolean_output_connections
+            if isinstance(sequencer_config.boolean_output_connections, ArrayAttr)
+            else ()
+        )
+        if boolean_output_connections and not module_spec.is_rf:
+            raise VerifyException(
+                f"{module_config.kind.data.value} does not support boolean output aliases"
+            )
+        component_outputs = sorted(
+            f"out{connection.output_id.data}={connection.path.data.value}"
+            for connection in output_path_connections
+            if not isinstance(connection.path, NoneAttr)
+            and connection.path.data not in module_spec.output_path_components
+        )
+        if component_outputs:
+            allowed = sorted(path.value for path in module_spec.output_path_components)
+            raise VerifyException(
+                f"{module_config.kind.data.value} does not support output paths "
+                f"{component_outputs!r}; expected {allowed!r}"
+            )
         for connection in output_path_connections:
             output_id = connection.output_id.data
             if output_id not in configured_outputs:
@@ -455,11 +508,62 @@ class SequenceOp(IRDLOperation):
                     f"{module_config.kind.data.value} sequencer {seq_idx} cannot drive "
                     f"output {output_id}"
                 )
+        for connection in boolean_output_connections:
+            output_id = connection.output_id.data
+            if output_id not in configured_outputs:
+                raise VerifyException(
+                    f"SequenceOp output {output_id} is absent from the configuration "
+                    f"of module ({module_config.instrument_id.data!r}, "
+                    f"{module_config.slot_idx.data})"
+                )
+            if seq_idx not in DEFAULT_QBLOX_TARGET.output_sequencers(
+                module_config.kind.data, output_id
+            ):
+                raise VerifyException(
+                    f"{module_config.kind.data.value} sequencer {seq_idx} cannot drive "
+                    f"output {output_id}"
+                )
 
         acquisition_path_connections = (
             sequencer_config.acquisition_path_connections
             if isinstance(sequencer_config.acquisition_path_connections, ArrayAttr)
             else ()
+        )
+        disabled_acquisition_paths = (
+            sequencer_config.disabled_acquisition_paths
+            if isinstance(sequencer_config.disabled_acquisition_paths, ArrayAttr)
+            else ()
+        )
+        component_paths = sorted(
+            {
+                connection.path.data.value
+                for connection in acquisition_path_connections
+                if connection.path.data not in module_spec.acquisition_path_components
+            }
+            | {
+                path.data.value
+                for path in disabled_acquisition_paths
+                if path.data not in module_spec.acquisition_path_components
+            }
+        )
+        if component_paths:
+            allowed = sorted(path.value for path in module_spec.acquisition_path_components)
+            raise VerifyException(
+                f"{module_config.kind.data.value} does not support acquisition paths "
+                f"{component_paths!r}; expected {allowed!r}"
+            )
+        if (
+            not isinstance(sequencer_config.combined_acquisition_alias, NoneAttr)
+            and module_spec.acquisition_connection_mode
+            is not AcquisitionConnectionMode.combined
+        ):
+            raise VerifyException(
+                f"{module_config.kind.data.value} does not support a boolean "
+                "acquisition alias"
+            )
+        _verify_mixed_connection_compatibility(
+            sequencer_config,
+            module_spec,
         )
         for connection in acquisition_path_connections:
             input_id = connection.input_id.data
@@ -476,6 +580,18 @@ class SequenceOp(IRDLOperation):
                     f"{module_config.kind.data.value} sequencer {seq_idx} cannot read "
                     f"acquisition input {input_id}"
                 )
+        if not isinstance(sequencer_config.combined_acquisition_alias, NoneAttr):
+            if 0 not in configured_inputs:
+                raise VerifyException(
+                    "SequenceOp boolean acquisition alias requires configured input 0"
+                )
+            if seq_idx not in DEFAULT_QBLOX_TARGET.input_sequencers(
+                module_config.kind.data, 0
+            ):
+                raise VerifyException(
+                    f"{module_config.kind.data.value} sequencer {seq_idx} cannot read "
+                    "acquisition input 0"
+                )
 
         oscillator_id = sequencer_config.local_oscillator_id
         if isinstance(oscillator_id, StringAttr) and all(
@@ -484,6 +600,100 @@ class SequenceOp(IRDLOperation):
         ):
             raise VerifyException(
                 f"SequenceOp references unknown local oscillator '{oscillator_id.data}'"
+            )
+
+
+def _verify_mixed_connection_compatibility(
+    sequencer_config: SequencerConfigAttr,
+    module_spec: ModuleSpec,
+) -> None:
+    """Reject bulk and direct routing only when their states disagree."""
+
+    connections = (
+        sequencer_config.connections
+        if isinstance(sequencer_config.connections, ArrayAttr)
+        else ()
+    )
+    output_path_connections = (
+        sequencer_config.output_path_connections
+        if isinstance(sequencer_config.output_path_connections, ArrayAttr)
+        else ()
+    )
+    boolean_output_connections = (
+        sequencer_config.boolean_output_connections
+        if isinstance(sequencer_config.boolean_output_connections, ArrayAttr)
+        else ()
+    )
+    acquisition_path_connections = (
+        sequencer_config.acquisition_path_connections
+        if isinstance(sequencer_config.acquisition_path_connections, ArrayAttr)
+        else ()
+    )
+    disabled_acquisition_paths = (
+        sequencer_config.disabled_acquisition_paths
+        if isinstance(sequencer_config.disabled_acquisition_paths, ArrayAttr)
+        else ()
+    )
+    bulk_outputs: dict[int, SignalPath] = {}
+    bulk_acquisition: dict[SignalPath, int] = {}
+    for entry in connections:
+        if module_spec.is_rf:
+            for output_id in entry.output_ids:
+                bulk_outputs[output_id] = SignalPath.iq
+            for input_id in entry.input_ids:
+                bulk_acquisition[SignalPath.iq] = input_id
+            continue
+        for path, output_id in zip(
+            (SignalPath.i, SignalPath.q), entry.output_ids, strict=False
+        ):
+            bulk_outputs[output_id] = path
+        for path, input_id in zip(
+            (SignalPath.i, SignalPath.q), entry.input_ids, strict=False
+        ):
+            bulk_acquisition[path] = input_id
+
+    direct_outputs: dict[int, SignalPath | bool] = {
+        entry.output_id.data: entry.path.data
+        for entry in output_path_connections
+        if not isinstance(entry.path, NoneAttr)
+    }
+    direct_outputs.update(
+        {
+            entry.output_id.data: bool(entry.enabled.value.data)
+            for entry in boolean_output_connections
+        }
+    )
+    for output_id, direct in direct_outputs.items():
+        if output_id not in bulk_outputs:
+            continue
+        if not (
+            (direct is True and bulk_outputs[output_id] is SignalPath.iq)
+            or direct is bulk_outputs[output_id]
+        ):
+            raise VerifyException(
+                f"SequenceOp gives output {output_id} conflicting bulk and direct states"
+            )
+
+    direct_acquisition = {
+        component: entry.input_id.data
+        for entry in acquisition_path_connections
+        for component in module_spec.acquisition_components(entry.path.data)
+    }
+    direct_acquisition.update(
+        {
+            component: -1
+            for path in disabled_acquisition_paths
+            for component in module_spec.acquisition_components(path.data)
+        }
+    )
+    alias = sequencer_config.combined_acquisition_alias
+    if not isinstance(alias, NoneAttr):
+        direct_acquisition[SignalPath.iq] = 0 if bool(alias.value.data) else -1
+    for path, direct in direct_acquisition.items():
+        if path in bulk_acquisition and direct != bulk_acquisition[path]:
+            raise VerifyException(
+                f"SequenceOp gives acquisition path {path.value} conflicting bulk and "
+                "direct states"
             )
 
 

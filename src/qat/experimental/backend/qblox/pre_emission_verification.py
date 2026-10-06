@@ -303,19 +303,33 @@ class _QbloxPreEmissionVerifier:
             acquisition_explicitly_disabled = not isinstance(
                 sequencer_config.acquisition_enabled, NoneAttr
             ) and not bool(sequencer_config.acquisition_enabled.value.data)
+            boolean_acquisition_disabled = not isinstance(
+                sequencer_config.combined_acquisition_alias, NoneAttr
+            ) and not bool(sequencer_config.combined_acquisition_alias.value.data)
             if has_acquisition and (
-                acquisition_disabled or acquisition_explicitly_disabled
+                acquisition_disabled
+                or acquisition_explicitly_disabled
+                or boolean_acquisition_disabled
             ):
                 raise PassFailedException(
                     f"Sequence {sequence.channel_id.data!r} uses acquisitions while its "
                     "acquisition path is explicitly disabled."
                 )
             has_acquisition_route = (
-                isinstance(sequencer_config.acquisition_path_connections, ArrayAttr)
-                and bool(sequencer_config.acquisition_path_connections)
-            ) or (
-                isinstance(sequencer_config.connections, ArrayAttr)
-                and any(connection.input_ids for connection in sequencer_config.connections)
+                (
+                    isinstance(sequencer_config.acquisition_path_connections, ArrayAttr)
+                    and bool(sequencer_config.acquisition_path_connections)
+                )
+                or (
+                    isinstance(sequencer_config.connections, ArrayAttr)
+                    and any(
+                        connection.input_ids for connection in sequencer_config.connections
+                    )
+                )
+                or (
+                    not isinstance(sequencer_config.combined_acquisition_alias, NoneAttr)
+                    and bool(sequencer_config.combined_acquisition_alias.value.data)
+                )
             )
             if has_acquisition and not has_acquisition_route:
                 raise PassFailedException(

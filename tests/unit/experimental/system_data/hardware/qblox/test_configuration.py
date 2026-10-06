@@ -12,6 +12,7 @@ from qat.experimental.system_data.canonical.schema import (
 from qat.experimental.system_data.hardware.qblox.configuration import (
     QBLOX_CONFIGURATION_ATTRIBUTE,
     AcquisitionPathConnection,
+    BooleanOutputConnection,
     OutputPathConnection,
     PortConnection,
     QbloxModuleConfiguration,
@@ -122,6 +123,22 @@ def test_port_connection_renders_the_qblox_connection_string(direction, port_ids
             "may select only one input",
         ),
         (
+            lambda: SequencerConnection(
+                boolean_output_connections=(BooleanOutputConnection(0, False),),
+                disabled_outputs=frozenset({0}),
+            ),
+            "only one direct connection value",
+        ),
+        (
+            lambda: SequencerConnection(
+                acquisition_path_connections=(
+                    AcquisitionPathConnection(input_id=0, path=SignalPath.iq),
+                ),
+                combined_acquisition_alias=True,
+            ),
+            "only one direct connection value",
+        ),
+        (
             lambda: QbloxSequencerConfiguration(index=-1),
             "non-negative integer",
         ),
@@ -220,6 +237,7 @@ def test_untyped_extension_values_are_rejected():
         ),
         SequencerConnection(acquisition_enabled=True),
         SequencerConnection(acquisition_disabled=True),
+        SequencerConnection(combined_acquisition_alias=False),
         SequencerConnection(disabled_acquisition_paths=frozenset({SignalPath.q})),
     ],
 )
@@ -240,6 +258,13 @@ def test_every_acquisition_routing_form_counts_as_acquisition_use(connection):
 )
 def test_output_only_routing_is_not_acquisition_use(connection):
     assert not connection.uses_acquisition
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_combined_acquisition_alias_selects_rf_input_zero(enabled):
+    connection = SequencerConnection(combined_acquisition_alias=enabled)
+
+    assert connection.input_ids == frozenset({0})
 
 
 @pytest.mark.parametrize(

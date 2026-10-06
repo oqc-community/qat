@@ -17,17 +17,19 @@ class ConnectionConfig(BaseModel):
         channel indices. If only one channel is specified,the sequencer operates in real
         mode; if two channels are specified, it operates in complex mode.
     :param out0: Component config of a sequencer's connection to output 0, if any. Possible
-        values are 'I', 'Q', 'IQ', or 'off'
+        values are 'I', 'Q', 'IQ', 'off', True, or False
     :param out1: Component config of a sequencer's connection to output 1, if any. Possible
-        values are 'I', 'Q', 'IQ', or 'off'
+        values are 'I', 'Q', 'IQ', 'off', True, or False
     :param out2: Component config of a sequencer's connection to output 2, if any. Possible
-        values are 'I', 'Q', 'IQ', or 'off'
+        values are 'I', 'Q', 'IQ', 'off', True, or False
     :param out3: Component config of a sequencer's connection to output 3, if any. Possible
-        values are 'I', 'Q', 'IQ', or 'off'
+        values are 'I', 'Q', 'IQ', 'off', True, or False
     :param out4: Component config of a sequencer's connection to output 4, if any. Possible
-        values are 'I', 'Q', 'IQ', or 'off'
+        values are 'I', 'Q', 'IQ', 'off', True, or False
     :param out5: Component config of a sequencer's connection to output 5, if any. Possible
-        values are 'I', 'Q', 'IQ', or 'off'
+        values are 'I', 'Q', 'IQ', 'off', True, or False
+    :param acq: Input connected to the combined acquisition path, if any. Possible values
+        are 'in0', 'in1', 'off', True, or False
     :param acq_I: Input config for the 'I' input of the acquisition path of this sequencer
         is connected to, if any. Possible values are 'in0', 'in1', or 'off'
     :param acq_Q: Input config for the 'Q' input of the acquisition path of this sequencer
@@ -35,13 +37,14 @@ class ConnectionConfig(BaseModel):
     """
 
     bulk_value: list[str] = Field(default_factory=list)
-    out0: str | None = None
-    out1: str | None = None
-    out2: str | None = None
-    out3: str | None = None
-    out4: str | None = None
-    out5: str | None = None
+    out0: str | bool | None = None
+    out1: str | bool | None = None
+    out2: str | bool | None = None
+    out3: str | bool | None = None
+    out4: str | bool | None = None
+    out5: str | bool | None = None
 
+    acq: str | bool | None = None
     acq_I: str | None = None
     acq_Q: str | None = None
 
