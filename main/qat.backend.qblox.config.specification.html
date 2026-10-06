@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.qblox.config.specification module &mdash; qat-compiler 3.0.0.post398.dev20261006015659 documentation</title>
+  <title>qat.backend.qblox.config.specification module &mdash; qat-compiler 3.0.0.post399.dev20261006032935 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -892,17 +892,19 @@ waveform generator to an output, or ‘io’ to do both. &lt;channel&gt; must be
 channel indices. If only one channel is specified,the sequencer operates in real
 mode; if two channels are specified, it operates in complex mode.</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.out0"></span><strong>out0</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.out0">¶</a> – Component config of a sequencer’s connection to output 0, if any. Possible
-values are ‘I’, ‘Q’, ‘IQ’, or ‘off’</p></li>
+values are ‘I’, ‘Q’, ‘IQ’, ‘off’, True, or False</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.out1"></span><strong>out1</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.out1">¶</a> – Component config of a sequencer’s connection to output 1, if any. Possible
-values are ‘I’, ‘Q’, ‘IQ’, or ‘off’</p></li>
+values are ‘I’, ‘Q’, ‘IQ’, ‘off’, True, or False</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.out2"></span><strong>out2</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.out2">¶</a> – Component config of a sequencer’s connection to output 2, if any. Possible
-values are ‘I’, ‘Q’, ‘IQ’, or ‘off’</p></li>
+values are ‘I’, ‘Q’, ‘IQ’, ‘off’, True, or False</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.out3"></span><strong>out3</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.out3">¶</a> – Component config of a sequencer’s connection to output 3, if any. Possible
-values are ‘I’, ‘Q’, ‘IQ’, or ‘off’</p></li>
+values are ‘I’, ‘Q’, ‘IQ’, ‘off’, True, or False</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.out4"></span><strong>out4</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.out4">¶</a> – Component config of a sequencer’s connection to output 4, if any. Possible
-values are ‘I’, ‘Q’, ‘IQ’, or ‘off’</p></li>
+values are ‘I’, ‘Q’, ‘IQ’, ‘off’, True, or False</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.out5"></span><strong>out5</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.out5">¶</a> – Component config of a sequencer’s connection to output 5, if any. Possible
-values are ‘I’, ‘Q’, ‘IQ’, or ‘off’</p></li>
+values are ‘I’, ‘Q’, ‘IQ’, ‘off’, True, or False</p></li>
+<li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.acq"></span><strong>acq</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.acq">¶</a> – Input connected to the combined acquisition path, if any. Possible values
+are ‘in0’, ‘in1’, ‘off’, True, or False</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.acq_I"></span><strong>acq_I</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.acq_I">¶</a> – Input config for the ‘I’ input of the acquisition path of this sequencer
 is connected to, if any. Possible values are ‘in0’, ‘in1’, or ‘off’</p></li>
 <li><p><span class="target" id="qat.backend.qblox.config.specification.ConnectionConfig.params.acq_Q"></span><strong>acq_Q</strong><a class="paramlink headerlink reference internal" href="#qat.backend.qblox.config.specification.ConnectionConfig.params.acq_Q">¶</a> – Input config for the ‘Q’ input of the acquisition path of this sequencer
@@ -914,6 +916,11 @@ is connected to, if any. Possible values are ‘in0’, ‘in1’, or ‘off’<
 <p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
 validated to form a valid model.</p>
 <p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.acq">
+<span class="sig-name descname"><span class="pre">acq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.acq" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.acq_I">
 <span class="sig-name descname"><span class="pre">acq_I</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.acq_I" title="Link to this definition"></a></dt>
@@ -937,32 +944,32 @@ validated to form a valid model.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.out0">
-<span class="sig-name descname"><span class="pre">out0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out0" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">out0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out0" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.out1">
-<span class="sig-name descname"><span class="pre">out1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out1" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">out1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out1" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.out2">
-<span class="sig-name descname"><span class="pre">out2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out2" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">out2</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out2" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.out3">
-<span class="sig-name descname"><span class="pre">out3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out3" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">out3</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out3" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.out4">
-<span class="sig-name descname"><span class="pre">out4</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out4" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">out4</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out4" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.backend.qblox.config.specification.ConnectionConfig.out5">
-<span class="sig-name descname"><span class="pre">out5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out5" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">out5</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.backend.qblox.config.specification.ConnectionConfig.out5" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

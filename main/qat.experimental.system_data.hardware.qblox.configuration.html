@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.hardware.qblox.configuration module &mdash; qat-compiler 3.0.0.post398.dev20261006015659 documentation</title>
+  <title>qat.experimental.system_data.hardware.qblox.configuration module &mdash; qat-compiler 3.0.0.post399.dev20261006032935 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -752,6 +752,31 @@ unset value with one the calibration deliberately configured.</p>
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BooleanOutputConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enabled</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>One RF output configured through the Qblox boolean alias.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_id</strong> – Physical RF output configured by the <code class="docutils literal notranslate"><span class="pre">outN</span></code> field.</p></li>
+<li><p><strong>enabled</strong> – Exact boolean value supplied to <code class="docutils literal notranslate"><span class="pre">connect_outN</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection.enabled">
+<span class="sig-name descname"><span class="pre">enabled</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection.enabled" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection.output_id">
+<span class="sig-name descname"><span class="pre">output_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection.output_id" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.OutputPathConnection">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OutputPathConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.OutputPathConnection" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -904,7 +929,7 @@ present.</p></li>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequencerConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_path_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disabled_outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disabled_acquisition_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_disabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">SequencerConnection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_path_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boolean_output_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_path_connections</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_enabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disabled_outputs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">disabled_acquisition_paths</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">frozenset({})</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">acquisition_disabled</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">combined_acquisition_alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Routing the source supplies for one physical sequencer.</p>
 <dl class="field-list simple">
@@ -912,11 +937,13 @@ present.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>connections</strong> – Ordered entries of the source <code class="docutils literal notranslate"><span class="pre">bulk_value</span></code> list.</p></li>
 <li><p><strong>output_path_connections</strong> – Output path selected for each physical output.</p></li>
+<li><p><strong>boolean_output_connections</strong> – Exact RF boolean aliases selected for outputs.</p></li>
 <li><p><strong>acquisition_path_connections</strong> – Physical input selected for each acquisition path.</p></li>
 <li><p><strong>acquisition_enabled</strong> – Explicit acquisition enable supplied as a boolean.</p></li>
 <li><p><strong>disabled_outputs</strong> – Physical outputs the source configures as <code class="docutils literal notranslate"><span class="pre">off</span></code>.</p></li>
 <li><p><strong>disabled_acquisition_paths</strong> – Acquisition paths the source configures as <code class="docutils literal notranslate"><span class="pre">off</span></code>.</p></li>
 <li><p><strong>acquisition_disabled</strong> – Whether the combined acquisition path is <code class="docutils literal notranslate"><span class="pre">off</span></code>.</p></li>
+<li><p><strong>combined_acquisition_alias</strong> – Exact RF boolean alias for <code class="docutils literal notranslate"><span class="pre">connect_acq</span></code>.</p></li>
 </ul>
 </dd>
 </dl>
@@ -933,6 +960,16 @@ present.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection.acquisition_path_connections">
 <span class="sig-name descname"><span class="pre">acquisition_path_connections</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.configuration.AcquisitionPathConnection" title="qat.experimental.system_data.hardware.qblox.configuration.AcquisitionPathConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquisitionPathConnection</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection.acquisition_path_connections" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection.boolean_output_connections">
+<span class="sig-name descname"><span class="pre">boolean_output_connections</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><span class="pre">[</span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection" title="qat.experimental.system_data.hardware.qblox.configuration.BooleanOutputConnection"><code class="xref py py-class docutils literal notranslate"><span class="pre">BooleanOutputConnection</span></code></a><span class="pre">,</span> <code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code><span class="pre">]</span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection.boolean_output_connections" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection.combined_acquisition_alias">
+<span class="sig-name descname"><span class="pre">combined_acquisition_alias</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.configuration.SequencerConnection.combined_acquisition_alias" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
