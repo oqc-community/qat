@@ -184,7 +184,7 @@ class TestPurrImporterDelayAndSync:
         module = imp.build(builder)
         wait_ops = _ops_of_type(module, WaitOp)
         assert len(wait_ops) == 1
-        assert wait_ops[0].duration.owner.value.value.data == pytest.approx(320e-9)
+        assert wait_ops[0].duration.owner.value.value.data == pytest.approx(320e3)
 
     def test_synchronize_single_target_emits_no_sync_op(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -341,7 +341,7 @@ class TestPurrImporterMacqFrames:
         kernel_ops = [op for op in _ops(module) if _has_kernel_parent(op)]
         assert kernel_ops.index(wait) < kernel_ops.index(acquire)
         assert all(op.frame is not create_measure.result for op in wait_ops)
-        assert wait.duration.owner.value.value.data == pytest.approx(220e-9)
+        assert wait.duration.owner.value.value.data == pytest.approx(220e3)
 
     def test_macq_delay_threads_to_both_frames(self, builder, hw):
         ch = _make_macq_channel(hw)
@@ -407,7 +407,7 @@ class TestPurrImporterAcquire:
         module = imp.build(builder)
         acq_ops = _ops_of_type(module, AcquireOp)
         assert len(acq_ops) == 1
-        assert acq_ops[0].duration.owner.value.value.data == pytest.approx(1e-6)
+        assert acq_ops[0].duration.owner.value.value.data == pytest.approx(1e6)
         # No waveform constructed when no filter is given.
         assert not any(isinstance(op, SquareWaveformOp) for op in _ops(module))
 
@@ -1129,14 +1129,16 @@ class TestPurrImporterWaveformTranslation:
         assert isinstance(waveform_owner, ConstantOp)
         assert isinstance(waveform_owner.value, SampledWaveformAttr)
 
+        sample_time_ps = ch.sample_time * 1e12  # Sample time in picoseconds
+
         sampled_attr = waveform_owner.value
         assert np.allclose(
             sampled_attr.samples.data, np.asarray(samples, dtype=np.complex128)
         )
         assert sampled_attr.width.literal_value == pytest.approx(
-            ch.sample_time * len(samples)
+            sample_time_ps * len(samples)
         )
-        assert sampled_attr.sample_time.literal_value == pytest.approx(ch.sample_time)
+        assert sampled_attr.sample_time.literal_value == pytest.approx(sample_time_ps)
 
     def test_gaussian_drag_maps_beta_to_drag_coefficient(self, builder, hw):
         ch = hw.get_qubit(0).get_drive_channel()
@@ -1955,4 +1957,242 @@ class TestPurrImporterChannelScale:
 
         imp = PurrImporter()
         with pytest.raises(ValueError, match="non-negligible imaginary"):
+            imp.build(builder)
+
+
+class TestPurrImporterFractionalRegression:
+    """Regression tests for handling fractional frequency and time from PuRR calibration
+    files.
+
+    When PuRR calibration sources (e.g., from experimental quantum hardware) produce non-
+    integer frequencies or times, the importer must convert them to integer Hz or ps for the
+    canonical Pulse IR FrequencyAttr and TimeAttr representations.
+    """
+
+    def test_fractional_hz_channel_frequency_creates_integer_hz_frame(self, builder, hw):
+        """Fractional channel frequency (e.g., 31.25 Hz) is rounded to integer Hz."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        # Simulate PuRR channel with fractional Hz (from experimental Q1 NCO: 125÷4)
+        ch.frequency = 31.25
+        builder.add(PhaseShift(ch, 0.1))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        create_frame_ops = _ops_of_type(module, CreateFrameOp)
+        assert len(create_frame_ops) == 1
+        freq_const = create_frame_ops[0].frequency.owner
+        assert isinstance(freq_const, ConstantOp)
+        # 31.25 Hz rounds to 31 Hz
+        assert freq_const.value.value.data == 31
+
+    def test_fractional_hz_device_update_rounds_to_integer_hz(self, builder, hw):
+        """Fractional frequency in device update (5.5 GHz + 0.75 Hz) is rounded to
+        integer."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(PhaseShift(ch, 0.1))
+        # Simulate genuinely fractional device update: 5,500,000,000.75 Hz
+        builder.add(DeviceUpdate(ch, "frequency", 5_500_000_000.75))
+        builder.add(PhaseShift(ch, 0.2))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        create_frame_ops = _ops_of_type(module, CreateFrameOp)
+        assert len(create_frame_ops) == 1
+        freq_const = create_frame_ops[0].frequency.owner
+        assert isinstance(freq_const, ConstantOp)
+        # 5,500,000,000.75 Hz rounds to 5,500,000,001 Hz
+        assert freq_const.value.value.data == 5_500_000_001
+
+    def test_fractional_hz_macq_frame_update_both_frames_rounded(self, builder, hw):
+        """Both measure and acquire frames get rounded fractional Hz (7.25 GHz + 0.75
+        Hz)."""
+        ch = _make_macq_channel(hw)
+        # Simulate genuinely fractional frequency update: 7,250,000,000.75 Hz
+        builder.add(DeviceUpdate(ch, "frequency", 7_250_000_000.75))
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=80e-9, amp=0.4))
+        builder.add(Acquire(ch, time=1e-6, output_variable="measurement"))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        create_frame_ops = _ops_of_type(module, CreateFrameOp)
+        assert len(create_frame_ops) == 2
+        for frame_op in create_frame_ops:
+            freq_const = frame_op.frequency.owner
+            assert isinstance(freq_const, ConstantOp)
+            # 7,250,000,000.75 Hz rounds to 7,250,000,001 Hz
+            assert freq_const.value.value.data == 7_250_000_001
+
+    def test_pulse_with_whole_picosecond_width_succeeds(self, builder, hw):
+        """Pulse width that represents a whole number of picoseconds is accepted."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        # 10 ns = 10,000 ps (whole number)
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=10e-9, amp=0.5))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        assert len(square_ops) == 1
+        width_const = square_ops[0].width.owner
+        assert isinstance(width_const, ConstantOp)
+        # 10 ns = 10,000 ps
+        assert width_const.value.value.data == 10_000
+
+    def test_pulse_with_fractional_picosecond_width_rounds_with_warning(
+        self, builder, hw, mocker
+    ):
+        """Pulse width with significant fractional ps logs a warning but succeeds.
+
+        10/3 ns ≈ 3.333 ns ≈ 3333.333 ps rounds to 3333 ps with a warning (~0.333 ps error).
+        """
+        ch = hw.get_qubit(0).get_drive_channel()
+        # 10/3 ns ≈ 3.333... ns, which is not a whole picosecond
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=10 / 3 * 1e-9, amp=0.5))
+
+        # Mock logger to verify warning is emitted
+        mock_logger = mocker.patch(
+            "qat.experimental.frontend.importer.pulse.builder.logger"
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        # Verify warning was logged for the significant fractional error
+        mock_logger.warning.assert_called_once()
+
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        assert len(square_ops) == 1
+        width_const = square_ops[0].width.owner
+        assert isinstance(width_const, ConstantOp)
+        # 10/3 ns ≈ 3333.333... ps rounds to 3333 ps
+        assert width_const.value.value.data == 3_333
+
+    def test_wait_with_whole_nanosecond_duration_succeeds(self, builder, hw):
+        """Wait duration that represents a whole number of picoseconds is accepted."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(PhaseShift(ch, 0.1))
+        # 50 ns = 50,000 ps (whole number)
+        builder.add(Delay(ch, time=50e-9))
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        wait_ops = _ops_of_type(module, WaitOp)
+        assert len(wait_ops) == 1
+        duration_const = wait_ops[0].duration.owner
+        assert isinstance(duration_const, ConstantOp)
+        # 50 ns = 50,000 ps
+        assert duration_const.value.value.data == 50_000
+
+    def test_wait_with_fractional_picosecond_duration_rounds_with_warning(
+        self, builder, hw, mocker
+    ):
+        """Wait duration with significant fractional ps logs a warning but succeeds.
+
+        1/3 ns ≈ 0.333 ns ≈ 333.333 ps rounds to 333 ps with a warning (~0.333 ps error).
+        """
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(PhaseShift(ch, 0.1))
+        # 1/3 ns ≈ 0.333... ns, which is not a whole picosecond
+        builder.add(Delay(ch, time=1 / 3 * 1e-9))
+
+        # Mock logger to verify warning is emitted
+        mock_logger = mocker.patch(
+            "qat.experimental.frontend.importer.pulse.builder.logger"
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        # Verify warning was logged for the significant fractional error
+        mock_logger.warning.assert_called_once()
+
+        wait_ops = _ops_of_type(module, WaitOp)
+        assert len(wait_ops) == 1
+        duration_const = wait_ops[0].duration.owner
+        assert isinstance(duration_const, ConstantOp)
+        # 1/3 ns ≈ 333.333... ps rounds to 333 ps
+        assert duration_const.value.value.data == 333
+
+    def test_pulse_with_tiny_fractional_picosecond_width_succeeds_silently(
+        self, builder, hw, mocker
+    ):
+        """Pulse width within floating-point rounding tolerance succeeds without warning.
+
+        4.0000000000005 ns is within 1e-9 ps tolerance of 4000 ps and rounds without
+        warning.
+        """
+        ch = hw.get_qubit(0).get_drive_channel()
+        # 4.0000000000005 ns ≈ 4000.0000000005 ps (within 1e-9 tolerance of 4000 ps)
+        builder.add(Pulse(ch, PulseShapeType.SQUARE, width=4.0000000000005e-9, amp=0.5))
+
+        # Mock logger to verify no warning is emitted for in-tolerance inputs
+        mock_logger = mocker.patch(
+            "qat.experimental.frontend.importer.pulse.builder.logger"
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        # Verify no warning was logged
+        mock_logger.warning.assert_not_called()
+
+        square_ops = _ops_of_type(module, SquareWaveformOp)
+        assert len(square_ops) == 1
+        width_const = square_ops[0].width.owner
+        assert isinstance(width_const, ConstantOp)
+        # 4.0000000000005 ns rounds to 4000 ps
+        assert width_const.value.value.data == 4_000
+
+    def test_wait_with_tiny_fractional_picosecond_duration_succeeds_silently(
+        self, builder, hw, mocker
+    ):
+        """Wait duration within floating-point rounding tolerance succeeds without
+        warning."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(PhaseShift(ch, 0.1))
+        # 20.0000000000005 ns ≈ 20000.0000000005 ps (within 1e-9 tolerance)
+        builder.add(Delay(ch, time=20.0000000000005e-9))
+
+        # Mock logger to verify no warning is emitted for in-tolerance inputs
+        mock_logger = mocker.patch(
+            "qat.experimental.frontend.importer.pulse.builder.logger"
+        )
+
+        imp = PurrImporter()
+        module = imp.build(builder)
+
+        # Verify no warning was logged
+        mock_logger.warning.assert_not_called()
+
+        wait_ops = _ops_of_type(module, WaitOp)
+        assert len(wait_ops) == 1
+        duration_const = wait_ops[0].duration.owner
+        assert isinstance(duration_const, ConstantOp)
+        # 20.0000000000005 ns rounds to 20000 ps
+        assert duration_const.value.value.data == 20_000
+
+    def test_negative_channel_frequency_raises_error(self, builder, hw):
+        """Channel with negative frequency is rejected."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        # Simulate PuRR channel with negative frequency
+        ch.frequency = -31.25
+        builder.add(PhaseShift(ch, 0.1))
+
+        imp = PurrImporter()
+        with pytest.raises(ValueError, match="non-negative"):
+            imp.build(builder)
+
+    def test_negative_device_update_frequency_raises_error(self, builder, hw):
+        """Device update with negative frequency is rejected."""
+        ch = hw.get_qubit(0).get_drive_channel()
+        builder.add(PhaseShift(ch, 0.1))
+        # Simulate negative device update frequency
+        builder.add(DeviceUpdate(ch, "frequency", -5.5e9))
+
+        imp = PurrImporter()
+        with pytest.raises(ValueError, match="non-negative"):
             imp.build(builder)

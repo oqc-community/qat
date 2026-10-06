@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
+import math
+
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp, IndexCastOp
 from xdsl.dialects.builtin import BoolAttr, FloatAttr, IndexType, IntAttr, f64, i32
 from xdsl.interpreters.scf import scf
@@ -42,13 +44,40 @@ from qat.experimental.dialect.results.ir import (
     StoreOp,
 )
 from qat.experimental.frontend.importer.environment import EnvironmentTracker
+from qat.experimental.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+_PICOSECOND_ROUNDING_ABS_TOLERANCE = 1e-9
+_PICOSECOND_CONVERSION_ABS_TOLERANCE = 1e-6
 
 
-def _create_time_constant_op(time: float) -> ConstantOp:
-    """Create a constant operation for a given time value."""
+def _create_time_constant_op(time_seconds: float) -> ConstantOp:
+    """Create a time constant from a duration in seconds, storing integer ps.
 
-    # TODO: COMPILER-1388, convert to ps
-    return ConstantOp(TimeAttr(time))
+    Checks if the scaled picosecond value is close to an integer. Logs a warning if the
+    fractional part exceeds tolerance (1e-9 ps).
+
+    :raises ValueError: If the input duration is negative.
+    """
+    if time_seconds < 0:
+        raise ValueError("Duration must be non-negative.")
+
+    scaled_value_ps = time_seconds * 1e12
+    rounded_value_ps = int(round(scaled_value_ps))
+
+    if not math.isclose(
+        scaled_value_ps,
+        float(rounded_value_ps),
+        rel_tol=0.0,
+        abs_tol=_PICOSECOND_ROUNDING_ABS_TOLERANCE,
+    ):
+        logger.warning(
+            "Rounded duration from scaled picoseconds value %s to integer %s.",
+            scaled_value_ps,
+            rounded_value_ps,
+        )
+    return ConstantOp(TimeAttr(rounded_value_ps))
 
 
 def _create_amplitude_constant_op(amplitude: complex | float) -> ConstantOp:
@@ -56,11 +85,9 @@ def _create_amplitude_constant_op(amplitude: complex | float) -> ConstantOp:
     return ConstantOp(AmplitudeAttr(amplitude))
 
 
-def _create_frequency_constant_op(frequency: float) -> ConstantOp:
-    """Create a constant operation for a given frequency value."""
-
-    # TODO: COMPILER-1388, convert to Hz
-    return ConstantOp(FrequencyAttr(frequency))
+def _create_frequency_constant_op(frequency_hz: float) -> ConstantOp:
+    """Create a frequency constant from a value in Hz."""
+    return ConstantOp(FrequencyAttr(frequency_hz))
 
 
 def _create_phase_constant_op(phase: float) -> ConstantOp:
@@ -621,9 +648,34 @@ class PulseKernelBuilder:
         if len(samples) == 0:
             raise ValueError("Samples list cannot be empty for the sampled waveform.")
 
-        sample_time = duration / len(samples)
+        duration_ps = duration * 1e12
+        if not math.isfinite(duration_ps):
+            raise ValueError("Sampled waveform duration must be an integer number of ps.")
+        rounded_duration_ps = round(duration_ps)
+        # Accept values within floating-point conversion precision. IEEE 754 double
+        # precision can introduce errors at ~15th decimal place; at microsecond scale,
+        # this translates to ~1e-9 ps error. Use 1e-6 ps tolerance to safely accept all
+        # nanosecond and microsecond scale times while rejecting meaningfully fractional
+        # durations like 10/3 ns.
+        if not math.isclose(
+            duration_ps,
+            rounded_duration_ps,
+            rel_tol=0.0,
+            abs_tol=_PICOSECOND_CONVERSION_ABS_TOLERANCE,
+        ):
+            raise ValueError("Sampled waveform duration must be an integer number of ps.")
+
+        duration_ps = rounded_duration_ps
+        sample_time_ps, remainder = divmod(duration_ps, len(samples))
+        # TODO(COMPILER-1547): Define a quantisation or resampling policy instead of
+        # rejecting custom waveforms whose sample intervals are fractional picoseconds.
+        if sample_time_ps <= 0 or remainder != 0:
+            raise ValueError(
+                "Sampled waveform sample time must be an integer number of ps "
+                "greater than zero."
+            )
         sampled_waveform_attr = SampledWaveformAttr(
-            samples, TimeAttr(duration), TimeAttr(sample_time)
+            samples, TimeAttr(duration_ps), TimeAttr(sample_time_ps)
         )
         custom_waveform_op = ConstantOp(sampled_waveform_attr)
         self._add_ops(custom_waveform_op)

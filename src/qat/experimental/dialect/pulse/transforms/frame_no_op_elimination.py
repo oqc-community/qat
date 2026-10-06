@@ -13,7 +13,8 @@ from xdsl.pattern_rewriter import PatternRewriter, RewritePattern, op_type_rewri
 
 from qat.experimental.dialect.pulse.ir import ConstantOp, PhaseShiftOp, WaitOp
 
-_COMPARISON_TOLERANCE = 1e-12
+_PHASE_COMPARISON_TOLERANCE = 1e-12
+_WAIT_COMPARISON_TOLERANCE = 1  # Tolerance for comparing wait durations to zero is 1 ps.
 
 
 class FoldZeroPhaseShiftOp(RewritePattern):
@@ -35,8 +36,8 @@ class FoldZeroPhaseShiftOp(RewritePattern):
         literal_value = operand_value[0].literal_value
         modulo_value = literal_value % tau
         if not (
-            isclose(modulo_value, 0.0, abs_tol=_COMPARISON_TOLERANCE)
-            or isclose(modulo_value, tau, abs_tol=_COMPARISON_TOLERANCE)
+            isclose(modulo_value, 0.0, abs_tol=_PHASE_COMPARISON_TOLERANCE)
+            or isclose(modulo_value, tau, abs_tol=_PHASE_COMPARISON_TOLERANCE)
         ):
             return
 
@@ -45,7 +46,11 @@ class FoldZeroPhaseShiftOp(RewritePattern):
 
 class FoldZeroWaitOp(RewritePattern):
     """Finds :class:`WaitOp` with a constant operand that is equal to zero and removes the
-    operation."""
+    operation.
+
+    This only applies to WaitOp instructions (not other duration-based operations). Wait
+    operations with zero duration are no-ops and can be safely eliminated.
+    """
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: WaitOp, rewriter: PatternRewriter):
@@ -60,7 +65,7 @@ class FoldZeroWaitOp(RewritePattern):
             return
 
         literal_value = operand_value[0].literal_value
-        if not isclose(literal_value, 0.0, abs_tol=_COMPARISON_TOLERANCE):
+        if not isclose(literal_value, 0.0, abs_tol=_WAIT_COMPARISON_TOLERANCE):
             return
 
         rewriter.replace_op(op, [], (op.frame,))

@@ -22,7 +22,6 @@ from .attributes import (
     DiscriminatorPolicyAttr,
     EqualiseAttr,
     FrequencyAttr,
-    FrequencyUnitsData,
     MaximumLikelihoodPolicyAttr,
     NumericArrayData,
     PhaseAttr,
@@ -31,7 +30,6 @@ from .attributes import (
     SampledWaveformAttr,
     StateMapDictAttr,
     TimeAttr,
-    TimeUnitsData,
     WeightsAttr,
 )
 from .interfaces import IsAnalyticalWaveformInterface
@@ -146,7 +144,7 @@ _types = [
     WaveformType,
 ]
 
-_data_attributes = [ComplexData, NumericArrayData, TimeUnitsData, FrequencyUnitsData]
+_data_attributes = [ComplexData, NumericArrayData]
 
 _attributes = [
     AmplitudeAttr,

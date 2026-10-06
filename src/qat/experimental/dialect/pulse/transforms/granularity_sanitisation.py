@@ -14,6 +14,7 @@ from xdsl.pattern_rewriter import (
     RewritePattern,
     op_type_rewrite_pattern,
 )
+from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir import ConstantOp
 from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr, TimeAttr
@@ -21,33 +22,19 @@ from qat.experimental.dialect.pulse.ir.types import TimeType, WaveformType
 from qat.experimental.passes.pass_ordering import OrderedPass
 from qat.experimental.system_data.pulse.constraints import PulseLevelConstraints
 
-_COMPARISON_TOLERANCE = 1e-10
 
+def _round_up_to_granularity_if_required(value: int, granularity: int) -> int:
+    """Returns the value rounded up to the nearest multiple of granularity.
 
-def _round_up_to_granularity_if_required(
-    value: float | int, granularity: float
-) -> float | None:
-    """Returns the rounded-up value if sanitisation is required.
-
-    :param value: Value in seconds.
-    :param granularity: Granularity in seconds.
-    :returns: The rounded-up value, or ``None`` if already aligned.
+    :param value: Value in picoseconds.
+    :param granularity: Granularity in picoseconds.
+    :returns: The rounded-up value.
     """
 
-    value_in_granularity_units = value / granularity
-    rounded_value_in_granularity_units = int(
-        np.ceil(value_in_granularity_units - _COMPARISON_TOLERANCE)
-    )
-
-    if np.isclose(
-        value_in_granularity_units,
-        rounded_value_in_granularity_units,
-        rtol=0.0,
-        atol=_COMPARISON_TOLERANCE,
-    ):
-        return None
-
-    return rounded_value_in_granularity_units * granularity
+    remainder = value % granularity
+    if remainder == 0:
+        return value
+    return value + granularity - remainder
 
 
 class GranularitySanitisation(RewritePattern):
@@ -77,13 +64,15 @@ class GranularitySanitisation(RewritePattern):
         :param constraints: Pulse level constraints containing the granularity.
         """
 
-        self.granularity = constraints.granularity_s
+        self.granularity_ps = constraints.granularity_ps
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: ConstantOp, rewriter: PatternRewriter) -> None:
         if not isinstance(op.result.type, TimeType | WaveformType):
             return
 
+        # operand_value is a tuple of attributes carrying their unit via their type.
+        # TimeAttr values are in picoseconds, WaveformAttr widths/sample_time in ps.
         operand_value = op.fold()
         if not operand_value:
             return
@@ -92,14 +81,12 @@ class GranularitySanitisation(RewritePattern):
             time_attr = operand_value[0]
 
             new_duration = _round_up_to_granularity_if_required(
-                time_attr.literal_value, self.granularity
+                time_attr.literal_value, self.granularity_ps
             )
-            if new_duration is None:
+            if new_duration == time_attr.literal_value:
                 return
 
-            new_time_op = ConstantOp(
-                TimeAttr.from_literal_value(new_duration, time_attr.unit.data), TimeType()
-            )
+            new_time_op = ConstantOp(TimeAttr(new_duration), TimeType())
             rewriter.replace_op(op, new_time_op)
             return
 
@@ -108,26 +95,28 @@ class GranularitySanitisation(RewritePattern):
 
         width_attr = waveform_attr.width
         sample_time_attr = waveform_attr.sample_time
-        width = width_attr.literal_value
-        sample_time = sample_time_attr.literal_value
+        width_ps = width_attr.literal_value
+        sample_time_ps = sample_time_attr.literal_value
 
-        samples = width / sample_time
-        if not np.isclose(
-            samples,
-            np.round(samples),
-            rtol=0.0,
-            atol=_COMPARISON_TOLERANCE,
-        ):
+        if width_ps % sample_time_ps != 0:
             return
 
-        new_width = _round_up_to_granularity_if_required(width, self.granularity)
-        if new_width is None:
+        new_width_ps = _round_up_to_granularity_if_required(width_ps, self.granularity_ps)
+        if new_width_ps == width_ps:
             return
 
-        if new_width < width:
+        if new_width_ps < width_ps:
             return
 
-        padding = int(np.round((new_width - width) / sample_time, 0))
+        width_increase_ps = new_width_ps - width_ps
+        padding, remainder = divmod(width_increase_ps, sample_time_ps)
+        if remainder != 0:
+            raise PassFailedException(
+                f"Waveform granularity rounding produces non-integral sample count: "
+                f"width {width_ps} → {new_width_ps} ps (increase {width_increase_ps} ps) "
+                f"with sample_time {sample_time_ps} ps. "
+                f"Width must round to a multiple of sample_time."
+            )
         new_waveform_array = np.pad(
             waveform_array,
             (0, padding),
@@ -137,8 +126,8 @@ class GranularitySanitisation(RewritePattern):
 
         new_waveform_attr = SampledWaveformAttr(
             new_waveform_array,
-            TimeAttr.from_literal_value(new_width, width_attr.unit.data),
-            TimeAttr.from_literal_value(sample_time, sample_time_attr.unit.data),
+            TimeAttr(new_width_ps),
+            sample_time_attr,
         )
         new_waveform_op = ConstantOp(new_waveform_attr, WaveformType())
         rewriter.replace_op(op, new_waveform_op)

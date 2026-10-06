@@ -137,7 +137,7 @@ class TestPulseKernelBuilderOperations:
         [frame_op] = _ops_of_type(kernel, CreateFrameOp)
         [wait_op] = _ops_of_type(kernel, WaitOp)
         assert wait_op.frame is frame_op.result
-        assert _pulse_constant_value(wait_op.duration) == pytest.approx(120e-9)
+        assert _pulse_constant_value(wait_op.duration) == pytest.approx(120e3)
         _assert_no_repeat_epilogue(kernel)
 
     def test_synchronize_gives_correct_ops(self):
@@ -170,7 +170,7 @@ class TestPulseKernelBuilderOperations:
         [frame_op] = _ops_of_type(kernel, CreateFrameOp)
         [acquire_op] = _ops_of_type(kernel, AcquireOp)
         assert acquire_op.frame is frame_op.result
-        assert _pulse_constant_value(acquire_op.duration) == pytest.approx(1e-6)
+        assert _pulse_constant_value(acquire_op.duration) == pytest.approx(1e6)
         assert acquire_op.weights is None
         assert acquire_op.label is not None
         assert acquire_op.label.data == "m0"
@@ -290,7 +290,7 @@ class TestPulseKernelWaveformOperations:
         kernel = (
             PulseKernelBuilder("test").create_square_waveform("wf", 0.5, 80e-9).finalize()
         )
-        self._assert_waveform_op(kernel, SquareWaveformOp, [80e-9, 0.5])
+        self._assert_waveform_op(kernel, SquareWaveformOp, [80e3, 0.5])
 
     def test_gaussian_waveform_gives_correct_ops(self):
         """Does a gaussian waveform and then finalises, inspecting the waveform has the
@@ -300,7 +300,7 @@ class TestPulseKernelWaveformOperations:
             .create_gaussian_waveform("wf", 0.5, 80e-9, 0.4)
             .finalize()
         )
-        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e-9, 0.5, 0.4])
+        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e3, 0.5, 0.4])
 
     def test_gaussian_square_waveform_gives_correct_ops(self):
         """Does a gaussian square waveform and then finalises, inspecting the waveform has
@@ -313,7 +313,7 @@ class TestPulseKernelWaveformOperations:
         self._assert_waveform_op(
             kernel,
             GaussianSquareWaveformOp,
-            [80e-9, 0.5, 0.3, 0.5],
+            [80e3, 0.5, 0.3, 0.5],
             self._assert_zero_at_edges,
         )
 
@@ -327,7 +327,7 @@ class TestPulseKernelWaveformOperations:
         self._assert_waveform_op(
             kernel,
             GaussianSquareWaveformOp,
-            [80e-9, 0.5, 0.3, 0.5, 0.1],
+            [80e3, 0.5, 0.3, 0.5, 0.1],
             self._assert_zero_at_edges,
         )
 
@@ -339,7 +339,7 @@ class TestPulseKernelWaveformOperations:
             .create_soft_square_waveform("wf", 0.5, 80e-9, 0.75, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SoftSquareWaveformOp, [80e-9, 0.5, 0.75, 0.2])
+        self._assert_waveform_op(kernel, SoftSquareWaveformOp, [80e3, 0.5, 0.75, 0.2])
 
     def test_regularized_soft_square_waveform_gives_correct_ops(self):
         """Does a regularized soft square waveform and then finalises, inspecting the
@@ -352,7 +352,7 @@ class TestPulseKernelWaveformOperations:
         self._assert_waveform_op(
             kernel,
             SoftSquareWaveformOp,
-            [80e-9, 0.5, 0.75, 0.2],
+            [80e3, 0.5, 0.75, 0.2],
             self._assert_zero_at_edges,
         )
 
@@ -367,7 +367,7 @@ class TestPulseKernelWaveformOperations:
         self._assert_waveform_op(
             kernel,
             GaussianWaveformOp,
-            [80e-9, 0.5, 0.4],
+            [80e3, 0.5, 0.4],
             self._assert_zero_at_edges,
         )
 
@@ -378,7 +378,7 @@ class TestPulseKernelWaveformOperations:
             .create_gaussian_waveform("wf", 0.5, 80e-9, 0.4, False, 0.1, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e-9, 0.5, 0.4, 0.1, 0.2])
+        self._assert_waveform_op(kernel, GaussianWaveformOp, [80e3, 0.5, 0.4, 0.1, 0.2])
 
     def test_blackman_waveform_gives_correct_ops(self):
         """Does a Blackman waveform and then finalises, inspecting the waveform has the
@@ -386,7 +386,7 @@ class TestPulseKernelWaveformOperations:
         kernel = (
             PulseKernelBuilder("test").create_blackman_waveform("wf", 0.5, 80e-9).finalize()
         )
-        self._assert_waveform_op(kernel, BlackmanWaveformOp, [80e-9, 0.5])
+        self._assert_waveform_op(kernel, BlackmanWaveformOp, [80e3, 0.5])
 
     def test_setup_hold_waveform_gives_correct_ops(self):
         """Does a setup hold waveform and then finalises, inspecting the waveform has the
@@ -396,7 +396,7 @@ class TestPulseKernelWaveformOperations:
             .create_setup_hold_waveform("wf", 0.5, 80e-9, 0.25, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SetupHoldWaveformOp, [80e-9, 0.5, 0.25, 0.2])
+        self._assert_waveform_op(kernel, SetupHoldWaveformOp, [80e3, 0.5, 0.25, 0.2])
 
     def test_rounded_square_waveform_gives_correct_ops(self):
         """Does a rounded square waveform and then finalises, inspecting the waveform has
@@ -406,7 +406,7 @@ class TestPulseKernelWaveformOperations:
             .create_rounded_square_waveform("wf", 0.5, 80e-9, 0.5, 0.2)
             .finalize()
         )
-        self._assert_waveform_op(kernel, RoundedSquareWaveformOp, [80e-9, 0.5, 0.5, 0.2])
+        self._assert_waveform_op(kernel, RoundedSquareWaveformOp, [80e3, 0.5, 0.5, 0.2])
 
     def test_sech_waveform_gives_correct_ops(self):
         """Does a sech waveform and then finalises, inspecting the waveform has the correct
@@ -416,7 +416,7 @@ class TestPulseKernelWaveformOperations:
             .create_sech_waveform("wf", 0.5, 80e-9, 0.3)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SechWaveformOp, [80e-9, 0.5, 0.3])
+        self._assert_waveform_op(kernel, SechWaveformOp, [80e3, 0.5, 0.3])
 
     def test_sinusoidal_waveform_gives_correct_ops(self):
         """Does a sinusoidal waveform and then finalises, inspecting the waveform has the
@@ -426,15 +426,16 @@ class TestPulseKernelWaveformOperations:
             .create_sinusoidal_waveform("wf", 0.5, 80e-9, 3.0, 0.25)
             .finalize()
         )
-        self._assert_waveform_op(kernel, SinusoidalWaveformOp, [80e-9, 0.5, 3.0, 0.25])
+        self._assert_waveform_op(kernel, SinusoidalWaveformOp, [80e3, 0.5, 3.0, 0.25])
 
     def test_custom_waveform_gives_correct_attribute_payload(self):
         """Custom waveforms should be emitted as a constant sampled waveform."""
         samples = [0.0, 0.25 + 0.5j, -0.75]
-        duration = 12e-9
+        duration_s = 12e-9  # Duration in seconds
+        duration_ps = duration_s * 1e12  # Duration in picoseconds
         kernel = (
             PulseKernelBuilder("test")
-            .create_custom_waveform("wf", samples, duration)
+            .create_custom_waveform("wf", samples, duration_s)
             .finalize()
         )
 
@@ -447,8 +448,8 @@ class TestPulseKernelWaveformOperations:
         attr = sampled_constants[0].value
         assert isinstance(attr, SampledWaveformAttr)
         assert np.allclose(attr.samples.data, np.asarray(samples, dtype=np.complex128))
-        assert attr.width.literal_value == pytest.approx(duration)
-        assert attr.sample_time.literal_value == pytest.approx(duration / len(samples))
+        assert attr.width.literal_value == pytest.approx(duration_ps)
+        assert attr.sample_time.literal_value == pytest.approx(duration_ps / len(samples))
         _assert_no_repeat_epilogue(kernel)
 
 
@@ -552,3 +553,49 @@ class TestPulseKernelBuilderErrors:
             ValueError, match="Samples list cannot be empty for the sampled waveform."
         ):
             builder.create_custom_waveform("wf", [], 12e-9)
+
+    def test_sampled_waveform_with_non_integer_sample_time_raises_value_error(self):
+        """Sampled waveform samples must have an integer-picosecond interval."""
+        builder = PulseKernelBuilder("test")
+        with pytest.raises(ValueError, match="sample time must be an integer number of ps"):
+            builder.create_custom_waveform("wf", [0.0] * 7, 12e-9)
+
+    def test_sampled_waveform_with_zero_duration_raises_value_error(self):
+        """Sampled waveforms must have a positive sample interval."""
+        builder = PulseKernelBuilder("test")
+        with pytest.raises(ValueError, match="sample time must be an integer number of ps"):
+            builder.create_custom_waveform("wf", [0.0, 1.0], 0.0)
+
+    def test_sampled_waveform_rejects_fractional_ps_duration_at_large_scale(self):
+        builder = PulseKernelBuilder("test")
+        with pytest.raises(ValueError, match="duration must be an integer number of ps"):
+            builder.create_custom_waveform("wf", [0.0, 1.0], 0.0010000000005)
+
+    def test_negative_duration_raises_value_error(self):
+        """Time constant creation rejects negative durations before rounding."""
+        from qat.experimental.frontend.importer.pulse.builder import (
+            _create_time_constant_op,
+        )
+
+        with pytest.raises(ValueError, match="non-negative"):
+            _create_time_constant_op(-0.25e-12)
+
+    def test_sampled_waveform_accepts_microsecond_duration_with_conversion_precision_noise(
+        self,
+    ):
+        """Sampled waveform accepts microsecond-scale durations with floating-point
+        conversion precision noise.
+
+        When a nanosecond-to-picosecond duration is converted via float seconds, IEEE 754
+        double-precision introduces rounding errors. For microsecond-scale times like
+        8.39e-6 seconds, this error (~1.9e-9 ps) exceeds the strict 1e-9 warning tolerance
+        but should still be accepted as an integer-ps duration if within the relaxed 1e-6
+        conversion tolerance.
+        """
+        builder = PulseKernelBuilder("test")
+        # 8.39 microseconds = 8390 ps exactly. When passed as seconds, conversion error
+        # is ~1.9e-9 ps, exceeding the 1e-9 warning threshold but within 1e-6 acceptance.
+        # This should succeed without raising an error.
+        duration_s = 8.39e-6
+        # Should not raise; the relaxed tolerance accepts this microsecond-scale value.
+        builder.create_custom_waveform("wf", [0.0, 1.0], duration_s)

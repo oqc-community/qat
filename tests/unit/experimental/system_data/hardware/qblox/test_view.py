@@ -271,6 +271,43 @@ def test_does_not_infer_qblox_identity_from_resource_names():
     assert not view.modules
 
 
+@pytest.mark.parametrize("external_resource_id", [None, "missing-resource"])
+def test_ignores_ports_without_a_resolved_external_resource(external_resource_id):
+    canonical = _canonical()
+    port = PortData(
+        id="unresolved-port",
+        sample_time=1000,
+        external_resource_id=external_resource_id,
+    )
+
+    view = QbloxHardwareView.derive(
+        CanonicalSystemData(ports=(port,), metadata=canonical.metadata)
+    )
+
+    assert not view.modules
+
+
+def test_ignores_channels_without_a_projected_port():
+    canonical = _canonical()
+    orphan_channel = ChannelData(
+        id="orphan-channel",
+        port_id="missing-port",
+        frequency=4_200_000_000,
+    )
+
+    view = QbloxHardwareView.derive(
+        CanonicalSystemData(
+            external_resources=canonical.external_resources,
+            ports=canonical.ports,
+            oscillators=canonical.oscillators,
+            channels=(orphan_channel,),
+            metadata=canonical.metadata,
+        )
+    )
+
+    assert "orphan-channel" not in view.channel_bindings
+
+
 def test_typed_reference_is_authoritative_over_resource_object_type():
     canonical = _canonical()
     resources = tuple(
@@ -412,6 +449,107 @@ def test_rejects_missing_oscillator_join_and_cross_module_use():
         QbloxHardwareView.derive(
             CanonicalSystemData(
                 external_resources=(canonical.external_resources[0],),
+                ports=canonical.ports,
+                oscillators=(oscillator,),
+                channels=canonical.channels,
+                metadata=canonical.metadata,
+            )
+        )
+
+
+def test_rejects_port_reference_to_missing_oscillator():
+    canonical = _canonical()
+    port_resource = canonical.external_resources[0]
+    replacement_resource = ExternalResourceData(
+        id=port_resource.id,
+        object_type=port_resource.object_type,
+        attributes=(
+            AttributeEntry(
+                key="qblox",
+                value=_reference(oscillator_id="missing-oscillator"),
+            ),
+        ),
+    )
+
+    with pytest.raises(ValueError, match="port references missing oscillator"):
+        QbloxHardwareView.derive(
+            CanonicalSystemData(
+                external_resources=(
+                    replacement_resource,
+                    *canonical.external_resources[1:],
+                ),
+                ports=canonical.ports,
+                oscillators=canonical.oscillators,
+                channels=canonical.channels,
+                metadata=canonical.metadata,
+            )
+        )
+
+
+def test_rejects_channel_reference_to_missing_oscillator():
+    canonical = _canonical()
+    channel = ChannelData(
+        id=canonical.channels[0].id,
+        port_id=canonical.channels[0].port_id,
+        frequency=canonical.channels[0].frequency,
+        oscillator_reference="missing-oscillator",
+    )
+
+    with pytest.raises(ValueError, match="channel references missing oscillator"):
+        QbloxHardwareView.derive(
+            CanonicalSystemData(
+                external_resources=canonical.external_resources,
+                ports=canonical.ports,
+                oscillators=canonical.oscillators,
+                channels=(channel,),
+                metadata=canonical.metadata,
+            )
+        )
+
+
+def test_rejects_ports_with_different_module_kinds_at_same_location():
+    canonical = _canonical()
+    second_resource_id = "second-port-resource"
+    second_resource = ExternalResourceData(
+        id=second_resource_id,
+        object_type="port",
+        attributes=(
+            AttributeEntry(
+                key="qblox",
+                value=_reference(oscillator_id=None, kind=QbloxModuleKind.qrm),
+            ),
+        ),
+    )
+    second_port = PortData(
+        id="second-port",
+        sample_time=1000,
+        external_resource_id=second_resource_id,
+    )
+
+    with pytest.raises(ValueError, match="inconsistent module kinds"):
+        QbloxHardwareView.derive(
+            CanonicalSystemData(
+                external_resources=(*canonical.external_resources, second_resource),
+                ports=(*canonical.ports, second_port),
+                oscillators=canonical.oscillators,
+                channels=canonical.channels,
+                metadata=canonical.metadata,
+            )
+        )
+
+
+def test_rejects_oscillator_without_external_resource_join():
+    canonical = _canonical()
+    oscillator = OscillatorData(
+        id=canonical.oscillators[0].id,
+        frequency=canonical.oscillators[0].frequency,
+        external_resource_id=None,
+    )
+
+    with pytest.raises(ValueError, match="has no external-resource join"):
+        QbloxHardwareView.derive(
+            CanonicalSystemData(
+                external_resources=canonical.external_resources,
                 ports=canonical.ports,
                 oscillators=(oscillator,),
                 channels=canonical.channels,

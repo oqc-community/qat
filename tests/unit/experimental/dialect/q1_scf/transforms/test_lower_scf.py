@@ -30,7 +30,9 @@ from qat.experimental.dialect.q1 import (
     DurationImm,
     MoveImmRdOp,
     MoveRsRdOp,
+    Muls16RsImmRdOp,
     NopOp,
+    NotImmRdOp,
     NotRsRdOp,
     Registers,
     ResetPhOp,
@@ -97,6 +99,10 @@ class TestGetStaticInteger:
     def test_returns_integer_for_q1_move_immediate(self):
         move = MoveImmRdOp(SU32Imm(42), IntRegisterType.unallocated())
         assert _get_static_integer(move.rd) == 42
+
+    def test_returns_integer_for_q1_not_immediate(self):
+        not_imm = NotImmRdOp(SU32Imm(0xFFFFFFFE), IntRegisterType.unallocated())
+        assert _get_static_integer(not_imm.rd) == 1
 
     def test_returns_none_for_block_arg(self):
         block = Block(arg_types=[IndexType()])
@@ -336,6 +342,13 @@ class TestForLowering:
         with pytest.raises(PassFailedException, match="step"):
             LowerScfToQ1ScfPass().apply(None, module)
 
+    @pytest.mark.parametrize("step", [0, -1])
+    def test_rejects_non_positive_step(self, step: int):
+        seq = _make_shots_loop(0, 5, step)
+
+        with pytest.raises(PassFailedException, match="step must be positive"):
+            LowerScfToQ1ScfPass().apply(None, ModuleOp([seq]))
+
     def test_rejects_zero_trip_count_equal_bounds(self):
         """A loop with ``lb == ub`` has zero iterations and is rejected."""
         seq = _make_shots_loop(5, 5, 1)
@@ -471,6 +484,61 @@ class TestForLowering:
             "nop",
             "acquire",
         ]
+
+    @pytest.mark.parametrize("lb", [0, 3])
+    def test_non_unit_step_remaps_induction_var(self, lb: int):
+        step = 2
+        lb_op = ArithConstantOp.from_int_and_width(lb, IndexType())
+        ub_op = ArithConstantOp.from_int_and_width(lb + 5, IndexType())
+        step_op = ArithConstantOp.from_int_and_width(step, IndexType())
+        body_block = Block(arg_types=[IndexType()])
+        body_move = MoveRsRdOp(body_block.args[0], IntRegisterType.unallocated())
+        body_block.add_ops([body_move, ScfYieldOp()])
+
+        for_op = ScfForOp(
+            lb=lb_op.result,
+            ub=ub_op.result,
+            step=step_op.result,
+            iter_args=[],
+            body=body_block,
+        )
+        entry = Block()
+        entry.add_ops([lb_op, ub_op, step_op, for_op, StopOp()])
+        lower_entry = _lower(SequenceOp("Q0", Region([entry])))
+
+        (lowered_for,) = _ops_of_type(lower_entry, ForOp)
+        lowered_body = list(lowered_for.body.blocks)[0]
+        # NOPs are inserted for data-hazard scheduling (COMPILER-1587)
+        (
+            not_op,
+            not_latency,
+            count_add,
+            count_add_latency,
+            scale_op,
+            scale_op_latency,
+            *remaining_ops,
+        ) = list(lowered_body.ops)
+        assert isinstance(not_op, NotRsRdOp)
+        assert isinstance(not_latency, NopOp)
+        assert isinstance(count_add, AddRsImmRdOp)
+        assert count_add.imm.data == 4
+        assert isinstance(count_add_latency, NopOp)
+        assert isinstance(scale_op, Muls16RsImmRdOp)
+        assert scale_op.imm.data == step
+        assert isinstance(scale_op_latency, NopOp)
+
+        if lb == 0:
+            move_op, _yield = remaining_ops
+            assert isinstance(move_op, MoveRsRdOp)
+            assert move_op.rs is scale_op.rd
+        else:
+            shift_op, shift_op_latency, move_op, _yield = remaining_ops
+            assert isinstance(shift_op, AddRsImmRdOp)
+            assert shift_op.rs is scale_op.rd
+            assert shift_op.imm.data == lb
+            assert isinstance(shift_op_latency, NopOp)
+            assert isinstance(move_op, MoveRsRdOp)
+            assert move_op.rs is shift_op.rd
 
     def test_rejects_incompatible_iter_arg_type(self):
         """An iter_arg that is not ``q1.reg`` is rejected."""

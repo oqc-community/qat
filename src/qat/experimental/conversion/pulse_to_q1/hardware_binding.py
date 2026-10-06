@@ -13,9 +13,10 @@ strategy. When multiple sequencers can satisfy a candidate, a tie-breaker applie
 the sequencer with minimum (instrument_id, slot, sequencer_index) is chosen to ensure
 deterministic and reproducible allocation across runs.
 
-Frequency matching tolerates ±0.5 Hz to account for Q1asm's 1 Hz frequency resolution.
-Only channels actively selected by sequences consume allocation; calibrated but unplayed
-channels do not reserve sequencers, enabling efficient hardware utilization.
+Frequency matching uses exact integer-Hz equality, consistent with the Pulse frequency
+attribute and canonical channel model. Only channels actively selected by sequences consume
+allocation; calibrated but unplayed channels do not reserve sequencers, enabling efficient
+hardware utilization.
 
 The pass merges existing program-owned sequencer configuration with the resolved
 configuration during binding, preserving acquisition settings while enforcing canonical
@@ -24,7 +25,6 @@ module constraints.
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from math import isclose
 
 from xdsl.context import Context
 from xdsl.dialects import scf
@@ -196,8 +196,7 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
         """Return the unconsumed canonical candidates for a sequence.
 
         Finds all canonical channels matching the sequence's port and frame carrier
-        frequency (within ±0.5 Hz tolerance). Filters out channels already consumed by
-        earlier sequences in the pass.
+        frequency. Filters out channels already consumed by earlier sequences in the pass.
         """
 
         carrier, candidates = self._frame_candidates(sequence_op, channels)
@@ -242,15 +241,11 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
             )
         carrier = extract_frequency_hz(frames[0])
 
-        # Q1asm allows a frequency resolution of 1Hz, so we allow a tolerance of ±0.5 Hz
-        _FREQUENCY_RESOLUTION = 0.5
         candidates = [
             channel
             for channel in channels.values()
             if channel.port_id == sequence_op.port_id.data
-            and isclose(
-                channel.carrier_frequency, carrier, rel_tol=0, abs_tol=_FREQUENCY_RESOLUTION
-            )
+            and channel.carrier_frequency == carrier
         ]
         return carrier, candidates
 

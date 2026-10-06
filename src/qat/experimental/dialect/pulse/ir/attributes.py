@@ -3,7 +3,7 @@
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterable, Mapping
-from math import isclose, isnan
+from math import isclose, isfinite, isnan
 from numbers import Number
 from typing import ClassVar, Generic
 
@@ -16,13 +16,6 @@ from xdsl.irdl import ParametrizedAttribute, irdl_attr_definition
 from xdsl.parser import AttrParser
 from xdsl.printer import Printer
 from xdsl.utils.exceptions import VerifyException
-
-from qat.experimental.dialect.pulse.units import (
-    FREQUENCY_UNIT_EXPONENTS,
-    TIME_UNIT_EXPONENTS,
-    FrequencyUnits,
-    TimeUnits,
-)
 
 from .types import (
     PULSE_VAR_TYPE,
@@ -57,68 +50,64 @@ class PulseNumericTypedAttr(ParametrizedAttribute, Generic[PULSE_VAR_TYPE], ABC)
 
 
 @irdl_attr_definition
-class TimeUnitsData(Data[TimeUnits]):
-    """Data attribute for representing time units in the pulse dialect."""
-
-    name = "pulse.time_units"
-
-    def print_parameter(self, printer: Printer) -> None:
-        """Prints the parameters of the attribute, which are expected to be a string
-        representing the time units."""
-        printer.print_string_literal(self.data.value)
-
-    @classmethod
-    def parse_parameter(cls, parser: AttrParser) -> TimeUnits:
-        """Parses the parameters of the attribute, which are expected to be a string
-        representing the time units."""
-
-        unit_str = parser.parse_str_literal()
-
-        try:
-            return TimeUnits(unit_str)
-        except ValueError as e:
-            raise ValueError(f"Unable to resolve time units {unit_str}.") from e
-
-
-@irdl_attr_definition
 class TimeAttr(PulseNumericTypedAttr[TimeType]):
     """An attribute that represents a compile-time constant time.
 
-    This attribute intentionally does not specify the precision of the time value, and uses
-    the standard Python precision for its respective type. The representation of the value
-    will be set by the target.
+    Times are represented as a non-negative integer number of picoseconds. Float inputs are
+    accepted for compatibility when they are within rounding tolerance of a whole
+    picosecond, but zero is the minimum valid value.
 
-    :ivar value: The time value, which can be a float or an integer.
-    :ivar unit: The time units, which is an instance of the :class:`TimeUnits` enum.
+    :ivar value: The time value in picoseconds.
     """
 
     name = "pulse.time_attr"
-    value: FloatData | IntAttr
-    unit: TimeUnitsData
+    value: IntAttr
 
-    def __init__(self, value: float | int, unit: TimeUnits = TimeUnits.SECOND):
+    def __init__(self, value: float | int):
         """
-        :param value: The time value in seconds, which can be a float or an integer.
-        :param unit: The time units, which is an instance of the :class:`TimeUnits` enum
-            and defaults to seconds if not provided.
+        :param value: The time value in picoseconds.
+        :raises ValueError: If ``value`` is not finite or cannot be represented as an
+            integer number of picoseconds.
         """
 
-        value = IntAttr(value) if isinstance(value, int) else FloatData(value)
-        return super().__init__(value, TimeUnitsData(unit))
+        if isinstance(value, bool) or not isinstance(
+            value, int | float | np.integer | np.floating
+        ):
+            raise TypeError("Time values must be integer picoseconds.")
+        if value < 0:
+            raise ValueError("Time values must be non-negative finite integer picoseconds.")
+        if isinstance(value, float | np.floating):
+            if not isfinite(value) or not isclose(
+                value, round(value), abs_tol=1e-9, rel_tol=0
+            ):
+                raise ValueError(
+                    "Time values must be non-negative finite integer picoseconds."
+                )
+            value = round(value)
+        if not isinstance(value, int | np.integer):
+            raise TypeError("Time values must be integer picoseconds.")
+        return super().__init__(IntAttr(value))
 
     @property
-    def literal_value(self) -> float | int:
-        """Returns the time value in seconds."""
-        return self.value.data * 10 ** TIME_UNIT_EXPONENTS[self.unit.data]
+    def literal_value(self) -> int:
+        """Returns the time value in picoseconds."""
+        return self.value.data
 
-    def value_in_unit(self, unit: TimeUnits) -> float | int:
-        """Returns the time value in the specified units.
-
-        :param unit: The units to convert the time value to.
-        :returns: The time value in the specified units.
-        """
-        return self.value.data * 10 ** (
-            TIME_UNIT_EXPONENTS[self.unit.data] - TIME_UNIT_EXPONENTS[unit]
+    @classmethod
+    def _is_valid(cls, value: float | int) -> bool:
+        """Check if a value is valid for TimeAttr without raising."""
+        if isinstance(value, bool) or not isinstance(
+            value, int | float | np.integer | np.floating
+        ):
+            return False
+        if value < 0:
+            return False
+        return not (
+            isinstance(value, float | np.floating)
+            and (
+                not isfinite(value)
+                or not isclose(value, round(value), abs_tol=1e-9, rel_tol=0)
+            )
         )
 
     @property
@@ -126,96 +115,82 @@ class TimeAttr(PulseNumericTypedAttr[TimeType]):
         """Returns the associated dialect type."""
         return TimeType
 
-    @classmethod
-    def from_literal_value(
-        cls, value: float | int, unit: TimeUnits = TimeUnits.SECOND
-    ) -> "TimeAttr":
-        """Creates a time attribute from a canonical value in seconds.
-
-        :param value: The time value in seconds.
-        :param unit: The unit used to store the value.
-        :returns: A time attribute storing ``value`` in the requested unit.
-        """
-
-        value_in_unit = value / 10 ** TIME_UNIT_EXPONENTS[unit]
-        if value_in_unit.is_integer():
-            value_in_unit = int(value_in_unit)
-
-        return cls(value_in_unit, unit)
-
-
-@irdl_attr_definition
-class FrequencyUnitsData(Data[FrequencyUnits]):
-    """Data attribute for representing frequency units in the pulse dialect."""
-
-    name = "pulse.frequency_units"
-
-    def print_parameter(self, printer: Printer) -> None:
-        """Prints the parameters of the attribute, which are expected to be a string
-        representing the frequency units."""
-        printer.print_string_literal(self.data.value)
-
-    @classmethod
-    def parse_parameter(cls, parser: AttrParser) -> FrequencyUnits:
-        """Parses the parameters of the attribute, which are expected to be a string
-        representing the frequency units."""
-
-        unit_str = parser.parse_str_literal()
-        try:
-            return FrequencyUnits(unit_str)
-        except ValueError as e:
-            raise ValueError(f"Unable to resolve frequency units {unit_str}.") from e
+    def verify(self):
+        super().verify()
+        if self.literal_value < 0:
+            raise VerifyException(
+                "Time values must be non-negative finite integer picoseconds."
+            )
 
 
 @irdl_attr_definition
 class FrequencyAttr(PulseNumericTypedAttr[FrequencyType]):
     """An attribute that represents a compile-time constant frequency.
 
-    :ivar value: The frequency value, which can be a float or an integer.
-    :ivar unit: The frequency units, which is an instance of the :class:`FrequencyUnits`
-        enum.
+    Frequencies are represented as non-negative integer values in Hertz. Zero is valid; the
+    value must not be negative.
+
+    :ivar value: The frequency value in Hertz.
     """
 
     name = "pulse.frequency_attr"
-    value: FloatData | IntAttr
-    unit: FrequencyUnitsData
+    value: IntAttr
 
-    def __init__(self, value: float | int, unit: FrequencyUnits = FrequencyUnits.HERTZ):
+    def __init__(self, value: float | int):
         """
         :param value: The frequency value in Hz, which can be a float or an integer.
-        :param unit: The frequency units, which is an instance of the
-            :class:`FrequencyUnits`, enum and defaults to hertz if not provided.
         """
-
-        value = IntAttr(value) if isinstance(value, int) else FloatData(value)
-        return super().__init__(value, FrequencyUnitsData(unit))
+        if isinstance(value, bool) or not isinstance(
+            value, int | float | np.integer | np.floating
+        ):
+            raise TypeError("Frequency values must be integer Hertz.")
+        if value < 0:
+            raise ValueError("Frequency values must be non-negative finite integer Hertz.")
+        if isinstance(value, float | np.floating):
+            if not isfinite(value) or not isclose(
+                value, round(value), abs_tol=1e-9, rel_tol=0
+            ):
+                raise ValueError(
+                    "Frequency values must be non-negative finite integer Hertz."
+                )
+            value = round(value)
+        if not isinstance(value, int | np.integer):
+            raise TypeError("Frequency values must be integer Hertz.")
+        return super().__init__(IntAttr(value))
 
     @property
     def literal_value(self) -> float | int:
         """Returns the frequency value in Hertz."""
-        return self.value.data * 10 ** FREQUENCY_UNIT_EXPONENTS[self.unit.data]
+        return self.value.data
+
+    @classmethod
+    def _is_valid(cls, value: float | int) -> bool:
+        """Check if a value is valid for FrequencyAttr without raising."""
+        if isinstance(value, bool) or not isinstance(
+            value, int | float | np.integer | np.floating
+        ):
+            return False
+        if value < 0:
+            return False
+        return not (
+            isinstance(value, float | np.floating)
+            and (
+                not isfinite(value)
+                or not isclose(value, round(value), abs_tol=1e-9, rel_tol=0)
+            )
+        )
 
     @property
     def associated_type(self) -> type[FrequencyType]:
         """Returns the associated dialect type."""
         return FrequencyType
 
-    @classmethod
-    def from_literal_value(
-        cls, value: float | int, unit: FrequencyUnits = FrequencyUnits.HERTZ
-    ) -> "FrequencyAttr":
-        """Creates a frequency attribute from a canonical value in Hertz.
-
-        :param value: The frequency value in Hertz.
-        :param unit: The unit used to store the value.
-        :returns: A frequency attribute storing ``value`` in the requested unit.
-        """
-
-        value_in_unit = value / 10 ** FREQUENCY_UNIT_EXPONENTS[unit]
-        if value_in_unit.is_integer():
-            value_in_unit = int(value_in_unit)
-
-        return cls(value_in_unit, unit)
+    def verify(self):
+        super().verify()
+        if self.literal_value < 0:
+            raise VerifyException(
+                "Frequency values must be non-negative finite integer Hertz."
+            )
 
 
 @irdl_attr_definition

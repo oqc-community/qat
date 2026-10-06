@@ -775,13 +775,8 @@ def test_sequencer_allocation_failure_for_selected_channels_is_rejected(monkeypa
         )
 
 
-def test_frequency_tolerance_boundary_inside_tolerance():
-    """Verify that frequencies at ±0.5 Hz boundary are matched.
-
-    Q1asm provides 1 Hz frequency resolution, so the pass allows ±0.5 Hz tolerance when
-    matching sequence frames to canonical channels. Verify that sequences at frequencies
-    within the tolerance of a canonical channel are all successfully bound.
-    """
+def test_frequency_matching_accepts_exact_channel_frequencies():
+    """Verify that integer-Hz frequencies match their canonical channels exactly."""
     base_freq = 4_200_000_000
     # Create data with 3 channels on port-0, naturally spaced at 100 MHz apart
     # Then adjust to place them around the tolerance boundary
@@ -809,31 +804,8 @@ def test_frequency_tolerance_boundary_inside_tolerance():
     assert len(sequences) == 3
 
 
-def test_frequency_tolerance_boundary_outside_tolerance():
-    """Verify that frequencies outside ±0.5 Hz boundary are rejected.
-
-    Frequencies more than 0.5 Hz away from a canonical channel should not match, causing the
-    pass to reject binding.
-    """
-    base_freq = 4_200_000_000
-    data = canonical_data(
-        configurations=[supplied([sequencer(0)])],
-        channels_per_port=1,
-    )
-    # Create a sequence at a frequency > 0.5 Hz away from any canonical channel
-    sequence = _sequence(base_freq + 0.501)
-
-    # Should raise because no canonical channel matches the frequency
-    with pytest.raises(PassFailedException, match="maps to"):
-        _bind(data, sequence)
-
-
-def test_frequency_one_hz_apart_is_rejected():
-    """Verify that a 1 Hz offset does not match a canonical channel.
-
-    Q1asm rounds to 1 Hz resolution, but hardware binding only tolerates frequencies within
-    ±0.5 Hz of a canonical channel. A full 1 Hz offset must therefore be rejected.
-    """
+def test_frequency_matching_rejects_one_hz_difference():
+    """Verify that a one-hertz offset does not match an integer-Hz channel."""
     base_freq = 4_200_000_000
     data = canonical_data(
         configurations=[supplied([sequencer(0)])],
@@ -845,11 +817,11 @@ def test_frequency_one_hz_apart_is_rejected():
         _bind(data, _sequence(base_freq + 1))
 
 
-def test_frequency_ambiguity_multiple_candidates_within_tolerance():
+def test_frequency_ambiguity_multiple_candidates_at_same_frequency():
     """Verify that explicit channel_id preferences are respected in binding.
 
     When a sequence specifies an explicit channel_id that matches an available canonical
-    channel within the frequency tolerance, that channel is selected.
+    channel at the same frequency, that channel is selected.
     """
     base_freq = 4_200_000_000
     # Create data with 3 channels on port-0, naturally spaced 100 MHz apart

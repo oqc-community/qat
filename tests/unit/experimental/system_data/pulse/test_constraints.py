@@ -16,58 +16,8 @@ from qat.experimental.system_data.pulse.constraints import (
 )
 
 
-class TestPortConstraints:
-    """Tests the access methods on the :class:`PortConstraints` class."""
-
-    def test_sample_time_in_seconds_gives_correct_value(self):
-        """Tests that the sample time in seconds is correctly calculated."""
-        constraints = PortConstraints(
-            sample_time_ps=8000,
-            min_duration_ps=0,
-            max_duration_ps=None,
-            acquire_allowed=True,
-        )
-        assert constraints.sample_time_s == 8e-9
-
-    @pytest.mark.parametrize("min_duration_ps, min_duration_s", [(0, 0.0), (8000, 8e-9)])
-    def test_min_pulse_duration_in_seconds_gives_correct_value(
-        self, min_duration_ps, min_duration_s
-    ):
-        """Tests that the minimum pulse duration in seconds is correctly calculated."""
-        constraints = PortConstraints(
-            sample_time_ps=0,
-            min_duration_ps=min_duration_ps,
-            max_duration_ps=None,
-            acquire_allowed=True,
-        )
-        assert constraints.min_pulse_duration_s == min_duration_s
-
-    @pytest.mark.parametrize(
-        "max_duration_ps, max_duration_s", [(None, None), (8000, 8e-9)]
-    )
-    def test_max_pulse_duration_in_seconds_gives_correct_value(
-        self, max_duration_ps, max_duration_s
-    ):
-        """Tests that the maximum pulse duration in seconds is correctly calculated."""
-        constraints = PortConstraints(
-            sample_time_ps=0,
-            min_duration_ps=0,
-            max_duration_ps=max_duration_ps,
-            acquire_allowed=True,
-        )
-        assert constraints.max_pulse_duration_s == max_duration_s
-
-
 class TestPulseLevelConstraints:
     """Tests the access methods on the :class:`PulseLevelConstraints` class."""
-
-    def test_granularity_in_seconds_gives_correct_value(self):
-        """Tests that the granularity in seconds is correctly calculated."""
-        constraints = PulseLevelConstraints(
-            ports={},
-            granularity_ps=8000,
-        )
-        assert constraints.granularity_s == 8e-9
 
     @pytest.mark.parametrize(
         "waveform_shape, response",
@@ -87,32 +37,8 @@ class TestPulseLevelConstraints:
         )
         assert constraints.supports_waveform_shape(waveform_shape) == response
 
-    def test_port_sample_times_seconds_gives_correct_value(self):
-        """Tests that port_sample_times_seconds returns a dict with correct values."""
-        port_constraints_1 = PortConstraints(
-            sample_time_ps=8000,
-            min_duration_ps=0,
-            max_duration_ps=None,
-            acquire_allowed=True,
-        )
-        port_constraints_2 = PortConstraints(
-            sample_time_ps=4000,
-            min_duration_ps=0,
-            max_duration_ps=None,
-            acquire_allowed=False,
-        )
-        constraints = PulseLevelConstraints(
-            ports={
-                "port_1": port_constraints_1,
-                "port_2": port_constraints_2,
-            },
-            granularity_ps=0,
-        )
-        port_times = constraints.port_sample_times_seconds
-        assert port_times == {"port_1": 8e-9, "port_2": 4e-9}
-
-    def test_port_sample_times_seconds_is_immutable(self):
-        """Tests that port_sample_times_seconds returns an immutable mapping."""
+    def test_port_sample_times_ps_is_immutable(self):
+        """Tests that port_sample_times_ps returns an immutable mapping."""
         constraints = PulseLevelConstraints(
             ports={
                 "port_1": PortConstraints(
@@ -125,9 +51,9 @@ class TestPulseLevelConstraints:
             granularity_ps=0,
         )
 
-        port_times = constraints.port_sample_times_seconds
+        port_times = constraints.port_sample_times_ps
         with pytest.raises(TypeError):
-            port_times["port_2"] = 4e-9
+            port_times["port_2"] = 4000
 
 
 class TestBuildPulseLevelConstraints:
@@ -164,31 +90,24 @@ class TestBuildPulseLevelConstraints:
         """Tests that the granularity is correctly calculated from canonical data."""
         pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.granularity_ps == 8000
-        assert pulse_constraints.granularity_s == 8e-9
 
     def test_building_gives_correct_sample_times(self, canonical_data):
         """Tests that the sample times are correctly calculated from canonical data."""
         pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].sample_time_ps == 1000
         assert pulse_constraints.ports["port_2"].sample_time_ps == 500
-        assert pulse_constraints.ports["port_1"].sample_time_s == 1e-9
-        assert pulse_constraints.ports["port_2"].sample_time_s == 5e-10
 
     def test_building_gives_correct_min_durations(self, canonical_data):
         """Tests that the minimum durations are correctly calculated from canonical data."""
         pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].min_duration_ps == 8000
         assert pulse_constraints.ports["port_2"].min_duration_ps == 8000
-        assert pulse_constraints.ports["port_1"].min_pulse_duration_s == 8e-9
-        assert pulse_constraints.ports["port_2"].min_pulse_duration_s == 8e-9
 
     def test_building_gives_correct_max_durations(self, canonical_data):
         """Tests that the maximum durations are correctly calculated from canonical data."""
         pulse_constraints = PulseLevelConstraints.derive(canonical_data)
         assert pulse_constraints.ports["port_1"].max_duration_ps == 80000
         assert pulse_constraints.ports["port_2"].max_duration_ps is None
-        assert pulse_constraints.ports["port_1"].max_pulse_duration_s == 8e-8
-        assert pulse_constraints.ports["port_2"].max_pulse_duration_s is None
 
     def test_building_gives_correct_native_waveform_shapes(self, canonical_data):
         """Tests that native waveform shapes are correctly calculated from canonical data

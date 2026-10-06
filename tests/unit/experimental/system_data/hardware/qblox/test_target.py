@@ -22,6 +22,7 @@ from qat.experimental.system_data.hardware.qblox.target import (
     Q1SequencerSpec,
     Q1SequencerType,
     QbloxTargetDescription,
+    ReadoutSpec,
 )
 
 
@@ -176,33 +177,24 @@ def test_qrc_local_oscillator_accepts_documented_boundaries(frequency):
     assert not oscillator.supports(frequency + 50_000_000)
 
 
+@pytest.mark.parametrize(
+    ("minimum", "maximum", "step", "message"),
+    [
+        (-1, 1, 1, "minimum frequency must be non-negative"),
+        (2, 1, 1, "maximum frequency must not be below its minimum"),
+        (0, 1, 0, "frequency step must be positive"),
+    ],
+)
+def test_local_oscillator_rejects_invalid_limits(minimum, maximum, step, message):
+    with pytest.raises(ValueError, match=message):
+        LocalOscillatorSpec(minimum, maximum, step)
+
+
 def test_module_rf_classification_requires_a_local_oscillator_specification():
     qcm = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm)
 
     with pytest.raises(ValueError, match="RF module classification"):
         replace(qcm, is_rf=True)
-
-
-@pytest.mark.parametrize(
-    ("arguments", "message"),
-    [
-        (
-            (-1, 1, 1),
-            "minimum frequency must be non-negative",
-        ),
-        (
-            (1, 0, 1),
-            "maximum frequency must not be below its minimum",
-        ),
-        (
-            (0, 1, 0),
-            "frequency step must be positive",
-        ),
-    ],
-)
-def test_local_oscillator_rejects_invalid_limits(arguments, message):
-    with pytest.raises(ValueError, match=message):
-        LocalOscillatorSpec(*arguments)
 
 
 @pytest.mark.parametrize(
@@ -459,6 +451,100 @@ def test_module_rejects_control_sequencer_on_input_channel_map():
         )
 
 
+@pytest.mark.parametrize(
+    ("sequencer_type", "readout"),
+    [
+        (Q1SequencerType.control, ReadoutSpec()),
+        (Q1SequencerType.readout, None),
+    ],
+)
+def test_sequencer_spec_requires_readout_limits_to_match_type(sequencer_type, readout):
+    with pytest.raises(ValueError, match="require readout-path limits"):
+        replace(DEFAULT_QBLOX_TARGET.sequencer_spec(sequencer_type), readout=readout)
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        ({"sequencers": [Q1SequencerType.control]}, "sequencers must be an immutable"),
+        ({"output_channel_map": {0: (0,)}}, "channel maps must be immutable"),
+        (
+            {"output_channel_map": frozendict({0: [0], 1: (), 2: (), 3: ()})},
+            "sequencer indices must be tuples",
+        ),
+        (
+            {"output_channel_map": frozendict({1: (), 2: (), 3: ()})},
+            "output channel map is incomplete",
+        ),
+        (
+            {"output_channel_map": frozendict({0: (6,), 1: (), 2: (), 3: ()})},
+            "references an invalid sequencer",
+        ),
+        ({"acquisition_memory_bins": 1}, "acquisition memory must match"),
+        ({"is_rf": True}, "RF module classification"),
+    ],
+)
+def test_module_spec_rejects_invalid_configuration(updates, message):
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm)
+
+    with pytest.raises((TypeError, ValueError), match=message):
+        replace(module_spec, **updates)
+
+
+def test_module_spec_requires_input_map_for_declared_inputs():
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qrm)
+
+    with pytest.raises(ValueError, match="input channel map is incomplete"):
+        replace(module_spec, input_channel_map=frozendict({0: ()}))
+
+
+def test_rf_module_requires_local_oscillator_specification():
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm_rf)
+
+    with pytest.raises(ValueError, match="RF module classification"):
+        replace(module_spec, local_oscillator=None)
+
+
 def test_target_rejects_mutable_specification_maps():
     with pytest.raises(TypeError, match="immutable frozendict"):
         replace(DEFAULT_QBLOX_TARGET, module_specs=dict(DEFAULT_QBLOX_TARGET.module_specs))
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        ({"min_module_slot": 0}, "slot range is invalid"),
+        ({"min_module_slot": 5, "max_module_slot": 4}, "slot range is invalid"),
+        (
+            {
+                "sequencer_specs": frozendict(
+                    {
+                        Q1SequencerType.control: DEFAULT_QBLOX_TARGET.sequencer_spec(
+                            Q1SequencerType.readout
+                        ),
+                        Q1SequencerType.readout: DEFAULT_QBLOX_TARGET.sequencer_spec(
+                            Q1SequencerType.control
+                        ),
+                    }
+                )
+            },
+            "keys must match their types",
+        ),
+        (
+            {
+                "module_specs": frozendict(
+                    {
+                        **DEFAULT_QBLOX_TARGET.module_specs,
+                        QbloxModuleKind.qcm: DEFAULT_QBLOX_TARGET.module_spec(
+                            QbloxModuleKind.qcm_rf
+                        ),
+                    }
+                )
+            },
+            "keys must match their kinds",
+        ),
+    ],
+)
+def test_target_rejects_inconsistent_specifications(updates, message):
+    with pytest.raises(ValueError, match=message):
+        replace(DEFAULT_QBLOX_TARGET, **updates)

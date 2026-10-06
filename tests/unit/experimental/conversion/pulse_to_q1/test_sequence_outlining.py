@@ -96,7 +96,7 @@ def _frame(frequency: float, channel_id: str) -> tuple[ConstantOp, CreateFrameOp
 
 def _square_pulse(frame: CreateFrameOp) -> list:
     """A square pulse played on `frame`, with the constants it consumes."""
-    width = ConstantOp(TimeAttr(64e-9))
+    width = ConstantOp(TimeAttr(64e3))
     amplitude = ConstantOp(AmplitudeAttr(1.0))
     waveform = SquareWaveformOp(width, amplitude)
     return [width, amplitude, waveform, PulseOp(frame, waveform)]
@@ -125,7 +125,7 @@ def _shot_loop_module(
     carried = list(body.args[1:])
     for position, channel in enumerate(measure_channels):
         measure_freq, measure = _frame(7.1e9 + position * 1e8, channel)
-        duration = ConstantOp(TimeAttr(1e-6))
+        duration = ConstantOp(TimeAttr(1e6))
         acquire = AcquireOp(measure, duration)
         slot = 0 if shared_array else position
         store = StoreOp.value_in_array(carried[slot], index, acquire.acquisition_result)
@@ -265,7 +265,7 @@ class TestPulseToQ1SequenceOutlining:
         """Verify that a region-bearing op referencing a frame is placed in its outlined
         sequence."""
         freq, frame_op = _frame(4.8e9, "q0.drive")
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame_op, duration)
         container = _ContainerOp(Region(Block([wait])))
         module = _module_with_main([freq, frame_op, duration, container, func.ReturnOp()])
@@ -284,7 +284,7 @@ class TestPulseToQ1SequenceOutlining:
         """Verify that entry-block constants used as free variables inside a nested region
         are included in the outlined sequence."""
         freq, frame_op = _frame(4.8e9, "q0.drive")
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame_op, duration)
         container = _ContainerOp(Region(Block([wait])))
         module = _module_with_main([freq, frame_op, duration, container, func.ReturnOp()])
@@ -303,7 +303,7 @@ class TestPulseToQ1SequenceOutlining:
         """Verify that a frame referenced inside a doubly-nested region causes the outermost
         container to be included in the sequence."""
         freq, frame_op = _frame(4.8e9, "q0.drive")
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame_op, duration)
         inner = _ContainerOp(Region(Block([wait])))
         outer = _ContainerOp(Region(Block([inner])))
@@ -321,9 +321,9 @@ class TestPulseToQ1SequenceOutlining:
         """Verify that a constant not referenced by any lineage is excluded from the
         outlined sequence."""
         freq, frame_op = _frame(4.8e9, "q0.drive")
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame_op, duration)
-        unused = ConstantOp(TimeAttr(32e-9))
+        unused = ConstantOp(TimeAttr(32e3))
         module = _module_with_main(
             [freq, frame_op, duration, wait, unused, func.ReturnOp()]
         )
@@ -342,7 +342,7 @@ class TestPulseToQ1SequenceOutlining:
         outlined sequence body, keeping each sequence self-contained."""
         f0_freq, f0 = _frame(4.8e9, "q0.drive")
         f1_freq, f1 = _frame(5.2e9, "q1.drive")
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait_0 = WaitOp(f0, duration)
         wait_1 = WaitOp(f1, duration)
         module = _module_with_main(
@@ -364,8 +364,8 @@ class TestPulseToQ1SequenceOutlining:
         """Verify that a multi-level dependency chain feeding a lineage op is pulled in
         transitively, not just its immediate operand."""
         freq, frame_op = _frame(4.8e9, "q0.drive")
-        time_0 = ConstantOp(TimeAttr(16e-9))
-        time_1 = ConstantOp(TimeAttr(32e-9))
+        time_0 = ConstantOp(TimeAttr(16e3))
+        time_1 = ConstantOp(TimeAttr(32e3))
         combined = MaxTimeOp(time_0, time_1)
         wait = WaitOp(frame_op, combined)
         module = _module_with_main(
@@ -652,7 +652,7 @@ class TestPulseToQ1ShotLoopFissionRejections:
         """A frame arriving as a block argument has no resolvable lineage, so the loop body
         would be attributed to no partition and silently vanish."""
         freq, frame = _frame(4.8e9, "q0/drive")
-        width, amplitude = ConstantOp(TimeAttr(64e-9)), ConstantOp(AmplitudeAttr(1.0))
+        width, amplitude = ConstantOp(TimeAttr(64e3)), ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(width, amplitude)
         bounds = [
             ArithConstantOp.from_int_and_width(value, IndexType())
@@ -673,7 +673,7 @@ class TestPulseToQ1ShotLoopFissionRejections:
         """Retained operations are copied from the loop body only, so work nested inside a
         region there would be dropped rather than copied."""
         freq, frame = _frame(4.8e9, "q0/drive")
-        width, amplitude = ConstantOp(TimeAttr(64e-9)), ConstantOp(AmplitudeAttr(1.0))
+        width, amplitude = ConstantOp(TimeAttr(64e3)), ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(width, amplitude)
         bounds = [
             ArithConstantOp.from_int_and_width(value, IndexType())
@@ -701,7 +701,7 @@ class TestPulseToQ1ShotLoopFissionRejections:
         """Only pulse.integrate and results bookkeeping are accounted for; any other
         consumer would be dropped and the acquisition would mean something else."""
         freq, frame = _frame(7.1e9, "q0/measure")
-        duration = ConstantOp(TimeAttr(1e-6))
+        duration = ConstantOp(TimeAttr(1e6))
         acquire = AcquireOp(frame, duration)
         bounds = [
             ArithConstantOp.from_int_and_width(value, IndexType())
@@ -728,7 +728,7 @@ class TestPulseToQ1ShotLoopFissionRejections:
         """A rebuilt loop carries nothing out, so an operation still needing one of its
         results would be left holding a value from the original loop."""
         freq, frame = _frame(4.8e9, "q0/drive")
-        width, amplitude = ConstantOp(TimeAttr(64e-9)), ConstantOp(AmplitudeAttr(1.0))
+        width, amplitude = ConstantOp(TimeAttr(64e3)), ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(width, amplitude)
         bounds = [
             ArithConstantOp.from_int_and_width(value, IndexType())

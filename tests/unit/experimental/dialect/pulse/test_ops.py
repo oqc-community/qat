@@ -128,11 +128,11 @@ class TestConstantOp:
         [
             (PhaseAttr(np.pi / 2), PhaseType()),
             (FrequencyAttr(5.5e9), FrequencyType()),
-            (TimeAttr(160e-9), TimeType()),
+            (TimeAttr(160e3), TimeType()),
             (AmplitudeAttr(0.5 - 0.5j), AmplitudeType()),
             (
                 SampledWaveformAttr(
-                    np.array([0.0, 0.5, 1.0, 0.5, 0.0]), TimeAttr(5e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.5, 1.0, 0.5, 0.0]), TimeAttr(5e3), TimeAttr(1e3)
                 ),
                 WaveformType(),
             ),
@@ -168,7 +168,7 @@ class TestConstantOp:
         [
             (PhaseAttr(np.pi / 2), PhaseType()),
             (FrequencyAttr(5.5e9), FrequencyType()),
-            (TimeAttr(160e-9), TimeType()),
+            (TimeAttr(160e3), TimeType()),
             (AmplitudeAttr(0.5 - 0.5j), AmplitudeType()),
         ],
     )
@@ -191,14 +191,14 @@ class TestInternalBinaryOps:
         [
             (PhaseAttr(0.5), PhaseAttr(1.0), PhaseType()),
             (FrequencyAttr(5.5e9), FrequencyAttr(0.1e9), FrequencyType()),
-            (TimeAttr(160e-9), TimeAttr(40e-9), TimeType()),
+            (TimeAttr(160e3), TimeAttr(40e3), TimeType()),
             (AmplitudeAttr(0.5 - 0.5j), AmplitudeAttr(0.25 + 0.25j), AmplitudeType()),
             (
                 SampledWaveformAttr(
-                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3)
                 ),
                 SampledWaveformAttr(
-                    np.array([0.0, 0.25, 0.5]), TimeAttr(3e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.25, 0.5]), TimeAttr(3e3), TimeAttr(1e3)
                 ),
                 WaveformType(),
             ),
@@ -293,9 +293,9 @@ class TestMaxTimeOp:
     @pytest.mark.parametrize(
         "times, expected",
         [
-            ([TimeAttr(64e-9), TimeAttr(128e-9)], TimeAttr(128e-9)),
-            ([TimeAttr(192e-9), TimeAttr(64e-9), TimeAttr(128e-9)], TimeAttr(192e-9)),
-            ([TimeAttr(256e-9)], TimeAttr(256e-9)),
+            ([TimeAttr(64e3), TimeAttr(128e3)], TimeAttr(128e3)),
+            ([TimeAttr(192e3), TimeAttr(64e3), TimeAttr(128e3)], TimeAttr(192e3)),
+            ([TimeAttr(256e3)], TimeAttr(256e3)),
         ],
     )
     def test_initialization(self, times, expected):
@@ -313,7 +313,7 @@ class TestMaxTimeOp:
             PhaseAttr(0.5),
             FrequencyAttr(5.5e9),
             AmplitudeAttr(0.5 - 0.5j),
-            SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)),
+            SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3)),
         ],
     )
     def test_invalid_operand_types(self, attr):
@@ -333,10 +333,8 @@ class TestMaxTimeOp:
 
 class TestMixOp:
     def test_initialization(self):
-        wf1 = SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9))
-        wf2 = SampledWaveformAttr(
-            np.array([0.0, 0.25, 0.5]), TimeAttr(3e-9), TimeAttr(1e-9)
-        )
+        wf1 = SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3))
+        wf2 = SampledWaveformAttr(np.array([0.0, 0.25, 0.5]), TimeAttr(3e3), TimeAttr(1e3))
         constant1 = ConstantOp(wf1)
         constant2 = ConstantOp(wf2)
         op = MixOp(constant1.results[0], constant2.results[0])
@@ -365,8 +363,8 @@ class TestScaleOp:
             (IntegerAttr(2, i64), PhaseAttr(np.pi / 2), PhaseType()),
             (FloatAttr(0.5, 64), FrequencyAttr(5.5e9), FrequencyType()),
             (IntegerAttr(2, i64), FrequencyAttr(5.5e9), FrequencyType()),
-            (FloatAttr(0.5, 64), TimeAttr(160e-9), TimeType()),
-            (IntegerAttr(2, i64), TimeAttr(160e-9), TimeType()),
+            (FloatAttr(0.5, 64), TimeAttr(160e3), TimeType()),
+            (IntegerAttr(2, i64), TimeAttr(160e3), TimeType()),
             (FloatAttr(0.5, 64), AmplitudeAttr(0.5 - 0.5j), AmplitudeType()),
             (IntegerAttr(2, i64), AmplitudeAttr(0.5 - 0.5j), AmplitudeType()),
             (
@@ -377,21 +375,21 @@ class TestScaleOp:
             (
                 FloatAttr(0.5, 64),
                 SampledWaveformAttr(
-                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3)
                 ),
                 WaveformType(),
             ),
             (
                 IntegerAttr(2, i64),
                 SampledWaveformAttr(
-                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3)
                 ),
                 WaveformType(),
             ),
             (
                 ComplexNumberAttr(0.5, -0.5, ComplexType(f64)),
                 SampledWaveformAttr(
-                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)
+                    np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3)
                 ),
                 WaveformType(),
             ),
@@ -429,7 +427,7 @@ class TestScaleOp:
         [
             PhaseAttr(np.pi / 2),
             FrequencyAttr(5.5e9),
-            TimeAttr(160e-9),
+            TimeAttr(160e3),
         ],
     )
     def test_complex_lhs_on_not_allowed_rhs_raises(self, attr):
@@ -483,9 +481,9 @@ class TestModuloOp:
         "attr",
         [
             FrequencyAttr(5.5e9),
-            TimeAttr(160e-9),
+            TimeAttr(160e3),
             AmplitudeAttr(0.5 - 0.5j),
-            SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e-9), TimeAttr(1e-9)),
+            SampledWaveformAttr(np.array([0.0, 0.5, 1.0]), TimeAttr(3e3), TimeAttr(1e3)),
         ],
     )
     def test_invalid_operand_types(self, attr):
@@ -527,7 +525,7 @@ class TestSoftSquareWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return SoftSquareWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["fractional_top_width"],
             shape_operands["fractional_rise"],
@@ -536,7 +534,7 @@ class TestSoftSquareWaveformOp:
         )
 
     def test_initialization(self):
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
         fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
@@ -557,7 +555,7 @@ class TestSoftSquareWaveformOp:
         op.verify()
 
     def test_initialization_accepts_bool_for_regularize(self):
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
         fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
@@ -598,11 +596,11 @@ class TestSoftSquareWaveformOp:
 class TestSquareWaveformOp:
     @staticmethod
     def _build_waveform_op():
-        return SquareWaveformOp(_time_constant(800e-9), _amplitude_constant(1.0))
+        return SquareWaveformOp(_time_constant(800e3), _amplitude_constant(1.0))
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
 
         op = SquareWaveformOp(width, amplitude)
         assert op.width == width.results[0]
@@ -635,7 +633,7 @@ class TestGaussianSquareWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return GaussianSquareWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["fractional_rise"],
             shape_operands["fractional_top_width"],
@@ -645,7 +643,7 @@ class TestGaussianSquareWaveformOp:
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
         regularize = BoolAttr(False, value_type=1)
@@ -667,7 +665,7 @@ class TestGaussianSquareWaveformOp:
 
     def test_initialization_accepts_single_drag_coefficient(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
         drag_coefficient = ArithConstantOp(FloatAttr(0.1, 64), f64)
@@ -686,7 +684,7 @@ class TestGaussianSquareWaveformOp:
 
     def test_initialization_accepts_bool_for_regularize(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
 
@@ -704,7 +702,7 @@ class TestGaussianSquareWaveformOp:
         """Multiple DRAG coefficients are not allowed."""
 
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_rise = ArithConstantOp(FloatAttr(0.2, 64), f64)
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
         drag_first = ArithConstantOp(FloatAttr(0.1, 64), f64)
@@ -756,7 +754,7 @@ class TestGaussianWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return GaussianWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["fractional_breadth"],
             False,
@@ -765,7 +763,7 @@ class TestGaussianWaveformOp:
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_breadth = ArithConstantOp(FloatAttr(0.47, 64), f64)
 
         op = GaussianWaveformOp(
@@ -783,7 +781,7 @@ class TestGaussianWaveformOp:
 
     def test_initialization_accepts_bool_for_regularize(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_breadth = ArithConstantOp(FloatAttr(0.47, 64), f64)
 
         op = GaussianWaveformOp(width, amplitude, fractional_breadth, False)
@@ -792,7 +790,7 @@ class TestGaussianWaveformOp:
 
     def test_initialization_with_drag_coefficients(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_breadth = ArithConstantOp(FloatAttr(0.47, 64), f64)
         drag_first = ArithConstantOp(FloatAttr(0.1, 64), f64)
         drag_second = ArithConstantOp(FloatAttr(0.2, 64), f64)
@@ -835,7 +833,7 @@ class TestGaussianWaveformOp:
 class TestBlackmanWaveformOp:
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
 
         op = BlackmanWaveformOp(width, amplitude)
         assert op.width == width.results[0]
@@ -847,7 +845,7 @@ class TestBlackmanWaveformOp:
         """BlackmanWaveformOp has no shape params so build_shape always returns the
         shape."""
         op = BlackmanWaveformOp(
-            _time_constant(800e-9), _amplitude_constant(1.0), _float_constant(0.1)
+            _time_constant(800e3), _amplitude_constant(1.0), _float_constant(0.1)
         )
         shape = op.build_shape()
 
@@ -867,7 +865,7 @@ class TestSetupHoldWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return SetupHoldWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["setup"],
             shape_operands["fractional_rise"],
@@ -875,7 +873,7 @@ class TestSetupHoldWaveformOp:
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         setup = ArithConstantOp(FloatAttr(0.5, 64), f64)
         fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
 
@@ -927,7 +925,7 @@ class TestRoundedSquareWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return RoundedSquareWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["fractional_top_width"],
             shape_operands["fractional_rise"],
@@ -936,7 +934,7 @@ class TestRoundedSquareWaveformOp:
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_top_width = ArithConstantOp(FloatAttr(0.5, 64), f64)
         fractional_rise = ArithConstantOp(FloatAttr(0.1, 64), f64)
 
@@ -989,7 +987,7 @@ class TestSinusoidalWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return SinusoidalWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["number_of_periods"],
             shape_operands["internal_phase"],
@@ -998,7 +996,7 @@ class TestSinusoidalWaveformOp:
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         number_of_periods = ArithConstantOp(FloatAttr(0.5, 64), f64)
         internal_phase = ConstantOp(PhaseAttr(1.57))
 
@@ -1045,7 +1043,7 @@ class TestSechWaveformOp:
     @staticmethod
     def _build_waveform_op(shape_operands):
         return SechWaveformOp(
-            _time_constant(800e-9),
+            _time_constant(800e3),
             _amplitude_constant(1.0),
             shape_operands["fractional_breadth"],
             False,
@@ -1054,7 +1052,7 @@ class TestSechWaveformOp:
 
     def test_initialization(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_breadth = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
         op = SechWaveformOp(
@@ -1072,7 +1070,7 @@ class TestSechWaveformOp:
 
     def test_initialization_accepts_bool_for_regularize(self):
         amplitude = ConstantOp(AmplitudeAttr(1.0))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         fractional_breadth = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
 
         op = SechWaveformOp(width, amplitude, fractional_breadth, False)
@@ -1208,7 +1206,7 @@ class TestPhaseOps:
 class TestWaitOp:
     def test_initialization(self):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        time = ConstantOp(TimeAttr(800e-9))
+        time = ConstantOp(TimeAttr(800e3))
         wait_op = WaitOp(frame.results[0], time.results[0])
         assert wait_op.frame == frame.results[0]
         assert wait_op.duration == time.results[0]
@@ -1221,7 +1219,7 @@ class TestWaitOp:
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
         )
-        time = ConstantOp(TimeAttr(800e-9))
+        time = ConstantOp(TimeAttr(800e3))
         wait_op = WaitOp(frame.results[0], time.results[0])
         assert wait_op.result.type == FrameType("measure")
         wait_op.verify()
@@ -1265,7 +1263,7 @@ class TestSynchronizeOp:
 class TestPulseOp:
     def test_initialization(self):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         amp = ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(width, amp)
         pulse_op = PulseOp(frame.result, waveform.result)
@@ -1280,7 +1278,7 @@ class TestPulseOp:
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
         )
-        width = ConstantOp(TimeAttr(800e-9))
+        width = ConstantOp(TimeAttr(800e3))
         amp = ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(width, amp)
         pulse_op = PulseOp(frame.result, waveform.result)
@@ -1332,7 +1330,7 @@ class TestStopContinuousWaveformOp:
 class TestAcquireOp:
     def test_initialization(self):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
-        duration = ConstantOp(TimeAttr(400e-9))
+        duration = ConstantOp(TimeAttr(400e3))
         acquire_op = AcquireOp(frame.result, duration.result)
         assert acquire_op.frame == frame.results[0]
         assert acquire_op.duration is duration.result
@@ -1348,7 +1346,7 @@ class TestAcquireOp:
             ConstantOp(FrequencyAttr(5.0e9)),
             StringAttr("measure"),
         )
-        duration = ConstantOp(TimeAttr(400e-9))
+        duration = ConstantOp(TimeAttr(400e3))
         acquire_op = AcquireOp(frame.result, duration.result)
         assert acquire_op.frame_result.type == FrameType("measure")
         acquire_op.verify()
@@ -1356,7 +1354,7 @@ class TestAcquireOp:
     def test_with_weights_is_valid(self):
         """Tests that an AcquireOp with weights is valid and the weights are accessible."""
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
-        duration = ConstantOp(TimeAttr(400e-9))
+        duration = ConstantOp(TimeAttr(400e3))
         weights = np.asarray([0.1, 0.2, 0.3])
         weights_attr = WeightsAttr(weights)
         acquire_op = AcquireOp(frame.result, duration.result, weights=weights_attr)
@@ -1366,7 +1364,7 @@ class TestAcquireOp:
     def test_with_label(self):
         """Tests that an AcquireOp with a label is valid and the label is accessible."""
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
-        duration = ConstantOp(TimeAttr(400e-9))
+        duration = ConstantOp(TimeAttr(400e3))
         label = StringAttr("acquire_label")
         acquire_op = AcquireOp(frame.result, duration.result, label=label)
         assert acquire_op.label == label
@@ -1380,7 +1378,7 @@ class TestIntegrateOp:
         """Tests when the result is directly passed to the integrate operation."""
 
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("measure"))
-        duration = ConstantOp(TimeAttr(400e-9))
+        duration = ConstantOp(TimeAttr(400e3))
         acquire_op = AcquireOp(frame.result, duration.result)
         integrate_op = IntegrateOp(acquire_op.acquisition_result)
         assert integrate_op.acquisition == acquire_op.acquisition_result

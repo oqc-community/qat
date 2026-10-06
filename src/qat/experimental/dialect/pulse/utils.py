@@ -88,11 +88,11 @@ def require_constant_operand(
     return owner
 
 
-def extract_time_seconds(op: WaitOp) -> float:
-    """Extract a constant wait duration in seconds from ``pulse.wait``.
+def extract_time_ps(op: WaitOp) -> int:
+    """Extract a constant wait duration in picoseconds from ``pulse.wait``.
 
     :param op: The wait operation to extract from.
-    :returns: Duration in seconds as a Python float.
+    :returns: Duration in picoseconds as a Python int.
     :raises PassFailedException: If the duration operand is not a constant or its
         attribute is not a ``TimeAttr``.
     """
@@ -100,7 +100,7 @@ def extract_time_seconds(op: WaitOp) -> float:
     folded = const.fold()
     if not folded or not isinstance(folded[0], TimeAttr):
         raise PassFailedException(f"{op.name} expects pulse.constant time operand.")
-    return float(folded[0].literal_value)
+    return folded[0].literal_value
 
 
 def extract_phase_radians(op: PhaseSetOp | PhaseShiftOp) -> float:

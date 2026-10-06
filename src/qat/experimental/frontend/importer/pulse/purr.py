@@ -33,6 +33,7 @@ from qat.experimental.dialect.results.ir import (
 )
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
 from qat.experimental.frontend.importer.pulse.post_processing import PostProcessingFactory
+from qat.experimental.system_data.materialisers.purr.materialisers.common import _hz_to_int
 from qat.experimental.utils.logging import get_logger
 from qat.experimental.waveforms.shapes.gaussian import GaussianWaveformShape
 from qat.experimental.waveforms.shapes.gaussian_square import GaussianSquareWaveformShape
@@ -345,7 +346,13 @@ class PurrImporter:
                     frame_name,
                     float(self._resolve_numeric(channel.frequency)),
                 )
-                builder.create_frame(frame_name, frequency, channel.physical_channel_id)
+                if frequency < 0:
+                    raise ValueError(
+                        f"Channel frequency must be non-negative, got {frequency} Hz."
+                    )
+                # Convert to integer Hz for new FrequencyAttr validation.
+                frequency_hz = _hz_to_int(frequency)
+                builder.create_frame(frame_name, frequency_hz, channel.physical_channel_id)
         return builder
 
     def _resolve_device_updates(self, analysis: _PurrAnalysis) -> dict[str, float]:
@@ -377,7 +384,13 @@ class PurrImporter:
             for fid in self._frame_keys(purr_device).all_frames:
                 if fid in frequency_updates:
                     raise ValueError(f"Multiple frequency updates for pulse channel {fid}.")
-                frequency_updates[fid] = float(purr_value)
+                if purr_value < 0:
+                    raise ValueError(
+                        "Device update frequency must be non-negative, "
+                        f"got {purr_value} Hz."
+                    )
+                # Convert to integer Hz for new FrequencyAttr validation.
+                frequency_updates[fid] = _hz_to_int(purr_value)
 
         return frequency_updates
 

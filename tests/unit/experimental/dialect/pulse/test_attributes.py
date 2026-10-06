@@ -36,171 +36,136 @@ from qat.experimental.dialect.pulse.ir.attributes import (
     RealThresholdPolicyAttr,
     StateMapDictAttr,
 )
-from qat.experimental.dialect.pulse.units import FrequencyUnits, TimeUnits
 
 
 class TestTimeAttr:
     @pytest.mark.parametrize(
-        "value, units, type_, value_in_seconds",
+        "value, expected",
         [
-            (80e-9, TimeUnits.SECOND, float, 80e-9),
-            (800, TimeUnits.NANOSECOND, int, 800e-9),
-            (4, TimeUnits.MICROSECOND, int, 4e-6),
-            (8e-5, TimeUnits.MILLISECOND, float, 8e-8),
-            (0, TimeUnits.SECOND, int, 0.0),
-            (0.0, TimeUnits.SECOND, float, 0.0),
+            (80e3, 80_000),
+            (800_000, 800_000),
+            (4, 4),
+            (0, 0),
+            (0.0, 0),
+            (np.int64(80_000), 80_000),
+            (np.float32(80_000), 80_000),
+            (np.float64(80_000), 80_000),
+            (1_000.0000000005, 1_000),
         ],
     )
-    def test_properties(self, value, units, type_, value_in_seconds):
-        attr = TimeAttr(value, units)
-        assert attr.value.data == value
-        assert attr.unit.data == units
-        assert isinstance(attr.value.data, type_)
-        assert np.isclose(attr.literal_value, value_in_seconds)
+    def test_properties(self, value, expected):
+        attr = TimeAttr(value)
+        assert attr.value.data == expected
+        assert isinstance(attr.value.data, int | np.integer)
         assert attr.associated_type is TimeType
         attr.verify()  # should succeed
 
     @pytest.mark.parametrize(
-        "value, units, type_",
+        "value, expected",
         [
-            (0.04, TimeUnits.SECOND, "float_data"),
-            (8, TimeUnits.NANOSECOND, "int"),
+            (40.0, 40),
+            (8_000, 8_000),
         ],
     )
-    def test_print_and_parse_roundtrip(self, value, units, type_, io_stream):
-        attr = TimeAttr(value, units)
+    def test_print_and_parse_roundtrip(self, value, expected, io_stream):
+        attr = TimeAttr(value)
         printer = Printer(stream=io_stream)
         printer.print_attribute(attr)
         output = io_stream.getvalue()
 
-        pattern = (
-            r"#pulse\.time_attr<\s*#builtin\.(.*?)<(.*?)>,"
-            r"\s*#pulse\.time_units\"(.*?)\"\s*>"
-        )
+        pattern = r"#pulse\.time_attr<\s*#builtin\.(.*?)<(.*?)>>"
         match = re.search(pattern, output)
         assert match is not None
-        type_string, value_str, unit_str = match.groups()
-        assert type_string == type_
-        assert np.isclose(float(value_str), value)
-        assert unit_str == units.value
+        type_string, value_str = match.groups()
+        assert type_string == "int"
+        assert int(value_str) == expected
 
         context = Context()
         context.load_dialect(Pulse)
         context.load_dialect(Builtin)
         parser = Parser(context, output)
         parsed_attr = parser.parse_attribute()
-        assert parsed_attr.value.data == value
-        assert parsed_attr.unit.data == units
+        assert parsed_attr.value.data == expected
         assert parsed_attr == attr
 
-    def test_parse_with_unknown_units_raises_parse_exception(self):
-        attr_str = '#pulse.time_attr<#builtin.float_data<0.1>, #pulse.time_units"GHz">'
-        context = Context()
-        context.load_dialect(Pulse)
-        context.load_dialect(Builtin)
-        parser = Parser(context, attr_str)
-        with pytest.raises(ValueError, match=r"Unable to resolve time units GHz."):
-            parser.parse_attribute()
+    @pytest.mark.parametrize(
+        "value", [0.04, 1_000.000000002, float("inf"), float("-inf"), nan]
+    )
+    def test_rejects_non_integral_or_non_finite_float_values(self, value):
+        with pytest.raises(ValueError, match="finite integer picoseconds"):
+            TimeAttr(value)
 
     def test_equality(self):
-        attr1 = TimeAttr(80e-9, TimeUnits.SECOND)
-        attr2 = TimeAttr(80e-9, TimeUnits.SECOND)
+        attr1 = TimeAttr(80_000)
+        attr2 = TimeAttr(80_000)
         assert attr1 == attr2
 
     def test_inequality_with_value(self):
-        attr1 = TimeAttr(80e-9, TimeUnits.SECOND)
-        attr2 = TimeAttr(90e-9, TimeUnits.SECOND)
+        attr1 = TimeAttr(80_000)
+        attr2 = TimeAttr(90_000)
         assert attr1 != attr2
 
-    def test_inequality_with_units(self):
-        attr1 = TimeAttr(80e-9, TimeUnits.SECOND)
-        attr2 = TimeAttr(80e-9, TimeUnits.NANOSECOND)
-        assert attr1 != attr2
+    @pytest.mark.parametrize("value", [-1, -1.0, -5_000, -0.5])
+    def test_rejects_negative_values(self, value):
+        with pytest.raises(ValueError, match="non-negative.*picoseconds"):
+            TimeAttr(value)
 
-    def test_inequality_with_different_value_type(self):
-        """Documents how xDSL equality works, and is not tested for each individual
-        attribute."""
-        assert 80 == 80.0
-        attr1 = TimeAttr(80.0, TimeUnits.SECOND)
-        attr2 = TimeAttr(80, TimeUnits.SECOND)
-        assert attr1 != attr2
+    @pytest.mark.parametrize("value", [True, False])
+    def test_rejects_boolean_values(self, value):
+        with pytest.raises(TypeError, match="integer picoseconds"):
+            TimeAttr(value)
 
-    @pytest.mark.parametrize(
-        "value, units, stored_value, type_",
-        [
-            (8e-9, TimeUnits.NANOSECOND, 8, int),
-            (0.5e-9, TimeUnits.NANOSECOND, 0.5, float),
-        ],
-    )
-    def test_from_literal_value_preserves_integer_values(
-        self, value, units, stored_value, type_
-    ):
-        attr = TimeAttr.from_literal_value(value, units)
+    @pytest.mark.parametrize("value", ["5", 5.5, 1e-6])
+    def test_rejects_non_integer_values(self, value):
+        with pytest.raises((TypeError, ValueError), match="picoseconds"):
+            TimeAttr(value)
 
-        assert attr.value.data == stored_value
-        assert isinstance(attr.value.data, type_)
-        assert attr.unit.data == units
-        assert np.isclose(attr.literal_value, value)
-
-    @pytest.mark.parametrize(
-        "before_value, before_unit, after_value, after_unit",
-        [
-            (8, TimeUnits.SECOND, 8, TimeUnits.SECOND),
-            (80e-9, TimeUnits.SECOND, 80, TimeUnits.NANOSECOND),
-            (8, TimeUnits.MICROSECOND, 8e-6, TimeUnits.SECOND),
-        ],
-    )
-    def test_value_in_unit(self, before_value, before_unit, after_value, after_unit):
-        """Tests that the conversion utility gives the correct values."""
-        attr = TimeAttr(before_value, before_unit)
-        value_with_new_unit = attr.value_in_unit(after_unit)
-        assert np.isclose(value_with_new_unit, after_value)
+    def test_generic_construction_rejects_negative_values(self):
+        with pytest.raises(VerifyException, match="non-negative"):
+            TimeAttr.new([IntAttr(-1)])
 
 
 class TestFrequencyAttr:
     @pytest.mark.parametrize(
-        "value, units, type_, value_in_hz",
+        "value, expected",
         [
-            (5e9, FrequencyUnits.HERTZ, float, 5e9),
-            (5000, FrequencyUnits.KILOHERTZ, int, 5e6),
-            (5, FrequencyUnits.MEGAHERTZ, int, 5e6),
-            (0.005, FrequencyUnits.GIGAHERTZ, float, 5e6),
-            (0, FrequencyUnits.HERTZ, int, 0.0),
-            (0.0, FrequencyUnits.HERTZ, float, 0.0),
+            (5e9, 5_000_000_000),
+            (5_000_000, 5_000_000),
+            (np.int64(80_000), 80_000),
+            (np.float32(80_000), 80_000),
+            (np.float64(80_000), 80_000),
+            (4, 4),
+            (0, 0),
+            (0.0, 0),
+            (1_000.0000000005, 1_000),
         ],
     )
-    def test_properties(self, value, units, type_, value_in_hz):
-        attr = FrequencyAttr(value, units)
-        assert attr.value.data == value
-        assert attr.unit.data == units
-        assert isinstance(attr.value.data, type_)
-        assert np.isclose(attr.literal_value, value_in_hz)
+    def test_properties(self, value, expected):
+        attr = FrequencyAttr(value)
+        assert attr.value.data == expected
+        assert isinstance(attr.literal_value, int | np.integer)
         assert attr.associated_type is FrequencyType
         attr.verify()  # should succeed
 
     @pytest.mark.parametrize(
-        "value, units, type_",
+        "value, expected",
         [
-            (5.0, FrequencyUnits.HERTZ, "float_data"),
-            (5, FrequencyUnits.KILOHERTZ, "int"),
+            (5.0, 5),
+            (8, 8),
         ],
     )
-    def test_print_and_parse_roundtrip(self, value, units, type_, io_stream):
-        attr = FrequencyAttr(value, units)
+    def test_print_and_parse_roundtrip(self, value, expected, io_stream):
+        attr = FrequencyAttr(value)
         printer = Printer(stream=io_stream)
         printer.print_attribute(attr)
         output = io_stream.getvalue()
 
-        pattern = (
-            r"#pulse\.frequency_attr<\s*#builtin\.(.*?)<(.*?)>,"
-            r"\s*#pulse\.frequency_units\"(.*?)\"\s*>"
-        )
+        pattern = r"#pulse\.frequency_attr<\s*#builtin\.(.*?)<(.*?)>>"
         match = re.search(pattern, output)
         assert match is not None
-        type_string, value_str, unit_str = match.groups()
-        assert type_string == type_
-        assert np.isclose(float(value_str), value)
-        assert unit_str == units.value
+        type_string, value_str = match.groups()
+        assert type_string == "int"
+        assert int(value_str) == expected
 
         context = Context()
         context.load_dialect(Pulse)
@@ -208,51 +173,36 @@ class TestFrequencyAttr:
         parser = Parser(context, output)
         parsed_attr = parser.parse_attribute()
         assert parsed_attr.value.data == value
-        assert parsed_attr.unit.data == units
         assert parsed_attr == attr
 
-    def test_parse_with_unknown_units_raises_parse_exception(self):
-        attr_str = (
-            '#pulse.frequency_attr<#builtin.float_data<5.0>, #pulse.frequency_units"ns">'
-        )
-        context = Context()
-        context.load_dialect(Pulse)
-        context.load_dialect(Builtin)
-        parser = Parser(context, attr_str)
-        with pytest.raises(ValueError, match=r"Unable to resolve frequency units ns."):
-            parser.parse_attribute()
-
     def test_equality(self):
-        attr1 = FrequencyAttr(5e9, FrequencyUnits.HERTZ)
-        attr2 = FrequencyAttr(5e9, FrequencyUnits.HERTZ)
+        attr1 = FrequencyAttr(5e9)
+        attr2 = FrequencyAttr(5e9)
         assert attr1 == attr2
 
     def test_inequality_with_value(self):
-        attr1 = FrequencyAttr(5e9, FrequencyUnits.HERTZ)
-        attr2 = FrequencyAttr(6e9, FrequencyUnits.HERTZ)
+        attr1 = FrequencyAttr(5e9)
+        attr2 = FrequencyAttr(6e9)
         assert attr1 != attr2
 
-    def test_inequality_with_units(self):
-        attr1 = FrequencyAttr(5e9, FrequencyUnits.HERTZ)
-        attr2 = FrequencyAttr(5e9, FrequencyUnits.KILOHERTZ)
-        assert attr1 != attr2
+    @pytest.mark.parametrize("value", [-1, -1.0, -5_000_000, -0.5])
+    def test_rejects_negative_values(self, value):
+        with pytest.raises(ValueError, match="non-negative.*Hertz"):
+            FrequencyAttr(value)
 
-    @pytest.mark.parametrize(
-        "value, units, stored_value, type_",
-        [
-            (5e6, FrequencyUnits.MEGAHERTZ, 5, int),
-            (5.5e6, FrequencyUnits.MEGAHERTZ, 5.5, float),
-        ],
-    )
-    def test_from_literal_value_preserves_integer_values(
-        self, value, units, stored_value, type_
-    ):
-        attr = FrequencyAttr.from_literal_value(value, units)
+    @pytest.mark.parametrize("value", [True, False])
+    def test_rejects_boolean_values(self, value):
+        with pytest.raises(TypeError, match="integer Hertz"):
+            FrequencyAttr(value)
 
-        assert attr.value.data == stored_value
-        assert isinstance(attr.value.data, type_)
-        assert attr.unit.data == units
-        assert np.isclose(attr.literal_value, value)
+    @pytest.mark.parametrize("value", ["5", 5.5, 1e-6])
+    def test_rejects_non_integer_values(self, value):
+        with pytest.raises((TypeError, ValueError), match="Hertz"):
+            FrequencyAttr(value)
+
+    def test_generic_construction_rejects_negative_values(self):
+        with pytest.raises(VerifyException, match="non-negative"):
+            FrequencyAttr.new([IntAttr(-1)])
 
 
 class TestPhaseAttr:
@@ -340,8 +290,8 @@ class TestSampledWaveformAttr:
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
         attr2 = SampledWaveformAttr(
             [0.0, 1.0, 0.5],
-            TimeAttr(3e18, TimeUnits.NANOSECOND),
-            TimeAttr(1e9),
+            TimeAttr(3e8),
+            TimeAttr(1e8),
         )
         assert attr1 != attr2
 
@@ -352,8 +302,8 @@ class TestSampledWaveformAttr:
 
     def test_print_and_parse_roundtrip(self, io_stream):
         waveform = [0.0, 1.0, 0.5, -1 / 3]
-        time = TimeAttr(3.0, TimeUnits.NANOSECOND)
-        sample_time = TimeAttr(1.0, TimeUnits.NANOSECOND)
+        time = TimeAttr(4_000)
+        sample_time = TimeAttr(1_000)
         attr = SampledWaveformAttr(waveform, time, sample_time)
         printer = Printer(stream=io_stream)
         printer.print_attribute(attr)
@@ -361,8 +311,9 @@ class TestSampledWaveformAttr:
 
         # Match the full output
         pattern = (
-            r"#pulse\.sampled_waveform<\s*#pulse\.numeric_array_data\[(.*?)\],"
-            r"\s*#pulse\.time_attr<(.*?)>,\s*#pulse\.time_attr<(.*?)>\s*>"
+            r"#pulse\.sampled_waveform<\s*#pulse\.numeric_array_data\[(.*?)\],\s*"
+            r"#pulse\.time_attr<(.*?)>,\s*"
+            r"#pulse\.time_attr<(.*?)>\s*>\Z"
         )
         match = re.search(pattern, output)
         assert match is not None
@@ -376,22 +327,18 @@ class TestSampledWaveformAttr:
             assert np.isclose(waveform[i], complex(float(real), float(imag)))
 
         # Match the time attribute contents
-        time_pattern = r"#builtin\.(.*?)<(.*?)>,\s*#pulse\.time_units\"(.*?)\""
+        time_pattern = r"#builtin\.(.*?)<(.*?)>"
         time_match = re.search(time_pattern, time_str)
         assert time_match is not None
 
-        time_type_str, time_value_str, time_unit_str = time_match.groups()
-        assert time_type_str == "float_data"
-        assert time_unit_str == TimeUnits.NANOSECOND.value
+        time_type_str, time_value_str = time_match.groups()
+        assert time_type_str == "int"
         assert np.isclose(float(time_value_str), time.value.data)
 
         sample_time_match = re.search(time_pattern, sample_time_str)
         assert sample_time_match is not None
-        sample_time_type_str, sample_time_value_str, sample_time_unit_str = (
-            sample_time_match.groups()
-        )
-        assert sample_time_type_str == "float_data"
-        assert sample_time_unit_str == TimeUnits.NANOSECOND.value
+        sample_time_type_str, sample_time_value_str = sample_time_match.groups()
+        assert sample_time_type_str == "int"
         assert np.isclose(float(sample_time_value_str), sample_time.value.data)
 
         # Match the contents to the expectation
@@ -444,8 +391,8 @@ class TestSampledWaveformAttr:
         attr1 = SampledWaveformAttr([0.0, 1.0, 0.5], TimeAttr(3e9), TimeAttr(1e9))
         attr2 = SampledWaveformAttr(
             [0.0, 1.0, 0.5],
-            TimeAttr(3e18, TimeUnits.NANOSECOND),
-            TimeAttr(1e9),
+            TimeAttr(3e8),
+            TimeAttr(1e8),
         )
         assert hash(attr1) != hash(attr2)
 

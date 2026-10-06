@@ -23,7 +23,6 @@ from qat.experimental.dialect.pulse.ir import (
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData, PortData
 from qat.experimental.system_data.derived.interface import DerivedViewInterface
 
-_PICOSECONDS_CONVERSION = 1e-12
 _NAME_TO_WAVEFORM_OP_MAPPING = {
     waveform_op.WAVEFORM_NAME: waveform_op for waveform_op in ANALYTICAL_WAVEFORM_OPS
 }
@@ -48,23 +47,6 @@ class PortConstraints:
     min_duration_ps: int
     max_duration_ps: int | None
     acquire_allowed: bool
-
-    @cached_property
-    def sample_time_s(self) -> float:
-        """The sample time of the port in seconds."""
-        return self.sample_time_ps * _PICOSECONDS_CONVERSION
-
-    @cached_property
-    def min_pulse_duration_s(self) -> float:
-        """The minimum pulse duration of the port in seconds."""
-        return self.min_duration_ps * _PICOSECONDS_CONVERSION
-
-    @cached_property
-    def max_pulse_duration_s(self) -> float | None:
-        """The maximum pulse duration of the port in seconds."""
-        if self.max_duration_ps is None:
-            return None
-        return self.max_duration_ps * _PICOSECONDS_CONVERSION
 
 
 def _build_constraints_from_port_data(
@@ -146,16 +128,11 @@ class PulseLevelConstraints(DerivedViewInterface[CanonicalSystemData]):
         return waveform_shape in self.native_waveform_shapes
 
     @cached_property
-    def granularity_s(self) -> float:
-        """The timing granularity of the hardware in seconds."""
-        return self.granularity_ps * _PICOSECONDS_CONVERSION
-
-    @cached_property
-    def port_sample_times_seconds(self) -> Mapping[str, float]:
-        """The sample time of each port in seconds."""
+    def port_sample_times_ps(self) -> Mapping[str, int]:
+        """The sample time of each port in picoseconds."""
         return MappingProxyType(
             {
-                port_id: constraints.sample_time_s
+                port_id: constraints.sample_time_ps
                 for port_id, constraints in self.ports.items()
             }
         )

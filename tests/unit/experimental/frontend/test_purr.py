@@ -182,7 +182,7 @@ def test_passive_reset_time_from_canonical_data_is_used(builder, canonical_model
 
     module = frontend.emit(builder)
 
-    assert any(duration == pytest.approx(2e-3) for duration in _wait_durations(module))
+    assert any(duration == pytest.approx(2e9) for duration in _wait_durations(module))
 
 
 def test_passive_reset_time_falls_back_to_builder_model(builder, canonical_model_from_echo):
@@ -195,7 +195,7 @@ def test_passive_reset_time_falls_back_to_builder_model(builder, canonical_model
     module = frontend.emit(builder)
 
     assert any(
-        duration == pytest.approx(builder.model.default_repetition_period)
+        duration == pytest.approx(builder.model.default_repetition_period * 1e12)
         for duration in _wait_durations(module)
     )
 
@@ -239,7 +239,7 @@ def test_passive_reset_time_ignores_non_passive_and_missing_duration_attribute(
     module = frontend.emit(builder)
 
     assert any(
-        duration == pytest.approx(builder.model.default_repetition_period)
+        duration == pytest.approx(builder.model.default_repetition_period * 1e12)
         for duration in _wait_durations(module)
     )
 

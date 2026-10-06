@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 from qat.experimental.system_data.materialisers.purr.materialisers.common import (
+    _hz_to_int,
     _seconds_to_picoseconds,
 )
 from qat.experimental.system_data.materialisers.purr.materialisers.qubits import (
@@ -105,3 +106,30 @@ def test_build_qubit_modes_skips_none_mode_from_resonator_channel():
         },
     )
     assert not any(m.id == "readout_measure" for m in modes)
+
+
+def test_hz_to_int_converts_fractional_hz_to_nearest_integer():
+    """Fractional Hz values are rounded to the nearest integer."""
+    # 31.25 Hz (Q1 NCO: 125 ÷ 4) rounds to 31 Hz
+    assert _hz_to_int(31.25) == 31
+    # 31.5 Hz rounds to 32 Hz (banker's rounding)
+    assert _hz_to_int(31.5) == 32
+    # 31.7 Hz rounds to 32 Hz
+    assert _hz_to_int(31.7) == 32
+
+
+def test_hz_to_int_preserves_large_integer_hz():
+    """Large integer Hz values in GHz range are preserved correctly."""
+    assert _hz_to_int(6_000_000_000) == 6_000_000_000
+    assert _hz_to_int(6.0e9) == 6_000_000_000
+
+
+def test_hz_to_int_handles_none():
+    """None input returns None."""
+    assert _hz_to_int(None) is None
+
+
+def test_hz_to_int_handles_zero():
+    """Zero Hz is a valid frequency value."""
+    assert _hz_to_int(0) == 0
+    assert _hz_to_int(0.0) == 0

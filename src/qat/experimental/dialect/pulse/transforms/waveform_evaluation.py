@@ -35,7 +35,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import ClassVar
 
-import numpy as np
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.ir import SSAValue
@@ -61,29 +60,6 @@ from qat.experimental.waveforms.shapes.base import WaveformShape
 
 log = get_logger(__name__)
 _PICOSECONDS_PER_SECOND = 1e12
-
-
-def _seconds_to_picoseconds(seconds: float, *, value_name: str) -> int:
-    """Convert seconds to integer picoseconds with pass-level validation."""
-
-    if seconds <= 0:
-        raise PassFailedException(f"{value_name} must be positive.")
-
-    picoseconds = int(round(seconds * _PICOSECONDS_PER_SECOND))
-    if picoseconds <= 0:
-        raise PassFailedException(f"{value_name} must be at least 1 ps after conversion.")
-
-    if not np.isclose(
-        picoseconds / _PICOSECONDS_PER_SECOND,
-        seconds,
-        rtol=0.0,
-        atol=1e-15,
-    ):
-        raise PassFailedException(
-            f"{value_name} {seconds} cannot be represented as integer picoseconds."
-        )
-
-    return picoseconds
 
 
 def _resolve_sample_time(
@@ -140,14 +116,19 @@ def _make_sampled_constant(
 
     :param op: The analytical waveform operation.
     :param shape: The already-built waveform shape.
-    :param sample_time: Desired sample time in seconds.
+    :param sample_time: Desired sample time in picoseconds.
     :returns: A ``ConstantOp`` with sampled waveform, or ``None`` if sampling is skipped.
     """
-    # TODO: COMPILER-1388, units should be in ps by default
-    width: float = extract_constant_scalar(op.width)
+    # TODO(COMPILER-1546): Reject zero-width waveform ops at construction and have callers
+    # catch that error and omit the no-op, consistent with _make_sampled_constant returning
+    # None for zero width during waveform evaluation.
+    width: int = extract_constant_scalar(op.width)
     amplitude: float | complex = extract_constant_scalar(op.amplitude)
-    if width is None or amplitude is None:
+    if width in (None, 0) or amplitude is None:
         return None
+
+    if sample_time <= 0:
+        raise PassFailedException("Waveform sample time must be positive.")
 
     drag_coefficients_operands = op.drag_coefficients
     drag_coefficients: list[float] = []
@@ -157,17 +138,14 @@ def _make_sampled_constant(
             return None
         drag_coefficients.append(float(drag_coefficient))
 
-    width_ps = _seconds_to_picoseconds(width, value_name="Width")
-    sample_time_ps = _seconds_to_picoseconds(sample_time, value_name="Sample time")
-
-    if width_ps % sample_time_ps != 0:
+    if width % sample_time != 0:
         raise PassFailedException(
             f"Width {width} is not an integer multiple of sample time {sample_time}."
         )
 
     samples = evaluate_waveform(
-        width=width_ps,
-        sample_time=sample_time_ps,
+        width=width,
+        sample_time=sample_time,
         shape=shape,
         amplitude=amplitude,
         drag_coefficients=drag_coefficients,
@@ -212,7 +190,7 @@ class _RewriteAnalyticalWaveform(RewritePattern):
             return
 
         pulses_by_sample_time = _group_pulse_uses_by_sample_time(
-            op.results[0], self._constraints.port_sample_times_seconds
+            op.results[0], self._constraints.port_sample_times_ps
         )
         if pulses_by_sample_time is None:
             log.debug(
@@ -242,8 +220,8 @@ class _RewriteAnalyticalWaveform(RewritePattern):
             width = extract_constant_scalar(op.width)
             log.debug(
                 f"waveform-evaluation: sampled {op_type} ({type(shape).__name__}) "
-                f"with sample_time={sample_time:.3e}s, duration="
-                f"{width:.3e}s, rewired {len(uses)} pulse(s)."
+                f"with sample_time={sample_time:.3e}ps, duration="
+                f"{width:.3e}ps, rewired {len(uses)} pulse(s)."
             )
 
         rewriter.erase_op(op)

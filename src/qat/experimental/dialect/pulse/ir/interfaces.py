@@ -33,6 +33,10 @@ class IsAnalyticalWaveformInterface(PulseOperationInterface):
     their own shape-specific operands and properties.
     """
 
+    # TODO(COMPILER-1546): Reject zero-width waveform ops at construction and have callers
+    # catch that error and omit the no-op, consistent with _make_sampled_constant returning
+    # None for zero width during waveform evaluation.
+
     # By convention and xDSL enforcement, this class variable name has to be capitalised
     WAVEFORM_NAME: ClassVar[str]
     """The string representation of the waveform which acts as a hook for waveform

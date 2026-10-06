@@ -5,7 +5,6 @@
 from collections import defaultdict
 from collections.abc import Callable
 from hashlib import md5
-from math import ceil
 
 from numpy import ndarray
 from xdsl.context import Context
@@ -47,11 +46,11 @@ from qat.experimental.dialect.pulse.ir import (
     SquareWaveformOp,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
+    TimeAttr,
     WaitOp,
     WeightsAttr,
 )
 from qat.experimental.dialect.pulse.ir.ops import extract_constant_scalar
-from qat.experimental.dialect.pulse.units import TIME_UNIT_EXPONENTS, TimeUnits
 from qat.experimental.dialect.pulse.utils import require_constant_operand
 from qat.experimental.dialect.q1 import (
     AcquireWeightedImmRsRsRsImmOp,
@@ -209,9 +208,11 @@ def _sequencer_data(op: Operation, target_data: QbloxTargetData) -> SequencerDes
 class RewriteWaitOp(RewritePattern):
     """Lower ``pulse.wait`` to one or more ``q1.wait`` instructions.
 
-    The requested duration is converted from seconds to nanoseconds and aligned up to
-    the sequencer grid time. Durations that exceed the maximum wait immediate are split
-    into a chain of ``q1.wait`` instructions whose durations sum to the requested value.
+    The requested duration is converted from picoseconds to nanoseconds and aligned up
+    to the sequencer grid time. Durations that exceed the maximum wait immediate are
+    split into a chain of ``q1.wait`` instructions whose durations sum to the aligned
+    duration (not necessarily the requested value; e.g. a 5 ns request on a 4 ns grid
+    becomes 8 ns).
     The frame carried by ``pulse.wait`` is forwarded to downstream operations.
 
     Register-driven durations that do not fold to a compile-time constant are left
@@ -223,8 +224,8 @@ class RewriteWaitOp(RewritePattern):
 
     @op_type_rewrite_pattern
     def match_and_rewrite(self, op: WaitOp, rewriter: PatternRewriter) -> None:
-        duration_s = extract_constant_scalar(op.duration)
-        if duration_s is None:
+        duration_ps = extract_constant_scalar(op.duration)
+        if duration_ps is None:
             return
 
         sequencer_data = _sequencer_data(op, self.target_data)
@@ -237,16 +238,9 @@ class RewriteWaitOp(RewritePattern):
                 f"{grid_time} ns sequencer alignment."
             )
 
-        total_ns = int(
-            ceil(
-                duration_s
-                * 10
-                ** (
-                    TIME_UNIT_EXPONENTS[TimeUnits.SECOND]
-                    - TIME_UNIT_EXPONENTS[TimeUnits.NANOSECOND]
-                )
-            )
-        )
+        # Convert duration from picoseconds (Pulse IR canonical time) to nanoseconds
+        # (Q1 sequencer time). Rounds up to ensure minimum duration is met.
+        total_ns = (duration_ps + 999) // 1_000
         remainder = total_ns % grid_time
         if remainder:
             total_ns += grid_time - remainder
@@ -389,7 +383,13 @@ class RewritePulseOp(RewritePattern):
 
         # Convert duration to ns for Q1. Each sample is assumed to be 1 ns, so we don't need
         # to worry about rounding error.
-        duration_ns = round(waveform_op.value.width.value_in_unit(TimeUnits.NANOSECOND))
+        duration_ns, remainder_ps = divmod(waveform_op.value.width.literal_value, 1000)
+        if remainder_ps != 0:
+            raise PassFailedException(
+                f"Sampled waveform width must be a whole number of nanoseconds; "
+                f"got {waveform_op.value.width.literal_value} ps "
+                f"({duration_ns} ns + {remainder_ps} ps)."
+            )
         min_duration = _sequencer_data(op, self.target_data).grid_time
 
         # TODO(COMPILER-1389): Remove this validation in favour of a dedicated pulse-level
@@ -618,24 +618,26 @@ class RewritePreQ1AcquireOp(RewritePattern):
     def _get_ns_duration(self, op: PreQ1AcquireOp) -> int:
         """Get the duration of the acquisition in nanoseconds.
 
-        TODO(COMPILER-1388): Consume integer picoseconds once Pulse IR units are removed.
+        The duration must be a compile-time constant TimeAttr in picoseconds.
+        Register-driven or non-time durations are rejected.
 
         :param op: The ``pre_q1_pulse.acquire`` operation to extract from.
         :returns: Duration in nanoseconds as an integer.
-        :raises PassFailedException: If the duration operand is not a constant or its
-            attribute is not a ``TimeAttr``.
+        :raises PassFailedException: If the duration operand is not a constant,
+            its attribute is not a ``TimeAttr``, or the conversion is not integral.
         """
         const = require_constant_operand(op.name, "duration", op.duration)
         time_attr = const.fold()[0]
-        unit = time_attr.unit.data
-        value = time_attr.value.data
-        duration_ns = value * 10 ** (
-            TIME_UNIT_EXPONENTS[unit] - TIME_UNIT_EXPONENTS[TimeUnits.NANOSECOND]
-        )
+        if not isinstance(time_attr, TimeAttr):
+            raise PassFailedException(
+                f"Acquisition duration must be a TimeAttr, got {type(time_attr).__name__}"
+            )
+        value = time_attr.literal_value
+        duration_ns = value / 1_000
         integer_duration_ns = int(duration_ns)
         if integer_duration_ns != duration_ns:
             raise PassFailedException(
-                f"Acquisition duration {value} {unit.value} converts to "
+                f"Acquisition duration {value} ps converts to "
                 f"{duration_ns} ns, but Q1 acquisition duration requires a whole "
                 "number of nanoseconds."
             )

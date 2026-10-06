@@ -36,7 +36,6 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
     WaveformType,
 )
-from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
     AcquireImmRsImmOp,
     EmissionContext,
@@ -96,7 +95,7 @@ class TestDebugInfoAutoAttach:
 
     def test_wait_op(self):
         freq, frame = _frame()
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait)
         _run_q1_pipeline(module)
@@ -106,7 +105,7 @@ class TestDebugInfoAutoAttach:
     def test_pulse_op(self):
         samples = np.ones(16, dtype=complex)
         waveform = ConstantOp(
-            SampledWaveformAttr(samples, TimeAttr(16e-9), TimeAttr(1e-9)), WaveformType()
+            SampledWaveformAttr(samples, TimeAttr(16_000), TimeAttr(1_000)), WaveformType()
         )
         freq, frame = _frame()
         pulse = PulseOp(frame, waveform)
@@ -139,7 +138,7 @@ class TestDebugInfoAutoAttach:
 
     def test_acquire_op(self):
         freq, frame = _frame("q0/measure")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         const_op = ArithConstantOp.from_int_and_width(1, IndexType())
         acquire = PreQ1AcquireOp(frame, duration, const_op, 1)
         module = _sequence_module(freq, frame, duration, acquire, channel_id="q0_measure")
@@ -163,7 +162,7 @@ class TestDebugInfoAutoAttach:
     def test_port_matches_sequence_channel(self):
         """The port in the attached debug info matches the enclosing SequenceOp channel."""
         freq, frame = _frame("q1/drive")
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait, channel_id="q1_drive")
         _run_q1_pipeline(module)
@@ -174,7 +173,7 @@ class TestDebugInfoAutoAttach:
         """Every WaitImmOp in a chunked long wait carries provenance from the source op."""
         max_wait_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
         freq, frame = _frame()
-        duration = ConstantOp(TimeAttr((2 * max_wait_time + 16) * 1e-9))
+        duration = ConstantOp(TimeAttr((2 * max_wait_time + 16) * 1_000))
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait)
         _run_q1_pipeline(module)
@@ -186,7 +185,7 @@ class TestDebugInfoAutoAttach:
     def test_debug_info_visible_in_emitted_assembly(self):
         """assembly_line with emit_debug_info=True shows provenance in the output."""
         freq, frame = _frame()
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame, duration)
         module = _sequence_module(freq, frame, duration, wait)
         _run_q1_pipeline(module)

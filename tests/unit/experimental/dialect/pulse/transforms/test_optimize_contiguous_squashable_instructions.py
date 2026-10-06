@@ -33,14 +33,14 @@ from qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_in
 
 def _build_waveform_ops():
     amplitude = ConstantOp(AmplitudeAttr(1.0))
-    width = ConstantOp(TimeAttr(800e-9))
+    width = ConstantOp(TimeAttr(800e3))
     fractional_breadth = ArithConstantOp(FloatAttr(1.0 / 3.0, 64), f64)
     waveform = GaussianWaveformOp(width, amplitude, fractional_breadth, BoolAttr(False, i1))
     return [amplitude, width, fractional_breadth, waveform], waveform
 
 
 def _build_acquire_ops():
-    duration = ConstantOp(TimeAttr(1.0e-6))
+    duration = ConstantOp(TimeAttr(1.0e6))
     return duration
 
 
@@ -404,7 +404,7 @@ class TestFoldContiguousPhaseShifts:
         phase1 = ConstantOp(PhaseAttr(0.1))
         phase_op1 = PhaseShiftOp(frame.results[0], phase1.results[0])
 
-        wait_duration = ConstantOp(TimeAttr(1.0e-9))
+        wait_duration = ConstantOp(TimeAttr(1.0e3))
         wait_op = WaitOp(phase_op1.results[0], wait_duration.results[0])
 
         phase2 = ConstantOp(PhaseAttr(0.2))
@@ -469,10 +469,10 @@ class TestFoldContiguousPhaseShifts:
         phase = ConstantOp(PhaseAttr(0.1))
         phase_op = PhaseShiftOp(frame.results[0], phase.results[0])
 
-        wait_duration = ConstantOp(TimeAttr(1.0e-9))
+        wait_duration = ConstantOp(TimeAttr(1.0e3))
         wait_op = WaitOp(phase_op.results[0], wait_duration.results[0])
 
-        acquire_duration = ConstantOp(TimeAttr(1.0e-6))
+        acquire_duration = ConstantOp(TimeAttr(1.0e6))
         acquire = AcquireOp(wait_op.results[0], acquire_duration.results[0])
 
         module = ModuleOp(
@@ -603,10 +603,10 @@ class TestFoldContiguousPhaseShifts:
     @pytest.mark.parametrize("terminal_op_type", ["pulse", "acquire"])
     def test_does_not_fold_when_backtracking_crosses_block_boundary(self, terminal_op_type):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        dur1 = ConstantOp(TimeAttr(1.0e-9))
+        dur1 = ConstantOp(TimeAttr(1.0e3))
         wait_op1 = WaitOp(frame.results[0], dur1.results[0])
 
-        dur2 = ConstantOp(TimeAttr(2.0e-9))
+        dur2 = ConstantOp(TimeAttr(2.0e3))
         wait_op2 = WaitOp(wait_op1.results[0], dur2.results[0])
 
         if terminal_op_type == "pulse":
@@ -713,7 +713,7 @@ class TestFoldContiguousPhaseShifts:
         phase2 = ConstantOp(PhaseAttr(0.2))
         shift2 = PhaseShiftOp(frame.results[0], phase2.results[0])
 
-        wait_1 = ConstantOp(TimeAttr(1.0e-9))
+        wait_1 = ConstantOp(TimeAttr(1.0e3))
         wait_op = WaitOp(shift2.results[0], wait_1.results[0])
 
         phase3 = ConstantOp(PhaseAttr(0.3))
@@ -766,9 +766,9 @@ class TestFoldContiguousWaits:
     @pytest.mark.parametrize("terminal_op_type", ["pulse", "acquire"])
     def test_fold_contiguous_waits(self, terminal_op_type):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        dur1 = ConstantOp(TimeAttr(1.0e-9))
+        dur1 = ConstantOp(TimeAttr(1.0e3))
         wait_op1 = WaitOp(frame.results[0], dur1.results[0])
-        dur2 = ConstantOp(TimeAttr(2.0e-9))
+        dur2 = ConstantOp(TimeAttr(2.0e3))
         wait_op2 = WaitOp(wait_op1.results[0], dur2.results[0])
 
         if terminal_op_type == "pulse":
@@ -795,7 +795,7 @@ class TestFoldContiguousWaits:
     @pytest.mark.parametrize("terminal_op_type", ["pulse", "acquire"])
     def test_does_not_fold_single_wait(self, terminal_op_type):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        dur = ConstantOp(TimeAttr(1.0e-9))
+        dur = ConstantOp(TimeAttr(1.0e3))
         wait_op = WaitOp(frame.results[0], dur.results[0])
 
         if terminal_op_type == "pulse":
@@ -819,13 +819,13 @@ class TestFoldContiguousWaits:
 
     def test_does_not_fold_when_waits_are_separated_by_pulse(self):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        dur1 = ConstantOp(TimeAttr(1.0e-9))
+        dur1 = ConstantOp(TimeAttr(1.0e3))
         wait_op1 = WaitOp(frame.results[0], dur1.results[0])
 
         wf_ops, waveform = _build_waveform_ops()
         pulse_mid = PulseOp(frame=wait_op1.results[0], waveform=waveform.results[0])
 
-        dur2 = ConstantOp(TimeAttr(2.0e-9))
+        dur2 = ConstantOp(TimeAttr(2.0e3))
         wait_op2 = WaitOp(pulse_mid.results[0], dur2.results[0])
         pulse_out = PulseOp(frame=wait_op2.results[0], waveform=waveform.results[0])
 
@@ -850,7 +850,7 @@ class TestFoldContiguousWaits:
         n_waits = 100
 
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        dur = ConstantOp(TimeAttr(1.0e-9))
+        dur = ConstantOp(TimeAttr(1.0e3))
 
         current_frame = frame.results[0]
         wait_ops = []
@@ -894,13 +894,13 @@ class TestFoldContiguousWaits:
     def test_folds_waits_interleaved_with_phase_shifts(self, terminal_op_type):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
 
-        dur1 = ConstantOp(TimeAttr(1.0e-9))
+        dur1 = ConstantOp(TimeAttr(1.0e3))
         wait_op1 = WaitOp(frame.results[0], dur1.results[0])
 
         phase = ConstantOp(PhaseAttr(0.1))
         phase_op = PhaseShiftOp(wait_op1.results[0], phase.results[0])
 
-        dur2 = ConstantOp(TimeAttr(2.0e-9))
+        dur2 = ConstantOp(TimeAttr(2.0e3))
         wait_op2 = WaitOp(phase_op.results[0], dur2.results[0])
 
         if terminal_op_type == "pulse":
@@ -965,10 +965,10 @@ class TestFoldContiguousWaits:
     @pytest.mark.parametrize("terminal_op_type", ["pulse", "acquire"])
     def test_does_not_fold_when_backtracking_crosses_block_boundary(self, terminal_op_type):
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        dur1 = ConstantOp(TimeAttr(1.0e-9))
+        dur1 = ConstantOp(TimeAttr(1.0e3))
         wait_op1 = WaitOp(frame.results[0], dur1.results[0])
 
-        dur2 = ConstantOp(TimeAttr(2.0e-9))
+        dur2 = ConstantOp(TimeAttr(2.0e3))
         wait_op2 = WaitOp(wait_op1.results[0], dur2.results[0])
 
         if terminal_op_type == "pulse":
@@ -1010,16 +1010,16 @@ class TestFoldContiguousWaits:
         head due to the single-use guard.
         """
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
-        d0 = ConstantOp(TimeAttr(1.0e-9))
+        d0 = ConstantOp(TimeAttr(1.0e3))
         shared_root = WaitOp(frame.results[0], d0.results[0])
 
-        d1a = ConstantOp(TimeAttr(2.0e-9))
-        d2a = ConstantOp(TimeAttr(3.0e-9))
+        d1a = ConstantOp(TimeAttr(2.0e3))
+        d2a = ConstantOp(TimeAttr(3.0e3))
         branch_a_1 = WaitOp(shared_root.results[0], d1a.results[0])
         branch_a_2 = WaitOp(branch_a_1.results[0], d2a.results[0])
 
-        d1b = ConstantOp(TimeAttr(4.0e-9))
-        d2b = ConstantOp(TimeAttr(5.0e-9))
+        d1b = ConstantOp(TimeAttr(4.0e3))
+        d2b = ConstantOp(TimeAttr(5.0e3))
         branch_b_1 = WaitOp(shared_root.results[0], d1b.results[0])
         branch_b_2 = WaitOp(branch_b_1.results[0], d2b.results[0])
 
@@ -1072,7 +1072,7 @@ class TestRandomizedInterleaving:
 
         frame = CreateFrameOp(ConstantOp(FrequencyAttr(5.0e9)), StringAttr("drive"))
         phase = ConstantOp(PhaseAttr(2.0 * np.pi / n_phases))
-        duration = ConstantOp(TimeAttr(1.0e-9))
+        duration = ConstantOp(TimeAttr(1.0e3))
 
         op_kinds = ["phase"] * n_phases + ["wait"] * n_waits
         random.Random(function_seed).shuffle(op_kinds)

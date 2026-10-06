@@ -84,7 +84,7 @@ class TestDeadFrameEliminationPass:
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
         phase_set = PhaseSetOp(frame, ConstantOp(PhaseAttr(0.0)))
         phase_shift = PhaseShiftOp(phase_set, ConstantOp(PhaseAttr(1.5)))
-        wait = WaitOp(phase_shift, ConstantOp(TimeAttr(100e-9)))
+        wait = WaitOp(phase_shift, ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops([freq, frame, phase_set, phase_shift, wait])
 
@@ -112,7 +112,7 @@ class TestDeadFrameEliminationPass:
         freq = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
         phase_shift = PhaseShiftOp(frame, ConstantOp(PhaseAttr(1.5)))
-        acquire = AcquireOp(phase_shift, ConstantOp(TimeAttr(100e-9)))
+        acquire = AcquireOp(phase_shift, ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops([freq, frame, phase_shift, acquire])
 
@@ -135,7 +135,7 @@ class TestDeadFrameEliminationPass:
         """
         freq = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
-        duration = ConstantOp(TimeAttr(100e-9))
+        duration = ConstantOp(TimeAttr(100_000))
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(duration, amplitude)
         pulse = PulseOp(frame, waveform)
@@ -168,8 +168,8 @@ class TestDeadFrameEliminationPass:
         # Synchronize both frames
         sync = SynchronizeOp(frame_0, frame_1)
         # Use synchronized frames with acquire (live)
-        acquire_0 = AcquireOp(sync.results[0], ConstantOp(TimeAttr(100e-9)))
-        acquire_1 = AcquireOp(sync.results[1], ConstantOp(TimeAttr(100e-9)))
+        acquire_0 = AcquireOp(sync.results[0], ConstantOp(TimeAttr(100_000)))
+        acquire_1 = AcquireOp(sync.results[1], ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops(
             [freq_0, freq_1, frame_0, frame_1, sync, acquire_0, acquire_1]
@@ -221,7 +221,7 @@ class TestDeadFrameEliminationPass:
         freq = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
         # Just wait on the frame - no live ops
-        wait = WaitOp(frame, ConstantOp(TimeAttr(100e-9)))
+        wait = WaitOp(frame, ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops([freq, frame, wait])
 
@@ -243,8 +243,8 @@ class TestDeadFrameEliminationPass:
         frame_1 = CreateFrameOp(freq_1, StringAttr("q1/drive"))
 
         # Dead operations on each frame
-        wait_0 = WaitOp(frame_0, ConstantOp(TimeAttr(100e-9)))
-        wait_1 = WaitOp(frame_1, ConstantOp(TimeAttr(100e-9)))
+        wait_0 = WaitOp(frame_0, ConstantOp(TimeAttr(100_000)))
+        wait_1 = WaitOp(frame_1, ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops([freq_0, freq_1, frame_0, frame_1, wait_0, wait_1])
 
@@ -268,12 +268,12 @@ class TestDeadFrameEliminationPass:
         # Dead frame
         freq_dead = ConstantOp(FrequencyAttr(5.0e9))
         frame_dead = CreateFrameOp(freq_dead, StringAttr("q0/drive"))
-        wait_dead = WaitOp(frame_dead, ConstantOp(TimeAttr(100e-9)))
+        wait_dead = WaitOp(frame_dead, ConstantOp(TimeAttr(100_000)))
 
         # Live frame
         freq_live = ConstantOp(FrequencyAttr(6.0e9))
         frame_live = CreateFrameOp(freq_live, StringAttr("q1/drive"))
-        acquire_live = AcquireOp(frame_live, ConstantOp(TimeAttr(100e-9)))
+        acquire_live = AcquireOp(frame_live, ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops(
             [freq_dead, frame_dead, wait_dead, freq_live, frame_live, acquire_live]
@@ -297,7 +297,7 @@ class TestDeadFrameEliminationPass:
         # Frame 1: has a pulse (live)
         freq_0 = ConstantOp(FrequencyAttr(5.0e9))
         frame_0 = CreateFrameOp(freq_0, StringAttr("q0/drive"))
-        duration_0 = ConstantOp(TimeAttr(100e-9))
+        duration_0 = ConstantOp(TimeAttr(100_000))
         amplitude_0 = ConstantOp(AmplitudeAttr(1.0))
         waveform_0 = SquareWaveformOp(duration_0, amplitude_0)
         pulse_0 = PulseOp(frame_0, waveform_0)
@@ -309,8 +309,8 @@ class TestDeadFrameEliminationPass:
 
         # Synchronize both frames
         sync = SynchronizeOp(pulse_0.result, phase_shift_1.result)
-        acquire_0 = AcquireOp(sync.results[0], ConstantOp(TimeAttr(100e-9)))
-        acquire_1 = AcquireOp(sync.results[1], ConstantOp(TimeAttr(100e-9)))
+        acquire_0 = AcquireOp(sync.results[0], ConstantOp(TimeAttr(100_000)))
+        acquire_1 = AcquireOp(sync.results[1], ConstantOp(TimeAttr(100_000)))
 
         module = build_module_from_ops(
             [
@@ -393,7 +393,7 @@ class TestDeadFrameEliminationPass:
 
         freq = ConstantOp(FrequencyAttr(5.0e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
-        duration = ConstantOp(TimeAttr(100e-9))
+        duration = ConstantOp(TimeAttr(100_000))
         amplitude = ConstantOp(AmplitudeAttr(1.0))
         waveform = SquareWaveformOp(duration, amplitude)
         pulse = PulseOp(frame, waveform)

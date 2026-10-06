@@ -143,7 +143,7 @@ class TestPulseLevelMiddleendTransformsExampleIR:
         waited_frame = WaitOp(shifted_frame, zero_duration)
         # An analytical square waveform (80 ns) -> sampled by waveform evaluation. 80 ns is
         # a whole multiple of the 8 ns granularity and the 1 ns sample time of "port0".
-        width = ConstantOp(TimeAttr(80e-9))
+        width = ConstantOp(TimeAttr(80_000))
         amplitude = ConstantOp(AmplitudeAttr(0.5))
         waveform = SquareWaveformOp(width, amplitude)
         pulse = PulseOp(waited_frame, waveform)

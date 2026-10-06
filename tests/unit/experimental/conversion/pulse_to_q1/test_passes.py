@@ -57,7 +57,6 @@ from qat.experimental.dialect.pulse.ir import (
     WaitOp,
     WeightsAttr,
 )
-from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
     AcquireImmRsImmOp,
     AcquireWeightedImmRsRsRsImmOp,
@@ -248,7 +247,7 @@ class TestQ1PulseValidationPass:
 
     def test_accepts_integer_nanosecond_wait(self):
         freq, frame = _frame()
-        time = ConstantOp(TimeAttr(5e-9))
+        time = ConstantOp(TimeAttr(5e3))
         wait = WaitOp(frame, time)
         self._run(_sequence_module(freq, frame, time, wait))
 
@@ -260,37 +259,22 @@ class TestQ1PulseValidationPass:
 
     def test_rejects_non_integer_nanosecond_wait(self):
         freq, frame = _frame()
-        bad_time = ConstantOp(TimeAttr(4.5e-9))
+        bad_time = ConstantOp(TimeAttr(4_500))
         wait = WaitOp(frame, bad_time)
         with pytest.raises(
-            PassFailedException, match="must map to integer nanoseconds within tolerance"
+            PassFailedException, match="must be a whole number of nanoseconds"
         ):
             self._run(_sequence_module(freq, frame, bad_time, wait))
 
-    @pytest.mark.parametrize("duration", [math.inf, -math.inf, math.nan])
-    def test_rejects_non_finite_wait_duration(self, duration: float):
-        freq, frame = _frame()
-        time = ConstantOp(TimeAttr(duration))
-        wait = WaitOp(frame, time)
-        with pytest.raises(PassFailedException, match="duration must be finite"):
-            self._run(_sequence_module(freq, frame, time, wait))
-
-    def test_rejects_negative_wait_duration(self):
-        freq, frame = _frame()
-        time = ConstantOp(TimeAttr(-16e-9))
-        wait = WaitOp(frame, time)
-        with pytest.raises(PassFailedException, match="duration must be non-negative"):
-            self._run(_sequence_module(freq, frame, time, wait))
-
     def test_accepts_minimum_nanosecond_duration(self):
         freq, frame = _frame()
-        time = ConstantOp(TimeAttr(1e-9))
+        time = ConstantOp(TimeAttr(1e3))
         wait = WaitOp(frame, time)
         self._run(_sequence_module(freq, frame, time, wait))
 
     def test_rejects_sub_nanosecond_non_zero_duration(self):
         freq, frame = _frame()
-        time = ConstantOp(TimeAttr(0.5e-9))
+        time = ConstantOp(TimeAttr(0.5e3))
         wait = WaitOp(frame, time)
         with pytest.raises(PassFailedException, match="smaller than one nanosecond"):
             self._run(_sequence_module(freq, frame, time, wait))
@@ -303,21 +287,26 @@ class TestQ1PulseValidationPass:
             self._run(_sequence_module(freq, frame, dynamic_time, wait))
 
     def test_accepts_square_waveform_at_minimum_width(self):
-        self._run(_square_pulse_module(TimeAttr(4e-9)))
+        self._run(_square_pulse_module(TimeAttr(4e3)))
 
     def test_rejects_square_waveform_below_minimum_width(self):
         with pytest.raises(
             PassFailedException,
             match="pulse.square_waveform width must be at least 4 ns",
         ):
-            self._run(_square_pulse_module(TimeAttr(3e-9)))
+            self._run(_square_pulse_module(TimeAttr(3e3)))
 
     def test_rejects_square_waveform_width_off_sequencer_grid(self):
         with pytest.raises(
             PassFailedException,
             match="width must be a multiple of sequencer grid_time",
         ):
-            self._run(_square_pulse_module(TimeAttr(5e-9)))
+            self._run(_square_pulse_module(TimeAttr(5e3)))
+
+    def test_rejects_large_square_waveform_width_off_nanosecond_boundary(self):
+        width_ps = 9_007_199_254_744_001
+        with pytest.raises(PassFailedException, match="nanosecond"):
+            self._run(_square_pulse_module(TimeAttr(width_ps)))
 
     def test_uses_readout_sequencer_grid_for_square_waveform_width(self):
         readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
@@ -327,7 +316,7 @@ class TestQ1PulseValidationPass:
             update={"READOUT_SEQUENCER_DATA": readout_data}
         )
         module = _square_pulse_module(
-            TimeAttr(12e-9),
+            TimeAttr(12e3),
             module_kind=QbloxModuleKind.qrm,
             seq_idx=0,
         )
@@ -343,7 +332,7 @@ class TestQ1PulseValidationPass:
         self, amplitude: complex | float
     ):
         frequency, frame = _frame()
-        width = ConstantOp(TimeAttr(8e-9))
+        width = ConstantOp(TimeAttr(8e3))
         amplitude_constant = ConstantOp(AmplitudeAttr(amplitude))
         waveform = SquareWaveformOp(width, amplitude_constant)
         pulse = PulseOp(frame, waveform)
@@ -403,13 +392,6 @@ class TestQ1PulseValidationPass:
                     pulse,
                 )
             )
-
-    @pytest.mark.parametrize("frequency", [math.inf, -math.inf, math.nan])
-    def test_rejects_non_finite_frame_frequency(self, frequency: float):
-        freq_const = ConstantOp(FrequencyAttr(frequency))
-        frame = CreateFrameOp(freq_const, StringAttr("q0/drive"))
-        with pytest.raises(PassFailedException, match="frequency must be finite"):
-            self._run(_sequence_module(freq_const, frame))
 
     def test_rejects_dynamic_frame_frequency(self):
         @irdl_op_definition
@@ -580,7 +562,7 @@ def _create_acquire_module(
     :returns: A module carrying the (possibly loop-nested) acquisition.
     """
     freq, frame = _frame(channel_id)
-    duration = ConstantOp(TimeAttr(duration_ns, TimeUnits.NANOSECOND))
+    duration = ConstantOp(TimeAttr(duration_ns * 1e3))
 
     acquires = [
         AcquireOp(frame, duration, weights=weights, label=label) for _ in range(no_acquires)
@@ -694,12 +676,11 @@ class TestQ1PreAcquireTransformationPass:
         Q1PreAcquireTransformationPass().apply(Context(), module)
         pre_acquire = self._pre_acquire_op(module)
         duration_attr = pre_acquire.duration.owner.fold()[0]
-        assert duration_attr.value.data == 500
-        assert duration_attr.unit.data == TimeUnits.NANOSECOND
+        assert duration_attr.value.data == 500_000
 
     def test_rejects_dynamic_loop_bounds(self):
         freq, frame = _frame("q0/readout")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         acquire = AcquireOp(frame, duration)
         yield_op = scf.YieldOp()
         body = Block(
@@ -731,7 +712,7 @@ class TestPreQ1AcquireOp:
         channel_id: str = "q0/readout",
     ) -> tuple[CreateFrameOp, ConstantOp, ArithConstantOp]:
         _, frame = _frame(channel_id)
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
         return frame, duration, store_idx
 

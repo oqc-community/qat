@@ -40,7 +40,7 @@ def _const_phase(value: float = 0.0) -> ConstantOp:
     return ConstantOp(PhaseAttr(value))
 
 
-def _const_time(value: float = 1e-7) -> ConstantOp:
+def _const_time(value: float = 1e5) -> ConstantOp:
     return ConstantOp(TimeAttr(value))
 
 
@@ -140,7 +140,7 @@ class TestBaseLinearImporterAddOps:
     def test_pulse_op_rebinds_frame(self):
         imp = _DummyImporter()
         [frame] = imp.get_frames([("q0", 3.8e9)])
-        width = _const_time(1e-7)
+        width = _const_time(1e5)
         amp = _const_amp(0.5)
         wave = SquareWaveformOp(width, amp)
         pulse = PulseOp(frame, wave)
@@ -154,7 +154,7 @@ class TestBaseLinearImporterAddOps:
     def test_wait_op_rebinds_frame(self):
         imp = _DummyImporter()
         [frame] = imp.get_frames([("q0", 4.2e9)])
-        dur = _const_time(1e-7)
+        dur = _const_time(1e5)
         wait = WaitOp(frame, dur)
         imp._add_ops([dur, wait])
         assert imp._current_environment_variables.inverse.get(frame) is None
@@ -184,7 +184,7 @@ class TestBaseLinearImporterAddOps:
     def test_acquire_op_rebinds_frame(self):
         imp = _DummyImporter()
         [frame] = imp.get_frames([("q0", 4.2e9)])
-        dur = _const_time(1e-6)
+        dur = _const_time(1e6)
         acquire = AcquireOp(frame, dur)
         imp._add_ops([dur, acquire])
         assert imp._current_environment_variables.inverse.get(frame) is None
@@ -199,7 +199,7 @@ class TestBaseLinearImporterAddOps:
         orphan = CreateFrameOp(freq, StringAttr("q_orphan"))
         imp._current_block.add_ops([freq, orphan])
 
-        wait_dur = _const_time(1e-7)
+        wait_dur = _const_time(1e5)
         wait = WaitOp(orphan.result, wait_dur)
         with pytest.raises(KeyError):
             imp._add_ops([wait_dur, wait])
@@ -258,7 +258,7 @@ class TestBaseLinearImporterForLoops:
         imp = _DummyImporter()
         [outer_frame] = imp.get_frames([("q0", 4.2e9)])
         imp.enter_for_loop(0, 10, 1)
-        dur = _const_time(1e-7)
+        dur = _const_time(1e5)
         wait = WaitOp(outer_frame, dur)
         imp._add_ops([dur, wait])
         assert imp._current_environment_variables.get("q0") is wait.result
@@ -282,12 +282,12 @@ class TestBaseLinearImporterForLoops:
         [outer_frame] = imp.get_frames([("q0", 1e9)])
 
         imp.enter_for_loop(0, 4, 1)
-        d1 = _const_time(1e-7)
+        d1 = _const_time(1e5)
         w1 = WaitOp(outer_frame, d1)
         imp._add_ops([d1, w1])
 
         imp.enter_for_loop(0, 2, 1)
-        d2 = _const_time(2e-7)
+        d2 = _const_time(2e5)
         w2 = WaitOp(w1.result, d2)
         imp._add_ops([d2, w2])
         inner_for_body = imp._current_block
@@ -315,7 +315,7 @@ class TestBaseLinearImporterForLoops:
         [frame] = imp.get_frames([("q0", 1e9)])
 
         imp.enter_for_loop(0, 4, 1)
-        d1 = _const_time(1e-7)
+        d1 = _const_time(1e5)
         w1 = WaitOp(frame, d1)
         imp._add_ops([d1, w1])
         imp.exit_for_loop()
@@ -326,7 +326,7 @@ class TestBaseLinearImporterForLoops:
         assert imp._current_environment_variables.get("q0") is first_for.results[0]
 
         imp.enter_for_loop(0, 2, 1)
-        d2 = _const_time(2e-7)
+        d2 = _const_time(2e5)
         live = imp._current_environment_variables.get("q0")
         w2 = WaitOp(live, d2)
         imp._add_ops([d2, w2])

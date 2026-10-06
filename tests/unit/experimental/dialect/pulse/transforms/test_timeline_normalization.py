@@ -64,7 +64,6 @@ from qat.experimental.dialect.pulse.transforms.timeline_normalization import (
     _SynchronizeCandidate,
     _TimeExpression,
 )
-from qat.experimental.dialect.pulse.units import TimeUnits
 
 from tests.unit.utils.ir import (
     build_module_from_ops,
@@ -155,7 +154,7 @@ class TestTimelineNormalizationWithKeyOperations:
                 late_sync,
                 [
                     _TimeExpression.constant(
-                        TimeAttr(64, TimeUnits.NANOSECOND), InsertPoint.before(early_sync)
+                        TimeAttr(64_000), InsertPoint.before(early_sync)
                     ),
                     None,
                 ],
@@ -176,7 +175,7 @@ class TestTimelineNormalizationWithKeyOperations:
         the duration of the pulse."""
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
@@ -202,8 +201,8 @@ class TestTimelineNormalizationWithKeyOperations:
 
         ops, frames = _make_block_with_frames(2)
         samples = np.linspace(0, 1, 64)
-        sample_time = TimeAttr(1, TimeUnits.NANOSECOND)
-        width = TimeAttr(64, TimeUnits.NANOSECOND)
+        sample_time = TimeAttr(1_000)
+        width = TimeAttr(64_000)
         sampled_waveform_op = ConstantOp(
             SampledWaveformAttr(samples=samples, sample_time=sample_time, width=width)
         )
@@ -221,14 +220,14 @@ class TestTimelineNormalizationWithKeyOperations:
         assert len(ops[WaitOp]) == 1
         constant_time_op = ops[WaitOp][0].duration.owner
         assert isinstance(constant_time_op, ConstantOp)
-        assert constant_time_op.value.value.data == 64
+        assert constant_time_op.value.value.data == 64_000
 
     def test_with_acquire_op_increments_frame_time(self):
         """Tests that a frame operation with an acquire op increments the time of the frame
         by the duration of the acquire."""
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         acquire_op = AcquireOp(frames[0], time_op.result)
         sync_op = SynchronizeOp(frames[1], acquire_op.frame_result)
 
@@ -250,7 +249,7 @@ class TestTimelineNormalizationWithKeyOperations:
         the duration of the wait."""
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         wait_op = WaitOp(frames[0], time_op.result)
         sync_op = SynchronizeOp(frames[1], wait_op.result)
 
@@ -312,7 +311,7 @@ class TestTimelineNormalizationWithKeyOperations:
 
         # Make the inner loop
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
@@ -400,11 +399,11 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
         """
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[1], square_op.result)
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
         amp_op_2 = ConstantOp(AmplitudeAttr(1.0))
         square_op_2 = SquareWaveformOp(time_op_2.result, amp_op_2.result)
         pulse_op_2 = PulseOp(pulse_op.result, square_op_2.result)
@@ -443,7 +442,7 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
         # Run canonicalization and check it simplifies nicely
         CanonicalizePass().apply(_CONTEXT, module_op)
         assert isinstance(lowered_wait_op.duration.owner, ConstantOp)
-        assert lowered_wait_op.duration.owner.value.value.data == 192
+        assert lowered_wait_op.duration.owner.value.value.data == 192_000
 
     def test_two_frames_with_equal_time_removes_synchronize_operation_with_no_waits(self):
         """Creates a program with two frames, where both evolve under the same time
@@ -454,7 +453,7 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
         """
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op_1 = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op_1 = PulseOp(frames[0], square_op_1.result)
@@ -485,9 +484,9 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
         """
 
         ops, frames = _make_block_with_frames(2)
-        time_op_1 = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
-        time_op_3 = ConstantOp(TimeAttr(192, TimeUnits.NANOSECOND))
+        time_op_1 = ConstantOp(TimeAttr(64_000))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
+        time_op_3 = ConstantOp(TimeAttr(192_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op_1 = SquareWaveformOp(time_op_1.result, amp_op.result)
         pulse_op_1 = PulseOp(frames[0], square_op_1.result)
@@ -543,7 +542,7 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
             module_op,
             frames,
             {frames[0]: [PulseOp, PulseOp], frames[1]: [PulseOp]},
-            {frames[0]: [64, 128], frames[1]: [192]},
+            {frames[0]: [64_000, 128_000], frames[1]: [192_000]},
         )
 
     def test_multiple_synchronizations_on_two_frames_resolves_into_correct_times(self):
@@ -554,20 +553,20 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
         of the synchronizes are the expected deterministic expressions.
         """
 
-        time_1 = 60
-        time_2 = 132
-        time_3 = 234
+        time_1 = 60_000
+        time_2 = 132_000
+        time_3 = 234_000
 
         ops, frames = _make_block_with_frames(2)
-        time_op_1 = ConstantOp(TimeAttr(time_1, TimeUnits.NANOSECOND))
-        time_op_2 = ConstantOp(TimeAttr(time_2, TimeUnits.NANOSECOND))
+        time_op_1 = ConstantOp(TimeAttr(time_1))
+        time_op_2 = ConstantOp(TimeAttr(time_2))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op_1 = SquareWaveformOp(time_op_1.result, amp_op.result)
         pulse_op_1 = PulseOp(frames[0], square_op_1.result)
         square_op_2 = SquareWaveformOp(time_op_2.result, amp_op.result)
         pulse_op_2 = PulseOp(frames[1], square_op_2.result)
         sync_op_1 = SynchronizeOp(pulse_op_1.result, pulse_op_2.result)
-        time_op_3 = ConstantOp(TimeAttr(time_3, TimeUnits.NANOSECOND))
+        time_op_3 = ConstantOp(TimeAttr(time_3))
         amp_op_3 = ConstantOp(AmplitudeAttr(1.0))
         square_op_3 = SquareWaveformOp(time_op_3.result, amp_op_3.result)
         pulse_op_3 = PulseOp(sync_op_1.result[0], square_op_3.result)
@@ -634,10 +633,10 @@ class TestTimelineNormalizationResolvesAllSynchronizesToConstants:
         """Creates a program with many frames, and different many different synchronization
         groups, and checks the results are entirely as expected."""
 
-        times = [34, 78, 23, 46, 102, 4]
+        times = [34_000, 78_000, 23_000, 46_000, 102_000, 4_000]
 
         ops, frames = _make_block_with_frames(5)
-        time_ops = [ConstantOp(TimeAttr(time, TimeUnits.NANOSECOND)) for time in times]
+        time_ops = [ConstantOp(TimeAttr(time)) for time in times]
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_ops = [
             SquareWaveformOp(time_op.result, amp_op.result) for time_op in time_ops
@@ -730,8 +729,8 @@ class TestTimelineNormalizationWithNonConstantTimes:
         waveform_op_1 = SquareWaveformOp(time_arg, amp_op.result)
         pulse_op = PulseOp(frames[0], waveform_op_1.result)
         sync_op_1 = SynchronizeOp(frames[1], pulse_op.result)
-        time_op_1 = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
+        time_op_1 = ConstantOp(TimeAttr(64_000))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
         waveform_op_2 = SquareWaveformOp(time_op_1.result, amp_op.result)
         waveform_op_3 = SquareWaveformOp(time_op_2.result, amp_op.result)
         pulse_op_2 = PulseOp(sync_op_1.result[0], waveform_op_2.result)
@@ -806,8 +805,8 @@ class TestTimelineNormalizationWithNonConstantTimes:
         waveform_op_2 = SquareWaveformOp(time_arg_2, amp_op.result)
         pulse_op_2 = PulseOp(frames[1], waveform_op_2.result)
         sync_op_1 = SynchronizeOp(pulse_op_1.result, pulse_op_2.result)
-        time_op_1 = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
+        time_op_1 = ConstantOp(TimeAttr(64_000))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
         waveform_op_3 = SquareWaveformOp(time_op_1.result, amp_op.result)
         waveform_op_4 = SquareWaveformOp(time_op_2.result, amp_op.result)
         pulse_op_3 = PulseOp(sync_op_1.result[0], waveform_op_3.result)
@@ -887,8 +886,8 @@ class TestTimelineNormalizationWithNonConstantTimes:
         lower_bound = ArithConstantOp(IntegerAttr(0, i32))
         upper_bound = ArithConstantOp(IntegerAttr(10, i32))
         step = ArithConstantOp(IntegerAttr(1, i32))
-        time_start = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
-        time_increment = ConstantOp(TimeAttr(8, TimeUnits.NANOSECOND))
+        time_start = ConstantOp(TimeAttr(64_000))
+        time_increment = ConstantOp(TimeAttr(8_000))
         for_body = Block([], arg_types=(i32, TimeType()))
 
         time_arg = for_body.args[1]
@@ -900,8 +899,8 @@ class TestTimelineNormalizationWithNonConstantTimes:
         waveform_op_1 = SquareWaveformOp(time_arg, amp_op.result)
         pulse_op = PulseOp(frames[0], waveform_op_1.result)
         sync_op_1 = SynchronizeOp(frames[1], pulse_op.result)
-        time_op_1 = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
+        time_op_1 = ConstantOp(TimeAttr(64_000))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
         waveform_op_2 = SquareWaveformOp(time_op_1.result, amp_op.result)
         waveform_op_3 = SquareWaveformOp(time_op_2.result, amp_op.result)
         pulse_op_2 = PulseOp(sync_op_1.result[0], waveform_op_2.result)
@@ -1020,13 +1019,13 @@ class TestTimelineNormalizationWithUnknowns:
         """
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
         unknown_op = self._UnknownFrameConsumerOp(pulse_op.result, frames[1])
         sync_op_1 = SynchronizeOp(*unknown_op.result)
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
         square_op_2 = SquareWaveformOp(time_op_2.result, amp_op.result)
         pulse_op_2 = PulseOp(sync_op_1.result[0], square_op_2.result)
         sync_op_2 = SynchronizeOp(sync_op_1.result[1], pulse_op_2.result)
@@ -1075,7 +1074,7 @@ class TestTimelineNormalizationWithUnknowns:
         invalidate other frames."""
 
         ops, frames = _make_block_with_frames(4)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
@@ -1110,7 +1109,7 @@ class TestTimelineNormalizationWithUnknowns:
         tact."""
 
         ops, frames = _make_block_with_frames(3)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
@@ -1138,13 +1137,13 @@ class TestTimelineNormalizationWithUnknowns:
         synchronizations are not resolved."""
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
         unknown_region_op = self._UnknownRegionOp()
         sync_op_1 = SynchronizeOp(frames[1], pulse_op.result)
-        time_op_2 = ConstantOp(TimeAttr(128, TimeUnits.NANOSECOND))
+        time_op_2 = ConstantOp(TimeAttr(128_000))
         square_op_2 = SquareWaveformOp(time_op_2.result, amp_op.result)
         pulse_op_2 = PulseOp(sync_op_1.result[0], square_op_2.result)
         sync_op_2 = SynchronizeOp(sync_op_1.result[1], pulse_op_2.result)
@@ -1181,7 +1180,7 @@ class TestTimelineNormalizationWithUnknowns:
         within can't be resolved."""
 
         ops, frames = _make_block_with_frames(2)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         pulse_op = PulseOp(frames[0], square_op.result)
@@ -1237,7 +1236,7 @@ class TestTimelineNormalizationWithUnknowns:
         """
 
         ops, frames = _make_block_with_frames(4)
-        time_op = ConstantOp(TimeAttr(64, TimeUnits.NANOSECOND))
+        time_op = ConstantOp(TimeAttr(64_000))
         amp_op = ConstantOp(AmplitudeAttr(1.0))
         square_op = SquareWaveformOp(time_op.result, amp_op.result)
         square_op_2 = SquareWaveformOp(time_op.result, amp_op.result)

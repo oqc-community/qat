@@ -16,7 +16,6 @@ from qat.experimental.dialect.pulse.ir import (
     SquareWaveformOp,
     TimeAttr,
 )
-from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
     DurationImm,
     SetAwgOffsImmImmOp,
@@ -46,18 +45,23 @@ class SquareWaveformLegalisation:
     ) -> None:
         """Legalise the square waveform consumed by ``op``.
 
+        The waveform width is expected to be in picoseconds (canonical Pulse IR unit) and
+        will be rounded to integer nanoseconds for Q1 consumption.
+
         :param pulse_op: Square-waveform pulse operation to legalise.
         :param rewriter: Pattern rewriter used to replace the operation.
         """
         waveform = _square_waveform(pulse_op)
-        width = waveform.width.owner
-        if not isinstance(width, ConstantOp) or not isinstance(width.value, TimeAttr):
+        width_ps_op = waveform.width.owner
+        if not isinstance(width_ps_op, ConstantOp) or not isinstance(
+            width_ps_op.value, TimeAttr
+        ):
             raise PassFailedException(
                 "pulse.square_waveform width must be a pulse.time constant."
             )
 
-        width_ns = round(width.value.value_in_unit(TimeUnits.NANOSECOND))
-        legalised_width = ConstantOp(TimeAttr(width_ns, TimeUnits.NANOSECOND))
+        width_ps = round(width_ps_op.value.literal_value, -3)
+        legalised_width = ConstantOp(TimeAttr(width_ps))
         legalised_waveform = SquareWaveformOp(legalised_width, waveform.amplitude)
         legalised_pulse = PulseOp(pulse_op.frame, legalised_waveform)
         rewriter.replace_op(
@@ -95,12 +99,11 @@ class SquareWaveformLowering:
         if (
             not isinstance(width, ConstantOp)
             or not isinstance(width.value, TimeAttr)
-            or width.value.unit.data is not TimeUnits.NANOSECOND
-            or not isinstance(width.value.value.data, int)
+            or width.value.literal_value % 1000 != 0
         ):
             raise PassFailedException(
-                "pulse.square_waveform width is not canonical. Run "
-                "Q1PulseLegalisationPass before lowering."
+                "pulse.square_waveform width must be an integer number of nanoseconds "
+                "(a multiple of 1000 ps). Run Q1PulseLegalisationPass before lowering."
             )
 
         amplitude = cast(ConstantOp, waveform.amplitude.owner)
@@ -120,7 +123,7 @@ class SquareWaveformLowering:
             else target_data.CONTROL_SEQUENCER_DATA
         )
         grid_time = sequencer_data.grid_time
-        width_ns = width.value.value.data
+        width_ns = width.value.literal_value // 1000
         rise_duration = width_ns if width_ns < 2 * grid_time else grid_time
         remaining_duration = width_ns - rise_duration
 

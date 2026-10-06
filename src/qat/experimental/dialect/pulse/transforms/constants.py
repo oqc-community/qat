@@ -2,7 +2,6 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import Enum
 from math import isclose
 from typing import ClassVar
 
@@ -32,10 +31,6 @@ from qat.experimental.dialect.pulse.ir import (
     TimeAttr,
     TimeType,
     WaveformType,
-)
-from qat.experimental.dialect.pulse.units import (
-    FREQUENCY_UNIT_EXPONENTS,
-    TIME_UNIT_EXPONENTS,
 )
 from qat.experimental.passes.pass_ordering import OrderedPass
 
@@ -70,71 +65,33 @@ class PulseConstantFoldAdapter(ABC):
 class ScalarConstantFoldAdapter(PulseConstantFoldAdapter):
     """Base class for folding binary operations on scalar attributes in the pulse dialect.
 
-    Unpacks the values from the attributes, promotes units if necessary, applies the binary
-    operation, and then constructs a new attribute with the result.
+    Unpacks the values from the attributes, applies the binary operation, and constructs a
+    new attribute with the result.
     """
 
-    def __init__(
-        self, attr_constructor: type[Attribute], exponent_map: dict[Enum, int] | None = None
-    ):
+    def __init__(self, attr_constructor: type[Attribute]):
         """
         :param attr_constructor: A callable that takes the result of the binary operation
-            (and unit if applicable) and returns a new attribute.
-        :param exponent_map: An optional mapping from unit enum values to decimal exponents
-            If provided, the adapter will align the units of the two attributes using these
-            exponents before performing the binary operation.
+            and returns a new attribute.
         """
         self.attr_constructor = attr_constructor
-        self.exponent_map = exponent_map
-
-    def _extract(self, attr: Attribute):
-        """Helper function to extract the value and unit from an attribute, if
-        applicable."""
-        if self.exponent_map and isinstance(attr, self.attr_constructor):
-            return attr.value.data, attr.unit.data
-        return self._unpack_value(attr), None
-
-    def _align_units(self, lhs_value, lhs_unit, rhs_value, rhs_unit):
-        """Helper function to align the units of two attributes based on the provided
-        UnitSpec, returning the potentially modified values and the resulting unit to use
-        for the folded attribute."""
-
-        if not self.exponent_map:
-            return lhs_value, rhs_value, None
-
-        exp = self.exponent_map
-
-        if rhs_unit is None:
-            return lhs_value, rhs_value, lhs_unit
-        if lhs_unit is None:
-            return lhs_value, rhs_value, rhs_unit
-        if lhs_unit == rhs_unit:
-            return lhs_value, rhs_value, lhs_unit
-
-        if exp[lhs_unit] < exp[rhs_unit]:
-            rhs_value *= 10 ** (exp[rhs_unit] - exp[lhs_unit])
-            return lhs_value, rhs_value, lhs_unit
-        else:
-            lhs_value *= 10 ** (exp[lhs_unit] - exp[rhs_unit])
-            return lhs_value, rhs_value, rhs_unit
 
     def fold(self, op: BinaryOp, lhs: Attribute, rhs: Attribute) -> Attribute | None:
-        """Folds two scalar attributes, potentially with units, into a single attribute if
-        possible, returning None if the attributes cannot be folded."""
+        """Fold scalar attributes into one attribute when both values are supported."""
 
-        lhs_value, lhs_unit = self._extract(lhs)
-        rhs_value, rhs_unit = self._extract(rhs)
+        lhs_value = self._unpack_value(lhs)
+        rhs_value = self._unpack_value(rhs)
 
         if lhs_value is None or rhs_value is None:
             return None
 
-        lhs_value, rhs_value, out_unit = self._align_units(
-            lhs_value, lhs_unit, rhs_value, rhs_unit
-        )
         result = op.py_operation(lhs_value, rhs_value)
 
-        if self.exponent_map:
-            return self.attr_constructor(result, out_unit)
+        if hasattr(
+            self.attr_constructor, "_is_valid"
+        ) and not self.attr_constructor._is_valid(result):
+            return None
+
         return self.attr_constructor(result)
 
 
@@ -156,12 +113,12 @@ class WaveformConstantFoldAdapter(PulseConstantFoldAdapter):
                 return None
 
             # Pick the width and sample time ambiguously from either operand
-            width = lhs.width
-            sample_time = lhs.sample_time
+            width_ps = lhs.width
+            sample_time_ps = lhs.sample_time
         else:
             waveform_attr = lhs if isinstance(lhs, SampledWaveformAttr) else rhs
-            width = waveform_attr.width
-            sample_time = waveform_attr.sample_time
+            width_ps = waveform_attr.width
+            sample_time_ps = waveform_attr.sample_time
 
         lhs_value = self._unpack_value(lhs)
         rhs_value = self._unpack_value(rhs)
@@ -169,15 +126,15 @@ class WaveformConstantFoldAdapter(PulseConstantFoldAdapter):
             return None
 
         return SampledWaveformAttr(
-            op.py_operation(lhs_value, rhs_value), width, sample_time
+            op.py_operation(lhs_value, rhs_value), width_ps, sample_time_ps
         )
 
 
 _ADAPTERS: dict[TypeAttribute, PulseConstantFoldAdapter] = {
     AmplitudeType(): ScalarConstantFoldAdapter(AmplitudeAttr),
     PhaseType(): ScalarConstantFoldAdapter(PhaseAttr),
-    TimeType(): ScalarConstantFoldAdapter(TimeAttr, TIME_UNIT_EXPONENTS),
-    FrequencyType(): ScalarConstantFoldAdapter(FrequencyAttr, FREQUENCY_UNIT_EXPONENTS),
+    TimeType(): ScalarConstantFoldAdapter(TimeAttr),
+    FrequencyType(): ScalarConstantFoldAdapter(FrequencyAttr),
     WaveformType(): WaveformConstantFoldAdapter(),
 }
 

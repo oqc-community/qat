@@ -53,12 +53,12 @@ frequency_q1 = ConstantOp(FrequencyAttr(5.1e9))
 frame_q0 = CreateFrameOp(frequency_q0, StringAttr("q0.drive"))
 frame_q1 = CreateFrameOp(frequency_q1, StringAttr("q1.drive"))
 phase = ConstantOp(PhaseAttr(np.pi / 2))
-duration = ConstantOp(TimeAttr(4e-9))
+duration = ConstantOp(TimeAttr(4e3))
 waveform = ConstantOp(
     SampledWaveformAttr(
         [0.25 + 0.0j, 0.5 + 0.0j, 0.5 + 0.0j, 0.25 + 0.0j],
-        width=TimeAttr(4e-9),
-        sample_time=TimeAttr(1e-9),
+        width=TimeAttr(4e3),
+        sample_time=TimeAttr(1e3),
     )
 )
 phase_set = PhaseSetOp(frame_q0, phase)

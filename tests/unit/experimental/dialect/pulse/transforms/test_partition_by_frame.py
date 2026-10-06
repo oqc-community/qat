@@ -154,7 +154,7 @@ class TestFrameLineageAnalysis:
         frame_0 = CreateFrameOp(freq_0, StringAttr("q0/drive"))
         frame_1 = CreateFrameOp(freq_1, StringAttr("q0/drive"))
 
-        time = ConstantOp(TimeAttr(16e-9))
+        time = ConstantOp(TimeAttr(16e3))
         wait_0 = WaitOp(frame_0, time)
         wait_1 = WaitOp(frame_1, time)
         stop = func.ReturnOp()
@@ -184,7 +184,7 @@ class TestFrameLineageAnalysis:
         frame_0 = CreateFrameOp(freq_0, StringAttr("q0/drive"))
         frame_1 = CreateFrameOp(freq_1, StringAttr("q1/drive"))
         sync = SynchronizeOp(frame_0, frame_1)
-        duration = ConstantOp(TimeAttr(24e-9))
+        duration = ConstantOp(TimeAttr(24e3))
         wait_0 = WaitOp(sync.results[0], duration)
         wait_1 = WaitOp(sync.results[1], duration)
         analysis = build_frame_lineage_analysis(
@@ -223,10 +223,10 @@ class TestFrameLineageAnalysis:
         """Verify that acquisition and subsequent pulse use remain in one lineage."""
         freq = ConstantOp(FrequencyAttr(5.1e9))
         frame = CreateFrameOp(freq, StringAttr("q0/measure"))
-        duration = ConstantOp(TimeAttr(1e-6))
+        duration = ConstantOp(TimeAttr(1e6))
         acquire = AcquireOp(frame, duration)
         amp = ConstantOp(AmplitudeAttr(0.3))
-        width = ConstantOp(TimeAttr(40e-9))
+        width = ConstantOp(TimeAttr(40e3))
         waveform = SquareWaveformOp(width, amp)
         pulse = PulseOp(acquire.frame_result, waveform)
         analysis = build_frame_lineage_analysis(
@@ -253,7 +253,7 @@ class TestFrameLineageAnalysis:
         """Verify that analysis fails when a frame operand precedes its defining frame."""
         freq = ConstantOp(FrequencyAttr(5.1e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame, duration)
         module = _module_with_main([duration, wait, freq, frame, func.ReturnOp()])
 
@@ -293,7 +293,7 @@ class TestFrameLineageAnalysis:
         the root frame value."""
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame, duration)
         analysis = build_frame_lineage_analysis(
             _module_with_main([freq, frame, duration, wait, func.ReturnOp()])
@@ -309,7 +309,7 @@ class TestFrameLineageAnalysis:
         though a derived value is owned by the same lineage."""
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0/drive"))
-        duration = ConstantOp(TimeAttr(16e-9))
+        duration = ConstantOp(TimeAttr(16e3))
         wait = WaitOp(frame, duration)
         analysis = build_frame_lineage_analysis(
             _module_with_main([freq, frame, duration, wait, func.ReturnOp()])

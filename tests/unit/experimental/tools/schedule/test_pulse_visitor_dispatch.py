@@ -253,8 +253,8 @@ def test_pulse_schedule_visitor_records_sampled_constants(mocker):
 def test_build_pulse_schedule_evaluates_static_waveform_expressions(
     operation_type, expected
 ):
-    width = TimeAttr(2e-9)
-    sample_time = TimeAttr(1e-9)
+    width = TimeAttr(2e3)
+    sample_time = TimeAttr(1e3)
     lhs = ConstantOp(SampledWaveformAttr([1.0, 2.0], width, sample_time))
     rhs = ConstantOp(SampledWaveformAttr([3.0, 4.0], width, sample_time))
     if operation_type is MixOp:
@@ -271,8 +271,8 @@ def test_build_pulse_schedule_evaluates_static_waveform_expressions(
 
 
 def test_build_pulse_schedule_preserves_carrier_metadata_without_modulating_envelope():
-    width = TimeAttr(2e-9)
-    sample_time = TimeAttr(1e-9)
+    width = TimeAttr(2e3)
+    sample_time = TimeAttr(1e3)
     waveform = ConstantOp(SampledWaveformAttr([1.0, 1.0], width, sample_time))
     frequency = ConstantOp(FrequencyAttr(4.9e9))
     frame = CreateFrameOp(frequency, StringAttr("drive"))

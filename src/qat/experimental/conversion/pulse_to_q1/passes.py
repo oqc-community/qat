@@ -3,7 +3,7 @@
 """Pass and pipeline definitions for the Pulse-to-Q1 conversion."""
 
 from dataclasses import dataclass, field
-from math import isclose, isfinite
+from math import isfinite
 
 from numpy import prod
 from xdsl.context import Context
@@ -48,7 +48,7 @@ from qat.experimental.dialect.pulse.ir import (
 from qat.experimental.dialect.pulse.utils import (
     extract_frequency_hz,
     extract_phase_radians,
-    extract_time_seconds,
+    extract_time_ps,
 )
 from qat.experimental.dialect.q1.transforms.reg_alloc import (
     LinearScanRegisterAllocationPass,
@@ -60,8 +60,6 @@ from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosi
 from qat.experimental.passes.pass_ordering import OrderedPass, OrderedPassPipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
-
-_TIME_ROUNDING_TOLERANCE_NS = 1e-3
 
 
 @dataclass(frozen=True)
@@ -109,33 +107,34 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
     def _validate_wait(self, op: WaitOp) -> None:
         if not isinstance(op.duration.owner, ConstantOp):
             raise PassFailedException("Dynamic pulse.wait duration is not supported.")
-        self._validate_time_to_nanoseconds(op.name, "duration", extract_time_seconds(op))
+        self._validate_time_to_nanoseconds(op.name, "duration", extract_time_ps(op))
 
     @staticmethod
     def _validate_time_to_nanoseconds(
-        op_name: str, operand_name: str, seconds: float
+        op_name: str, operand_name: str, picoseconds: int
     ) -> int:
-        if not isfinite(seconds):
+        # Integers are inherently finite; skip float conversion to avoid OverflowError
+        # on sufficiently large valid TimeAttr values.
+        if isinstance(picoseconds, float) and not isfinite(picoseconds):
             raise PassFailedException(
-                f"{op_name} {operand_name} must be finite. Got {seconds}."
+                f"{op_name} {operand_name} must be finite. Got {picoseconds}."
             )
-        if seconds < 0:
+        if picoseconds < 0:
             raise PassFailedException(
-                f"{op_name} {operand_name} must be non-negative. Got {seconds}."
+                f"{op_name} {operand_name} must be non-negative. Got {picoseconds}."
             )
 
-        ns_float = seconds * 1e9
-        if 0 < ns_float < 1:
+        ns_int, remainder_ps = divmod(picoseconds, 1_000)
+        if 0 < picoseconds < 1_000:
             raise PassFailedException(
                 f"{op_name} {operand_name} smaller than one nanosecond is illegal. "
-                f"Got {ns_float} ns."
+                f"Got {picoseconds / 1e3} ns."
             )
 
-        ns_int = round(ns_float)
-        if not isclose(ns_float, ns_int, abs_tol=_TIME_ROUNDING_TOLERANCE_NS, rel_tol=0):
+        if remainder_ps:
             raise PassFailedException(
-                f"{op_name} {operand_name} must map to integer nanoseconds within "
-                f"tolerance. Got {ns_float} ns."
+                f"{op_name} {operand_name} must be a whole number of nanoseconds. "
+                f"Got {picoseconds / 1e3} ns."
             )
         return ns_int
 
@@ -191,7 +190,7 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
             )
 
         width_ns = self._validate_time_to_nanoseconds(
-            op.name, "width", float(width.value.literal_value)
+            op.name, "width", width.value.literal_value
         )
 
         sequence = find_enclosing_sequence(op)

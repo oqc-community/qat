@@ -73,7 +73,6 @@ from qat.experimental.dialect.pulse.ir import (
     WaveformType,
     WeightsAttr,
 )
-from qat.experimental.dialect.pulse.units import TimeUnits
 from qat.experimental.dialect.q1 import (
     AcquireWeightedImmRsRsRsImmOp,
     MoveImmRdOp,
@@ -84,6 +83,7 @@ from qat.experimental.dialect.q1 import (
     StopOp,
     WaitImmOp,
 )
+from qat.experimental.dialect.q1.ir.imm_desc import DurationImm
 from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp, UpdParamImmOp
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
@@ -230,7 +230,7 @@ def test_bound_dead_frame_elimination_removes_only_unreferenced_metadata():
 def test_rewrite_wait_op_lowers_short_wait():
     """A short wait lowers to a single ``q1.wait`` with the requested duration."""
     freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(16e-9))
+    duration = ConstantOp(TimeAttr(16e3))  # 16 ns in ps
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
@@ -243,17 +243,17 @@ def test_rewrite_wait_op_lowers_short_wait():
 
 
 @pytest.mark.parametrize(
-    ("duration_s", "target_data", "expected_duration_ns"),
+    ("duration_ps", "target_data", "expected_duration_ns"),
     [
-        (5e-9, TARGET_DATA, 8),
-        (9e-9, _target_with_control_timing(500e6, 8), 16),
+        (5e3, TARGET_DATA, 8),  # 5 ns in ps
+        (9e3, _target_with_control_timing(500e6, 8), 16),  # 9 ns in ps
     ],
 )
 def test_rewrite_wait_op_aligns_to_sequencer_grid(
-    duration_s, target_data, expected_duration_ns
+    duration_ps, target_data, expected_duration_ns
 ):
     freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(duration_s))
+    duration = ConstantOp(TimeAttr(duration_ps))
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
@@ -287,7 +287,7 @@ def test_rewrite_wait_op_chains_long_wait():
     max_wait_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
     total_ns = 2 * max_wait_time + 16
     freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(total_ns * 1e-9))
+    duration = ConstantOp(TimeAttr(total_ns * 1e3))  # total_ns in ps
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
@@ -300,6 +300,30 @@ def test_rewrite_wait_op_chains_long_wait():
     assert sum(durations) == total_ns
 
 
+def test_rewrite_wait_op_rounds_large_picosecond_duration_up(monkeypatch):
+    duration_ps = 9_007_199_254_744_001
+    expected_duration_ns = 9_007_199_254_748
+    monkeypatch.setattr(DurationImm, "_MAX", expected_duration_ns)
+    target_data = TARGET_DATA.model_copy(
+        update={
+            "Q1ASM_DATA": TARGET_DATA.Q1ASM_DATA.model_copy(
+                update={"max_wait_time": expected_duration_ns}
+            )
+        }
+    )
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(duration_ps))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PatternRewriteWalker(
+        RewriteWaitOp(target_data), apply_recursively=False
+    ).rewrite_module(module)
+
+    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+    assert [op.duration.data for op in wait_ops] == [expected_duration_ns]
+
+
 def test_rewrite_wait_op_uses_grid_aligned_chunks():
     """Long wait chunks respect a selected sequencer's coarser timing grid."""
     target_data = _target_with_control_timing(
@@ -310,7 +334,7 @@ def test_rewrite_wait_op_uses_grid_aligned_chunks():
     max_aligned_wait_time = max_wait_time - max_wait_time % 8
     total_ns = 2 * max_aligned_wait_time + 16
     freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(total_ns * 1e-9))
+    duration = ConstantOp(TimeAttr(total_ns * 1e3))  # total_ns in ps
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
@@ -579,16 +603,16 @@ class TestRewritePreQ1AcquireOp:
         Q1 acquire ops found in its body.
 
         :param acquire_params: One entry per ``PreQ1AcquireOp`` to emit, each a triple of
-            ``(weights, duration_ns, channel_id)`` where ``duration_ns`` is an integer
-            number of nanoseconds, reflecting the IR state after the duration
+            ``(weights, duration_ps, channel_id)`` where ``duration_ps`` is an integer
+            number of picoseconds, reflecting the IR state after the duration
             unit-normalisation pass.
         :returns: ``(sequencer, q1_acquire_ops)`` where ``q1_acquire_ops`` preserves
             the original program order.
         """
         ops = []
-        for weights, duration_ns, channel_id in acquire_params:
+        for weights, duration_ps, channel_id in acquire_params:
             freq, frame = _frame(channel_id)
-            duration = ConstantOp(TimeAttr(duration_ns, TimeUnits.NANOSECOND))
+            duration = ConstantOp(TimeAttr(duration_ps))
             store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
             acquire = PreQ1AcquireOp(
                 frame=frame,
@@ -615,7 +639,7 @@ class TestRewritePreQ1AcquireOp:
     def test_single_unweighted(self):
         """Single unweighted acquire lowers to AcquireImmRsImmOp with correct acq_idx,
         bin_idx and duration, and registers one acquisition table entry."""
-        seq, acq_ops = self._run((None, 1000, "q0/measure"))
+        seq, acq_ops = self._run((None, 1000_000, "q0/measure"))
 
         assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
         [op] = acq_ops
@@ -636,7 +660,7 @@ class TestRewritePreQ1AcquireOp:
         config = SequencerConfigAttr(port_id="q0/measure", nco=nco)
 
         seq, _ = self._run(
-            (None, 1000, "q0/measure"),
+            (None, 1000_000, "q0/measure"),
             sequencer_config=config,
         )
 
@@ -648,7 +672,7 @@ class TestRewritePreQ1AcquireOp:
         target_data = _target_with_readout_sample_rate(500_000_000)
 
         seq, [op] = self._run(
-            (None, 16, "q0/measure"),
+            (None, 16_000, "q0/measure"),
             target_data=target_data,
         )
 
@@ -666,32 +690,32 @@ class TestRewritePreQ1AcquireOp:
             ),
         ):
             self._run(
-                (None, 12, "q0/measure"),
+                (None, 12_000, "q0/measure"),
                 target_data=target_data,
             )
 
     @pytest.mark.parametrize(
-        ("duration_ns", "sample_count"),
+        ("duration_ps", "sample_count"),
         [
             pytest.param(0, 0, id="below-minimum"),
-            pytest.param((1 << 24) - 3, (1 << 24) - 3, id="above-maximum"),
+            pytest.param(((1 << 24) - 3) * 1e3, (1 << 24) - 3, id="above-maximum"),
         ],
     )
     def test_unweighted_rejects_out_of_range_integration_length(
-        self, duration_ns, sample_count
+        self, duration_ps, sample_count
     ):
         with pytest.raises(
             PassFailedException,
             match=rf"spans {sample_count} samples.*outside the supported.*range",
         ):
-            self._run((None, duration_ns, "q0/measure"))
+            self._run((None, duration_ps, "q0/measure"))
 
     def test_unweighted_rejects_fractional_sample_count(self):
         target_data = _target_with_readout_sample_rate(750_000_000)
 
         with pytest.raises(PassFailedException, match="integer number of samples"):
             self._run(
-                (None, 10, "q0/measure"),
+                (None, 10_000, "q0/measure"),
                 target_data=target_data,
             )
 
@@ -700,7 +724,7 @@ class TestRewritePreQ1AcquireOp:
 
         with pytest.raises(PassFailedException, match="sample rate must be an integer"):
             self._run(
-                (None, 16, "q0/measure"),
+                (None, 16_000, "q0/measure"),
                 target_data=target_data,
             )
 
@@ -715,18 +739,18 @@ class TestRewritePreQ1AcquireOp:
         with pytest.raises(
             PassFailedException,
             match=(
-                "Acquisition duration 4.5 ns converts to 4.5 ns.*"
+                "Acquisition duration 4500 ps converts to 4.5 ns.*"
                 "requires a whole number of nanoseconds"
             ),
         ):
-            self._run((weights, 4.5, "q0/measure"))
+            self._run((weights, 4500, "q0/measure"))
 
     def test_single_weighted(self):
         """Single weighted acquire lowers to AcquireWeightedImmRsRsRsImmOp with correct
         acq_idx, bin_idx, weight_idx0/1 and duration, and registers one acquisition and two
         weight table entries."""
         seq, acq_ops = self._run(
-            (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000, "q0/measure")
+            (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000_000, "q0/measure")
         )
 
         assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
@@ -760,8 +784,8 @@ class TestRewritePreQ1AcquireOp:
         integration length, as a sequencer exposes a single ``integration_length_acq``.
         """
         seq, acq_ops = self._run(
-            (None, 1000, "q0/measure"),
-            (None, 1000, "q1/measure"),
+            (None, 1000_000, "q0/measure"),
+            (None, 1000_000, "q1/measure"),
         )
 
         assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
@@ -786,8 +810,8 @@ class TestRewritePreQ1AcquireOp:
         with consecutive acq_idx and weight_idx values, correct durations, and four weight
         table entries."""
         seq, acq_ops = self._run(
-            (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000, "q0/measure"),
-            (WeightsAttr(np.array([1.0 + 0.0j, 0.0 + 1.0j])), 800, "q1/measure"),
+            (WeightsAttr(np.array([0.5 + 0.5j, 0.3 + 0.1j])), 1000_000, "q0/measure"),
+            (WeightsAttr(np.array([1.0 + 0.0j, 0.0 + 1.0j])), 800_000, "q1/measure"),
         )
 
         assert len([op for op in seq.body.block.ops if isinstance(op, PreQ1AcquireOp)]) == 0
@@ -819,7 +843,7 @@ class TestRewritePreQ1AcquireOp:
     def test_two_unweighted_same_frames(self):
         ops = []
         freq, frame = _frame()
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
         ops.extend([freq, frame, duration, store_idx])
 
@@ -862,17 +886,17 @@ class TestRewritePreQ1AcquireOp:
             match="Conflicting square-weight integration lengths",
         ):
             self._run(
-                (None, 1000, "q0/measure"),
-                (None, 2000, "q1/measure"),
+                (None, 1000_000, "q0/measure"),
+                (None, 2000_000, "q1/measure"),
             )
 
     @pytest.mark.parametrize(
         "time_attr, expected_ns",
         [
-            pytest.param(TimeAttr(1000, TimeUnits.NANOSECOND), 1000, id="nanoseconds"),
-            pytest.param(TimeAttr(1.1, TimeUnits.MICROSECOND), 1100, id="microseconds"),
-            pytest.param(TimeAttr(0.0008, TimeUnits.MILLISECOND), 800, id="milliseconds"),
-            pytest.param(TimeAttr(6e-7, TimeUnits.SECOND), 600, id="seconds"),
+            pytest.param(TimeAttr(1000_000), 1000, id="nanoseconds"),
+            pytest.param(TimeAttr(1_100_000), 1100, id="microseconds"),
+            pytest.param(TimeAttr(800_000), 800, id="milliseconds"),
+            pytest.param(TimeAttr(6e5), 600, id="seconds"),
         ],
     )
     def test_duration_unit_conversion(self, time_attr, expected_ns):
@@ -901,7 +925,7 @@ class TestRewritePreQ1AcquireOp:
     def test_integrated_acquisition_lowers_and_erases_integrate_marker(self):
         """An IntegrateOp marks the binned Qblox acquisition and is not emitted."""
         freq, frame = _frame("q0/measure")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
         acquire = PreQ1AcquireOp(
             frame=frame,
@@ -923,7 +947,7 @@ class TestRewritePreQ1AcquireOp:
     def test_raw_acquisition_is_rejected(self):
         """A bare acquisition cannot be mislabeled as Qblox scope data."""
         freq, frame = _frame("q0/measure")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
         acquire = PreQ1AcquireOp(
             frame=frame,
@@ -944,8 +968,8 @@ class TestRewritePreQ1AcquireOp:
         second registration raises ValueError."""
         with pytest.raises(ValueError, match="already exists"):
             self._run(
-                (None, 1000, "q0/measure"),
-                (None, 1000, "q0/measure"),
+                (None, 1000_000, "q0/measure"),
+                (None, 1000_000, "q0/measure"),
                 override_label="q0_acquire",
             )
 
@@ -984,7 +1008,7 @@ class TestRewritePreQ1AcquireOp:
         """When a label is provided on pre_q1_pulse.acquire, it should be used as the
         acquisition name in the table rather than the frame channel_id."""
         freq, frame = _frame("q0/measure")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
         acquire = PreQ1AcquireOp(
             frame=frame,
@@ -1011,7 +1035,7 @@ class TestRewritePreQ1AcquireOp:
         stand-in.
         """
         freq, frame = _frame("q0/measure")
-        duration = ConstantOp(TimeAttr(1000, TimeUnits.NANOSECOND))
+        duration = ConstantOp(TimeAttr(1000_000))
         store_idx = ArithConstantOp.from_int_and_width(0, IndexType())
         acquire = PreQ1AcquireOp(
             frame=frame,
@@ -1028,7 +1052,7 @@ class TestRewritePreQ1AcquireOp:
 
 
 def _sampled_waveform(samples) -> ConstantOp:
-    sample_time = 1e-9
+    sample_time = 1e3
     width = len(samples) * sample_time
     return ConstantOp(
         SampledWaveformAttr(samples, TimeAttr(width), TimeAttr(sample_time)),
@@ -1205,7 +1229,7 @@ class TestRewritePulseOp:
     def test_match_and_rewrite_raises_for_non_sampled_waveform(self):
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0.drive"))
-        width = ConstantOp(TimeAttr(50e-9))
+        width = ConstantOp(TimeAttr(50e3))
         amp = ConstantOp(AmplitudeAttr(0.23))
         fractional_breadth = ArithConstantOp(FloatAttr(0.2, f64), f64)
         waveform = GaussianWaveformOp(width, amp, fractional_breadth, BoolAttr(False, i1))
@@ -1268,7 +1292,7 @@ class TestRewritePulseOp:
 
 class TestSquareWaveformLegalisation:
     def test_legalises_width_to_integer_nanoseconds(self):
-        module, sequence = _square_pulse_module(TimeAttr(80e-9))
+        module, sequence = _square_pulse_module(TimeAttr(80e3))
 
         PatternRewriteWalker(
             create_pulse_to_q1_legalisation_patterns()[0],
@@ -1284,13 +1308,13 @@ class TestSquareWaveformLegalisation:
         ] == [legalised_waveform]
         legalised_width = legalised_waveform.width.owner
         assert isinstance(legalised_width, ConstantOp)
-        assert legalised_width.value == TimeAttr(80, TimeUnits.NANOSECOND)
+        assert legalised_width.value == TimeAttr(80_000.0)
 
 
 class TestSquareWaveformLowering:
     @pytest.mark.parametrize("width_ns", [4, 12, 80])
     def test_lowers_square_pulse_with_exact_plateau_duration(self, width_ns: int):
-        module, sequence = _square_pulse_module(TimeAttr(width_ns, TimeUnits.NANOSECOND))
+        module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
 
         PatternRewriteWalker(
             RewriteSquareWaveformPulseOp(
@@ -1345,7 +1369,7 @@ class TestSquareWaveformLowering:
                 "Q1ASM_DATA": q1asm_data,
             }
         )
-        module, _ = _square_pulse_module(TimeAttr(16, TimeUnits.NANOSECOND))
+        module, _ = _square_pulse_module(TimeAttr(16_000))
 
         with pytest.raises(
             PassFailedException,
@@ -1367,7 +1391,7 @@ class TestSquareWaveformLowering:
             update={"CONTROL_SEQUENCER_DATA": control_data}
         )
         width_ns = 65_544
-        module, sequence = _square_pulse_module(TimeAttr(width_ns, TimeUnits.NANOSECOND))
+        module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
 
         PatternRewriteWalker(
             RewriteSquareWaveformPulseOp(
@@ -1385,8 +1409,26 @@ class TestSquareWaveformLowering:
         assert all(duration % control_data.grid_time == 0 for duration in durations)
         assert sum(durations[:-1]) == width_ns
 
+    def test_adjusts_wait_when_final_chunk_would_be_too_short(self):
+        q1asm_data = TARGET_DATA.Q1ASM_DATA.model_copy(update={"max_wait_time": 12})
+        target_data = TARGET_DATA.model_copy(update={"Q1ASM_DATA": q1asm_data})
+        module, sequence = _square_pulse_module(TimeAttr(17_000))
+
+        PatternRewriteWalker(
+            RewriteSquareWaveformPulseOp(
+                target_data,
+                rewrite_callable=SquareWaveformLowering(),
+            ),
+            apply_recursively=False,
+        ).rewrite_module(module)
+
+        wait_durations = [
+            op.duration.data for op in sequence.body.block.ops if isinstance(op, WaitImmOp)
+        ]
+        assert wait_durations == [9, 4]
+
     def test_lowering_pass_emits_complete_q1_sequence(self):
-        module, sequence = _square_pulse_module(TimeAttr(80e-9))
+        module, sequence = _square_pulse_module(TimeAttr(80_000))
 
         _run_q1_pipeline(module)
 
@@ -1403,12 +1445,12 @@ class TestSquareWaveformLowering:
         assert sum(isinstance(op, UpdParamImmOp) for op in sequence.body.block.ops) == 2
         assert sum(isinstance(op, WaitImmOp) for op in sequence.body.block.ops) == 1
 
-    def test_rejects_non_canonical_width(self):
-        module, _ = _square_pulse_module(TimeAttr(80e-9))
+    def test_rejects_width_that_is_not_a_whole_number_of_nanoseconds(self):
+        module, _ = _square_pulse_module(TimeAttr(80_500))
 
         with pytest.raises(
             PassFailedException,
-            match="width is not canonical",
+            match="width must be an integer number of nanoseconds",
         ):
             PatternRewriteWalker(
                 RewriteSquareWaveformPulseOp(
@@ -1462,7 +1504,7 @@ class TestRewriteStartContinuousWaveformOp:
     def test_raises_for_non_amplitude_constant(self):
         freq = ConstantOp(FrequencyAttr(4.8e9))
         frame = CreateFrameOp(freq, StringAttr("q0.drive"))
-        bad_amp = ConstantOp(TimeAttr(4e-9))
+        bad_amp = ConstantOp(TimeAttr(4e3))
         start = StartContinuousWaveformOp(frame, bad_amp)
         sequence = SequenceOp("q0_drive", [freq, frame, bad_amp, start, StopOp()])
         module = ModuleOp([sequence])

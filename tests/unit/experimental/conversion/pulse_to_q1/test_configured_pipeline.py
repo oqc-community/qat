@@ -73,6 +73,7 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     AcquisitionPathConnectionAttr,
     InputConfigAttr,
     ModuleConfigAttr,
+    NcoConfigAttr,
     SequencerConfigAttr,
     UnweightedAcquireConfigAttr,
     make_acquisition,
@@ -197,7 +198,7 @@ def test_downstream_ordering_constraints_reject_misordered_lowering():
 def test_bound_readout_grid_is_used_during_square_validation():
     frequency = ConstantOp(FrequencyAttr(6_200_000_000))
     frame = CreateFrameOp(frequency, StringAttr("port-0"))
-    width = ConstantOp(TimeAttr(12e-9))
+    width = ConstantOp(TimeAttr(12e3))
     amplitude = ConstantOp(AmplitudeAttr(0.5))
     waveform = SquareWaveformOp(width, amplitude)
     pulse = PulseOp(frame, waveform)
@@ -216,7 +217,7 @@ def test_bound_readout_grid_is_used_during_square_validation():
 
 def test_pipeline_lowers_normalized_pulse_to_configured_flat_q1():
     frequency, frame = _frame()
-    duration = ConstantOp(TimeAttr(8e-9))
+    duration = ConstantOp(TimeAttr(8e3))
     wait = WaitOp(frame, duration)
     module = _pulse_module(frequency, frame, duration, wait)
 
@@ -230,7 +231,7 @@ def test_pipeline_lowers_normalized_pulse_to_configured_flat_q1():
 def test_pipeline_preserves_timing_instruction_through_control_flow_lowering():
     frequency, frame = _frame()
     amplitude = ConstantOp(AmplitudeAttr(0.25))
-    duration = ConstantOp(TimeAttr(8e-9))
+    duration = ConstantOp(TimeAttr(8e3))
     start = StartContinuousWaveformOp(frame, amplitude)
     wait = WaitOp(start, duration)
     stop = StopContinuousWaveformOp(wait)
@@ -250,7 +251,7 @@ def test_pipeline_preserves_timing_instruction_through_control_flow_lowering():
 def test_program_acquisition_length_overrides_hardware_default():
     frequency = ConstantOp(FrequencyAttr(6_200_000_000))
     frame = CreateFrameOp(frequency, StringAttr("port-0"))
-    duration = ConstantOp(TimeAttr(1000e-9))
+    duration = ConstantOp(TimeAttr(1000e3))
     acquire = AcquireOp(frame, duration)
     integrate = IntegrateOp(acquire.acquisition_result)
     module = _pulse_module(frequency, frame, duration, acquire, integrate)
@@ -264,7 +265,7 @@ def test_program_acquisition_length_overrides_hardware_default():
 def test_pipeline_reports_unsupported_nested_control_flow_lowering():
     frequency, frame = _frame()
     amplitude = ConstantOp(AmplitudeAttr(0.25))
-    duration = ConstantOp(TimeAttr(8e-9))
+    duration = ConstantOp(TimeAttr(8e3))
     start = StartContinuousWaveformOp(frame, amplitude)
     wait = WaitOp(start, duration)
     stop = StopContinuousWaveformOp(wait)
@@ -429,6 +430,30 @@ def test_pre_emission_verification_checks_table_entries(
 
     with pytest.raises(PassFailedException, match=message):
         QbloxPreEmissionVerificationPass().apply(Context(), _configured_module(sequence))
+
+
+@pytest.mark.parametrize("frequency", [600_000_000.0, float("inf")])
+def test_pre_emission_verification_rejects_out_of_range_nco_frequency(frequency):
+    sequence = _sequence_with()
+    sequence.properties["sequencer_config"] = SequencerConfigAttr(
+        nco=NcoConfigAttr(frequency=frequency)
+    )
+
+    with pytest.raises(PassFailedException, match="NCO frequency .* is outside"):
+        QbloxPreEmissionVerificationPass().apply(Context(), _configured_module(sequence))
+
+
+def test_pre_emission_verification_enforces_instruction_capacity():
+    sequence = _sequence_with(MoveImmRdOp(SU32Imm(1), Registers.R1))
+    sequencer_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
+        update={"max_num_instructions": 1}
+    )
+    target_data = TARGET_DATA.model_copy(update={"CONTROL_SEQUENCER_DATA": sequencer_data})
+
+    with pytest.raises(PassFailedException, match="exceeding the 1 instruction capacity"):
+        QbloxPreEmissionVerificationPass(target_data).apply(
+            Context(), _configured_module(sequence)
+        )
 
 
 def test_pre_emission_verification_rejects_non_sequence_top_level_operation():

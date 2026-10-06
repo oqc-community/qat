@@ -25,7 +25,7 @@ from qat.experimental.dialect.pulse.ir import (
 from qat.experimental.dialect.pulse.utils import (
     extract_frequency_hz,
     extract_phase_radians,
-    extract_time_seconds,
+    extract_time_ps,
     pulse_entry_block,
     require_constant_operand,
 )
@@ -73,7 +73,7 @@ def test_pulse_entry_block_returns_kernel_body_when_main_is_also_present():
 
 def test_pulse_entry_block_rejects_kernel_with_unrelated_top_level_operation():
     kernel = KernelOp("program", ((), ()), Region(Block()))
-    module = ModuleOp([kernel, ConstantOp(TimeAttr(8e-9))])
+    module = ModuleOp([kernel, ConstantOp(TimeAttr(8e3))])
 
     with pytest.raises(PassFailedException, match="may only contain additional functions"):
         pulse_entry_block(module)
@@ -83,7 +83,7 @@ def test_pulse_entry_block_rejects_mixed_module_shape():
     freq, frame = _frame()
     body = Block([freq, frame, func.ReturnOp()])
     fn = func.FuncOp("main", ((), ()), Region(body))
-    module = ModuleOp([fn, ConstantOp(TimeAttr(8e-9))])
+    module = ModuleOp([fn, ConstantOp(TimeAttr(8e3))])
 
     with pytest.raises(PassFailedException, match="either a flat module or a module"):
         pulse_entry_block(module)
@@ -115,21 +115,21 @@ def test_require_constant_operand_rejects_dynamic_operand():
         require_constant_operand(phase_set.name, "phase", phase_set.phase)
 
 
-def test_extract_time_seconds_returns_literal_seconds():
+def test_extract_time_ps_returns_literal_picoseconds():
     freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(16e-9))
+    duration = ConstantOp(TimeAttr(16_000))
     wait = WaitOp(frame, duration)
 
-    assert extract_time_seconds(wait) == pytest.approx(16e-9)
+    assert extract_time_ps(wait) == 16_000
 
 
-def test_extract_time_seconds_rejects_non_time_constant():
+def test_extract_time_ps_rejects_non_time_constant():
     freq, frame = _frame()
     malformed_duration = ConstantOp(PhaseAttr(0.5), result_type=TimeType())
     wait = WaitOp(frame, malformed_duration)
 
     with pytest.raises(PassFailedException, match="expects pulse.constant time operand"):
-        extract_time_seconds(wait)
+        extract_time_ps(wait)
 
 
 def test_extract_phase_radians_returns_literal_radians():
@@ -142,7 +142,7 @@ def test_extract_phase_radians_returns_literal_radians():
 
 def test_extract_phase_radians_rejects_non_phase_constant():
     freq, frame = _frame()
-    malformed_phase = ConstantOp(TimeAttr(4e-9), result_type=PhaseType())
+    malformed_phase = ConstantOp(TimeAttr(4e3), result_type=PhaseType())
     phase_set = PhaseSetOp(frame, malformed_phase)
 
     with pytest.raises(PassFailedException, match="expects pulse.constant phase operand"):

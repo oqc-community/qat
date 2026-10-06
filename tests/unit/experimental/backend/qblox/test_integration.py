@@ -65,7 +65,7 @@ def _compile(module: ModuleOp, canonical: CanonicalSystemData):
 def _control_module(port_id: str, carrier: int) -> ModuleOp:
     frequency = ConstantOp(FrequencyAttr(carrier))
     frame = CreateFrameOp(frequency, StringAttr(port_id))
-    width = ConstantOp(TimeAttr(16e-9))
+    width = ConstantOp(TimeAttr(16_000))
     amplitude = ConstantOp(AmplitudeAttr(0.5))
     fractional_breadth = ArithConstantOp(FloatAttr(0.2, f64), f64)
     waveform = GaussianWaveformOp(width, amplitude, fractional_breadth, regularize=False)
@@ -87,7 +87,7 @@ def _acquisition_module(
 ) -> ModuleOp:
     frequency = ConstantOp(FrequencyAttr(carrier))
     frame = CreateFrameOp(frequency, StringAttr(port_id))
-    duration = ConstantOp(TimeAttr(16e-9))
+    duration = ConstantOp(TimeAttr(16_000))
     acquire = AcquireOp(frame, duration, weights=weights, label="readout")
     integrate = IntegrateOp(acquire.acquisition_result)
     return ModuleOp(
@@ -115,7 +115,7 @@ def _acquisition_module(
 def _pulse_chain(port_id: str, carrier: int):
     frequency = ConstantOp(FrequencyAttr(carrier))
     frame = CreateFrameOp(frequency, StringAttr(port_id))
-    duration = ConstantOp(TimeAttr(8e-9))
+    duration = ConstantOp(TimeAttr(8_000))
     amplitude = ConstantOp(AmplitudeAttr(0.5))
     waveform = SquareWaveformOp(duration, amplitude)
     return frequency, frame, duration, amplitude, waveform, PulseOp(frame, waveform)
@@ -126,7 +126,7 @@ def _repeated_wait_module(port_ids: tuple[str, ...], carrier: int) -> ModuleOp:
     for port_id in port_ids:
         frequency = ConstantOp(FrequencyAttr(carrier))
         frame = CreateFrameOp(frequency, StringAttr(port_id))
-        duration = ConstantOp(TimeAttr(8e-9))
+        duration = ConstantOp(TimeAttr(8_000))
         body_ops.extend([frequency, frame, duration, WaitOp(frame, duration)])
 
     lower = ArithConstantOp.from_int_and_width(0, IndexType())
@@ -306,7 +306,7 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
     )
     readout_frequency = ConstantOp(FrequencyAttr(4_200_000_000))
     readout_frame = CreateFrameOp(readout_frequency, StringAttr("port-1"))
-    readout_duration = ConstantOp(TimeAttr(16e-9))
+    readout_duration = ConstantOp(TimeAttr(16_000))
     readout_acquire = AcquireOp(
         readout_frame, readout_duration, weights=None, label="readout"
     )

@@ -58,7 +58,7 @@ class TestPhaseShiftElimination:
         frame = CreateFrameOp(freq_const, StringAttr("port"))
         constant_phase = ConstantOp(PhaseAttr(phase_value))
         shifted_frame = PhaseShiftOp(frame, constant_phase)
-        time_const = ConstantOp(TimeAttr(100e-9))
+        time_const = ConstantOp(TimeAttr(100e3))
         acquire = AcquireOp(shifted_frame, time_const)
         module = build_module_from_ops(
             [freq_const, frame, constant_phase, shifted_frame, time_const, acquire]
@@ -162,7 +162,7 @@ class TestPhaseShiftElimination:
 class TestWaitElimination:
     """Tests that waits with zero duration are removed."""
 
-    @pytest.mark.parametrize("duration_value", [0, 0.0, 1e-12])
+    @pytest.mark.parametrize("duration_value", [0, 0.0, 1])
     def test_canonicalization_with_zero_duration_wait_is_eliminated(self, duration_value):
         """Tests that a wait with zero duration is removed by canonicalization."""
 
@@ -172,7 +172,7 @@ class TestWaitElimination:
         frame = CreateFrameOp(freq_const, StringAttr("port"))
         zero_duration = ConstantOp(TimeAttr(duration_value))
         wait_op = WaitOp(frame, zero_duration)
-        acquire_duration = ConstantOp(TimeAttr(100e-9))
+        acquire_duration = ConstantOp(TimeAttr(100e3))
         acquire_op = AcquireOp(wait_op, acquire_duration)
         module = build_module_from_ops(
             [freq_const, frame, zero_duration, wait_op, acquire_duration, acquire_op]
@@ -191,9 +191,9 @@ class TestWaitElimination:
         freq = FrequencyAttr(5.5e9)
         freq_const = ConstantOp(freq)
         frame = CreateFrameOp(freq_const, StringAttr("port"))
-        non_zero_duration = ConstantOp(TimeAttr(1e-9))
+        non_zero_duration = ConstantOp(TimeAttr(1e3))
         wait_op = WaitOp(frame, non_zero_duration)
-        acquire_duration = ConstantOp(TimeAttr(100e-9))
+        acquire_duration = ConstantOp(TimeAttr(100e3))
         acquire_op = AcquireOp(wait_op, acquire_duration)
         module = build_module_from_ops(
             [freq_const, frame, non_zero_duration, wait_op, acquire_duration, acquire_op]
@@ -250,7 +250,7 @@ class TestWaitElimination:
         zero_duration = ConstantOp(TimeAttr(0.0))
         wait_op1 = WaitOp(frame, zero_duration)
         wait_op2 = WaitOp(wait_op1, zero_duration)
-        acquire_duration = ConstantOp(TimeAttr(100e-9))
+        acquire_duration = ConstantOp(TimeAttr(100e3))
         acquire_op = AcquireOp(wait_op2, acquire_duration)
         module = build_module_from_ops(
             [

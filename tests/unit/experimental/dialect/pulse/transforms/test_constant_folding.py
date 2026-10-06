@@ -44,7 +44,6 @@ from qat.experimental.dialect.pulse.ir import (
     TimeType,
     WaveformType,
 )
-from qat.experimental.dialect.pulse.units import FrequencyUnits, TimeUnits
 
 from tests.unit.utils.ir import create_context, get_operations_with_type
 
@@ -76,8 +75,8 @@ class _DummyOpWithResult(IRDLOperation):
         super().__init__(result_types=[result_type])
 
 
-_SAMPLE_TIME_ATTR = TimeAttr(0.5, TimeUnits.NANOSECOND)
-_WIDTH_ATTR = TimeAttr(80, TimeUnits.NANOSECOND)
+_SAMPLE_TIME_ATTR = TimeAttr(500)
+_WIDTH_ATTR = TimeAttr(80_000)
 
 
 class TestConstantFoldingOnOps:
@@ -100,27 +99,27 @@ class TestConstantFoldingOnOps:
                 AmplitudeType(),
             ),
             (
-                TimeAttr(400, TimeUnits.NANOSECOND),
-                TimeAttr(200, TimeUnits.NANOSECOND),
-                TimeAttr(600, TimeUnits.NANOSECOND),
+                TimeAttr(400_000),
+                TimeAttr(200_000),
+                TimeAttr(600_000),
                 TimeType(),
             ),
             (
-                TimeAttr(200, TimeUnits.NANOSECOND),
-                TimeAttr(0.4, TimeUnits.MICROSECOND),
-                TimeAttr(600.0, TimeUnits.NANOSECOND),
+                TimeAttr(200_000),
+                TimeAttr(400_000),
+                TimeAttr(600_000),
                 TimeType(),
             ),
             (
-                FrequencyAttr(5.5, FrequencyUnits.GIGAHERTZ),
-                FrequencyAttr(0.1, FrequencyUnits.GIGAHERTZ),
-                FrequencyAttr(5.6, FrequencyUnits.GIGAHERTZ),
+                FrequencyAttr(5.5 * 1e9),
+                FrequencyAttr(0.1 * 1e9),
+                FrequencyAttr(5.6 * 1e9),
                 FrequencyType(),
             ),
             (
-                FrequencyAttr(5.5, FrequencyUnits.GIGAHERTZ),
-                FrequencyAttr(100, FrequencyUnits.MEGAHERTZ),
-                FrequencyAttr(5600.0, FrequencyUnits.MEGAHERTZ),
+                FrequencyAttr(5.5 * 1e9),
+                FrequencyAttr(100 * 1e6),
+                FrequencyAttr(5.6 * 1e9),
                 FrequencyType(),
             ),
             (
@@ -163,27 +162,27 @@ class TestConstantFoldingOnOps:
                 AmplitudeType(),
             ),
             (
-                TimeAttr(500, TimeUnits.NANOSECOND),
-                TimeAttr(200, TimeUnits.NANOSECOND),
-                TimeAttr(300, TimeUnits.NANOSECOND),
+                TimeAttr(500_000),
+                TimeAttr(200_000),
+                TimeAttr(300_000),
                 TimeType(),
             ),
             (
-                TimeAttr(0.5, TimeUnits.MICROSECOND),
-                TimeAttr(200, TimeUnits.NANOSECOND),
-                TimeAttr(300.0, TimeUnits.NANOSECOND),
+                TimeAttr(500_000),
+                TimeAttr(200_000),
+                TimeAttr(300_000),
                 TimeType(),
             ),
             (
-                FrequencyAttr(5.5, FrequencyUnits.GIGAHERTZ),
-                FrequencyAttr(0.1, FrequencyUnits.GIGAHERTZ),
-                FrequencyAttr(5.4, FrequencyUnits.GIGAHERTZ),
+                FrequencyAttr(5.5 * 1e9),
+                FrequencyAttr(0.1 * 1e9),
+                FrequencyAttr(5.4 * 1e9),
                 FrequencyType(),
             ),
             (
-                FrequencyAttr(5.5, FrequencyUnits.GIGAHERTZ),
-                FrequencyAttr(100, FrequencyUnits.MEGAHERTZ),
-                FrequencyAttr(5400.0, FrequencyUnits.MEGAHERTZ),
+                FrequencyAttr(5.5 * 1e9),
+                FrequencyAttr(100 * 1e6),
+                FrequencyAttr(5400.0 * 1e6),
                 FrequencyType(),
             ),
             (
@@ -257,15 +256,15 @@ class TestConstantFoldingOnOps:
             ),
             (
                 FloatAttr(2.0, f64),
-                TimeAttr(2, TimeUnits.MILLISECOND),
-                TimeAttr(4.0, TimeUnits.MILLISECOND),
+                TimeAttr(2_000_000_000),
+                TimeAttr(4_000_000_000),
                 TimeType(),
             ),
-            (IntegerAttr(3, i64), TimeAttr(2), TimeAttr(6), TimeType()),
+            (IntegerAttr(3, i64), TimeAttr(int(2e12)), TimeAttr(int(6e12)), TimeType()),
             (
                 FloatAttr(2.0, f64),
-                FrequencyAttr(5.5, FrequencyUnits.KILOHERTZ),
-                FrequencyAttr(11.0, FrequencyUnits.KILOHERTZ),
+                FrequencyAttr(5.5 * 1e3),
+                FrequencyAttr(11.0 * 1e3),
                 FrequencyType(),
             ),
             (IntegerAttr(3, i64), FrequencyAttr(4), FrequencyAttr(12), FrequencyType()),
@@ -515,14 +514,10 @@ class TestConstantFoldingIsUnsuccessful:
         """Tests that if we try to fold two SampledWaveformAttrs with different widths, the
         pass raises a PassFailedException."""
         constant1 = ConstantOp(
-            SampledWaveformAttr(
-                np.ones(160), TimeAttr(80, TimeUnits.NANOSECOND), _SAMPLE_TIME_ATTR
-            )
+            SampledWaveformAttr(np.ones(160), TimeAttr(80_000), _SAMPLE_TIME_ATTR)
         )
         constant2 = ConstantOp(
-            SampledWaveformAttr(
-                2 * np.ones(180), TimeAttr(90, TimeUnits.NANOSECOND), _SAMPLE_TIME_ATTR
-            )
+            SampledWaveformAttr(2 * np.ones(180), TimeAttr(90_000), _SAMPLE_TIME_ATTR)
         )
         add_op = AddOp(constant1, constant2, WaveformType())
         dummy_op = _DummyOp(add_op.result)
@@ -542,15 +537,15 @@ class TestConstantFoldingIsUnsuccessful:
         constant1 = ConstantOp(
             SampledWaveformAttr(
                 np.ones(160),
-                TimeAttr(80, TimeUnits.NANOSECOND),
-                TimeAttr(0.5, TimeUnits.NANOSECOND),
+                TimeAttr(80_000),
+                TimeAttr(500),
             )
         )
         constant2 = ConstantOp(
             SampledWaveformAttr(
                 2 * np.ones(80),
-                TimeAttr(80, TimeUnits.NANOSECOND),
-                TimeAttr(1.0, TimeUnits.NANOSECOND),
+                TimeAttr(80_000),
+                TimeAttr(1_000),
             )
         )
         add_op = AddOp(constant1, constant2, WaveformType())
@@ -581,6 +576,58 @@ class TestConstantFoldingIsUnsuccessful:
         assert module.body.ops.first.next_op is constant2
         assert module.body.ops.first.next_op.next_op is add_op
 
+    def test_fractional_time_scale_is_left_unfolded(self):
+        """A fractional picosecond result remains as an expression."""
+        scale = ArithConstantOp(FloatAttr(0.5, f64), f64)
+        duration = ConstantOp(TimeAttr(3), TimeType())
+        scale_op = ScaleOp(scale, duration, TimeType())
+        dummy_op = _DummyOp(scale_op.result)
+        module = ModuleOp(ops=[scale, duration, scale_op, dummy_op])
+
+        CanonicalizePass().apply(Context(), module)
+
+        assert scale_op in module.body.block.ops
+        assert dummy_op.arg.owner is scale_op
+
+    def test_negative_time_subtraction_is_left_unfolded(self):
+        """A negative picosecond result remains as an expression."""
+        lhs = ConstantOp(TimeAttr(3), TimeType())
+        rhs = ConstantOp(TimeAttr(4), TimeType())
+        sub_op = SubOp(lhs, rhs, TimeType())
+        dummy_op = _DummyOp(sub_op.result)
+        module = ModuleOp(ops=[lhs, rhs, sub_op, dummy_op])
+
+        CanonicalizePass().apply(Context(), module)
+
+        assert sub_op in module.body.block.ops
+        assert dummy_op.arg.owner is sub_op
+
+    def test_fractional_frequency_scale_is_left_unfolded(self):
+        """A fractional Hertz result remains as an expression."""
+        scale = ArithConstantOp(FloatAttr(0.5, f64), f64)
+        frequency = ConstantOp(FrequencyAttr(3), FrequencyType())
+        scale_op = ScaleOp(scale, frequency, FrequencyType())
+        dummy_op = _DummyOp(scale_op.result)
+        module = ModuleOp(ops=[scale, frequency, scale_op, dummy_op])
+
+        CanonicalizePass().apply(Context(), module)
+
+        assert scale_op in module.body.block.ops
+        assert dummy_op.arg.owner is scale_op
+
+    def test_negative_frequency_subtraction_is_left_unfolded(self):
+        """A negative Hertz result remains as an expression."""
+        lhs = ConstantOp(FrequencyAttr(3), FrequencyType())
+        rhs = ConstantOp(FrequencyAttr(4), FrequencyType())
+        sub_op = SubOp(lhs, rhs, FrequencyType())
+        dummy_op = _DummyOp(sub_op.result)
+        module = ModuleOp(ops=[lhs, rhs, sub_op, dummy_op])
+
+        CanonicalizePass().apply(Context(), module)
+
+        assert sub_op in module.body.block.ops
+        assert dummy_op.arg.owner is sub_op
+
 
 class TestMaxTimeOpConstantFolding:
     """Runs tests to make sure constantly folding works on MaxTimeOp.
@@ -594,9 +641,9 @@ class TestMaxTimeOpConstantFolding:
     def test_constant_folding_on_max_time_op(self):
         """Tests that if all operands of a MaxTimeOp are constant, it is folded to a single
         constant with the maximum time value."""
-        time1 = TimeAttr(200, TimeUnits.NANOSECOND)
-        time2 = TimeAttr(300, TimeUnits.NANOSECOND)
-        time3 = TimeAttr(400, TimeUnits.NANOSECOND)
+        time1 = TimeAttr(200_000)
+        time2 = TimeAttr(300_000)
+        time3 = TimeAttr(400_000)
 
         const1 = ConstantOp(time1)
         const2 = ConstantOp(time2)
@@ -644,8 +691,8 @@ class TestMaxTimeOpConstantFolding:
 
     def test_no_folding_on_max_time_op_with_non_constant_operand(self):
         """Tests that if any operand of a MaxTimeOp is not constant, no folding is done."""
-        time1 = TimeAttr(200, TimeUnits.NANOSECOND)
-        time2 = TimeAttr(300, TimeUnits.NANOSECOND)
+        time1 = TimeAttr(200_000)
+        time2 = TimeAttr(300_000)
 
         const1 = ConstantOp(time1)
         const2 = ConstantOp(time2)
@@ -667,10 +714,10 @@ class TestMaxTimeOpConstantFolding:
     def test_folding_chain_of_time_additions_into_max_time_op(self):
         """Tests that if we have a chain of time additions, fed into a MaxTimeOp, the whole
         chain is folded into a single constant with the maximum time value."""
-        time1 = TimeAttr(100, TimeUnits.NANOSECOND)
-        time2 = TimeAttr(200, TimeUnits.NANOSECOND)
-        time3 = TimeAttr(300, TimeUnits.NANOSECOND)
-        time4 = TimeAttr(400, TimeUnits.NANOSECOND)
+        time1 = TimeAttr(100_000)
+        time2 = TimeAttr(200_000)
+        time3 = TimeAttr(300_000)
+        time4 = TimeAttr(400_000)
 
         const1 = ConstantOp(time1)
         const2 = ConstantOp(time2)
@@ -699,4 +746,4 @@ class TestMaxTimeOpConstantFolding:
         assert isinstance(folded_constant, ConstantOp), (
             f"Expected folded constant to be a ConstantOp, but it was {folded_constant}"
         )
-        assert folded_constant.value.value.data == 100 + 200 + 300
+        assert folded_constant.value.value.data == 100_000 + 200_000 + 300_000
