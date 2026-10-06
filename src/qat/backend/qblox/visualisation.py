@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -52,50 +52,72 @@ def plot_program(program: QbloxProgram):
     plt.show()
 
 
-def plot_playback(playback: dict[str, list[Acquisition]]):
+def plot_playback(
+    playback: dict[str, list[Acquisition]],
+    figure_width: float = 10,
+    row_height: float = 2,
+) -> None:
     if not playback:
         return
 
     for pulse_channel_id, acquisitions in playback.items():
         for acquisition in acquisitions:
+            scope_data = acquisition.acquisition.scope
+            scope_pairs = []
+            for path_ids in ((0, 1), (2, 3)):
+                populated_paths = [
+                    (path_id, path)
+                    for path_id in path_ids
+                    if (path := getattr(scope_data, f"path{path_id}")) is not None
+                    and np.asarray(path.data).size
+                ]
+                if populated_paths:
+                    scope_pairs.append((path_ids, populated_paths))
+
+            nrows = len(scope_pairs) + 2
             fig, axes = plt.subplots(
-                nrows=3,
+                nrows=nrows,
                 ncols=1,
                 sharex=False,
                 sharey=False,
                 squeeze=False,
-                figsize=(10, 5),
+                figsize=(figure_width, row_height * nrows),
             )
             fig.suptitle(f"Playback plots for {acquisition.name} on {pulse_channel_id}")
 
-            scope_data = acquisition.acquisition.scope
             integ_data = acquisition.acquisition.bins.integration
             thrld_data = acquisition.acquisition.bins.threshold
 
             # Scope data
-            axes[0, 0].plot(scope_data.path0.data, label="I")
-            axes[0, 0].plot(scope_data.path1.data, label="Q")
-            axes[0, 0].set_xlabel("Sample (ns)")
-            axes[0, 0].set_ylabel("Value")
-            axes[0, 0].autoscale()
-            axes[0, 0].legend()
-            axes[0, 0].title.set_text("Scope acquisition")
+            for row, (path_ids, populated_paths) in enumerate(scope_pairs):
+                axis = axes[row, 0]
+                for path_id, path in populated_paths:
+                    axis.plot(path.data, label=f"path{path_id}")
+                axis.set_xlabel("Sample (ns)")
+                axis.set_ylabel("Value")
+                axis.autoscale()
+                axis.legend()
+                axis.title.set_text(
+                    f"Scope acquisition (paths {path_ids[0]}/{path_ids[1]})"
+                )
 
             # Integration data
-            axes[1, 0].plot(integ_data.path0, label="I")
-            axes[1, 0].plot(integ_data.path1, label="Q")
-            axes[1, 0].set_xlabel("Iteration")
-            axes[1, 0].set_ylabel("Value")
-            axes[1, 0].autoscale()
-            axes[1, 0].legend()
-            axes[1, 0].title.set_text("Integrated acquisition")
+            integration_axis = axes[len(scope_pairs), 0]
+            integration_axis.plot(integ_data.path0, label="I")
+            integration_axis.plot(integ_data.path1, label="Q")
+            integration_axis.set_xlabel("Iteration")
+            integration_axis.set_ylabel("Value")
+            integration_axis.autoscale()
+            integration_axis.legend()
+            integration_axis.title.set_text("Integrated acquisition")
 
             # Threshold data
-            axes[2, 0].plot(thrld_data, label="I")
-            axes[2, 0].set_xlabel("Iteration")
-            axes[2, 0].set_ylabel("Value")
-            axes[2, 0].autoscale()
-            axes[2, 0].title.set_text("Thresholded acquisition")
+            threshold_axis = axes[len(scope_pairs) + 1, 0]
+            threshold_axis.plot(thrld_data, label="I")
+            threshold_axis.set_xlabel("Iteration")
+            threshold_axis.set_ylabel("Value")
+            threshold_axis.autoscale()
+            threshold_axis.title.set_text("Thresholded acquisition")
 
         plt.tight_layout()
         plt.show()

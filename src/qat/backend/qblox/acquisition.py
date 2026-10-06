@@ -2,7 +2,7 @@
 # Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 import numpy as np
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SerializerFunctionWrapHandler, model_serializer
 
 from qat.utils.pydantic import FloatNDArray, IntNDArray
 
@@ -43,14 +43,29 @@ class IntegData(BaseModel):
 
 
 class ScopeAcqData(BaseModel):
-    """Path 0 refers to I while Path 1 refers to Q.
+    """Raw scope traces returned by a Qblox readout module.
 
-    Their lengths are statically equal
-    to :class:`Constants.MAX_SAMPLE_SIZE_SCOPE_ACQUISITIONS`
+    Paths 0 and 1 are the I/Q pair for the first physical input. QRC modules additionally
+    return paths 2 and 3 for the second physical input. Paths 2 and 3 are independently
+    optional because this result model also accepts QRM and partial acquisition payloads.
+    Their lengths are statically equal to the target's maximum scope acquisition size.
     """
 
     path0: PathData = PathData()
     path1: PathData = PathData()
+    path2: PathData | None = None
+    path3: PathData | None = None
+
+    @model_serializer(mode="wrap")
+    def _serialize_scope_paths(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, object]:
+        scope_data = handler(self)
+        if self.path2 is None:
+            scope_data.pop("path2", None)
+        if self.path3 is None:
+            scope_data.pop("path3", None)
+        return scope_data
 
 
 class BinnedAcqData(BaseModel):
@@ -136,18 +151,12 @@ class Acquisition(BaseModel):
 
         scope_data1 = self.acquisition.scope
         scope_data2 = other.acquisition.scope
-        scope_data = result.acquisition.scope
-
-        scope_data.path0.avg_cnt = min(
-            scope_data1.path0.avg_cnt or 0, scope_data2.path0.avg_cnt or 0
+        result.acquisition.scope = ScopeAcqData(
+            path0=_merge_path_data(scope_data1.path0, scope_data2.path0),
+            path1=_merge_path_data(scope_data1.path1, scope_data2.path1),
+            path2=_merge_optional_path_data(scope_data1.path2, scope_data2.path2),
+            path3=_merge_optional_path_data(scope_data1.path3, scope_data2.path3),
         )
-        scope_data.path0.oor = scope_data1.path0.oor and scope_data2.path0.oor
-        scope_data.path0.data = np.append(scope_data1.path0.data, scope_data2.path0.data)
-        scope_data.path1.avg_cnt = min(
-            scope_data1.path1.avg_cnt or 0, scope_data2.path1.avg_cnt or 0
-        )
-        scope_data.path1.oor = scope_data1.path1.oor and scope_data2.path1.oor
-        scope_data.path1.data = np.append(scope_data1.path1.data, scope_data2.path1.data)
 
         bin_data1 = self.acquisition.bins
         bin_data2 = other.acquisition.bins
@@ -163,3 +172,21 @@ class Acquisition(BaseModel):
         bin_data.threshold = np.append(bin_data1.threshold, bin_data2.threshold)
 
         return result
+
+
+def _merge_path_data(left: PathData, right: PathData) -> PathData:
+    return PathData(
+        avg_cnt=min(left.avg_cnt or 0, right.avg_cnt or 0),
+        **{"out-of-range": left.oor and right.oor},
+        data=np.append(left.data, right.data),
+    )
+
+
+def _merge_optional_path_data(
+    left: PathData | None, right: PathData | None
+) -> PathData | None:
+    if left is None:
+        return right.model_copy(deep=True) if right is not None else None
+    if right is None:
+        return left.model_copy(deep=True)
+    return _merge_path_data(left, right)

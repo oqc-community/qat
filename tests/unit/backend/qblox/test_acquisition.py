@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +23,8 @@ def _current_acquisition(
     index: int = 0,
     path0: list[float] | None = None,
     path1: list[float] | None = None,
+    path2: list[float] | None = None,
+    path3: list[float] | None = None,
 ) -> current_acquisition.Acquisition:
     return CurrentAcquisition(
         name=name,
@@ -39,6 +41,16 @@ def _current_acquisition(
                     **{"out-of-range": True},
                     data=path1 or [2.0],
                 ),
+                path2=current_acquisition.PathData(
+                    avg_cnt=3,
+                    **{"out-of-range": True},
+                    data=path2 or [7.0],
+                ),
+                path3=current_acquisition.PathData(
+                    avg_cnt=1,
+                    **{"out-of-range": True},
+                    data=path3 or [8.0],
+                ),
             ),
             bins=current_acquisition.BinnedAcqData(
                 avg_cnt=[1],
@@ -51,7 +63,7 @@ def _current_acquisition(
 
 def test_current_acquisition_concatenates_data():
     first = _current_acquisition()
-    second = _current_acquisition(path0=[5.0], path1=[6.0])
+    second = _current_acquisition(path0=[5.0], path1=[6.0], path2=[9.0], path3=[10.0])
 
     result = first + second
 
@@ -63,6 +75,8 @@ def test_current_acquisition_concatenates_data():
     assert result.acquisition.scope.path1.oor
     np.testing.assert_array_equal(result.acquisition.scope.path0.data, [1.0, 5.0])
     np.testing.assert_array_equal(result.acquisition.scope.path1.data, [2.0, 6.0])
+    np.testing.assert_array_equal(result.acquisition.scope.path2.data, [7.0, 9.0])
+    np.testing.assert_array_equal(result.acquisition.scope.path3.data, [8.0, 10.0])
     np.testing.assert_array_equal(result.acquisition.bins.avg_cnt, [1, 1])
     np.testing.assert_array_equal(result.acquisition.bins.integration.path0, [3.0, 3.0])
     np.testing.assert_array_equal(result.acquisition.bins.integration.path1, [4.0, 4.0])
@@ -74,6 +88,41 @@ def test_current_acquisition_handles_empty_operands():
 
     assert acquisition + CurrentAcquisition() == acquisition
     assert CurrentAcquisition() + acquisition == acquisition
+
+
+def test_current_acquisition_serializes_qrc_scope_paths_conditionally():
+    empty_scope_data = CurrentAcquisition().model_dump()["acquisition"]["scope"]
+    populated_scope_data = _current_acquisition().model_dump()["acquisition"]["scope"]
+
+    assert set(empty_scope_data) == {"path0", "path1"}
+    assert set(populated_scope_data) == {"path0", "path1", "path2", "path3"}
+
+
+@pytest.mark.parametrize("path_name", ["path2", "path3"])
+@pytest.mark.parametrize(
+    ("left_present", "right_present"),
+    [(False, False), (True, False), (False, True)],
+)
+def test_current_acquisition_merges_optional_paths(path_name, left_present, right_present):
+    left = _current_acquisition()
+    right = _current_acquisition()
+    if not left_present:
+        setattr(left.acquisition.scope, path_name, None)
+    if not right_present:
+        setattr(right.acquisition.scope, path_name, None)
+
+    result = left + right
+    result_path = getattr(result.acquisition.scope, path_name)
+
+    if not left_present and not right_present:
+        assert result_path is None
+        return
+
+    source = left if left_present else right
+    source_path = getattr(source.acquisition.scope, path_name)
+    assert result_path == source_path
+    result_path.data[0] = -1
+    assert source_path.data[0] != -1
 
 
 def test_current_acquisition_rejects_incompatible_operands():

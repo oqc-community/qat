@@ -82,13 +82,36 @@ def test_plot_playback_ignores_empty_results(mocker):
     show.assert_not_called()
 
 
-def test_plot_playback_plots_scope_integration_and_threshold_data(mocker):
+def _qrm_acquisition():
+    return SimpleNamespace(
+        name="readout",
+        acquisition=SimpleNamespace(
+            scope=SimpleNamespace(
+                path0=SimpleNamespace(data=np.array([1.0, 2.0])),
+                path1=SimpleNamespace(data=np.array([3.0, 4.0])),
+                path2=SimpleNamespace(data=np.array([])),
+                path3=SimpleNamespace(data=np.array([])),
+            ),
+            bins=SimpleNamespace(
+                integration=SimpleNamespace(
+                    path0=np.array([5.0]),
+                    path1=np.array([6.0]),
+                ),
+                threshold=np.array([1]),
+            ),
+        ),
+    )
+
+
+def test_plot_playback_plots_each_scope_pair_separately(mocker):
     acquisition = SimpleNamespace(
         name="readout",
         acquisition=SimpleNamespace(
             scope=SimpleNamespace(
                 path0=SimpleNamespace(data=np.array([1.0, 2.0])),
                 path1=SimpleNamespace(data=np.array([3.0, 4.0])),
+                path2=SimpleNamespace(data=np.array([7.0, 8.0])),
+                path3=SimpleNamespace(data=np.array([9.0, 10.0])),
             ),
             bins=SimpleNamespace(
                 integration=SimpleNamespace(
@@ -100,7 +123,7 @@ def test_plot_playback_plots_scope_integration_and_threshold_data(mocker):
         ),
     )
     figure = mocker.Mock()
-    axes = np.array([[mocker.Mock()], [mocker.Mock()], [mocker.Mock()]])
+    axes = np.array([[mocker.Mock()], [mocker.Mock()], [mocker.Mock()], [mocker.Mock()]])
     subplots = mocker.patch(
         "qat.backend.qblox.visualisation.plt.subplots",
         return_value=(figure, axes),
@@ -111,19 +134,77 @@ def test_plot_playback_plots_scope_integration_and_threshold_data(mocker):
     plot_playback({"q0.readout": [acquisition]})
 
     subplots.assert_called_once_with(
+        nrows=4,
+        ncols=1,
+        sharex=False,
+        sharey=False,
+        squeeze=False,
+        figsize=(10, 8),
+    )
+    figure.suptitle.assert_called_once_with("Playback plots for readout on q0.readout")
+    assert axes[0, 0].plot.call_count == 2
+    assert [call.kwargs["label"] for call in axes[0, 0].plot.call_args_list] == [
+        "path0",
+        "path1",
+    ]
+    assert [call.kwargs["label"] for call in axes[1, 0].plot.call_args_list] == [
+        "path2",
+        "path3",
+    ]
+    axes[0, 0].title.set_text.assert_called_once_with("Scope acquisition (paths 0/1)")
+    axes[1, 0].title.set_text.assert_called_once_with("Scope acquisition (paths 2/3)")
+    assert axes[2, 0].plot.call_count == 2
+    axes[2, 0].title.set_text.assert_called_once_with("Integrated acquisition")
+    axes[3, 0].plot.assert_called_once_with(np.array([1]), label="I")
+    axes[3, 0].title.set_text.assert_called_once_with("Thresholded acquisition")
+    tight_layout.assert_called_once_with()
+    show.assert_called_once_with()
+
+
+def test_plot_playback_uses_one_scope_row_for_qrm_data(mocker):
+    acquisition = _qrm_acquisition()
+    figure = mocker.Mock()
+    axes = np.array([[mocker.Mock()], [mocker.Mock()], [mocker.Mock()]])
+    subplots = mocker.patch(
+        "qat.backend.qblox.visualisation.plt.subplots",
+        return_value=(figure, axes),
+    )
+    mocker.patch("qat.backend.qblox.visualisation.plt.tight_layout")
+    mocker.patch("qat.backend.qblox.visualisation.plt.show")
+
+    plot_playback({"q0.readout": [acquisition]})
+
+    subplots.assert_called_once_with(
         nrows=3,
         ncols=1,
         sharex=False,
         sharey=False,
         squeeze=False,
-        figsize=(10, 5),
+        figsize=(10, 6),
     )
-    figure.suptitle.assert_called_once_with("Playback plots for readout on q0.readout")
-    assert axes[0, 0].plot.call_count == 2
-    assert axes[1, 0].plot.call_count == 2
-    axes[2, 0].plot.assert_called_once_with(np.array([1]), label="I")
-    axes[0, 0].title.set_text.assert_called_once_with("Scope acquisition")
+    assert [call.kwargs["label"] for call in axes[0, 0].plot.call_args_list] == [
+        "path0",
+        "path1",
+    ]
+    axes[0, 0].title.set_text.assert_called_once_with("Scope acquisition (paths 0/1)")
     axes[1, 0].title.set_text.assert_called_once_with("Integrated acquisition")
     axes[2, 0].title.set_text.assert_called_once_with("Thresholded acquisition")
-    tight_layout.assert_called_once_with()
-    show.assert_called_once_with()
+
+
+def test_plot_playback_uses_configured_figure_size(mocker):
+    figure = mocker.Mock()
+    axes = np.array([[mocker.Mock()], [mocker.Mock()], [mocker.Mock()]])
+    subplots = mocker.patch(
+        "qat.backend.qblox.visualisation.plt.subplots",
+        return_value=(figure, axes),
+    )
+    mocker.patch("qat.backend.qblox.visualisation.plt.tight_layout")
+    mocker.patch("qat.backend.qblox.visualisation.plt.show")
+
+    plot_playback(
+        {"q0.readout": [_qrm_acquisition()]},
+        figure_width=12,
+        row_height=3,
+    )
+
+    assert subplots.call_args.kwargs["figsize"] == (12, 9)
