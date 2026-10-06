@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.constants module &mdash; qat-compiler 3.0.0.post401.dev20261006082842 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.constants module &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -209,7 +209,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.analysis.html">qat.experimental.dialect.pulse.analysis package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6 current"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.utils.html">qat.experimental.dialect.pulse.utils module</a></li>
 </ul>
 </li>
@@ -816,27 +815,21 @@ attributes cannot be folded.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScalarConstantFoldAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr_constructor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponent_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScalarConstantFoldAdapter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attr_constructor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter" title="qat.experimental.dialect.pulse.transforms.constants.PulseConstantFoldAdapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseConstantFoldAdapter</span></code></a></p>
 <p>Base class for folding binary operations on scalar attributes in the pulse dialect.</p>
-<p>Unpacks the values from the attributes, promotes units if necessary, applies the binary
-operation, and then constructs a new attribute with the result.</p>
+<p>Unpacks the values from the attributes, applies the binary operation, and constructs a
+new attribute with the result.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.attr_constructor"></span><strong>attr_constructor</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.attr_constructor">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code>]</span>) – A callable that takes the result of the binary operation
-(and unit if applicable) and returns a new attribute.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.exponent_map"></span><strong>exponent_map</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.exponent_map">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]]</span>) – An optional mapping from unit enum values to decimal exponents
-If provided, the adapter will align the units of the two attributes using these
-exponents before performing the binary operation.</p></li>
-</ul>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.attr_constructor"></span><strong>attr_constructor</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.params.attr_constructor">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code>]</span>) – A callable that takes the result of the binary operation
+and returns a new attribute.</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.fold">
 <span class="sig-name descname"><span class="pre">fold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rhs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.constants.ScalarConstantFoldAdapter.fold" title="Link to this definition"></a></dt>
-<dd><p>Folds two scalar attributes, potentially with units, into a single attribute if
-possible, returning None if the attributes cannot be folded.</p>
+<dd><p>Fold scalar attributes into one attribute when both values are supported.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Attribute</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>

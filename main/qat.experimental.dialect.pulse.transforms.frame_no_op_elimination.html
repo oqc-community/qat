@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.frame_no_op_elimination module &mdash; qat-compiler 3.0.0.post401.dev20261006082842 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.frame_no_op_elimination module &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -209,7 +209,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.analysis.html">qat.experimental.dialect.pulse.analysis package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6 current"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.utils.html">qat.experimental.dialect.pulse.utils module</a></li>
 </ul>
 </li>
@@ -743,6 +742,8 @@ and removes the operation.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Finds <code class="xref py py-class docutils literal notranslate"><span class="pre">WaitOp</span></code> with a constant operand that is equal to zero and removes the
 operation.</p>
+<p>This only applies to WaitOp instructions (not other duration-based operations). Wait
+operations with zero duration are no-ops and can be safely eliminated.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroWaitOp.match_and_rewrite">
 <span class="sig-name descname"><span class="pre">match_and_rewrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Operation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rewriter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PatternRewriter</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.FoldZeroWaitOp.match_and_rewrite" title="Link to this definition"></a></dt>

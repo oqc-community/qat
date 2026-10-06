@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir package &mdash; qat-compiler 3.0.0.post401.dev20261006082842 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir package &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -210,7 +210,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.analysis.html">qat.experimental.dialect.pulse.analysis package</a></li>
 <li class="toctree-l6 current"><a class="current reference internal" href="#">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.utils.html">qat.experimental.dialect.pulse.utils module</a></li>
 </ul>
 </li>
@@ -1845,49 +1844,23 @@ but is expected to match a meaningful port in the context of the system data.</p
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">FrequencyUnits.HERTZ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.PulseNumericTypedAttr" title="qat.experimental.dialect.pulse.ir.attributes.PulseNumericTypedAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseNumericTypedAttr</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.FrequencyType" title="qat.experimental.dialect.pulse.ir.types.FrequencyType"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyType</span></code></a>]</p>
 <p>An attribute that represents a compile-time constant frequency.</p>
+<p>Frequencies are represented as non-negative integer values in Hertz. Zero is valid; the
+value must not be negative.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> – The frequency value, which can be a float or an integer.</p></li>
-<li><p><strong>unit</strong> – The frequency units, which is an instance of the <code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnits</span></code>
-enum.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>value</strong> – The frequency value in Hertz.</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The frequency value in Hz, which can be a float or an integer.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.params.unit"></span><strong>unit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.params.unit">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.FrequencyUnits" title="qat.experimental.dialect.pulse.units.FrequencyUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnits</span></code></a></span>) – The frequency units, which is an instance of the
-<code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnits</span></code>, enum and defaults to hertz if not provided.</p></li>
-</ul>
+<dd class="field-even"><p><span class="target" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The frequency value in Hz, which can be a float or an integer.</p>
 </dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.associated_type">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">associated_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.FrequencyType" title="qat.experimental.dialect.pulse.ir.types.FrequencyType"><span class="pre">FrequencyType</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.associated_type" title="Link to this definition"></a></dt>
 <dd><p>Returns the associated dialect type.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.from_literal_value">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_literal_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">FrequencyUnits.HERTZ</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.from_literal_value" title="Link to this definition"></a></dt>
-<dd><p>Creates a frequency attribute from a canonical value in Hertz.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.from_literal_value.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.from_literal_value.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The frequency value in Hertz.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.from_literal_value.params.unit"></span><strong>unit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.from_literal_value.params.unit">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.FrequencyUnits" title="qat.experimental.dialect.pulse.units.FrequencyUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnits</span></code></a></span>) – The unit used to store the value.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr" title="qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyAttr</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A frequency attribute storing <code class="docutils literal notranslate"><span class="pre">value</span></code> in the requested unit.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1909,14 +1882,16 @@ enum.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.unit">
-<span class="sig-name descname"><span class="pre">unit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData" title="qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnitsData</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.unit" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.value">
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.value" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.value">
-<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatData</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.value" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyAttr.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyAttr.verify" title="Link to this definition"></a></dt>
+<dd><p>Check that the attribute parameters satisfy the expected invariants.
+Raise a VerifyException otherwise.</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -1937,43 +1912,6 @@ channels.</p>
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyType.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.frequency'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyType.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyUnitsData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">FrequencyUnitsData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyUnitsData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.FrequencyUnits" title="qat.experimental.dialect.pulse.units.FrequencyUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnits</span></code></a>]</p>
-<p>Data attribute for representing frequency units in the pulse dialect.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyUnitsData.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.frequency_units'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyUnitsData.name" title="Link to this definition"></a></dt>
-<dd><p>The attribute name should be a static field in the attribute classes.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyUnitsData.parse_parameter">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyUnitsData.parse_parameter" title="Link to this definition"></a></dt>
-<dd><p>Parses the parameters of the attribute, which are expected to be a string
-representing the frequency units.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.FrequencyUnits" title="qat.experimental.dialect.pulse.units.FrequencyUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrequencyUnits</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.FrequencyUnitsData.print_parameter">
-<span class="sig-name descname"><span class="pre">print_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.FrequencyUnitsData.print_parameter" title="Link to this definition"></a></dt>
-<dd><p>Prints the parameters of the attribute, which are expected to be a string
-representing the frequency units.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -4745,51 +4683,28 @@ results matches the number of operands.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TimeUnits.SECOND</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeAttr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.PulseNumericTypedAttr" title="qat.experimental.dialect.pulse.ir.attributes.PulseNumericTypedAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">PulseNumericTypedAttr</span></code></a>[<a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.TimeType" title="qat.experimental.dialect.pulse.ir.types.TimeType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeType</span></code></a>]</p>
 <p>An attribute that represents a compile-time constant time.</p>
-<p>This attribute intentionally does not specify the precision of the time value, and uses
-the standard Python precision for its respective type. The representation of the value
-will be set by the target.</p>
+<p>Times are represented as a non-negative integer number of picoseconds. Float inputs are
+accepted for compatibility when they are within rounding tolerance of a whole
+picosecond, but zero is the minimum valid value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> – The time value, which can be a float or an integer.</p></li>
-<li><p><strong>unit</strong> – The time units, which is an instance of the <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code> enum.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>value</strong> – The time value in picoseconds.</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.TimeAttr.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.TimeAttr.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The time value in seconds, which can be a float or an integer.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.TimeAttr.params.unit"></span><strong>unit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.TimeAttr.params.unit">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.TimeUnits" title="qat.experimental.dialect.pulse.units.TimeUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code></a></span>) – The time units, which is an instance of the <code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code> enum
-and defaults to seconds if not provided.</p></li>
-</ul>
+<dd class="field-even"><p><span class="target" id="qat.experimental.dialect.pulse.ir.TimeAttr.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.TimeAttr.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The time value in picoseconds.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is not finite or cannot be represented as an
+integer number of picoseconds.</p>
 </dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.associated_type">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">associated_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="qat.experimental.dialect.pulse.ir.types.html#qat.experimental.dialect.pulse.ir.types.TimeType" title="qat.experimental.dialect.pulse.ir.types.TimeType"><span class="pre">TimeType</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.associated_type" title="Link to this definition"></a></dt>
 <dd><p>Returns the associated dialect type.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.from_literal_value">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_literal_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TimeUnits.SECOND</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.from_literal_value" title="Link to this definition"></a></dt>
-<dd><p>Creates a time attribute from a canonical value in seconds.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.TimeAttr.from_literal_value.params.value"></span><strong>value</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.TimeAttr.from_literal_value.params.value">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The time value in seconds.</p></li>
-<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.TimeAttr.from_literal_value.params.unit"></span><strong>unit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.TimeAttr.from_literal_value.params.unit">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.TimeUnits" title="qat.experimental.dialect.pulse.units.TimeUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code></a></span>) – The unit used to store the value.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr" title="qat.experimental.dialect.pulse.ir.attributes.TimeAttr"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeAttr</span></code></a></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A time attribute storing <code class="docutils literal notranslate"><span class="pre">value</span></code> in the requested unit.</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -4800,8 +4715,8 @@ and defaults to seconds if not provided.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.literal_value">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">literal_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.literal_value" title="Link to this definition"></a></dt>
-<dd><p>Returns the time value in seconds.</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">literal_value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.literal_value" title="Link to this definition"></a></dt>
+<dd><p>Returns the time value in picoseconds.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -4811,30 +4726,15 @@ and defaults to seconds if not provided.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.unit">
-<span class="sig-name descname"><span class="pre">unit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData" title="qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnitsData</span></code></a></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.unit" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.value">
-<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">FloatData</span></code> <span class="pre">|</span> <code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.value" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">IntAttr</span></code></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.value" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.value_in_unit">
-<span class="sig-name descname"><span class="pre">value_in_unit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.value_in_unit" title="Link to this definition"></a></dt>
-<dd><p>Returns the time value in the specified units.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.ir.TimeAttr.value_in_unit.params.unit"></span><strong>unit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.TimeAttr.value_in_unit.params.unit">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.TimeUnits" title="qat.experimental.dialect.pulse.units.TimeUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code></a></span>) – The units to convert the time value to.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The time value in the specified units.</p>
-</dd>
-</dl>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeAttr.verify">
+<span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeAttr.verify" title="Link to this definition"></a></dt>
+<dd><p>Check that the attribute parameters satisfy the expected invariants.
+Raise a VerifyException otherwise.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4854,43 +4754,6 @@ and defaults to seconds if not provided.</p></li>
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeType.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.time'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeType.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeUnitsData">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeUnitsData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeUnitsData" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Data</span></code>[<a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.TimeUnits" title="qat.experimental.dialect.pulse.units.TimeUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code></a>]</p>
-<p>Data attribute for representing time units in the pulse dialect.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeUnitsData.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pulse.time_units'</span></em><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeUnitsData.name" title="Link to this definition"></a></dt>
-<dd><p>The attribute name should be a static field in the attribute classes.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeUnitsData.parse_parameter">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parse_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeUnitsData.parse_parameter" title="Link to this definition"></a></dt>
-<dd><p>Parses the parameters of the attribute, which are expected to be a string
-representing the time units.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html#qat.experimental.dialect.pulse.units.TimeUnits" title="qat.experimental.dialect.pulse.units.TimeUnits"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimeUnits</span></code></a></span></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.TimeUnitsData.print_parameter">
-<span class="sig-name descname"><span class="pre">print_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">printer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.TimeUnitsData.print_parameter" title="Link to this definition"></a></dt>
-<dd><p>Prints the parameters of the attribute, which are expected to be a string
-representing the time units.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -5079,19 +4942,11 @@ Raise a VerifyException otherwise.</p>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.ExternalPolicyAttr"><code class="docutils literal notranslate"><span class="pre">ExternalPolicyAttr</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.associated_type"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.associated_type</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.from_literal_value"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.from_literal_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.get_irdl_definition()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.literal_value"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.literal_value</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.name"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.unit"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.unit</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.value"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.value</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData"><code class="docutils literal notranslate"><span class="pre">FrequencyUnitsData</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.data"><code class="docutils literal notranslate"><span class="pre">FrequencyUnitsData.data</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.name"><code class="docutils literal notranslate"><span class="pre">FrequencyUnitsData.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.parse_parameter"><code class="docutils literal notranslate"><span class="pre">FrequencyUnitsData.parse_parameter()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyUnitsData.print_parameter"><code class="docutils literal notranslate"><span class="pre">FrequencyUnitsData.print_parameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.FrequencyAttr.verify"><code class="docutils literal notranslate"><span class="pre">FrequencyAttr.verify()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.MaximumLikelihoodPolicyAttr"><code class="docutils literal notranslate"><span class="pre">MaximumLikelihoodPolicyAttr</span></code></a><ul>
@@ -5153,20 +5008,11 @@ Raise a VerifyException otherwise.</p>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr"><code class="docutils literal notranslate"><span class="pre">TimeAttr</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.associated_type"><code class="docutils literal notranslate"><span class="pre">TimeAttr.associated_type</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.from_literal_value"><code class="docutils literal notranslate"><span class="pre">TimeAttr.from_literal_value()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.get_irdl_definition"><code class="docutils literal notranslate"><span class="pre">TimeAttr.get_irdl_definition()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.literal_value"><code class="docutils literal notranslate"><span class="pre">TimeAttr.literal_value</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.name"><code class="docutils literal notranslate"><span class="pre">TimeAttr.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.unit"><code class="docutils literal notranslate"><span class="pre">TimeAttr.unit</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.value"><code class="docutils literal notranslate"><span class="pre">TimeAttr.value</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.value_in_unit"><code class="docutils literal notranslate"><span class="pre">TimeAttr.value_in_unit()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData"><code class="docutils literal notranslate"><span class="pre">TimeUnitsData</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData.data"><code class="docutils literal notranslate"><span class="pre">TimeUnitsData.data</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData.name"><code class="docutils literal notranslate"><span class="pre">TimeUnitsData.name</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData.parse_parameter"><code class="docutils literal notranslate"><span class="pre">TimeUnitsData.parse_parameter()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeUnitsData.print_parameter"><code class="docutils literal notranslate"><span class="pre">TimeUnitsData.print_parameter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.TimeAttr.verify"><code class="docutils literal notranslate"><span class="pre">TimeAttr.verify()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.WeightsAttr"><code class="docutils literal notranslate"><span class="pre">WeightsAttr</span></code></a><ul>

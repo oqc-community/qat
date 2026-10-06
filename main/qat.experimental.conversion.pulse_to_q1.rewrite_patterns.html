@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post401.dev20261006082842 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.rewrite_patterns module &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -209,7 +209,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.analysis.html">qat.experimental.dialect.pulse.analysis package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.utils.html">qat.experimental.dialect.pulse.utils module</a></li>
 </ul>
 </li>
@@ -932,9 +931,11 @@ on both output paths, emitted as a <code class="docutils literal notranslate"><s
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RewriteWaitOp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.conversion.pulse_to_q1.rewrite_patterns.RewriteWaitOp" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">RewritePattern</span></code></p>
 <p>Lower <code class="docutils literal notranslate"><span class="pre">pulse.wait</span></code> to one or more <code class="docutils literal notranslate"><span class="pre">q1.wait</span></code> instructions.</p>
-<p>The requested duration is converted from seconds to nanoseconds and aligned up to
-the sequencer grid time. Durations that exceed the maximum wait immediate are split
-into a chain of <code class="docutils literal notranslate"><span class="pre">q1.wait</span></code> instructions whose durations sum to the requested value.
+<p>The requested duration is converted from picoseconds to nanoseconds and aligned up
+to the sequencer grid time. Durations that exceed the maximum wait immediate are
+split into a chain of <code class="docutils literal notranslate"><span class="pre">q1.wait</span></code> instructions whose durations sum to the aligned
+duration (not necessarily the requested value; e.g. a 5 ns request on a 4 ns grid
+becomes 8 ns).
 The frame carried by <code class="docutils literal notranslate"><span class="pre">pulse.wait</span></code> is forwarded to downstream operations.</p>
 <p>Register-driven durations that do not fold to a compile-time constant are left
 untouched. Those are handled elsewhere and are out of scope for this lowering.</p>

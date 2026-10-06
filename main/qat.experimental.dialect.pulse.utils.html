@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.utils module &mdash; qat-compiler 3.0.0.post401.dev20261006082842 documentation</title>
+  <title>qat.experimental.dialect.pulse.utils module &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -23,7 +23,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="qat.experimental.dialect.q1 package" href="qat.experimental.dialect.q1.html" />
-    <link rel="prev" title="qat.experimental.dialect.pulse.units module" href="qat.experimental.dialect.pulse.units.html" /> 
+    <link rel="prev" title="qat.experimental.dialect.pulse.transforms.waveform_evaluation module" href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -209,7 +209,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.analysis.html">qat.experimental.dialect.pulse.analysis package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 <li class="toctree-l6 current"><a class="current reference internal" href="#">qat.experimental.dialect.pulse.utils module</a></li>
 </ul>
 </li>
@@ -757,18 +756,18 @@ attribute is not a <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.utils.extract_time_seconds">
-<span class="sig-name descname"><span class="pre">extract_time_seconds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.utils.extract_time_seconds" title="Link to this definition"></a></dt>
-<dd><p>Extract a constant wait duration in seconds from <code class="docutils literal notranslate"><span class="pre">pulse.wait</span></code>.</p>
+<dt class="sig sig-object py" id="qat.experimental.dialect.pulse.utils.extract_time_ps">
+<span class="sig-name descname"><span class="pre">extract_time_ps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">op</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.utils.extract_time_ps" title="Link to this definition"></a></dt>
+<dd><p>Extract a constant wait duration in picoseconds from <code class="docutils literal notranslate"><span class="pre">pulse.wait</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.utils.extract_time_seconds.params.op"></span><strong>op</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.utils.extract_time_seconds.params.op">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.WaitOp" title="qat.experimental.dialect.pulse.ir.ops.WaitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaitOp</span></code></a></span>) – The wait operation to extract from.</p>
+<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.utils.extract_time_ps.params.op"></span><strong>op</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.utils.extract_time_ps.params.op">¶</a> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.WaitOp" title="qat.experimental.dialect.pulse.ir.ops.WaitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaitOp</span></code></a></span>) – The wait operation to extract from.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Duration in seconds as a Python float.</p>
+<dd class="field-odd"><p>Duration in picoseconds as a Python int.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>PassFailedException</strong> – If the duration operand is not a constant or its
@@ -839,7 +838,7 @@ functions without a kernel, or mixes a function with other non-kernel operations
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="qat.experimental.dialect.pulse.units.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.pulse.units module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html" class="btn btn-neutral float-left" title="qat.experimental.dialect.pulse.transforms.waveform_evaluation module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="qat.experimental.dialect.q1.html" class="btn btn-neutral float-right" title="qat.experimental.dialect.q1 package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

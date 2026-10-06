@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post401.dev20261006082842 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -209,7 +209,6 @@
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.analysis.html">qat.experimental.dialect.pulse.analysis package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.ir.html">qat.experimental.dialect.pulse.ir package</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.html">qat.experimental.dialect.pulse.transforms package</a></li>
-<li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.units.html">qat.experimental.dialect.pulse.units module</a></li>
 <li class="toctree-l6"><a class="reference internal" href="qat.experimental.dialect.pulse.utils.html">qat.experimental.dialect.pulse.utils module</a></li>
 </ul>
 </li>
@@ -723,9 +722,10 @@ defaulting to the first available candidate.</p>
 strategy. When multiple sequencers can satisfy a candidate, a tie-breaker applies:
 the sequencer with minimum (instrument_id, slot, sequencer_index) is chosen to ensure
 deterministic and reproducible allocation across runs.</p>
-<p>Frequency matching tolerates ±0.5 Hz to account for Q1asm’s 1 Hz frequency resolution.
-Only channels actively selected by sequences consume allocation; calibrated but unplayed
-channels do not reserve sequencers, enabling efficient hardware utilization.</p>
+<p>Frequency matching uses exact integer-Hz equality, consistent with the Pulse frequency
+attribute and canonical channel model. Only channels actively selected by sequences consume
+allocation; calibrated but unplayed channels do not reserve sequencers, enabling efficient
+hardware utilization.</p>
 <p>The pass merges existing program-owned sequencer configuration with the resolved
 configuration during binding, preserving acquisition settings while enforcing canonical
 module constraints.</p>
