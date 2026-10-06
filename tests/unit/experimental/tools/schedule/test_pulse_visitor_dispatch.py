@@ -10,6 +10,7 @@ from xdsl.dialects.builtin import IndexType, ModuleOp, StringAttr
 from xdsl.ir import Block
 
 from qat.experimental.dialect.pulse.ir.attributes import (
+    AmplitudeAttr,
     FrequencyAttr,
     PhaseAttr,
     SampledWaveformAttr,
@@ -26,6 +27,7 @@ from qat.experimental.dialect.pulse.ir.ops import (
     PhaseSetOp,
     PhaseShiftOp,
     PulseOp,
+    SquareWaveformOp,
     StartContinuousWaveformOp,
     StopContinuousWaveformOp,
     SubOp,
@@ -114,7 +116,11 @@ def test_pulse_schedule_visitor_dispatches_scheduling_operations(mocker):
     )
 
     assert schedule_tracker.timelines["q0"][-1].label == "pulse"
-    assert schedule_tracker.timelines["q0"][-1].end == 4.0
+    assert schedule_tracker.timelines["q0"][-1].end == pytest.approx(4e-12)
+    assert schedule_tracker.timelines["q0"][-1].unit == "s"
+    assert [event.duration for event in schedule_tracker.timelines["q0"]] == (
+        pytest.approx([1e-12, 1e-12, 2e-12])
+    )
     assert schedule_tracker.timelines["q1"] == ()
     np.testing.assert_array_equal(
         schedule_tracker.timelines["q0"][0].signal,
@@ -176,24 +182,115 @@ def test_pulse_schedule_visitor_configures_signal_metadata():
 def test_pulse_schedule_visitor_samples_analytical_waveforms(mocker):
     schedule_tracker = ScheduleTracker()
     schedule_visitor = PulseScheduleVisitor(schedule_tracker)
-    schedule_visitor._scalar = lambda value: 2.0
-    mocker.patch(
+    schedule_visitor._scalar = lambda value: 1_000_000
+    evaluate = mocker.patch(
         "qat.experimental.dialect.pulse.ir.schedule.evaluate_waveform",
         return_value=np.array([1.0 + 0.0j]),
     )
+    shape = object()
     operation = SimpleNamespace(
         width=SimpleNamespace(),
         amplitude=SimpleNamespace(),
         result="waveform",
         name="test_waveform",
-        build_shape=lambda: object(),
+        build_shape=lambda: shape,
     )
 
     PulseScheduleVisitor.__dict__["visit"].dispatcher.registry[
         IsAnalyticalWaveformInterface
     ](schedule_visitor, operation)
 
-    assert schedule_visitor._waveforms["waveform"][0] == 2.0
+    evaluate.assert_called_once_with(
+        width=1_000_000,
+        sample_time=1_000,
+        shape=shape,
+        amplitude=1_000_000,
+    )
+    assert schedule_visitor._waveforms["waveform"][0] == 1_000_000
+
+
+@pytest.mark.parametrize(
+    ("time_unit", "expected_duration"),
+    [("s", 1e-6), ("ns", 1_000), ("ps", 1_000_000)],
+)
+def test_build_pulse_schedule_converts_analytical_duration(
+    mocker, time_unit, expected_duration
+):
+    width = ConstantOp(TimeAttr(1_000_000))
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(width, amplitude)
+    frequency = ConstantOp(FrequencyAttr(0))
+    frame = CreateFrameOp(frequency, StringAttr("drive"))
+    module = ModuleOp(
+        [width, amplitude, waveform, frequency, frame, PulseOp(frame, waveform)]
+    )
+    evaluate = mocker.patch(
+        "qat.experimental.dialect.pulse.ir.schedule.evaluate_waveform",
+        return_value=np.array([1.0 + 0.0j]),
+    )
+
+    schedule = build_pulse_schedule(
+        module,
+        **({} if time_unit == "s" else {"time_unit": time_unit}),
+    )
+
+    evaluate.assert_called_once()
+    evaluated_width = evaluate.call_args.kwargs["width"]
+    evaluated_sample_time = evaluate.call_args.kwargs["sample_time"]
+    assert evaluated_width == 1_000_000
+    assert evaluated_sample_time == 1_000
+    assert schedule.records[0].duration == pytest.approx(expected_duration)
+    assert schedule.records[0].unit == time_unit
+
+
+def test_build_pulse_schedule_evaluates_one_microsecond_square_waveform():
+    width = ConstantOp(TimeAttr(1_000_000))
+    amplitude = ConstantOp(AmplitudeAttr(0.5))
+    waveform = SquareWaveformOp(width, amplitude)
+    frequency = ConstantOp(FrequencyAttr(0))
+    frame = CreateFrameOp(frequency, StringAttr("drive"))
+    module = ModuleOp(
+        [width, amplitude, waveform, frequency, frame, PulseOp(frame, waveform)]
+    )
+
+    schedule = build_pulse_schedule(module)
+
+    assert schedule.records[0].signal.size == 1_000
+    assert schedule.records[0].duration == pytest.approx(1e-6)
+    assert schedule.records[0].unit == "s"
+
+
+@pytest.mark.parametrize(
+    ("time_unit", "expected_duration"),
+    [("s", 1e-6), ("ns", 1_000), ("ps", 1_000_000)],
+)
+def test_build_pulse_schedule_converts_sampled_duration(time_unit, expected_duration):
+    waveform = ConstantOp(
+        SampledWaveformAttr(
+            np.ones(1_000),
+            TimeAttr(1_000_000),
+            TimeAttr(1_000),
+        )
+    )
+    frequency = ConstantOp(FrequencyAttr(0))
+    frame = CreateFrameOp(frequency, StringAttr("drive"))
+    module = ModuleOp([waveform, frequency, frame, PulseOp(frame, waveform)])
+
+    schedule = build_pulse_schedule(module, time_unit=time_unit)
+
+    assert schedule.records[0].duration == pytest.approx(expected_duration)
+    assert schedule.records[0].unit == time_unit
+
+
+@pytest.mark.parametrize("sample_time_ps", [True, 1.5, 0, -1])
+def test_pulse_schedule_visitor_rejects_invalid_sample_time(sample_time_ps):
+    with pytest.raises(ValueError, match="positive integer.*picoseconds"):
+        PulseScheduleVisitor(ScheduleTracker(), sample_time_ps=sample_time_ps)
+
+
+def test_pulse_schedule_visitor_rejects_unsupported_time_unit():
+    with pytest.raises(ValueError, match="Unsupported pulse schedule time unit"):
+        PulseScheduleVisitor(ScheduleTracker(), time_unit="minute")
 
 
 @pytest.mark.parametrize(
@@ -476,7 +573,7 @@ def test_pulse_schedule_visitor_tracks_frame_ssa_lineage_and_phase_semantics():
         frequency: 5e9,
         set_phase: np.pi / 2,
         shift_phase: np.pi / 4,
-        duration: 1e-9,
+        duration: 1_000,
     }
     schedule_visitor._scalar = values.get
     initial_frame, set_frame, shifted_frame = (object() for _ in range(3))
@@ -524,7 +621,7 @@ def test_pulse_operations_propagate_real_frame_ssa_values():
     initial_frame = CreateFrameOp(frequency, StringAttr("drive"))
     set_phase = PhaseSetOp(initial_frame, ConstantOp(PhaseAttr(np.pi / 2)))
     shift_phase = PhaseShiftOp(set_phase, ConstantOp(PhaseAttr(np.pi / 4)))
-    wait = WaitOp(shift_phase, ConstantOp(TimeAttr(1e-9)))
+    wait = WaitOp(shift_phase, ConstantOp(TimeAttr(1_000)))
 
     for operation in (initial_frame, set_phase, shift_phase, wait):
         operation.accept(schedule_visitor)
@@ -603,17 +700,33 @@ def test_pulse_schedule_visitor_rejects_unknown_frame_ssa_value():
         )
 
 
-def test_pulse_schedule_visitor_plots_continuous_waveforms_during_timed_ops():
+@pytest.mark.parametrize(
+    ("time_unit", "expected_duration"),
+    [("s", 4e-9), ("ns", 4), ("ps", 4_000)],
+)
+def test_pulse_schedule_visitor_plots_continuous_waveforms_during_timed_ops(
+    time_unit, expected_duration
+):
     schedule_tracker = ScheduleTracker()
-    schedule_visitor = PulseScheduleVisitor(schedule_tracker, sample_time=1.0)
+    schedule_visitor = PulseScheduleVisitor(
+        schedule_tracker,
+        sample_time_ps=1_000,
+        time_unit=time_unit,
+    )
     registry = PulseScheduleVisitor.__dict__["visit"].dispatcher.registry
-    schedule_visitor._scalar = lambda value: 2.0
+    frequency, amplitude, duration = object(), object(), object()
+    values = {
+        frequency: 0,
+        amplitude: 2.0,
+        duration: 4_000,
+    }
+    schedule_visitor._scalar = values.get
     initial_frame, started_frame, waited_frame = (object() for _ in range(3))
 
     registry[CreateFrameOp](
         schedule_visitor,
         SimpleNamespace(
-            frequency=object(),
+            frequency=frequency,
             port=SimpleNamespace(data="drive"),
             result=initial_frame,
         ),
@@ -622,13 +735,13 @@ def test_pulse_schedule_visitor_plots_continuous_waveforms_during_timed_ops():
         schedule_visitor,
         SimpleNamespace(
             frame=initial_frame,
-            amplitude=object(),
+            amplitude=amplitude,
             result=started_frame,
         ),
     )
     registry[WaitOp](
         schedule_visitor,
-        SimpleNamespace(frame=started_frame, duration=object(), result=waited_frame),
+        SimpleNamespace(frame=started_frame, duration=duration, result=waited_frame),
     )
     registry[StopContinuousWaveformOp](
         schedule_visitor,
@@ -637,7 +750,9 @@ def test_pulse_schedule_visitor_plots_continuous_waveforms_during_timed_ops():
 
     start, wait, stop = schedule_tracker.timelines["drive"]
     assert start.label == "start continuous waveform"
-    np.testing.assert_allclose(wait.signal, [2.0, 2.0])
+    assert wait.duration == pytest.approx(expected_duration)
+    assert wait.unit == time_unit
+    np.testing.assert_allclose(wait.signal, [2.0] * 4)
     assert stop.label == "stop continuous waveform"
 
 

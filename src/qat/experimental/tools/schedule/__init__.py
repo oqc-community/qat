@@ -3,6 +3,7 @@
 """Generic schedule tracking and visualisation."""
 
 from qat.experimental.tools.schedule.tracker import (
+    SECONDS_PER_TIME_UNIT as SECONDS_PER_TIME_UNIT,
     ResourceKind as ResourceKind,
     ScheduleEvent as ScheduleEvent,
     ScheduleResource as ScheduleResource,
@@ -15,6 +16,7 @@ from qat.experimental.tools.schedule.visualisation import (
 
 __all__ = [
     "plot_schedule",
+    "SECONDS_PER_TIME_UNIT",
     "ResourceKind",
     "ScheduleEvent",
     "ScheduleResource",

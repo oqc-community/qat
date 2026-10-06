@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from functools import singledispatchmethod
+from numbers import Integral
 
 import numpy as np
 from xdsl.dialects import arith, scf
@@ -31,25 +32,52 @@ from qat.experimental.dialect.pulse.ir.ops import (
     WaitOp,
 )
 from qat.experimental.dialect.pulse.ir.types import WaveformType
-from qat.experimental.tools.schedule import ResourceKind, ScheduleTracker
+from qat.experimental.tools.schedule import (
+    SECONDS_PER_TIME_UNIT,
+    ResourceKind,
+    ScheduleTracker,
+)
 from qat.experimental.waveforms.evaluate import evaluate_waveform
 
 
 class PulseScheduleVisitor:
-    """Translate statically scheduled Pulse operations into ledger updates."""
+    """Translate statically scheduled Pulse operations into ledger updates.
+
+    Pulse IR and waveform evaluation use integer picoseconds. Schedule tracker records use
+    the configurable ``time_unit``.
+    """
 
     def __init__(
         self,
         tracker: ScheduleTracker,
-        sample_time: float = 1e-9,
+        sample_time_ps: int = 1_000,
+        time_unit: str = "s",
         signal_unit: str = "DAC/ADC range",
         signal_limits: tuple[float, float] | None = (-1.0, 1.0),
     ) -> None:
+        if (
+            isinstance(sample_time_ps, bool)
+            or not isinstance(sample_time_ps, Integral)
+            or sample_time_ps <= 0
+        ):
+            raise ValueError(
+                "Pulse waveform sample time must be a positive integer number of "
+                "picoseconds."
+            )
+        try:
+            self._picoseconds_per_schedule_unit = round(
+                SECONDS_PER_TIME_UNIT[time_unit] * 1e12
+            )
+        except KeyError as error:
+            raise ValueError(
+                f"Unsupported pulse schedule time unit {time_unit!r}"
+            ) from error
         self.tracker = tracker
-        self.sample_time = sample_time
+        self.sample_time_ps = int(sample_time_ps)
+        self.time_unit = time_unit
         self.signal_unit = signal_unit
         self.signal_limits = signal_limits
-        self._waveforms: dict[SSAValue, tuple[float, np.ndarray]] = {}
+        self._waveforms: dict[SSAValue, tuple[int, np.ndarray]] = {}
         self._frames: dict[SSAValue, str] = {}
         self._port_frame_counts: dict[str, int] = {}
         self._continuous_amplitudes: dict[str, complex | None] = {}
@@ -65,7 +93,7 @@ class PulseScheduleVisitor:
         value = ConstantLike.get_constant_value(operation.result)
         if isinstance(value, SampledWaveformAttr):
             self._waveforms[operation.result] = (
-                float(value.width.literal_value),
+                value.width.literal_value,
                 value.literal_value,
             )
 
@@ -76,11 +104,9 @@ class PulseScheduleVisitor:
         shape = operation.build_shape()
         if width is None or amplitude is None or shape is None:
             raise ValueError(f"Pulse waveform {operation.name} requires static operands")
-        width_ps = round(width * 1e12)
-        sample_time_ps = round(self.sample_time * 1e12)
         samples = evaluate_waveform(
-            width=width_ps,
-            sample_time=sample_time_ps,
+            width=width,
+            sample_time=self.sample_time_ps,
             shape=shape,
             amplitude=amplitude,
         )
@@ -121,7 +147,7 @@ class PulseScheduleVisitor:
         self.tracker.resource(
             resource,
             ResourceKind.FRAME,
-            "s",
+            self.time_unit,
             signal_unit=self.signal_unit,
             signal_limits=self.signal_limits,
             frequency_modulates_signal=False,
@@ -150,7 +176,7 @@ class PulseScheduleVisitor:
             raise ValueError("Pulse wait duration must be statically known")
         resource = self._select_frame(operation.frame)
         self.tracker.wait(
-            duration,
+            self._schedule_duration(duration),
             self._continuous_signal(resource, duration),
         )
         self._frames[operation.result] = resource
@@ -169,7 +195,7 @@ class PulseScheduleVisitor:
             raise ValueError(
                 "Pulse waveform must be visited before pulse operation"
             ) from error
-        self.tracker.pulse(duration, signal)
+        self.tracker.pulse(self._schedule_duration(duration), signal)
         self._frames[operation.result] = resource
 
     @visit.register
@@ -196,7 +222,7 @@ class PulseScheduleVisitor:
             raise ValueError("Pulse acquisition duration must be statically known")
         resource = self._select_frame(operation.frame)
         self.tracker.acquire(
-            duration,
+            self._schedule_duration(duration),
             self._continuous_signal(resource, duration),
             operation.label.data if operation.label is not None else "acquire",
         )
@@ -213,13 +239,20 @@ class PulseScheduleVisitor:
         self.tracker.select(resource)
         return resource
 
-    def _continuous_signal(self, resource: str, duration: float) -> np.ndarray | None:
+    def _schedule_duration(self, duration_ps: int) -> float:
+        """Convert a Pulse IR duration to the configured schedule unit."""
+        return duration_ps / self._picoseconds_per_schedule_unit
+
+    def _continuous_signal(self, resource: str, duration_ps: int) -> np.ndarray | None:
         amplitude = self._continuous_amplitudes[resource]
-        if duration == 0:
+        if duration_ps == 0:
             return None
         if amplitude is None:
             return np.zeros(2, dtype=complex)
-        sample_count = min(max(round(duration / self.sample_time), 2), 10_000)
+        sample_count = min(
+            max(round(duration_ps / self.sample_time_ps), 2),
+            10_000,
+        )
         return np.full(sample_count, amplitude, dtype=complex)
 
     @staticmethod
@@ -233,6 +266,9 @@ class PulseScheduleVisitor:
 
 def build_pulse_schedule(
     module: ModuleOp,
+    *,
+    sample_time_ps: int = 1_000,
+    time_unit: str = "s",
 ) -> ScheduleTracker:
     """Walk a Pulse module and record one execution of its entry-block schedule.
 
@@ -241,13 +277,20 @@ def build_pulse_schedule(
     rejected.
 
     :param module: Pulse module containing the executable entry block.
+    :param sample_time_ps: Sample period for analytical and continuous waveforms in
+        picoseconds.
+    :param time_unit: Unit used for schedule tracker durations.
     :returns: The populated schedule tracker.
     """
     from qat.experimental.dialect.pulse.ir.interfaces import PulseOperationInterface
     from qat.experimental.dialect.pulse.utils import pulse_entry_block
 
     tracker = ScheduleTracker()
-    visitor = PulseScheduleVisitor(tracker)
+    visitor = PulseScheduleVisitor(
+        tracker,
+        sample_time_ps=sample_time_ps,
+        time_unit=time_unit,
+    )
     for operation in _one_shot_operations(pulse_entry_block(module)):
         if isinstance(operation, PulseOperationInterface):
             operation.accept(visitor)

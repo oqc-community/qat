@@ -5,11 +5,17 @@ import numpy as np
 import pytest
 
 from qat.experimental.tools.schedule import (
+    SECONDS_PER_TIME_UNIT,
     ResourceKind,
     ScheduleEvent,
     ScheduleResource,
     ScheduleTracker,
 )
+
+
+def test_schedule_time_units_are_immutable():
+    with pytest.raises(TypeError):
+        SECONDS_PER_TIME_UNIT["s"] = 2.0  # type: ignore[index]
 
 
 def test_schedule_metadata_preserves_previous_positional_constructor_api():

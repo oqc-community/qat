@@ -4,14 +4,25 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import Enum
 from math import isclose, isfinite
 from numbers import Real
+from types import MappingProxyType
 
 import numpy as np
 from numpy.typing import NDArray
+
+SECONDS_PER_TIME_UNIT: Mapping[str, float] = MappingProxyType(
+    {
+        "s": 1.0,
+        "ms": 1e-3,
+        "us": 1e-6,
+        "ns": 1e-9,
+        "ps": 1e-12,
+    }
+)
 
 
 class ResourceKind(str, Enum):
@@ -363,12 +374,6 @@ class ScheduleTracker:
     @staticmethod
     def _seconds_per_unit(unit: str) -> float:
         try:
-            return {
-                "s": 1.0,
-                "ms": 1e-3,
-                "us": 1e-6,
-                "ns": 1e-9,
-                "ps": 1e-12,
-            }[unit]
+            return SECONDS_PER_TIME_UNIT[unit]
         except KeyError as error:
             raise ValueError(f"Unsupported schedule time unit {unit!r}") from error

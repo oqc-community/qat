@@ -12,15 +12,12 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
-from qat.experimental.tools.schedule.tracker import ScheduleEvent, ScheduleTracker
+from qat.experimental.tools.schedule.tracker import (
+    SECONDS_PER_TIME_UNIT,
+    ScheduleEvent,
+    ScheduleTracker,
+)
 
-_SECONDS_PER_UNIT = {
-    "s": 1.0,
-    "ms": 1e-3,
-    "us": 1e-6,
-    "ns": 1e-9,
-    "ps": 1e-12,
-}
 SignalInterpolation = Literal["linear", "zero_order_hold"]
 
 
@@ -182,12 +179,12 @@ def visualise_schedule(
 
 def _phase_trace(event: ScheduleEvent) -> tuple[np.ndarray, np.ndarray]:
     signal_sample_count = event.signal.size if event.signal is not None else 0
-    seconds = event.duration * _SECONDS_PER_UNIT[event.unit]
+    seconds = event.duration * SECONDS_PER_TIME_UNIT[event.unit]
     frequency = event.frequency if event.frequency_modulates_signal else 0.0
     cycles = abs(frequency) * seconds
     sample_count = min(max(signal_sample_count, ceil(cycles * 16), 2), 10_000)
     times = np.linspace(event.start, event.end, sample_count + 1)
-    elapsed_seconds = (times - event.start) * _SECONDS_PER_UNIT[event.unit]
+    elapsed_seconds = (times - event.start) * SECONDS_PER_TIME_UNIT[event.unit]
     phase = event.phase + 2 * np.pi * frequency * elapsed_seconds
     wrapped_phase = (phase + np.pi) % (2 * np.pi) - np.pi
     displayed_phase = wrapped_phase * event.phase_scale
