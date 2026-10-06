@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.schedule module &mdash; qat-compiler 3.0.0.post402.dev20261006103547 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.schedule module &mdash; qat-compiler 3.0.0.post403.dev20261006163858 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -716,9 +716,11 @@
 <p>Pulse operation visitor for the generic schedule ledger.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.schedule.PulseScheduleVisitor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseScheduleVisitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tracker</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-09</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DAC/ADC</span> <span class="pre">range'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-1.0,</span> <span class="pre">1.0)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.schedule.PulseScheduleVisitor" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PulseScheduleVisitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tracker</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'s'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'DAC/ADC</span> <span class="pre">range'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signal_limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-1.0,</span> <span class="pre">1.0)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.schedule.PulseScheduleVisitor" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Translate statically scheduled Pulse operations into ledger updates.</p>
+<p>Pulse IR and waveform evaluation use integer picoseconds. Schedule tracker records use
+the configurable <code class="docutils literal notranslate"><span class="pre">time_unit</span></code>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.schedule.PulseScheduleVisitor.visit">
 <span class="sig-name descname"><span class="pre">visit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">operation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.schedule.PulseScheduleVisitor.visit" title="Link to this definition"></a></dt>
@@ -733,14 +735,19 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule">
-<span class="sig-name descname"><span class="pre">build_pulse_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">build_pulse_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_time_ps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'s'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule" title="Link to this definition"></a></dt>
 <dd><p>Walk a Pulse module and record one execution of its entry-block schedule.</p>
 <p>A canonical top-level static <code class="docutils literal notranslate"><span class="pre">scf.for</span></code> shot loop is visualised once without
 modifying the input IR. Other region-bearing operations and nested control flow are
 rejected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span>) – Pulse module containing the executable entry block.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span>) – Pulse module containing the executable entry block.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.sample_time_ps"></span><strong>sample_time_ps</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.sample_time_ps">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Sample period for analytical and continuous waveforms in
+picoseconds.</p></li>
+<li><p><span class="target" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.time_unit"></span><strong>time_unit</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.time_unit">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – Unit used for schedule tracker durations.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleTracker" title="qat.experimental.tools.schedule.tracker.ScheduleTracker"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScheduleTracker</span></code></a></span></p>
