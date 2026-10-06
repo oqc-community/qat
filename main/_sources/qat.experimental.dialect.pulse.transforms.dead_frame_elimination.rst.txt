@@ -1,0 +1,7 @@
+qat.experimental.dialect.pulse.transforms.dead\_frame\_elimination module
+=========================================================================
+
+.. automodule:: qat.experimental.dialect.pulse.transforms.dead_frame_elimination
+   :members:
+   :undoc-members:
+   :show-inheritance:

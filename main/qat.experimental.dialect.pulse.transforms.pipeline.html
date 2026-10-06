@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.pipeline module &mdash; qat-compiler 3.0.0.post396.dev20261005141727 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.pipeline module &mdash; qat-compiler 3.0.0.post398.dev20261006015659 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -725,22 +725,39 @@ validated <a class="reference internal" href="qat.experimental.passes.pass_order
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass" title="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedCanonicalizePass</span></code></a>
 — fold all constant arithmetic so that subsequent passes only see canonical
 <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ConstantOp" title="qat.experimental.dialect.pulse.ir.ops.ConstantOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code></a> operands.</p></li>
+</ol>
+<ol class="arabic simple">
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.html#qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation" title="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.ApplyGranularitySanitisation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApplyGranularitySanitisation</span></code></a>
 — round constant durations and sampled-waveform widths up to the hardware timing
 granularity, so later passes only see realisable times.</p></li>
+</ol>
+<ol class="arabic simple">
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.waveform_evaluation.html#qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples" title="qat.experimental.dialect.pulse.transforms.waveform_evaluation.EvaluateWaveformsAsSamples"><code class="xref py py-class docutils literal notranslate"><span class="pre">EvaluateWaveformsAsSamples</span></code></a>
 — convert analytical waveform ops into sampled
 <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.ConstantOp" title="qat.experimental.dialect.pulse.ir.ops.ConstantOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code></a> payloads, using the
 per-port sample times from <em>constraints</em>.</p></li>
+</ol>
+<ol class="arabic simple">
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.timeline_normalization.html#qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization" title="qat.experimental.dialect.pulse.transforms.timeline_normalization.TimelineNormalization"><code class="xref py py-class docutils literal notranslate"><span class="pre">TimelineNormalization</span></code></a>
 — resolve <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.SynchronizeOp" title="qat.experimental.dialect.pulse.ir.ops.SynchronizeOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">SynchronizeOp</span></code></a> operations
 into explicit <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.WaitOp" title="qat.experimental.dialect.pulse.ir.ops.WaitOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">WaitOp</span></code></a> chains using
 symbolic time-expression analysis.</p></li>
+</ol>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass" title="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeadFrameEliminationPass</span></code></a>
+— eliminate frame creation and manipulation operations that do not contribute to
+any hardware-visible pulse operations, reducing IR complexity.</p></li>
+</ol>
+<ol class="arabic simple">
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations" title="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations"><code class="xref py py-class docutils literal notranslate"><span class="pre">ApplySquashContiguousOptimizations</span></code></a>
 — merge adjacent wait and phase operations.</p></li>
+</ol>
+<ol class="arabic simple">
 <li><p><a class="reference internal" href="qat.experimental.conversion.pulse.lower_kernels_to_arrays.html#qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays" title="qat.experimental.conversion.pulse.lower_kernels_to_arrays.LowerKernelsToResultsArrays"><code class="xref py py-class docutils literal notranslate"><span class="pre">LowerKernelsToResultsArrays</span></code></a>
 — rewrite each kernel signature from <code class="docutils literal notranslate"><span class="pre">ResultsCollectionType</span></code> values to
 <code class="docutils literal notranslate"><span class="pre">ResultsArrayType</span></code> values and update all call sites to match the expanded signature.</p></li>
+</ol>
+<ol class="arabic simple">
 <li><p><a class="reference internal" href="qat.experimental.dialect.pulse.transforms.constants.html#qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass" title="qat.experimental.dialect.pulse.transforms.constants.OrderedCanonicalizePass"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedCanonicalizePass</span></code></a>
 — a final canonicalization pass that folds any constants left behind by the earlier
 passes and removes the resulting no-ops.</p></li>

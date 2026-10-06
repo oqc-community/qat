@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Index &mdash; qat-compiler 3.0.0.post396.dev20261005141727 documentation</title>
+  <title>Index &mdash; qat-compiler 3.0.0.post398.dev20261006015659 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -2175,6 +2175,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.html#qat.experimental.dialect.pulse.transforms.optimize_contiguous_squashable_instructions.ApplySquashContiguousOptimizations.apply">(ApplySquashContiguousOptimizations method)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.BoundDeadFrameEliminationPass.apply">(BoundDeadFrameEliminationPass method)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply">(DeadFrameEliminationPass method)</a>
 </li>
         <li><a href="qat.pipelines.purr.sweep.flattener.html#qat.pipelines.purr.sweep.flattener.DeviceAssignSet.apply">(DeviceAssignSet method)</a>
 </li>
@@ -4503,14 +4505,14 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.runtime.results_processing.html#qat.runtime.results_processing.complex_to_binary">complex_to_binary() (in module qat.runtime.results_processing)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.pulse.ir.html#qat.experimental.dialect.pulse.ir.ComplexData">ComplexData (class in qat.experimental.dialect.pulse.ir)</a>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.ir.attributes.html#qat.experimental.dialect.pulse.ir.attributes.ComplexData">(class in qat.experimental.dialect.pulse.ir.attributes)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.utilities.html#qat.purr.backends.utilities.ComplexFunction">ComplexFunction (class in qat.purr.backends.utilities)</a>
 
       <ul>
@@ -5348,6 +5350,8 @@ window.runMermaid = runMermaid;</script>
       <ul>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply.params.ctx">(qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply parameter)</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply.params.ctx">(qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply parameter)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.ir.abstract_ops.html#qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line.params.ctx">(qat.experimental.dialect.q1.ir.abstract_ops.Q1AsmOperation.assembly_line parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.Q1asmTarget.emit.params.ctx">(qat.experimental.dialect.q1.Q1asmTarget.emit parameter)</a>
@@ -5518,6 +5522,8 @@ window.runMermaid = runMermaid;</script>
       <li><a href="qat.model.device.html#qat.model.device.DDropResetQubitPulseChannel">DDropResetQubitPulseChannel (class in qat.model.device)</a>
 </li>
       <li><a href="qat.model.device.html#qat.model.device.DDropResetResonatorPulseChannel">DDropResetResonatorPulseChannel (class in qat.model.device)</a>
+</li>
+      <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass">DeadFrameEliminationPass (class in qat.experimental.dialect.pulse.transforms.dead_frame_elimination)</a>
 </li>
       <li><a href="qat.purr.utils.logger.html#qat.purr.utils.logger.LoggerLevel.DEBUG">DEBUG (LoggerLevel attribute)</a>
 </li>
@@ -8241,6 +8247,18 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.ir.waveforms.html#qat.ir.waveforms.Waveform.frequency">frequency (Waveform attribute)</a>
 </li>
+      <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleTracker.resource.params.frequency_modulates_signal">frequency_modulates_signal (qat.experimental.tools.schedule.ScheduleTracker.resource parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleTracker.resource.params.frequency_modulates_signal">(qat.experimental.tools.schedule.tracker.ScheduleTracker.resource parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.resource.params.frequency_modulates_signal">(qat.experimental.tools.ScheduleTracker.resource parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.frequency_modulates_signal">(ScheduleEvent attribute)</a>, <a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleEvent.frequency_modulates_signal">[1]</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleEvent.frequency_modulates_signal">[2]</a>
+</li>
+        <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleResource.frequency_modulates_signal">(ScheduleResource attribute)</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleResource.frequency_modulates_signal">[1]</a>
+</li>
+      </ul></li>
       <li><a href="qat.ir.instruction_builder.html#qat.ir.instruction_builder.QuantumInstructionBuilder.frequency_shift">frequency_shift() (QuantumInstructionBuilder method)</a>, <a href="qat.purr.compiler.builders.html#qat.purr.compiler.builders.QuantumInstructionBuilder.frequency_shift">[1]</a>
 </li>
       <li><a href="qat.experimental.system_data.hardware.qblox.target.html#qat.experimental.system_data.hardware.qblox.target.LocalOscillatorSpec.frequency_step_hz">frequency_step_hz (LocalOscillatorSpec attribute)</a>
@@ -14845,6 +14863,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#module-qat.experimental.dialect.pulse.transforms.constants">qat.experimental.dialect.pulse.transforms.constants</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#module-qat.experimental.dialect.pulse.transforms.dead_frame_elimination">qat.experimental.dialect.pulse.transforms.dead_frame_elimination</a>
+</li>
         <li><a href="qat.experimental.dialect.pulse.transforms.frame_no_op_elimination.html#module-qat.experimental.dialect.pulse.transforms.frame_no_op_elimination">qat.experimental.dialect.pulse.transforms.frame_no_op_elimination</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.transforms.granularity_sanitisation.html#module-qat.experimental.dialect.pulse.transforms.granularity_sanitisation">qat.experimental.dialect.pulse.transforms.granularity_sanitisation</a>
@@ -16023,6 +16043,8 @@ window.runMermaid = runMermaid;</script>
 </li>
         <li><a href="qat.experimental.dialect.results.ir.html#qat.experimental.dialect.results.ir.CreateOp.name">(CreateOp attribute)</a>, <a href="qat.experimental.dialect.results.ir.ops.html#qat.experimental.dialect.results.ir.ops.CreateOp.name">[1]</a>
 </li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.name">(DeadFrameEliminationPass attribute)</a>
+</li>
         <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.DefDirectiveOp.name">(DefDirectiveOp attribute)</a>, <a href="qat.experimental.dialect.q1.ir.ops.html#qat.experimental.dialect.q1.ir.ops.DefDirectiveOp.name">[1]</a>
 </li>
         <li><a href="qat.experimental.dialect.q1_sequence.html#qat.experimental.dialect.q1_sequence.DirectionKindAttr.name">(DirectionKindAttr attribute)</a>, <a href="qat.experimental.dialect.q1_sequence.ir.attrs.html#qat.experimental.dialect.q1_sequence.ir.attrs.DirectionKindAttr.name">[1]</a>
@@ -17112,6 +17134,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply.params.op">(qat.experimental.conversion.pulse_to_q1.passes.Q1PreAcquireTransformationPass.apply parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.analysis.locate_kernels.html#qat.experimental.dialect.pulse.analysis.locate_kernels.locate_kernels.params.op">(qat.experimental.dialect.pulse.analysis.locate_kernels.locate_kernels parameter)</a>
+</li>
+        <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply.params.op">(qat.experimental.dialect.pulse.transforms.dead_frame_elimination.DeadFrameEliminationPass.apply parameter)</a>
 </li>
         <li><a href="qat.experimental.dialect.pulse.utils.html#qat.experimental.dialect.pulse.utils.extract_frequency_hz.params.op">(qat.experimental.dialect.pulse.utils.extract_frequency_hz parameter)</a>
 </li>
@@ -18236,6 +18260,18 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleResource.phase_label">(ScheduleResource attribute)</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleResource.phase_label">[1]</a>
 </li>
       </ul></li>
+      <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleTracker.resource.params.phase_modulates_signal">phase_modulates_signal (qat.experimental.tools.schedule.ScheduleTracker.resource parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleTracker.resource.params.phase_modulates_signal">(qat.experimental.tools.schedule.tracker.ScheduleTracker.resource parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.resource.params.phase_modulates_signal">(qat.experimental.tools.ScheduleTracker.resource parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.phase_modulates_signal">(ScheduleEvent attribute)</a>, <a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleEvent.phase_modulates_signal">[1]</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleEvent.phase_modulates_signal">[2]</a>
+</li>
+        <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleResource.phase_modulates_signal">(ScheduleResource attribute)</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleResource.phase_modulates_signal">[1]</a>
+</li>
+      </ul></li>
       <li><a href="qat.backend.qblox.config.specification.html#qat.backend.qblox.config.specification.NcoConfig.phase_offs">phase_offs (NcoConfig attribute)</a>, <a href="qat.purr.backends.qblox.config.html#qat.purr.backends.qblox.config.NcoConfig.phase_offs">[1]</a>
 
       <ul>
@@ -18574,8 +18610,12 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.purr.backends.realtime_chip_simulator.html#qat.purr.backends.realtime_chip_simulator.RealtimeChipSimEngine.plot_pulses">plot_pulses() (RealtimeChipSimEngine method)</a>
 </li>
-      <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule">plot_schedule() (in module qat.experimental.tools.schedule.visualisation)</a>
+      <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.plot_schedule">plot_schedule() (in module qat.experimental.tools.schedule)</a>
+
+      <ul>
+        <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule">(in module qat.experimental.tools.schedule.visualisation)</a>
 </li>
+      </ul></li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Plus">Plus (class in qat.ir.instructions)</a>
 
       <ul>
@@ -20751,6 +20791,13 @@ window.runMermaid = runMermaid;</script>
 
       <ul>
         <li><a href="qat.experimental.dialect.pulse.transforms.constants.html#module-qat.experimental.dialect.pulse.transforms.constants">module</a>
+</li>
+      </ul></li>
+      <li>
+    qat.experimental.dialect.pulse.transforms.dead_frame_elimination
+
+      <ul>
+        <li><a href="qat.experimental.dialect.pulse.transforms.dead_frame_elimination.html#module-qat.experimental.dialect.pulse.transforms.dead_frame_elimination">module</a>
 </li>
       </ul></li>
       <li>
@@ -25054,6 +25101,18 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.resource_info">resource_info() (ScheduleTracker method)</a>, <a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleTracker.resource_info">[1]</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleTracker.resource_info">[2]</a>
 </li>
+      <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.plot_schedule.params.resource_order">resource_order (qat.experimental.tools.schedule.plot_schedule parameter)</a>
+
+      <ul>
+        <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule.params.resource_order">(qat.experimental.tools.schedule.visualisation.plot_schedule parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.visualise_schedule.params.resource_order">(qat.experimental.tools.schedule.visualisation.visualise_schedule parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.visualise_schedule.params.resource_order">(qat.experimental.tools.schedule.visualise_schedule parameter)</a>
+</li>
+        <li><a href="qat.experimental.tools.html#qat.experimental.tools.visualise_schedule.params.resource_order">(qat.experimental.tools.visualise_schedule parameter)</a>
+</li>
+      </ul></li>
       <li><a href="qat.experimental.tools.html#qat.experimental.tools.ResourceKind">ResourceKind (class in qat.experimental.tools)</a>
 
       <ul>
@@ -27068,8 +27127,6 @@ window.runMermaid = runMermaid;</script>
         <li><a href="getting_started/shot_selection.html#qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained">(qat.runtime.passes.analysis.PostSelectionResult parameter)</a>, <a href="qat.runtime.passes.analysis.html#qat.runtime.passes.analysis.PostSelectionResult.params.shots_retained">[1]</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.purr.backends.qblox.live.html#qat.purr.backends.qblox.live.AbstractQbloxLiveEngine.shutdown">shutdown() (AbstractQbloxLiveEngine method)</a>
 
       <ul>
@@ -27078,6 +27135,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.purr.backends.live.html#qat.purr.backends.live.LiveDeviceEngine.shutdown">(LiveDeviceEngine method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="qat.experimental.dialect.q1.html#qat.experimental.dialect.q1.SI16Imm">SI16Imm (class in qat.experimental.dialect.q1)</a>
 
       <ul>
@@ -27092,9 +27151,11 @@ window.runMermaid = runMermaid;</script>
       </ul></li>
       <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleEvent.signal">signal (ScheduleEvent attribute)</a>, <a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleEvent.signal">[1]</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleEvent.signal">[2]</a>
 </li>
-      <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule.params.signal_interpolation">signal_interpolation (qat.experimental.tools.schedule.visualisation.plot_schedule parameter)</a>
+      <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.plot_schedule.params.signal_interpolation">signal_interpolation (qat.experimental.tools.schedule.plot_schedule parameter)</a>
 
       <ul>
+        <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule.params.signal_interpolation">(qat.experimental.tools.schedule.visualisation.plot_schedule parameter)</a>
+</li>
         <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.visualise_schedule.params.signal_interpolation">(qat.experimental.tools.schedule.visualisation.visualise_schedule parameter)</a>
 </li>
         <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.visualise_schedule.params.signal_interpolation">(qat.experimental.tools.schedule.visualise_schedule parameter)</a>
@@ -27870,6 +27931,8 @@ window.runMermaid = runMermaid;</script>
 </li>
       <li><a href="qat.experimental.tools.html#qat.experimental.tools.ScheduleTracker.synchronise">synchronise() (ScheduleTracker method)</a>, <a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.ScheduleTracker.synchronise">[1]</a>, <a href="qat.experimental.tools.schedule.tracker.html#qat.experimental.tools.schedule.tracker.ScheduleTracker.synchronise">[2]</a>
 </li>
+      <li><a href="qat.experimental.conversion.pulse_to_q1.loop_fission.html#qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage.params.synchronization_grid_time">synchronization_grid_time (qat.experimental.conversion.pulse_to_q1.loop_fission.fission_for_lineage parameter)</a>
+</li>
       <li><a href="qat.ir.instructions.html#qat.ir.instructions.Synchronize">Synchronize (class in qat.ir.instructions)</a>
 
       <ul>
@@ -28008,6 +28071,8 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.PulseToQ1LoweringPass.target_data">(PulseToQ1LoweringPass attribute)</a>
 </li>
         <li><a href="qat.experimental.system_data.materialisers.purr.plugin.html#qat.experimental.system_data.materialisers.purr.plugin.PurrV010AdditionalData.target_data">(PurrV010AdditionalData attribute)</a>
+</li>
+        <li><a href="qat.experimental.conversion.pulse_to_q1.sequence_outlining.html#qat.experimental.conversion.pulse_to_q1.sequence_outlining.Q1OutliningPass.target_data">(Q1OutliningPass attribute)</a>
 </li>
         <li><a href="qat.experimental.conversion.pulse_to_q1.passes.html#qat.experimental.conversion.pulse_to_q1.passes.Q1PulseValidationPass.target_data">(Q1PulseValidationPass attribute)</a>
 </li>
@@ -28522,9 +28587,11 @@ window.runMermaid = runMermaid;</script>
         <li><a href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.CreateFrameOp.params.track_phase">(qat.experimental.dialect.pulse.ir.ops.CreateFrameOp parameter)</a>
 </li>
       </ul></li>
-      <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule.params.tracker">tracker (qat.experimental.tools.schedule.visualisation.plot_schedule parameter)</a>
+      <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.plot_schedule.params.tracker">tracker (qat.experimental.tools.schedule.plot_schedule parameter)</a>
 
       <ul>
+        <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.plot_schedule.params.tracker">(qat.experimental.tools.schedule.visualisation.plot_schedule parameter)</a>
+</li>
         <li><a href="qat.experimental.tools.schedule.visualisation.html#qat.experimental.tools.schedule.visualisation.visualise_schedule.params.tracker">(qat.experimental.tools.schedule.visualisation.visualise_schedule parameter)</a>
 </li>
         <li><a href="qat.experimental.tools.schedule.html#qat.experimental.tools.schedule.visualise_schedule.params.tracker">(qat.experimental.tools.schedule.visualise_schedule parameter)</a>

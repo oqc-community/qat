@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.ir.schedule module &mdash; qat-compiler 3.0.0.post396.dev20261005141727 documentation</title>
+  <title>qat.experimental.dialect.pulse.ir.schedule module &mdash; qat-compiler 3.0.0.post398.dev20261006015659 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -735,7 +735,10 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule">
 <span class="sig-name descname"><span class="pre">build_pulse_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule" title="Link to this definition"></a></dt>
-<dd><p>Walk a Pulse module and record its entry-block schedule.</p>
+<dd><p>Walk a Pulse module and record one execution of its entry-block schedule.</p>
+<p>A canonical top-level static <code class="docutils literal notranslate"><span class="pre">scf.for</span></code> shot loop is visualised once without
+modifying the input IR. Other region-bearing operations and nested control flow are
+rejected.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="target" id="qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.module"></span><strong>module</strong><a class="paramlink headerlink reference internal" href="#qat.experimental.dialect.pulse.ir.schedule.build_pulse_schedule.params.module">¶</a> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleOp</span></code></span>) – Pulse module containing the executable entry block.</p>
