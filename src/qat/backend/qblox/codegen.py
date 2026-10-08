@@ -2,6 +2,7 @@
 # Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 from collections import defaultdict
+from collections.abc import Iterable
 from contextlib import ExitStack, contextmanager
 from numbers import Number
 
@@ -19,7 +20,7 @@ from qat.backend.passes.purr.analysis import (
     TriagePass,
 )
 from qat.backend.passes.purr.transform import ScopePeeling
-from qat.backend.qblox.config.specification import ModuleConfig, SequencerConfig
+from qat.backend.qblox.config.specification import LoConfig, ModuleConfig, SequencerConfig
 from qat.backend.qblox.execution import DEFAULT_TIMEOUT_SECONDS, QbloxPackage, QbloxProgram
 from qat.backend.qblox.ir import Opcode, SequenceBuilder
 from qat.backend.qblox.passes.analysis import (
@@ -64,6 +65,56 @@ from qat.purr.compiler.instructions import (
 from qat.purr.utils.logger import get_default_logger
 
 log = get_default_logger()
+
+
+def _get_lo_lanes(lo: LoConfig, connections: set[str]) -> set[str]:
+    """Return the LO lanes used by a sequencer with these connections.
+
+    Lane ``x`` is set via ``lo.x_freq``.
+
+    - QCM-RF (``out0_en``/``out1_en`` set): one LO per output, ``out0`` and ``out1``.
+    - QRM-RF/QRC: ``out0``/``in0`` share ``out0_in0`` (if ``out0_in0_en``), ``out1``/``in1``
+      share ``out1_in1``.
+    - ``out2``-``out5``: one LO per output.
+    """
+    per_output = bool(lo.out0_en or lo.out1_en)
+    lanes = set()
+    if lo.out0_en and "out0" in connections:
+        lanes.add("out0")
+    if lo.out1_en and "out1" in connections:
+        lanes.add("out1")
+    if not per_output and lo.out0_in0_en and connections & {"out0", "in0"}:
+        lanes.add("out0_in0")
+    if not per_output and connections & {"out1", "in1"}:
+        lanes.add("out1_in1")
+    lanes.update(f"out{n}" for n in range(2, 6) if f"out{n}" in connections)
+    return lanes
+
+
+def _check_shared_lo_conflicts(
+    packages: Iterable[QbloxPackage],
+) -> None:
+    """Raise if packages on one module need different frequencies from one LO lane.
+
+    Only lanes a package uses count.
+    """
+    requests: dict[tuple[str | None, int, str], dict[str, float]] = defaultdict(dict)
+    for package in packages:
+        connections = set(package.seq_config.connection.bulk_value)
+        for lane in _get_lo_lanes(package.mod_config.lo, connections):
+            key = (package.instrument_id, package.slot_idx, lane)
+            requests[key][package.pulse_channel_id] = getattr(
+                package.mod_config.lo, f"{lane}_freq"
+            )
+
+    for (instrument_id, slot_idx, lane), by_channel in requests.items():
+        if len(set(by_channel.values())) > 1:
+            details = ", ".join(f"{ch} at {freq} Hz" for ch, freq in by_channel.items())
+            raise ValueError(
+                f"LO lane {lane} on the module in slot {slot_idx} of instrument "
+                f"{instrument_id} can only have one frequency, but these pulse channels "
+                f"need different ones: {details}."
+            )
 
 
 class QbloxContext:
@@ -144,36 +195,31 @@ class QbloxContext:
         lo_freq, nco_freq = TILegalisationPass.decompose_freq(target.frequency, target)
 
         qblox_config = target.physical_channel.config
-        mod_config: ModuleConfig = qblox_config.module
-        seq_config: SequencerConfig = qblox_config.sequencers[seq_idx]
+        # Copy so per-package values don't leak into the model or other packages. Only this
+        # package's lanes get a frequency, so stale model values aren't re-applied.
+        seq_config: SequencerConfig = qblox_config.sequencers[seq_idx].model_copy(deep=True)
         connections = set(seq_config.connection.bulk_value)
+        model_lo = qblox_config.module.lo
+        lo = LoConfig(
+            **model_lo.model_dump(
+                exclude={f for f in LoConfig.model_fields if "_freq" in f}
+            ),
+            **{f"{lane}_freq": lo_freq for lane in _get_lo_lanes(model_lo, connections)},
+        )
+        mod_config: ModuleConfig = qblox_config.module.model_copy(
+            update={"lo": lo}, deep=True
+        )
 
         # Customise Module config
-        if {"out0"} <= connections and mod_config.lo.out0_en:
-            mod_config.lo.out0_freq = lo_freq
-        if {"out1"} <= connections and mod_config.lo.out1_en:
-            mod_config.lo.out1_freq = lo_freq
-        if {"out0", "in0"} <= connections and mod_config.lo.out0_in0_en:
-            mod_config.lo.out0_in0_freq = lo_freq
-        if {"out1", "in1"} <= connections:
-            mod_config.lo.out1_in1_freq = lo_freq
-        if {"out2"} <= connections:
-            mod_config.lo.out2_freq = lo_freq
-        if {"out3"} <= connections:
-            mod_config.lo.out3_freq = lo_freq
-        if {"out4"} <= connections:
-            mod_config.lo.out4_freq = lo_freq
-        if {"out5"} <= connections:
-            mod_config.lo.out5_freq = lo_freq
-
-        mod_config.scope_acq.sequencer_select = seq_idx
         if {"in0"} <= connections:
+            mod_config.scope_acq.sequencer_select = seq_idx
             mod_config.scope_acq.trigger_mode_path0 = "sequencer"
             mod_config.scope_acq.trigger_mode_path1 = "sequencer"
             mod_config.scope_acq.avg_mode_en_path0 = True
             mod_config.scope_acq.avg_mode_en_path1 = True
 
         if {"in1"} <= connections:
+            mod_config.scope_acq.sequencer_select = seq_idx
             mod_config.scope_acq.trigger_mode_path2 = "sequencer"
             mod_config.scope_acq.trigger_mode_path3 = "sequencer"
             mod_config.scope_acq.avg_mode_en_path2 = True
@@ -196,6 +242,7 @@ class QbloxContext:
             seq_idx=seq_idx,
             seq_config=seq_config,
             slot_idx=slot_idx,
+            instrument_id=target.physical_channel.baseband.instrument_id,
             mod_config=mod_config,
             sequence=self.sequence_builder.build(),
             timeline=self._timeline,
@@ -997,6 +1044,7 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
                     seq_idx, slot_idx = self.allocate(target)
                     package = context.create_package(target, seq_idx, slot_idx)
                     packages[target.full_id()] = package
+            _check_shared_lo_conflicts(packages.values())
             return QbloxProgram(
                 packages=packages,
                 driver_version=TARGET_DATA.driver_version,

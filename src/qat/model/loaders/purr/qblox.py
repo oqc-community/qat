@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 import uuid
 from collections import deque
@@ -64,30 +64,14 @@ _CONTROL_CONFIG_MAP = {
             attenuation=AttConfig(out0=0, out1=0, out2=0, out3=0, out4=0, out5=0),
         ),
         sequencers={
-            0: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out2"])
-            ),
-            1: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out3"])
-            ),
-            2: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out4"])
-            ),
-            3: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out5"])
-            ),
-            4: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out2"])
-            ),
-            5: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out3"])
-            ),
-            6: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out4"])
-            ),
-            7: SequencerConfig(
-                connection=ConnectionConfig(bulk_value=["out0", "out1", "out5"])
-            ),
+            0: SequencerConfig(connection=ConnectionConfig(bulk_value=["out2"])),
+            1: SequencerConfig(connection=ConnectionConfig(bulk_value=["out3"])),
+            2: SequencerConfig(connection=ConnectionConfig(bulk_value=["out4"])),
+            3: SequencerConfig(connection=ConnectionConfig(bulk_value=["out5"])),
+            4: SequencerConfig(connection=ConnectionConfig(bulk_value=["out2"])),
+            5: SequencerConfig(connection=ConnectionConfig(bulk_value=["out3"])),
+            6: SequencerConfig(connection=ConnectionConfig(bulk_value=["out4"])),
+            7: SequencerConfig(connection=ConnectionConfig(bulk_value=["out5"])),
             8: SequencerConfig(
                 connection=ConnectionConfig(bulk_value=["out2", "out3", "out4", "out5"]),
             ),

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
+import copy
 import re
 from contextlib import nullcontext
 
@@ -10,7 +11,20 @@ from matplotlib import pyplot as plt
 from more_itertools import partition
 
 from qat import qatconfig
-from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
+from qat.backend.passes.purr.analysis import TILegalisationPass
+from qat.backend.qblox.codegen import (
+    QbloxBackend1,
+    QbloxBackend2,
+    _check_shared_lo_conflicts,
+    _get_lo_lanes,
+)
+from qat.backend.qblox.config.specification import (
+    ConnectionConfig,
+    LoConfig,
+    ModuleConfig,
+    SequencerConfig,
+)
+from qat.backend.qblox.execution import QbloxPackage
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
 from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA, Q1ASM_DATA, TARGET_DATA
 from qat.backend.qblox.visualisation import plot_program
@@ -53,6 +67,11 @@ from tests.unit.utils.builder_nuggets import (
 )
 
 log = get_default_logger()
+
+
+@pytest.fixture()
+def copied_qblox_model(qblox_model):
+    return copy.deepcopy(qblox_model)
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
@@ -441,14 +460,14 @@ class TestQbloxBackend1:
             1e3,
         ],
     )
-    def test_measure_acquire_operands(self, qblox_model, pulse_width, delay_width):
+    def test_measure_acquire_operands(self, copied_qblox_model, pulse_width, delay_width):
         qubit_indices = [0]
         for index in qubit_indices:
-            qubit = qblox_model.get_qubit(index)
+            qubit = copied_qblox_model.get_qubit(index)
             qubit.pulse_measure["width"] = pulse_width * 1e-9
             qubit.measure_acquire["delay"] = delay_width * 1e-9
 
-        builder = measure_acquire(qblox_model, qubit_indices)
+        builder = measure_acquire(copied_qblox_model, qubit_indices)
 
         effective_width = max(
             min(pulse_width, delay_width), CONTROL_SEQUENCER_DATA.grid_time
@@ -458,15 +477,15 @@ class TestQbloxBackend1:
                 with pytest.raises(
                     ValueError, match=r"Expected pulse width >= delay width \+ 4 ns"
                 ):
-                    do_emit(qblox_model, QbloxBackend1, builder)
+                    do_emit(copied_qblox_model, QbloxBackend1, builder)
             else:
                 with pytest.raises(
                     ValueError, match=r"Remaining width after delay must be at least 4 ns"
                 ):
-                    do_emit(qblox_model, QbloxBackend1, builder)
+                    do_emit(copied_qblox_model, QbloxBackend1, builder)
 
         else:
-            executable = do_emit(qblox_model, QbloxBackend1, builder)
+            executable = do_emit(copied_qblox_model, QbloxBackend1, builder)
             for program in executable.programs:
                 packages = program.packages
                 if pulse_width < CONTROL_SEQUENCER_DATA.grid_time:
@@ -781,3 +800,148 @@ class TestQbloxBackend2:
                     assert pkg.timeline.size > 0
                     assert not np.any(np.equal(pkg.timeline, None))
                     assert not np.any(np.isnan(pkg.timeline))
+
+
+# Legacy model compares by identity, so compare copies of its pydantic configs.
+def _config_snapshot(model):
+    return {
+        pc.id: pc.config.model_copy(deep=True)
+        for pc in model.physical_channels.values()
+        if isinstance(pc, QbloxPhysicalChannel)
+    }
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+@pytest.mark.parametrize("builder_func", [qubit_spect, resonator_spect, measure_acquire])
+def test_compilation_leaves_model_config_unchanged(
+    copied_qblox_model, backend_type, builder_func
+):
+    model = copied_qblox_model
+    # Sentinels for values compilation overwrites, so any write to the model shows.
+    for channel in model.physical_channels.values():
+        if isinstance(channel, QbloxPhysicalChannel):
+            channel.config.module.scope_acq.sequencer_select = 7
+            for seq_config in channel.config.sequencers.values():
+                seq_config.nco.freq = 1.0
+    snapshot = _config_snapshot(model)
+    assert snapshot
+
+    do_emit(model, backend_type, builder_func(model, [0, 1]))
+
+    assert _config_snapshot(model) == snapshot
+
+
+@pytest.mark.parametrize(
+    "lo, connections, lanes",
+    [
+        (LoConfig(out0_in0_en=True), {"out0"}, {"out0_in0"}),
+        (LoConfig(out0_in0_en=True), {"in0"}, {"out0_in0"}),
+        (LoConfig(out0_in0_en=True), {"out1"}, {"out1_in1"}),
+        (LoConfig(out0_in0_en=True), {"in1"}, {"out1_in1"}),
+        (LoConfig(out0_in0_en=True), {"out0", "in0"}, {"out0_in0"}),
+        (LoConfig(out0_in0_en=True), {"out2", "out5"}, {"out2", "out5"}),
+        (
+            LoConfig(out0_en=True, out1_en=True),
+            {"out0", "out1"},
+            {"out0", "out1"},
+        ),
+        (LoConfig(), {"out0"}, set()),
+        (LoConfig(), {"out1"}, {"out1_in1"}),
+    ],
+)
+def test_get_lo_lanes(lo, connections, lanes):
+    assert _get_lo_lanes(lo, connections) == lanes
+
+
+@pytest.mark.parametrize(
+    "instrument, slot, connections, lo",
+    [
+        ("qrc", 1, ["in0"], LoConfig(out0_in0_en=True, out0_in0_freq=1e9)),
+        ("qrc", 2, ["out0"], LoConfig(out0_in0_en=True, out0_in0_freq=2e9)),
+        ("other_qrc", 1, ["out0"], LoConfig(out0_in0_en=True, out0_in0_freq=2e9)),
+        ("qrc", 1, ["out2"], LoConfig(out0_in0_en=True, out2_freq=2e9)),
+    ],
+    ids=["same_freq", "different_slot", "different_instrument", "different_lane"],
+)
+def test_check_shared_lo_conflicts_allows(instrument, slot, connections, lo):
+    first = QbloxPackage(
+        pulse_channel_id="a",
+        instrument_id="qrc",
+        slot_idx=1,
+        mod_config=ModuleConfig(lo=LoConfig(out0_in0_en=True, out0_in0_freq=1e9)),
+        seq_config=SequencerConfig(connection=ConnectionConfig(bulk_value=["out0"])),
+    )
+    second = QbloxPackage(
+        pulse_channel_id="b",
+        instrument_id=instrument,
+        slot_idx=slot,
+        mod_config=ModuleConfig(lo=lo),
+        seq_config=SequencerConfig(connection=ConnectionConfig(bulk_value=connections)),
+    )
+
+    _check_shared_lo_conflicts([first, second])
+
+
+def test_check_shared_lo_conflicts_raises_for_different_freqs_on_one_lane():
+    first = QbloxPackage(
+        pulse_channel_id="a",
+        instrument_id="qrc",
+        slot_idx=1,
+        mod_config=ModuleConfig(lo=LoConfig(out0_in0_en=True, out0_in0_freq=1e9)),
+        seq_config=SequencerConfig(connection=ConnectionConfig(bulk_value=["out0"])),
+    )
+    second = QbloxPackage(
+        pulse_channel_id="b",
+        instrument_id="qrc",
+        slot_idx=1,
+        mod_config=ModuleConfig(lo=LoConfig(out0_in0_en=True, out0_in0_freq=2e9)),
+        seq_config=SequencerConfig(connection=ConnectionConfig(bulk_value=["in0"])),
+    )
+
+    with pytest.raises(ValueError, match="can only have one frequency"):
+        _check_shared_lo_conflicts([first, second])
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+@pytest.mark.parametrize(
+    "connections, field", [(["out0"], "out0_in0_freq"), (["out1"], "out1_in1_freq")]
+)
+def test_qrc_drive_on_out0_or_out1_gets_shared_lo(
+    copied_qblox_model, backend_type, connections, field
+):
+    model = copied_qblox_model
+    drive = model.get_qubit(0).get_drive_channel()
+    for seq_config in drive.physical_channel.config.sequencers.values():
+        seq_config.connection.bulk_value = connections
+    builder = model.create_builder().add(
+        Pulse(drive, PulseShapeType.GAUSSIAN, width=100e-9, rise=1.0 / 5.0)
+    )
+
+    executable = do_emit(model, backend_type, builder)
+
+    package = next(
+        pkg
+        for program in executable.programs
+        for pkg in program.packages.values()
+        if pkg.pulse_channel_id == drive.full_id()
+    )
+    expected = TILegalisationPass.decompose_freq(drive.frequency, drive)[0]
+    assert getattr(package.mod_config.lo, field) == expected
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+def test_shared_lo_conflict_fails_compilation(copied_qblox_model, backend_type):
+    model = copied_qblox_model
+    drive = model.get_qubit(0).get_drive_channel()
+    for seq_config in drive.physical_channel.config.sequencers.values():
+        seq_config.connection.bulk_value = ["out0"]
+    builder = model.create_builder().add(
+        Pulse(drive, PulseShapeType.GAUSSIAN, width=100e-9, rise=1.0 / 5.0)
+    )
+    builder.add(measure_acquire(model, [0]))
+
+    with pytest.raises(ValueError, match="can only have one frequency"):
+        do_emit(model, backend_type, builder)

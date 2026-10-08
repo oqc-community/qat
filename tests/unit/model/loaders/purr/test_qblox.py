@@ -20,14 +20,14 @@ def test_qrc_default_configs_retain_legacy_bulk_connections():
         for index, config in _CONTROL_CONFIG_MAP[ClusterType.CLUSTER_QRC].sequencers.items()
     }
     assert control_connections == {
-        0: ["out0", "out1", "out2"],
-        1: ["out0", "out1", "out3"],
-        2: ["out0", "out1", "out4"],
-        3: ["out0", "out1", "out5"],
-        4: ["out0", "out1", "out2"],
-        5: ["out0", "out1", "out3"],
-        6: ["out0", "out1", "out4"],
-        7: ["out0", "out1", "out5"],
+        0: ["out2"],
+        1: ["out3"],
+        2: ["out4"],
+        3: ["out5"],
+        4: ["out2"],
+        5: ["out3"],
+        6: ["out4"],
+        7: ["out5"],
         8: ["out2", "out3", "out4", "out5"],
         9: ["out2", "out3", "out4", "out5"],
         10: ["out2", "out3", "out4", "out5"],
