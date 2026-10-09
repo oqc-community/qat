@@ -24,12 +24,15 @@ so this pipeline must be instantiated directly rather than wired up via qatconfi
     )
 """
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.engines import NativeEngine
 from qat.engines.qblox.execution import QbloxEngine
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.experimental.runtime.results_pipeline import get_qblox_results_pipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
 from qat.experimental.utils.logging import get_logger
 from qat.pipelines.pipeline import ExecutePipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
@@ -65,7 +68,7 @@ class ExperimentalQbloxExecutePipeline(UpdateablePipeline):
     def _build_pipeline(
         config: ExperimentalQbloxExecutePipelineConfig,
         model: CanonicalSystemData,
-        target_data: QbloxTargetData | None = None,
+        target_data: QbloxTargetDescription | None = None,
         engine: NativeEngine | None = None,
     ) -> ExecutePipeline:
         if engine is not None:
@@ -75,7 +78,7 @@ class ExperimentalQbloxExecutePipeline(UpdateablePipeline):
                 "engine will be ignored."
             )
 
-        target_data = target_data if target_data is not None else TARGET_DATA
+        target_data = target_data if target_data is not None else DEFAULT_QBLOX_TARGET
         instrument = QbloxLeafInstrument(
             id=config.name,
             name=config.name,

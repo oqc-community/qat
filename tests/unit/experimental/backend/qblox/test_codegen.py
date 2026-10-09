@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
+from dataclasses import replace
+
 import pytest
+from frozendict import frozendict
 from pydantic_extra_types.semantic_version import SemanticVersion
 from xdsl.dialects.builtin import ArrayAttr, ModuleOp
 from xdsl.ir import Block, Region
@@ -9,7 +12,6 @@ from xdsl.irdl import irdl_op_definition, region_def
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.target_data import TARGET_DATA
 from qat.executables import Executable
 from qat.experimental.backend.qblox.codegen import emit_qblox_program
 from qat.experimental.dialect.q1 import (
@@ -45,11 +47,15 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_weight,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
-from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxHardwareView,
+)
 from qat.experimental.system_data.hardware.qblox.models import (
     DirectionKind,
     QbloxModuleKind,
 )
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
     canonical_data,
@@ -505,10 +511,19 @@ def test_accepts_static_register_weight_references(hardware_view):
 
 
 def test_uses_target_data_waveform_capacity(hardware_view):
-    control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"max_sample_size_waveforms": 1}
+    control_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        waveform_sample_capacity=1,
     )
-    target_data = TARGET_DATA.model_copy(update={"CONTROL_SEQUENCER_DATA": control_data})
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.control: control_data,
+            }
+        ),
+    )
     sequence = _sequence(waveforms=[make_waveform("large", 0, [0.0, 0.0])])
 
     with pytest.raises(PassFailedException, match="2 waveform samples"):
@@ -516,10 +531,19 @@ def test_uses_target_data_waveform_capacity(hardware_view):
 
 
 def test_rejects_program_exceeding_target_data_instruction_capacity(hardware_view):
-    control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"max_num_instructions": 1}
+    control_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        instruction_capacity=1,
     )
-    target_data = TARGET_DATA.model_copy(update={"CONTROL_SEQUENCER_DATA": control_data})
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.control: control_data,
+            }
+        ),
+    )
     sequence = _sequence(operations=[MoveImmRdOp(SU32Imm(0), Registers.R1), StopOp()])
 
     with pytest.raises(PassFailedException, match="2 instructions"):
@@ -527,17 +551,23 @@ def test_rejects_program_exceeding_target_data_instruction_capacity(hardware_vie
 
 
 def test_qrc_control_uses_control_sequencer_instruction_capacity(hardware_view):
-    readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-        update={"max_num_instructions": 1}
+    readout_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+        instruction_capacity=1,
     )
-    control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"max_num_instructions": 2}
+    control_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        instruction_capacity=2,
     )
-    target_data = TARGET_DATA.model_copy(
-        update={
-            "CONTROL_SEQUENCER_DATA": control_data,
-            "READOUT_SEQUENCER_DATA": readout_data,
-        }
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.readout: readout_data,
+                Q1SequencerType.control: control_data,
+            }
+        ),
     )
     sequence = _sequence(
         seq_idx=8,
@@ -562,10 +592,20 @@ def test_qrc_control_uses_control_sequencer_instruction_capacity(hardware_view):
 
 
 def test_rejects_nco_frequency_outside_target_data_range(hardware_view):
-    control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"nco_min_freq": -100e6, "nco_max_freq": 100e6}
+    control_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        nco_min_frequency_hz=-100e6,
+        nco_max_frequency_hz=100e6,
     )
-    target_data = TARGET_DATA.model_copy(update={"CONTROL_SEQUENCER_DATA": control_data})
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.control: control_data,
+            }
+        ),
+    )
     sequence = _sequence()
     sequence.properties["sequencer_config"] = _sequencer_config(nco_frequency=200e6)
 
@@ -574,10 +614,20 @@ def test_rejects_nco_frequency_outside_target_data_range(hardware_view):
 
 
 def test_accepts_nco_frequency_inside_widened_target_data_range(hardware_view):
-    control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"nco_min_freq": -600e6, "nco_max_freq": 600e6}
+    control_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        nco_min_frequency_hz=-600e6,
+        nco_max_frequency_hz=600e6,
     )
-    target_data = TARGET_DATA.model_copy(update={"CONTROL_SEQUENCER_DATA": control_data})
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.control: control_data,
+            }
+        ),
+    )
     sequence = _sequence()
     sequence.properties["sequencer_config"] = _sequencer_config(nco_frequency=550e6)
 

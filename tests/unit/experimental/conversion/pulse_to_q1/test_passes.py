@@ -3,8 +3,10 @@
 
 import io
 import math
+from dataclasses import replace
 
 import pytest
+from frozendict import frozendict
 from xdsl.context import Context
 from xdsl.dialects import func, scf
 from xdsl.dialects.arith import AddiOp, ConstantOp as ArithConstantOp, MuliOp
@@ -22,7 +24,6 @@ from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.passes import (
     BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
@@ -75,7 +76,12 @@ from qat.experimental.system_data.canonical.schema import (
     OscillatorData,
     PortData,
 )
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 
 def _module_with_main(ops) -> ModuleOp:
@@ -242,7 +248,9 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
 
 
 class TestQ1PulseValidationPass:
-    def _run(self, module: ModuleOp, target_data: QbloxTargetData = TARGET_DATA) -> None:
+    def _run(
+        self, module: ModuleOp, target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET
+    ) -> None:
         Q1PulseValidationPass(target_data).apply(Context(), module)
 
     def test_accepts_integer_nanosecond_wait(self):
@@ -309,11 +317,17 @@ class TestQ1PulseValidationPass:
             self._run(_square_pulse_module(TimeAttr(width_ps)))
 
     def test_uses_readout_sequencer_grid_for_square_waveform_width(self):
-        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-            update={"grid_time": 8}
+        readout_data = replace(
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout), clock_period_ns=8
         )
-        target_data = TARGET_DATA.model_copy(
-            update={"READOUT_SEQUENCER_DATA": readout_data}
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            sequencer_specs=frozendict(
+                {
+                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                    Q1SequencerType.readout: readout_data,
+                }
+            ),
         )
         module = _square_pulse_module(
             TimeAttr(12e3),

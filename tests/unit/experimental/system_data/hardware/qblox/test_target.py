@@ -548,3 +548,13 @@ def test_target_rejects_mutable_specification_maps():
 def test_target_rejects_inconsistent_specifications(updates, message):
     with pytest.raises(ValueError, match=message):
         replace(DEFAULT_QBLOX_TARGET, **updates)
+
+
+@pytest.mark.parametrize("clock_period_ns", [0, -1])
+def test_sequencer_spec_requires_positive_clock_period(clock_period_ns):
+    with pytest.raises(ValueError, match="clock period must be positive"):
+        Q1SequencerSpec(
+            Q1SequencerType.control,
+            instruction_capacity=1,
+            clock_period_ns=clock_period_ns,
+        )

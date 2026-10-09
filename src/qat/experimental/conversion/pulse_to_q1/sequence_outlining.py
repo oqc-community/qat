@@ -13,7 +13,6 @@ from xdsl.ir import Operation, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.conversion.pulse_to_q1.loop_fission import (
     fission_for_lineage,
     is_results_op,
@@ -41,6 +40,11 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.target import (
+    Q1SequencerType,
+    QbloxTargetDescription,
+)
 
 _NON_SYMBOL_CHARS = compile(r"[^0-9A-Za-z_$.]")
 _MULTI_UNDERSCORE = compile(r"_+")
@@ -51,11 +55,11 @@ _MULTI_UNDERSCORE = compile(r"_+")
 _MARKER_BITMASK = 0b0011
 
 
-def _synchronization_grid_time(target_data: QbloxTargetData) -> int:
+def _synchronization_grid_time(target_data: QbloxTargetDescription) -> int:
     """Return a synchronization duration valid for control and readout sequencers."""
     return lcm(
-        target_data.CONTROL_SEQUENCER_DATA.grid_time,
-        target_data.READOUT_SEQUENCER_DATA.grid_time,
+        target_data.sequencer_spec(Q1SequencerType.control).clock_period_ns,
+        target_data.sequencer_spec(Q1SequencerType.readout).clock_period_ns,
     )
 
 
@@ -186,7 +190,7 @@ def _build_partition_sequence_body(
     op_by_result: dict[SSAValue, Operation],
     entry_lineages: dict[Operation, list[FrameLineage]],
     analysis: FrameLineageAnalysis,
-    target_data: QbloxTargetData,
+    target_data: QbloxTargetDescription,
 ) -> list[Operation]:
     """Build the cloned body for one outlined sequence.
 
@@ -323,7 +327,7 @@ class Q1OutliningPass(OrderedPass, ModulePass):
 
     name = "pulse-to-q1-outlining"
 
-    target_data: QbloxTargetData = TARGET_DATA
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET
     state: OutliningState = field(default_factory=OutliningState, init=False)
 
     def _sequence_op_for_partition(

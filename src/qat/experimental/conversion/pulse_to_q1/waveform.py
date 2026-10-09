@@ -8,7 +8,6 @@ from xdsl.ir import Operation
 from xdsl.pattern_rewriter import PatternRewriter
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import QbloxTargetData
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
     ConstantOp,
@@ -25,7 +24,11 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
 from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
-from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    Q1SequencerType,
+    QbloxTargetDescription,
+)
 
 
 def _square_waveform(op: PulseOp) -> SquareWaveformOp:
@@ -84,7 +87,7 @@ class SquareWaveformLowering:
         self,
         pulse_op: PulseOp,
         rewriter: PatternRewriter,
-        target_data: QbloxTargetData,
+        target_data: QbloxTargetDescription,
         debug_info: DebugInfoAttr | None = None,
     ) -> None:
         """Lower the square waveform consumed by ``op``.
@@ -117,18 +120,17 @@ class SquareWaveformLowering:
                 sequence_op.module_config.kind.data, sequence_op.seq_idx.data
             )
         )
-        sequencer_data = (
-            target_data.READOUT_SEQUENCER_DATA
-            if is_readout
-            else target_data.CONTROL_SEQUENCER_DATA
+        sequencer_spec_type = (
+            Q1SequencerType.readout if is_readout else Q1SequencerType.control
         )
-        grid_time = sequencer_data.grid_time
+        sequencer_data = target_data.sequencer_spec(sequencer_spec_type)
+        grid_time = sequencer_data.clock_period_ns
         width_ns = width.value.literal_value // 1000
         rise_duration = width_ns if width_ns < 2 * grid_time else grid_time
         remaining_duration = width_ns - rise_duration
 
         value = amplitude_value.literal_value
-        max_offset = target_data.Q1ASM_DATA.max_offset
+        max_offset = target_data.q1asm.max_offset
         q1_ops: list[Operation] = [
             SetAwgOffsImmImmOp(
                 SI16Imm(int(value.real * max_offset)),
@@ -137,11 +139,11 @@ class SquareWaveformLowering:
             UpdParamImmOp(DurationImm(rise_duration)).with_debug_info(debug_info),
         ]
         minimum_duration = DurationImm._MIN
-        maximum_wait = target_data.Q1ASM_DATA.max_wait_time
+        maximum_wait = target_data.q1asm.max_wait_time_ns
         maximum_wait -= maximum_wait % grid_time
         if remaining_duration and maximum_wait < minimum_duration:
             raise PassFailedException(
-                f"Q1 wait limit {target_data.Q1ASM_DATA.max_wait_time} ns cannot represent "
+                f"Q1 wait limit {target_data.q1asm.max_wait_time_ns} ns cannot represent "
                 f"the required {grid_time} ns sequencer alignment."
             )
         while remaining_duration > maximum_wait:

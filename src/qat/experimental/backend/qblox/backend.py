@@ -12,7 +12,6 @@ from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.base import BaseBackend
 from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.core.metrics_base import MetricsManager
 from qat.core.result_base import ResultManager
 from qat.executables import Executable
@@ -24,7 +23,11 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
 from qat.experimental.dialect.pulse.analysis.locate_kernels import locate_kernels
 from qat.experimental.dialect.results.ir import ResultsArrayType
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
-from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxHardwareView,
+    QbloxTargetDescription,
+)
 
 
 class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
@@ -37,7 +40,7 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
     def __init__(
         self,
         model: CanonicalSystemData,
-        target_data: QbloxTargetData = TARGET_DATA,
+        target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
     ):
         super().__init__(model=model)
         self.target_data = target_data

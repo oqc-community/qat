@@ -2,9 +2,10 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 """Tests for the experimental Qblox execute pipeline."""
 
+from dataclasses import replace
+
 import pytest
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.engines.qblox.execution import QbloxEngine
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.experimental.pipelines.execute import (
@@ -12,6 +13,7 @@ from qat.experimental.pipelines.execute import (
     ExperimentalQbloxExecutePipelineConfig,
 )
 from qat.experimental.runtime.results_pipeline import get_qblox_results_pipeline
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.pipelines.pipeline import ExecutePipeline
 from qat.runtime import SimpleRuntime
 from qat.runtime.aggregator import QBloxAggregator
@@ -47,7 +49,7 @@ class TestExperimentalQbloxExecutePipeline:
         assert isinstance(pipeline, ExecutePipeline)
         assert pipeline.name == config.name
         assert pipeline.model is canonical_model
-        assert pipeline.target_data is TARGET_DATA
+        assert pipeline.target_data is DEFAULT_QBLOX_TARGET
         assert isinstance(pipeline.runtime, SimpleRuntime)
         assert isinstance(pipeline.runtime.aggregator, QBloxAggregator)
         assert isinstance(pipeline.engine, QbloxEngine)
@@ -56,7 +58,7 @@ class TestExperimentalQbloxExecutePipeline:
 
     def test_build_pipeline_uses_supplied_target_data(self, canonical_model):
         """The execute builder preserves explicitly supplied target data."""
-        target_data = QbloxTargetData()
+        target_data = replace(DEFAULT_QBLOX_TARGET)
         config = ExperimentalQbloxExecutePipelineConfig(host="127.0.0.1")
 
         pipeline = ExperimentalQbloxExecutePipeline._build_pipeline(

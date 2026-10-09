@@ -19,7 +19,6 @@ from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.transforms.reconcile_unrealized_casts import ReconcileUnrealizedCastsPass
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.backend.qblox.pre_emission_verification import (
     QbloxPreEmissionVerificationPass,
 )
@@ -59,7 +58,11 @@ from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
 from qat.experimental.passes.pass_ordering import OrderedPass, OrderedPassPipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
-from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 
 @dataclass(frozen=True)
@@ -83,7 +86,7 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
     """
 
     name = "q1-pulse-validation"
-    target_data: QbloxTargetData = field(default=TARGET_DATA)
+    target_data: QbloxTargetDescription = field(default=DEFAULT_QBLOX_TARGET)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset({Q1OutliningPass, QbloxHardwareBindingPass})
@@ -201,12 +204,11 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
                 sequence.module_config.kind.data, sequence.seq_idx.data
             )
         )
-        sequencer_data = (
-            self.target_data.READOUT_SEQUENCER_DATA
-            if is_readout
-            else self.target_data.CONTROL_SEQUENCER_DATA
+        sequencer_spec_type = (
+            Q1SequencerType.readout if is_readout else Q1SequencerType.control
         )
-        grid_time = sequencer_data.grid_time
+        sequencer_data = self.target_data.sequencer_spec(sequencer_spec_type)
+        grid_time = sequencer_data.clock_period_ns
         min_width_ns = grid_time
         if width_ns < min_width_ns:
             raise PassFailedException(
@@ -455,7 +457,7 @@ class PulseToQ1LoweringPass(OrderedPass, ModulePass):
     """
 
     name = "pulse-to-q1-lowering"
-    target_data: QbloxTargetData = field(default=TARGET_DATA)
+    target_data: QbloxTargetDescription = field(default=DEFAULT_QBLOX_TARGET)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset(
@@ -510,7 +512,7 @@ class BoundDeadFrameEliminationPass(OrderedPass, ModulePass):
 
 def create_qblox_configured_q1_pipeline(
     canonical_data: CanonicalSystemData,
-    target_data: QbloxTargetData = TARGET_DATA,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> PassPipeline:
     """Create the Pulse-to-emission-ready configured Qblox Q1 conversion pipeline.
 

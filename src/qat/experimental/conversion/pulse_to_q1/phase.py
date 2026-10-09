@@ -20,7 +20,6 @@ from numpy import mod, pi, rad2deg
 from xdsl.pattern_rewriter import PatternRewriter
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import QbloxTargetData
 from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     PhaseAttr,
@@ -37,7 +36,11 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
 from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
-from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    Q1SequencerType,
+    QbloxTargetDescription,
+)
 
 
 class PhaseLegalisation:
@@ -80,7 +83,7 @@ class PhaseLowering:
         self,
         op: PhaseSetOp | PhaseShiftOp,
         rewriter: PatternRewriter,
-        target_data: QbloxTargetData,
+        target_data: QbloxTargetDescription,
         debug_info: DebugInfoAttr | None = None,
     ) -> None:
         """Apply the lowering-stage phase rewrite.
@@ -98,11 +101,10 @@ class PhaseLowering:
                 sequence.module_config.kind.data, sequence.seq_idx.data
             )
         )
-        sequencer_data = (
-            target_data.READOUT_SEQUENCER_DATA
-            if is_readout
-            else target_data.CONTROL_SEQUENCER_DATA
+        sequencer_spec_type = (
+            Q1SequencerType.readout if is_readout else Q1SequencerType.control
         )
+        sequencer_data = target_data.sequencer_spec(sequencer_spec_type)
         legalised_radians = extract_phase_radians(op)
         if not (0.0 <= legalised_radians < 2 * pi):
             raise PassFailedException(
@@ -110,8 +112,8 @@ class PhaseLowering:
                 "before lowering."
             )
         phase_deg = rad2deg(legalised_radians)
-        steps = int(round(phase_deg * sequencer_data.nco_phase_steps_per_deg))
-        steps %= sequencer_data.nco_max_phase_steps
+        steps = int(round(phase_deg * sequencer_data.nco_phase_steps_per_degree))
+        steps %= sequencer_data.nco_phase_steps
         primary = (
             SetPhImmOp(NcoPhaseImm(steps))
             if isinstance(op, PhaseSetOp)
@@ -119,6 +121,6 @@ class PhaseLowering:
         ).with_debug_info(debug_info)
         rewriter.replace_op(
             op,
-            [primary, UpdParamImmOp(DurationImm(sequencer_data.grid_time))],
+            [primary, UpdParamImmOp(DurationImm(sequencer_data.clock_period_ns))],
             (op.frame,),
         )

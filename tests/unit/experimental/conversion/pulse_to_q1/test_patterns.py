@@ -2,9 +2,11 @@
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
 
 import math
+from dataclasses import replace
 
 import numpy as np
 import pytest
+from frozendict import frozendict
 from xdsl.context import Context
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
@@ -25,7 +27,6 @@ from xdsl.pattern_rewriter import PatternRewriteWalker
 from xdsl.transforms.dead_code_elimination import DeadCodeElimination
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
-from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.passes import (
     BoundDeadFrameEliminationPass,
     PulseToQ1LoweringPass,
@@ -92,29 +93,44 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_dense_floats,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
-
-_CONTROL_SEQUENCER_DATA = TARGET_DATA.CONTROL_SEQUENCER_DATA
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 
 def _target_with_readout_sample_rate(sample_rate: float):
     """Return target data with a custom readout sample rate."""
 
-    readout = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-        update={"sample_rate": sample_rate}
+    readout = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+        sample_rate_hz=sample_rate,
     )
-    return TARGET_DATA.model_copy(
-        update={"READOUT_SEQUENCER_DATA": readout},
+    return replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.readout: readout,
+            }
+        ),
     )
 
 
 def _target_with_control_timing(sample_rate: float, grid_time: int):
     """Return target data with custom control sequencer timing."""
 
-    control = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"sample_rate": sample_rate, "grid_time": grid_time},
+    control = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        sample_rate_hz=sample_rate,
+        clock_period_ns=grid_time,
     )
-    return TARGET_DATA.model_copy(
-        update={"CONTROL_SEQUENCER_DATA": control},
+    return replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.control: control,
+            }
+        ),
     )
 
 
@@ -245,7 +261,7 @@ def test_rewrite_wait_op_lowers_short_wait():
 @pytest.mark.parametrize(
     ("duration_ps", "target_data", "expected_duration_ns"),
     [
-        (5e3, TARGET_DATA, 8),  # 5 ns in ps
+        (5e3, DEFAULT_QBLOX_TARGET, 8),  # 5 ns in ps
         (9e3, _target_with_control_timing(500e6, 8), 16),  # 9 ns in ps
     ],
 )
@@ -284,7 +300,7 @@ def test_enclosing_port_ignores_non_sequence_parent():
 
 def test_rewrite_wait_op_chains_long_wait():
     """A wait longer than the maximum immediate lowers to a chain summing to the value."""
-    max_wait_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
+    max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_time_ns
     total_ns = 2 * max_wait_time + 16
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(total_ns * 1e3))  # total_ns in ps
@@ -304,12 +320,12 @@ def test_rewrite_wait_op_rounds_large_picosecond_duration_up(monkeypatch):
     duration_ps = 9_007_199_254_744_001
     expected_duration_ns = 9_007_199_254_748
     monkeypatch.setattr(DurationImm, "_MAX", expected_duration_ns)
-    target_data = TARGET_DATA.model_copy(
-        update={
-            "Q1ASM_DATA": TARGET_DATA.Q1ASM_DATA.model_copy(
-                update={"max_wait_time": expected_duration_ns}
-            )
-        }
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        q1asm=replace(
+            DEFAULT_QBLOX_TARGET.q1asm,
+            max_wait_time_ns=expected_duration_ns,
+        ),
     )
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(duration_ps))
@@ -330,7 +346,7 @@ def test_rewrite_wait_op_uses_grid_aligned_chunks():
         sample_rate=1_000_000_000,
         grid_time=8,
     )
-    max_wait_time = target_data.Q1ASM_DATA.max_wait_time
+    max_wait_time = target_data.q1asm.max_wait_time_ns
     max_aligned_wait_time = max_wait_time - max_wait_time % 8
     total_ns = 2 * max_aligned_wait_time + 16
     freq, frame = _frame()
@@ -376,7 +392,11 @@ def test_rewrite_phase_set_op_converts_radians_to_nco_phase_steps():
     body_ops = _sequence_body_ops(module)
     [set_ph] = [op for op in body_ops if isinstance(op, SetPhImmOp)]
     expected_steps = round(
-        math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+        math.degrees(phase_rad)
+        % 360
+        * DEFAULT_QBLOX_TARGET.sequencer_spec(
+            Q1SequencerType.control
+        ).nco_phase_steps_per_degree
     )
     assert set_ph.imm.data == expected_steps
 
@@ -411,7 +431,11 @@ def test_rewrite_phase_shift_op_converts_radians_to_nco_phase_steps():
     body_ops = _sequence_body_ops(module)
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
     expected_steps = round(
-        math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+        math.degrees(phase_rad)
+        % 360
+        * DEFAULT_QBLOX_TARGET.sequencer_spec(
+            Q1SequencerType.control
+        ).nco_phase_steps_per_degree
     )
     assert set_ph_delta.imm.data == expected_steps
 
@@ -430,7 +454,11 @@ def test_rewrite_phase_shift_op_wraps_negative_radians_to_valid_nco_range():
     body_ops = _sequence_body_ops(module)
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
     expected_steps = round(
-        math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+        math.degrees(phase_rad)
+        % 360
+        * DEFAULT_QBLOX_TARGET.sequencer_spec(
+            Q1SequencerType.control
+        ).nco_phase_steps_per_degree
     )
     assert set_ph_delta.imm.data == expected_steps
 
@@ -473,7 +501,11 @@ def test_rewrite_phase_shift_op_near_full_rotation_stays_in_nco_range():
 
     body_ops = _sequence_body_ops(module)
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
-    assert 0 <= set_ph_delta.imm.data < _CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+    assert (
+        0
+        <= set_ph_delta.imm.data
+        < DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).nco_phase_steps
+    )
 
 
 @pytest.mark.parametrize(
@@ -498,9 +530,13 @@ def test_rewrite_phase_set_op_wraps_wide_radian_range_to_valid_nco_steps(phase_r
     [set_ph] = [op for op in body_ops if isinstance(op, SetPhImmOp)]
     expected_steps = (
         round(
-            math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+            math.degrees(phase_rad)
+            % 360
+            * DEFAULT_QBLOX_TARGET.sequencer_spec(
+                Q1SequencerType.control
+            ).nco_phase_steps_per_degree
         )
-        % _CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+        % DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).nco_phase_steps
     )
     assert set_ph.imm.data == expected_steps
 
@@ -529,9 +565,13 @@ def test_rewrite_phase_shift_op_wraps_wide_radian_range_to_valid_nco_steps(
     [set_ph_delta] = [op for op in body_ops if isinstance(op, SetPhDeltaImmOp)]
     expected_steps = (
         round(
-            math.degrees(phase_rad) % 360 * _CONTROL_SEQUENCER_DATA.nco_phase_steps_per_deg
+            math.degrees(phase_rad)
+            % 360
+            * DEFAULT_QBLOX_TARGET.sequencer_spec(
+                Q1SequencerType.control
+            ).nco_phase_steps_per_degree
         )
-        % _CONTROL_SEQUENCER_DATA.nco_max_phase_steps
+        % DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).nco_phase_steps
     )
     assert set_ph_delta.imm.data == expected_steps
 
@@ -596,7 +636,7 @@ class TestRewritePreQ1AcquireOp:
         *acquire_params: tuple[WeightsAttr | None, int | float, str],
         override_label=None,
         sequencer_config: SequencerConfigAttr | None = None,
-        target_data=TARGET_DATA,
+        target_data=DEFAULT_QBLOX_TARGET,
     ) -> tuple[SequenceOp, list]:
         """Build a module of ``pre_q1_pulse.acquire`` ops from ``acquire_params``, apply
         ``PulseToQ1LoweringPass``, and return the lowered ``SequenceOp`` together with all
@@ -976,7 +1016,7 @@ class TestRewritePreQ1AcquireOp:
     def test_acq_table_overflow_raises(self):
         """Registering a 33rd distinct acquisition on the same sequencer exceeds the
         hardware table limit of 32 entries (acq_idx 0–31) and raises VerifyException."""
-        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(DEFAULT_QBLOX_TARGET)
         seq = SequenceOp("test", [StopOp()])
         for i in range(32):
             pattern._register_acquisition(seq, f"acq_{i}", num_bins=1)
@@ -986,7 +1026,7 @@ class TestRewritePreQ1AcquireOp:
     def test_weight_table_overflow_raises(self):
         """Registering a 33rd weight on the same sequencer exceeds the hardware table limit
         of 32 entries (indices 0–31) and raises VerifyException."""
-        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(DEFAULT_QBLOX_TARGET)
         seq = SequenceOp("test", [StopOp()])
         for i in range(32):
             pattern._register_weight(seq, np.full(4, i / 33))
@@ -996,7 +1036,7 @@ class TestRewritePreQ1AcquireOp:
     def test_duplicate_weight_payload_returns_existing_index(self):
         """Registering the same weight payload twice returns the existing index without
         adding a duplicate entry to the weight table."""
-        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(DEFAULT_QBLOX_TARGET)
         seq = SequenceOp("test", [StopOp()])
         coeffs = np.ones(4)
         first_index = pattern._register_weight(seq, coeffs)
@@ -1046,7 +1086,7 @@ class TestRewritePreQ1AcquireOp:
         )
         # acquire is a standalone op with no SequenceOp ancestor
 
-        pattern = RewritePreQ1AcquireOp(TARGET_DATA)
+        pattern = RewritePreQ1AcquireOp(DEFAULT_QBLOX_TARGET)
         with pytest.raises(ValueError, match="No SequenceOp found in the parent chain"):
             pattern.match_and_rewrite(acquire, None)
 
@@ -1105,7 +1145,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
@@ -1121,7 +1161,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         names = [wf.waveform_name.data for wf in sequence.waveforms.data]
@@ -1133,7 +1173,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         assert not any(
@@ -1154,7 +1194,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
@@ -1182,7 +1222,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
@@ -1210,7 +1250,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
@@ -1242,7 +1282,7 @@ class TestRewritePulseOp:
 
         with pytest.raises(PassFailedException, match="SampledWaveformAttr"):
             PatternRewriteWalker(
-                RewritePulseOp(TARGET_DATA), apply_recursively=False
+                RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
             ).rewrite_module(module)
 
     def test_pulse_with_too_small_value_raises_pass_failed_exception(self):
@@ -1253,14 +1293,14 @@ class TestRewritePulseOp:
 
         with pytest.raises(PassFailedException, match="Pulse duration 2 ns is below"):
             PatternRewriteWalker(
-                RewritePulseOp(TARGET_DATA), apply_recursively=False
+                RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
             ).rewrite_module(module)
 
     def test_pulse_with_too_large_value_raises_pass_failed_exception(self):
         """When a pulse is greater than the value set in target data, it cannot be
         played."""
 
-        max_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
+        max_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_time_ns
         waveform_op = _sampled_waveform([0.2 + 0.1j] * (max_time + 1))
         sequence = _sequence_with_pulse(waveform_op)
         module = ModuleOp([sequence])
@@ -1269,10 +1309,12 @@ class TestRewritePulseOp:
             PassFailedException, match=f"Pulse duration {max_time + 1} ns is above"
         ):
             PatternRewriteWalker(
-                RewritePulseOp(TARGET_DATA), apply_recursively=False
+                RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
             ).rewrite_module(module)
 
-    @pytest.mark.parametrize("pulse_length", [4, TARGET_DATA.Q1ASM_DATA.max_wait_time])
+    @pytest.mark.parametrize(
+        "pulse_length", [4, DEFAULT_QBLOX_TARGET.q1asm.max_wait_time_ns]
+    )
     def test_edge_case_times_lower_successfully(self, pulse_length):
         """When a pulse is exactly 4ns or the maximum value set in target data it can be
         played."""
@@ -1281,7 +1323,7 @@ class TestRewritePulseOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewritePulseOp(TARGET_DATA), apply_recursively=False
+            RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
         ).rewrite_module(module)
 
         play_ops = [op for op in sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)]
@@ -1318,7 +1360,7 @@ class TestSquareWaveformLowering:
 
         PatternRewriteWalker(
             RewriteSquareWaveformPulseOp(
-                TARGET_DATA,
+                DEFAULT_QBLOX_TARGET,
                 rewrite_callable=SquareWaveformLowering(),
             ),
             apply_recursively=False,
@@ -1332,8 +1374,8 @@ class TestSquareWaveformLowering:
             if isinstance(op, SetAwgOffsImmImmOp | UpdParamImmOp | WaitImmOp)
         )
         assert isinstance(q1_ops[0], SetAwgOffsImmImmOp)
-        assert q1_ops[0].imm1.data == int(0.5 * TARGET_DATA.Q1ASM_DATA.max_offset)
-        assert q1_ops[0].imm2.data == int(0.25 * TARGET_DATA.Q1ASM_DATA.max_offset)
+        assert q1_ops[0].imm1.data == int(0.5 * DEFAULT_QBLOX_TARGET.q1asm.max_offset)
+        assert q1_ops[0].imm2.data == int(0.25 * DEFAULT_QBLOX_TARGET.q1asm.max_offset)
 
         fall_index = next(
             index
@@ -1347,27 +1389,36 @@ class TestSquareWaveformLowering:
         assert q1_ops[fall_index].imm1.data == 0
         assert q1_ops[fall_index].imm2.data == 0
         assert isinstance(q1_ops[fall_index + 1], UpdParamImmOp)
-        assert q1_ops[fall_index + 1].duration.data == _CONTROL_SEQUENCER_DATA.grid_time
+        assert (
+            q1_ops[fall_index + 1].duration.data
+            == DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).clock_period_ns
+        )
         assert (
             sum(
                 op.duration.data
                 for op in q1_ops
                 if isinstance(op, UpdParamImmOp | WaitImmOp)
             )
-            == width_ns + _CONTROL_SEQUENCER_DATA.grid_time
+            == width_ns
+            + DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).clock_period_ns
         )
         assert not any(isinstance(op, SquareWaveformOp) for op in sequence.body.block.ops)
 
     def test_rejects_wait_limit_smaller_than_sequencer_grid(self):
-        control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-            update={"grid_time": 8}
+        control_data = replace(
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+            clock_period_ns=8,
         )
-        q1asm_data = TARGET_DATA.Q1ASM_DATA.model_copy(update={"max_wait_time": 4})
-        target_data = TARGET_DATA.model_copy(
-            update={
-                "CONTROL_SEQUENCER_DATA": control_data,
-                "Q1ASM_DATA": q1asm_data,
-            }
+        q1asm_data = replace(DEFAULT_QBLOX_TARGET.q1asm, max_wait_time_ns=4)
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            sequencer_specs=frozendict(
+                {
+                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                    Q1SequencerType.control: control_data,
+                },
+            ),
+            q1asm=q1asm_data,
         )
         module, _ = _square_pulse_module(TimeAttr(16_000))
 
@@ -1384,11 +1435,18 @@ class TestSquareWaveformLowering:
             ).rewrite_module(module)
 
     def test_splits_long_waits_on_the_sequencer_grid(self):
-        control_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-            update={"grid_time": 8}
+        control_data = replace(
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+            clock_period_ns=8,
         )
-        target_data = TARGET_DATA.model_copy(
-            update={"CONTROL_SEQUENCER_DATA": control_data}
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            sequencer_specs=frozendict(
+                {
+                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                    Q1SequencerType.control: control_data,
+                }
+            ),
         )
         width_ns = 65_544
         module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
@@ -1406,12 +1464,17 @@ class TestSquareWaveformLowering:
             for op in sequence.body.block.ops
             if isinstance(op, UpdParamImmOp | WaitImmOp)
         ]
-        assert all(duration % control_data.grid_time == 0 for duration in durations)
+        assert all(duration % control_data.clock_period_ns == 0 for duration in durations)
         assert sum(durations[:-1]) == width_ns
 
     def test_adjusts_wait_when_final_chunk_would_be_too_short(self):
-        q1asm_data = TARGET_DATA.Q1ASM_DATA.model_copy(update={"max_wait_time": 12})
-        target_data = TARGET_DATA.model_copy(update={"Q1ASM_DATA": q1asm_data})
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(
+                DEFAULT_QBLOX_TARGET.q1asm,
+                max_wait_time_ns=12,
+            ),
+        )
         module, sequence = _square_pulse_module(TimeAttr(17_000))
 
         PatternRewriteWalker(
@@ -1454,7 +1517,7 @@ class TestSquareWaveformLowering:
         ):
             PatternRewriteWalker(
                 RewriteSquareWaveformPulseOp(
-                    TARGET_DATA,
+                    DEFAULT_QBLOX_TARGET,
                     rewrite_callable=SquareWaveformLowering(),
                 ),
                 apply_recursively=False,
@@ -1471,7 +1534,7 @@ class TestRewriteStartContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStartContinuousWaveformOp(TARGET_DATA),
+            RewriteStartContinuousWaveformOp(DEFAULT_QBLOX_TARGET),
             apply_recursively=False,
         ).rewrite_module(module)
 
@@ -1479,7 +1542,7 @@ class TestRewriteStartContinuousWaveformOp:
             op for op in sequence.body.block.ops if isinstance(op, SetAwgOffsImmImmOp)
         ]
         assert len(offs_ops) == 1
-        max_offset = TARGET_DATA.Q1ASM_DATA.max_offset
+        max_offset = DEFAULT_QBLOX_TARGET.q1asm.max_offset
         assert offs_ops[0].imm1.data == int(0.5 * max_offset)
         assert offs_ops[0].imm2.data == int(0.25 * max_offset)
 
@@ -1492,7 +1555,7 @@ class TestRewriteStartContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStartContinuousWaveformOp(TARGET_DATA),
+            RewriteStartContinuousWaveformOp(DEFAULT_QBLOX_TARGET),
             apply_recursively=False,
         ).rewrite_module(module)
 
@@ -1511,7 +1574,7 @@ class TestRewriteStartContinuousWaveformOp:
 
         with pytest.raises(PassFailedException, match="AmplitudeAttr"):
             PatternRewriteWalker(
-                RewriteStartContinuousWaveformOp(TARGET_DATA),
+                RewriteStartContinuousWaveformOp(DEFAULT_QBLOX_TARGET),
                 apply_recursively=False,
             ).rewrite_module(module)
 
@@ -1527,7 +1590,7 @@ class TestRewriteStartContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStartContinuousWaveformOp(TARGET_DATA),
+            RewriteStartContinuousWaveformOp(DEFAULT_QBLOX_TARGET),
             apply_recursively=False,
         ).rewrite_module(module)
 
@@ -1550,7 +1613,7 @@ class TestRewriteStopContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStopContinuousWaveformOp(TARGET_DATA),
+            RewriteStopContinuousWaveformOp(DEFAULT_QBLOX_TARGET),
             apply_recursively=False,
         ).rewrite_module(module)
 
@@ -1569,7 +1632,7 @@ class TestRewriteStopContinuousWaveformOp:
         module = ModuleOp([sequence])
 
         PatternRewriteWalker(
-            RewriteStopContinuousWaveformOp(TARGET_DATA),
+            RewriteStopContinuousWaveformOp(DEFAULT_QBLOX_TARGET),
             apply_recursively=False,
         ).rewrite_module(module)
 

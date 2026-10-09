@@ -13,7 +13,6 @@ from xdsl.ir import Block, Region
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.backend.qblox.execution import QbloxProgram
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.core.result_base import ResultManager
 from qat.executables import AcquireData, Executable
 from qat.experimental.analysis.post_processing import PostProcessingAnalysis
@@ -31,7 +30,10 @@ from qat.experimental.pipelines.compile import (
     ExperimentalQbloxCompilePipelineConfig,
 )
 from qat.experimental.system_data.canonical.schema import AttributeEntry
-from qat.experimental.system_data.hardware.qblox import QbloxHardwareView
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxHardwareView,
+)
 from qat.ir.measure import AcquireMode, PostSelect
 from qat.pipelines.pipeline import CompilePipeline
 
@@ -119,18 +121,18 @@ class TestExperimentalQbloxCompilePipeline:
 
         assert isinstance(pipeline, CompilePipeline)
         assert pipeline.model is canonical_model_qblox
-        assert pipeline.target_data is TARGET_DATA
+        assert pipeline.target_data is DEFAULT_QBLOX_TARGET
         assert isinstance(pipeline.frontend, PurrFrontend)
         assert pipeline.frontend.model is canonical_model_qblox
         assert isinstance(pipeline.middleend, PulseLevelMiddleend)
         assert pipeline.middleend.model is canonical_model_qblox
         assert isinstance(pipeline.backend, ExperimentalQbloxBackend)
         assert pipeline.backend.model is canonical_model_qblox
-        assert pipeline.backend.target_data is TARGET_DATA
+        assert pipeline.backend.target_data is DEFAULT_QBLOX_TARGET
 
     def test_build_pipeline_uses_supplied_target_data(self, canonical_model_qblox):
         """The pipeline and backend preserve explicitly supplied Qblox target data."""
-        target_data = QbloxTargetData()
+        target_data = replace(DEFAULT_QBLOX_TARGET)
 
         pipeline = ExperimentalQbloxCompilePipeline._build_pipeline(
             config=ExperimentalQbloxCompilePipelineConfig(),
@@ -166,12 +168,14 @@ class TestExperimentalQbloxCompilePipeline:
 
         executable = backend.emit(module, metadata={"revision": 1})
 
-        lowering_factory.assert_called_once_with(canonical_model_qblox, TARGET_DATA)
+        lowering_factory.assert_called_once_with(
+            canonical_model_qblox, DEFAULT_QBLOX_TARGET
+        )
         lowering.apply.assert_called_once()
         emitter.assert_called_once_with(
             module,
             hardware_view,
-            TARGET_DATA,
+            DEFAULT_QBLOX_TARGET,
             metadata={"revision": 1},
         )
         assert isinstance(executable, Executable)

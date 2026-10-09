@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
+from dataclasses import replace
 
 import pytest
+from frozendict import frozendict
 from xdsl.context import Context
 from xdsl.dialects import func, scf
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
@@ -84,7 +86,9 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPassPipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind, SignalPath
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
     canonical_data,
@@ -203,8 +207,18 @@ def test_bound_readout_grid_is_used_during_square_validation():
     waveform = SquareWaveformOp(width, amplitude)
     pulse = PulseOp(frame, waveform)
     module = _pulse_module(frequency, frame, width, amplitude, waveform, pulse)
-    readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(update={"grid_time": 8})
-    target_data = TARGET_DATA.model_copy(update={"READOUT_SEQUENCER_DATA": readout_data})
+    readout_data = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout), clock_period_ns=8
+    )
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.readout: readout_data,
+            }
+        ),
+    )
 
     with pytest.raises(
         PassFailedException,
@@ -445,10 +459,19 @@ def test_pre_emission_verification_rejects_out_of_range_nco_frequency(frequency)
 
 def test_pre_emission_verification_enforces_instruction_capacity():
     sequence = _sequence_with(MoveImmRdOp(SU32Imm(1), Registers.R1))
-    sequencer_data = TARGET_DATA.CONTROL_SEQUENCER_DATA.model_copy(
-        update={"max_num_instructions": 1}
+    control_spec = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+        instruction_capacity=1,
     )
-    target_data = TARGET_DATA.model_copy(update={"CONTROL_SEQUENCER_DATA": sequencer_data})
+    target_data = replace(
+        DEFAULT_QBLOX_TARGET,
+        sequencer_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                Q1SequencerType.control: control_spec,
+            }
+        ),
+    )
 
     with pytest.raises(PassFailedException, match="exceeding the 1 instruction capacity"):
         QbloxPreEmissionVerificationPass(target_data).apply(

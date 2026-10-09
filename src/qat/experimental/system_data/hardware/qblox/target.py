@@ -121,6 +121,8 @@ class Q1SequencerSpec:
     readout: ReadoutSpec | None = None
 
     def __post_init__(self) -> None:
+        if self.clock_period_ns < 1:
+            raise ValueError("Q1 sequencer clock period must be positive")
         if (self.type is Q1SequencerType.readout) != (self.readout is not None):
             raise ValueError("Readout sequencer specifications require readout-path limits")
 

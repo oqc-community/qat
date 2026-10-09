@@ -13,12 +13,6 @@ from xdsl.ir import Attribute, ParametrizedAttribute, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
-from qat.backend.qblox.target_data import (
-    TARGET_DATA,
-    ModuleDescription,
-    QbloxTargetData,
-    SequencerDescription,
-)
 from qat.experimental.dialect.q1 import (
     ACQUISITION_OP_TYPES,
     AcquireImmImmImmOp,
@@ -39,8 +33,10 @@ from qat.experimental.passes.pass_ordering import OrderedPass
 from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
 from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
+    ModuleSpec,
     Q1SequencerFeature,
-    Q1SequencerType,
+    Q1SequencerSpec,
+    QbloxTargetDescription,
     SequencerTarget,
 )
 
@@ -63,14 +59,13 @@ class _QbloxPreEmissionVerifier:
     """Reject IR that is not a configured, allocated, flat Qblox Q1 sequence module.
 
     The fixed target description owns structural topology and capabilities.
-    ``QbloxTargetData`` supplies configurable numeric limits.
+    ``QbloxTargetDescription`` supplies configurable numeric limits.
     """
 
-    def __init__(self, target_data: QbloxTargetData):
+    def __init__(self, target_data: QbloxTargetDescription):
         self.target_data = target_data
 
-    @staticmethod
-    def _sequencer_target(sequence: SequenceOp) -> SequencerTarget:
+    def _sequencer_target(self, sequence: SequenceOp) -> SequencerTarget:
         """Return the configured physical sequencer target."""
 
         if sequence.module_config is None or sequence.seq_idx is None:
@@ -92,23 +87,17 @@ class _QbloxPreEmissionVerifier:
             Q1SequencerFeature.acquisition
         )
 
-    def _sequencer_data(self, sequence: SequenceOp) -> SequencerDescription:
+    def _sequencer_data(self, sequence: SequenceOp) -> Q1SequencerSpec:
         """Return numeric limits for the configured physical sequencer."""
 
-        if self._sequencer_target(sequence).sequencer_spec.type is Q1SequencerType.readout:
-            return self.target_data.READOUT_SEQUENCER_DATA
-        return self.target_data.CONTROL_SEQUENCER_DATA
+        return self.target_data.sequencer_specs[
+            self._sequencer_target(sequence).sequencer_spec.type
+        ]
 
-    def _module_data(self, kind: QbloxModuleKind) -> ModuleDescription:
+    def _module_data(self, kind: QbloxModuleKind) -> ModuleSpec:
         """Return numeric limits for ``kind`` from the legacy target data."""
 
-        return {
-            QbloxModuleKind.qcm: self.target_data.QCM_DATA,
-            QbloxModuleKind.qcm_rf: self.target_data.QCM_RF_DATA,
-            QbloxModuleKind.qrm: self.target_data.QRM_DATA,
-            QbloxModuleKind.qrm_rf: self.target_data.QRM_RF_DATA,
-            QbloxModuleKind.qrc: self.target_data.QRC_DATA,
-        }[kind]
+        return self.target_data.module_specs[kind]
 
     def verify(self, op: ModuleOp) -> list[SequenceOp]:
         top_level = list(op.body.block.ops)
@@ -202,13 +191,15 @@ class _QbloxPreEmissionVerifier:
         frequency = frequency_attr.value.data
         sequencer_data = self._sequencer_data(sequence)
         if not isfinite(frequency) or not (
-            sequencer_data.nco_min_freq <= frequency <= sequencer_data.nco_max_freq
+            sequencer_data.nco_min_frequency_hz
+            <= frequency
+            <= sequencer_data.nco_max_frequency_hz
         ):
             sequencer_type = self._sequencer_target(sequence).sequencer_spec.type
             raise PassFailedException(
                 f"NCO frequency {frequency} is outside "
-                f"[{sequencer_data.nco_min_freq:.0f}, "
-                f"{sequencer_data.nco_max_freq:.0f}] Hz for the selected "
+                f"[{sequencer_data.nco_min_frequency_hz:.0f}, "
+                f"{sequencer_data.nco_max_frequency_hz:.0f}] Hz for the selected "
                 f"{sequencer_type.value} sequencer."
             )
 
@@ -342,7 +333,7 @@ class _QbloxPreEmissionVerifier:
 
         for key, total in totals.items():
             kind = modules[key].kind.data
-            limit = getattr(self._module_data(kind), "max_binned_acquisitions", None)
+            limit = self._module_data(kind).acquisition_memory_bins
             if limit is None:
                 continue
             if total > limit:
@@ -356,7 +347,7 @@ class _QbloxPreEmissionVerifier:
 
         for sequence in sequences:
             sequencer_data = self._sequencer_data(sequence)
-            waveform_limit = sequencer_data.max_sample_size_waveforms
+            waveform_limit = sequencer_data.waveform_sample_capacity
             waveform_indices = {waveform.index.data for waveform in sequence.waveforms}
             weight_indices = {weight.index.data for weight in sequence.weights}
             for nested in sequence.body.block.walk():
@@ -387,7 +378,7 @@ class _QbloxPreEmissionVerifier:
                 )
             weight_total = sum(len(weight.data) for weight in sequence.weights)
             weight_limit = (
-                sequencer_data.max_sample_size_waveforms
+                sequencer_data.readout.weight_sample_capacity
                 if self._is_readout_sequencer(sequence)
                 else 0
             )
@@ -413,18 +404,18 @@ class _QbloxPreEmissionVerifier:
                 not isinstance(instruction, LabelOp)
                 for instruction in sequence.body.block.ops
             )
-            if instruction_count > sequencer_data.max_num_instructions:
+            if instruction_count > sequencer_data.instruction_capacity:
                 raise PassFailedException(
                     f"Sequence {sequence.channel_id.data!r} contains "
                     f"{instruction_count} instructions, exceeding the "
-                    f"{sequencer_data.max_num_instructions} instruction capacity for its "
+                    f"{sequencer_data.instruction_capacity} instruction capacity for its "
                     f"{sequencer_type.value} sequencer."
                 )
 
 
 def verify_qblox_pre_emission(
     op: ModuleOp,
-    target_data: QbloxTargetData = TARGET_DATA,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> list[SequenceOp]:
     """Verify that a module is ready for Qblox program emission.
 
@@ -442,7 +433,7 @@ class QbloxPreEmissionVerificationPass(OrderedPass, ModulePass):
     """Pipeline wrapper for Qblox pre-emission verification."""
 
     name = "qblox-pre-emission-verification"
-    target_data: QbloxTargetData = field(default=TARGET_DATA)
+    target_data: QbloxTargetDescription = field(default=DEFAULT_QBLOX_TARGET)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
         return frozenset({LinearScanRegisterAllocationPass, LineariseQ1CfToQ1Pass})

@@ -32,11 +32,14 @@ The inherited ``target_data`` argument carries the Qblox limits used by the back
 lowering pipeline.
 """
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.backend.qblox.backend import ExperimentalQbloxBackend
 from qat.experimental.frontend.purr import PurrFrontend
 from qat.experimental.middleend.middleend import PulseLevelMiddleend
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
 from qat.pipelines.pipeline import CompilePipeline
 from qat.pipelines.updateable import PipelineConfig, UpdateablePipeline
 
@@ -51,6 +54,7 @@ class ExperimentalQbloxCompilePipelineConfig(PipelineConfig):
 
 
 class ExperimentalQbloxCompilePipeline(UpdateablePipeline):
+    # TODO(COMPILER-1443): Replace with new pipeline infrastructure.
     """Compiles programs for the experimental Qblox target using the frontend, middleend,
     and backend stack.
 
@@ -61,10 +65,10 @@ class ExperimentalQbloxCompilePipeline(UpdateablePipeline):
     def _build_pipeline(
         config: ExperimentalQbloxCompilePipelineConfig,
         model: CanonicalSystemData,
-        target_data: QbloxTargetData | None = None,
+        target_data: QbloxTargetDescription | None = None,
         engine: None = None,
     ) -> CompilePipeline:
-        target_data = TARGET_DATA if target_data is None else target_data
+        target_data = DEFAULT_QBLOX_TARGET if target_data is None else target_data
         return CompilePipeline(
             name=config.name,
             model=model,

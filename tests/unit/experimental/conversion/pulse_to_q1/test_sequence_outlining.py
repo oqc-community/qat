@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2026 Oxford Quantum Circuits Ltd
+from dataclasses import replace
 
 import pytest
+from frozendict import frozendict
 from xdsl.context import Context
 from xdsl.dialects import func
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp, IndexCastOp
@@ -11,7 +13,6 @@ from xdsl.ir import Block, Region
 from xdsl.irdl import IRDLOperation, irdl_op_definition, operand_def, region_def, result_def
 from xdsl.utils.exceptions import PassFailedException
 
-from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import (
     Q1OutliningPass,
     _normalize_sequence_symbol,
@@ -47,6 +48,8 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1_sequence import SequenceOp
 from qat.experimental.dialect.results.ir import CreateOp, StoreOp
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 _SHOTS = 1000
 
@@ -544,11 +547,18 @@ class TestPulseToQ1ShotLoopFission:
 
     def test_scaffolding_uses_common_sequencer_grid_time(self):
         """Verify synchronization scaffolding is aligned for control and readout."""
-        readout_data = TARGET_DATA.READOUT_SEQUENCER_DATA.model_copy(
-            update={"grid_time": 8}
+        readout_data = replace(
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+            clock_period_ns=8,
         )
-        target_data = TARGET_DATA.model_copy(
-            update={"READOUT_SEQUENCER_DATA": readout_data}
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            sequencer_specs=frozendict(
+                {
+                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                    Q1SequencerType.readout: readout_data,
+                }
+            ),
         )
         module = _shot_loop_module()
 
@@ -556,12 +566,12 @@ class TestPulseToQ1ShotLoopFission:
 
         for sequence in _sequences_by_port(module).values():
             _, latch_enable, apply_latch = list(sequence.body.block.ops)[:3]
-            assert latch_enable.duration.data == readout_data.grid_time
-            assert apply_latch.duration.data == readout_data.grid_time
+            assert latch_enable.duration.data == readout_data.clock_period_ns
+            assert apply_latch.duration.data == readout_data.clock_period_ns
         for loop in _outlined_loops(module).values():
             wait_sync, _, apply_phase_reset = list(loop.body.block.ops)[:3]
-            assert wait_sync.duration.data == readout_data.grid_time
-            assert apply_phase_reset.duration.data == readout_data.grid_time
+            assert wait_sync.duration.data == readout_data.clock_period_ns
+            assert apply_phase_reset.duration.data == readout_data.clock_period_ns
 
     def test_fissioned_drive_loop_drops_the_acquisition_plumbing(self):
         """Verify that a partition with no acquisition keeps neither the results array nor

@@ -28,7 +28,6 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData, SequencerDescription
 from qat.experimental.conversion.pulse_to_q1.phase import PhaseLegalisation, PhaseLowering
 from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.waveform import (
@@ -73,19 +72,24 @@ from qat.experimental.dialect.q1_sequence.ir.attrs import (
     make_weight,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
-from qat.experimental.system_data.hardware.qblox.target import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox import QbloxTargetDescription
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    Q1SequencerSpec,
+    Q1SequencerType,
+)
 
 PhaseRewriteCallable = Callable[
     [
         PhaseSetOp | PhaseShiftOp,
         PatternRewriter,
-        QbloxTargetData,
+        QbloxTargetDescription,
         DebugInfoAttr | None,
     ],
     None,
 ]
 SquareWaveformRewriteCallable = Callable[
-    [PulseOp, PatternRewriter, QbloxTargetData, DebugInfoAttr | None],
+    [PulseOp, PatternRewriter, QbloxTargetDescription, DebugInfoAttr | None],
     None,
 ]
 
@@ -183,7 +187,7 @@ def _make_debug_info(op: IRDLOperation) -> DebugInfoAttr | None:
     return ProvenanceInfoAttr(source_op=op.name, port=port)
 
 
-def _sequencer_data(op: Operation, target_data: QbloxTargetData) -> SequencerDescription:
+def _sequencer_data(op: Operation, target_data: QbloxTargetDescription) -> Q1SequencerSpec:
     """Return target data for the physical sequencer enclosing ``op``.
 
     Hardware binding runs before Pulse-to-Q1 lowering, so each enclosing sequence must
@@ -197,12 +201,12 @@ def _sequencer_data(op: Operation, target_data: QbloxTargetData) -> SequencerDes
 
     sequence = find_enclosing_sequence(op)
     if sequence.module_config is None or sequence.seq_idx is None:
-        return target_data.CONTROL_SEQUENCER_DATA
+        return target_data.sequencer_spec(Q1SequencerType.control)
     if DEFAULT_QBLOX_TARGET.is_readout_sequencer(
         sequence.module_config.kind.data, sequence.seq_idx.data
     ):
-        return target_data.READOUT_SEQUENCER_DATA
-    return target_data.CONTROL_SEQUENCER_DATA
+        return target_data.sequencer_spec(Q1SequencerType.readout)
+    return target_data.sequencer_spec(Q1SequencerType.control)
 
 
 class RewriteWaitOp(RewritePattern):
@@ -219,7 +223,7 @@ class RewriteWaitOp(RewritePattern):
     untouched. Those are handled elsewhere and are out of scope for this lowering.
     """
 
-    def __init__(self, target_data: QbloxTargetData) -> None:
+    def __init__(self, target_data: QbloxTargetDescription) -> None:
         self.target_data = target_data
 
     @op_type_rewrite_pattern
@@ -229,8 +233,8 @@ class RewriteWaitOp(RewritePattern):
             return
 
         sequencer_data = _sequencer_data(op, self.target_data)
-        grid_time = sequencer_data.grid_time
-        max_wait_time = self.target_data.Q1ASM_DATA.max_wait_time
+        grid_time = sequencer_data.clock_period_ns
+        max_wait_time = self.target_data.q1asm.max_wait_time_ns
         max_aligned_wait_time = max_wait_time - max_wait_time % grid_time
         if max_aligned_wait_time < DurationImm._MIN:
             raise PassFailedException(
@@ -265,7 +269,7 @@ class RewriteSquareWaveformPulseOp(RewritePattern):
 
     def __init__(
         self,
-        target_data: QbloxTargetData,
+        target_data: QbloxTargetDescription,
         rewrite_callable: SquareWaveformRewriteCallable,
     ) -> None:
         self.target_data = target_data
@@ -289,7 +293,7 @@ class RewritePhaseSetOp(RewritePattern):
 
     def __init__(
         self,
-        target_data: QbloxTargetData,
+        target_data: QbloxTargetDescription,
         rewrite_callable: PhaseRewriteCallable,
     ) -> None:
         self.target_data = target_data
@@ -308,7 +312,7 @@ class RewritePhaseShiftOp(RewritePattern):
 
     def __init__(
         self,
-        target_data: QbloxTargetData,
+        target_data: QbloxTargetDescription,
         rewrite_callable: PhaseRewriteCallable,
     ) -> None:
         self.target_data = target_data
@@ -335,7 +339,7 @@ class RewritePulseOp(RewritePattern):
     re-comparing sample arrays.
     """
 
-    def __init__(self, target_data: QbloxTargetData) -> None:
+    def __init__(self, target_data: QbloxTargetDescription) -> None:
         """Initialise the pattern.
 
         :param target_data: Qblox target data used during lowering.
@@ -390,7 +394,7 @@ class RewritePulseOp(RewritePattern):
                 f"got {waveform_op.value.width.literal_value} ps "
                 f"({duration_ns} ns + {remainder_ps} ps)."
             )
-        min_duration = _sequencer_data(op, self.target_data).grid_time
+        min_duration = _sequencer_data(op, self.target_data).clock_period_ns
 
         # TODO(COMPILER-1389): Remove this validation in favour of a dedicated pulse-level
         # pass
@@ -400,7 +404,7 @@ class RewritePulseOp(RewritePattern):
             )
 
         # Fails if pulse is too long
-        max_duration = self.target_data.Q1ASM_DATA.max_wait_time
+        max_duration = self.target_data.q1asm.max_wait_time_ns
         if duration_ns > max_duration:
             raise PassFailedException(
                 f"Pulse duration {duration_ns} ns is above maximum {max_duration} ns."
@@ -425,7 +429,7 @@ class RewriteStartContinuousWaveformOp(RewritePattern):
     ``SetAwgOffsImmImmOp`` carrying the I and Q offsets scaled to the DAC range.
     """
 
-    def __init__(self, target_data: QbloxTargetData) -> None:
+    def __init__(self, target_data: QbloxTargetDescription) -> None:
         """Initialise the pattern.
 
         :param target_data: Qblox target data used during lowering.
@@ -453,7 +457,7 @@ class RewriteStartContinuousWaveformOp(RewritePattern):
             )
 
         amplitude = amplitude_op.value.literal_value
-        max_offset = self.target_data.Q1ASM_DATA.max_offset
+        max_offset = self.target_data.q1asm.max_offset
         q1_start = SetAwgOffsImmImmOp(
             SI16Imm(int(amplitude.real * max_offset)),
             SI16Imm(int(amplitude.imag * max_offset)),
@@ -470,7 +474,7 @@ class RewriteStopContinuousWaveformOp(RewritePattern):
     on both output paths, emitted as a ``SetAwgOffsImmImmOp`` with zero offsets.
     """
 
-    def __init__(self, target_data: QbloxTargetData) -> None:
+    def __init__(self, target_data: QbloxTargetDescription) -> None:
         """Initialise the pattern.
 
         :param target_data: Qblox target data used during lowering.
@@ -506,7 +510,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
     integer registers. A later register-allocation pass assigns concrete Q1 GPRs.
     """
 
-    def __init__(self, target_data: QbloxTargetData) -> None:
+    def __init__(self, target_data: QbloxTargetDescription) -> None:
         self.target_data = target_data
         self.square_weight_lengths: dict[SequenceOp, int] = {}
 
@@ -655,9 +659,9 @@ class RewritePreQ1AcquireOp(RewritePattern):
             samples or the resulting integration length is not hardware-aligned.
         """
 
-        readout_data = self.target_data.READOUT_SEQUENCER_DATA
-        sample_rate = int(readout_data.sample_rate)
-        if sample_rate != readout_data.sample_rate:
+        readout_data = self.target_data.sequencer_specs[Q1SequencerType.readout]
+        sample_rate = int(readout_data.sample_rate_hz)
+        if sample_rate != readout_data.sample_rate_hz:
             raise PassFailedException(
                 "Readout sequencer sample rate must be an integer number of samples/s."
             )
@@ -668,17 +672,17 @@ class RewritePreQ1AcquireOp(RewritePattern):
                 f"of samples at {sample_rate} samples/s."
             )
         if not (
-            readout_data.min_acq_integration_length
+            readout_data.readout.min_integration_length_samples
             <= sample_count
-            <= readout_data.max_acq_integration_length
+            <= readout_data.readout.max_integration_length_samples
         ):
             raise PassFailedException(
                 f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
                 f"{sample_rate} samples/s, outside the supported integration length "
-                f"range [{readout_data.min_acq_integration_length}, "
-                f"{readout_data.max_acq_integration_length}] samples."
+                f"range [{readout_data.readout.min_integration_length_samples}, "
+                f"{readout_data.readout.max_integration_length_samples}] samples."
             )
-        alignment = readout_data.grid_time
+        alignment = readout_data.clock_period_ns
         if sample_count % alignment:
             raise PassFailedException(
                 f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
@@ -728,7 +732,7 @@ class RewritePreQ1AcquireOp(RewritePattern):
 
 
 def create_pulse_to_q1_legalisation_patterns(
-    target_data: QbloxTargetData = TARGET_DATA,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> tuple[RewritePattern, ...]:
     """Create the rewrite set used by the legalisation stage.
 
@@ -763,7 +767,7 @@ def create_pulse_to_q1_legalisation_patterns(
 
 
 def create_pulse_to_q1_lowering_patterns(
-    target_data: QbloxTargetData = TARGET_DATA,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
 ) -> tuple[RewritePattern, ...]:
     """Create the rewrite set used by the lowering stage.
 

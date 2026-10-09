@@ -10,7 +10,6 @@ from pydantic import JsonValue
 from xdsl.dialects.builtin import ModuleOp
 
 from qat.backend.qblox.execution import DEFAULT_TIMEOUT_SECONDS, QbloxPackage, QbloxProgram
-from qat.backend.qblox.target_data import TARGET_DATA, QbloxTargetData
 from qat.experimental.backend.qblox.pre_emission_verification import (
     verify_qblox_pre_emission,
 )
@@ -24,6 +23,10 @@ from qat.experimental.dialect.q1 import (
     PlayRsRsImmOp,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
+from qat.experimental.system_data.hardware.qblox.target import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxTargetDescription,
+)
 from qat.experimental.system_data.hardware.qblox.view import QbloxHardwareView
 
 
@@ -80,7 +83,7 @@ def _resolve_static_table_index(sequence: SequenceOp, value) -> int:
 def emit_qblox_program(
     module: ModuleOp,
     hardware_view: QbloxHardwareView,
-    target_data: QbloxTargetData = TARGET_DATA,
+    target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET,
     metadata: dict[str, JsonValue] | None = None,
 ) -> QbloxProgram:
     """Emit the shared Qblox runtime program from configured Q1 sequence IR.
