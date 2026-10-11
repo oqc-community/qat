@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.frontend.importer.pulse.purr module &mdash; qat-compiler 3.0.0.post405.dev20261009134008 documentation</title>
+  <title>qat.experimental.frontend.importer.pulse.purr module &mdash; qat-compiler 3.0.0.post406.dev20261011131316 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -726,8 +726,17 @@ embedded within the shot loop. This kernel returns a results collection.</p></li
 through a <code class="docutils literal notranslate"><span class="pre">results.map</span></code> operation. The main function returns the results collection
 after post-processing has been applied.</p></li>
 </ol>
-<p>The importer does not currently support sweeps, or general device updates and
-parameterised operation operands.</p>
+<p>The importer does not currently support:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Sweep</span></code> and <code class="docutils literal notranslate"><span class="pre">EndSweep</span></code> instructions (control flow).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ResultsProcessing</span></code>, <code class="docutils literal notranslate"><span class="pre">Label</span></code>, <code class="docutils literal notranslate"><span class="pre">Jump</span></code>, and <code class="docutils literal notranslate"><span class="pre">EndRepeat</span></code> instructions
+(legacy control flow and post-processing).</p></li>
+<li><p>Parameterised device updates (those with <code class="docutils literal notranslate"><span class="pre">Variable</span></code> values); static frequency
+updates are supported.</p></li>
+<li><p>Parameterised operation operands.</p></li>
+</ul>
+</div></blockquote>
 <p>The importer starts by doing an analysis walk through the builder, understanding what
 results processing operations happen, and collecting unique pulse channels (frames).
 This allows us to structure the program in a way that does not necessarily map onto the
