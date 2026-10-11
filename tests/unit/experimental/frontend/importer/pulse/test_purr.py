@@ -4,6 +4,7 @@
 
 import numpy as np
 import pytest
+from compiler_config.config import InlineResultsProcessing
 from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp, TupleType
 from xdsl.interpreters.scf import scf
@@ -47,6 +48,7 @@ from qat.experimental.dialect.results.ir import (
 )
 from qat.experimental.frontend.importer.pulse.post_processing import PostProcessingFactory
 from qat.experimental.frontend.importer.pulse.purr import PurrImporter
+from qat.experimental.frontend.purr import PurrFrontend
 from qat.experimental.system_data.pulse.post_processing import (
     DiscriminateData,
     PostProcessingView,
@@ -63,6 +65,9 @@ from qat.purr.compiler.instructions import (
     DeviceUpdate,
     EndRepeat,
     EndSweep,
+    Instruction,
+    Jump,
+    Label,
     PhaseReset,
     PhaseSet,
     PhaseShift,
@@ -71,6 +76,7 @@ from qat.purr.compiler.instructions import (
     Pulse,
     QuantumInstruction,
     Repeat,
+    ResultsProcessing,
     Return,
     Sweep,
     Synchronize,
@@ -856,6 +862,51 @@ class TestPurrImporterAssign:
 
 
 class TestPurrImporterUnsupportedInstructions:
+    def test_unknown_non_quantum_instruction_raises(self, builder):
+        class UnknownInstruction(Instruction):
+            pass
+
+        builder.add(UnknownInstruction())
+        expected_message = (
+            r"UnknownInstruction.*at builder\.instructions\[\d+\] "
+            r"is not a supported instruction\."
+        )
+
+        with pytest.raises(ValueError, match=expected_message):
+            PurrImporter().build(builder)
+
+        with pytest.raises(ValueError, match=expected_message):
+            PurrFrontend(run_purr_pipeline=False).emit(builder)
+
+    @pytest.mark.parametrize(
+        ("instruction", "instruction_type"),
+        [
+            (
+                ResultsProcessing("measurement", InlineResultsProcessing.Binary),
+                "ResultsProcessing",
+            ),
+            (Label("loop_start"), "Label"),
+            (Jump("loop_start"), "Jump"),
+            (EndRepeat(), "EndRepeat"),
+            (EndSweep(), "EndSweep"),
+        ],
+    )
+    def test_unsupported_instructions_raise(self, builder, instruction, instruction_type):
+        builder.add(instruction)
+        # Match instruction type and rejection reason, but not the array index,
+        # to avoid coupling this test to internal implementation details like
+        # instruction order in analysis.
+        expected_message = (
+            rf"{instruction_type}.*at builder\.instructions\[\d+\] "
+            r"is not a supported instruction\."
+        )
+
+        with pytest.raises(ValueError, match=expected_message):
+            PurrImporter().build(builder)
+
+        with pytest.raises(ValueError, match=expected_message):
+            PurrFrontend(run_purr_pipeline=False).emit(builder)
+
     @pytest.mark.parametrize(
         "type_", [PostProcessType.MEAN, PostProcessType.DOWN_CONVERT, PostProcessType.MUL]
     )
@@ -1249,7 +1300,6 @@ class TestPurrImporterRepeat:
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(Repeat(100))
         builder.add(PhaseShift(ch, 0.1))
-        builder.add(EndRepeat())
         imp = PurrImporter()
         module = imp.build(builder)
         for_ops = [op for op in _ops(module) if isinstance(op, scf.ForOp)]
@@ -1261,8 +1311,6 @@ class TestPurrImporterRepeat:
     def test_multiple_repeats_raises_value_error(self, builder):
         builder.add(Repeat(10))
         builder.add(Repeat(20))
-        builder.add(EndRepeat())
-        builder.add(EndRepeat())
         imp = PurrImporter()
         with pytest.raises(
             ValueError, match="Multiple repeat instructions are not supported."
@@ -1324,11 +1372,11 @@ class TestPurrImporterModuleStructure:
 
     def test_quantum_ops_are_nested_in_kernel_loop(self, builder, hw):
         """Checks that repeated quantum ops are emitted in the kernel loop, not in main."""
-
+        # Note: EndRepeat is not added because it is now unsupported and would cause
+        # the importer to reject the builder. Modern PuRR does not emit it.
         ch = hw.get_qubit(0).get_drive_channel()
         builder.add(Repeat(5))
         builder.add(PhaseShift(ch, 0.1))
-        builder.add(EndRepeat())
 
         imp = PurrImporter()
         module = imp.build(builder)

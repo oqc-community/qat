@@ -51,7 +51,10 @@ from qat.purr.compiler.instructions import (
     CustomPulse,
     Delay,
     DeviceUpdate,
+    EndRepeat,
     EndSweep,
+    Jump,
+    Label,
     PhaseReset,
     PhaseSet,
     PhaseShift,
@@ -60,6 +63,7 @@ from qat.purr.compiler.instructions import (
     Pulse,
     QuantumInstruction,
     Repeat,
+    ResultsProcessing,
     Return,
     Sweep,
     Synchronize,
@@ -119,7 +123,12 @@ class _PurrAnalysis:
 
         analysis = cls()
 
-        for instruction in builder.instructions:
+        # Instructions that are explicitly unsupported and rejected at analysis time.
+        # These include legacy control flow (Label, Jump, EndRepeat) and results
+        # processing (ResultsProcessing), as well as EndSweep from sweep blocks.
+        unsupported_instructions = (ResultsProcessing, Label, Jump, EndRepeat, EndSweep)
+
+        for index, instruction in enumerate(builder.instructions):
             if isinstance(instruction, Repeat):
                 if analysis.repeat is not None:
                     raise ValueError("Multiple repeat instructions are not supported.")
@@ -135,8 +144,6 @@ class _PurrAnalysis:
             if isinstance(instruction, Sweep):
                 analysis.sweeps.append(instruction)
                 continue
-            if isinstance(instruction, EndSweep):
-                raise ValueError("EndSweep is not a supported instruction.")
             if isinstance(instruction, Assign):
                 analysis.assigns.append(instruction)
                 continue
@@ -145,6 +152,11 @@ class _PurrAnalysis:
             if isinstance(instruction, DeviceUpdate):
                 analysis.device_updates.append(instruction)
                 continue
+            if isinstance(instruction, unsupported_instructions):
+                raise ValueError(
+                    f"{type(instruction).__name__} at builder.instructions[{index}] "
+                    "is not a supported instruction."
+                )
             if isinstance(instruction, Acquire):
                 key = instruction.output_variable
                 analysis.acquisition_types[key] = instruction.mode
@@ -152,6 +164,11 @@ class _PurrAnalysis:
                 for target in instruction.quantum_targets:
                     analysis.pulse_channels.add(target)
                 analysis.quantum_instructions.append(instruction)
+                continue
+            raise ValueError(
+                f"{type(instruction).__name__} at builder.instructions[{index}] "
+                "is not a supported instruction."
+            )
 
         return analysis
 
@@ -199,8 +216,14 @@ class PurrImporter:
        through a ``results.map`` operation. The main function returns the results collection
        after post-processing has been applied.
 
-    The importer does not currently support sweeps, or general device updates and
-    parameterised operation operands.
+    The importer does not currently support:
+
+      * ``Sweep`` and ``EndSweep`` instructions (control flow).
+      * ``ResultsProcessing``, ``Label``, ``Jump``, and ``EndRepeat`` instructions
+        (legacy control flow and post-processing).
+      * Parameterised device updates (those with ``Variable`` values); static frequency
+        updates are supported.
+      * Parameterised operation operands.
 
     The importer starts by doing an analysis walk through the builder, understanding what
     results processing operations happen, and collecting unique pulse channels (frames).
