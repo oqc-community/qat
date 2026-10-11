@@ -52,6 +52,7 @@ from qat.experimental.dialect.pulse.utils import (
 from qat.experimental.dialect.q1.transforms.reg_alloc import (
     LinearScanRegisterAllocationPass,
 )
+from qat.experimental.dialect.q1.transforms.verify_allocation import VerifyQ1AllocationPass
 from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_scf.transforms.lower_scf import LowerScfToQ1ScfPass
 from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
@@ -549,8 +550,11 @@ def create_qblox_configured_q1_pipeline(
             LowerScfToQ1ScfPass(),
             ReconcileUnrealizedCastsPass(),
             LinearScanRegisterAllocationPass(),
+            VerifyQ1AllocationPass(),
             LowerQ1ScfToQ1CfPass(),
+            VerifyQ1AllocationPass(),
             LineariseQ1CfToQ1Pass(),
+            VerifyQ1AllocationPass(),
             QbloxPreEmissionVerificationPass(target_data=target_data),
         )
     )

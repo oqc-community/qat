@@ -241,8 +241,11 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
         "lower-scf-to-q1-scf",
         "reconcile-unrealized-casts",
         "q1-lin-scan-reg-alloc",
+        "q1-verify-allocation",
         "lower-q1-scf-to-q1-cf",
+        "q1-verify-allocation",
         "linearise-q1-cf-to-q1",
+        "q1-verify-allocation",
         "qblox-pre-emission-verification",
     ]
 
