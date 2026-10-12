@@ -19,6 +19,7 @@ from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import BoolAttr, FloatAttr, StringAttr, f64, i1
 from xdsl.ir import SSAValue
 from xdsl.irdl import IRDLOperation, irdl_op_definition, operand_def, result_def
+from xdsl.transforms.common_subexpression_elimination import CommonSubexpressionElimination
 from xdsl.utils.exceptions import PassFailedException
 
 from qat.experimental.dialect.pulse.ir import (
@@ -887,3 +888,78 @@ class TestConstantFoldedOperands:
         assert len(get_operations_with_type(module, GaussianWaveformOp)) == 1
         assert len(get_operations_with_type(module, AddOp)) == 1
         assert _get_sampled_constants(module) == []
+
+
+class TestCommonSubExpressionElimination:
+    """Tests that the pass eliminates duplicate waveform ops that are equivalent."""
+
+    @pytest.mark.parametrize("spec", _WAVEFORM_SPECS, ids=_spec_id)
+    def test_equivalent_waveform_ops_are_eliminated(self, spec):
+        module, waveform = _build_module_with_pulse(spec)
+        duplicate = waveform.clone()
+
+        pulse = get_operations_with_type(module, PulseOp)[0]
+        block = waveform.parent
+        block.add_op(duplicate)
+        duplicate_pulse = PulseOp(pulse.frame, duplicate)
+        block.add_op(duplicate_pulse)
+
+        assert len(get_operations_with_type(module, spec.op_cls)) == 2
+
+        CommonSubexpressionElimination().apply(_CONTEXT, module)
+
+        assert len(get_operations_with_type(module, spec.op_cls)) == 1
+        assert pulse.waveform is duplicate_pulse.waveform
+
+    def test_waveforms_with_different_properties_are_not_eliminated(self):
+        module, waveform = _build_module_with_pulse(_GAUSSIAN_SPEC)
+        duplicate = waveform.clone()
+        duplicate.properties["regularize"] = BoolAttr(
+            not bool(waveform.regularize.value.data), i1
+        )
+
+        pulse = get_operations_with_type(module, PulseOp)[0]
+        block = waveform.parent
+        assert block is not None
+        block.add_op(duplicate)
+        duplicate_pulse = PulseOp(pulse.frame, duplicate)
+        block.add_op(duplicate_pulse)
+
+        CommonSubexpressionElimination().apply(_CONTEXT, module)
+
+        assert len(get_operations_with_type(module, GaussianWaveformOp)) == 2
+        assert pulse.waveform is waveform.result
+        assert duplicate_pulse.waveform is duplicate.result
+
+    @pytest.mark.parametrize("spec", _WAVEFORM_SPECS, ids=_spec_id)
+    def test_duplicates_share_one_sampled_waveform_after_evaluation(self, spec):
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: 1_000},
+            native_waveform_shapes=(),
+        )
+
+        reference_module, _ = _build_module_with_pulse(spec)
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(
+            _CONTEXT, reference_module
+        )
+        [reference_constant] = _get_sampled_constants(reference_module)
+
+        module, waveform = _build_module_with_pulse(spec)
+        pulse = get_operations_with_type(module, PulseOp)[0]
+        duplicate = waveform.clone()
+        duplicate_pulse = PulseOp(pulse.frame, duplicate)
+        block = waveform.parent
+        block.add_op(duplicate)
+        block.add_op(duplicate_pulse)
+        assert len(get_operations_with_type(module, spec.op_cls)) == 2
+
+        CommonSubexpressionElimination().apply(_CONTEXT, module)
+        EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert get_operations_with_type(module, spec.op_cls) == []
+        [sampled_constant] = _get_sampled_constants(module)
+        assert pulse.waveform is sampled_constant.result
+        assert duplicate_pulse.waveform is sampled_constant.result
+        assert_array_equal(
+            sampled_constant.value.samples.data, reference_constant.value.samples.data
+        )

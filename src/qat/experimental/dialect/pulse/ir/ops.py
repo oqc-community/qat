@@ -537,6 +537,7 @@ class SquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.square_waveform"
     WAVEFORM_NAME: ClassVar[str] = "square"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -595,6 +596,7 @@ class SoftSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.soft_square_waveform"
     WAVEFORM_NAME: ClassVar[str] = "soft_square"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -684,6 +686,7 @@ class GaussianSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.gaussian_square_waveform"
     WAVEFORM_NAME: ClassVar[str] = "gaussian_square"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -765,6 +768,7 @@ class GaussianWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.gaussian_waveform"
     WAVEFORM_NAME: ClassVar[str] = "gaussian"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -831,6 +835,7 @@ class BlackmanWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.blackman_waveform"
     WAVEFORM_NAME: ClassVar[str] = "blackman"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -886,6 +891,7 @@ class SetupHoldWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.setup_hold_waveform"
     WAVEFORM_NAME: ClassVar[str] = "setup_hold"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -960,6 +966,7 @@ class RoundedSquareWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.rounded_square_waveform"
     WAVEFORM_NAME: ClassVar[str] = "rounded_square"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1035,6 +1042,7 @@ class SinusoidalWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.sinusoidal_waveform"
     WAVEFORM_NAME: ClassVar[str] = "sinusoidal"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)
@@ -1113,6 +1121,7 @@ class SechWaveformOp(IRDLOperation, IsAnalyticalWaveformInterface):
 
     name = "pulse.sech_waveform"
     WAVEFORM_NAME: ClassVar[str] = "sech"
+    traits = traits_def(Pure())
 
     width = operand_def(TimeType)
     amplitude = operand_def(AmplitudeType)

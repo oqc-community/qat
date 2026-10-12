@@ -4,11 +4,25 @@
 
 from __future__ import annotations
 
+from numpy.testing import assert_array_equal
+from xdsl.context import Context
+from xdsl.dialects.arith import ConstantOp as ArithConstantOp
+from xdsl.dialects.builtin import BoolAttr, FloatAttr, StringAttr, f64, i1
 from xdsl.passes import PassPipeline
+from xdsl.transforms.common_subexpression_elimination import CommonSubexpressionElimination
 
 from qat.experimental.conversion.pulse.lower_kernels_to_arrays import (
     LowerKernelsToResultsArrays,
 )
+from qat.experimental.dialect.pulse.ir import (
+    AmplitudeAttr,
+    ConstantOp,
+    CreateFrameOp,
+    FrequencyAttr,
+    TimeAttr,
+)
+from qat.experimental.dialect.pulse.ir.attributes import SampledWaveformAttr
+from qat.experimental.dialect.pulse.ir.ops import GaussianWaveformOp, PulseOp
 from qat.experimental.dialect.pulse.transforms.constants import OrderedCanonicalizePass
 from qat.experimental.dialect.pulse.transforms.dead_frame_elimination import (
     DeadFrameEliminationPass,
@@ -32,6 +46,9 @@ from qat.experimental.system_data.pulse.constraints import (
     PortConstraints,
     PulseLevelConstraints,
 )
+from qat.experimental.waveforms.evaluate import evaluate_waveform
+
+from tests.unit.utils.ir import build_module_from_ops, get_operations_with_type
 
 
 def _constraints() -> PulseLevelConstraints:
@@ -101,6 +118,7 @@ def test_pipeline_manager_produces_correct_pass_order():
     assert [type(p) for p in pipeline.passes] == [
         OrderedCanonicalizePass,
         ApplyGranularitySanitisation,
+        CommonSubexpressionElimination,
         EvaluateWaveformsAsSamples,
         TimelineNormalization,
         DeadFrameEliminationPass,
@@ -144,6 +162,7 @@ def test_pipeline_manager_from_canonical_data_builds_valid_pipeline():
     assert [type(p) for p in pipeline.passes] == [
         OrderedCanonicalizePass,
         ApplyGranularitySanitisation,
+        CommonSubexpressionElimination,
         EvaluateWaveformsAsSamples,
         TimelineNormalization,
         DeadFrameEliminationPass,
@@ -162,7 +181,7 @@ def test_pipeline_manager_reuses_canonicalize_as_cleanup():
         for index, p in enumerate(pipeline.passes)
         if isinstance(p, OrderedCanonicalizePass)
     ]
-    assert canonicalize_positions == [0, 7]
+    assert canonicalize_positions == [0, 8]
 
 
 def test_pipeline_manager_lowers_kernels_before_final_cleanup():
@@ -177,3 +196,61 @@ def test_pipeline_manager_lowers_kernels_before_final_cleanup():
     assert pass_types[lowering_index - 1] is ApplySquashContiguousOptimizations
     assert pass_types[lowering_index + 1] is OrderedCanonicalizePass
     assert lowering_index == len(pass_types) - 2
+
+
+def test_default_pipeline_samples_identical_waveforms_once_per_sample_time():
+    """Identical waveforms on ports with different sample times are merged, then sampled
+    once per sample time, so each pulse gets the samples for its own port."""
+    sample_times = {"channel_1": 1_000, "channel_2": 2_000}
+    constraints = PulseLevelConstraints(
+        ports={
+            port: PortConstraints(
+                sample_time_ps=sample_time,
+                min_duration_ps=0,
+                max_duration_ps=None,
+                acquire_allowed=True,
+            )
+            for port, sample_time in sample_times.items()
+        },
+        granularity_ps=8000,
+        native_waveform_shapes=(),
+    )
+
+    width, amplitude, breadth = 80_000, 0.5, 0.47
+    operands = (
+        ConstantOp(TimeAttr(width)),
+        ConstantOp(AmplitudeAttr(amplitude)),
+        ArithConstantOp(FloatAttr(breadth, 64), f64),
+    )
+    ops = list(operands)
+    pulses = {}
+    waveforms = []
+    for port in sample_times:
+        frame = CreateFrameOp(ConstantOp(FrequencyAttr(5e9)), StringAttr(port))
+        waveform = GaussianWaveformOp(*operands, BoolAttr(False, i1))
+        waveforms.append(waveform)
+        pulses[port] = PulseOp(frame, waveform)
+        ops.extend([frame.frequency.owner, frame, waveform, pulses[port]])
+    module = build_module_from_ops(ops)
+    assert len(get_operations_with_type(module, GaussianWaveformOp)) == 2
+
+    PulsePipelineManager(constraints).build_default_pipeline().apply(Context(), module)
+
+    sampled = [
+        op
+        for op in get_operations_with_type(module, ConstantOp)
+        if isinstance(op.value, SampledWaveformAttr)
+    ]
+    assert get_operations_with_type(module, GaussianWaveformOp) == []
+    assert sorted(op.value.sample_time.literal_value for op in sampled) == [1_000, 2_000]
+
+    shape = waveforms[0].build_shape()
+    for port, sample_time in sample_times.items():
+        attr = pulses[port].waveform.owner.value
+        assert attr.sample_time.literal_value == sample_time
+        assert_array_equal(
+            attr.samples.data,
+            evaluate_waveform(
+                width=width, sample_time=sample_time, shape=shape, amplitude=amplitude
+            ),
+        )

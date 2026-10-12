@@ -16,6 +16,9 @@ The default pipeline runs the following passes, in order:
 1. :class:`.ApplyGranularitySanitisation`
    — round constant durations and sampled-waveform widths up to the hardware timing
    granularity, so later passes only see realisable times.
+1. :class:`~xdsl.transforms.common_subexpression_elimination.CommonSubexpressionElimination`
+   — merge duplicate pure operations, including analytical waveform ops, so that later
+   passes only see one producer for each unique waveform.
 1. :class:`.EvaluateWaveformsAsSamples`
    — convert analytical waveform ops into sampled
    :class:`~qat.experimental.dialect.pulse.ir.ops.ConstantOp` payloads, using the
@@ -43,6 +46,8 @@ time.
 """
 
 from __future__ import annotations
+
+from xdsl.transforms.common_subexpression_elimination import CommonSubexpressionElimination
 
 from qat.experimental.conversion.pulse.lower_kernels_to_arrays import (
     LowerKernelsToResultsArrays,
@@ -101,6 +106,10 @@ class PulsePipelineManager:
             (
                 OrderedCanonicalizePass(),
                 ApplyGranularitySanitisation(constraints=self.constraints),
+                # CSE is order-independent, but merges analytical waveforms only before
+                # they are sampled, and finds more duplicates once operands are folded
+                # and rounded.
+                CommonSubexpressionElimination(),
                 EvaluateWaveformsAsSamples(constraints=self.constraints),
                 TimelineNormalization(),
                 DeadFrameEliminationPass(),
