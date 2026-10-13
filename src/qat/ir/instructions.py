@@ -14,10 +14,12 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Field,
+    ValidatorFunctionWrapHandler,
     computed_field,
     field_serializer,
     field_validator,
 )
+from pydantic_core import PydanticCustomError
 from typing_extensions import TypeAliasType
 
 from qat.purr.compiler.instructions import (
@@ -193,6 +195,26 @@ class ResultsProcessing(Instruction):
 
     variable: str
     results_processing: InlineResultsProcessing = InlineResultsProcessing.Raw
+
+    @field_validator("results_processing", mode="wrap")
+    @classmethod
+    def _invalid_option_as_validation_error(
+        cls, value: Any, handler: ValidatorFunctionWrapHandler
+    ):
+        # On Python 3.10, ``Flag._missing_`` raises ``TypeError`` for non-integer input
+        # rather than ``ValueError``, which newer pydantic-core does not convert into a
+        # ``ValidationError``.
+        try:
+            return handler(value)
+        except TypeError:
+            options = [
+                str(option.value) for option in InlineResultsProcessing.__members__.values()
+            ]
+            raise PydanticCustomError(
+                "enum",
+                "Input should be {expected}",
+                {"expected": ", ".join(options[:-1]) + " or " + options[-1]},
+            ) from None
 
     @classmethod
     def _from_legacy(cls, legacy_rp):
