@@ -143,7 +143,7 @@ class QbloxContext:
         self._acq_index: int = 0
         self._wgt_index: int = 0
 
-        self._durations: list[float | str] = []
+        self._accumulated_duration: float | None = 0
         self._frequency: float = 0.0  # Tracks frequency shifts on the target
         self._phases: list[float | str] = []
         self._timeline: np.ndarray = np.empty(0, dtype=complex)
@@ -172,13 +172,13 @@ class QbloxContext:
         self.sequence_builder.stop()
 
     @property
-    def durations(self):
-        return self._durations
+    def has_static_duration(self) -> bool:
+        return self._accumulated_duration is not None
 
     @property
     def duration(self):
-        if all(isinstance(d, Number) for d in self._durations):
-            return sum(self._durations)
+        if self._accumulated_duration is not None:
+            return self._accumulated_duration
 
         raise ValueError("Cannot determine duration statically in dynamic settings")
 
@@ -368,11 +368,12 @@ class QbloxContext:
                 total_phase = sum(self._phases)
                 pulse = pulse * np.exp(1.0j * total_phase)
             assert pulse.size == duration
-            self._durations.append(duration)
+            if self._accumulated_duration is not None:
+                self._accumulated_duration += duration
             if self._timeline is not None:
                 self._timeline = np.append(self._timeline, pulse)
         elif isinstance(duration, str):
-            self._durations.append(duration)
+            self._accumulated_duration = None
             self._timeline = None  # Destroy the timeline as we are in dynamic setting
         else:
             raise ValueError(f"Expected legal immediate or register, but got {duration}")
@@ -858,20 +859,23 @@ class QbloxContext:
         """
 
         is_static = all(
-            all(isinstance(d, Number) for d in contexts[target].durations)
-            for target in inst.quantum_targets
+            contexts[target].has_static_duration for target in inst.quantum_targets
+        )
+
+        max_duration = (
+            max((contexts[target].duration for target in inst.quantum_targets), default=0)
+            if is_static
+            else None
         )
 
         for target in inst.quantum_targets:
             cxt = contexts[target]
             if is_static:
-                duration_offset = (
-                    max(contexts[target].duration for target in inst.quantum_targets)
-                    - cxt.duration
-                )
+                duration_offset = max_duration - cxt.duration
                 cxt.wait_imm(duration_offset)
                 cxt.ledger(duration_offset)
             else:
+                cxt._accumulated_duration = None
                 cxt.sequence_builder.wait_sync(
                     cxt.target_data.CONTROL_SEQUENCER_DATA.grid_time
                 )

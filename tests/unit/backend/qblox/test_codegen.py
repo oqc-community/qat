@@ -11,10 +11,11 @@ from matplotlib import pyplot as plt
 from more_itertools import partition
 
 from qat import qatconfig
-from qat.backend.passes.purr.analysis import TILegalisationPass
+from qat.backend.passes.purr.analysis import ReadWriteResult, TILegalisationPass
 from qat.backend.qblox.codegen import (
     QbloxBackend1,
     QbloxBackend2,
+    QbloxContext,
     _check_shared_lo_conflicts,
     _get_lo_lanes,
 )
@@ -25,6 +26,7 @@ from qat.backend.qblox.config.specification import (
     SequencerConfig,
 )
 from qat.backend.qblox.execution import QbloxPackage
+from qat.backend.qblox.ir import Opcode
 from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
 from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA, Q1ASM_DATA, TARGET_DATA
 from qat.backend.qblox.visualisation import plot_program
@@ -46,6 +48,7 @@ from qat.purr.compiler.instructions import (
     Repeat,
     Sweep,
     SweepValue,
+    Synchronize,
     Variable,
     calculate_duration,
 )
@@ -72,6 +75,105 @@ log = get_default_logger()
 @pytest.fixture()
 def copied_qblox_model(qblox_model):
     return copy.deepcopy(qblox_model)
+
+
+class TestQbloxContext:
+    """Tests properties of the QBloxContext, used by the two backends."""
+
+    def test_duration_tracking_is_static_until_a_register_is_seen(self):
+        context = QbloxContext(ReadWriteResult(), {})
+
+        assert context.has_static_duration
+        assert context.duration == 0
+
+        context.ledger(40)
+        context.ledger(60)
+
+        assert context.has_static_duration
+        assert context.duration == 100
+
+        context.ledger("iter")
+
+        assert not context.has_static_duration
+        with pytest.raises(
+            ValueError,
+            match="Cannot determine duration statically in dynamic settings",
+        ):
+            _ = context.duration
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_synchronize_uses_static_wait_when_all_contexts_are_static(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        measure_channel = qblox_model.get_qubit(1).get_measure_channel()
+        contexts = {
+            drive_channel: QbloxContext(ReadWriteResult(), {}),
+            measure_channel: QbloxContext(ReadWriteResult(), {}),
+        }
+        contexts[drive_channel].ledger(20)
+        contexts[measure_channel].ledger(40)
+
+        assert contexts[drive_channel].has_static_duration
+        assert contexts[measure_channel].has_static_duration
+        assert contexts[drive_channel].duration == 20
+        assert contexts[measure_channel].duration == 40
+
+        QbloxContext.synchronize(Synchronize([drive_channel, measure_channel]), contexts)
+
+        assert contexts[drive_channel].has_static_duration
+        assert contexts[measure_channel].has_static_duration
+        assert contexts[drive_channel].duration == 40
+        assert contexts[measure_channel].duration == 40
+        assert (
+            contexts[drive_channel].sequence_builder.q1asm_instructions[-1].opcode
+            == Opcode.WAIT
+        )
+        assert contexts[drive_channel].sequence_builder.build().program == "wait 20"
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_synchronize_uses_wait_sync_when_any_context_is_dynamic(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        measure_channel = qblox_model.get_qubit(1).get_measure_channel()
+        contexts = {
+            drive_channel: QbloxContext(ReadWriteResult(), {}),
+            measure_channel: QbloxContext(ReadWriteResult(), {}),
+        }
+        contexts[drive_channel].ledger(40)
+        contexts[measure_channel].ledger("iter")
+
+        assert contexts[drive_channel].has_static_duration
+        assert not contexts[measure_channel].has_static_duration
+        assert contexts[drive_channel].duration == 40
+        with pytest.raises(ValueError, match="Cannot determine duration statically"):
+            _ = contexts[measure_channel].duration
+
+        QbloxContext.synchronize(Synchronize([drive_channel, measure_channel]), contexts)
+
+        assert not contexts[drive_channel].has_static_duration
+        assert not contexts[measure_channel].has_static_duration
+        with pytest.raises(ValueError, match="Cannot determine duration statically"):
+            _ = contexts[drive_channel].duration
+        with pytest.raises(ValueError, match="Cannot determine duration statically"):
+            _ = contexts[measure_channel].duration
+        assert (
+            contexts[drive_channel].sequence_builder.q1asm_instructions[-1].opcode
+            == Opcode.WAIT_SYNC
+        )
+        assert (
+            contexts[measure_channel].sequence_builder.q1asm_instructions[-1].opcode
+            == Opcode.WAIT_SYNC
+        )
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_synchronize_with_no_targets_does_nothing(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        contexts = {drive_channel: QbloxContext(ReadWriteResult(), {})}
+        contexts[drive_channel].ledger(20)
+
+        QbloxContext.synchronize(Synchronize([]), contexts)
+
+        assert contexts[drive_channel].has_static_duration
+        assert contexts[drive_channel].duration == 20
+        assert contexts[drive_channel].sequence_builder.q1asm_instructions == []
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
