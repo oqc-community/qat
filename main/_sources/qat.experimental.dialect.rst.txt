@@ -13,6 +13,7 @@ Subpackages
    :maxdepth: 4
 
    qat.experimental.dialect.common
+   qat.experimental.dialect.gate
    qat.experimental.dialect.pulse
    qat.experimental.dialect.q1
    qat.experimental.dialect.q1_cf
