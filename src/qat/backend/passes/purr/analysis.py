@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import itertools
 from collections import defaultdict
 from copy import deepcopy
@@ -598,10 +598,14 @@ class CFGPass(AnalysisPass):
         stabilised in the codebase
         """
 
+        # The legacy builder flattens nested instruction blocks on each property access, so
+        # cache the assembled list once per recursive call before walking it repeatedly.
+        instructions = builder.instructions
+
         flow = [(e.src.head(), e.dest.head()) for e in cfg.edges]
         headers = sorted([n.head() for n in cfg.nodes]) or [
             i
-            for i, inst in enumerate(builder.instructions)
+            for i, inst in enumerate(instructions)
             if isinstance(inst, Sweep | Repeat | EndSweep | EndRepeat)
         ]
         if headers[0] != 0:
@@ -610,7 +614,7 @@ class CFGPass(AnalysisPass):
         next_flow = set(flow)
         next_headers = set(headers)
         for i, h in enumerate(headers):
-            inst_at_h = builder.instructions[h]
+            inst_at_h = instructions[h]
             src = cfg.get_or_create_node(h)
             if isinstance(inst_at_h, Repeat):
                 next_headers.add(h + 1)
@@ -623,16 +627,14 @@ class CFGPass(AnalysisPass):
                 dest = cfg.get_or_create_node(h + 1)
                 cfg.get_or_create_edge(src, dest)
             elif isinstance(inst_at_h, EndSweep | EndRepeat):
-                if h < len(builder.instructions) - 1:
+                if h < len(instructions) - 1:
                     next_headers.add(h + 1)
                     next_flow.add((h, h + 1))
                     dest = cfg.get_or_create_node(h + 1)
                     cfg.get_or_create_edge(src, dest)
                 delimiter_type = Sweep if isinstance(inst_at_h, EndSweep) else Repeat
                 p = next(
-                    p
-                    for p in headers[i::-1]
-                    if isinstance(builder.instructions[p], delimiter_type)
+                    p for p in headers[i::-1] if isinstance(instructions[p], delimiter_type)
                 )
                 next_headers.add(p)
                 next_flow.add((h, p))
@@ -642,7 +644,7 @@ class CFGPass(AnalysisPass):
                 k = next(
                     (
                         s
-                        for s, inst in enumerate(builder.instructions[h + 1 :])
+                        for s, inst in enumerate(instructions[h + 1 :])
                         if isinstance(inst, Sweep | Repeat | EndSweep | EndRepeat)
                     ),
                     None,
@@ -657,7 +659,7 @@ class CFGPass(AnalysisPass):
         if next_headers == set(headers) and next_flow == set(flow):
             # TODO - In-place use instructions instead of indices directly
             for n in cfg.nodes:
-                n.elements = [builder.instructions[i] for i in n.elements]
+                n.elements = [instructions[i] for i in n.elements]
             return
 
         self._build_cfg(builder, cfg)
