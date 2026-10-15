@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post413.dev20261015032841 documentation</title>
+  <title>qat.experimental.conversion.pulse_to_q1.hardware_binding module &mdash; qat-compiler 3.0.0.post414.dev20261015110422 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -720,8 +720,8 @@
 <p>This pass assigns each outlined sequence to a Qblox sequencer based on its frame’s
 port and carrier frequency. A sequence’s frame nominally identifies a canonical channel;
 when a port exposes multiple channels at the same frequency (ambiguous case), the pass
-selects one deterministically: preferring an explicit sequence channel_id match, then
-defaulting to the first available candidate.</p>
+selects one deterministically: preferring a channel matching the frame’s raw label, then
+one matching the sequence channel_id, then defaulting to the first available candidate.</p>
 <p>Once selected, each sequence is resolved to a sequencer binding via the allocation
 strategy. When multiple sequencers can satisfy a candidate, a tie-breaker applies:
 the sequencer with minimum (instrument_id, slot, sequencer_index) is chosen to ensure
