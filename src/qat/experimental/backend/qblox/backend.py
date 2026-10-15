@@ -28,6 +28,7 @@ from qat.experimental.system_data.hardware.qblox import (
     QbloxHardwareView,
     QbloxTargetDescription,
 )
+from qat.ir.measure import Discriminate, PostSelect
 
 
 class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
@@ -67,7 +68,10 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
         :param compiler_config: Compiler settings accepted for pipeline compatibility. The
             effective shot count has already been materialised in ``ir`` by the frontend.
         :param metadata: Optional runtime metadata copied into the emitted program.
+        :param kwargs: Extra backend arguments accepted for pipeline compatibility.
         :returns: Executable containing the emitted Qblox program.
+        :raises PassFailedException: If a post-selection predicate has no matching
+            acquisition or preceding discrimination step.
         """
 
         res_mgr = ResultManager() if res_mgr is None else res_mgr
@@ -75,15 +79,47 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
         post_processing = extract_post_processing_instructions(ir, (shots,))
         res_mgr.add(post_processing)
 
+        acquires = {
+            output_variable: acquire.model_copy(deep=True)
+            for output_variable, acquire in post_processing.acquire_data.items()
+        }
+        post_selects_by_output: dict[str, PostSelect] = {}
+        for post_select in post_processing.post_selects:
+            output_variable = post_select.output_variable
+            acquire = acquires.get(output_variable)
+            if acquire is None:
+                raise PassFailedException(
+                    f"Post-selection output '{output_variable}' has no matching "
+                    "acquisition."
+                )
+            if not any(
+                isinstance(instruction, Discriminate)
+                for instruction in acquire.post_processing
+            ):
+                raise PassFailedException(
+                    f"Post-selection output '{output_variable}' has no preceding "
+                    "Discriminate."
+                )
+            if output_variable in post_selects_by_output:
+                post_selects_by_output[output_variable].additional_disallowed.update(
+                    post_select.additional_disallowed
+                )
+            else:
+                post_selects_by_output[output_variable] = post_select.model_copy(deep=True)
+
+        for output_variable, post_select in post_selects_by_output.items():
+            acquires[output_variable].post_processing.append(post_select)
+
         create_qblox_configured_q1_pipeline(self.model, self.target_data).apply(
             Context(), ir
         )
         program = emit_qblox_program(
             ir, self.hardware_view, self.target_data, metadata=metadata
         )
+
         return Executable[QbloxProgram](
             programs=[program],
-            acquires=post_processing.acquire_data,
+            acquires=acquires,
             assigns=post_processing.assigns,
             returns=post_processing.returns,
             shots=shots,

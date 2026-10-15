@@ -34,7 +34,7 @@ from qat.experimental.system_data.hardware.qblox import (
     DEFAULT_QBLOX_TARGET,
     QbloxHardwareView,
 )
-from qat.ir.measure import AcquireMode, PostSelect
+from qat.ir.measure import AcquireMode, Discriminate, PostSelect
 from qat.pipelines.pipeline import CompilePipeline
 
 pytest_plugins = ("tests.unit.experimental.utils.canonical",)
@@ -203,6 +203,9 @@ class TestExperimentalQbloxCompilePipeline:
             mode=AcquireMode.INTEGRATOR,
             shape=(7,),
             physical_channel="",
+            post_processing=[
+                Discriminate(output_variable="readout", threshold=0.0),
+            ],
         )
         post_select = PostSelect(output_variable="readout", additional_disallowed={1})
         analysis = PostProcessingAnalysis(
@@ -224,8 +227,14 @@ class TestExperimentalQbloxCompilePipeline:
         )
 
         extractor.assert_called_once_with(module, (7,))
-        assert executable.acquires == {"readout": acquire}
-        assert executable.acquires["readout"].post_processing == []
+        assert executable.acquires["readout"].post_processing == [
+            Discriminate(output_variable="readout", threshold=0.0),
+            post_select,
+        ]
+        assert analysis.acquire_data == {"readout": acquire}
+        assert analysis.acquire_data["readout"].post_processing == [
+            Discriminate(output_variable="readout", threshold=0.0),
+        ]
         assert executable.returns == {"readout"}
         assert executable.shots == 7
         assert result_manager.lookup_by_type(PostProcessingAnalysis) is analysis
