@@ -509,8 +509,6 @@ _READOUT = Q1SequencerType.readout
 _SIX_CONTROL = (_CONTROL,) * 6
 _SIX_READOUT = (_READOUT,) * 6
 
-# TODO: Remove the overlapping legacy QbloxTargetData constants once all experimental
-# lowering consumers use QbloxTargetDescription.
 DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
     q1asm=Q1AsmSpec(),
     sequencer_specs=frozendict(

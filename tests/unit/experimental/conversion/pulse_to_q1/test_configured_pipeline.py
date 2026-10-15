@@ -18,7 +18,6 @@ from xdsl.ir import Block, Region
 from xdsl.irdl import IRDLOperation, irdl_op_definition, result_def
 from xdsl.utils.exceptions import PassFailedException, VerifyException
 
-from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.backend.qblox.pre_emission_verification import (
     QbloxPreEmissionVerificationPass,
 )
@@ -626,7 +625,7 @@ def _qrm_module_config() -> ModuleConfigAttr:
 
 def test_pre_emission_verification_uses_named_acquisition_bin_capacity_spec():
     """The aggregate acquisition-bin check uses the authoritative Qblox target limit."""
-    limit = TARGET_DATA.QRM_DATA.max_binned_acquisitions
+    limit = DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qrm).acquisition_memory_bins
     module_config = _qrm_module_config()
     sequence = SequenceOp(
         "q0.readout",
@@ -774,7 +773,9 @@ def test_pre_emission_verification_rejects_missing_weight_table_entry():
 def test_pre_emission_verification_uses_named_waveform_sample_capacity_spec():
     """The per-sequencer waveform-sample check must reject at the authoritative Qblox
     sequencer target limit, not an ad hoc constant."""
-    limit = TARGET_DATA.CONTROL_SEQUENCER_DATA.max_sample_size_waveforms
+    limit = DEFAULT_QBLOX_TARGET.sequencer_spec(
+        Q1SequencerType.control
+    ).waveform_sample_capacity
     sequence = SequenceOp(
         "q0.drive",
         [StopOp()],
@@ -794,7 +795,9 @@ def test_pre_emission_verification_uses_named_waveform_sample_capacity_spec():
 def test_pre_emission_verification_uses_named_weight_sample_capacity_spec():
     """The per-sequencer weight-sample check must reject at the authoritative Qblox readout
     target limit, not an ad hoc constant."""
-    limit = TARGET_DATA.READOUT_SEQUENCER_DATA.max_sample_size_waveforms
+    limit = DEFAULT_QBLOX_TARGET.sequencer_spec(
+        Q1SequencerType.readout
+    ).readout.weight_sample_capacity
     module_config = _qrm_module_config()
     sequence = SequenceOp(
         "q0.readout",

@@ -14,7 +14,6 @@ from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import IndexType, ModuleOp, StringAttr
 from xdsl.ir import Operation
 
-from qat.backend.qblox.target_data import TARGET_DATA
 from qat.experimental.conversion.pulse_to_q1.passes import (
     PulseToQ1LoweringPass,
     Q1PulseLegalisationPass,
@@ -48,6 +47,7 @@ from qat.experimental.dialect.q1 import (
     WaitImmOp,
 )
 from qat.experimental.dialect.q1_sequence import SequenceOp
+from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
 
 
 def _sequence_module(*ops, channel_id: str = "q0_drive") -> ModuleOp:
@@ -171,7 +171,7 @@ class TestDebugInfoAutoAttach:
 
     def test_long_wait_all_chunks_annotated(self):
         """Every WaitImmOp in a chunked long wait carries provenance from the source op."""
-        max_wait_time = TARGET_DATA.Q1ASM_DATA.max_wait_time
+        max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_immediate_ns
         freq, frame = _frame()
         duration = ConstantOp(TimeAttr((2 * max_wait_time + 16) * 1_000))
         wait = WaitOp(frame, duration)
