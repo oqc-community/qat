@@ -89,6 +89,7 @@ class TestPulseKernelBuilderOperations:
 
         [frame_op] = _ops_of_type(kernel, CreateFrameOp)
         assert frame_op.port.data == "port0"
+        assert frame_op.label.data == "q0/drive"
         assert _pulse_constant_value(frame_op.frequency) == pytest.approx(4.8e9)
         _assert_no_repeat_epilogue(kernel)
 

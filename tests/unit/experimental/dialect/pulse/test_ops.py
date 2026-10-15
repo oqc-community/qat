@@ -3,10 +3,12 @@
 
 import numpy as np
 import pytest
+from xdsl.context import Context
 from xdsl.dialects import func
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import (
     BoolAttr,
+    Builtin,
     ComplexType,
     FlatSymbolRefAttr,
     FloatAttr,
@@ -28,6 +30,8 @@ from xdsl.irdl import (
     param_def,
     result_def,
 )
+from xdsl.parser import Parser
+from xdsl.printer import Printer
 from xdsl.traits import IsolatedFromAbove, SymbolTable
 from xdsl.utils.exceptions import VerifyException
 
@@ -61,6 +65,7 @@ from qat.experimental.dialect.pulse.ir import (
     PhaseSetOp,
     PhaseShiftOp,
     PhaseType,
+    Pulse,
     PulseOp,
     RealThresholdPolicyAttr,
     ReturnOp,
@@ -1165,6 +1170,41 @@ class TestCreateFrameOp:
         assert not frame.pulse_allowed.value.data
         assert not frame.track_phase.value.data
         frame.verify()
+
+    def test_without_label(self):
+        """A frame created without a label has no label attribute and still verifies."""
+        frequency = ConstantOp(FrequencyAttr(5.0e9))
+        frame = CreateFrameOp(frequency, StringAttr("drive"))
+        assert frame.label is None
+        assert "label" not in frame.attributes
+        frame.verify()
+
+    @pytest.mark.parametrize("label", ["q0_drive", StringAttr("q0_drive")])
+    def test_with_label(self, label):
+        """A frame label given as a string or string attribute is stored as an attribute."""
+        frequency = ConstantOp(FrequencyAttr(5.0e9))
+        frame = CreateFrameOp(frequency, StringAttr("q0/drive"), label=label)
+        assert frame.label == StringAttr("q0_drive")
+        assert frame.port == StringAttr("q0/drive")
+        frame.verify()
+
+    @pytest.mark.parametrize("label", [None, "q0_drive"])
+    def test_print_and_parse_roundtrip_preserves_label(self, label, io_stream):
+        """Printing then parsing a frame keeps its label, or its absence."""
+        frequency = ConstantOp(FrequencyAttr(5.0e9))
+        frame = CreateFrameOp(frequency, StringAttr("q0/drive"), label=label)
+        Printer(stream=io_stream).print_op(ModuleOp([frequency, frame]))
+
+        context = Context()
+        context.load_dialect(Builtin)
+        context.load_dialect(Pulse)
+        parsed = Parser(context, io_stream.getvalue()).parse_module()
+
+        [parsed_frame] = [op for op in parsed.walk() if isinstance(op, CreateFrameOp)]
+        expected = None if label is None else StringAttr(label)
+        assert parsed_frame.label == expected
+        assert parsed_frame.port == StringAttr("q0/drive")
+        parsed_frame.verify()
 
 
 @pytest.mark.parametrize("op", [PhaseSetOp, PhaseShiftOp])

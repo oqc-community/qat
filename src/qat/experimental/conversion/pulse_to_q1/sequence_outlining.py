@@ -96,12 +96,14 @@ class OutliningState:
 class _SymbolAllocator:
     """Allocate stable outlined-sequence symbols for a frame partition.
 
-    When a physical channel token uniquely identifies one logical frame, the
-    emitted symbol is derived from that token after normalisation. The
-    normalised form is used only if it has not already been claimed by a prior
-    partition. Otherwise the allocator falls back to deterministic ``frame_i``
-    naming. When the token is shared across multiple frames, the fallback is
-    applied unconditionally.
+    When the frame's ``pulse.create_frame`` carries a ``label``, the emitted
+    symbol is derived from that label after normalisation. Otherwise, when a
+    physical channel token uniquely identifies one logical frame, the symbol is
+    derived from that token. The normalised form is used only if it has not
+    already been claimed by a prior partition, so duplicate labels are
+    tolerated. Otherwise the allocator falls back to deterministic ``frame_i``
+    naming. An unlabelled frame whose token is shared across multiple frames
+    always takes the fallback.
 
     All ``frame_i`` fallback names are pre-reserved on construction so that
     normalised tokens can never claim them. This guarantees that the fallback
@@ -131,8 +133,15 @@ class _SymbolAllocator:
 
         channel_token = lineage.port
         sequence_symbol = frame_id
-        if self.symbol_counts[channel_token] == 1:
-            normalized_symbol = _normalize_sequence_symbol(channel_token)
+        label = lineage.create_frame.label
+        if label is not None and label.data:
+            preferred_token = label.data
+        elif self.symbol_counts[channel_token] == 1:
+            preferred_token = channel_token
+        else:
+            preferred_token = None
+        if preferred_token is not None:
+            normalized_symbol = _normalize_sequence_symbol(preferred_token)
             if normalized_symbol not in self.used_sequence_symbols:
                 sequence_symbol = normalized_symbol
 
@@ -370,10 +379,11 @@ class Q1OutliningPass(OrderedPass, ModulePass):
     ) -> tuple[list[SequenceOp], dict[str, str], dict[str, str]]:
         """Emit sequence operations from frame-lineage analysis.
 
-        Each logical frame partition yields one emitted sequence. When a
-        physical channel token identifies a unique partition, the emitted
-        symbol is derived from that token after symbol normalisation. When the
-        token is shared or the derived symbol would collide, the pass falls
+        Each logical frame partition yields one emitted sequence. When the
+        frame carries a ``label``, the emitted symbol is derived from it after
+        symbol normalisation; otherwise, when a physical channel token
+        identifies a unique partition, it is derived from that token. When
+        neither applies or the derived symbol would collide, the pass falls
         back to deterministic ``frame_i`` naming.
 
         :param module: Pulse module containing the entry block to partition.
@@ -409,7 +419,8 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         frame_to_port: dict[str, str] = {}
         frame_to_sequence: dict[str, str] = {}
         for frame_index, lineage in enumerate(analysis.lineages):
-            # TODO(COMPILER-1379): Prefer the optional frame label once it is available.
+            # Labels are not unique, so the synthetic id stays the partition key; the
+            # label only influences the emitted symbol (see ``_SymbolAllocator``).
             frame_id = f"frame_{frame_index}"
             sequence_body = _build_partition_sequence_body(
                 entry_block_ops,

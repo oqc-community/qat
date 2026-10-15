@@ -76,13 +76,14 @@ def _sequence(
     *,
     port_id: str = "port-0",
     channel_id: str = "port-0-channel-0",
+    label: str | None = None,
     sequencer_config: SequencerConfigAttr | None = None,
     **properties,
 ) -> SequenceOp:
     """Build a minimal outlined sequence carrying one Pulse frame."""
 
     frequency = ConstantOp(FrequencyAttr(carrier))
-    frame = CreateFrameOp(frequency, StringAttr(port_id))
+    frame = CreateFrameOp(frequency, StringAttr(port_id), label=label)
     return SequenceOp(
         channel_id,
         [frequency, frame, StopOp()],
@@ -407,6 +408,66 @@ def test_explicit_sequence_channel_id_is_preferred_when_ambiguous():
     )
 
     assert channel_ids == ["port-0-channel-1"]
+
+
+@pytest.mark.parametrize(
+    ("sequences", "expected"),
+    [
+        pytest.param(
+            [{"channel_id": "port_0_channel_1", "label": "port-0-channel-1"}],
+            ["port-0-channel-1"],
+            id="label-survives-symbol-normalisation",
+        ),
+        pytest.param(
+            [{"channel_id": "port-0-channel-0", "label": "port-0-channel-1"}],
+            ["port-0-channel-1"],
+            id="label-outranks-sequence-channel-id",
+        ),
+        pytest.param(
+            [
+                {"channel_id": "port_0_channel_1", "label": "port-0-channel-1"},
+                {"channel_id": "frame_1", "label": "port-0-channel-1"},
+            ],
+            ["port-0-channel-1", "port-0-channel-0"],
+            id="duplicate-label-falls-back-to-remaining-candidate",
+        ),
+        pytest.param(
+            [{"channel_id": "port-0-channel-1", "label": "unknown"}],
+            ["port-0-channel-1"],
+            id="unmatched-label-falls-back-to-sequence-channel-id",
+        ),
+    ],
+)
+def test_frame_label_is_preferred_verbatim_when_ambiguous(sequences, expected):
+    """Verify the raw frame label selects the canonical channel when ambiguous.
+
+    Outlining normalises and deduplicates the sequence channel_id, so the label is read from
+    the frame and compared verbatim against canonical channel identifiers.
+    """
+    data = _ambiguous_channel_data()
+    pass_ = QbloxHardwareBindingPass(data)
+
+    channel_ids = pass_._sequence_channel_ids(
+        [_sequence(4_200_000_000, **sequence) for sequence in sequences],
+        hardware_binding.QbloxHardwareView.derive(data).channel_bindings,
+    )
+
+    assert channel_ids == expected
+
+
+def test_labelled_frame_binds_its_channel_sequencer():
+    """Verify a labelled sequence takes its own channel's sequencer."""
+    data = _ambiguous_channel_data()
+
+    module = _bind(
+        data,
+        _sequence(4_200_000_000, channel_id="port_0_channel_1", label="port-0-channel-1"),
+        _sequence(4_200_000_000, channel_id="frame_1"),
+    )
+
+    labelled, unlabelled = module.body.block.ops
+    assert labelled.seq_idx == SequencerIndexAttr(1)
+    assert unlabelled.seq_idx == SequencerIndexAttr(0)
 
 
 def test_one_sequence_does_not_allocate_all_ambiguous_candidates():

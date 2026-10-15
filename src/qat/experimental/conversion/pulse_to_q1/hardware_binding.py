@@ -5,8 +5,8 @@
 This pass assigns each outlined sequence to a Qblox sequencer based on its frame's
 port and carrier frequency. A sequence's frame nominally identifies a canonical channel;
 when a port exposes multiple channels at the same frequency (ambiguous case), the pass
-selects one deterministically: preferring an explicit sequence channel_id match, then
-defaulting to the first available candidate.
+selects one deterministically: preferring a channel matching the frame's raw label, then
+one matching the sequence channel_id, then defaulting to the first available candidate.
 
 Once selected, each sequence is resolved to a sequencer binding via the allocation
 strategy. When multiple sequencers can satisfy a candidate, a tie-breaker applies:
@@ -175,17 +175,37 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
         sequence_op: SequenceOp,
         available_candidates: list[QbloxChannelBinding],
     ) -> QbloxChannelBinding:
-        """Select a candidate, preferring explicit sequence channel ID."""
+        """Select a candidate, preferring the frame label, then the sequence channel ID.
 
-        preferred_candidate = next(
-            (
-                candidate
-                for candidate in available_candidates
-                if candidate.channel_id == sequence_op.channel_id.data
-            ),
-            None,
-        )
-        return preferred_candidate or available_candidates[0]
+        The label is compared verbatim against canonical channel identifiers. It is read
+        from the frame rather than from the sequence channel ID, because outlining
+        normalises and deduplicates that ID, so it may no longer equal the label.
+        """
+
+        for preferred_channel_id in self._preferred_channel_ids(sequence_op):
+            preferred_candidate = next(
+                (
+                    candidate
+                    for candidate in available_candidates
+                    if candidate.channel_id == preferred_channel_id
+                ),
+                None,
+            )
+            if preferred_candidate is not None:
+                return preferred_candidate
+        return available_candidates[0]
+
+    def _preferred_channel_ids(self, sequence_op: SequenceOp) -> list[str]:
+        """Return the canonical channel identifiers a sequence prefers, in priority order.
+
+        :param sequence_op: The outlined sequence to inspect.
+        :returns: The frame label, when present, followed by the sequence channel ID.
+        """
+
+        label = self._frame_on_sequence_port(sequence_op).label
+        preferred_channel_ids = [label.data] if label is not None and label.data else []
+        preferred_channel_ids.append(sequence_op.channel_id.data)
+        return preferred_channel_ids
 
     def _available_candidates(
         self,
@@ -228,6 +248,25 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
             ``pulse.create_frame`` matching its port.
         """
 
+        carrier = extract_frequency_hz(self._frame_on_sequence_port(sequence_op))
+
+        candidates = [
+            channel
+            for channel in channels.values()
+            if channel.port_id == sequence_op.port_id.data
+            and channel.carrier_frequency == carrier
+        ]
+        return carrier, candidates
+
+    def _frame_on_sequence_port(self, sequence_op: SequenceOp) -> CreateFrameOp:
+        """Return the single frame a sequence creates on its port.
+
+        :param sequence_op: The outlined sequence to inspect.
+        :returns: The sequence's ``pulse.create_frame`` matching its port.
+        :raises PassFailedException: If the sequence does not contain exactly one
+            ``pulse.create_frame`` matching its port.
+        """
+
         frames = [
             nested
             for nested in sequence_op.walk()
@@ -239,15 +278,7 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
                 f"pulse.create_frame matching port {sequence_op.port_id.data!r} before "
                 "Qblox hardware binding."
             )
-        carrier = extract_frequency_hz(frames[0])
-
-        candidates = [
-            channel
-            for channel in channels.values()
-            if channel.port_id == sequence_op.port_id.data
-            and channel.carrier_frequency == carrier
-        ]
-        return carrier, candidates
+        return frames[0]
 
     def _resolve_sequence(
         self,
@@ -258,9 +289,9 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
     ) -> tuple[SequencerBinding, str]:
         """Resolve the sequencer binding for a sequence.
 
-        Selects a canonical channel from available candidates (preferring an explicit
-        channel_id match), retrieves its sequencer binding, and applies a tie-breaker
-        if multiple candidates have bindings.
+        Selects a canonical channel from available candidates (preferring the frame label,
+        then the sequence channel_id), retrieves its sequencer binding, and applies a
+        tie-breaker if multiple candidates have bindings.
 
         The tie-breaker ensures deterministic selection: when multiple candidates have
         resolved sequencer bindings, the one with the minimum (instrument_id, slot,
@@ -293,7 +324,9 @@ class QbloxHardwareBindingPass(OrderedPass, ModulePass):
         ]
         if len(resolved_candidates) == 0:
             # Distinguish between preferred channel unavailable vs no binding found
-            is_preferred = selected_candidate.channel_id == sequence_op.channel_id.data
+            is_preferred = selected_candidate.channel_id in self._preferred_channel_ids(
+                sequence_op
+            )
             if is_preferred:
                 ch_id = selected_candidate.channel_id
                 raise PassFailedException(

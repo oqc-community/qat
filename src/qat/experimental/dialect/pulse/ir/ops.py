@@ -1200,6 +1200,11 @@ class CreateFrameOp(IRDLOperation, PulseOperationInterface):
         be tracked when frame swapping on hardware. If False, this highly simplifies
         allocation logic, allowing us to make more efficient use of hardware. This should
         be used carefully. Defaults to True.
+    :ivar label: Optional string attribute giving the logical frame a human-readable
+        identifier. Used for observability and debugging, and as a hint when binding the
+        frame to a canonical channel: Qblox hardware binding prefers the channel whose
+        identifier equals the label verbatim when the frame's port and frequency are
+        ambiguous. It does not contribute to dataflow. Uniqueness is not enforced.
     :ivar port: The string attribute containing the port identifier.
     :ivar result: The SSA value representing the Frame. Can only be consumed by a single
         operation.
@@ -1213,6 +1218,7 @@ class CreateFrameOp(IRDLOperation, PulseOperationInterface):
     acquire_allowed = attr_def(BoolAttr, default_value=BoolAttr(True, value_type=1))
     pulse_allowed = attr_def(BoolAttr, default_value=BoolAttr(True, value_type=1))
     track_phase = attr_def(BoolAttr, default_value=BoolAttr(True, value_type=1))
+    label = opt_attr_def(StringAttr)
 
     result = result_def(FrameType)
 
@@ -1225,6 +1231,7 @@ class CreateFrameOp(IRDLOperation, PulseOperationInterface):
         acquire_allowed: BoolAttr | None = None,
         pulse_allowed: BoolAttr | None = None,
         track_phase: BoolAttr | None = None,
+        label: str | StringAttr | None = None,
     ):
         """
         :param frequency: The SSA value representing the frequency of the frame.
@@ -1239,6 +1246,8 @@ class CreateFrameOp(IRDLOperation, PulseOperationInterface):
             pulses. Defaults to an attribute with True.
         :param track_phase: The boolean attribute stating if phase strictly needs to be
             tracked when frame swapping on hardware. Defaults to an attribute with True.
+        :param label: Optional human-readable identifier for the logical frame, used for
+            observability and debugging.
         """
         attributes = {}
         if imbalance is not None:
@@ -1251,6 +1260,8 @@ class CreateFrameOp(IRDLOperation, PulseOperationInterface):
             attributes["pulse_allowed"] = pulse_allowed
         if track_phase is not None:
             attributes["track_phase"] = track_phase
+        if label is not None:
+            attributes["label"] = StringAttr(label) if isinstance(label, str) else label
 
         return super().__init__(
             operands=[frequency],

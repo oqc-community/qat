@@ -92,9 +92,11 @@ class _AcquisitionConsumerOp(IRDLOperation):
         super().__init__(operands=[acquisition])
 
 
-def _frame(frequency: float, channel_id: str) -> tuple[ConstantOp, CreateFrameOp]:
+def _frame(
+    frequency: float, channel_id: str, label: str | None = None
+) -> tuple[ConstantOp, CreateFrameOp]:
     freq = ConstantOp(FrequencyAttr(frequency))
-    return freq, CreateFrameOp(freq, StringAttr(channel_id))
+    return freq, CreateFrameOp(freq, StringAttr(channel_id), label=label)
 
 
 def _square_pulse(frame: CreateFrameOp) -> list:
@@ -238,6 +240,37 @@ class TestPulseToQ1SequenceOutlining:
         assert pass_instance.state.frame_to_sequence == {
             "frame_0": "frame_0",
             "frame_1": "frame_1",
+        }
+
+    def test_frame_label_names_sequence(self):
+        """Verify that a frame label is preferred over the port for the sequence symbol."""
+        freq, frame = _frame(4.8e9, "q0/drive", label="q0 drive/main")
+        module = _module_with_main([freq, frame, func.ReturnOp()])
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        [seq] = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        assert seq.channel_id.data == "q0_drive_main"
+        assert seq.port_id.data == "q0/drive"
+        assert pass_instance.state.frame_to_port == {"frame_0": "q0/drive"}
+        assert pass_instance.state.frame_to_sequence == {"frame_0": "q0_drive_main"}
+
+    def test_labels_name_frames_sharing_channel_id(self):
+        """Verify that labels distinguish frames that share a physical port."""
+        f0_freq, f0 = _frame(4.8e9, "shared.port", label="drive")
+        f1_freq, f1 = _frame(5.2e9, "shared.port", label="cross_resonance")
+        module = _module_with_main([f0_freq, f0, f1_freq, f1, func.ReturnOp()])
+
+        pass_instance = Q1OutliningPass()
+        pass_instance.apply(Context(), module)
+
+        sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
+        assert [seq.channel_id.data for seq in sequences] == ["drive", "cross_resonance"]
+        assert [seq.port_id.data for seq in sequences] == ["shared.port", "shared.port"]
+        assert pass_instance.state.frame_to_sequence == {
+            "frame_0": "drive",
+            "frame_1": "cross_resonance",
         }
 
     def test_empty_module_lowers_to_no_sequences(self):
@@ -516,6 +549,50 @@ class TestSequenceSymbolAllocator:
 
         assert sym_0 == "frame_0"
         assert sym_1 == "q1_drive"
+
+    @pytest.mark.parametrize(
+        "label, port_count, expected",
+        [
+            (None, 1, "q0_drive"),
+            (None, 2, "frame_0"),
+            ("", 1, "q0_drive"),
+            ("drive", 1, "drive"),
+            ("drive", 2, "drive"),
+            ("q1/drive", 1, "q1_drive"),
+        ],
+    )
+    def test_label_is_preferred_over_channel_token(self, label, port_count, expected):
+        """Verify the label wins over the port token when present and non-empty, and that an
+        unlabelled frame keeps the port-derived or ``frame_i`` symbol."""
+        _, frame = _frame(4.8e9, "q0/drive", label=label)
+        lineage = FrameLineage(create_frame=frame, port="q0/drive")
+        allocator = _SymbolAllocator(
+            symbol_counts={"q0/drive": port_count},
+            used_sequence_symbols={"frame_0", "frame_1"},
+        )
+
+        port, symbol = allocator.allocate("frame_0", lineage)
+
+        assert port == "q0/drive"
+        assert symbol == expected
+
+    def test_duplicate_labels_fall_back_to_frame_id(self):
+        """Verify that a label already claimed by another frame falls back to frame_i, so
+        uniqueness of labels is not required."""
+        _, frame_0 = _frame(4.8e9, "q0/drive", label="drive")
+        _, frame_1 = _frame(5.2e9, "q1/drive", label="drive")
+        lin_0 = FrameLineage(create_frame=frame_0, port="q0/drive")
+        lin_1 = FrameLineage(create_frame=frame_1, port="q1/drive")
+        allocator = _SymbolAllocator(
+            symbol_counts={"q0/drive": 1, "q1/drive": 1},
+            used_sequence_symbols={"frame_0", "frame_1"},
+        )
+
+        _, sym_0 = allocator.allocate("frame_0", lin_0)
+        _, sym_1 = allocator.allocate("frame_1", lin_1)
+
+        assert sym_0 == "drive"
+        assert sym_1 == "frame_1"
 
 
 class TestPulseToQ1ShotLoopFission:

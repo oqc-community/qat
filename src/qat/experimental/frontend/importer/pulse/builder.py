@@ -176,13 +176,14 @@ class PulseKernelBuilder:
     ) -> "PulseKernelBuilder":
         """Create a new frame and add it to the pulse block.
 
-        :param frame_name: The name of the frame to create.
+        :param frame_name: The name of the frame to create, also recorded as the frame's
+            ``label``.
         :param frequency: The frequency of the frame to create.
         :param port: The port of the frame to create.
         :returns: The PulseKernelBuilder instance for method chaining.
         """
         freq_op = _create_frequency_constant_op(frequency)
-        frame_op = CreateFrameOp(freq_op, port)
+        frame_op = CreateFrameOp(freq_op, port, label=frame_name)
         self._add_ops(freq_op, frame_op)
         self._frames.set_by_name(frame_name, frame_op.result)
         return self
