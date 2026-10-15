@@ -140,7 +140,7 @@ class Q1ScheduleVisitor:
 
     @visit.register
     def _(self, operation: NopOp) -> None:
-        self._advance(self._sequencer_spec.clock_period_ns, "nop")
+        self._advance(self._sequencer_spec.q1_core_clock_period_ns, "nop")
 
     @visit.register(StopOp)
     @visit.register(StopImmOp)
@@ -359,7 +359,7 @@ class Q1ScheduleVisitor:
         return envelope
 
     def _advance(self, duration: int, label: str) -> None:
-        sample_count = round(duration * self._sequencer_spec.sample_rate_hz * 1e-9)
+        sample_count = round(duration / self._sequencer_spec.sample_period_ns)
         signal = np.zeros(sample_count, dtype=complex)
         if self._active_waveform is not None:
             remaining = self._active_waveform.size - self._waveform_cursor

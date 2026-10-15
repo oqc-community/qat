@@ -199,7 +199,7 @@ def test_downstream_ordering_constraints_reject_misordered_lowering():
     )
 
 
-def test_bound_readout_grid_is_used_during_square_validation():
+def test_square_validation_is_independent_of_bound_q1_core_clock():
     frequency = ConstantOp(FrequencyAttr(6_200_000_000))
     frame = CreateFrameOp(frequency, StringAttr("port-0"))
     width = ConstantOp(TimeAttr(12e3))
@@ -208,7 +208,8 @@ def test_bound_readout_grid_is_used_during_square_validation():
     pulse = PulseOp(frame, waveform)
     module = _pulse_module(frequency, frame, width, amplitude, waveform, pulse)
     readout_data = replace(
-        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout), clock_period_ns=8
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+        q1_core_clock_period_ns=8,
     )
     target_data = replace(
         DEFAULT_QBLOX_TARGET,
@@ -220,13 +221,9 @@ def test_bound_readout_grid_is_used_during_square_validation():
         ),
     )
 
-    with pytest.raises(
-        PassFailedException,
-        match=r"multiple of sequencer grid_time \(8 ns\)",
-    ):
-        create_qblox_configured_q1_pipeline(_readout_canonical_data(), target_data).apply(
-            Context(), module
-        )
+    create_qblox_configured_q1_pipeline(_readout_canonical_data(), target_data).apply(
+        Context(), module
+    )
 
 
 def test_pipeline_lowers_normalized_pulse_to_configured_flat_q1():

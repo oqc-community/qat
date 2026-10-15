@@ -176,12 +176,42 @@ class SI16Imm(Q1Imm):
 class DurationImm(Q1Imm):
     """RT-instruction duration in ns: ``[4, 65535]``.
 
-    The minimum value of 4 ns matches the Q1 Real-Time core clock cycle.
+    Q1 instructions have 1 ns duration resolution and a 4 ns minimum non-zero duration.
+
+    See
+    https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions.
     """
 
     name = "q1.duration_imm"
     _MIN = 4
     _MAX = 65535
+
+
+@irdl_attr_definition
+class WaitDurationImm(Q1Imm):
+    """Wait duration immediate in ns: ``0`` or ``[4, 65535]``.
+
+    Zero is the Q1 ``wait 0`` special case that suspends the real-time underflow guard.
+    Pulse-level zero waits are semantic no-ops and are not lowered to this value.
+
+    See:
+
+    * https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/linq_based_feedback.html
+    """
+
+    name = "q1.wait_duration_imm"
+    _MIN = 0
+    _MAX = 65535
+
+    @classmethod
+    def _validate(cls, value: int) -> None:
+        super()._validate(value)
+        if 0 < value < DurationImm._MIN:
+            raise VerifyException(
+                f"{cls.__name__} value must be 0 or in "
+                f"[{DurationImm._MIN}, {cls._MAX}], got {value}"
+            )
 
 
 @irdl_attr_definition

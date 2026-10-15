@@ -74,6 +74,7 @@ from qat.experimental.dialect.q1.ir.imm_desc import (
     UI16Imm,
     UI24Imm,
     UI32Imm,
+    WaitDurationImm,
 )
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 
@@ -2967,8 +2968,11 @@ class LatchRstRsOp(RsOperation[IntRegisterType]):
 
 
 @irdl_op_definition
-class WaitImmOp(ImmOperation[DurationImm]):
-    """Waits for the specified duration in ns."""
+class WaitImmOp(ImmOperation[WaitDurationImm]):
+    """Waits for the specified duration in ns.
+
+    ``wait 0`` has special Q1 semantics and suspends the real-time underflow guard.
+    """
 
     name = "q1.i.wait"
 

@@ -39,6 +39,7 @@ from qat.experimental.dialect.q1.ir.imm_desc import (
     UI16Imm,
     UI24Imm,
     UI32Imm,
+    WaitDurationImm,
 )
 from qat.experimental.dialect.q1.ir.ops import (
     AcquireImmImmImmOp,
@@ -370,6 +371,7 @@ Q1 = Dialect(
         UI16Imm,
         SI16Imm,
         DurationImm,
+        WaitDurationImm,
         UI24Imm,
         UI32Imm,
         SI32Imm,
@@ -552,6 +554,7 @@ __all__ = [
     "UI8Imm",
     "UpdParamImmOp",
     "WaitImmOp",
+    "WaitDurationImm",
     "WaitRsOp",
     "WaitSyncImmOp",
     "WaitSyncRsOp",

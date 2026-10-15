@@ -22,6 +22,7 @@ from xdsl.backend.register_allocatable import (
 )
 from xdsl.dialects.builtin import StringAttr
 from xdsl.traits import Commutative, IsTerminator, Pure
+from xdsl.utils.exceptions import VerifyException
 from xdsl.utils.test_value import create_ssa_value
 
 from qat.experimental.dialect.q1 import (
@@ -208,16 +209,25 @@ def _imm_types(op_class) -> tuple[type[Q1Imm], ...]:
 def _imm(op_class, *values) -> tuple[Q1Imm, ...]:
     """Wrap the given int(s) in the op class's bound Q1Imm subtypes.
 
-    Values are clamped into the bound type's valid range so that generic test bodies don't
-    need to know each op's per-slot constraints.
+    Values are moved to a valid value for the bound type so generic test bodies do not need
+    to know each op's per-slot constraints, including disjoint ranges.
     """
     types_ = _imm_types(op_class)
     assert len(values) == len(types_), (
         f"{op_class.__name__} expects {len(types_)} imm(s), got {len(values)}"
     )
-    return tuple(
-        t(max(t._MIN, min(t._MAX, v))) for t, v in zip(types_, values, strict=False)
-    )
+    return tuple(_valid_imm(t, v) for t, v in zip(types_, values, strict=False))
+
+
+def _valid_imm(imm_type: type[Q1Imm], value: int) -> Q1Imm:
+    """Construct an immediate from a valid value, including disjoint ranges."""
+    clamped = max(imm_type._MIN, min(imm_type._MAX, value))
+    for candidate in (clamped, imm_type._MIN, imm_type._MAX):
+        try:
+            return imm_type(candidate)
+        except VerifyException:
+            continue
+    raise AssertionError(f"{imm_type.__name__} has no constructible boundary value")
 
 
 def _assert_traits(op: Any, expected_traits: tuple) -> None:

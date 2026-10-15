@@ -82,6 +82,7 @@ from qat.experimental.dialect.q1 import (
     UI16Imm,
     UI24Imm,
     UI32Imm,
+    WaitDurationImm,
     XorRsImmRdOp,
     XorRsRsRdOp,
     emit_program,
@@ -614,7 +615,7 @@ def _all_concrete_q1_ops():
         q1_ops.FbPopDataImmRdOp(UI16Imm(71), Registers.R36),
         q1_ops.FbPullDataRsRdOp(create_ssa_value(Registers.R37), Registers.R38),
         # Real-time Instructions
-        q1_ops.WaitImmOp(DurationImm(100)),
+        q1_ops.WaitImmOp(WaitDurationImm(100)),
         q1_ops.WaitRsOp(r0),
         q1_ops.WaitSyncImmOp(DurationImm(200)),
         q1_ops.WaitSyncRsOp(r1),

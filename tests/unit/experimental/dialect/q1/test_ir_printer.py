@@ -105,6 +105,7 @@ from qat.experimental.dialect.q1 import (
     UI24Imm,
     UI32Imm,
     UpdParamImmOp,
+    WaitDurationImm,
     WaitImmOp,
     WaitRsOp,
     WaitSyncImmOp,
@@ -196,7 +197,12 @@ def _print_ir(op) -> str:
             "<{imm1 = #q1.bool_imm<1>, imm2 = #q1.duration_imm<4>}>",
             None,
         ),
-        (WaitImmOp(DurationImm(10)), None, "<{imm = #q1.duration_imm<10>}>", None),
+        (
+            WaitImmOp(WaitDurationImm(10)),
+            None,
+            "<{imm = #q1.wait_duration_imm<10>}>",
+            None,
+        ),
         (WaitSyncImmOp(DurationImm(20)), None, "<{imm = #q1.duration_imm<20>}>", None),
         (
             WaitTriggerImmImmOp(UI4Imm(1), DurationImm(50)),

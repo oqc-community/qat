@@ -279,8 +279,47 @@ class TestQ1PulseValidationPass:
 
     def test_accepts_minimum_nanosecond_duration(self):
         freq, frame = _frame()
-        time = ConstantOp(TimeAttr(1e3))
+        time = ConstantOp(TimeAttr(4e3))
         wait = WaitOp(frame, time)
+        self._run(_sequence_module(freq, frame, time, wait))
+
+    @pytest.mark.parametrize("duration_ns", [1, 3])
+    def test_rejects_wait_below_minimum_rt_duration(self, duration_ns):
+        freq, frame = _frame()
+        time = ConstantOp(TimeAttr(duration_ns * 1e3))
+        wait = WaitOp(frame, time)
+
+        with pytest.raises(
+            PassFailedException,
+            match="must be 0 or at least the 4 ns minimum RT duration",
+        ):
+            self._run(_sequence_module(freq, frame, time, wait))
+
+    def test_rejects_wait_off_rt_resolution(self):
+        freq, frame = _frame()
+        time = ConstantOp(TimeAttr(5e3))
+        wait = WaitOp(frame, time)
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(
+                DEFAULT_QBLOX_TARGET.q1asm,
+                rt_duration_resolution_ns=2,
+                max_rt_duration_ns=65_534,
+                max_wait_immediate_ns=65_534,
+            ),
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match="must align to the 2 ns RT duration resolution",
+        ):
+            self._run(_sequence_module(freq, frame, time, wait), target_data)
+
+    def test_accepts_five_nanosecond_wait(self):
+        freq, frame = _frame()
+        time = ConstantOp(TimeAttr(5e3))
+        wait = WaitOp(frame, time)
+
         self._run(_sequence_module(freq, frame, time, wait))
 
     def test_rejects_sub_nanosecond_non_zero_duration(self):
@@ -300,6 +339,9 @@ class TestQ1PulseValidationPass:
     def test_accepts_square_waveform_at_minimum_width(self):
         self._run(_square_pulse_module(TimeAttr(4e3)))
 
+    def test_accepts_square_waveform_on_one_nanosecond_grid(self):
+        self._run(_square_pulse_module(TimeAttr(5e3)))
+
     def test_rejects_square_waveform_below_minimum_width(self):
         with pytest.raises(
             PassFailedException,
@@ -307,21 +349,32 @@ class TestQ1PulseValidationPass:
         ):
             self._run(_square_pulse_module(TimeAttr(3e3)))
 
-    def test_rejects_square_waveform_width_off_sequencer_grid(self):
-        with pytest.raises(
-            PassFailedException,
-            match="width must be a multiple of sequencer grid_time",
-        ):
-            self._run(_square_pulse_module(TimeAttr(5e3)))
-
     def test_rejects_large_square_waveform_width_off_nanosecond_boundary(self):
         width_ps = 9_007_199_254_744_001
         with pytest.raises(PassFailedException, match="nanosecond"):
             self._run(_square_pulse_module(TimeAttr(width_ps)))
 
-    def test_uses_readout_sequencer_grid_for_square_waveform_width(self):
+    def test_rejects_square_waveform_width_off_rt_resolution(self):
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(
+                DEFAULT_QBLOX_TARGET.q1asm,
+                rt_duration_resolution_ns=2,
+                max_rt_duration_ns=65_534,
+                max_wait_immediate_ns=65_534,
+            ),
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match=r"must align to the RT duration resolution \(2 ns\)",
+        ):
+            self._run(_square_pulse_module(TimeAttr(5e3)), target_data)
+
+    def test_readout_square_waveform_uses_rt_duration_resolution(self):
         readout_data = replace(
-            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout), clock_period_ns=8
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+            q1_core_clock_period_ns=8,
         )
         target_data = replace(
             DEFAULT_QBLOX_TARGET,
@@ -338,11 +391,7 @@ class TestQ1PulseValidationPass:
             seq_idx=0,
         )
 
-        with pytest.raises(
-            PassFailedException,
-            match=r"multiple of sequencer grid_time \(8 ns\)",
-        ):
-            self._run(module, target_data)
+        self._run(module, target_data)
 
     @pytest.mark.parametrize("amplitude", [1.1, -1.1, 1.1j, -1.1j])
     def test_rejects_square_waveform_amplitude_outside_dac_range(

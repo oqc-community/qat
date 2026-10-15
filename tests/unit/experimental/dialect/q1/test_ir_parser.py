@@ -4,6 +4,7 @@
 import pytest
 from xdsl.dialects.builtin import StringAttr
 from xdsl.parser import Parser
+from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.q1 import (
     AcquireImmImmImmOp,
@@ -344,10 +345,22 @@ def _imm_props(op_type) -> str:
         ["imm"] if len(imm_types) == 1 else [f"imm{i + 1}" for i in range(len(imm_types))]
     )
     body = ", ".join(
-        f"{s} = #{t.name}<{max(t._MIN, min(t._MAX, i + 1))}>"
-        for i, (s, t) in enumerate(zip(slots, imm_types, strict=True))
+        f"{slot} = #{imm_type.name}<{_valid_imm_value(imm_type, index + 1)}>"
+        for index, (slot, imm_type) in enumerate(zip(slots, imm_types, strict=True))
     )
     return f"<{{{body}}}>"
+
+
+def _valid_imm_value(imm_type, value: int) -> int:
+    """Return a valid value for an immediate, including disjoint ranges."""
+    clamped = max(imm_type._MIN, min(imm_type._MAX, value))
+    for candidate in (clamped, imm_type._MIN, imm_type._MAX):
+        try:
+            imm_type(candidate)
+        except VerifyException:
+            continue
+        return candidate
+    raise AssertionError(f"{imm_type.__name__} has no constructible boundary value")
 
 
 def _bound_imm_types(op_type) -> list[type]:

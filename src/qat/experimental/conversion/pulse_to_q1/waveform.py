@@ -20,15 +20,62 @@ from qat.experimental.dialect.q1 import (
     SetAwgOffsImmImmOp,
     SI16Imm,
     UpdParamImmOp,
+    WaitDurationImm,
     WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr
-from qat.experimental.dialect.q1_sequence.ir.ops import find_enclosing_sequence
 from qat.experimental.system_data.hardware.qblox.target import (
-    DEFAULT_QBLOX_TARGET,
-    Q1SequencerType,
+    Q1AsmSpec,
     QbloxTargetDescription,
 )
+
+
+def split_wait_duration(duration_ns: int, q1asm: Q1AsmSpec) -> tuple[int, ...]:
+    """Split a pulse-level wait into exactly representable normal Q1 waits.
+
+    The special ``wait 0`` encoding is never emitted here. A final remainder below the
+    minimum non-zero RT duration is made up by shortening the preceding chunks.
+
+    :param duration_ns: Total pulse-level wait duration in nanoseconds.
+    :param q1asm: Q1 instruction timing limits.
+    :returns: Wait-immediate durations whose exact sum is ``duration_ns``.
+    :raises PassFailedException: If the duration cannot be represented using normal waits.
+    """
+
+    if duration_ns == 0:
+        return ()
+
+    minimum = q1asm.min_rt_duration_ns
+    maximum = q1asm.max_wait_immediate_ns
+    resolution = q1asm.rt_duration_resolution_ns
+    if duration_ns < minimum or duration_ns % resolution:
+        raise PassFailedException(
+            f"Q1 wait duration {duration_ns} ns is not representable by normal waits "
+            f"with minimum {minimum} ns and resolution {resolution} ns."
+        )
+
+    full_chunks, remainder = divmod(duration_ns, maximum)
+    chunks = [maximum] * full_chunks
+    if remainder == 0:
+        return tuple(chunks)
+    if remainder >= minimum:
+        chunks.append(remainder)
+        return tuple(chunks)
+
+    deficit = minimum - remainder
+    for index in range(len(chunks) - 1, -1, -1):
+        transfer = min(deficit, chunks[index] - minimum)
+        chunks[index] -= transfer
+        deficit -= transfer
+        if deficit == 0:
+            break
+    if deficit:
+        raise PassFailedException(
+            f"Q1 wait duration {duration_ns} ns cannot be split into waits in "
+            f"[{minimum}, {maximum}] ns at {resolution} ns resolution."
+        )
+    chunks.append(minimum)
+    return tuple(chunks)
 
 
 def _square_waveform(op: PulseOp) -> SquareWaveformOp:
@@ -80,7 +127,7 @@ class SquareWaveformLowering:
     """Lower a canonical square pulse to latched Q1 AWG offsets.
 
     The non-zero offset remains live for exactly the Pulse waveform width. Latching the
-    falling edge then advances the Q1 timeline by one additional sequencer grid interval.
+    falling edge then advances the Q1 timeline by one minimum RT duration.
     """
 
     def __call__(
@@ -112,22 +159,15 @@ class SquareWaveformLowering:
         amplitude = cast(ConstantOp, waveform.amplitude.owner)
         amplitude_value = cast(AmplitudeAttr, amplitude.value)
 
-        sequence_op = find_enclosing_sequence(pulse_op)
-        is_readout = (
-            sequence_op.module_config is not None
-            and sequence_op.seq_idx is not None
-            and DEFAULT_QBLOX_TARGET.is_readout_sequencer(
-                sequence_op.module_config.kind.data, sequence_op.seq_idx.data
-            )
-        )
-        sequencer_spec_type = (
-            Q1SequencerType.readout if is_readout else Q1SequencerType.control
-        )
-        sequencer_data = target_data.sequencer_spec(sequencer_spec_type)
-        grid_time = sequencer_data.clock_period_ns
         width_ns = width.value.literal_value // 1000
-        rise_duration = width_ns if width_ns < 2 * grid_time else grid_time
+        minimum_duration = target_data.q1asm.min_rt_duration_ns
+        rise_duration = width_ns if width_ns < 2 * minimum_duration else minimum_duration
         remaining_duration = width_ns - rise_duration
+        if rise_duration > target_data.q1asm.max_rt_duration_ns:
+            raise PassFailedException(
+                f"Square waveform rising-edge duration {rise_duration} ns exceeds the "
+                f"maximum RT duration {target_data.q1asm.max_rt_duration_ns} ns."
+            )
 
         value = amplitude_value.literal_value
         max_offset = target_data.q1asm.max_offset
@@ -138,28 +178,14 @@ class SquareWaveformLowering:
             ).with_debug_info(debug_info),
             UpdParamImmOp(DurationImm(rise_duration)).with_debug_info(debug_info),
         ]
-        minimum_duration = DurationImm._MIN
-        maximum_wait = target_data.q1asm.max_wait_time_ns
-        maximum_wait -= maximum_wait % grid_time
-        if remaining_duration and maximum_wait < minimum_duration:
-            raise PassFailedException(
-                f"Q1 wait limit {target_data.q1asm.max_wait_time_ns} ns cannot represent "
-                f"the required {grid_time} ns sequencer alignment."
-            )
-        while remaining_duration > maximum_wait:
-            wait_duration = maximum_wait
-            if remaining_duration - wait_duration < minimum_duration:
-                wait_duration -= minimum_duration - (remaining_duration - wait_duration)
-            q1_ops.append(WaitImmOp(DurationImm(wait_duration)).with_debug_info(debug_info))
-            remaining_duration -= wait_duration
-        if remaining_duration:
+        for wait_duration in split_wait_duration(remaining_duration, target_data.q1asm):
             q1_ops.append(
-                WaitImmOp(DurationImm(remaining_duration)).with_debug_info(debug_info)
+                WaitImmOp(WaitDurationImm(wait_duration)).with_debug_info(debug_info)
             )
         q1_ops.extend(
             [
                 SetAwgOffsImmImmOp(SI16Imm(0), SI16Imm(0)).with_debug_info(debug_info),
-                UpdParamImmOp(DurationImm(grid_time)).with_debug_info(debug_info),
+                UpdParamImmOp(DurationImm(minimum_duration)).with_debug_info(debug_info),
             ]
         )
         rewriter.replace_op(pulse_op, q1_ops, new_results=[pulse_op.frame])

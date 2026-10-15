@@ -157,7 +157,7 @@ def test_q1_schedule_visitor_uses_target_clock_period_for_nop():
     schedule_tracker = ScheduleTracker()
     sequencer_spec = replace(
         DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
-        clock_period_ns=8,
+        q1_core_clock_period_ns=8,
     )
     target = SimpleNamespace(
         q1asm=DEFAULT_QBLOX_TARGET.q1asm,

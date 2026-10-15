@@ -38,6 +38,7 @@ from qat.experimental.dialect.q1.ir.ops import (
     SetPhImmOp,
     StopOp,
     UpdParamImmOp,
+    WaitDurationImm,
     WaitImmOp,
     WaitSyncImmOp,
 )
@@ -59,7 +60,7 @@ def test_q1_operations_accept_q1_schedule_visitor():
 
     NopOp().accept(schedule_visitor)
     SetFreqImmOp(SI32Imm(125)).accept(schedule_visitor)
-    WaitImmOp(DurationImm(8)).accept(schedule_visitor)
+    WaitImmOp(WaitDurationImm(8)).accept(schedule_visitor)
 
     schedule_events = schedule_tracker.timelines["q0"]
     assert [event.label for event in schedule_events] == ["nop", "wait"]
@@ -88,7 +89,7 @@ def test_q1_schedule_visitor_registers_sequence_resource():
 
 
 def test_build_q1_schedule_walks_module():
-    module = ModuleOp([NopOp(), WaitImmOp(DurationImm(8))])
+    module = ModuleOp([NopOp(), WaitImmOp(WaitDurationImm(8))])
 
     schedule_tracker = build_q1_schedule(module)
 
@@ -120,7 +121,7 @@ def test_build_q1_schedule_reads_sequence_waveform_table():
         [
             SetAwgGainImmImmOp(SI16Imm(16_384), SI16Imm(16_384)),
             PlayImmImmImmOp(UI10Imm(0), UI10Imm(1), DurationImm(4)),
-            WaitImmOp(DurationImm(4)),
+            WaitImmOp(WaitDurationImm(4)),
             StopOp(),
         ],
         waveforms=ArrayAttr(
@@ -508,7 +509,7 @@ def test_build_q1_schedule_accepts_unmatched_multi_sequence_wait_sync():
         "first",
         [WaitSyncImmOp(DurationImm(4)), StopOp()],
     )
-    second = SequenceOp("second", [WaitImmOp(DurationImm(8)), StopOp()])
+    second = SequenceOp("second", [WaitImmOp(WaitDurationImm(8)), StopOp()])
 
     schedule = build_q1_schedule(ModuleOp([first, second]))
 
@@ -577,7 +578,7 @@ def test_build_q1_schedule_blocks_early_participant_at_wait_sync():
     first = SequenceOp(
         "first",
         [
-            WaitImmOp(DurationImm(8)),
+            WaitImmOp(WaitDurationImm(8)),
             WaitSyncImmOp(DurationImm(4)),
             PlayImmImmImmOp(UI10Imm(0), UI10Imm(1), DurationImm(4)),
             StopOp(),
@@ -623,7 +624,7 @@ def test_build_q1_schedule_blocks_early_participant_at_wait_sync():
 def test_build_q1_schedule_falls_back_when_sequence_sync_is_disabled():
     first = SequenceOp(
         "first",
-        [WaitImmOp(DurationImm(8)), WaitSyncImmOp(DurationImm(4)), StopOp()],
+        [WaitImmOp(WaitDurationImm(8)), WaitSyncImmOp(DurationImm(4)), StopOp()],
         sequencer_config=SequencerConfigAttr(enable_sync=True),
     )
     second = SequenceOp(

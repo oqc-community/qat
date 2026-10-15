@@ -545,11 +545,11 @@ class TestPulseToQ1ShotLoopFission:
             for sequence in _sequences_by_port(module).values()
         )
 
-    def test_scaffolding_uses_common_sequencer_grid_time(self):
-        """Verify synchronization scaffolding is aligned for control and readout."""
+    def test_scaffolding_uses_minimum_rt_duration(self):
+        """Verify synchronization scaffolding is independent of the Q1 core clock."""
         readout_data = replace(
             DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
-            clock_period_ns=8,
+            q1_core_clock_period_ns=8,
         )
         target_data = replace(
             DEFAULT_QBLOX_TARGET,
@@ -564,14 +564,15 @@ class TestPulseToQ1ShotLoopFission:
 
         Q1OutliningPass(target_data=target_data).apply(Context(), module)
 
+        duration = target_data.q1asm.min_rt_duration_ns
         for sequence in _sequences_by_port(module).values():
             _, latch_enable, apply_latch = list(sequence.body.block.ops)[:3]
-            assert latch_enable.duration.data == readout_data.clock_period_ns
-            assert apply_latch.duration.data == readout_data.clock_period_ns
+            assert latch_enable.duration.data == duration
+            assert apply_latch.duration.data == duration
         for loop in _outlined_loops(module).values():
             wait_sync, _, apply_phase_reset = list(loop.body.block.ops)[:3]
-            assert wait_sync.duration.data == readout_data.clock_period_ns
-            assert apply_phase_reset.duration.data == readout_data.clock_period_ns
+            assert wait_sync.duration.data == duration
+            assert apply_phase_reset.duration.data == duration
 
     def test_fissioned_drive_loop_drops_the_acquisition_plumbing(self):
         """Verify that a partition with no acquisition keeps neither the results array nor

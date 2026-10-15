@@ -56,14 +56,13 @@ from qat.experimental.dialect.q1.transforms.verify_allocation import VerifyQ1All
 from qat.experimental.dialect.q1_cf.transforms.linearise_q1_cf import LineariseQ1CfToQ1Pass
 from qat.experimental.dialect.q1_scf.transforms.lower_scf import LowerScfToQ1ScfPass
 from qat.experimental.dialect.q1_scf.transforms.lower_to_cf import LowerQ1ScfToQ1CfPass
-from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp, find_enclosing_sequence
+from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass, OrderedPassPipeline
 from qat.experimental.system_data.canonical.schema import CanonicalSystemData
 from qat.experimental.system_data.hardware.qblox import (
     DEFAULT_QBLOX_TARGET,
     QbloxTargetDescription,
 )
-from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
 
 
 @dataclass(frozen=True)
@@ -78,10 +77,11 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
 
     The following constraints are enforced:
 
-    * ``pulse.wait`` constant duration: finite, non-negative, and an integer
-      number of nanoseconds.
+    * ``pulse.wait`` constant duration: finite, non-negative, an integer number of
+      nanoseconds, and either zero or at least the minimum Q1 RT duration.
     * ``pulse.square_waveform`` constant width and amplitude components in ``[-1, 1]``,
-      with a width aligned to at least one sequencer grid cycle.
+      with a width at least the minimum Q1 RT duration and aligned to the RT duration
+      resolution.
     * ``pulse.create_frame`` constant frequency: finite.
     * ``pulse.phase_set`` and ``pulse.phase_shift`` constant phase: finite.
     """
@@ -111,7 +111,21 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
     def _validate_wait(self, op: WaitOp) -> None:
         if not isinstance(op.duration.owner, ConstantOp):
             raise PassFailedException("Dynamic pulse.wait duration is not supported.")
-        self._validate_time_to_nanoseconds(op.name, "duration", extract_time_ps(op))
+        duration_ns = self._validate_time_to_nanoseconds(
+            op.name, "duration", extract_time_ps(op)
+        )
+        minimum = self.target_data.q1asm.min_rt_duration_ns
+        if 0 < duration_ns < minimum:
+            raise PassFailedException(
+                f"{op.name} duration must be 0 or at least the {minimum} ns minimum RT "
+                f"duration. Got {duration_ns} ns."
+            )
+        resolution = self.target_data.q1asm.rt_duration_resolution_ns
+        if duration_ns % resolution:
+            raise PassFailedException(
+                f"{op.name} duration must align to the {resolution} ns RT duration "
+                f"resolution. Got {duration_ns} ns."
+            )
 
     @staticmethod
     def _validate_time_to_nanoseconds(
@@ -197,29 +211,17 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
             op.name, "width", width.value.literal_value
         )
 
-        sequence = find_enclosing_sequence(op)
-        is_readout = (
-            sequence.module_config is not None
-            and sequence.seq_idx is not None
-            and DEFAULT_QBLOX_TARGET.is_readout_sequencer(
-                sequence.module_config.kind.data, sequence.seq_idx.data
-            )
-        )
-        sequencer_spec_type = (
-            Q1SequencerType.readout if is_readout else Q1SequencerType.control
-        )
-        sequencer_data = self.target_data.sequencer_spec(sequencer_spec_type)
-        grid_time = sequencer_data.clock_period_ns
-        min_width_ns = grid_time
+        min_width_ns = self.target_data.q1asm.min_rt_duration_ns
         if width_ns < min_width_ns:
             raise PassFailedException(
                 f"pulse.square_waveform width must be at least {min_width_ns} ns "
-                f"(grid_time). Got {width_ns} ns."
+                f"(minimum RT duration). Got {width_ns} ns."
             )
-        if width_ns % grid_time:
+        resolution = self.target_data.q1asm.rt_duration_resolution_ns
+        if width_ns % resolution:
             raise PassFailedException(
-                "pulse.square_waveform width must be a multiple of sequencer grid_time "
-                f"({grid_time} ns). Got {width_ns} ns."
+                "pulse.square_waveform width must align to the RT duration resolution "
+                f"({resolution} ns). Got {width_ns} ns."
             )
 
 

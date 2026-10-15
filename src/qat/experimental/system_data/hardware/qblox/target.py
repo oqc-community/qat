@@ -51,26 +51,125 @@ class AcquisitionConnectionMode(str, Enum):
 
 @dataclass(frozen=True, slots=True)
 class Q1AsmSpec:
-    """Immediate and register limits of the Q1ASM instruction set."""
+    """Immediate, duration, and register limits of the Q1ASM instruction set.
+
+    Q1 real-time instruction durations have 1 ns resolution and a 4 ns minimum
+    non-zero duration. The wait instruction has a 16-bit immediate whose zero value is
+    reserved for the documented real-time underflow-guard suspension behaviour.
+
+    See:
+
+    * https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/linq_based_feedback.html
+    """
 
     min_gain: int = -(1 << 15)
     max_gain: int = (1 << 15) - 1
     min_offset: int = -(1 << 15)
     max_offset: int = (1 << 15) - 1
-    max_wait_time_ns: int = (1 << 16) - 4
+    rt_duration_resolution_ns: int = 1
+    min_rt_duration_ns: int = 4
+    max_rt_duration_ns: int = (1 << 16) - 1
+    min_wait_immediate_ns: int = 0
+    max_wait_immediate_ns: int = (1 << 16) - 1
     register_size: int = (1 << 32) - 1
-    loop_unroll_threshold: int = 4
+
+    def __post_init__(self) -> None:
+        timing_fields = {
+            "RT duration resolution": self.rt_duration_resolution_ns,
+            "minimum RT duration": self.min_rt_duration_ns,
+            "maximum RT duration": self.max_rt_duration_ns,
+            "minimum wait immediate": self.min_wait_immediate_ns,
+            "maximum wait immediate": self.max_wait_immediate_ns,
+        }
+        for name, value in timing_fields.items():
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an integer number of ns")
+        if self.rt_duration_resolution_ns < 1:
+            raise ValueError("RT duration resolution must be positive")
+        if self.min_rt_duration_ns < 4:
+            raise ValueError("Minimum RT duration must be at least 4 ns")
+        if self.min_rt_duration_ns > (1 << 16) - 1:
+            raise ValueError("Minimum RT duration must fit the Q1 duration immediate")
+        if self.min_rt_duration_ns < self.rt_duration_resolution_ns:
+            raise ValueError("Minimum RT duration must not be below its resolution")
+        if self.min_rt_duration_ns % self.rt_duration_resolution_ns:
+            raise ValueError("Minimum RT duration must align to the RT resolution")
+        if self.max_rt_duration_ns < self.min_rt_duration_ns:
+            raise ValueError("Maximum RT duration must not be below its minimum")
+        if self.max_rt_duration_ns > (1 << 16) - 1:
+            raise ValueError("Maximum RT duration must fit the Q1 duration immediate")
+        if self.max_rt_duration_ns % self.rt_duration_resolution_ns:
+            raise ValueError("Maximum RT duration must align to the RT resolution")
+        if self.min_wait_immediate_ns != 0:
+            raise ValueError("Minimum wait immediate must be the special value 0")
+        if self.max_wait_immediate_ns < self.min_rt_duration_ns:
+            raise ValueError(
+                "Maximum wait immediate must represent the minimum RT duration"
+            )
+        if self.max_wait_immediate_ns > (1 << 16) - 1:
+            raise ValueError("Maximum wait immediate must fit its 16-bit encoding")
+        if self.max_wait_immediate_ns % self.rt_duration_resolution_ns:
+            raise ValueError("Maximum wait immediate must align to the RT resolution")
 
 
 @dataclass(frozen=True, slots=True)
 class ReadoutSpec:
-    """Limits of the acquisition path added by a readout sequencer."""
+    """Limits of the acquisition path added by a readout sequencer.
+
+    Integration length is measured in samples of ``integration_sample_period_ns`` and
+    must be a multiple of ``integration_length_step_samples``, independently of Q1
+    instruction duration constraints. Integration and weight limits follow the readout
+    sequencer and sequencer API documentation.
+
+    See:
+
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/readout.html
+    * https://docs.qblox.com/en/main/products/qblox_instruments/api/sequencer.html
+    """
 
     min_integration_length_samples: int = 4
     max_integration_length_samples: int = (1 << 24) - 4
+    integration_length_step_samples: int = 4
+    integration_sample_period_ns: int = 1
+    weight_sample_period_ns: int = 1
     min_acquisition_threshold: int = -((1 << 24) - 4)
     max_acquisition_threshold: int = (1 << 24) - 4
     weight_sample_capacity: int = 16_384
+
+    def __post_init__(self) -> None:
+        integer_fields = {
+            "Minimum integration length": self.min_integration_length_samples,
+            "Maximum integration length": self.max_integration_length_samples,
+            "Integration length step": self.integration_length_step_samples,
+            "Integration sample period": self.integration_sample_period_ns,
+            "Weight sample period": self.weight_sample_period_ns,
+            "Minimum acquisition threshold": self.min_acquisition_threshold,
+            "Maximum acquisition threshold": self.max_acquisition_threshold,
+            "Weight sample capacity": self.weight_sample_capacity,
+        }
+        for name, value in integer_fields.items():
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an integer")
+        if self.min_integration_length_samples < 1:
+            raise ValueError("Minimum integration length must be positive")
+        if self.max_integration_length_samples < self.min_integration_length_samples:
+            raise ValueError("Maximum integration length must not be below its minimum")
+        if self.integration_length_step_samples < 1:
+            raise ValueError("Integration length step must be positive")
+        if (
+            self.min_integration_length_samples % self.integration_length_step_samples
+            or self.max_integration_length_samples % self.integration_length_step_samples
+        ):
+            raise ValueError("Integration length bounds must align to their step")
+        if self.integration_sample_period_ns < 1:
+            raise ValueError("Integration sample period must be positive")
+        if self.weight_sample_period_ns != 1:
+            raise ValueError("Weight sample period must be 1 ns")
+        if self.min_acquisition_threshold > self.max_acquisition_threshold:
+            raise ValueError("Maximum acquisition threshold must not be below its minimum")
+        if self.weight_sample_capacity < 1:
+            raise ValueError("Weight sample capacity must be positive")
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,12 +201,23 @@ class LocalOscillatorSpec:
 
 @dataclass(frozen=True, slots=True)
 class Q1SequencerSpec:
-    """Static limits and features of one Q1 sequencer type."""
+    """Static limits and features of one Q1 sequencer type.
+
+    ``q1_core_clock_period_ns`` describes instruction issue timing such as ``nop``.
+    ``sample_period_ns`` describes the independent waveform memory sampling grid.
+
+    See:
+
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html#q1-core
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html#real-time-core
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/control.html
+    * https://docs.qblox.com/en/main/products/architecture/sequencers/readout.html
+    """
 
     type: Q1SequencerType
     instruction_capacity: int
-    clock_period_ns: int = 4
-    sample_rate_hz: int = 1_000_000_000
+    q1_core_clock_period_ns: int = 4
+    sample_period_ns: int = 1
     min_waveform_sample: float = -1.0
     max_waveform_sample: float = 1.0
     nco_min_frequency_hz: float = -500_000_000.0
@@ -121,8 +231,18 @@ class Q1SequencerSpec:
     readout: ReadoutSpec | None = None
 
     def __post_init__(self) -> None:
-        if self.clock_period_ns < 1:
-            raise ValueError("Q1 sequencer clock period must be positive")
+        if isinstance(self.q1_core_clock_period_ns, bool) or not isinstance(
+            self.q1_core_clock_period_ns, int
+        ):
+            raise TypeError("Q1 core clock period must be an integer number of ns")
+        if self.q1_core_clock_period_ns < 1:
+            raise ValueError("Q1 core clock period must be positive")
+        if isinstance(self.sample_period_ns, bool) or not isinstance(
+            self.sample_period_ns, int
+        ):
+            raise TypeError("Waveform sample period must be an integer number of ns")
+        if self.sample_period_ns < 1:
+            raise ValueError("Waveform sample period must be positive")
         if (self.type is Q1SequencerType.readout) != (self.readout is not None):
             raise ValueError("Readout sequencer specifications require readout-path limits")
 

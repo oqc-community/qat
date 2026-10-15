@@ -57,7 +57,7 @@ def fission_for_lineage(
     lineage: FrameLineage,
     analysis: FrameLineageAnalysis,
     value_mapper: dict[SSAValue, SSAValue],
-    synchronization_grid_time: int,
+    synchronization_duration: int,
 ) -> ForOp:
     """Build a copy of an ``scf.for`` with only the contents belonging to ``lineage``.
 
@@ -66,7 +66,7 @@ def fission_for_lineage(
     :param analysis: Analysis providing per-operation lineage ownership.
     :param value_mapper: Clone mapping for the partition, used to resolve operands
         defined by entry-block operations already copied into this sequence.
-    :param synchronization_grid_time: Duration valid on every sequencer that can receive
+    :param synchronization_duration: RT duration valid on every sequencer that can receive
         synchronization scaffolding.
     :returns: A newly built ``scf.for`` carrying only ``lineage``'s operations, with no
         loop-carried values.
@@ -88,7 +88,7 @@ def fission_for_lineage(
         _retained_ops(op, lineage, analysis),
         lineage,
         value_mapper,
-        synchronization_grid_time,
+        synchronization_duration,
     )
 
 
@@ -181,7 +181,7 @@ def _build_loop(
     retained: set[Operation],
     lineage: FrameLineage,
     value_mapper: dict[SSAValue, SSAValue],
-    synchronization_grid_time: int,
+    synchronization_duration: int,
 ) -> ForOp:
     """Build a loop over ``retained``, carrying no values between iterations."""
     block = op.body.block
@@ -197,9 +197,9 @@ def _build_loop(
     mapper[block.args[0]] = body.args[0]
     body.add_ops(
         [
-            WaitSyncImmOp(DurationImm(synchronization_grid_time)),
+            WaitSyncImmOp(DurationImm(synchronization_duration)),
             ResetPhOp(),
-            UpdParamImmOp(DurationImm(synchronization_grid_time)),
+            UpdParamImmOp(DurationImm(synchronization_duration)),
             *(inner.clone(mapper) for inner in block.ops if inner in retained),
         ]
     )

@@ -3,7 +3,6 @@
 """Q1 sequence outlining: splits a Pulse entry block into per-frame sequence envelopes."""
 
 from dataclasses import dataclass, field
-from math import lcm
 from re import compile
 
 from xdsl.context import Context
@@ -41,10 +40,7 @@ from qat.experimental.dialect.q1 import (
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass
 from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
-from qat.experimental.system_data.hardware.qblox.target import (
-    Q1SequencerType,
-    QbloxTargetDescription,
-)
+from qat.experimental.system_data.hardware.qblox.target import QbloxTargetDescription
 
 _NON_SYMBOL_CHARS = compile(r"[^0-9A-Za-z_$.]")
 _MULTI_UNDERSCORE = compile(r"_+")
@@ -55,12 +51,10 @@ _MULTI_UNDERSCORE = compile(r"_+")
 _MARKER_BITMASK = 0b0011
 
 
-def _synchronization_grid_time(target_data: QbloxTargetDescription) -> int:
-    """Return a synchronization duration valid for control and readout sequencers."""
-    return lcm(
-        target_data.sequencer_spec(Q1SequencerType.control).clock_period_ns,
-        target_data.sequencer_spec(Q1SequencerType.readout).clock_period_ns,
-    )
+def _synchronization_duration(target_data: QbloxTargetDescription) -> int:
+    """Return a normal RT duration valid for synchronization scaffolding."""
+
+    return target_data.q1asm.min_rt_duration_ns
 
 
 def _normalize_sequence_symbol(channel_token: str) -> str:
@@ -230,7 +224,7 @@ def _build_partition_sequence_body(
                     lineage,
                     analysis,
                     value_mapper,
-                    _synchronization_grid_time(target_data),
+                    _synchronization_duration(target_data),
                 )
             )
         else:
@@ -357,11 +351,11 @@ class Q1OutliningPass(OrderedPass, ModulePass):
             raise ValueError(f"Partition {frame_id} does not contain pulse.create_frame.")
 
         channel_token, sequence_symbol = symbol_allocator.allocate(frame_id, lineage)
-        grid_time = _synchronization_grid_time(self.target_data)
+        synchronization_duration = _synchronization_duration(self.target_data)
         sequence_ops = [
             SetMrkImmOp(UI4Imm(_MARKER_BITMASK)),
-            SetLatchEnImmImmOp(BoolImm(1), DurationImm(grid_time)),
-            UpdParamImmOp(DurationImm(grid_time)),
+            SetLatchEnImmImmOp(BoolImm(1), DurationImm(synchronization_duration)),
+            UpdParamImmOp(DurationImm(synchronization_duration)),
             *sequence_body,
             StopOp(),
         ]

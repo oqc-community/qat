@@ -48,7 +48,10 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     create_pulse_to_q1_legalisation_patterns,
     create_pulse_to_q1_lowering_patterns,
 )
-from qat.experimental.conversion.pulse_to_q1.waveform import SquareWaveformLowering
+from qat.experimental.conversion.pulse_to_q1.waveform import (
+    SquareWaveformLowering,
+    split_wait_duration,
+)
 from qat.experimental.dialect.pulse.ir import (
     AddOp,
     AmplitudeAttr,
@@ -84,25 +87,32 @@ from qat.experimental.dialect.q1 import (
     StopOp,
     WaitImmOp,
 )
-from qat.experimental.dialect.q1.ir.imm_desc import DurationImm
 from qat.experimental.dialect.q1.ir.ops import AcquireImmRsImmOp, UpdParamImmOp
 from qat.experimental.dialect.q1.ir.reg_desc import IntRegisterType
 from qat.experimental.dialect.q1_sequence.ir.attrs import (
+    ModuleConfigAttr,
     NcoConfigAttr,
     SequencerConfigAttr,
     make_dense_floats,
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
-from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
-from qat.experimental.system_data.hardware.qblox.target import Q1SequencerType
+from qat.experimental.system_data.hardware.qblox import (
+    DEFAULT_QBLOX_TARGET,
+    QbloxModuleKind,
+)
+from qat.experimental.system_data.hardware.qblox.target import Q1AsmSpec, Q1SequencerType
 
 
-def _target_with_readout_sample_rate(sample_rate: float):
-    """Return target data with a custom readout sample rate."""
+def _target_with_readout_sample_period(sample_period_ns: int):
+    """Return target data with a custom readout sample period."""
 
+    readout_spec = replace(
+        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout).readout,
+        integration_sample_period_ns=sample_period_ns,
+    )
     readout = replace(
         DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
-        sample_rate_hz=sample_rate,
+        readout=readout_spec,
     )
     return replace(
         DEFAULT_QBLOX_TARGET,
@@ -110,25 +120,6 @@ def _target_with_readout_sample_rate(sample_rate: float):
             {
                 **DEFAULT_QBLOX_TARGET.sequencer_specs,
                 Q1SequencerType.readout: readout,
-            }
-        ),
-    )
-
-
-def _target_with_control_timing(sample_rate: float, grid_time: int):
-    """Return target data with custom control sequencer timing."""
-
-    control = replace(
-        DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
-        sample_rate_hz=sample_rate,
-        clock_period_ns=grid_time,
-    )
-    return replace(
-        DEFAULT_QBLOX_TARGET,
-        sequencer_specs=frozendict(
-            {
-                **DEFAULT_QBLOX_TARGET.sequencer_specs,
-                Q1SequencerType.control: control,
             }
         ),
     )
@@ -259,22 +250,20 @@ def test_rewrite_wait_op_lowers_short_wait():
 
 
 @pytest.mark.parametrize(
-    ("duration_ps", "target_data", "expected_duration_ns"),
+    ("duration_ps", "expected_duration_ns"),
     [
-        (5e3, DEFAULT_QBLOX_TARGET, 8),  # 5 ns in ps
-        (9e3, _target_with_control_timing(500e6, 8), 16),  # 9 ns in ps
+        (5e3, 5),
+        (9e3, 9),
     ],
 )
-def test_rewrite_wait_op_aligns_to_sequencer_grid(
-    duration_ps, target_data, expected_duration_ns
-):
+def test_rewrite_wait_op_preserves_nanosecond_duration(duration_ps, expected_duration_ns):
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(duration_ps))
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
     Q1PulseLegalisationPass().apply(Context(), module)
-    PulseToQ1LoweringPass(target_data=target_data).apply(Context(), module)
+    PulseToQ1LoweringPass().apply(Context(), module)
 
     wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
     assert [op.duration.data for op in wait_ops] == [expected_duration_ns]
@@ -300,7 +289,7 @@ def test_enclosing_port_ignores_non_sequence_parent():
 
 def test_rewrite_wait_op_chains_long_wait():
     """A wait longer than the maximum immediate lowers to a chain summing to the value."""
-    max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_time_ns
+    max_wait_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_immediate_ns
     total_ns = 2 * max_wait_time + 16
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(total_ns * 1e3))  # total_ns in ps
@@ -316,50 +305,97 @@ def test_rewrite_wait_op_chains_long_wait():
     assert sum(durations) == total_ns
 
 
-def test_rewrite_wait_op_rounds_large_picosecond_duration_up(monkeypatch):
-    duration_ps = 9_007_199_254_744_001
-    expected_duration_ns = 9_007_199_254_748
-    monkeypatch.setattr(DurationImm, "_MAX", expected_duration_ns)
-    target_data = replace(
-        DEFAULT_QBLOX_TARGET,
-        q1asm=replace(
-            DEFAULT_QBLOX_TARGET.q1asm,
-            max_wait_time_ns=expected_duration_ns,
-        ),
-    )
+def test_rewrite_wait_op_preserves_five_nanoseconds():
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(5_000))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PulseToQ1LoweringPass().apply(Context(), module)
+
+    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+    assert [op.duration.data for op in wait_ops] == [5]
+
+
+def test_rewrite_zero_wait_emits_no_q1_wait():
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(0))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PulseToQ1LoweringPass().apply(Context(), module)
+
+    assert not any(isinstance(op, WaitImmOp) for op in _sequence_body_ops(module))
+
+
+@pytest.mark.parametrize(
+    ("total_ns", "expected"),
+    [
+        (65_535, [65_535]),
+        (65_536, [65_532, 4]),
+        (65_539, [65_535, 4]),
+        (131_070, [65_535, 65_535]),
+    ],
+)
+def test_rewrite_wait_op_splits_full_immediate_range(total_ns, expected):
+    freq, frame = _frame()
+    duration = ConstantOp(TimeAttr(total_ns * 1_000))
+    wait = WaitOp(frame, duration)
+    module = _sequence_module(freq, frame, duration, wait)
+
+    PulseToQ1LoweringPass().apply(Context(), module)
+
+    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
+    assert [op.duration.data for op in wait_ops] == expected
+
+
+def test_rewrite_wait_op_rejects_fractional_nanoseconds():
+    duration_ps = 5_001
     freq, frame = _frame()
     duration = ConstantOp(TimeAttr(duration_ps))
     wait = WaitOp(frame, duration)
     module = _sequence_module(freq, frame, duration, wait)
 
-    PatternRewriteWalker(
-        RewriteWaitOp(target_data), apply_recursively=False
-    ).rewrite_module(module)
-
-    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
-    assert [op.duration.data for op in wait_ops] == [expected_duration_ns]
+    with pytest.raises(PassFailedException, match="whole number of nanoseconds"):
+        PatternRewriteWalker(
+            RewriteWaitOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
+        ).rewrite_module(module)
 
 
-def test_rewrite_wait_op_uses_grid_aligned_chunks():
-    """Long wait chunks respect a selected sequencer's coarser timing grid."""
-    target_data = _target_with_control_timing(
-        sample_rate=1_000_000_000,
-        grid_time=8,
-    )
-    max_wait_time = target_data.q1asm.max_wait_time_ns
-    max_aligned_wait_time = max_wait_time - max_wait_time % 8
-    total_ns = 2 * max_aligned_wait_time + 16
-    freq, frame = _frame()
-    duration = ConstantOp(TimeAttr(total_ns * 1e3))  # total_ns in ps
-    wait = WaitOp(frame, duration)
-    module = _sequence_module(freq, frame, duration, wait)
+@pytest.mark.parametrize(
+    ("duration_ns", "q1asm", "message"),
+    [
+        (3, Q1AsmSpec(), "not representable"),
+        (
+            5,
+            Q1AsmSpec(
+                rt_duration_resolution_ns=2,
+                min_rt_duration_ns=4,
+                max_rt_duration_ns=10,
+                max_wait_immediate_ns=10,
+            ),
+            "not representable",
+        ),
+        (
+            5,
+            Q1AsmSpec(
+                min_rt_duration_ns=4,
+                max_rt_duration_ns=4,
+                max_wait_immediate_ns=4,
+            ),
+            "cannot be split",
+        ),
+    ],
+)
+def test_split_wait_duration_rejects_unrepresentable_duration(duration_ns, q1asm, message):
+    with pytest.raises(PassFailedException, match=message):
+        split_wait_duration(duration_ns, q1asm)
 
-    PulseToQ1LoweringPass(target_data=target_data).apply(Context(), module)
 
-    wait_ops = [op for op in _sequence_body_ops(module) if isinstance(op, WaitImmOp)]
-    durations = [op.duration.data for op in wait_ops]
-    assert durations == [max_aligned_wait_time, max_aligned_wait_time, 16]
-    assert all(duration_ns % 8 == 0 for duration_ns in durations)
+def test_split_wait_duration_redistributes_short_remainder_across_chunks():
+    q1asm = Q1AsmSpec(max_rt_duration_ns=6, max_wait_immediate_ns=6)
+
+    assert split_wait_duration(13, q1asm) == (5, 4, 4)
 
 
 def test_rewrite_phase_set_op_lowers_to_set_ph_and_upd_param():
@@ -708,8 +744,8 @@ class TestRewritePreQ1AcquireOp:
         assert seq.sequencer_config.port_id.data == "q0/measure"
         assert seq.sequencer_config.integration_length.data == 1000
 
-    def test_unweighted_integration_length_uses_readout_sample_rate(self):
-        target_data = _target_with_readout_sample_rate(500_000_000)
+    def test_unweighted_integration_length_uses_readout_sample_period(self):
+        target_data = _target_with_readout_sample_period(2)
 
         seq, [op] = self._run(
             (None, 16_000, "q0/measure"),
@@ -720,7 +756,7 @@ class TestRewritePreQ1AcquireOp:
         assert seq.sequencer_config.integration_length.data == 8
 
     def test_unweighted_rejects_misaligned_integration_length(self):
-        target_data = _target_with_readout_sample_rate(500_000_000)
+        target_data = _target_with_readout_sample_period(2)
 
         with pytest.raises(
             PassFailedException,
@@ -735,36 +771,49 @@ class TestRewritePreQ1AcquireOp:
             )
 
     @pytest.mark.parametrize(
-        ("duration_ps", "sample_count"),
+        ("duration_ps", "message"),
         [
-            pytest.param(0, 0, id="below-minimum"),
-            pytest.param(((1 << 24) - 3) * 1e3, (1 << 24) - 3, id="above-maximum"),
+            pytest.param(0, "below minimum 4 ns", id="below-minimum"),
+            pytest.param(65_536_000, "above maximum 65535 ns", id="above-maximum"),
         ],
     )
-    def test_unweighted_rejects_out_of_range_integration_length(
-        self, duration_ps, sample_count
-    ):
-        with pytest.raises(
-            PassFailedException,
-            match=rf"spans {sample_count} samples.*outside the supported.*range",
-        ):
+    def test_unweighted_rejects_out_of_range_rt_duration(self, duration_ps, message):
+        with pytest.raises(PassFailedException, match=message):
             self._run((None, duration_ps, "q0/measure"))
 
     def test_unweighted_rejects_fractional_sample_count(self):
-        target_data = _target_with_readout_sample_rate(750_000_000)
+        target_data = _target_with_readout_sample_period(3)
 
-        with pytest.raises(PassFailedException, match="integer number of samples"):
+        with pytest.raises(PassFailedException, match=r"integer number of .* samples"):
             self._run(
                 (None, 10_000, "q0/measure"),
                 target_data=target_data,
             )
 
-    def test_unweighted_rejects_non_integer_sample_rate(self):
-        target_data = _target_with_readout_sample_rate(500_000_000.5)
+    @pytest.mark.parametrize(
+        "weights",
+        [
+            pytest.param(None, id="unweighted"),
+            pytest.param(WeightsAttr(np.array([0.5 + 0.5j] * 5)), id="weighted"),
+        ],
+    )
+    def test_acquisition_rejects_duration_off_rt_resolution(self, weights):
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(
+                DEFAULT_QBLOX_TARGET.q1asm,
+                rt_duration_resolution_ns=2,
+                max_rt_duration_ns=65_534,
+                max_wait_immediate_ns=65_534,
+            ),
+        )
 
-        with pytest.raises(PassFailedException, match="sample rate must be an integer"):
+        with pytest.raises(
+            PassFailedException,
+            match="must align to the 2 ns RT duration resolution",
+        ):
             self._run(
-                (None, 16_000, "q0/measure"),
+                (weights, 5_000, "q0/measure"),
                 target_data=target_data,
             )
 
@@ -1091,8 +1140,7 @@ class TestRewritePreQ1AcquireOp:
             pattern.match_and_rewrite(acquire, None)
 
 
-def _sampled_waveform(samples) -> ConstantOp:
-    sample_time = 1e3
+def _sampled_waveform(samples, sample_time=1e3) -> ConstantOp:
     width = len(samples) * sample_time
     return ConstantOp(
         SampledWaveformAttr(samples, TimeAttr(width), TimeAttr(sample_time)),
@@ -1300,7 +1348,7 @@ class TestRewritePulseOp:
         """When a pulse is greater than the value set in target data, it cannot be
         played."""
 
-        max_time = DEFAULT_QBLOX_TARGET.q1asm.max_wait_time_ns
+        max_time = DEFAULT_QBLOX_TARGET.q1asm.max_rt_duration_ns
         waveform_op = _sampled_waveform([0.2 + 0.1j] * (max_time + 1))
         sequence = _sequence_with_pulse(waveform_op)
         module = ModuleOp([sequence])
@@ -1312,8 +1360,103 @@ class TestRewritePulseOp:
                 RewritePulseOp(DEFAULT_QBLOX_TARGET), apply_recursively=False
             ).rewrite_module(module)
 
+    def test_pulse_rejects_duration_off_rt_resolution(self):
+        waveform_op = _sampled_waveform([0.2 + 0.1j] * 5)
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(
+                DEFAULT_QBLOX_TARGET.q1asm,
+                rt_duration_resolution_ns=2,
+                max_rt_duration_ns=65_534,
+                max_wait_immediate_ns=65_534,
+            ),
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match="must align to the 2 ns RT duration resolution",
+        ):
+            PatternRewriteWalker(
+                RewritePulseOp(target_data), apply_recursively=False
+            ).rewrite_module(module)
+
+    def test_pulse_rejects_sample_time_off_target_period(self):
+        waveform_op = _sampled_waveform([0.2 + 0.1j] * 4)
+        sequence = _sequence_with_pulse(waveform_op)
+        module = ModuleOp([sequence])
+        control = replace(
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
+            sample_period_ns=2,
+        )
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            sequencer_specs=frozendict(
+                {
+                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                    Q1SequencerType.control: control,
+                }
+            ),
+        )
+
+        with pytest.raises(
+            PassFailedException,
+            match="does not match the target waveform sample period 2000 ps",
+        ):
+            PatternRewriteWalker(
+                RewritePulseOp(target_data), apply_recursively=False
+            ).rewrite_module(module)
+
+    def test_pulse_uses_bound_readout_sequencer_sample_period(self):
+        readout = replace(
+            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout),
+            sample_period_ns=2,
+        )
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            sequencer_specs=frozendict(
+                {
+                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
+                    Q1SequencerType.readout: readout,
+                }
+            ),
+        )
+        module_config = ModuleConfigAttr(1, "cluster", QbloxModuleKind.qrm)
+
+        invalid_waveform = _sampled_waveform([0.2 + 0.1j] * 4)
+        invalid_sequence = SequenceOp(
+            "q0_measure",
+            [*_pulse_ops(invalid_waveform, "q0.measure"), StopOp()],
+            seq_idx=0,
+            module_config=module_config,
+        )
+        with pytest.raises(
+            PassFailedException,
+            match="does not match the target waveform sample period 2000 ps",
+        ):
+            PatternRewriteWalker(
+                RewritePulseOp(target_data), apply_recursively=False
+            ).rewrite_module(ModuleOp([invalid_sequence]))
+
+        valid_waveform = _sampled_waveform([0.2 + 0.1j] * 4, sample_time=2e3)
+        valid_sequence = SequenceOp(
+            "q0_measure",
+            [*_pulse_ops(valid_waveform, "q0.measure"), StopOp()],
+            seq_idx=0,
+            module_config=module_config,
+        )
+        PatternRewriteWalker(
+            RewritePulseOp(target_data), apply_recursively=False
+        ).rewrite_module(ModuleOp([valid_sequence]))
+
+        [play] = [
+            op for op in valid_sequence.body.block.ops if isinstance(op, PlayImmImmImmOp)
+        ]
+        assert play.imm3.data == 8
+
     @pytest.mark.parametrize(
-        "pulse_length", [4, DEFAULT_QBLOX_TARGET.q1asm.max_wait_time_ns]
+        "pulse_length", [4, DEFAULT_QBLOX_TARGET.q1asm.max_rt_duration_ns]
     )
     def test_edge_case_times_lower_successfully(self, pulse_length):
         """When a pulse is exactly 4ns or the maximum value set in target data it can be
@@ -1391,7 +1534,7 @@ class TestSquareWaveformLowering:
         assert isinstance(q1_ops[fall_index + 1], UpdParamImmOp)
         assert (
             q1_ops[fall_index + 1].duration.data
-            == DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).clock_period_ns
+            == DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
         )
         assert (
             sum(
@@ -1399,61 +1542,17 @@ class TestSquareWaveformLowering:
                 for op in q1_ops
                 if isinstance(op, UpdParamImmOp | WaitImmOp)
             )
-            == width_ns
-            + DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control).clock_period_ns
+            == width_ns + DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
         )
         assert not any(isinstance(op, SquareWaveformOp) for op in sequence.body.block.ops)
 
-    def test_rejects_wait_limit_smaller_than_sequencer_grid(self):
-        control_data = replace(
-            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
-            clock_period_ns=8,
-        )
-        q1asm_data = replace(DEFAULT_QBLOX_TARGET.q1asm, max_wait_time_ns=4)
-        target_data = replace(
-            DEFAULT_QBLOX_TARGET,
-            sequencer_specs=frozendict(
-                {
-                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
-                    Q1SequencerType.control: control_data,
-                },
-            ),
-            q1asm=q1asm_data,
-        )
-        module, _ = _square_pulse_module(TimeAttr(16_000))
-
-        with pytest.raises(
-            PassFailedException,
-            match="Q1 wait limit 4 ns cannot represent.*8 ns sequencer alignment",
-        ):
-            PatternRewriteWalker(
-                RewriteSquareWaveformPulseOp(
-                    target_data,
-                    rewrite_callable=SquareWaveformLowering(),
-                ),
-                apply_recursively=False,
-            ).rewrite_module(module)
-
-    def test_splits_long_waits_on_the_sequencer_grid(self):
-        control_data = replace(
-            DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control),
-            clock_period_ns=8,
-        )
-        target_data = replace(
-            DEFAULT_QBLOX_TARGET,
-            sequencer_specs=frozendict(
-                {
-                    **DEFAULT_QBLOX_TARGET.sequencer_specs,
-                    Q1SequencerType.control: control_data,
-                }
-            ),
-        )
-        width_ns = 65_544
+    def test_splits_long_waits_without_q1_core_clock_alignment(self):
+        width_ns = 65_541
         module, sequence = _square_pulse_module(TimeAttr(width_ns * 1000))
 
         PatternRewriteWalker(
             RewriteSquareWaveformPulseOp(
-                target_data,
+                DEFAULT_QBLOX_TARGET,
                 rewrite_callable=SquareWaveformLowering(),
             ),
             apply_recursively=False,
@@ -1464,7 +1563,8 @@ class TestSquareWaveformLowering:
             for op in sequence.body.block.ops
             if isinstance(op, UpdParamImmOp | WaitImmOp)
         ]
-        assert all(duration % control_data.clock_period_ns == 0 for duration in durations)
+        assert 65_533 in durations
+        assert 4 in durations
         assert sum(durations[:-1]) == width_ns
 
     def test_adjusts_wait_when_final_chunk_would_be_too_short(self):
@@ -1472,7 +1572,7 @@ class TestSquareWaveformLowering:
             DEFAULT_QBLOX_TARGET,
             q1asm=replace(
                 DEFAULT_QBLOX_TARGET.q1asm,
-                max_wait_time_ns=12,
+                max_wait_immediate_ns=12,
             ),
         )
         module, sequence = _square_pulse_module(TimeAttr(17_000))
@@ -1489,6 +1589,29 @@ class TestSquareWaveformLowering:
             op.duration.data for op in sequence.body.block.ops if isinstance(op, WaitImmOp)
         ]
         assert wait_durations == [9, 4]
+
+    def test_rejects_rising_edge_above_configured_rt_maximum(self):
+        target_data = replace(
+            DEFAULT_QBLOX_TARGET,
+            q1asm=replace(
+                DEFAULT_QBLOX_TARGET.q1asm,
+                max_rt_duration_ns=6,
+                max_wait_immediate_ns=6,
+            ),
+        )
+        module, _ = _square_pulse_module(TimeAttr(7_000))
+
+        with pytest.raises(
+            PassFailedException,
+            match="rising-edge duration 7 ns exceeds the maximum RT duration 6 ns",
+        ):
+            PatternRewriteWalker(
+                RewriteSquareWaveformPulseOp(
+                    target_data,
+                    rewrite_callable=SquareWaveformLowering(),
+                ),
+                apply_recursively=False,
+            ).rewrite_module(module)
 
     def test_lowering_pass_emits_complete_q1_sequence(self):
         module, sequence = _square_pulse_module(TimeAttr(80_000))

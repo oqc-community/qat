@@ -18,6 +18,7 @@ from qat.experimental.system_data.hardware.qblox.target import (
     AcquisitionConnectionMode,
     LocalOscillatorSpec,
     ModuleSpec,
+    Q1AsmSpec,
     Q1SequencerFeature,
     Q1SequencerSpec,
     Q1SequencerType,
@@ -550,11 +551,170 @@ def test_target_rejects_inconsistent_specifications(updates, message):
         replace(DEFAULT_QBLOX_TARGET, **updates)
 
 
-@pytest.mark.parametrize("clock_period_ns", [0, -1])
-def test_sequencer_spec_requires_positive_clock_period(clock_period_ns):
-    with pytest.raises(ValueError, match="clock period must be positive"):
+@pytest.mark.parametrize("q1_core_clock_period_ns", [0, -1])
+def test_sequencer_spec_requires_positive_q1_core_clock(q1_core_clock_period_ns):
+    with pytest.raises(ValueError, match="Q1 core clock period must be positive"):
         Q1SequencerSpec(
             Q1SequencerType.control,
             instruction_capacity=1,
-            clock_period_ns=clock_period_ns,
+            q1_core_clock_period_ns=q1_core_clock_period_ns,
+        )
+
+
+def test_default_target_distinguishes_q1_and_rt_timing():
+    q1asm = DEFAULT_QBLOX_TARGET.q1asm
+    sequencer = DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.control)
+
+    assert q1asm.rt_duration_resolution_ns == 1
+    assert q1asm.min_rt_duration_ns == 4
+    assert q1asm.max_rt_duration_ns == 65_535
+    assert q1asm.min_wait_immediate_ns == 0
+    assert q1asm.max_wait_immediate_ns == 65_535
+    assert sequencer.q1_core_clock_period_ns == 4
+    assert sequencer.sample_period_ns == 1
+
+
+def test_readout_target_has_independent_integration_alignment():
+    readout = DEFAULT_QBLOX_TARGET.sequencer_spec(Q1SequencerType.readout).readout
+
+    assert readout.integration_length_step_samples == 4
+    assert readout.integration_sample_period_ns == 1
+    assert readout.weight_sample_period_ns == 1
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        ({"rt_duration_resolution_ns": 0}, "resolution must be positive"),
+        (
+            {"rt_duration_resolution_ns": 5},
+            "Minimum RT duration must not be below",
+        ),
+        (
+            {"rt_duration_resolution_ns": 3},
+            "Minimum RT duration must align",
+        ),
+        ({"max_rt_duration_ns": 3}, "Maximum RT duration must not be below"),
+        (
+            {"rt_duration_resolution_ns": 2, "max_rt_duration_ns": 65_535},
+            "Maximum RT duration must align",
+        ),
+        (
+            {"min_wait_immediate_ns": -1},
+            "Minimum wait immediate must be the special value 0",
+        ),
+        (
+            {"max_wait_immediate_ns": 3},
+            "Maximum wait immediate must represent",
+        ),
+        (
+            {"min_wait_immediate_ns": 8, "max_wait_immediate_ns": 7},
+            "Minimum wait immediate must be the special value 0",
+        ),
+        (
+            {
+                "rt_duration_resolution_ns": 2,
+                "max_rt_duration_ns": 65_534,
+                "max_wait_immediate_ns": 65_535,
+            },
+            "Maximum wait immediate must align",
+        ),
+        ({"min_rt_duration_ns": 3}, "Minimum RT duration must be at least 4 ns"),
+        (
+            {"min_rt_duration_ns": 65_536, "max_rt_duration_ns": 65_536},
+            "Minimum RT duration must fit",
+        ),
+        ({"max_rt_duration_ns": 65_536}, "Maximum RT duration must fit"),
+        ({"max_wait_immediate_ns": 65_536}, "Maximum wait immediate must fit"),
+    ],
+)
+def test_q1asm_spec_rejects_inconsistent_timing(updates, message):
+    with pytest.raises(ValueError, match=message):
+        Q1AsmSpec(**updates)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "rt_duration_resolution_ns",
+        "min_rt_duration_ns",
+        "max_rt_duration_ns",
+        "min_wait_immediate_ns",
+        "max_wait_immediate_ns",
+    ],
+)
+@pytest.mark.parametrize("value", [True, 4.0])
+def test_q1asm_spec_rejects_non_integer_timing(field, value):
+    with pytest.raises(TypeError, match="integer number of ns"):
+        Q1AsmSpec(**{field: value})
+
+
+@pytest.mark.parametrize(
+    ("updates", "message"),
+    [
+        ({"min_integration_length_samples": 0}, "Minimum integration length"),
+        (
+            {
+                "min_integration_length_samples": 8,
+                "max_integration_length_samples": 4,
+            },
+            "Maximum integration length must not be below",
+        ),
+        ({"integration_length_step_samples": 0}, "step must be positive"),
+        (
+            {"integration_length_step_samples": 3},
+            "bounds must align",
+        ),
+        ({"integration_sample_period_ns": 0}, "Integration sample period"),
+        ({"weight_sample_period_ns": 2}, "Weight sample period must be 1 ns"),
+        (
+            {"min_acquisition_threshold": 1, "max_acquisition_threshold": 0},
+            "Maximum acquisition threshold must not be below",
+        ),
+        ({"weight_sample_capacity": 0}, "Weight sample capacity must be positive"),
+    ],
+)
+def test_readout_spec_rejects_inconsistent_timing(updates, message):
+    with pytest.raises(ValueError, match=message):
+        ReadoutSpec(**updates)
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "min_integration_length_samples",
+        "max_integration_length_samples",
+        "integration_length_step_samples",
+        "integration_sample_period_ns",
+        "weight_sample_period_ns",
+        "min_acquisition_threshold",
+        "max_acquisition_threshold",
+        "weight_sample_capacity",
+    ],
+)
+@pytest.mark.parametrize("value", [True, 1.0])
+def test_readout_spec_rejects_non_integer_fields(field, value):
+    with pytest.raises(TypeError, match="must be an integer"):
+        ReadoutSpec(**{field: value})
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "error", "message"),
+    [
+        (
+            "q1_core_clock_period_ns",
+            4.0,
+            TypeError,
+            "core clock period must be an integer",
+        ),
+        ("sample_period_ns", 1.0, TypeError, "sample period must be an integer"),
+        ("sample_period_ns", 0, ValueError, "sample period must be positive"),
+    ],
+)
+def test_sequencer_spec_rejects_invalid_timing(field, value, error, message):
+    with pytest.raises(error, match=message):
+        Q1SequencerSpec(
+            Q1SequencerType.control,
+            instruction_capacity=1,
+            **{field: value},
         )

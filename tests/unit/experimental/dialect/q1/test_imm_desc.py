@@ -33,6 +33,7 @@ from qat.experimental.dialect.q1 import (
     UI16Imm,
     UI24Imm,
     UI32Imm,
+    WaitDurationImm,
 )
 
 _FIXED_RANGE_TYPES = [
@@ -49,6 +50,7 @@ _FIXED_RANGE_TYPES = [
     (UI16Imm, 0, 65535),
     (SI16Imm, -32768, 32767),
     (DurationImm, 4, 65535),
+    (WaitDurationImm, 0, 65535),
     (UI24Imm, 0, 16_777_215),
     (UI32Imm, 0, 2**32 - 1),
     (SI32Imm, -(2**31), 2**31 - 1),
@@ -78,6 +80,21 @@ def test_address_imm_is_ui14_alias():
     assert AddressImm is UI14Imm
 
 
+def test_duration_imm_accepts_one_nanosecond_resolution_above_minimum():
+    assert DurationImm(5).data == 5
+
+
+@pytest.mark.parametrize("value", [0, 4])
+def test_wait_duration_imm_accepts_zero_or_normal_rt_duration(value):
+    assert WaitDurationImm(value).data == value
+
+
+@pytest.mark.parametrize("value", [1, 3])
+def test_wait_duration_imm_rejects_gap_below_normal_rt_duration(value):
+    with pytest.raises(VerifyException, match="must be 0 or in"):
+        WaitDurationImm(value)
+
+
 def test_verify_runs_validation_post_construction():
     op = UI4Imm(7)
     object.__setattr__(op, "data", 99)
@@ -97,6 +114,7 @@ def test_diagnostic_includes_type_name_value_and_range():
         (UI4Imm, 12),
         (SI16Imm, -7),
         (DurationImm, 100),
+        (WaitDurationImm, 0),
         (SU32Imm, -42),
         (NcoPhaseImm, 1_000_000_000),
     ],

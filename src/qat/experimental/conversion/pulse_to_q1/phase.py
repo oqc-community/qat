@@ -121,6 +121,9 @@ class PhaseLowering:
         ).with_debug_info(debug_info)
         rewriter.replace_op(
             op,
-            [primary, UpdParamImmOp(DurationImm(sequencer_data.clock_period_ns))],
+            [
+                primary,
+                UpdParamImmOp(DurationImm(target_data.q1asm.min_rt_duration_ns)),
+            ],
             (op.frame,),
         )

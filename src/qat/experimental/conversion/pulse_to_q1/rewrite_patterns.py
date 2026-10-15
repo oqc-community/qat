@@ -33,6 +33,7 @@ from qat.experimental.conversion.pulse_to_q1.pre_q1_ir import PreQ1AcquireOp
 from qat.experimental.conversion.pulse_to_q1.waveform import (
     SquareWaveformLegalisation,
     SquareWaveformLowering,
+    split_wait_duration,
 )
 from qat.experimental.dialect.pulse.ir import (
     AmplitudeAttr,
@@ -59,6 +60,7 @@ from qat.experimental.dialect.q1 import (
     SetAwgOffsImmImmOp,
     SI16Imm,
     UI10Imm,
+    WaitDurationImm,
     WaitImmOp,
 )
 from qat.experimental.dialect.q1.ir.attrs import DebugInfoAttr, ProvenanceInfoAttr
@@ -202,7 +204,7 @@ def _sequencer_data(op: Operation, target_data: QbloxTargetDescription) -> Q1Seq
     sequence = find_enclosing_sequence(op)
     if sequence.module_config is None or sequence.seq_idx is None:
         return target_data.sequencer_spec(Q1SequencerType.control)
-    if DEFAULT_QBLOX_TARGET.is_readout_sequencer(
+    if target_data.is_readout_sequencer(
         sequence.module_config.kind.data, sequence.seq_idx.data
     ):
         return target_data.sequencer_spec(Q1SequencerType.readout)
@@ -212,11 +214,10 @@ def _sequencer_data(op: Operation, target_data: QbloxTargetDescription) -> Q1Seq
 class RewriteWaitOp(RewritePattern):
     """Lower ``pulse.wait`` to one or more ``q1.wait`` instructions.
 
-    The requested duration is converted from picoseconds to nanoseconds and aligned up
-    to the sequencer grid time. Durations that exceed the maximum wait immediate are
-    split into a chain of ``q1.wait`` instructions whose durations sum to the aligned
-    duration (not necessarily the requested value; e.g. a 5 ns request on a 4 ns grid
-    becomes 8 ns).
+    The requested duration must be an exact integer number of nanoseconds. Durations that
+    exceed the maximum wait immediate are split into normal non-zero waits whose exact sum
+    is preserved. A Pulse-level zero wait is removed rather than lowered to the special
+    Q1 ``wait 0`` instruction.
     The frame carried by ``pulse.wait`` is forwarded to downstream operations.
 
     Register-driven durations that do not fold to a compile-time constant are left
@@ -232,34 +233,20 @@ class RewriteWaitOp(RewritePattern):
         if duration_ps is None:
             return
 
-        sequencer_data = _sequencer_data(op, self.target_data)
-        grid_time = sequencer_data.clock_period_ns
-        max_wait_time = self.target_data.q1asm.max_wait_time_ns
-        max_aligned_wait_time = max_wait_time - max_wait_time % grid_time
-        if max_aligned_wait_time < DurationImm._MIN:
+        total_ns, remainder_ps = divmod(duration_ps, 1_000)
+        if remainder_ps:
             raise PassFailedException(
-                f"Q1 wait limit {max_wait_time} ns cannot represent the required "
-                f"{grid_time} ns sequencer alignment."
+                f"pulse.wait duration must be a whole number of nanoseconds. "
+                f"Got {duration_ps} ps."
             )
-
-        # Convert duration from picoseconds (Pulse IR canonical time) to nanoseconds
-        # (Q1 sequencer time). Rounds up to ensure minimum duration is met.
-        total_ns = (duration_ps + 999) // 1_000
-        remainder = total_ns % grid_time
-        if remainder:
-            total_ns += grid_time - remainder
 
         # Note: this has no breakpoint to turn unrolling into
         # hardware-based loops for now.
         debug_info = _make_debug_info(op)
-        wait_ops: list[Operation] = []
-        while total_ns > max_aligned_wait_time:
-            wait_ops.append(
-                WaitImmOp(DurationImm(max_aligned_wait_time)).with_debug_info(debug_info)
-            )
-            total_ns -= max_aligned_wait_time
-        if total_ns > 0:
-            wait_ops.append(WaitImmOp(DurationImm(total_ns)).with_debug_info(debug_info))
+        wait_ops: list[Operation] = [
+            WaitImmOp(WaitDurationImm(duration)).with_debug_info(debug_info)
+            for duration in split_wait_duration(total_ns, self.target_data.q1asm)
+        ]
 
         rewriter.replace_matched_op(wait_ops, new_results=[op.frame])
 
@@ -369,6 +356,15 @@ class RewritePulseOp(RewritePattern):
                 f"got {waveform_op}"
             )
 
+        sequencer_data = _sequencer_data(op, self.target_data)
+        expected_sample_time_ps = sequencer_data.sample_period_ns * 1_000
+        sample_time_ps = waveform_op.value.sample_time.literal_value
+        if sample_time_ps != expected_sample_time_ps:
+            raise PassFailedException(
+                f"Sampled waveform sample time {sample_time_ps} ps does not match the "
+                f"target waveform sample period {expected_sample_time_ps} ps."
+            )
+
         sequence_op = find_enclosing_sequence(pulse_op)
         waveform_to_index_map = self.sequence_to_waveform_to_index_map[sequence_op]
 
@@ -385,8 +381,7 @@ class RewritePulseOp(RewritePattern):
         else:
             i_index, q_index = waveform_to_index_map[waveform_op]
 
-        # Convert duration to ns for Q1. Each sample is assumed to be 1 ns, so we don't need
-        # to worry about rounding error.
+        # Convert duration to ns after checking the waveform uses the target sample period.
         duration_ns, remainder_ps = divmod(waveform_op.value.width.literal_value, 1000)
         if remainder_ps != 0:
             raise PassFailedException(
@@ -394,7 +389,7 @@ class RewritePulseOp(RewritePattern):
                 f"got {waveform_op.value.width.literal_value} ps "
                 f"({duration_ns} ns + {remainder_ps} ps)."
             )
-        min_duration = _sequencer_data(op, self.target_data).clock_period_ns
+        min_duration = self.target_data.q1asm.min_rt_duration_ns
 
         # TODO(COMPILER-1389): Remove this validation in favour of a dedicated pulse-level
         # pass
@@ -404,10 +399,16 @@ class RewritePulseOp(RewritePattern):
             )
 
         # Fails if pulse is too long
-        max_duration = self.target_data.q1asm.max_wait_time_ns
+        max_duration = self.target_data.q1asm.max_rt_duration_ns
         if duration_ns > max_duration:
             raise PassFailedException(
                 f"Pulse duration {duration_ns} ns is above maximum {max_duration} ns."
+            )
+        resolution = self.target_data.q1asm.rt_duration_resolution_ns
+        if duration_ns % resolution:
+            raise PassFailedException(
+                f"Pulse duration {duration_ns} ns must align to the {resolution} ns "
+                "RT duration resolution."
             )
 
         q1_pulse = PlayImmImmImmOp(
@@ -645,31 +646,43 @@ class RewritePreQ1AcquireOp(RewritePattern):
                 f"{duration_ns} ns, but Q1 acquisition duration requires a whole "
                 "number of nanoseconds."
             )
+        q1asm = self.target_data.q1asm
+        if integer_duration_ns < q1asm.min_rt_duration_ns:
+            raise PassFailedException(
+                f"Acquisition duration {integer_duration_ns} ns is below minimum "
+                f"{q1asm.min_rt_duration_ns} ns."
+            )
+        if integer_duration_ns > q1asm.max_rt_duration_ns:
+            raise PassFailedException(
+                f"Acquisition duration {integer_duration_ns} ns is above maximum "
+                f"{q1asm.max_rt_duration_ns} ns."
+            )
+        if integer_duration_ns % q1asm.rt_duration_resolution_ns:
+            raise PassFailedException(
+                f"Acquisition duration {integer_duration_ns} ns must align to the "
+                f"{q1asm.rt_duration_resolution_ns} ns RT duration resolution."
+            )
         return integer_duration_ns
 
     def _get_integration_length_samples(self, duration_ns: int) -> int:
         """Convert an acquisition duration to readout sequencer samples.
 
-        After conversion, the sample count is checked against the readout sequencer's
-        ``grid_time`` alignment.
+        After conversion, the sample count is checked against the independent readout
+        integration-length alignment.
 
         :param duration_ns: Acquisition duration in nanoseconds.
-        :returns: Number of samples at the target readout sequencer sample rate.
+        :returns: Number of samples at the target readout sequencer sample period.
         :raises PassFailedException: If the duration does not span an integer number of
             samples or the resulting integration length is not hardware-aligned.
         """
 
         readout_data = self.target_data.sequencer_specs[Q1SequencerType.readout]
-        sample_rate = int(readout_data.sample_rate_hz)
-        if sample_rate != readout_data.sample_rate_hz:
-            raise PassFailedException(
-                "Readout sequencer sample rate must be an integer number of samples/s."
-            )
-        sample_count, remainder = divmod(duration_ns * sample_rate, 1_000_000_000)
+        sample_period_ns = readout_data.readout.integration_sample_period_ns
+        sample_count, remainder = divmod(duration_ns, sample_period_ns)
         if remainder:
             raise PassFailedException(
                 f"Acquisition duration {duration_ns} ns does not span an integer number "
-                f"of samples at {sample_rate} samples/s."
+                f"of {sample_period_ns} ns samples."
             )
         if not (
             readout_data.readout.min_integration_length_samples
@@ -678,16 +691,16 @@ class RewritePreQ1AcquireOp(RewritePattern):
         ):
             raise PassFailedException(
                 f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
-                f"{sample_rate} samples/s, outside the supported integration length "
+                f"{sample_period_ns} ns/sample, outside the supported integration length "
                 f"range [{readout_data.readout.min_integration_length_samples}, "
                 f"{readout_data.readout.max_integration_length_samples}] samples."
             )
-        alignment = readout_data.clock_period_ns
+        alignment = readout_data.readout.integration_length_step_samples
         if sample_count % alignment:
             raise PassFailedException(
                 f"Acquisition duration {duration_ns} ns spans {sample_count} samples at "
-                f"{sample_rate} samples/s, but the integration length must be a multiple "
-                f"of {alignment} samples."
+                f"{sample_period_ns} ns/sample, but the integration length must be a "
+                f"multiple of {alignment} samples."
             )
         return int(sample_count)
 
