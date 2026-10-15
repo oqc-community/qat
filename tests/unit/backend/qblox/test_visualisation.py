@@ -10,21 +10,30 @@ from qat.backend.qblox.visualisation import plot_playback, plot_program
 
 
 @pytest.mark.parametrize(
-    "packages",
+    "packages, message",
     [
-        pytest.param({}, id="no-packages"),
+        pytest.param({}, "No packages", id="no-packages"),
         pytest.param(
             {"empty": SimpleNamespace(timeline=np.array([]))},
+            "All timelines are empty",
             id="empty-timeline",
+        ),
+        pytest.param(
+            {"missing": SimpleNamespace(timeline=None)},
+            "CompilerConfig(enable_debug_info=True)",
+            id="missing-timeline",
         ),
     ],
 )
-def test_plot_program_ignores_empty_programs(mocker, packages):
+def test_plot_program_ignores_empty_programs(mocker, packages, message):
     show = mocker.patch("qat.backend.qblox.visualisation.plt.show")
+    info = mocker.patch("qat.backend.qblox.visualisation.log.info")
 
     plot_program(SimpleNamespace(packages=packages))
 
     show.assert_not_called()
+    info.assert_called_once()
+    assert message in info.call_args.args[0]
 
 
 def test_plot_program_pads_and_plots_each_timeline(mocker):
@@ -71,6 +80,32 @@ def test_plot_program_pads_and_plots_each_timeline(mocker):
     axes[0, 0].legend.assert_called_once_with(loc="upper right")
     axes[1, 0].legend.assert_called_once_with(loc="upper right")
     tight_layout.assert_called_once_with()
+    show.assert_called_once_with()
+
+
+def test_plot_program_skips_packages_without_timelines(mocker):
+    figure = mocker.Mock()
+    axes = np.array([[mocker.Mock()]])
+    subplots = mocker.patch(
+        "qat.backend.qblox.visualisation.plt.subplots",
+        return_value=(figure, axes),
+    )
+    mocker.patch("qat.backend.qblox.visualisation.plt.tight_layout")
+    show = mocker.patch("qat.backend.qblox.visualisation.plt.show")
+
+    plot_program(
+        SimpleNamespace(
+            packages={
+                "q0.drive": SimpleNamespace(timeline=None, pulse_channel_id="q0.drive"),
+                "q1.drive": SimpleNamespace(
+                    timeline=np.array([1 + 2j]), pulse_channel_id="q1.drive"
+                ),
+            }
+        )
+    )
+
+    assert subplots.call_args.kwargs["nrows"] == 1
+    axes[0, 0].set_title.assert_called_once_with("q1.drive")
     show.assert_called_once_with()
 
 

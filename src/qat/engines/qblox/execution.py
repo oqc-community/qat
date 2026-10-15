@@ -20,6 +20,8 @@ class QbloxEngine(NativeEngine[QbloxProgram]):
     def __init__(self, instrument: InstrumentConcept):
         self.instrument: InstrumentConcept = instrument
 
+        # Plotting needs timelines, which are only recorded for static programs (time is
+        # static) compiled with `CompilerConfig(enable_debug_info=True)`.
         self.plot_program = False
         self.dump_program = False
         self.plot_playback = False

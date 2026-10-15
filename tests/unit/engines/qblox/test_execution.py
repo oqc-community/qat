@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 import numpy as np
 import pytest
@@ -9,6 +9,7 @@ from qat import qatconfig
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.execution import DEFAULT_TIMEOUT_SECONDS, QbloxProgram
 from qat.backend.qblox.target_data import QRM_DATA, TARGET_DATA
+from qat.engines.qblox.execution import QbloxEngine
 from qat.engines.qblox.live import QbloxLeafInstrument
 from qat.executables import Executable
 from qat.purr.compiler.devices import PulseShapeType
@@ -552,3 +553,23 @@ class TestDriverTimeoutConversion:
         assert spy.call_count >= 1
         for call in spy.call_args_list:
             assert call.kwargs["timeout"] == expected_minutes
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+def test_plot_program_informs_without_debug(qblox_model, backend_type, mocker):
+    show = mocker.patch("qat.backend.qblox.visualisation.plt.show")
+    info = mocker.patch("qat.backend.qblox.visualisation.log.info")
+    instrument = mocker.Mock()
+    instrument.playback.return_value = {}
+    engine = QbloxEngine(instrument)
+    engine.plot_program = True
+
+    builder = measure_acquire(qblox_model, [0])
+    program = do_emit(qblox_model, backend_type, builder, debug=False).programs[0]
+    engine.execute(program)
+
+    show.assert_not_called()
+    info.assert_called_once()
+    assert "CompilerConfig(enable_debug_info=True)" in info.call_args.args[0]
+    instrument.setup.assert_called_once_with(program)

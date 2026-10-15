@@ -12,13 +12,26 @@ log = get_default_logger()
 
 
 def plot_program(program: QbloxProgram):
-    packages = program.packages
+    packages = {
+        pulse_channel_id: pkg
+        for pulse_channel_id, pkg in program.packages.items()
+        if pkg.timeline is not None
+    }
+
+    if not program.packages:
+        log.info("No packages to plot.")
+        return
 
     if not packages:
+        log.info(
+            "No timelines to plot. Timelines are only recorded for static programs "
+            "compiled with `CompilerConfig(enable_debug_info=True)`."
+        )
         return
 
     max_length = max([len(pkg.timeline) for pkg in packages.values()])
     if max_length <= 0:
+        log.info("All timelines are empty, nothing to plot.")
         return
 
     # Padding short timelines with zeros

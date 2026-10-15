@@ -4,6 +4,7 @@
 import copy
 import re
 from contextlib import nullcontext
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -17,6 +18,7 @@ from qat.backend.qblox.codegen import (
     QbloxBackend2,
     QbloxContext,
     _check_shared_lo_conflicts,
+    _debug_info_enabled,
     _get_lo_lanes,
 )
 from qat.backend.qblox.config.specification import (
@@ -27,7 +29,7 @@ from qat.backend.qblox.config.specification import (
 )
 from qat.backend.qblox.execution import QbloxPackage
 from qat.backend.qblox.ir import Opcode
-from qat.backend.qblox.passes.analysis import QbloxLegalisationPass
+from qat.backend.qblox.passes.analysis import AllocationManager, QbloxLegalisationPass
 from qat.backend.qblox.target_data import CONTROL_SEQUENCER_DATA, Q1ASM_DATA, TARGET_DATA
 from qat.backend.qblox.visualisation import plot_program
 from qat.core.metrics_base import MetricsManager
@@ -44,6 +46,7 @@ from qat.purr.compiler.instructions import (
     Acquire,
     DeviceUpdate,
     MeasurePulse,
+    PhaseShift,
     Pulse,
     Repeat,
     Sweep,
@@ -175,6 +178,205 @@ class TestQbloxContext:
         assert contexts[drive_channel].duration == 20
         assert contexts[drive_channel].sequence_builder.q1asm_instructions == []
 
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_timeline_concatenates_ledger_entries_in_order(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = QbloxContext(ReadWriteResult(), {}, enable_timeline_debug_info=True)
+
+        context.ledger(8)
+        context.ledger(4, np.ones(4, dtype=complex))
+
+        pkg = context.create_package(drive_channel, 0, 0)
+        np.testing.assert_array_equal(
+            pkg.timeline, np.concatenate([np.zeros(8), np.ones(4)]).astype(complex)
+        )
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize(
+        "phase, rotation",
+        [
+            pytest.param(np.pi / 2, 1j, id="static-phase-rotates"),
+            pytest.param(Variable("phase"), 1, id="dynamic-phase-not-applied"),
+        ],
+    )
+    def test_timeline_applies_only_static_phase(self, qblox_model, phase, rotation):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        alloc_mgr = AllocationManager()
+        alloc_mgr.reg_alloc("phase")
+        context = QbloxContext(
+            ReadWriteResult(), {}, alloc_mgr=alloc_mgr, enable_timeline_debug_info=True
+        )
+
+        context.shift_phase(PhaseShift(drive_channel, phase))
+        context.ledger(4, np.ones(4, dtype=complex))
+
+        timeline = context.create_package(drive_channel, 0, 0).timeline
+        np.testing.assert_allclose(timeline[-4:], np.full(4, rotation, dtype=complex))
+
+    @staticmethod
+    def _phase_context(enable_timeline_debug_info=False):
+        alloc_mgr = AllocationManager()
+        alloc_mgr.reg_alloc("phase")
+        return QbloxContext(
+            ReadWriteResult(),
+            {},
+            alloc_mgr=alloc_mgr,
+            enable_timeline_debug_info=enable_timeline_debug_info,
+        )
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_phase_tracking_accumulates_static_shifts(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context()
+
+        assert context.phase == 0
+
+        context.shift_phase(PhaseShift(drive_channel, 0.25))
+        context.shift_phase(PhaseShift(drive_channel, 0.5))
+
+        assert context.phase == pytest.approx(0.75)
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_phase_tracking_stays_dynamic_once_a_variable_is_seen(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context()
+
+        context.shift_phase(PhaseShift(drive_channel, 0.25))
+        context.shift_phase(PhaseShift(drive_channel, Variable("phase")))
+
+        with pytest.raises(
+            ValueError, match="Cannot determine phase statically in dynamic settings"
+        ):
+            _ = context.phase
+
+        # A later static shift cannot make the phase known again.
+        context.shift_phase(PhaseShift(drive_channel, 0.5))
+
+        with pytest.raises(
+            ValueError, match="Cannot determine phase statically in dynamic settings"
+        ):
+            _ = context.phase
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize(
+        "phase",
+        [pytest.param(0.5, id="static"), pytest.param(Variable("phase"), id="dynamic")],
+    )
+    def test_reset_phase_restores_static_tracking(self, qblox_model, phase):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context()
+
+        context.shift_phase(PhaseShift(drive_channel, phase))
+        context.reset_phase()
+
+        assert context.phase == 0
+
+        context.shift_phase(PhaseShift(drive_channel, 0.25))
+
+        assert context.phase == pytest.approx(0.25)
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_timeline_applies_accumulated_phase(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context(enable_timeline_debug_info=True)
+
+        context.shift_phase(PhaseShift(drive_channel, np.pi / 4))
+        context.shift_phase(PhaseShift(drive_channel, np.pi / 4))
+        context.ledger(4, np.ones(4, dtype=complex))
+
+        timeline = context.create_package(drive_channel, 0, 0).timeline
+        np.testing.assert_allclose(timeline[-4:], np.full(4, 1j, dtype=complex))
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize(
+        "shifts, resets",
+        [
+            pytest.param(0, False, id="no-shifts"),
+            pytest.param(2, True, id="reset-after-shifts"),
+        ],
+    )
+    def test_timeline_is_not_rotated_when_accumulated_phase_is_zero(
+        self, qblox_model, shifts, resets
+    ):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context(enable_timeline_debug_info=True)
+        pulse = np.full(4, 0.5 + 0.25j)
+
+        for _ in range(shifts):
+            context.shift_phase(PhaseShift(drive_channel, np.pi / 3))
+        if resets:
+            context.reset_phase()
+        context.ledger(4, pulse)
+
+        timeline = context.create_package(drive_channel, 0, 0).timeline
+        np.testing.assert_array_equal(timeline[-4:], pulse)
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize("phase", [0.0, np.pi / 3], ids=["no-phase", "static-phase"])
+    def test_timeline_does_not_alias_the_pulse_and_is_complex(self, qblox_model, phase):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context(enable_timeline_debug_info=True)
+        pulse = np.full(4, 0.5)  # Real-valued input
+
+        if phase:
+            context.shift_phase(PhaseShift(drive_channel, phase))
+        context.ledger(4, pulse)
+        pulse[:] = 0.0  # Mutating the input must not change the recorded timeline
+
+        timeline = context.create_package(drive_channel, 0, 0).timeline
+        assert timeline.dtype == complex
+        np.testing.assert_allclose(timeline[-4:], np.full(4, 0.5 * np.exp(1.0j * phase)))
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_phase_is_tracked_when_timeline_is_not_recorded(self, qblox_model):
+        """The phase is tracked even when the timeline is not being recorded."""
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = self._phase_context(enable_timeline_debug_info=False)
+
+        context.shift_phase(PhaseShift(drive_channel, 0.5))
+        context.ledger(4, np.ones(4, dtype=complex))
+
+        assert context.phase == pytest.approx(0.5)
+        assert context.create_package(drive_channel, 0, 0).timeline is None
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    def test_timeline_is_empty_array_when_nothing_is_recorded(self, qblox_model):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = QbloxContext(ReadWriteResult(), {}, enable_timeline_debug_info=True)
+
+        pkg = context.create_package(drive_channel, 0, 0)
+
+        assert isinstance(pkg.timeline, np.ndarray)
+        assert pkg.timeline.size == 0
+
+    @pytest.mark.parametrize("qblox_model", [None], indirect=True)
+    @pytest.mark.parametrize(
+        "enable_timeline_debug_info, durations",
+        [
+            pytest.param(False, [8], id="not-recorded"),
+            pytest.param(True, [8, "iter"], id="dynamic-duration"),
+        ],
+    )
+    def test_timeline_is_none(self, qblox_model, enable_timeline_debug_info, durations):
+        drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+        context = QbloxContext(
+            ReadWriteResult(), {}, enable_timeline_debug_info=enable_timeline_debug_info
+        )
+
+        for duration in durations:
+            context.ledger(duration)
+
+        assert context.create_package(drive_channel, 0, 0).timeline is None
+
+    @pytest.mark.parametrize("enable_timeline_debug_info", [True, False])
+    def test_ledger_rejects_pulse_with_mismatched_size(self, enable_timeline_debug_info):
+        context = QbloxContext(
+            ReadWriteResult(), {}, enable_timeline_debug_info=enable_timeline_debug_info
+        )
+
+        with pytest.raises(AssertionError):
+            context.ledger(4, np.ones(3, dtype=complex))
+
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
 @pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
@@ -198,6 +400,136 @@ def test_sequencer_allocation(qblox_model, backend_type):
     backend = backend_type(model=qblox_model, pipeline=backend_pipeline)
 
     assert not backend.allocations
+
+
+@pytest.mark.parametrize(
+    "compiler_config, expected",
+    [
+        pytest.param(None, False, id="no-compiler-config"),
+        pytest.param(SimpleNamespace(), False, id="flag-not-supported"),
+        pytest.param(SimpleNamespace(enable_debug_info=False), False, id="debug-off"),
+        pytest.param(SimpleNamespace(enable_debug_info=True), True, id="debug-on"),
+    ],
+)
+def test_debug_info_enabled(compiler_config, expected):
+    assert _debug_info_enabled(compiler_config) is expected
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+@pytest.mark.parametrize(
+    "debug",
+    [pytest.param(False, id="debug-off"), pytest.param(None, id="no-compiler-config")],
+)
+def test_timeline_omitted_unless_debug_enabled(qblox_model, backend_type, debug):
+    builder = qblox_model.create_builder()
+    qubit = qblox_model.get_qubit(0)
+    drive_channel = qubit.get_drive_channel()
+    builder.add(
+        Pulse(
+            drive_channel,
+            PulseShapeType.GAUSSIAN,
+            width=100e-9,
+            rise=1.0 / 5.0,
+        )
+    )
+
+    executable = do_emit(
+        qblox_model,
+        backend_type,
+        builder,
+        debug=debug,
+    )
+
+    pkg = executable.programs[0].packages[drive_channel.full_id()]
+    assert pkg.timeline is None
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+def test_timeline_records_square_pulse_when_debug_enabled(qblox_model, backend_type):
+    drive_channel = qblox_model.get_qubit(0).get_drive_channel()
+    builder = qblox_model.create_builder()
+    builder.add(PhaseShift(drive_channel, np.pi / 2))
+    builder.add(
+        Pulse(
+            drive_channel,
+            PulseShapeType.SQUARE,
+            width=100e-9,
+            amp=0.5,
+            ignore_channel_scale=True,
+        )
+    )
+
+    executable = do_emit(qblox_model, backend_type, builder, debug=True)
+
+    pkg = executable.programs[0].packages[drive_channel.full_id()]
+    assert isinstance(pkg.timeline, np.ndarray)
+    samples = pkg.timeline[np.nonzero(pkg.timeline)]
+    expected = (0.5 + drive_channel.bias) * np.exp(1j * np.pi / 2)
+    assert samples.size == 100
+    np.testing.assert_allclose(samples, expected)
+
+
+def _square_measure_builder(qblox_model):
+    qubit = qblox_model.get_qubit(0)
+    measure_channel = qubit.get_measure_channel()
+    builder = qblox_model.create_builder()
+    builder.add(
+        [
+            MeasurePulse(
+                measure_channel,
+                PulseShapeType.SQUARE,
+                width=1e-6,
+                amp=0.25,
+                ignore_channel_scale=True,
+            ),
+            Acquire(
+                qubit.get_acquire_channel(),
+                time=7.5e-7,
+                delay=qubit.measure_acquire["delay"],
+            ),
+        ]
+    )
+    return builder, measure_channel
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+@pytest.mark.parametrize(
+    "debug",
+    [pytest.param(False, id="debug-off"), pytest.param(None, id="no-compiler-config")],
+)
+def test_square_measure_pulse_samples_not_built_without_debug(
+    qblox_model, backend_type, debug, mocker
+):
+    builder, measure_channel = _square_measure_builder(qblox_model)
+    spy = mocker.spy(QbloxContext, "_evaluate_waveform")
+
+    executable = do_emit(qblox_model, backend_type, builder, debug=debug)
+
+    pkg = executable.programs[0].packages[measure_channel.full_id()]
+    assert pkg.timeline is None
+    assert f"set_awg_offs {int(0.25 * Q1ASM_DATA.max_offset)},0" in pkg.sequence.program
+    measure_calls = [c for c in spy.call_args_list if isinstance(c.args[1], MeasurePulse)]
+    assert measure_calls
+    assert all(c.kwargs.get("num_samples") == 1 for c in measure_calls)
+
+
+@pytest.mark.parametrize("qblox_model", [None], indirect=True)
+@pytest.mark.parametrize("backend_type", [QbloxBackend1, QbloxBackend2])
+def test_timeline_records_square_measure_pulse_when_debug_enabled(
+    qblox_model, backend_type
+):
+    builder, measure_channel = _square_measure_builder(qblox_model)
+
+    executable = do_emit(qblox_model, backend_type, builder, debug=True)
+
+    pkg = executable.programs[0].packages[measure_channel.full_id()]
+    assert isinstance(pkg.timeline, np.ndarray)
+    samples = pkg.timeline[np.nonzero(pkg.timeline)]
+    assert samples.size == 1000
+    np.testing.assert_allclose(samples, 0.25 + measure_channel.bias)
 
 
 @pytest.mark.parametrize("qblox_model", [None], indirect=True)
@@ -651,7 +983,7 @@ class TestQbloxBackend1:
             gaussian = Pulse(drive_channel, PulseShapeType.GAUSSIAN, width=width, rise=rise)
             builder.add(gaussian)
 
-        executable = do_emit(qblox_model, QbloxBackend1, builder)
+        executable = do_emit(qblox_model, QbloxBackend1, builder, debug=True)
         for program in executable.programs:
             assert len(program.packages) == len(qubit_indices)
             for pkg in program.packages.values():
@@ -678,7 +1010,13 @@ class TestQbloxBackend2:
         builder = empty(qblox_model)
         assert len(builder.instructions) == 3
 
-        executable = do_emit(qblox_model, QbloxBackend2, builder, ignore_empty=False)
+        executable = do_emit(
+            qblox_model,
+            QbloxBackend2,
+            builder,
+            ignore_empty=False,
+            debug=True,
+        )
         assert len(executable.programs) == 1
         for program in executable.programs:
             assert len(program.packages) == 2
@@ -852,6 +1190,21 @@ class TestQbloxBackend2:
 
     @pytest.mark.parametrize("num_points", [10])
     @pytest.mark.parametrize("qubit_indices", [[0]])
+    def test_pulse_amplitude_iteration_records_silent_timeline_when_debug_enabled(
+        self, qblox_model, num_points, qubit_indices
+    ):
+        builder = pulse_amplitude_iteration(qblox_model, qubit_indices, num_points)
+        executable = do_emit(qblox_model, QbloxBackend2, builder, debug=True)
+
+        drive_channel = qblox_model.get_qubit(qubit_indices[0]).get_drive_channel()
+        pkg = executable.programs[0].packages[drive_channel.full_id()]
+        # The swept amplitude lives in a register, so the pulse is recorded as zeros.
+        assert isinstance(pkg.timeline, np.ndarray)
+        assert pkg.timeline.size > 0
+        assert np.count_nonzero(pkg.timeline) == 0
+
+    @pytest.mark.parametrize("num_points", [10])
+    @pytest.mark.parametrize("qubit_indices", [[0]])
     def test_time_and_phase_iteration(self, qblox_model, num_points, qubit_indices):
         builder = time_and_phase_iteration(qblox_model, qubit_indices, num_points)
         executable = do_emit(qblox_model, QbloxBackend2, builder)
@@ -869,7 +1222,7 @@ class TestQbloxBackend2:
 
         # Static settings
         builder = measure_acquire(qblox_model, qubit_indices, do_X)
-        executable = do_emit(qblox_model, QbloxBackend2, builder)
+        executable = do_emit(qblox_model, QbloxBackend2, builder, debug=True)
         for program in executable.programs:
             for pkg in program.packages.values():
                 assert pkg.timeline is not None
@@ -881,7 +1234,7 @@ class TestQbloxBackend2:
 
         # Dynamic settings
         builder = time_and_phase_iteration(qblox_model, qubit_indices, num_points)
-        executable = do_emit(qblox_model, QbloxBackend2, builder)
+        executable = do_emit(qblox_model, QbloxBackend2, builder, debug=True)
 
         default_pulse_channel_ids = [
             qblox_model.get_qubit(index).get_default_pulse_channel().full_id()
@@ -892,16 +1245,14 @@ class TestQbloxBackend2:
             for pkg in program.packages.values():
                 if pkg.pulse_channel_id in default_pulse_channel_ids:
                     assert pkg.timeline is None
-                    with pytest.raises(
-                        TypeError, match="object of type 'NoneType' has no len()"
-                    ):
-                        plot_program(program)
                 else:
                     assert pkg.timeline is not None
                     assert isinstance(pkg.timeline, np.ndarray)
                     assert pkg.timeline.size > 0
                     assert not np.any(np.equal(pkg.timeline, None))
                     assert not np.any(np.isnan(pkg.timeline))
+
+            plot_program(program)
 
 
 # Legacy model compares by identity, so compare copies of its pydantic configs.

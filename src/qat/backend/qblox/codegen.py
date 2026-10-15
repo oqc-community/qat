@@ -7,6 +7,7 @@ from contextlib import ExitStack, contextmanager
 from numbers import Number
 
 import numpy as np
+from compiler_config.config import CompilerConfig
 from more_itertools import partition
 
 from qat.backend.base import AllocatingBackend
@@ -117,6 +118,15 @@ def _check_shared_lo_conflicts(
             )
 
 
+def _debug_info_enabled(compiler_config: CompilerConfig | None) -> bool:
+    """Whether ``compiler_config`` asks for debug info to be recorded.
+
+    Reads the flag with ``getattr`` so that no compiler config, or a release of
+    ``compiler-config`` that predates ``enable_debug_info``, leaves debug info disabled.
+    """
+    return bool(getattr(compiler_config, "enable_debug_info", False))
+
+
 class QbloxContext:
     def __init__(
         self,
@@ -124,6 +134,7 @@ class QbloxContext:
         iter_bounds: dict[str, IterBound],
         alloc_mgr: AllocationManager = None,
         target_data: QbloxTargetData = None,
+        enable_timeline_debug_info: bool = False,
     ):
         self.inits: dict[str, list[Instruction]] = rw_result.inits
         self.reads: dict[str, list[Instruction]] = rw_result.reads
@@ -145,8 +156,8 @@ class QbloxContext:
 
         self._accumulated_duration: float | None = 0
         self._frequency: float = 0.0  # Tracks frequency shifts on the target
-        self._phases: list[float | str] = []
-        self._timeline: np.ndarray = np.empty(0, dtype=complex)
+        self._accumulated_phase: float | None = 0.0
+        self._timeline: list[np.ndarray] | None = [] if enable_timeline_debug_info else None
 
     def __enter__(self):
         """Serves as the prologue."""
@@ -184,8 +195,8 @@ class QbloxContext:
 
     @property
     def phase(self):
-        if all(isinstance(p, Number) for p in self._phases):
-            return sum(self._phases)
+        if self._accumulated_phase is not None:
+            return self._accumulated_phase
 
         raise ValueError("Cannot determine phase statically in dynamic settings")
 
@@ -236,6 +247,14 @@ class QbloxContext:
             self.sequencer_config.thresholded_acq.threshold
         )
 
+        timeline = None
+        if self._timeline is not None:
+            timeline = (
+                np.concatenate(self._timeline)
+                if self._timeline
+                else np.empty(0, dtype=complex)
+            )
+
         return QbloxPackage(
             pulse_channel_id=target.full_id(),
             physical_channel_id=target.physical_channel_id,
@@ -245,7 +264,7 @@ class QbloxContext:
             instrument_id=target.physical_channel.baseband.instrument_id,
             mod_config=mod_config,
             sequence=self.sequence_builder.build(),
-            timeline=self._timeline,
+            timeline=timeline,
         )
 
     def is_empty(self):
@@ -358,20 +377,25 @@ class QbloxContext:
     def ledger(self, duration: int | str, pulse: np.ndarray = None):
         """A helper method to keep track of the durations and phase as the codegen runs.
 
-        Every little bit of time is accounted for and a timeline object (in static cases) is
-        also kept up-to-date for debugging and visualisation purposes.
+        Every little bit of time is accounted for. When timeline recording is enabled, a
+        timeline object (in static cases) is also kept up-to-date for debugging and
+        visualisation purposes.
         """
 
         if isinstance(duration, int):
-            pulse = np.zeros(duration, dtype=complex) if pulse is None else pulse
-            if all(isinstance(p, Number) for p in self._phases):
-                total_phase = sum(self._phases)
-                pulse = pulse * np.exp(1.0j * total_phase)
-            assert pulse.size == duration
+            assert pulse is None or pulse.size == duration
             if self._accumulated_duration is not None:
                 self._accumulated_duration += duration
             if self._timeline is not None:
-                self._timeline = np.append(self._timeline, pulse)
+                if pulse is None:
+                    pulse = np.zeros(duration, dtype=complex)
+                else:
+                    # Copy so the timeline never aliases the caller's array, and so it
+                    # is always complex.
+                    pulse = np.array(pulse, dtype=complex)
+                    if self._accumulated_phase:
+                        pulse *= np.exp(1.0j * self._accumulated_phase)
+                self._timeline.append(pulse)
         elif isinstance(duration, str):
             self._accumulated_duration = None
             self._timeline = None  # Destroy the timeline as we are in dynamic setting
@@ -480,14 +504,17 @@ class QbloxContext:
             self.sequence_builder.wait(iter_reg)
             self.sequence_builder.label(batch_exit)
 
-    def _evaluate_waveform(self, waveform: Waveform, target: PulseChannel):
+    def _evaluate_waveform(
+        self, waveform: Waveform, target: PulseChannel, num_samples: int | None = None
+    ):
         """The waveform is evaluated as a 1d complex array.
 
         In QBlox, the Real and Imag parts of the pulse represent the digital offset on the
         AWG. They both must be within range [-1, 1].
         """
 
-        num_samples = int(calculate_duration(waveform))
+        if num_samples is None:
+            num_samples = int(calculate_duration(waveform))
         dt = target.sample_time
         length = num_samples * dt
         centre = length / 2.0
@@ -707,14 +734,17 @@ class QbloxContext:
         else:
             raise ValueError(f"Expected a Variable or a Number but got {inst.phase}")
 
-        self._phases.append(inst.phase)
+        if isinstance(inst.phase, Variable):
+            self._accumulated_phase = None
+        elif self._accumulated_phase is not None:
+            self._accumulated_phase += inst.phase
         self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def reset_phase(self):
         self.sequence_builder.reset_ph()
         self.sequence_builder.upd_param(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
-        self._phases.clear()
+        self._accumulated_phase = 0.0
         self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
     def waveform(self, waveform: Waveform, target: PulseChannel):
@@ -761,11 +791,13 @@ class QbloxContext:
 
             self.ledger(self.target_data.CONTROL_SEQUENCER_DATA.grid_time)
 
-            pulse = (
-                np.ones(pulse_width, dtype=complex) * pulse_amp
-                if isinstance(pulse_width, Number) and isinstance(pulse_amp, Number)
-                else None
-            )
+            pulse = None
+            if (
+                self._timeline is not None
+                and isinstance(pulse_width, Number)
+                and isinstance(pulse_amp, Number)
+            ):
+                pulse = np.ones(pulse_width, dtype=complex) * pulse_amp
         else:
             pulse = self._evaluate_waveform(waveform, target)
             pulse_width = pulse.size
@@ -799,8 +831,14 @@ class QbloxContext:
             + `threshold` to be corrected by the integration length
         """
 
-        pulse = self._evaluate_waveform(measure, target)
-        pulse_width = pulse.size
+        is_square = measure.shape == PulseShapeType.SQUARE
+        if is_square:
+            # A square pulse is constant, so its samples are only needed for the timeline.
+            pulse = None
+            pulse_width = int(calculate_duration(measure))
+        else:
+            pulse = self._evaluate_waveform(measure, target)
+            pulse_width = pulse.size
         delay_width = int(calculate_duration(Delay(acquire.channel, acquire.delay)))
 
         if pulse_width < self.target_data.CONTROL_SEQUENCER_DATA.grid_time:
@@ -832,9 +870,12 @@ class QbloxContext:
 
         i_steps, q_steps = None, None
         i_index, q_index = None, None
-        if measure.shape == PulseShapeType.SQUARE:
-            i_steps = int(pulse[0].real * self.target_data.Q1ASM_DATA.max_offset)
-            q_steps = int(pulse[0].imag * self.target_data.Q1ASM_DATA.max_offset)
+        if is_square:
+            pulse_amp = self._evaluate_waveform(measure, target, num_samples=1)[0]
+            i_steps = int(pulse_amp.real * self.target_data.Q1ASM_DATA.max_offset)
+            q_steps = int(pulse_amp.imag * self.target_data.Q1ASM_DATA.max_offset)
+            if self._timeline is not None:
+                pulse = np.full(pulse_width, pulse_amp, dtype=complex)
         else:
             i_index, q_index = self._register_waveform(measure, target, pulse)
 
@@ -1021,6 +1062,7 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
         precodegen_result: PreCodegenResult,
         cfg_result: CFGResult,
         ignore_empty=True,
+        enable_timeline_debug_info: bool = False,
     ) -> QbloxProgram:
         rw_results: dict[PulseChannel, ReadWriteResult] = binding_result.rw_results
         iter_bound_results: dict[PulseChannel, dict[str, IterBound]] = (
@@ -1035,6 +1077,7 @@ class AbstractQbloxBackend(AllocatingBackend[QbloxProgram]):
                         rw_result=rw_results[t],
                         iter_bounds=iter_bound_results[t],
                         alloc_mgr=alloc_mgrs[t],
+                        enable_timeline_debug_info=enable_timeline_debug_info,
                     )
                 )
                 for t in triage_result.target_map
@@ -1068,8 +1111,12 @@ class QbloxBackend1(AbstractQbloxBackend):
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         ignore_empty: bool = True,
+        compiler_config: CompilerConfig | None = None,
         **kwargs,
     ) -> Executable[QbloxProgram]:
+        # Timelines are only needed for debugging and visualisation, so only record them
+        # when debug info is enabled on the compiler config.
+        enable_timeline_debug_info = _debug_info_enabled(compiler_config)
         triage_result = res_mgr.lookup_by_type(TriageResult)
         device_updates = triage_result.device_updates
         quantum_instructions = triage_result.quantum_instructions
@@ -1097,7 +1144,13 @@ class QbloxBackend1(AbstractQbloxBackend):
                 (PassManager() | TriagePass() | BindingPass()).run(
                     ir, inner_res_mgr, inner_met_mgr, enable_hw_averaging=True
                 )
-                self.pipeline.run(ir, inner_res_mgr, inner_met_mgr, **kwargs)
+                self.pipeline.run(
+                    ir,
+                    inner_res_mgr,
+                    inner_met_mgr,
+                    compiler_config=compiler_config,
+                    **kwargs,
+                )
 
                 inner_triage_result = inner_res_mgr.lookup_by_type(TriageResult)
                 inner_binding_result = inner_res_mgr.lookup_by_type(BindingResult)
@@ -1109,6 +1162,7 @@ class QbloxBackend1(AbstractQbloxBackend):
                     inner_precodegen_result,
                     inner_cfg_result,
                     ignore_empty,
+                    enable_timeline_debug_info,
                 )
                 programs.append(program)
         finally:
@@ -1141,8 +1195,12 @@ class QbloxBackend2(AbstractQbloxBackend):
         res_mgr: ResultManager,
         met_mgr: MetricsManager,
         ignore_empty: bool = True,
+        compiler_config: CompilerConfig | None = None,
         **kwargs,
     ) -> Executable[QbloxProgram]:
+        # Timelines are only needed for debugging and visualisation, so only record them
+        # when debug info is enabled on the compiler config.
+        enable_timeline_debug_info = _debug_info_enabled(compiler_config)
         triage_result = res_mgr.lookup_by_type(TriageResult)
         device_updates = triage_result.device_updates
 
@@ -1163,7 +1221,9 @@ class QbloxBackend2(AbstractQbloxBackend):
         programs: list[QbloxProgram] = []
         try:
             dinjectors.inject()
-            self.pipeline.run(ir, res_mgr, met_mgr, **kwargs)
+            self.pipeline.run(
+                ir, res_mgr, met_mgr, compiler_config=compiler_config, **kwargs
+            )
 
             triage_result = res_mgr.lookup_by_type(TriageResult)
             binding_result = res_mgr.lookup_by_type(BindingResult)
@@ -1175,6 +1235,7 @@ class QbloxBackend2(AbstractQbloxBackend):
                 precodegen_result,
                 cfg_result,
                 ignore_empty,
+                enable_timeline_debug_info,
             )
             programs.append(program)
         finally:

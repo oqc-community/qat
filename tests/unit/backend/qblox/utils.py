@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 from collections import namedtuple
 
 import numpy as np
@@ -25,6 +25,8 @@ from qat.runtime import SimpleRuntime
 from qat.runtime.aggregator import QBloxAggregator
 
 Allocation = namedtuple("Allocation", ["control_slot", "readout_slot"])
+
+_DEBUG_INFO_FLAG = "enable_debug_info"
 
 _ADDRESSES = [None, None, None, None, None]
 
@@ -141,7 +143,12 @@ def do_emit(
     backend_type: type,
     builder,
     ignore_empty=True,
+    debug: bool | None = False,
 ):
+    """Run the Qblox middle-end and back-end over ``builder``.
+
+    ``debug=None`` emits without a compiler config.
+    """
     if backend_type == QbloxBackend1:
         middleend_pipeline = middleend_pipeline1(model, TARGET_DATA)
         backend_pipeline = backend_pipeline1()
@@ -155,7 +162,20 @@ def do_emit(
     met_mgr = MetricsManager()
     middleend_pipeline.run(builder, res_mgr, met_mgr, enable_hw_averaging=True)
     backend = backend_type(model=model, pipeline=backend_pipeline)
-    executable = backend.emit(builder, res_mgr, met_mgr, ignore_empty)
+    kwargs = {}
+    if debug is not None:
+        # Set after construction so this also works with a compiler-config release that
+        # predates the ``enable_debug_info`` keyword.
+        compiler_config = CompilerConfig()
+        setattr(compiler_config, _DEBUG_INFO_FLAG, debug)
+        kwargs["compiler_config"] = compiler_config
+    executable = backend.emit(
+        builder,
+        res_mgr,
+        met_mgr,
+        ignore_empty=ignore_empty,
+        **kwargs,
+    )
     return executable
 
 
