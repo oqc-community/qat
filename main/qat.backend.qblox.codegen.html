@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.backend.qblox.codegen module &mdash; qat-compiler 3.0.0.post415.dev20261015114055 documentation</title>
+  <title>qat.backend.qblox.codegen module &mdash; qat-compiler 3.0.0.post416.dev20261015121640 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -739,7 +739,7 @@ the QPU.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.qblox.codegen.QbloxBackend1.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxBackend1.emit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxBackend1.emit" title="Link to this definition"></a></dt>
 <dd><p>Converts an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> to machine instructions of a given target
 architecture.</p>
 <p>How targets convert the IR is at their discretion but they mostly follow macro-
@@ -766,7 +766,7 @@ the QPU.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.qblox.codegen.QbloxBackend2.emit">
-<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxBackend2.emit" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">emit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">met_mgr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_empty</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compiler_config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxBackend2.emit" title="Link to this definition"></a></dt>
 <dd><p>Converts an IR <code class="xref py py-class docutils literal notranslate"><span class="pre">QatIR</span></code> to machine instructions of a given target
 architecture.</p>
 <p>How targets convert the IR is at their discretion but they mostly follow macro-
@@ -799,7 +799,7 @@ the IR.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.backend.qblox.codegen.QbloxContext">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rw_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alloc_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxContext" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">QbloxContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rw_result</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alloc_mgr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enable_timeline_debug_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxContext" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="qat.backend.qblox.codegen.QbloxContext.clear">
@@ -872,8 +872,9 @@ targets This is temporary and criteria will change with more features coming in.
 <dt class="sig sig-object py" id="qat.backend.qblox.codegen.QbloxContext.ledger">
 <span class="sig-name descname"><span class="pre">ledger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pulse</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.backend.qblox.codegen.QbloxContext.ledger" title="Link to this definition"></a></dt>
 <dd><p>A helper method to keep track of the durations and phase as the codegen runs.</p>
-<p>Every little bit of time is accounted for and a timeline object (in static cases) is
-also kept up-to-date for debugging and visualisation purposes.</p>
+<p>Every little bit of time is accounted for. When timeline recording is enabled, a
+timeline object (in static cases) is also kept up-to-date for debugging and
+visualisation purposes.</p>
 </dd></dl>
 
 <dl class="py method">
