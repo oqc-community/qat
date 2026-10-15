@@ -621,6 +621,7 @@ class QbloxContext:
             ):
                 self.sequence_builder.move(wgt_i_index, wgt_i_reg)
                 self.sequence_builder.move(wgt_q_index, wgt_q_reg)
+                self.sequence_builder.nop()
 
                 self.sequence_builder.acquire_weighed(
                     acq_index, acq_bin, wgt_i_reg, wgt_q_reg, legal_acq_width

@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 import re
 from contextlib import nullcontext
 
@@ -420,7 +420,16 @@ class TestQbloxEmitter(InvokerMixin):
         for packages in iter2packages.values():
             for acquire_pkg in packages:
                 if enable_weights:
-                    assert "acquire_weighed" in acquire_pkg.sequence.program
+                    instructions = acquire_pkg.sequence.program.splitlines()
+                    acquire_indices = [
+                        index
+                        for index, instruction in enumerate(instructions)
+                        if instruction.startswith("acquire_weighed ")
+                    ]
+                    assert acquire_indices
+                    assert all(
+                        instructions[index - 1] == "nop" for index in acquire_indices
+                    )
                 else:
                     assert "acquire" in acquire_pkg.sequence.program
 

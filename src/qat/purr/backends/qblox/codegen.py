@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 from abc import ABC
 from bisect import insort
@@ -571,6 +571,7 @@ class QbloxContext(ABC):
             ):
                 self.sequence_builder.move(wgt_i_index, wgt_i_reg)
                 self.sequence_builder.move(wgt_q_index, wgt_q_reg)
+                self.sequence_builder.nop()
 
                 self.sequence_builder.acquire_weighed(
                     acq_index, acq_bin, wgt_i_reg, wgt_q_reg, legal_acq_width

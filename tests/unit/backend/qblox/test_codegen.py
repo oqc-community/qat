@@ -822,7 +822,16 @@ class TestQbloxBackend1:
         for program in executable.programs:
             for acquire_pkg in program.packages.values():
                 if enable_weights:
-                    assert "acquire_weighed" in acquire_pkg.sequence.program
+                    instructions = acquire_pkg.sequence.program.splitlines()
+                    acquire_indices = [
+                        index
+                        for index, instruction in enumerate(instructions)
+                        if instruction.startswith("acquire_weighed ")
+                    ]
+                    assert acquire_indices
+                    assert all(
+                        instructions[index - 1] == "nop" for index in acquire_indices
+                    )
                 else:
                     assert "acquire" in acquire_pkg.sequence.program
 
