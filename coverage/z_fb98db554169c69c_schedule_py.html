@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_0d258fbc4a187c4e_target_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-14 15:29 +0000
+            created at 2026-10-15 03:34 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -224,7 +224,7 @@
     <p class="pln"><span class="n"><a id="t140" href="#t140">140</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t141" href="#t141">141</a></span><span class="t">    <span class="op">@</span><span class="nam">visit</span><span class="op">.</span><span class="nam">register</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t142" href="#t142">142</a></span><span class="t">    <span class="key">def</span> <span class="nam">_</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">operation</span><span class="op">:</span> <span class="nam">NopOp</span><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_advance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">_sequencer_spec</span><span class="op">.</span><span class="nam">clock_period_ns</span><span class="op">,</span> <span class="str">"nop"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t143" href="#t143">143</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">_advance</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">_sequencer_spec</span><span class="op">.</span><span class="nam">q1_core_clock_period_ns</span><span class="op">,</span> <span class="str">"nop"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t144" href="#t144">144</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t145" href="#t145">145</a></span><span class="t">    <span class="op">@</span><span class="nam">visit</span><span class="op">.</span><span class="nam">register</span><span class="op">(</span><span class="nam">StopOp</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t146" href="#t146">146</a></span><span class="t">    <span class="op">@</span><span class="nam">visit</span><span class="op">.</span><span class="nam">register</span><span class="op">(</span><span class="nam">StopImmOp</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -443,7 +443,7 @@
     <p class="mis show_mis"><span class="n"><a id="t359" href="#t359">359</a></span><span class="t">        <span class="key">return</span> <span class="nam">envelope</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t360" href="#t360">360</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t361" href="#t361">361</a></span><span class="t">    <span class="key">def</span> <span class="nam">_advance</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">duration</span><span class="op">:</span> <span class="nam">int</span><span class="op">,</span> <span class="nam">label</span><span class="op">:</span> <span class="nam">str</span><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t362" href="#t362">362</a></span><span class="t">        <span class="nam">sample_count</span> <span class="op">=</span> <span class="nam">round</span><span class="op">(</span><span class="nam">duration</span> <span class="op">*</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_sequencer_spec</span><span class="op">.</span><span class="nam">sample_rate_hz</span> <span class="op">*</span> <span class="num">1e-9</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t362" href="#t362">362</a></span><span class="t">        <span class="nam">sample_count</span> <span class="op">=</span> <span class="nam">round</span><span class="op">(</span><span class="nam">duration</span> <span class="op">/</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_sequencer_spec</span><span class="op">.</span><span class="nam">sample_period_ns</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t363" href="#t363">363</a></span><span class="t">        <span class="nam">signal</span> <span class="op">=</span> <span class="nam">np</span><span class="op">.</span><span class="nam">zeros</span><span class="op">(</span><span class="nam">sample_count</span><span class="op">,</span> <span class="nam">dtype</span><span class="op">=</span><span class="nam">complex</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t364" href="#t364">364</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_active_waveform</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t365" href="#t365">365</a></span><span class="t">            <span class="nam">remaining</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_active_waveform</span><span class="op">.</span><span class="nam">size</span> <span class="op">-</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_waveform_cursor</span>&nbsp;</span><span class="r"></span></p>
@@ -735,7 +735,7 @@
             <a class="nav" href="z_0d258fbc4a187c4e_target_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2026-10-14 15:29 +0000
+            created at 2026-10-15 03:34 +0000
         </p>
     </div>
 </footer>

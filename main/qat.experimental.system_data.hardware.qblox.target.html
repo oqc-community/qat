@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.system_data.hardware.qblox.target module &mdash; qat-compiler 3.0.0.post412.dev20261014151958 documentation</title>
+  <title>qat.experimental.system_data.hardware.qblox.target module &mdash; qat-compiler 3.0.0.post413.dev20261015032841 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -910,14 +910,17 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1AsmSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-32768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32767</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-32768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32767</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_wait_time_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">65532</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4294967295</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop_unroll_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1AsmSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-32768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_gain</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32767</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-32768</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32767</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rt_duration_resolution_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_rt_duration_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_rt_duration_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">65535</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_wait_immediate_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_wait_immediate_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">65535</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4294967295</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Immediate and register limits of the Q1ASM instruction set.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.loop_unroll_threshold">
-<span class="sig-name descname"><span class="pre">loop_unroll_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.loop_unroll_threshold" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<p>Immediate, duration, and register limits of the Q1ASM instruction set.</p>
+<p>Q1 real-time instruction durations have 1 ns resolution and a 4 ns minimum
+non-zero duration. The wait instruction has a 16-bit immediate whose zero value is
+reserved for the documented real-time underflow-guard suspension behaviour.</p>
+<p>See:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions</a></p></li>
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/linq_based_feedback.html">https://docs.qblox.com/en/main/products/architecture/sequencers/linq_based_feedback.html</a></p></li>
+</ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_gain">
 <span class="sig-name descname"><span class="pre">max_gain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_gain" title="Link to this definition"></a></dt>
@@ -929,8 +932,13 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_wait_time_ns">
-<span class="sig-name descname"><span class="pre">max_wait_time_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_wait_time_ns" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_rt_duration_ns">
+<span class="sig-name descname"><span class="pre">max_rt_duration_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_rt_duration_ns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_wait_immediate_ns">
+<span class="sig-name descname"><span class="pre">max_wait_immediate_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.max_wait_immediate_ns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -944,8 +952,23 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.min_rt_duration_ns">
+<span class="sig-name descname"><span class="pre">min_rt_duration_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.min_rt_duration_ns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.min_wait_immediate_ns">
+<span class="sig-name descname"><span class="pre">min_wait_immediate_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.min_wait_immediate_ns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.register_size">
 <span class="sig-name descname"><span class="pre">register_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.register_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.rt_duration_resolution_ns">
+<span class="sig-name descname"><span class="pre">rt_duration_resolution_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1AsmSpec.rt_duration_resolution_ns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -969,14 +992,18 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1SequencerSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruction_capacity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clock_period_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_rate_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_waveform_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_waveform_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_min_frequency_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-500000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_max_frequency_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_phase_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_phase_steps_per_degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2777777.777777778</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_frequency_steps_per_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_frequency_limit_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_sample_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16384</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Q1SequencerSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">instruction_capacity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q1_core_clock_period_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_period_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_waveform_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_waveform_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_min_frequency_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-500000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_max_frequency_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500000000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_phase_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_phase_steps_per_degree</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2777777.777777778</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_frequency_steps_per_hz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nco_frequency_limit_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000000000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">register_count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">waveform_sample_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16384</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Static limits and features of one Q1 sequencer type.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.clock_period_ns">
-<span class="sig-name descname"><span class="pre">clock_period_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.clock_period_ns" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
+<p><code class="docutils literal notranslate"><span class="pre">q1_core_clock_period_ns</span></code> describes instruction issue timing such as <code class="docutils literal notranslate"><span class="pre">nop</span></code>.
+<code class="docutils literal notranslate"><span class="pre">sample_period_ns</span></code> describes the independent waveform memory sampling grid.</p>
+<p>See:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html#q1-core">https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html#q1-core</a></p></li>
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html#real-time-core">https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html#real-time-core</a></p></li>
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/control.html">https://docs.qblox.com/en/main/products/architecture/sequencers/control.html</a></p></li>
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/readout.html">https://docs.qblox.com/en/main/products/architecture/sequencers/readout.html</a></p></li>
+</ul>
 <dl class="py property">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.features">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">features</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">frozenset</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerFeature" title="qat.experimental.system_data.hardware.qblox.target.Q1SequencerFeature"><span class="pre">Q1SequencerFeature</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.features" title="Link to this definition"></a></dt>
@@ -1029,6 +1056,11 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.q1_core_clock_period_ns">
+<span class="sig-name descname"><span class="pre">q1_core_clock_period_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.q1_core_clock_period_ns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.readout">
 <span class="sig-name descname"><span class="pre">readout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec" title="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadoutSpec</span></code></a> <span class="pre">|</span> <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.readout" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -1039,8 +1071,8 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.sample_rate_hz">
-<span class="sig-name descname"><span class="pre">sample_rate_hz</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.sample_rate_hz" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.sample_period_ns">
+<span class="sig-name descname"><span class="pre">sample_period_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.Q1SequencerSpec.sample_period_ns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1211,9 +1243,28 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 
 <dl class="py class">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadoutSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_integration_length_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_length_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16777212</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_acquisition_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-16777212</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_acquisition_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16777212</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_sample_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16384</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ReadoutSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_integration_length_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_integration_length_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16777212</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_length_step_samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_sample_period_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_sample_period_ns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_acquisition_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-16777212</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_acquisition_threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16777212</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight_sample_capacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16384</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Limits of the acquisition path added by a readout sequencer.</p>
+<p>Integration length is measured in samples of <code class="docutils literal notranslate"><span class="pre">integration_sample_period_ns</span></code> and
+must be a multiple of <code class="docutils literal notranslate"><span class="pre">integration_length_step_samples</span></code>, independently of Q1
+instruction duration constraints. Integration and weight limits follow the readout
+sequencer and sequencer API documentation.</p>
+<p>See:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/readout.html">https://docs.qblox.com/en/main/products/architecture/sequencers/readout.html</a></p></li>
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/api/sequencer.html">https://docs.qblox.com/en/main/products/qblox_instruments/api/sequencer.html</a></p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.integration_length_step_samples">
+<span class="sig-name descname"><span class="pre">integration_length_step_samples</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.integration_length_step_samples" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.integration_sample_period_ns">
+<span class="sig-name descname"><span class="pre">integration_sample_period_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.integration_sample_period_ns" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.max_acquisition_threshold">
 <span class="sig-name descname"><span class="pre">max_acquisition_threshold</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.max_acquisition_threshold" title="Link to this definition"></a></dt>
@@ -1237,6 +1288,11 @@ QRC. The driver’s <code class="xref py py-class docutils literal notranslate">
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.weight_sample_capacity">
 <span class="sig-name descname"><span class="pre">weight_sample_capacity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.weight_sample_capacity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.weight_sample_period_ns">
+<span class="sig-name descname"><span class="pre">weight_sample_period_ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></em><a class="headerlink" href="#qat.experimental.system_data.hardware.qblox.target.ReadoutSpec.weight_sample_period_ns" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.q1.ir.imm_desc module &mdash; qat-compiler 3.0.0.post412.dev20261014151958 documentation</title>
+  <title>qat.experimental.dialect.q1.ir.imm_desc module &mdash; qat-compiler 3.0.0.post413.dev20261015032841 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -754,7 +754,9 @@ acquisition indices, jump addresses, and generic 32-bit values.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DurationImm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.DurationImm" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
 <p>RT-instruction duration in ns: <code class="docutils literal notranslate"><span class="pre">[4,</span> <span class="pre">65535]</span></code>.</p>
-<p>The minimum value of 4 ns matches the Q1 Real-Time core clock cycle.</p>
+<p>Q1 instructions have 1 ns duration resolution and a 4 ns minimum non-zero duration.</p>
+<p>See
+<a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions</a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.DurationImm.data">
 <span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataElement</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.DurationImm.data" title="Link to this definition"></a></dt>
@@ -1111,6 +1113,31 @@ or unsigned 32-bit representation (e.g. <code class="docutils literal notranslat
 <dl class="py attribute">
 <dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.UI8Imm.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.ui8_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.UI8Imm.name" title="Link to this definition"></a></dt>
+<dd><p>The attribute name should be a static field in the attribute classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.WaitDurationImm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">WaitDurationImm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.WaitDurationImm" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qat.experimental.dialect.q1.ir.imm_desc.Q1Imm" title="qat.experimental.dialect.q1.ir.imm_desc.Q1Imm"><code class="xref py py-class docutils literal notranslate"><span class="pre">Q1Imm</span></code></a></p>
+<p>Wait duration immediate in ns: <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">[4,</span> <span class="pre">65535]</span></code>.</p>
+<p>Zero is the Q1 <code class="docutils literal notranslate"><span class="pre">wait</span> <span class="pre">0</span></code> special case that suspends the real-time underflow guard.
+Pulse-level zero waits are semantic no-ops and are not lowered to this value.</p>
+<p>See:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions">https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html#real-time-instructions</a></p></li>
+<li><p><a class="reference external" href="https://docs.qblox.com/en/main/products/architecture/sequencers/linq_based_feedback.html">https://docs.qblox.com/en/main/products/architecture/sequencers/linq_based_feedback.html</a></p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.WaitDurationImm.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataElement</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.WaitDurationImm.data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="qat.experimental.dialect.q1.ir.imm_desc.WaitDurationImm.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ClassVar[str]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'q1.wait_duration_imm'</span></em><a class="headerlink" href="#qat.experimental.dialect.q1.ir.imm_desc.WaitDurationImm.name" title="Link to this definition"></a></dt>
 <dd><p>The attribute name should be a static field in the attribute classes.</p>
 </dd></dl>
 
