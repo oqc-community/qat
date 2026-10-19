@@ -8,8 +8,24 @@ from xdsl.parser import Parser
 from xdsl.printer import Printer
 from xdsl.utils.exceptions import VerifyException
 
-from qat.experimental.dialect.pulse.ir import Pulse
+from qat.experimental.dialect.pulse.ir import RESULT_RETURN_TYPES, IQResultType, Pulse
 from qat.experimental.dialect.pulse.ir.types import StateKeyType
+from qat.experimental.dialect.results.ir import (
+    RecordType,
+    ResultsArrayType,
+    ResultsCollectionType,
+)
+
+
+def test_result_plane_return_types_are_public():
+    """Pulse IR exposes the types that carry result-plane values across returns."""
+
+    assert (
+        IQResultType,
+        RecordType,
+        ResultsArrayType,
+        ResultsCollectionType,
+    ) == RESULT_RETURN_TYPES
 
 
 class TestStateKeyType:

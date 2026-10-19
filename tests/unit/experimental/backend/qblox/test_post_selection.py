@@ -33,6 +33,7 @@ from qat.experimental.dialect.pulse.ir import (
     IQResultType,
     KernelOp,
     RealThresholdPolicyAttr,
+    ReturnOp,
     TimeAttr,
 )
 from qat.experimental.dialect.results.ir import (
@@ -122,7 +123,7 @@ def _kernel(shots: int, acquire_label: str | None = None) -> KernelOp:
     return KernelOp(
         "program",
         ((), ()),
-        Region(Block([lower, upper, step, loop])),
+        Region(Block([lower, upper, step, loop, ReturnOp()])),
     )
 
 

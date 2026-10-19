@@ -29,10 +29,11 @@ from xdsl.irdl import (
     irdl_op_definition,
     param_def,
     result_def,
+    traits_def,
 )
 from xdsl.parser import Parser
 from xdsl.printer import Printer
-from xdsl.traits import IsolatedFromAbove, SymbolTable
+from xdsl.traits import IsolatedFromAbove, IsTerminator, SymbolTable
 from xdsl.utils.exceptions import VerifyException
 
 from qat.experimental.dialect.pulse.ir import (
@@ -1634,6 +1635,14 @@ def _build_kernel(
     return KernelOp(name=name, function_type=function_type, region=region)
 
 
+@irdl_op_definition
+class _UnsupportedKernelTerminatorOp(IRDLOperation):
+    """Terminator that is not part of the Pulse kernel contract."""
+
+    name = "test.unsupported_kernel_terminator"
+    traits = traits_def(IsTerminator())
+
+
 class TestKernelOp:
     """Tests the instantiation and verification of the kernel operation."""
 
@@ -1719,6 +1728,33 @@ class TestKernelOp:
 
         kernel = _build_kernel("my_kernel", ([PhaseType()], [FrequencyType()]), Region())
         kernel.verify()
+
+    def test_region_with_multiple_blocks_raises_verify_exception(self):
+        """Tests that a defined kernel has exactly one body block."""
+
+        body = Region([Block([ReturnOp()]), Block([ReturnOp()])])
+        kernel = _build_kernel("my_kernel", ([], []), body)
+
+        with pytest.raises(VerifyException, match="exactly one block"):
+            kernel.verify()
+
+    def test_body_without_terminator_raises_verify_exception(self):
+        """Tests that a defined kernel body cannot omit its terminator."""
+
+        body = Region(Block([ConstantOp(PhaseAttr(0.0))]))
+        kernel = _build_kernel("my_kernel", ([], []), body)
+
+        with pytest.raises(VerifyException, match="is not a terminator"):
+            kernel.verify()
+
+    def test_body_with_non_return_terminator_raises_verify_exception(self):
+        """Tests that a defined kernel must terminate with ``pulse.return``."""
+
+        body = Region(Block([_UnsupportedKernelTerminatorOp()]))
+        kernel = _build_kernel("my_kernel", ([], []), body)
+
+        with pytest.raises(VerifyException, match="must end with pulse.return"):
+            kernel.verify()
 
     def test_region_with_different_block_args_to_func_args_raises_verify_exception(self):
         """Tests that a kernel with a block with arguments that do not match the function

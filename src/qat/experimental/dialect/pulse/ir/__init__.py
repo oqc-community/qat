@@ -16,6 +16,12 @@ of a frame, and play / acquire waveforms on a port in that reference frame.
 
 from xdsl.ir import Dialect
 
+from qat.experimental.dialect.results.ir import (
+    RecordType,
+    ResultsArrayType,
+    ResultsCollectionType,
+)
+
 from .attributes import (
     AmplitudeAttr,
     ComplexData,
@@ -169,6 +175,13 @@ Pulse = Dialect(
 _all_classes = _ops + _interfaces + _traits + _types + _data_attributes + _attributes
 
 ANALYTICAL_WAVEFORM_OPS = tuple(IsAnalyticalWaveformInterface.__subclasses__())
+RESULT_RETURN_TYPES = (
+    IQResultType,
+    RecordType,
+    ResultsArrayType,
+    ResultsCollectionType,
+)
+"""Types that carry result-plane values across Pulse return boundaries."""
 
 __all__ = [
     "ANALYTICAL_WAVEFORM_OPS",
@@ -178,4 +191,5 @@ __all__ = [
     "PhaseOp",
     "Pulse",
     "PulseNumericTypedAttr",
+    "RESULT_RETURN_TYPES",
 ] + [cls_.__name__ for cls_ in _all_classes]

@@ -1854,8 +1854,10 @@ class KernelOp(IRDLOperation):
     """Represents a pulse-level kernel with function semantics.
 
     A kernel is the primary execution scope for a pulse program. It is modelled as a symbol
-    operation with a function signature and a body region. Calls target a kernel via symbol
-    reference, and verification ensures call operands and results match the signature.
+    operation with a function signature and either an empty declaration region or one
+    single-block body. A defined body ends with :class:`ReturnOp`. Calls target a kernel
+    via symbol reference, and verification ensures call operands and results match the
+    signature.
 
     The kernel is also an isolation boundary. Values such as frames, which model mutable
     execution context on control hardware, cannot cross this boundary via function
@@ -1867,7 +1869,8 @@ class KernelOp(IRDLOperation):
 
     :ivar sym_name: Symbol name used to reference this kernel from call sites.
     :ivar function_type: Function signature describing input and output value types.
-    :ivar body: Region containing the kernel entry block and pulse program operations.
+    :ivar body: Empty declaration region or one block containing the pulse program and
+        final :class:`ReturnOp`.
     """
 
     name = "pulse.kernel"
@@ -1887,8 +1890,9 @@ class KernelOp(IRDLOperation):
             :class:`StringAttr`.
         :param function_type: Kernel signature. A tuple form ``(inputs, outputs)`` is
             converted to :class:`FunctionType` via ``FunctionType.from_lists``.
-        :param region: Optional body region. By convention this region contains the entry
-            block and terminates with :class:`ReturnOp` when results are produced.
+        :param region: Optional body region. A defined kernel contains exactly one block
+            ending with :class:`ReturnOp`; an empty region represents an external
+            declaration.
         """
         if isinstance(name, str):
             name = StringAttr(name)
@@ -1908,8 +1912,8 @@ class KernelOp(IRDLOperation):
 
         * ``function_type`` inputs must not contain :class:`FrameType`.
         * ``function_type`` outputs must not contain :class:`FrameType`.
-        * If a body block exists, entry block argument types must exactly match
-          ``function_type`` input types in order.
+        * A defined body contains exactly one block ending with :class:`ReturnOp`.
+        * Entry block argument types exactly match ``function_type`` input types in order.
         """
 
         argument_types = self.function_type.inputs.data
@@ -1929,7 +1933,15 @@ class KernelOp(IRDLOperation):
         if len(self.body.blocks) == 0:
             return
 
+        if len(self.body.blocks) != 1:
+            raise VerifyException(
+                "A defined pulse.kernel body must contain exactly one block."
+            )
+
         entry_block = self.body.blocks.first
+        if not isinstance(entry_block.last_op, ReturnOp):
+            raise VerifyException("A defined pulse.kernel body must end with pulse.return.")
+
         block_arg_types = tuple(arg.type for arg in entry_block.args)
         if block_arg_types != argument_types:
             raise VerifyException(

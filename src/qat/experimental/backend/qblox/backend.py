@@ -8,7 +8,7 @@ from xdsl.context import Context
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.dialects.scf import ForOp
-from xdsl.utils.exceptions import PassFailedException
+from xdsl.utils.exceptions import PassFailedException, VerifyException
 
 from qat.backend.base import BaseBackend
 from qat.backend.qblox.execution import QbloxProgram
@@ -70,9 +70,17 @@ class ExperimentalQbloxBackend(BaseBackend[QbloxProgram]):
         :param metadata: Optional runtime metadata copied into the emitted program.
         :param kwargs: Extra backend arguments accepted for pipeline compatibility.
         :returns: Executable containing the emitted Qblox program.
-        :raises PassFailedException: If a post-selection predicate has no matching
-            acquisition or preceding discrimination step.
+        :raises PassFailedException: If the source Pulse IR fails verification, or a
+            post-selection predicate has no matching acquisition or preceding
+            discrimination step.
         """
+
+        try:
+            ir.verify()
+        except VerifyException as exc:
+            raise PassFailedException(
+                f"Pulse IR failed verification before Q1 lowering: {exc}"
+            ) from exc
 
         res_mgr = ResultManager() if res_mgr is None else res_mgr
         shots = _extract_shot_count(ir)

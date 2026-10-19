@@ -6,9 +6,10 @@ from dataclasses import dataclass, field
 from re import compile
 
 from xdsl.context import Context
+from xdsl.dialects import func
 from xdsl.dialects.builtin import ModuleOp
 from xdsl.dialects.scf import ForOp
-from xdsl.ir import Operation, SSAValue
+from xdsl.ir import Block, Operation, SSAValue
 from xdsl.passes import ModulePass
 from xdsl.utils.exceptions import PassFailedException
 
@@ -17,10 +18,13 @@ from qat.experimental.conversion.pulse_to_q1.loop_fission import (
     is_results_op,
 )
 from qat.experimental.dialect.pulse.ir import (
+    RESULT_RETURN_TYPES,
     AcquireOp,
     CreateFrameOp,
     FrameType,
     IntegrateOp,
+    KernelOp,
+    ReturnOp as PulseReturnOp,
 )
 from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     FrameLineage,
@@ -28,15 +32,7 @@ from qat.experimental.dialect.pulse.transforms.partition_by_frame import (
     build_frame_lineage_analysis,
 )
 from qat.experimental.dialect.pulse.utils import pulse_entry_block
-from qat.experimental.dialect.q1 import (
-    BoolImm,
-    DurationImm,
-    SetLatchEnImmImmOp,
-    SetMrkImmOp,
-    StopOp,
-    UI4Imm,
-    UpdParamImmOp,
-)
+from qat.experimental.dialect.q1 import StopOp
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.passes.pass_ordering import OrderedPass
 from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
@@ -44,11 +40,6 @@ from qat.experimental.system_data.hardware.qblox.target import QbloxTargetDescri
 
 _NON_SYMBOL_CHARS = compile(r"[^0-9A-Za-z_$.]")
 _MULTI_UNDERSCORE = compile(r"_+")
-
-# TODO(COMPILER-1450): Move marker initialisation after physical binding and derive it
-# from the module kind. QbloxTargetDescription has no RF marker-mask field, and
-# marker_count cannot identify the required bits. This legacy mask is not validated for QRC.
-_MARKER_BITMASK = 0b0011
 
 
 def _synchronization_duration(target_data: QbloxTargetDescription) -> int:
@@ -188,18 +179,19 @@ def _partition_dependency_closure(
 
 
 def _build_partition_sequence_body(
-    entry_block_ops: list[Operation],
+    entry_block: Block,
     lineage: FrameLineage,
     op_by_result: dict[SSAValue, Operation],
     entry_lineages: dict[Operation, list[FrameLineage]],
     analysis: FrameLineageAnalysis,
     target_data: QbloxTargetDescription,
 ) -> list[Operation]:
-    """Build the cloned body for one outlined sequence.
+    """Build the complete target body for one outlined sequence.
 
-    The analysis result describes lineage membership. The outlining pass still needs to
-    clone the supporting entry-block operations that feed that lineage so the emitted
-    sequence body remains valid on its own.
+    In xDSL terminology, a block body includes every operation in the block, including its
+    terminator. Here, ``sequence_payload`` means only the frame-local non-terminator
+    operations and their dependencies. The outlining pass validates the source terminator
+    once before partitioning, then gives each cloned payload a fresh target ``q1.stop``.
 
     A region-bearing entry-block operation enclosing this lineage's work, such as the
     shot loop, is rebuilt from the operations belonging to this lineage alone rather than
@@ -211,6 +203,7 @@ def _build_partition_sequence_body(
     lowers them.
     """
 
+    entry_block_ops = list(entry_block.ops)
     needed_ops = _partition_dependency_closure(lineage.entry_ops, op_by_result)
     for op in needed_ops:
         owners = entry_lineages.get(op, ())
@@ -221,13 +214,13 @@ def _build_partition_sequence_body(
             )
 
     value_mapper: dict[SSAValue, SSAValue] = {}
-    sequence_body: list[Operation] = []
+    sequence_payload: list[Operation] = []
     for op in entry_block_ops:
         if op not in needed_ops or is_results_op(op):
             continue
         if _needs_rebuilding(op, lineage, entry_lineages, analysis):
             _reject_consumed_loop_results(op, needed_ops)
-            sequence_body.append(
+            sequence_payload.append(
                 fission_for_lineage(
                     op,
                     lineage,
@@ -237,8 +230,48 @@ def _build_partition_sequence_body(
                 )
             )
         else:
-            sequence_body.append(op.clone(value_mapper))
+            sequence_payload.append(op.clone(value_mapper))
+    sequence_body = [*sequence_payload, StopOp()]
     return sequence_body
+
+
+def _validate_entry_terminator(entry_block: Block) -> None:
+    """Validate the source entry-block terminator for Q1 outlining.
+
+    Pulse kernels and compatibility ``func.func`` inputs are structurally verified before
+    the configured Q1 pipeline runs. Returned result-plane values have no Q1 control-flow
+    representation: Qblox acquisition metadata and result processing carry them instead.
+
+    :param entry_block: Source Pulse instruction block being outlined.
+    :raises PassFailedException: If the entry block has an unsupported owner or terminator,
+        or returns a value outside the supported result plane.
+    """
+
+    parent = entry_block.parent_op()
+    if isinstance(parent, KernelOp):
+        terminator = entry_block.last_op
+        if not isinstance(terminator, PulseReturnOp):
+            raise PassFailedException(
+                "Pulse kernel must end with pulse.return before Q1 outlining."
+            )
+        source_name = "Pulse kernel"
+    elif isinstance(parent, func.FuncOp):
+        terminator = entry_block.last_op
+        if not isinstance(terminator, func.ReturnOp):
+            raise PassFailedException(
+                "Pulse function must end with func.return before Q1 outlining."
+            )
+        source_name = "Pulse function"
+    else:
+        raise PassFailedException(
+            "Q1 outlining requires a Pulse entry block owned by pulse.kernel or func.func."
+        )
+
+    for operand in terminator.operands:
+        if not isinstance(operand.type, RESULT_RETURN_TYPES):
+            raise PassFailedException(
+                f"{source_name} has unsupported return value type {operand.type}."
+            )
 
 
 def _reject_consumed_loop_results(op: Operation, needed_ops: set[Operation]) -> None:
@@ -318,13 +351,9 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         pulse.create_frame %freq, "q0/drive"
         pulse.create_frame %freq, "q1/drive"
 
-    becomes two independent sequence envelopes::
-
-        q1_sequence.sequence @q0_drive { q1.i.set_mrk ... q1.stop }
-        q1_sequence.sequence @q1_drive { q1.i.set_mrk ... q1.stop }
-
-    Sequence scaffolding mirrors the legacy Qblox code generator: marker and trigger-latch
-    setup form the prologue, and ``q1.stop`` forms the epilogue. Fissioned shot loops carry
+    becomes two independent, structurally terminated sequence envelopes. Frame lineage
+    determines each sequence's non-terminator payload; outlining lowers the source region
+    terminator to a fresh ``q1.stop`` in every emitted body. Fissioned shot loops carry
     their per-shot synchronisation and phase-reset prologue inside the loop body.
     """
 
@@ -332,47 +361,6 @@ class Q1OutliningPass(OrderedPass, ModulePass):
 
     target_data: QbloxTargetDescription = DEFAULT_QBLOX_TARGET
     state: OutliningState = field(default_factory=OutliningState, init=False)
-
-    def _sequence_op_for_partition(
-        self,
-        frame_id: str,
-        lineage: FrameLineage,
-        sequence_body: list[Operation],
-        symbol_allocator: _SymbolAllocator,
-    ) -> tuple[SequenceOp, str, str]:
-        """Construct one outlined sequence together with its recorded metadata.
-
-        :param frame_id: Synthetic frame label used for fallback naming.
-        :param lineage: Frame lineage for this partition and its port metadata.
-        :param sequence_body: Cloned operations to place in the sequence body. The body
-            already contains the lineage ops plus any cloned definitions required to make
-            the envelope self-contained.
-        :param symbol_allocator: Symbol allocator for the outline run.
-        :returns: The emitted sequence op, the physical channel token, and the final
-            sequence symbol.
-        """
-
-        if not any(
-            isinstance(nested, CreateFrameOp)
-            for op in sequence_body
-            for nested in op.walk()
-        ):
-            raise ValueError(f"Partition {frame_id} does not contain pulse.create_frame.")
-
-        channel_token, sequence_symbol = symbol_allocator.allocate(frame_id, lineage)
-        synchronization_duration = _synchronization_duration(self.target_data)
-        sequence_ops = [
-            SetMrkImmOp(UI4Imm(_MARKER_BITMASK)),
-            SetLatchEnImmImmOp(BoolImm(1), DurationImm(synchronization_duration)),
-            UpdParamImmOp(DurationImm(synchronization_duration)),
-            *sequence_body,
-            StopOp(),
-        ]
-        return (
-            SequenceOp(sequence_symbol, sequence_ops, port_id=channel_token),
-            channel_token,
-            sequence_symbol,
-        )
 
     def _emit_sequence_ops(
         self, module: ModuleOp, analysis: FrameLineageAnalysis
@@ -412,6 +400,7 @@ class Q1OutliningPass(OrderedPass, ModulePass):
         symbol_allocator = _SymbolAllocator(symbol_counts, reserved)
 
         entry_block = pulse_entry_block(module)
+        _validate_entry_terminator(entry_block)
         entry_block_ops = list(entry_block.ops)
         op_by_result = {result: op for op in entry_block_ops for result in op.results}
 
@@ -423,18 +412,26 @@ class Q1OutliningPass(OrderedPass, ModulePass):
             # label only influences the emitted symbol (see ``_SymbolAllocator``).
             frame_id = f"frame_{frame_index}"
             sequence_body = _build_partition_sequence_body(
-                entry_block_ops,
+                entry_block,
                 lineage,
                 op_by_result,
                 entry_lineages,
                 analysis,
                 self.target_data,
             )
-            sequence_op, channel_token, sequence_symbol = self._sequence_op_for_partition(
-                frame_id,
-                lineage,
+            if not any(
+                isinstance(nested, CreateFrameOp)
+                for operation in sequence_body
+                for nested in operation.walk()
+            ):
+                raise ValueError(
+                    f"Partition {frame_id} does not contain pulse.create_frame."
+                )
+            channel_token, sequence_symbol = symbol_allocator.allocate(frame_id, lineage)
+            sequence_op = SequenceOp(
+                sequence_symbol,
                 sequence_body,
-                symbol_allocator,
+                port_id=channel_token,
             )
 
             frame_to_port[frame_id] = channel_token

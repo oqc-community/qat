@@ -17,6 +17,8 @@ from qat.experimental.system_data.hardware.qblox.target import (
     DEFAULT_QBLOX_TARGET,
     AcquisitionConnectionMode,
     LocalOscillatorSpec,
+    MarkerBitRole,
+    MarkerBitTarget,
     ModuleSpec,
     Q1AsmSpec,
     Q1SequencerFeature,
@@ -127,6 +129,67 @@ def test_routing_and_sequencer_types_come_from_target_description():
     assert control.sequencer_spec.type is Q1SequencerType.control
     assert control.sequencer_spec.supports(Q1SequencerFeature.awg)
     assert not control.sequencer_spec.supports(Q1SequencerFeature.acquisition)
+
+
+@pytest.mark.parametrize(
+    ("kind", "marker_bits"),
+    [
+        (
+            QbloxModuleKind.qcm,
+            (
+                MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                MarkerBitTarget(MarkerBitRole.marker_output, 1),
+                MarkerBitTarget(MarkerBitRole.marker_output, 2),
+                MarkerBitTarget(MarkerBitRole.marker_output, 3),
+            ),
+        ),
+        (
+            QbloxModuleKind.qcm_rf,
+            (
+                MarkerBitTarget(MarkerBitRole.output_switch, 0),
+                MarkerBitTarget(MarkerBitRole.output_switch, 1),
+                MarkerBitTarget(MarkerBitRole.marker_output, 1),
+                MarkerBitTarget(MarkerBitRole.marker_output, 0),
+            ),
+        ),
+        (
+            QbloxModuleKind.qrm,
+            (
+                MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                MarkerBitTarget(MarkerBitRole.marker_output, 1),
+                MarkerBitTarget(MarkerBitRole.marker_output, 2),
+                MarkerBitTarget(MarkerBitRole.marker_output, 3),
+            ),
+        ),
+        (
+            QbloxModuleKind.qrm_rf,
+            (
+                None,
+                MarkerBitTarget(MarkerBitRole.output_switch, 0),
+                MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                MarkerBitTarget(MarkerBitRole.marker_output, 1),
+            ),
+        ),
+        (
+            QbloxModuleKind.qrc,
+            (
+                MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                None,
+                None,
+                None,
+            ),
+        ),
+    ],
+)
+def test_module_marker_bits_match_physical_routing(kind, marker_bits):
+    module_spec = DEFAULT_QBLOX_TARGET.module_spec(kind)
+
+    assert (
+        module_spec.marker_bit_0,
+        module_spec.marker_bit_1,
+        module_spec.marker_bit_2,
+        module_spec.marker_bit_3,
+    ) == marker_bits
 
 
 @pytest.mark.parametrize(
@@ -447,6 +510,10 @@ def test_module_rejects_control_sequencer_on_input_channel_map():
             output_count=1,
             input_count=1,
             output_channel_map=frozendict({0: (0,)}),
+            marker_bit_0=None,
+            marker_bit_1=None,
+            marker_bit_2=None,
+            marker_bit_3=None,
             input_channel_map=frozendict({0: (0,)}),
             acquisition_memory_bins=1,
         )

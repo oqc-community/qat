@@ -20,7 +20,7 @@ from qat.experimental.backend.qblox.backend import (
     ExperimentalQbloxBackend,
     _extract_shot_count,
 )
-from qat.experimental.dialect.pulse.ir import AcquisitionType, KernelOp
+from qat.experimental.dialect.pulse.ir import AcquisitionType, KernelOp, ReturnOp
 from qat.experimental.dialect.results.ir import ResultsArrayType
 from qat.experimental.frontend.importer.pulse.builder import PulseKernelBuilder
 from qat.experimental.frontend.purr import PurrFrontend
@@ -64,6 +64,8 @@ def _kernel_with_shot_loop(
     result_types = [
         ResultsArrayType(AcquisitionType(), IntAttr(size)) for size in result_sizes
     ]
+    if not result_types:
+        body_ops.append(ReturnOp())
     return KernelOp(
         name,
         ((), result_types),
@@ -181,6 +183,23 @@ class TestExperimentalQbloxCompilePipeline:
         assert isinstance(executable, Executable)
         assert executable.programs == [program]
         assert executable.calibration_id == canonical_model_qblox.calibration_id
+
+    def test_backend_verifies_pulse_ir_before_q1_lowering(
+        self, canonical_model_qblox, mocker
+    ):
+        """Invalid Pulse structure fails before the configured Q1 pipeline runs."""
+
+        lowering_factory = mocker.patch(
+            "qat.experimental.backend.qblox.backend.create_qblox_configured_q1_pipeline"
+        )
+        module = ModuleOp(
+            [KernelOp("program", ((), ()), Region(Block([ReturnOp(), ReturnOp()])))]
+        )
+
+        with pytest.raises(PassFailedException, match="failed verification"):
+            ExperimentalQbloxBackend(canonical_model_qblox).emit(module)
+
+        lowering_factory.assert_not_called()
 
     def test_backend_attaches_results_processing_metadata(
         self, canonical_model_qblox, mocker

@@ -3,6 +3,7 @@
 
 import json
 from dataclasses import replace
+from io import StringIO
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,7 @@ from xdsl.dialects import scf
 from xdsl.dialects.arith import ConstantOp as ArithConstantOp
 from xdsl.dialects.builtin import IndexType, ModuleOp, StringAttr
 from xdsl.ir import Block
+from xdsl.printer import Printer
 from xdsl.utils.exceptions import PassFailedException
 
 import qat.experimental.conversion.pulse_to_q1.hardware_binding as hardware_binding
@@ -98,6 +100,24 @@ def _bind(data: CanonicalSystemData, *sequences: SequenceOp) -> ModuleOp:
     QbloxHardwareBindingPass(data).apply(Context(), module)
     module.verify()
     return module
+
+
+def _print_sequence_body(sequence: SequenceOp) -> str:
+    stream = StringIO()
+    printer = Printer(stream=stream)
+    for operation in sequence.body.block.ops:
+        printer.print_op(operation)
+    return stream.getvalue()
+
+
+def test_binding_does_not_change_sequence_body():
+    sequence = _sequence(4_200_000_000)
+    body_before = _print_sequence_body(sequence)
+    data = canonical_data(configurations=[supplied([sequencer(0)])])
+
+    _bind(data, sequence)
+
+    assert _print_sequence_body(sequence) == body_before
 
 
 def _looped_sequence(

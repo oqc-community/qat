@@ -30,6 +30,9 @@ from qat.experimental.conversion.pulse_to_q1.rewrite_patterns import (
     create_pulse_to_q1_legalisation_patterns,
     create_pulse_to_q1_lowering_patterns,
 )
+from qat.experimental.conversion.pulse_to_q1.sequence_convention import (
+    QbloxSequenceInitialisationPass,
+)
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
@@ -90,7 +93,13 @@ class Q1PulseValidationPass(OrderedPass, ModulePass):
     target_data: QbloxTargetDescription = field(default=DEFAULT_QBLOX_TARGET)
 
     def required_predecessors(self) -> frozenset[type[ModulePass]]:
-        return frozenset({Q1OutliningPass, QbloxHardwareBindingPass})
+        return frozenset(
+            {
+                Q1OutliningPass,
+                QbloxHardwareBindingPass,
+                QbloxSequenceInitialisationPass,
+            }
+        )
 
     def runs_before(self) -> frozenset[type[ModulePass]]:
         return frozenset({Q1PulseLegalisationPass})
@@ -543,6 +552,7 @@ def create_qblox_configured_q1_pipeline(
         (
             Q1OutliningPass(target_data=target_data),
             QbloxHardwareBindingPass(canonical_data),
+            QbloxSequenceInitialisationPass(target_data=target_data),
             Q1PulseValidationPass(target_data=target_data),
             Q1PreAcquireTransformationPass(),
             Q1PulseLegalisationPass(),

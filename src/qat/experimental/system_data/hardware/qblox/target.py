@@ -10,6 +10,7 @@ See:
 
 * https://docs.qblox.com/en/main/products/architecture/sequencers/sequencer.html
 * https://docs.qblox.com/en/main/products/qblox_instruments/api/sequencer.html
+* https://docs.qblox.com/en/main/products/qblox_instruments/q1/index.html
 * https://docs.qblox.com/en/main/products/architecture/modules/index.html
 """
 
@@ -47,6 +48,33 @@ class AcquisitionConnectionMode(str, Enum):
     none = "none"
     components = "components"
     combined = "combined"
+
+
+class MarkerBitRole(str, Enum):
+    """Kind of physical destination controlled by one Q1 ``mrk`` bit.
+
+    :ivar marker_output: Front-panel marker output channel.
+    :ivar output_switch: RF output-enable switch.
+    """
+
+    marker_output = "marker_output"
+    output_switch = "output_switch"
+
+
+@dataclass(frozen=True, slots=True)
+class MarkerBitTarget:
+    """One physical destination controlled by a Q1 ``mrk`` bit.
+
+    ``channel`` is the zero-based compiler identifier for the destination. Module
+    documentation labels baseband marker outputs as M1 through M4 and QRC output as M0.
+    These correspond to compiler channels 0 through 3 and channel 0 respectively.
+
+    :ivar role: Kind of physical destination controlled by the bit.
+    :ivar channel: Zero-based compiler channel identifier for that destination.
+    """
+
+    role: MarkerBitRole
+    channel: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -263,15 +291,45 @@ class Q1SequencerSpec:
 
 @dataclass(frozen=True, slots=True)
 class ModuleSpec:
-    """Physical sequencer bank and channel map of one Qblox module kind."""
+    """Physical sequencer bank, channel map, and Q1 marker-bit routing.
+
+    Each ``marker_bit_*`` field identifies the single physical destination controlled by
+    that Q1 ``mrk`` bit. ``None`` marks an unused bit.
+
+    :ivar kind: Qblox module kind described by this record.
+    :ivar sequencers: Sequencer type at each physical sequencer index.
+    :ivar output_count: Number of physical output channels.
+    :ivar input_count: Number of physical input channels.
+    :ivar output_channel_map: Sequencer indices permitted to drive each output channel.
+    :ivar marker_bit_0: Destination controlled by Q1 ``mrk`` bit 0, or ``None``.
+    :ivar marker_bit_1: Destination controlled by Q1 ``mrk`` bit 1, or ``None``.
+    :ivar marker_bit_2: Destination controlled by Q1 ``mrk`` bit 2, or ``None``.
+    :ivar marker_bit_3: Destination controlled by Q1 ``mrk`` bit 3, or ``None``.
+    :ivar input_channel_map: Sequencer indices permitted to acquire from each input channel.
+    :ivar acquisition_memory_bins: Total acquisition bins shared by the module.
+    :ivar supports_mixer_correction: Whether the module supports mixer corrections.
+    :ivar supports_local_oscillator_enable: Whether local oscillators can be enabled.
+    :ivar supports_awg_modulation: Whether AWG output paths support modulation.
+    :ivar supports_acquisition_demodulation: Whether acquisition paths support demodulation.
+    :ivar output_path_components: Signal components accepted by an output connection.
+    :ivar acquisition_connection_mode: Form of acquisition connection exposed by the module.
+    :ivar is_rf: Whether the module carries an RF front end. An RF module exposes one
+        logical I/O port per RF chain and derives its I and Q lanes internally, so a
+        connection may name only one port index. This mirrors
+        ``qblox_instruments.types.TypeHandle.is_rf_type`` for QCM-RF, QRM-RF, and QRC.
+    :ivar local_oscillator: Integrated local-oscillator limits, or ``None``.
+    """
 
     kind: QbloxModuleKind
     sequencers: tuple[Q1SequencerType, ...]
     output_count: int
     input_count: int
     output_channel_map: frozendict[int, tuple[int, ...]]
+    marker_bit_0: MarkerBitTarget | None
+    marker_bit_1: MarkerBitTarget | None
+    marker_bit_2: MarkerBitTarget | None
+    marker_bit_3: MarkerBitTarget | None
     input_channel_map: frozendict[int, tuple[int, ...]] = field(default_factory=frozendict)
-    marker_count: int = 0
     acquisition_memory_bins: int | None = None
     supports_mixer_correction: bool = True
     supports_local_oscillator_enable: bool = True
@@ -280,13 +338,6 @@ class ModuleSpec:
     output_path_components: frozenset[SignalPath] = frozenset({SignalPath.i, SignalPath.q})
     acquisition_connection_mode: AcquisitionConnectionMode = AcquisitionConnectionMode.none
     is_rf: bool = False
-    """Whether the module carries an RF front end.
-
-    An RF module exposes one logical I/O port per RF chain and derives its I and Q lanes
-    internally, so a connection may name only one port index. Mirrors
-    ``qblox_instruments.types.TypeHandle.is_rf_type``, which covers QCM-RF, QRM-RF, and
-    QRC. The driver's :class:`Module` property delegates to that classification.
-    """
     local_oscillator: LocalOscillatorSpec | None = None
 
     def __post_init__(self) -> None:
@@ -531,7 +582,10 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 output_channel_map=frozendict(
                     {output: tuple(range(6)) for output in range(4)}
                 ),
-                marker_count=4,
+                marker_bit_0=MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                marker_bit_1=MarkerBitTarget(MarkerBitRole.marker_output, 1),
+                marker_bit_2=MarkerBitTarget(MarkerBitRole.marker_output, 2),
+                marker_bit_3=MarkerBitTarget(MarkerBitRole.marker_output, 3),
             ),
             QbloxModuleKind.qcm_rf: ModuleSpec(
                 kind=QbloxModuleKind.qcm_rf,
@@ -547,7 +601,11 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                     {output: tuple(range(6)) for output in range(2)}
                 ),
                 output_path_components=frozenset({SignalPath.iq}),
-                marker_count=2,
+                marker_bit_0=MarkerBitTarget(MarkerBitRole.output_switch, 0),
+                marker_bit_1=MarkerBitTarget(MarkerBitRole.output_switch, 1),
+                marker_bit_2=MarkerBitTarget(MarkerBitRole.marker_output, 1),
+                # The Qblox compiler assigns digital output 0 to bit 3.
+                marker_bit_3=MarkerBitTarget(MarkerBitRole.marker_output, 0),
             ),
             QbloxModuleKind.qrm: ModuleSpec(
                 kind=QbloxModuleKind.qrm,
@@ -560,7 +618,10 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 input_channel_map=frozendict(
                     {input_: tuple(range(6)) for input_ in range(2)}
                 ),
-                marker_count=4,
+                marker_bit_0=MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                marker_bit_1=MarkerBitTarget(MarkerBitRole.marker_output, 1),
+                marker_bit_2=MarkerBitTarget(MarkerBitRole.marker_output, 2),
+                marker_bit_3=MarkerBitTarget(MarkerBitRole.marker_output, 3),
                 acquisition_memory_bins=3_000_000,
                 acquisition_connection_mode=AcquisitionConnectionMode.components,
             ),
@@ -577,7 +638,11 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                 output_channel_map=frozendict({0: tuple(range(6))}),
                 input_channel_map=frozendict({0: tuple(range(6))}),
                 output_path_components=frozenset({SignalPath.iq}),
-                marker_count=2,
+                # Q1 metadata and the Qblox compiler mark bit 0 as inactive.
+                marker_bit_0=None,
+                marker_bit_1=MarkerBitTarget(MarkerBitRole.output_switch, 0),
+                marker_bit_2=MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                marker_bit_3=MarkerBitTarget(MarkerBitRole.marker_output, 1),
                 acquisition_memory_bins=3_000_000,
                 acquisition_connection_mode=AcquisitionConnectionMode.combined,
             ),
@@ -606,7 +671,10 @@ DEFAULT_QBLOX_TARGET = QbloxTargetDescription(
                     {input_: tuple(range(8)) for input_ in range(2)}
                 ),
                 output_path_components=frozenset({SignalPath.iq}),
-                marker_count=1,
+                marker_bit_0=MarkerBitTarget(MarkerBitRole.marker_output, 0),
+                marker_bit_1=None,
+                marker_bit_2=None,
+                marker_bit_3=None,
                 acquisition_memory_bins=7_000_000,
                 acquisition_connection_mode=AcquisitionConnectionMode.combined,
                 supports_mixer_correction=False,

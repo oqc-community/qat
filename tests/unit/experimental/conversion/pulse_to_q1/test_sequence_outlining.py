@@ -25,8 +25,10 @@ from qat.experimental.dialect.pulse.ir import (
     ConstantOp,
     CreateFrameOp,
     FrequencyAttr,
+    KernelOp,
     MaxTimeOp,
     PulseOp,
+    ReturnOp as PulseReturnOp,
     SquareWaveformOp,
     SynchronizeOp,
     TimeAttr,
@@ -56,6 +58,10 @@ _SHOTS = 1000
 
 def _module_with_main(ops) -> ModuleOp:
     return ModuleOp([func.FuncOp("main", ((), ()), Region(Block(ops)))])
+
+
+def _module_with_kernel(ops) -> ModuleOp:
+    return ModuleOp([KernelOp("program", ((), ()), Region(Block(ops)))])
 
 
 @irdl_op_definition
@@ -160,8 +166,30 @@ def _sequences_by_port(module: ModuleOp) -> dict[str, SequenceOp]:
 
 
 class TestPulseToQ1SequenceOutlining:
+    def test_kernel_return_lowers_to_sequence_stop(self):
+        """Verify that a Pulse kernel return lowers to one target terminator."""
+        frequency, frame = _frame(4.8e9, "q0.drive")
+        module = _module_with_kernel([frequency, frame, PulseReturnOp()])
+
+        Q1OutliningPass().apply(Context(), module)
+
+        [sequence] = list(module.body.block.ops)
+        body = list(sequence.body.block.ops)
+        assert sum(isinstance(op, StopOp) for op in body) == 1
+        assert isinstance(body[-1], StopOp)
+        assert not any(isinstance(op, PulseReturnOp) for op in body)
+        sequence.verify()
+
+    def test_flat_module_is_not_an_outlining_input(self):
+        """Verify that historical flat Pulse scaffolding is not given target semantics."""
+        frequency, frame = _frame(4.8e9, "q0.drive")
+        module = ModuleOp([frequency, frame])
+
+        with pytest.raises(PassFailedException, match="pulse.kernel or func.func"):
+            Q1OutliningPass().apply(Context(), module)
+
     def test_single_frame_lowers_to_single_sequence(self):
-        """Verify that one logical frame yields one outlined Q1 sequence."""
+        """Verify that a compatible func return lowers to one target terminator."""
         freq, frame = _frame(4.8e9, "q0.drive")
         module = _module_with_main([freq, frame, func.ReturnOp()])
 
@@ -172,10 +200,14 @@ class TestPulseToQ1SequenceOutlining:
         assert isinstance(seq, SequenceOp)
         assert seq.channel_id.data == "q0.drive"
         assert seq.port_id.data == "q0.drive"
-        assert isinstance(seq.body.block.first_op, SetMrkImmOp)
-        assert seq.body.block.first_op.mrk.data == 3
+        assert not any(
+            isinstance(op, SetMrkImmOp | SetLatchEnImmImmOp | UpdParamImmOp)
+            for op in seq.body.block.ops
+        )
         assert any(isinstance(op, CreateFrameOp) for op in seq.body.block.ops)
+        assert sum(isinstance(op, StopOp) for op in seq.body.block.ops) == 1
         assert isinstance(seq.body.block.last_op, StopOp)
+        assert not any(isinstance(op, func.ReturnOp) for op in seq.body.block.ops)
         seq.verify()
 
     def test_distinct_frames_yield_distinct_sequences(self):
@@ -190,10 +222,19 @@ class TestPulseToQ1SequenceOutlining:
         sequences = [op for op in module.body.block.ops if isinstance(op, SequenceOp)]
         assert [seq.channel_id.data for seq in sequences] == ["q0.drive", "q1.drive"]
         assert [seq.port_id.data for seq in sequences] == ["q0.drive", "q1.drive"]
-        assert all(isinstance(seq.body.block.first_op, SetMrkImmOp) for seq in sequences)
-        assert all(seq.body.block.first_op.mrk.data == 3 for seq in sequences)
+        assert all(
+            not any(
+                isinstance(op, SetMrkImmOp | SetLatchEnImmImmOp | UpdParamImmOp)
+                for op in seq.body.block.ops
+            )
+            for seq in sequences
+        )
         assert all(
             any(isinstance(op, CreateFrameOp) for op in seq.body.block.ops)
+            for seq in sequences
+        )
+        assert all(
+            sum(isinstance(op, StopOp) for op in seq.body.block.ops) == 1
             for seq in sequences
         )
         assert all(isinstance(seq.body.block.last_op, StopOp) for seq in sequences)
@@ -205,6 +246,58 @@ class TestPulseToQ1SequenceOutlining:
             "frame_0": "q0.drive",
             "frame_1": "q1.drive",
         }
+
+    def test_kernel_with_unsupported_return_value_is_rejected(self):
+        """Verify that arbitrary returned values are not silently discarded."""
+        frequency, frame = _frame(4.8e9, "q0.drive")
+        return_op = PulseReturnOp(frequency)
+        kernel = KernelOp(
+            "program",
+            ((), (frequency.result.type,)),
+            Region(Block([frequency, frame, return_op])),
+        )
+
+        with pytest.raises(PassFailedException, match="unsupported return value"):
+            Q1OutliningPass().apply(Context(), ModuleOp([kernel]))
+
+    def test_kernel_without_frames_rejects_unsupported_return_value(self):
+        """Verify that return validation does not depend on frame partitions."""
+        frequency, _ = _frame(4.8e9, "q0.drive")
+        return_op = PulseReturnOp(frequency)
+        kernel = KernelOp(
+            "program",
+            ((), (frequency.result.type,)),
+            Region(Block([frequency, return_op])),
+        )
+
+        with pytest.raises(PassFailedException, match="unsupported return value"):
+            Q1OutliningPass().apply(Context(), ModuleOp([kernel]))
+
+    def test_function_with_unsupported_return_value_is_rejected(self):
+        """Verify that compatibility function returns use the same target restrictions."""
+        frequency, _ = _frame(4.8e9, "q0.drive")
+        function = func.FuncOp(
+            "main",
+            ((), (frequency.result.type,)),
+            Region(Block([frequency, func.ReturnOp(frequency)])),
+        )
+
+        with pytest.raises(PassFailedException, match="unsupported return value"):
+            Q1OutliningPass().apply(Context(), ModuleOp([function]))
+
+    def test_unverified_kernel_without_frames_requires_pulse_return(self):
+        """Verify that direct pass use reports an invalid source terminator clearly."""
+        kernel = KernelOp("program", ((), ()), Region(Block()))
+
+        with pytest.raises(PassFailedException, match="must end with pulse.return"):
+            Q1OutliningPass().apply(Context(), ModuleOp([kernel]))
+
+    def test_unverified_function_without_frames_requires_func_return(self):
+        """Verify that compatibility functions require their source terminator."""
+        function = func.FuncOp("main", ((), ()), Region(Block()))
+
+        with pytest.raises(PassFailedException, match="must end with func.return"):
+            Q1OutliningPass().apply(Context(), ModuleOp([function]))
 
     def test_sequence_symbol_normalizes_channel_slashes(self):
         """Verify that channel tokens are normalised before use as sequence symbols."""
@@ -273,16 +366,12 @@ class TestPulseToQ1SequenceOutlining:
             "frame_1": "cross_resonance",
         }
 
-    def test_empty_module_lowers_to_no_sequences(self):
-        """Verify that outlining preserves an empty module as empty."""
+    def test_empty_flat_module_is_not_an_outlining_input(self):
+        """Verify that flat-module rejection does not depend on frame partitions."""
         module = ModuleOp([])
 
-        pass_instance = Q1OutliningPass()
-        pass_instance.apply(Context(), module)
-
-        assert list(module.body.block.ops) == []
-        assert pass_instance.state.frame_to_port == {}
-        assert pass_instance.state.frame_to_sequence == {}
+        with pytest.raises(PassFailedException, match="pulse.kernel or func.func"):
+            Q1OutliningPass().apply(Context(), module)
 
     def test_emit_sequence_ops_rejects_partition_not_starting_with_create_frame(self):
         """Verify that malformed frame partitions are rejected during sequence emission."""
@@ -295,7 +384,9 @@ class TestPulseToQ1SequenceOutlining:
         )
         malformed = FrameLineageAnalysis.from_lineages([malformed_lin])
         with pytest.raises(ValueError, match="does not contain pulse.create_frame"):
-            Q1OutliningPass()._emit_sequence_ops(ModuleOp([]), malformed)
+            Q1OutliningPass()._emit_sequence_ops(
+                _module_with_main([func.ReturnOp()]), malformed
+            )
 
     def test_scf_container_with_frame_op_is_included_in_sequence(self):
         """Verify that a region-bearing op referencing a frame is placed in its outlined
@@ -313,7 +404,10 @@ class TestPulseToQ1SequenceOutlining:
         body_ops = list(seq.body.block.ops)
         assert any(isinstance(op, _ContainerOp) for op in body_ops)
         assert any(isinstance(op, CreateFrameOp) for op in body_ops)
-        assert isinstance(seq.body.block.first_op, SetMrkImmOp)
+        assert not any(
+            isinstance(op, SetMrkImmOp | SetLatchEnImmImmOp | UpdParamImmOp)
+            for op in body_ops
+        )
         assert isinstance(seq.body.block.last_op, StopOp)
 
     def test_outer_constant_free_var_in_container_body_is_pulled_in(self):
@@ -617,8 +711,10 @@ class TestPulseToQ1ShotLoopFission:
             for loop in loops.values()
         )
         assert all(
-            [type(op) for op in list(sequence.body.block.ops)[:3]]
-            == [SetMrkImmOp, SetLatchEnImmImmOp, UpdParamImmOp]
+            not any(
+                isinstance(op, SetMrkImmOp | SetLatchEnImmImmOp)
+                for op in sequence.body.block.ops
+            )
             for sequence in _sequences_by_port(module).values()
         )
 
@@ -642,10 +738,6 @@ class TestPulseToQ1ShotLoopFission:
         Q1OutliningPass(target_data=target_data).apply(Context(), module)
 
         duration = target_data.q1asm.min_rt_duration_ns
-        for sequence in _sequences_by_port(module).values():
-            _, latch_enable, apply_latch = list(sequence.body.block.ops)[:3]
-            assert latch_enable.duration.data == duration
-            assert apply_latch.duration.data == duration
         for loop in _outlined_loops(module).values():
             wait_sync, _, apply_phase_reset = list(loop.body.block.ops)[:3]
             assert wait_sync.duration.data == duration

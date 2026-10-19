@@ -31,6 +31,9 @@ from qat.experimental.conversion.pulse_to_q1.passes import (
     Q1PulseValidationPass,
     create_qblox_configured_q1_pipeline,
 )
+from qat.experimental.conversion.pulse_to_q1.sequence_convention import (
+    QbloxSequenceInitialisationPass,
+)
 from qat.experimental.conversion.pulse_to_q1.sequence_outlining import Q1OutliningPass
 from qat.experimental.dialect.pulse.ir import (
     AcquireOp,
@@ -160,8 +163,18 @@ def test_downstream_ordering_constraints_reject_misordered_lowering():
         OrderedPassPipeline(
             (
                 Q1OutliningPass(),
-                Q1PulseValidationPass(),
+                QbloxSequenceInitialisationPass(),
                 QbloxHardwareBindingPass(canonical),
+                Q1PulseValidationPass(),
+            )
+        )
+
+    with pytest.raises(VerifyException, match="qblox-sequence-initialisation"):
+        OrderedPassPipeline(
+            (
+                Q1OutliningPass(),
+                QbloxHardwareBindingPass(canonical),
+                Q1PulseValidationPass(),
             )
         )
 
@@ -170,6 +183,7 @@ def test_downstream_ordering_constraints_reject_misordered_lowering():
             (
                 Q1OutliningPass(),
                 QbloxHardwareBindingPass(canonical),
+                QbloxSequenceInitialisationPass(),
                 Q1PulseValidationPass(),
                 Q1PulseLegalisationPass(),
                 Q1PreAcquireTransformationPass(),
@@ -181,6 +195,7 @@ def test_downstream_ordering_constraints_reject_misordered_lowering():
             (
                 Q1OutliningPass(),
                 QbloxHardwareBindingPass(canonical),
+                QbloxSequenceInitialisationPass(),
                 Q1PulseValidationPass(),
                 Q1PreAcquireTransformationPass(),
                 PulseToQ1LoweringPass(),

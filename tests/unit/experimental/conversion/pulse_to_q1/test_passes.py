@@ -232,6 +232,7 @@ def test_configured_q1_pipeline_has_defensive_pass_order():
     assert [pass_.name for pass_ in pipeline.passes] == [
         "pulse-to-q1-outlining",
         "qblox-hardware-binding",
+        "qblox-sequence-initialisation",
         "q1-pulse-validation",
         "acquire-pre-q1-transformation",
         "q1-pulse-legalisation",
@@ -617,7 +618,7 @@ def _create_acquire_module(
     label: str | None = None,
     no_acquires: int = 1,
 ) -> ModuleOp:
-    """Build a flat Pulse module with one ``pulse.acquire`` wrapped in ``repeats`` loops.
+    """Build a Pulse function with one ``pulse.acquire`` wrapped in ``repeats`` loops.
 
     :param duration_ns: The acquisition duration in nanoseconds.
     :param channel_id: The frame channel identifier.
@@ -625,7 +626,7 @@ def _create_acquire_module(
     :param weights: Optional integration weights for the acquisition.
     :param label: Optional label for the acquisition.
     :param no_acquires: Number of acquires.
-    :returns: A module carrying the (possibly loop-nested) acquisition.
+    :returns: A module carrying the (possibly loop-nested) acquisition function.
     """
     freq, frame = _frame(channel_id)
     duration = ConstantOp(TimeAttr(duration_ns * 1e3))
@@ -651,7 +652,7 @@ def _create_acquire_module(
         )
         ops = [start_op, stop_op, step_op, loop]
 
-    return ModuleOp(ops)
+    return ModuleOp([func.FuncOp("main", ((), ()), Region(Block([*ops, func.ReturnOp()])))])
 
 
 class TestQ1PreAcquireTransformationPass:
