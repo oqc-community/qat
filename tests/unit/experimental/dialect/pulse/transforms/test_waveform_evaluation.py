@@ -37,6 +37,7 @@ from qat.experimental.dialect.pulse.ir.ops import (
     BlackmanWaveformOp,
     GaussianSquareWaveformOp,
     GaussianWaveformOp,
+    MixOp,
     PulseOp,
     RoundedSquareWaveformOp,
     SechWaveformOp,
@@ -67,6 +68,7 @@ _CONTEXT = create_context(Pulse)
 
 PORT_CONTROL = "channel_1"
 PORT_READOUT = "channel_2"
+_PARTIALLY_SAMPLED_LOG = "sampled only some uses of 1 more"
 
 
 def _create_pulse_constraints(
@@ -963,3 +965,92 @@ class TestCommonSubExpressionElimination:
         assert_array_equal(
             sampled_constant.value.samples.data, reference_constant.value.samples.data
         )
+
+    def test_pulse_use_is_sampled_when_a_duplicate_feeds_a_mix_op(self, caplog):
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: 1_000},
+            native_waveform_shapes=(),
+        )
+        module, waveform = _build_module_with_pulse(_GAUSSIAN_SPEC)
+        pulse = get_operations_with_type(module, PulseOp)[0]
+        duplicate = waveform.clone()
+        other = waveform.clone()
+        other.properties["regularize"] = BoolAttr(
+            not bool(waveform.regularize.value.data), i1
+        )
+        mix = MixOp(duplicate, other)
+        mixed_pulse = PulseOp(pulse.frame, mix)
+        block = waveform.parent
+        for op in (duplicate, other, mix, mixed_pulse):
+            block.add_op(op)
+
+        CommonSubexpressionElimination().apply(_CONTEXT, module)
+        with caplog.at_level("INFO"):
+            EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert _PARTIALLY_SAMPLED_LOG in caplog.text
+        [sampled_constant] = _get_sampled_constants(module)
+        assert pulse.waveform is sampled_constant.result
+        assert mix.lhs is waveform.result
+        assert waveform in get_operations_with_type(module, GaussianWaveformOp)
+
+    def test_pulse_use_is_sampled_when_a_duplicate_feeds_a_port_without_sample_time(
+        self, caplog
+    ):
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: 1_000},
+            native_waveform_shapes=(),
+        )
+        module, waveform = _build_module_with_pulse(_GAUSSIAN_SPEC)
+        pulse = get_operations_with_type(module, PulseOp)[0]
+        freq = ConstantOp(FrequencyAttr(5e9))
+        other_frame = CreateFrameOp(freq, StringAttr("no_sample_time"))
+        duplicate = waveform.clone()
+        unsampled_pulse = PulseOp(other_frame, duplicate)
+        block = waveform.parent
+        for op in (freq, other_frame, duplicate, unsampled_pulse):
+            block.add_op(op)
+
+        CommonSubexpressionElimination().apply(_CONTEXT, module)
+        with caplog.at_level("INFO"):
+            EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert _PARTIALLY_SAMPLED_LOG in caplog.text
+        [sampled_constant] = _get_sampled_constants(module)
+        assert pulse.waveform is sampled_constant.result
+        assert unsampled_pulse.waveform is waveform.result
+        assert get_operations_with_type(module, GaussianWaveformOp) == [waveform]
+
+    def test_waveform_on_two_ports_with_a_mix_op_user_keeps_the_analytical_op(self, caplog):
+        constraints = _create_pulse_constraints(
+            port_sample_times={PORT_CONTROL: 1_000, PORT_READOUT: 4_000},
+            native_waveform_shapes=(),
+        )
+        module, waveform = _build_module_with_pulse(_GAUSSIAN_SPEC)
+        pulse = get_operations_with_type(module, PulseOp)[0]
+        freq = ConstantOp(FrequencyAttr(5e9))
+        readout_frame = CreateFrameOp(freq, StringAttr(PORT_READOUT))
+        readout_pulse = PulseOp(readout_frame, waveform)
+        other = waveform.clone()
+        other.properties["regularize"] = BoolAttr(
+            not bool(waveform.regularize.value.data), i1
+        )
+        mix = MixOp(waveform, other)
+        mixed_pulse = PulseOp(pulse.frame, mix)
+        block = waveform.parent
+        for op in (freq, readout_frame, readout_pulse, other, mix, mixed_pulse):
+            block.add_op(op)
+
+        with caplog.at_level("INFO"):
+            EvaluateWaveformsAsSamples(constraints=constraints).apply(_CONTEXT, module)
+
+        assert _PARTIALLY_SAMPLED_LOG in caplog.text
+        sampled_constants = _get_sampled_constants(module)
+        assert len(sampled_constants) == 2
+        assert {c.value.sample_time.literal_value for c in sampled_constants} == {
+            1_000,
+            4_000,
+        }
+        assert pulse.waveform is not readout_pulse.waveform
+        assert mix.lhs is waveform.result
+        assert waveform in get_operations_with_type(module, GaussianWaveformOp)

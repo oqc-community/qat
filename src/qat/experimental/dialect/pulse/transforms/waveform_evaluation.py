@@ -15,6 +15,12 @@ their frame's port. A single :class:`ConstantOp` is emitted per distinct sample
 time, and each consuming :class:`PulseOp` is rewired to the appropriate one. This makes
 sharing a waveform across multiple ports safe.
 
+Only the :class:`PulseOp` uses with a resolvable sample time are rewired. Any other user
+of the waveform (for example a :class:`~qat.experimental.dialect.pulse.ir.ops.MixOp`, or a
+pulse on a port with no sample time) keeps reading the analytical op, which is erased only
+once it has no users left. This stops common subexpression elimination, which merges
+identical waveforms into one op, from blocking sampling for the users that can be sampled.
+
 Shapes that hardware supports natively are left untouched, and waveforms with any
 non-constant operand (for example, sweep variables) are also skipped to be handled at
 runtime.
@@ -81,23 +87,27 @@ def _resolve_sample_time(
 def _group_pulse_uses_by_sample_time(
     waveform_result: SSAValue,
     port_sample_times: dict[str, float],
-) -> dict[float, list[tuple[PulseOp, int]]] | None:
-    """Group every :class:`PulseOp` consuming ``waveform_result`` by its sample time.
+) -> dict[float, list[tuple[PulseOp, int]]]:
+    """Group the sampleable :class:`PulseOp` uses of ``waveform_result`` by sample time.
 
     Each entry pairs the consuming :class:`PulseOp` with the operand index at which it
-    holds the waveform, so the operand can be re-wired precisely. Returns ``None`` if
-    any use is not a :class:`PulseOp`, or if any consuming pulse's frame has no
-    configured sample time.
+    holds the waveform, so the operand can be re-wired precisely. Uses that are not a
+    :class:`PulseOp`, or whose frame has no configured sample time, cannot be sampled
+    and are omitted.
+
+    :param waveform_result: The waveform SSA value whose uses are inspected.
+    :param port_sample_times: Mapping of port ID to sample time in picoseconds.
+    :returns: The sampleable uses keyed by sample time; empty if there are none.
     """
 
     grouped: dict[float, list[tuple[PulseOp, int]]] = defaultdict(list)
     for use in waveform_result.uses:
         user = use.operation
         if not isinstance(user, PulseOp):
-            return None
+            continue
         sample_time = _resolve_sample_time(user.frame, port_sample_times)
         if sample_time is None:
-            return None
+            continue
         grouped[sample_time].append((user, use.index))
     return grouped
 
@@ -158,13 +168,19 @@ def _make_sampled_constant(
 
 
 class _RewriteAnalyticalWaveform(RewritePattern):
-    """Replace analytical waveform ops with :class:`ConstantOp` samples per sample time."""
+    """Rewire sampleable :class:`PulseOp` uses of analytical waveform ops to
+    :class:`ConstantOp` samples, one per sample time.
+
+    The analytical op is erased only when no users remain; otherwise it is kept for the
+    users that cannot be sampled.
+    """
 
     def __init__(self, constraints: PulseLevelConstraints):
         super().__init__()
         self._constraints = constraints
         self.visited = 0
         self.sampled = 0
+        self.partially_sampled = 0
 
     def match_and_rewrite(self, op, rewriter: PatternRewriter) -> None:
         if not isinstance(op, IsAnalyticalWaveformInterface):
@@ -192,10 +208,10 @@ class _RewriteAnalyticalWaveform(RewritePattern):
         pulses_by_sample_time = _group_pulse_uses_by_sample_time(
             op.results[0], self._constraints.port_sample_times_ps
         )
-        if pulses_by_sample_time is None:
+        if not pulses_by_sample_time:
             log.debug(
-                f"waveform-evaluation: skipping {op_type}: at least one consumer is "
-                f"not a PulseOp with a resolvable sample time (known ports: "
+                f"waveform-evaluation: skipping {op_type}: no consumer is a PulseOp "
+                f"with a resolvable sample time (known ports: "
                 f"{sorted(self._constraints.ports)})."
             )
             return
@@ -224,8 +240,15 @@ class _RewriteAnalyticalWaveform(RewritePattern):
                 f"{width:.3e}ps, rewired {len(uses)} pulse(s)."
             )
 
-        rewriter.erase_op(op)
-        self.sampled += 1
+        if op.results[0].uses:
+            log.debug(
+                f"waveform-evaluation: keeping {op_type}: it still has consumers that "
+                "cannot be sampled."
+            )
+            self.partially_sampled += 1
+        else:
+            rewriter.erase_op(op)
+            self.sampled += 1
 
 
 @dataclass(frozen=True)
@@ -235,7 +258,9 @@ class EvaluateWaveformsAsSamples(OrderedPass, ModulePass):
     For every :class:`IsAnalyticalWaveformInterface` op with all-constant operands, the
     op is replaced with one or more :class:`ConstantOp`\\ s carrying a
     :class:`SampledWaveformAttr` of the pre-computed IQ samples — one per distinct
-    sample time across the pulses that consume the waveform.
+    sample time across the pulses that consume the waveform. Consumers that cannot be
+    sampled (non-pulse users, or pulses on a port with no sample time) keep reading the
+    analytical op, which is only erased when no users remain.
 
     :ivar constraints: The pulse-level constraints of the hardware, used to determine the
         sample time for each port and whether a waveform shape is supported natively.
@@ -260,6 +285,7 @@ class EvaluateWaveformsAsSamples(OrderedPass, ModulePass):
         pattern = _RewriteAnalyticalWaveform(self.constraints)
         PatternRewriteWalker(pattern).rewrite_module(op)
         log.info(
-            f"waveform-evaluation: sampled {pattern.sampled} of {pattern.visited} "
-            f"analytical waveform op(s)."
+            f"waveform-evaluation: sampled and replaced {pattern.sampled} of "
+            f"{pattern.visited} analytical waveform op(s); sampled only some uses of "
+            f"{pattern.partially_sampled} more, which are kept for their other users."
         )
