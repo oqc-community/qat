@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post419.dev20261019082256 documentation</title>
+  <title>qat.experimental.dialect.pulse.transforms.waveform_evaluation module &mdash; qat-compiler 3.0.0.post420.dev20261019140605 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=bb4b49ea" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -729,6 +729,11 @@ consumes the analytical waveform and groups them by the sample time associated w
 their frame’s port. A single <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code> is emitted per distinct sample
 time, and each consuming <code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOp</span></code> is rewired to the appropriate one. This makes
 sharing a waveform across multiple ports safe.</p>
+<p>Only the <code class="xref py py-class docutils literal notranslate"><span class="pre">PulseOp</span></code> uses with a resolvable sample time are rewired. Any other user
+of the waveform (for example a <a class="reference internal" href="qat.experimental.dialect.pulse.ir.ops.html#qat.experimental.dialect.pulse.ir.ops.MixOp" title="qat.experimental.dialect.pulse.ir.ops.MixOp"><code class="xref py py-class docutils literal notranslate"><span class="pre">MixOp</span></code></a>, or a
+pulse on a port with no sample time) keeps reading the analytical op, which is erased only
+once it has no users left. This stops common subexpression elimination, which merges
+identical waveforms into one op, from blocking sampling for the users that can be sampled.</p>
 <p>Shapes that hardware supports natively are left untouched, and waveforms with any
 non-constant operand (for example, sweep variables) are also skipped to be handled at
 runtime.</p>
@@ -749,7 +754,9 @@ enforced by the pipeline builder via <code class="xref py py-meth docutils liter
 <p>For every <code class="xref py py-class docutils literal notranslate"><span class="pre">IsAnalyticalWaveformInterface</span></code> op with all-constant operands, the
 op is replaced with one or more <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstantOp</span></code>s carrying a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">SampledWaveformAttr</span></code> of the pre-computed IQ samples — one per distinct
-sample time across the pulses that consume the waveform.</p>
+sample time across the pulses that consume the waveform. Consumers that cannot be
+sampled (non-pulse users, or pulses on a port with no sample time) keep reading the
+analytical op, which is only erased when no users remain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>constraints</strong> – The pulse-level constraints of the hardware, used to determine the
