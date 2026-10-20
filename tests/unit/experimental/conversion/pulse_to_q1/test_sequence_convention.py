@@ -4,6 +4,7 @@
 from dataclasses import replace
 
 import pytest
+from frozendict import frozendict
 from xdsl.context import Context
 from xdsl.dialects.builtin import ModuleOp, StringAttr
 from xdsl.irdl import IRDLOperation, irdl_op_definition, traits_def
@@ -27,6 +28,11 @@ from qat.experimental.dialect.q1 import (
 )
 from qat.experimental.dialect.q1_sequence.ir.ops import SequenceOp
 from qat.experimental.system_data.hardware.qblox import DEFAULT_QBLOX_TARGET
+from qat.experimental.system_data.hardware.qblox.models import QbloxModuleKind
+from qat.experimental.system_data.hardware.qblox.target import (
+    MarkerBitRole,
+    MarkerBitTarget,
+)
 
 from tests.unit.experimental.conversion.pulse_to_q1.qblox_configuration.helpers import (
     canonical_data,
@@ -43,8 +49,12 @@ class _UnsupportedTerminatorOp(IRDLOperation):
     traits = traits_def(IsTerminator())
 
 
-def _bound_module(*prefix) -> tuple[ModuleOp, SequenceOp]:
-    frequency = ConstantOp(FrequencyAttr(4_200_000_000))
+def _bound_module(
+    *prefix, kind: QbloxModuleKind = QbloxModuleKind.qcm_rf
+) -> tuple[ModuleOp, SequenceOp]:
+    is_baseband = kind in {QbloxModuleKind.qcm, QbloxModuleKind.qrm}
+    frequency_hz = 200_000_000 if is_baseband else 4_200_000_000
+    frequency = ConstantOp(FrequencyAttr(frequency_hz))
     frame = CreateFrameOp(frequency, StringAttr("port-0"))
     sequence = SequenceOp(
         "port-0-channel-0",
@@ -52,7 +62,12 @@ def _bound_module(*prefix) -> tuple[ModuleOp, SequenceOp]:
         "port-0",
     )
     module = ModuleOp([sequence])
-    data = canonical_data(configurations=[supplied([sequencer(0)])])
+    data = canonical_data(
+        kind,
+        configurations=[supplied([sequencer(0)])],
+        carrier_frequency=frequency_hz,
+        oscillator_frequency=None if is_baseband else 4_000_000_000,
+    )
     QbloxHardwareBindingPass(data).apply(Context(), module)
     return module, sequence
 
@@ -91,17 +106,29 @@ def test_sequence_lowering_convention_rejects_non_stop_terminator_without_mutati
     assert tuple(sequence.body.block.ops) == original_operations
 
 
-def test_sequence_lowering_convention_orders_prologue_payload_and_final_stop():
-    """The prologue precedes payload and the structural stop remains final."""
+@pytest.mark.parametrize(
+    ("kind", "expected_marker"),
+    [
+        (QbloxModuleKind.qcm, 0b0000),
+        (QbloxModuleKind.qcm_rf, 0b0011),
+        (QbloxModuleKind.qrm, 0b0000),
+        (QbloxModuleKind.qrm_rf, 0b0010),
+        (QbloxModuleKind.qrc, 0b0000),
+    ],
+)
+def test_sequence_lowering_convention_uses_bound_module_marker_routing(
+    kind, expected_marker
+):
+    """The marker follows bound module routing and the structural stop remains final."""
 
-    module, sequence = _bound_module()
+    module, sequence = _bound_module(kind=kind)
 
     QbloxSequenceInitialisationPass().apply(Context(), module)
 
     marker, latch, update, frequency, frame, stop = sequence.body.block.ops
     duration = DEFAULT_QBLOX_TARGET.q1asm.min_rt_duration_ns
     assert isinstance(marker, SetMrkImmOp)
-    assert marker.mrk.data == 3
+    assert marker.mrk.data == expected_marker
     assert isinstance(latch, SetLatchEnImmImmOp)
     assert latch.latch_en == BoolImm(1)
     assert latch.duration == DurationImm(duration)
@@ -137,3 +164,29 @@ def test_sequence_lowering_convention_ignores_non_sequence_operations():
     QbloxSequenceInitialisationPass().apply(Context(), module)
 
     assert tuple(module.body.block.ops) == (frequency,)
+
+
+def test_sequence_lowering_convention_uses_custom_target_marker_routing():
+    module_spec = replace(
+        DEFAULT_QBLOX_TARGET.module_spec(QbloxModuleKind.qcm),
+        marker_bit_0=MarkerBitTarget(MarkerBitRole.output_switch, 0),
+        marker_bit_1=None,
+        marker_bit_2=MarkerBitTarget(MarkerBitRole.marker_output, 1),
+        marker_bit_3=MarkerBitTarget(MarkerBitRole.output_switch, 1),
+    )
+    target = replace(
+        DEFAULT_QBLOX_TARGET,
+        module_specs=frozendict(
+            {
+                **DEFAULT_QBLOX_TARGET.module_specs,
+                QbloxModuleKind.qcm: module_spec,
+            }
+        ),
+    )
+    module, sequence = _bound_module(kind=QbloxModuleKind.qcm)
+
+    QbloxSequenceInitialisationPass(target_data=target).apply(Context(), module)
+
+    marker = sequence.body.block.first_op
+    assert isinstance(marker, SetMrkImmOp)
+    assert marker.mrk.data == 0b1001

@@ -254,7 +254,7 @@ def test_compiles_repeated_sequences_with_legacy_synchronization_scaffolding():
 
     for package in program.packages.values():
         lines = package.sequence.program.splitlines()
-        assert lines[:3] == ["set_mrk 3", "set_latch_en 1, 4", "upd_param 4"]
+        assert lines[:3] == ["set_mrk 0", "set_latch_en 1, 4", "upd_param 4"]
         assert lines[-1] == "stop"
         label = next(index for index, line in enumerate(lines) if line.endswith(":"))
         assert lines[label + 1 : label + 4] == [
@@ -338,7 +338,7 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
         "seq_idx": 8,
         "connections": {"bulk_value": ["out2"]},
         "awg_modulation": None,
-        "program": ("set_mrk 3\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"),
+        "program": ("set_mrk 0\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"),
     }
     assert {
         "physical_channel_id": readout.physical_channel_id,
@@ -363,36 +363,41 @@ def test_compiles_qrc_control_and_acquisition_port_banks():
 
 
 @pytest.mark.parametrize(
-    ("kind", "acquire", "expected_connections"),
+    ("kind", "acquire", "expected_connections", "expected_marker"),
     [
         pytest.param(
             QbloxModuleKind.qcm,
             False,
             {"bulk_value": ["out0"]},
+            0,
             id="qcm",
         ),
         pytest.param(
             QbloxModuleKind.qcm_rf,
             False,
             {"bulk_value": ["out0"]},
+            3,
             id="qcm-rf",
         ),
         pytest.param(
             QbloxModuleKind.qrm,
             True,
             {"bulk_value": ["out0", "in0"]},
+            0,
             id="qrm",
         ),
         pytest.param(
             QbloxModuleKind.qrm_rf,
             True,
             {"bulk_value": ["out0", "in0"]},
+            2,
             id="qrm-rf",
         ),
         pytest.param(
             QbloxModuleKind.qrc,
             True,
             {"bulk_value": ["out0", "in0"]},
+            0,
             id="qrc",
         ),
     ],
@@ -401,6 +406,7 @@ def test_all_five_module_kinds_emit_independent_expected_payload_values(
     kind: QbloxModuleKind,
     acquire: bool,
     expected_connections: dict[str, object],
+    expected_marker: int,
 ):
     canonical = _canonical_for(kind, acquire=acquire)
     carrier = 4_200_000_000 if kind.value.endswith("_rf") else 200_000_000
@@ -415,7 +421,7 @@ def test_all_five_module_kinds_emit_independent_expected_payload_values(
         package.seq_idx,
     ) == ("port_0", "port-0", "cluster", 2, 0)
     assert package.sequence.program == (
-        "set_mrk 3\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"
+        f"set_mrk {expected_marker}\nset_latch_en 1, 4\nupd_param 4\nplay 0, 1, 8\nstop\n"
     )
     assert package.sequence.waveforms == {
         "waveform_0_I": {"data": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5], "index": 0},
