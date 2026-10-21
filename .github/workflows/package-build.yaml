@@ -108,8 +108,20 @@ jobs:
         id: pip-audit
         if: ${{ !cancelled() }}
         run: |
-          poetry run pip-audit \
-           --ignore-vuln CVE-2025-71176 \
+          ignore_args=(
+            --ignore-vuln CVE-2025-71176
+            # Pillow vulnerability, requires python 3.11+
+            # TODO(COMPILER-1509): Update pillow and remove ignores when python 3.10 is dropped.
+            --ignore-vuln CVE-2026-112895
+            --ignore-vuln CVE-2026-112400
+            --ignore-vuln CVE-2026-112397
+            --ignore-vuln CVE-2026-112896
+            --ignore-vuln CVE-2026-112897
+            --ignore-vuln CVE-2026-112395
+            --ignore-vuln CVE-2026-112404
+            --ignore-vuln CVE-2026-112899
+          )
+          poetry run pip-audit "${ignore_args[@]}"
 
       - name: Pip licensing check
         id: pip-licenses
