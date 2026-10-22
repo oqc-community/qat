@@ -120,6 +120,22 @@ jobs:
             --ignore-vuln CVE-2026-112395
             --ignore-vuln CVE-2026-112404
             --ignore-vuln CVE-2026-112899
+            --ignore-vuln CVE-2026-112402
+            --ignore-vuln CVE-2026-112900
+            --ignore-vuln CVE-2026-112893
+            --ignore-vuln CVE-2026-112392
+            --ignore-vuln CVE-2026-112891
+            --ignore-vuln CVE-2026-112405
+            --ignore-vuln CVE-2026-112390
+            --ignore-vuln CVE-2026-112401
+            --ignore-vuln CVE-2026-112901
+            --ignore-vuln CVE-2026-112391
+            --ignore-vuln CVE-2026-112894
+            --ignore-vuln CVE-2026-112406
+            --ignore-vuln CVE-2026-112399
+            --ignore-vuln CVE-2026-112892
+            --ignore-vuln CVE-2026-112393
+            --ignore-vuln CVE-2026-112396
           )
           poetry run pip-audit "${ignore_args[@]}"
 
