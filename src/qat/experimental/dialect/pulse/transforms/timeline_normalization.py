@@ -112,7 +112,7 @@ class _TimeOperationType(Enum):
     MAX = 3
 
 
-@dataclass(frozen=True, eq=True)
+@dataclass(frozen=True, eq=False)
 class _TimeExpression:
     """Models an expression for a time, which is manifested as an operation that produces a
     time SSA value.
@@ -120,6 +120,20 @@ class _TimeExpression:
     This is only to be used to store analysis on expressions we need to build for this pass.
     It does not model expressions currently in the IR. It does store an insertion point,
     which is used if the expression is materialized into the IR.
+
+    Expressions are analysis results, not IR, so they are only correct for one particular
+    state of the IR; transforming the IR invalidates them. They are immutable so that they
+    can be hashed and cached safely. Synchronization builds expressions from other
+    expressions heavily, and caching lets each sub-expression be materialized once and then
+    reused, rather than rebuilt at every use, which keeps the pass linear in the size of the
+    program.
+
+    Expressions share their operands, and each synchronization nests them one level deeper.
+    The hash is therefore computed once on construction from the cached hashes of the
+    operands, so its cost depends on the number of operands, not on how deep the expression
+    is. Equality returns early for the same object and for differing hashes, so comparing
+    expressions that share operands does not walk the operands either. Two equal expressions
+    that share nothing are still compared level by level, which is recursive.
 
     :ivar operation_type: The type of the time operation, which is used to determine how to
         evaluate the time expression.
@@ -132,6 +146,28 @@ class _TimeExpression:
     operation_type: _TimeOperationType
     operands: tuple["SSAValue | TimeAttr | _TimeExpression", ...]
     insertion_point: InsertPoint
+    _hash: int = field(init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "_hash", hash((self.operation_type, self.operands, self.insertion_point))
+        )
+
+    def __hash__(self) -> int:
+        return self._hash
+
+    def __eq__(self, other: object) -> bool:
+        if self is other:
+            return True
+        if not isinstance(other, _TimeExpression):
+            return NotImplemented
+        if self._hash != other._hash:
+            return False
+        return (
+            self.operation_type == other.operation_type
+            and self.operands == other.operands
+            and self.insertion_point == other.insertion_point
+        )
 
     @classmethod
     def constant(cls, value: TimeAttr, insertion_point: InsertPoint) -> "_TimeExpression":
@@ -203,52 +239,89 @@ class _TimeExpressionMaterializer:
 
     This approach helps minimize the number of operations we need to insert, as we can keep
     track of expressions that we have already materialized.
+
+    Every synchronization nests the expressions one level deeper, so they can be deeper than
+    Python's recursion limit. They are therefore materialized with an explicit stack, not by
+    recursion.
     """
 
     def __init__(self):
         self._expression_value_cache: dict[_TimeExpression, SSAValue] = {}
 
     def materialize(self, value: _TIME_TYPE) -> SSAValue | None:
-        """Materializes a time value/expression to an SSA result, reusing duplicates."""
+        """Materializes a time value/expression to an SSA result, reusing duplicates.
+
+        Expressions grow with the length of the program, so they are walked with an explicit
+        stack, operands before the expressions that use them, rather than by recursion.
+        """
         if value is None:
             return None
 
         if isinstance(value, SSAValue):
             return value
 
-        if isinstance(value, _TimeExpression):
-            if value in self._expression_value_cache:
-                return self._expression_value_cache[value]
+        if not isinstance(value, _TimeExpression):
+            raise PassFailedException(f"Invalid operand type: {type(value)}")
 
-            operands = value.operands
+        cache = self._expression_value_cache
+        stack: list[_TimeExpression] = [value]
+        while stack:
+            expression = stack[-1]
+            if expression in cache:
+                stack.pop()
+                continue
 
-            match value.operation_type:
-                case _TimeOperationType.CONSTANT:
-                    op = ConstantOp(value=operands[0], result_type=TimeType())
-                case _TimeOperationType.ADD:
-                    op = AddOp(
-                        self.materialize(operands[0]),
-                        self.materialize(operands[1]),
-                        result_type=TimeType(),
-                    )
-                case _TimeOperationType.SUB:
-                    op = SubOp(
-                        self.materialize(operands[0]),
-                        self.materialize(operands[1]),
-                        result_type=TimeType(),
-                    )
-                case _TimeOperationType.MAX:
-                    op = MaxTimeOp(*(self.materialize(operand) for operand in operands))
-                case _:
-                    raise PassFailedException(
-                        f"Invalid time operation type: {value.operation_type}"
-                    )
+            if expression.operation_type != _TimeOperationType.CONSTANT:
+                pending = [
+                    operand
+                    for operand in expression.operands
+                    if isinstance(operand, _TimeExpression) and operand not in cache
+                ]
+                if pending:
+                    stack.extend(reversed(pending))
+                    continue
 
-            Rewriter.insert_op(op, value.insertion_point)
-            self._expression_value_cache[value] = op.results[0]
-            return op.results[0]
+            stack.pop()
+            cache[expression] = self._materialize_node(expression)
 
-        raise PassFailedException(f"Invalid operand type: {type(value)}")
+        return cache[value]
+
+    def _resolve_operand(self, operand: "SSAValue | _TimeExpression") -> SSAValue:
+        """Returns the SSA value for an operand, looking up already materialized expressions
+        in the cache."""
+        if isinstance(operand, SSAValue):
+            return operand
+        return self._expression_value_cache[operand]
+
+    def _materialize_node(self, expression: _TimeExpression) -> SSAValue:
+        """Creates and inserts the operation for one expression, whose operand expressions
+        are already materialized."""
+        operands = expression.operands
+
+        match expression.operation_type:
+            case _TimeOperationType.CONSTANT:
+                op = ConstantOp(value=operands[0], result_type=TimeType())
+            case _TimeOperationType.ADD:
+                op = AddOp(
+                    self._resolve_operand(operands[0]),
+                    self._resolve_operand(operands[1]),
+                    result_type=TimeType(),
+                )
+            case _TimeOperationType.SUB:
+                op = SubOp(
+                    self._resolve_operand(operands[0]),
+                    self._resolve_operand(operands[1]),
+                    result_type=TimeType(),
+                )
+            case _TimeOperationType.MAX:
+                op = MaxTimeOp(*(self._resolve_operand(operand) for operand in operands))
+            case _:
+                raise PassFailedException(
+                    f"Invalid time operation type: {expression.operation_type}"
+                )
+
+        Rewriter.insert_op(op, expression.insertion_point)
+        return op.results[0]
 
 
 @dataclass

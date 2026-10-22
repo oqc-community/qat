@@ -1286,3 +1286,49 @@ class TestErrors:
 
         with pytest.raises(NotImplementedError, match="multiple blocks"):
             TimelineNormalization().apply(_CONTEXT, module_op)
+
+
+class TestTimelineNormalizationScaling:
+    """Tests the pass copes with programs that contain very many synchronizations."""
+
+    def test_long_chain_of_synchronizes_is_resolved_without_recursion_error(self):
+        """Creates a program that repeatedly pulses one frame and synchronizes it with a
+        second frame, and finally synchronizes both with a third, idle frame.
+
+        Every synchronize rebases the first two frames onto an expression one level deeper
+        than the last. The final synchronize needs that whole expression, so the pass has to
+        hash, compare and materialize it without exceeding Python's recursion limit.
+        """
+
+        num_syncs = 5000
+        width = 64_000
+
+        ops, frames = _make_block_with_frames(3)
+        time_op = ConstantOp(TimeAttr(width))
+        amp_op = ConstantOp(AmplitudeAttr(1.0))
+        square_op = SquareWaveformOp(time_op.result, amp_op.result)
+        ops.extend([time_op, amp_op, square_op])
+
+        frame_0, frame_1 = frames[0], frames[1]
+        for _ in range(num_syncs):
+            pulse_op = PulseOp(frame_0, square_op.result)
+            sync_op = SynchronizeOp(pulse_op.result, frame_1)
+            ops.extend([pulse_op, sync_op])
+            frame_0, frame_1 = sync_op.results
+        ops.append(SynchronizeOp(frame_0, frame_1, frames[2]))
+
+        module_op = build_module_from_ops(ops)
+        TimelineNormalization().apply(_CONTEXT, module_op)
+
+        ops_by_type = _get_ops_of_types(module_op, [SynchronizeOp, WaitOp])
+        assert len(ops_by_type[SynchronizeOp]) == 0
+
+        # The second frame waits for one pulse after every pulse, and at the end the third
+        # frame waits for the full duration of all the pulses.
+        wait_ops = ops_by_type[WaitOp]
+        assert len(wait_ops) == num_syncs + 1
+        CanonicalizePass().apply(_CONTEXT, module_op)
+        assert wait_ops[-1].frame == frames[2]
+        for wait_op in wait_ops[:-1]:
+            assert wait_op.duration.owner.value.value.data == width
+        assert wait_ops[-1].duration.owner.value.value.data == num_syncs * width
