@@ -211,17 +211,37 @@ class BindingPass(AnalysisPass):
     Values of the iteration variable are abstract and don't mean anything. In this pass, we
     only extract  the bound and associate it to the name variable. Further analysis is
     required on read sites to make sure their usage is consistent and meaningful.
+
+    By default, every sweep variable must be evenly spaced, because backends that lower
+    sweeps to hardware loops need a fixed step. Backends that unroll sweeps on the host
+    do not need one, so they can set ``allow_uneven_sweeps``. Every sweep is then
+    characterised by ``step=None``, and only its start, end and point count are meaningful.
+    Do not use it with passes that need a step, such as the legalisation passes.
     """
 
+    def __init__(self, allow_uneven_sweeps: bool = False):
+        """
+        :param allow_uneven_sweeps: Accept sweep variables that are not evenly spaced,
+            instead of raising a :class:`ValueError`. Defaults to False.
+        """
+        self.allow_uneven_sweeps = allow_uneven_sweeps
+
     @staticmethod
-    def extract_iter_bound(value: list | np.ndarray):
+    def extract_iter_bound(value: list | np.ndarray, allow_uneven: bool = False):
         """Given a sequence of numbers (typically having been generated from
         :code:`np.linspace()`), figure out if the numbers are linearly/evenly spaced, in
         which case returns an IterBound instance holding the start, step, end, and count of
-        the numbers in the array, or else fail.
+        the numbers in the array, or else fail (unless ``allow_uneven`` is set, in which
+        case the spacing is not checked and the step is None).
 
         In the future, we might be interested in relaxing this condition and return
         "interpolated" evenly spaced approximation of the input sequence.
+
+        :param value: The sweep values.
+        :param allow_uneven: If True, the spacing is not checked. The returned bound has
+            ``step=None`` and keeps the start, end and count. Defaults to False.
+        :raises ValueError: If the values are empty, or are unevenly spaced and
+            ``allow_uneven`` is False.
         """
 
         if value is None:
@@ -241,9 +261,17 @@ class BindingPass(AnalysisPass):
         if count < 2:
             return IterBound(start, step, end, count)
 
-        step = value[1] - value[0]
+        if allow_uneven:
+            # Only hardware loops need a fixed step.
+            # TODO - COMPILER-855 - Split this pass so bounds are only extracted
+            # where a sweep is lowered to a hardware loop.
+            return IterBound(start, None, end, count)
 
-        if not np.isclose(step, (end - start) / (count - 1)):
+        # Subtract as Python numbers: np.diff on booleans is a logical xor.
+        steps = [right - left for left, right in zip(value, value[1:], strict=False)]
+        step = steps[0]
+
+        if not np.allclose(steps, step):
             raise ValueError(f"Not a regularly partitioned space {value}")
 
         return IterBound(start, step, end, count)
@@ -282,7 +310,9 @@ class BindingPass(AnalysisPass):
                     for name, value in inst.variables.items():
                         scoping_result.scope2symbols[scope].add(name)
                         scoping_result.symbol2scopes[name].append(scope)
-                        iter_bound_result[name] = self.extract_iter_bound(value)
+                        iter_bound_result[name] = self.extract_iter_bound(
+                            value, allow_uneven=self.allow_uneven_sweeps
+                        )
 
                     iter_name = f"{hash(inst)}"
                     rw_result.inits[iter_name].append(inst)

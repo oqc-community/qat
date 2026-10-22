@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import numpy as np
 import pytest
 
@@ -13,6 +13,8 @@ from qat.purr.backends.qblox.live import (
 from qat.purr.compiler.devices import PulseShapeType
 from qat.purr.compiler.instructions import SweepValue, Variable
 from qat.purr.compiler.runtime import execute_instructions, get_builder
+from qat.purr.core.metrics_base import MetricsManager
+from qat.purr.core.result_base import ResultManager
 from qat.purr.utils.logger import get_default_logger
 
 from tests.unit.utils.builder_nuggets import (
@@ -440,6 +442,39 @@ class TestBuildingBlocks:
             assert f"Q{index}" in results
             assert results[f"Q{index}"].shape == expected_shape
             assert results[f"Q{index}"].dtype == expected_dtype
+
+
+@pytest.mark.parametrize("model", [None], indirect=True)
+class TestUnevenSweeps:
+    """Engine 1 unrolls sweeps on the host, so it accepts sweeps that are not evenly spaced.
+
+    Engine 2 lowers them to hardware loops, so it still rejects them.
+    """
+
+    num_points = 10
+
+    @staticmethod
+    def _run_passes(model, builder):
+        res_mgr, met_mgr = ResultManager(), MetricsManager()
+        model.create_runtime().run_pass_pipeline(builder, res_mgr, met_mgr)
+        return res_mgr, met_mgr
+
+    def test_engine1_emits_one_package_per_sweep_point(self, model):
+        engine = model.create_runtime().engine._legacy_engine
+        builder = resonator_spect(model, num_points=self.num_points, uneven=True)
+        res_mgr, met_mgr = self._run_passes(model, builder)
+
+        iter2packages = engine.invoke_backend(builder, res_mgr, met_mgr)
+
+        assert len(iter2packages) == self.num_points
+
+    def test_engine2_rejects_uneven_sweep(self, model):
+        engine = model.create_runtime().engine._new_engine
+        builder = resonator_spect(model, num_points=self.num_points, uneven=True)
+        res_mgr, met_mgr = self._run_passes(model, builder)
+
+        with pytest.raises(ValueError, match="Not a regularly partitioned space"):
+            engine.run_pass_pipeline(builder, res_mgr, met_mgr)
 
 
 @pytest.mark.parametrize("model", [None], indirect=True)

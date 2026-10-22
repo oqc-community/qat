@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 from compiler_config.config import CompilerConfig, QuantumResultsFormat, Tket
 
@@ -10,6 +11,8 @@ from qat import QAT
 from qat.backend.qblox.codegen import QbloxBackend1, QbloxBackend2
 from qat.backend.qblox.execution import QbloxProgram
 from qat.backend.qblox.target_data import TARGET_DATA, TargetData
+from qat.core.metrics_base import MetricsManager
+from qat.core.result_base import ResultManager
 from qat.engines.qblox.execution import QbloxEngine
 from qat.executables import Executable
 from qat.frontend import AutoFrontend
@@ -25,8 +28,10 @@ from qat.pipelines.purr.qblox import (
     QbloxPipeline2,
 )
 from qat.pipelines.purr.qblox.compile import QbloxCompilePipeline2
+from qat.purr.compiler.instructions import Sweep
 from qat.runtime import SimpleRuntime
 
+from tests.unit.utils.builder_nuggets import resonator_spect
 from tests.unit.utils.qasm_qir import get_pipeline_tests
 
 pytestmark = pytest.mark.qblox
@@ -122,6 +127,118 @@ class TestQbloxCompilePipeline:
         assert isinstance(compile_pipeline.target_data, TargetData)
 
         assert compile_pipeline.backend.pipeline is not None
+
+
+class TestQbloxCompilePipelineUnevenSweeps:
+    """Pipeline 1 unrolls sweeps on the host, so it accepts sweeps that are not evenly
+    spaced.
+
+    Pipeline 2 lowers them to hardware loops, so it still rejects them.
+    """
+
+    num_points = 10
+
+    @staticmethod
+    def _compile(pipeline_type, model, builder):
+        """Runs the pipeline's middleend and backend on ``builder``.
+
+        The frontend is skipped because QASM and QIR cannot express an uneven sweep.
+        """
+        pipeline = pipeline_type(
+            config=PipelineConfig(name="qblox_compile"),
+            model=model,
+            target_data=TARGET_DATA,
+        )
+        res_mgr, met_mgr = ResultManager(), MetricsManager()
+        kwargs = {"compiler_config": CompilerConfig(), "enable_hw_averaging": True}
+        ir = pipeline.middleend.emit(builder, res_mgr, met_mgr, **kwargs)
+        return pipeline.backend.emit(ir, res_mgr, met_mgr, **kwargs)
+
+    @staticmethod
+    def _swept_frequencies(model, executable, qubit_index: int = 0) -> np.ndarray:
+        """The frequency of a qubit's acquire channel in each program, one per sweep point.
+
+        The frequency is split between the LO and the NCO, so it is their sum.
+        """
+        acquire_id = model.get_qubit(qubit_index).get_acquire_channel().full_id()
+        frequencies = []
+        for program in executable.programs:
+            package = program.packages[acquire_id]
+            lo_freqs = {
+                value
+                for name, value in package.mod_config.lo.model_dump().items()
+                if name.endswith("_freq") and value is not None
+            }
+            assert len(lo_freqs) == 1
+            frequencies.append(lo_freqs.pop() + package.seq_config.nco.freq)
+        return np.array(frequencies)
+
+    def test_pipeline1_compiles_one_program_per_sweep_point(self):
+        model = QbloxModelLoader(qubit_count=4).load()
+        builder = resonator_spect(model, num_points=self.num_points, uneven=True)
+        swept = np.array(
+            next(i for i in builder.instructions if isinstance(i, Sweep)).variables["freq0"]
+        )
+        executable = self._compile(QbloxCompilePipeline1, model, builder)
+
+        assert len(executable.programs) == self.num_points
+
+        # Each program carries its own sweep point, and the points are not evenly spaced.
+        frequencies = self._swept_frequencies(model, executable)
+        assert np.allclose(frequencies, swept, rtol=1e-9)
+        steps = np.diff(frequencies)
+        assert not np.allclose(steps, steps[0], rtol=1e-3)
+
+    def test_pipeline1_compiles_uneven_sweep_with_several_variables(self):
+        model = QbloxModelLoader(qubit_count=4).load()
+        qubit_indices = [0, 1]
+        builder = resonator_spect(
+            model, qubit_indices, num_points=self.num_points, uneven=True
+        )
+        variables = next(i for i in builder.instructions if isinstance(i, Sweep)).variables
+        assert len(variables) == len(qubit_indices)
+
+        executable = self._compile(QbloxCompilePipeline1, model, builder)
+
+        assert len(executable.programs) == self.num_points
+        for index in qubit_indices:
+            frequencies = self._swept_frequencies(model, executable, index)
+            assert np.allclose(frequencies, np.array(variables[f"freq{index}"]), rtol=1e-9)
+            steps = np.diff(frequencies)
+            assert not np.allclose(steps, steps[0], rtol=1e-3)
+
+    def test_pipeline1_uneven_acquire_shapes_match_even_sweep(self):
+        model = QbloxModelLoader(qubit_count=4).load()
+        uneven = self._compile(
+            QbloxCompilePipeline1,
+            model,
+            resonator_spect(model, num_points=self.num_points, uneven=True),
+        )
+        even = self._compile(
+            QbloxCompilePipeline1,
+            model,
+            resonator_spect(model, num_points=self.num_points),
+        )
+
+        assert uneven.acquires.keys() == even.acquires.keys()
+        for name, acquire in uneven.acquires.items():
+            assert acquire.shape == even.acquires[name].shape
+
+        # Control: the even sweep really is evenly spaced, so the uneven one differs.
+        even_steps = np.diff(self._swept_frequencies(model, even))
+        uneven_steps = np.diff(self._swept_frequencies(model, uneven))
+        assert np.allclose(even_steps, even_steps[0], rtol=1e-3)
+        assert not np.allclose(uneven_steps, uneven_steps[0], rtol=1e-3)
+
+    def test_pipeline2_rejects_uneven_sweep(self):
+        model = QbloxModelLoader(qubit_count=4).load()
+
+        with pytest.raises(ValueError, match="Not a regularly partitioned space"):
+            self._compile(
+                QbloxCompilePipeline2,
+                model,
+                resonator_spect(model, num_points=self.num_points, uneven=True),
+            )
 
 
 class TestQbloxExecutePipeline:

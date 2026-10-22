@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 from abc import abstractmethod
 from collections import defaultdict
 from functools import reduce
@@ -283,7 +283,7 @@ class QbloxLiveEngine1(AbstractQbloxLiveEngine):
             | ReturnSanitisation()
             | DesugaringPass()
             | TriagePass()
-            | BindingPass()
+            | BindingPass(allow_uneven_sweeps=True)
         )
 
     def invoke_backend(self, ir, res_mgr: ResultManager, met_mgr: MetricsManager):

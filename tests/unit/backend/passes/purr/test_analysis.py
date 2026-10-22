@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 
 import itertools
 from copy import deepcopy
@@ -103,6 +103,11 @@ class TestAnalysisPasses:
         "value, bound",
         [
             ([1, 2, 4, 10], None),
+            # The first step matches the average step, but the spacing is uneven.
+            ([1, 2, 4, 4], None),
+            # Boolean differences are a logical xor, which hides the alternating sign.
+            ([False, True, False], None),
+            (np.array([False, True, False]), None),
             ([-0.1, 0, 0.1, 0.2, 0.3], IterBound(-0.1, 0.1, 0.3, 5)),
         ]
         + [
@@ -116,6 +121,68 @@ class TestAnalysisPasses:
                 BindingPass.extract_iter_bound(value)
         else:
             assert BindingPass.extract_iter_bound(value) == bound
+
+    @pytest.mark.parametrize("value", [[1, 2, 4, 10], np.array([1, 2, 4, 10])])
+    def test_extract_iter_bound_allow_uneven(self, value):
+        bound = BindingPass.extract_iter_bound(value, allow_uneven=True)
+        assert bound == IterBound(start=1, step=None, end=10, count=4)
+
+    @pytest.mark.parametrize(
+        "value", [[False, True, False], np.array([False, True, False])]
+    )
+    def test_extract_iter_bound_allow_uneven_boolean(self, value):
+        bound = BindingPass.extract_iter_bound(value, allow_uneven=True)
+        assert bound == IterBound(start=False, step=None, end=False, count=3)
+
+    def test_extract_iter_bound_allow_uneven_drops_step_of_even_values(self):
+        value = [-0.1, 0, 0.1, 0.2, 0.3]
+        bound = BindingPass.extract_iter_bound(value, allow_uneven=True)
+        assert bound == IterBound(-0.1, None, 0.3, 5)
+
+    @staticmethod
+    def _bind(builder, **pass_kwargs):
+        res_mgr = ResultManager()
+        ScopeSanitisation().run(builder, res_mgr)
+        DesugaringPass().run(builder, res_mgr)
+        TriagePass().run(builder, res_mgr)
+        BindingPass(**pass_kwargs).run(builder, res_mgr)
+        return res_mgr.lookup_by_type(BindingResult)
+
+    def test_binding_pass_rejects_uneven_sweep_by_default(self, function_seed):
+        model = EchoModelLoader(random_seed=function_seed).load()
+        builder = resonator_spect(model, uneven=True)
+        with pytest.raises(ValueError, match="Not a regularly partitioned space"):
+            self._bind(builder)
+
+    @pytest.mark.parametrize("num_points", [4, 10, 100])
+    @pytest.mark.parametrize("qubit_indices", [[0], [0, 1]])
+    def test_binding_pass_allows_uneven_sweep(
+        self, num_points, qubit_indices, function_seed
+    ):
+        model = EchoModelLoader(random_seed=function_seed).load()
+        uneven = self._bind(
+            resonator_spect(model, qubit_indices, num_points, uneven=True),
+            allow_uneven_sweeps=True,
+        )
+        even = self._bind(resonator_spect(model, qubit_indices, num_points))
+
+        assert uneven.acquire_data_map.keys() == even.acquire_data_map.keys()
+        for name, acquire_data in uneven.acquire_data_map.items():
+            assert acquire_data.shape == even.acquire_data_map[name].shape
+            assert acquire_data.shape[0] == num_points
+
+        # Iteration variable names embed instruction hashes, so compare the bounds by value.
+        def sweep_bounds(result, has_step):
+            return {
+                (bound.start, bound.end, bound.count)
+                for bounds in result.iter_bound_results.values()
+                for bound in bounds.values()
+                if (bound.step is not None) == has_step and bound.count == num_points
+            }
+
+        uneven_bounds = sweep_bounds(uneven, has_step=False)
+        assert uneven_bounds
+        assert uneven_bounds <= sweep_bounds(even, has_step=True)
 
     @pytest.mark.parametrize("num_points", [1, 10, 100])
     @pytest.mark.parametrize("qubit_indices", [[0], [0, 1], [0, 1, 2]])

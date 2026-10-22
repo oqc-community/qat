@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2025-2026 Oxford Quantum Circuits Ltd
 
 from qat.backend.passes.purr.analysis import (
     BindingPass,
@@ -47,7 +47,7 @@ def middleend_pipeline1(
         | ReturnSanitisation()
         | DesugaringPass()
         | TriagePass()
-        | BindingPass()
+        | BindingPass(allow_uneven_sweeps=True)
     )
 
 

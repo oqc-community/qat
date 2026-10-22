@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2024-2025 Oxford Quantum Circuits Ltd
+# Copyright (c) 2024-2026 Oxford Quantum Circuits Ltd
 import numbers
 
 import numpy as np
@@ -76,19 +76,25 @@ def empty(model, qubit_indices=None):
     return builder
 
 
-def resonator_spect(model, qubit_indices=None, num_points=None):
+def resonator_spect(model, qubit_indices=None, num_points=None, uneven=False):
+    """Resonator spectroscopy.
+
+    With ``uneven``, the sweep points are denser near the resonance, so they are not evenly
+    spaced.
+    """
     qubit_indices = qubit_indices if qubit_indices is not None else [0]
     num_points = num_points if num_points is not None else 10
     freq_range = 50e6
+
+    unit_offsets = np.linspace(-1, 1, num_points)
+    offsets = freq_range * (unit_offsets**3 if uneven else unit_offsets)
 
     readout_freqs = {
         f"Q{index}": model.get_qubit(index).get_measure_channel().frequency
         for index in qubit_indices
     }
     scan_freqs = {
-        f"Q{index}": readout_freqs[f"Q{index}"]
-        + np.linspace(-freq_range, freq_range, num_points)
-        for index in qubit_indices
+        f"Q{index}": readout_freqs[f"Q{index}"] + offsets for index in qubit_indices
     }
 
     builder = get_builder(model)
