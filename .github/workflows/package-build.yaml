@@ -136,6 +136,27 @@ jobs:
             --ignore-vuln CVE-2026-112892
             --ignore-vuln CVE-2026-112393
             --ignore-vuln CVE-2026-112396
+            --ignore-vuln CVE-2026-96638
+            --ignore-vuln CVE-2026-96641
+            --ignore-vuln CVE-2026-96640
+            --ignore-vuln CVE-2026-96642
+            --ignore-vuln CVE-2026-96639
+            --ignore-vuln CVE-2026-96643
+            --ignore-vuln CVE-2026-96637
+            --ignore-vuln CVE-2026-96644
+            --ignore-vuln CVE-2026-96778
+            --ignore-vuln CVE-2026-96636
+            --ignore-vuln CVE-2026-114501
+            --ignore-vuln CVE-2026-112398
+            --ignore-vuln GHSA-78g4-xqwv-q3g8
+            # Filelock vulnerability, requires python 3.11+
+            # TODO(COMPILER-1509): Update filelock and remove ignores when python 3.10 is dropped.
+            --ignore-vuln CVE-2026-112906
+            --ignore-vuln CVE-2026-112940
+            --ignore-vuln CVE-2026-112914
+            --ignore-vuln CVE-2026-112913
+            --ignore-vuln CVE-2026-112937
+            --ignore-vuln CVE-2026-112907
           )
           poetry run pip-audit "${ignore_args[@]}"
 
