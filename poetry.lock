@@ -5344,18 +5344,20 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyqir"
-version = "0.12.6"
+version = "0.12.7"
 description = ""
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyqir-0.12.6-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:1adbb3da7e75b881b9c1f4a6777bbcd0cf53e4fbf0347809b97e1a7fc50c36a3"},
-    {file = "pyqir-0.12.6-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:32bd0f13c8f1d5651f2010134452c130ad5445223449b9b64e17b12ce5a37172"},
-    {file = "pyqir-0.12.6-cp39-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:fda9f40a5cb5191a0b938524b60695ac0ceeba48da4c9807035191088d4fb69b"},
-    {file = "pyqir-0.12.6-cp39-abi3-manylinux_2_38_aarch64.whl", hash = "sha256:216451808d5a6b4b7be8913e2391746e2171445a64aa61aeeb81580ed37c3fc2"},
-    {file = "pyqir-0.12.6-cp39-abi3-win_amd64.whl", hash = "sha256:acae776a5054340f9f5c69f847ee9ae8431f1c70f4486310e63b2889423107c0"},
-    {file = "pyqir-0.12.6-cp39-abi3-win_arm64.whl", hash = "sha256:f67222f6cfbb285168c913f1c4e4f7e41408115dfca51c60d68c7de4d2acb67d"},
+    {file = "pyqir-0.12.7-cp315-abi3.abi3t-manylinux_2_28_aarch64.whl", hash = "sha256:238cd638ca96c0fc732b55e6be4d135a61e4ba420159441311f51f9dfda91f9f"},
+    {file = "pyqir-0.12.7-cp315-abi3.abi3t-manylinux_2_28_x86_64.whl", hash = "sha256:5259014b10c2106a3ab3a76cc56f78da589360ecb99d282d8ccd98fe85c5d28b"},
+    {file = "pyqir-0.12.7-cp39-abi3-macosx_10_12_x86_64.whl", hash = "sha256:b481e1ffebaeadef248aca6b16f071e84169a430bd2d951ccf6ec8308b721546"},
+    {file = "pyqir-0.12.7-cp39-abi3-macosx_11_0_arm64.whl", hash = "sha256:b7dd774702a8a725463b1ab122dc34915d6f1bfa6844355bf8a6390e42eb8b00"},
+    {file = "pyqir-0.12.7-cp39-abi3-manylinux_2_28_aarch64.whl", hash = "sha256:78997e64f7b9321c4b5b749189a4ae9ec56b0128813c3a9325d256930a6bd28c"},
+    {file = "pyqir-0.12.7-cp39-abi3-manylinux_2_28_x86_64.whl", hash = "sha256:a2c3fa533e8012e7123eaa0a2d7fdcba9787d9b7062358134e419a08ce3fdcba"},
+    {file = "pyqir-0.12.7-cp39-abi3-win_amd64.whl", hash = "sha256:12950efeaacc1daf924832818340aa0c2504465fe49be0ce2dc43ffab8b0957d"},
+    {file = "pyqir-0.12.7-cp39-abi3-win_arm64.whl", hash = "sha256:c5e1f078d8a189af64467e2061931fa58c4af16722f5a72e41bd160ee62653e4"},
 ]
 
 [package.extras]
