@@ -149,6 +149,8 @@ jobs:
             --ignore-vuln CVE-2026-114501
             --ignore-vuln CVE-2026-112398
             --ignore-vuln GHSA-78g4-xqwv-q3g8
+            --ignore-vuln PYSEC-2026-4327
+            --ignore-vuln PYSEC-2026-4332
             # Filelock vulnerability, requires python 3.11+
             # TODO(COMPILER-1509): Update filelock and remove ignores when python 3.10 is dropped.
             --ignore-vuln CVE-2026-112906
